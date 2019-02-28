@@ -16,9 +16,9 @@
           (string? sentry-client-dsn)
           (assoc "sentryDSN" sentry-client-dsn)))))
 
-(defn routes [{:keys [tenant-manager] :as opts}]
-  ["/env"
-   {:get {:handler (handler opts)}}])
+(defn routes [{:keys [routes-opts] :as opts}]
+  ["/env" (merge {:get {:handler (handler opts)}}
+                 (when routes-opts routes-opts))])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
   (routes opts))

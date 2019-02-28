@@ -16,7 +16,7 @@
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints middleware handler] :as opts}]
   (if-not handler
-    (let [routes  (->> endpoints
+    (let [routes  endpoints #_(->> endpoints
                        (reduce-kv (fn [c k v]
                                     (conj c [k v])) [] ))
           handler (ring/ring-handler
@@ -26,9 +26,9 @@
       (assoc opts :handler handler))
     opts))
 
-(s/def ::endpoints (s/map-of string? (s/coll-of vector? :distinct true)))
+(s/def ::endpoints any? #_(s/map-of string? (s/coll-of vector? :distinct true)))
 
-(s/def ::middleware (s/coll-of fn? :distinct true))
+(s/def ::middleware any? #_(s/coll-of fn? :distinct true))
 
 (s/def ::config (s/keys :req-un [::endpoints ::middleware]))
 

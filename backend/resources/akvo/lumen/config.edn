@@ -20,9 +20,8 @@
                                                                       :absolute-redirects     true
                                                                       :content-types          true
                                                                       :default-charset        "utf-8"}}
-
- :akvo.lumen.auth/public-path?-prod                       {}
- :akvo.lumen.auth/wrap-auth                         {:public-path?-fn #ig/ref :akvo.lumen.auth/public-path?}
+ :akvo.lumen.auth/public-path?-prod {}
+ :akvo.lumen.auth/wrap-auth                         {:public-path? #ig/ref :akvo.lumen.auth/public-path?}
  :akvo.lumen.auth/wrap-jwt-prod                               {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
  :akvo.lumen.component.tenant-manager/wrap-label-tenant  {}
  :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN" :opts {:namespaces ["org.akvo" "akvo"]}}
@@ -36,7 +35,8 @@
                                                        :import-config {:flow-api-url #duct/env "LUMEN_FLOW_API_URL"
                                                                        :keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
  :akvo.lumen.endpoint.data-source/data-source         {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
- :akvo.lumen.endpoint.env/env                         {:keycloak-public-client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]
+ :akvo.lumen.endpoint.env/env                         {:routes-opts {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
+                                                       :keycloak-public-client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]
                                                        :keycloak-url              #duct/env "LUMEN_KEYCLOAK_URL"
                                                        :flow-api-url              #duct/env "LUMEN_FLOW_API_URL"
                                                        :sentry-client-dsn         #duct/env "LUMEN_SENTRY_CLIENT_DSN"
@@ -73,36 +73,40 @@
                                                        :windshaft-url             "http://localhost:4000"}
 
  :akvo.lumen.component.handler/handler
- {:endpoints {"" [#ig/ref :akvo.lumen.endpoint.env/env
-                  #ig/ref :akvo.lumen.endpoint.healthz/healthz]
-              
-              "/api" [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
-                      #ig/ref :akvo.lumen.endpoint.collection/collection
-                      #ig/ref :akvo.lumen.endpoint.dashboard/dashboard
-                      #ig/ref :akvo.lumen.endpoint.dataset/dataset
-                      #ig/ref :akvo.lumen.endpoint.data-source/data-source
-                      #ig/ref :akvo.lumen.endpoint.export/export
-                      #ig/ref :akvo.lumen.endpoint.files/files
-                      #ig/ref :akvo.lumen.endpoint.raster/raster
-                      #ig/ref :akvo.lumen.endpoint.invite/invite
-                      #ig/ref :akvo.lumen.endpoint.invite/verify
-                      #ig/ref :akvo.lumen.endpoint.job-execution/job-execution
-                      #ig/ref :akvo.lumen.endpoint.library/library
-                      #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column
-                      #ig/ref :akvo.lumen.endpoint.split-column/endpoint
-                      #ig/ref :akvo.lumen.endpoint.resource/resource
-                      #ig/ref :akvo.lumen.endpoint.share/share
-                      #ig/ref :akvo.lumen.endpoint.tier/tier
-                      #ig/ref :akvo.lumen.endpoint.transformation/transformation
-                      #ig/ref :akvo.lumen.endpoint.user/user
-                      #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]
-              "/share" [ #ig/ref :akvo.lumen.endpoint.public/public]}
+ {:endpoints [["" [#ig/ref :akvo.lumen.endpoint.env/env           ;v
+                   #ig/ref :akvo.lumen.endpoint.healthz/healthz   ;v
+                   ]]
+              ["/api"
+               {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
+                             #ig/ref :akvo.lumen.auth/wrap-jwt
+                             #ig/ref :akvo.lumen.auth/wrap-auth]}
+               [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation 
+                #ig/ref :akvo.lumen.endpoint.collection/collection ;v
+                #ig/ref :akvo.lumen.endpoint.dashboard/dashboard ;v
+                #ig/ref :akvo.lumen.endpoint.dataset/dataset ;v
+                #ig/ref :akvo.lumen.endpoint.data-source/data-source ;v
+                #ig/ref :akvo.lumen.endpoint.export/export
+                #ig/ref :akvo.lumen.endpoint.files/files
+                #ig/ref :akvo.lumen.endpoint.raster/raster
+                #ig/ref :akvo.lumen.endpoint.invite/invite ;v
+                #ig/ref :akvo.lumen.endpoint.invite/verify
+                #ig/ref :akvo.lumen.endpoint.job-execution/job-execution ;v
+                #ig/ref :akvo.lumen.endpoint.library/library ;v
+                #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column ;v
+                #ig/ref :akvo.lumen.endpoint.split-column/endpoint ;v
+                #ig/ref :akvo.lumen.endpoint.resource/resource
+                #ig/ref :akvo.lumen.endpoint.share/share ;v
+                #ig/ref :akvo.lumen.endpoint.tier/tier ;deprecated
+                #ig/ref :akvo.lumen.endpoint.transformation/transformation 
+                #ig/ref :akvo.lumen.endpoint.user/user ;v
+                #ig/ref :akvo.lumen.endpoint.visualisation/visualisation ;v
+                ]]
+              ["/share" {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
+               [#ig/ref :akvo.lumen.endpoint.public/public ;v
+                         ]]]
   :middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
                #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
-               #ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                #ig/ref :akvo.lumen.monitoring/middleware
-               #ig/ref :akvo.lumen.auth/wrap-jwt
-               #ig/ref :akvo.lumen.auth/wrap-auth
                #ig/ref :akvo.lumen.component.handler/wrap-defaults
                #ig/ref :akvo.lumen.component.handler/wrap-json-body
                #ig/ref :akvo.lumen.component.handler/wrap-json-response

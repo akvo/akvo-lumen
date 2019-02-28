@@ -16,7 +16,7 @@
 
 (def tenant-host "http://t1.lumen.local:3030")
 
-(def local-server-path "http://t1.lumen.local:3100/local-development/local-server/")
+(def local-server-path "http://localhost:3100/local-development/local-server/")
 
 (defn local-file [file-name]
   (str local-server-path file-name))

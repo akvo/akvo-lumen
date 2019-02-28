@@ -80,18 +80,18 @@
        (println "Could not get cert from Keycloak")
        (throw e)))))
 
-(defmethod ig/init-key :akvo.lumen.auth/publi-path?-prod   [_ opts]
+(defmethod ig/init-key :akvo.lumen.auth/public-path?-prod  [_ opts]
   public-path?)
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
-  (wrap-auth (:public-path?-fn opts)))
 
-(s/def ::public-path?-fn fn?)
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
+  (wrap-auth (:public-path? opts)))
+
+(s/def ::public-path? fn?)
 
 (defmethod integrant-key :akvo.lumen.auth/wrap-auth [_]
   (s/cat :kw keyword?
-         :config (s/keys :req-un [::public-path?-fn])))
-
+         :config (s/keys :req-un [::public-path?] )))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-prod  [_ {:keys [keycloak]}]
   (wrap-jwt keycloak))

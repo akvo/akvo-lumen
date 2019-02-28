@@ -3,8 +3,8 @@
             [clojure.java.io :as io]
             [integrant.core :as ig]))
 
-(defn routes [opts]
-  ["/local-server"
+(defn routes [{:keys [routes-opts] :as opts}]
+  ["/local-server" routes-opts
    ["/:file" ["" {:get {:parameters {:path-params {:file string?}}
                         :handler (fn [{tenant :tenant
                                        {:keys [file]} :path-params}]
