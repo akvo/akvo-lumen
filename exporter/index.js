@@ -41,7 +41,9 @@ const captureMessage = (message) => {
 const configureScope = (contextData, callback) => {
   if (process.env.SENTRY_DSN) {
     Sentry.configureScope((scope) => {
-      scope.setExtra(contextData);
+      _.forEach(contextData, (value, key) => {
+        scope.setExtra(new Map([[key, value]]));
+      });
       callback();
     });
   } else {
@@ -104,6 +106,8 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
         try {
           await page.waitFor(s);
         } catch (error) {
+          captureException(error);
+          // Without the render-compose message this is problematic
           captureMessage('Visualisation didnt render with ID: ', s.replace('.render-completed-', ''));
           reject(error);
         }
