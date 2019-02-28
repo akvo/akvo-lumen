@@ -58,8 +58,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: lumen
-              key: sentry.exporter_dsn
-        env:
+              key: sentry.exporter_dsn        
         - name: ENVIRONMENT
           valueFrom:
             configMapKeyRef:
