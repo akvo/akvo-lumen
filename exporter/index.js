@@ -2,11 +2,11 @@ const express = require('express');
 const puppeteer = require('puppeteer'); // eslint-disable-line
 const validate = require('express-validation');
 const Joi = require('joi');
-const Raven = require('raven');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const httpCommon = require('_http_common');
 const _ = require('lodash');
+const Sentry = require('@sentry/node');
 
 const validation = {
   screenshot: {
@@ -22,18 +22,21 @@ const validation = {
 };
 
 if (process.env.SENTRY_DSN) {
-  Raven.config(process.env.SENTRY_DSN).install();
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.ENVIRONMENT,
+  });
 }
 
 const captureException = (error, runId = '') => {
   console.error(`Exception captured for run ID: ${runId} -`, error);
-  if (process.env.SENTRY_DSN) Raven.captureException(error);
+  if (process.env.SENTRY_DSN) Sentry.captureException(error);
 };
 
-const setContext = (contextData, callback) => {
+const configureScope = (contextData, callback) => {
   if (process.env.SENTRY_DSN) {
-    Raven.context(() => {
-      Raven.setContext(contextData);
+    Sentry.configureScope((scope) => {
+      scope.setExtra(contextData);
       callback();
     });
   } else {
@@ -61,7 +64,6 @@ app.use(cors());
   }
 })();
 
-
 function adaptTitle(title) {
   let r = '';
   [...title].forEach((c) => {
@@ -77,7 +79,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
 
   console.log('Starting run: ', runId, ' - ', target);
 
-  setContext({ target, format, title }, async () => {
+  configureScope({ target, format, title }, async () => {
     // Create a new incognito browser context.
     const context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
@@ -171,6 +173,7 @@ const sendScreenshotResponse = ({
 };
 
 app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
+  console.log(req);
   if (currentJobCount > MAX_CONCURRENT_JOBS) {
     res.sendStatus(503);
     return;
