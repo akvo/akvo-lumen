@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export no-console */
+/* eslint-disable import/prefer-default-export */
 import itsSet from 'its-set';
 
 import specMappings from '../constants/Visualisation/visualisationSpecMappings';
@@ -13,7 +13,7 @@ export const remapVisualisationDataColumnMappings = (visualisation, newVisualisa
   const mappings = specMappings[visualisation.visualisationType][newVisualisationType] || {};
 
   if (!specMappings[visualisation.visualisationType][newVisualisationType]) {
-    console.warn(`visualization data column mappings not defined for ${visualisation.visualisationType} -> ${newVisualisationType}`);
+    console.warn(`visualization data column mappings not defined for ${visualisation.visualisationType} -> ${newVisualisationType}`);  /* eslint-disable-line no-console */
   }
   return Object.keys(mappings)
     .reduce((acc, key) => {
