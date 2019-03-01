@@ -8,6 +8,8 @@ const httpCommon = require('_http_common');
 const _ = require('lodash');
 const Sentry = require('@sentry/node');
 
+console.log(process.env.VERSION);
+
 const validation = {
   screenshot: {
     body: {
@@ -25,6 +27,7 @@ if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     environment: process.env.ENVIRONMENT,
+    release: process.env.VERSION,
   });
 }
 
