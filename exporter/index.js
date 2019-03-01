@@ -106,8 +106,6 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
           await page.waitFor(s);
         } catch (error) {
           captureException(error);
-          // Without the render-compose message this is problematic
-          captureMessage('Visualisation didnt render with ID: ', _.nth(target.split('/'), -2));
           reject(error);
         }
       }));
