@@ -34,11 +34,6 @@ const captureException = (error, runId = '') => {
   if (process.env.SENTRY_DSN) Sentry.captureException(error);
 };
 
-const captureMessage = (message) => {
-  console.error(message);
-  if (process.env.SENTRY_DSN) Sentry.captureMessage(message);
-};
-
 const configureScope = (contextData, callback) => {
   if (process.env.SENTRY_DSN) {
     Sentry.configureScope((scope) => {
