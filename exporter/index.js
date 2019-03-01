@@ -8,8 +8,6 @@ const httpCommon = require('_http_common');
 const _ = require('lodash');
 const Sentry = require('@sentry/node');
 
-console.log(process.env.VERSION);
-
 const validation = {
   screenshot: {
     body: {
