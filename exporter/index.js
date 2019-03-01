@@ -39,6 +39,10 @@ const captureMessage = (message) => {
 };
 
 const configureScope = (contextData, callback) => {
+  console.log("@configureScope");
+  console.log(contextData.target);
+  console.log(contextData.format);
+  console.log(contextData.title);
   if (process.env.SENTRY_DSN) {
     Sentry.configureScope((scope) => {
       _.forEach(contextData, (value, key) => {
@@ -83,7 +87,8 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip,
   } = req.body;
-
+  console.log("@takeScreenshot");
+  console.log(req.body);
   console.log('Starting run: ', runId, ' - ', target);
 
   configureScope({ target, format, title }, async () => {
