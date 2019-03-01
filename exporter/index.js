@@ -39,14 +39,10 @@ const captureMessage = (message) => {
 };
 
 const configureScope = (contextData, callback) => {
-  console.log("@configureScope");
-  console.log(contextData.target);
-  console.log(contextData.format);
-  console.log(contextData.title);
   if (process.env.SENTRY_DSN) {
     Sentry.configureScope((scope) => {
-      _.forEach(contextData, (value, key) => {
-        scope.setExtra(new Map([[key, value]]));
+      _.map(contextData, (value, key) => {
+        scope.setExtra(key, value);
       });
       callback();
     });
@@ -87,8 +83,6 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip,
   } = req.body;
-  console.log("@takeScreenshot");
-  console.log(req.body);
   console.log('Starting run: ', runId, ' - ', target);
 
   configureScope({ target, format, title }, async () => {
@@ -113,7 +107,8 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
         } catch (error) {
           captureException(error);
           // Without the render-compose message this is problematic
-          captureMessage('Visualisation didnt render with ID: ', s.replace('.render-completed-', ''));
+          // captureMessage('Visualisation didnt render with ID: ', s.replace('.render-completed-', ''));
+          captureMessage('Visualisation didnt render with ID: ', _.nth(target.split('/'), -2));
           reject(error);
         }
       }));
