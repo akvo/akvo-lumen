@@ -67,7 +67,7 @@ spec:
         - name: VERSION
           valueFrom:
             fieldRef:
-              fieldPath: labels.lumen-version
+              fieldPath: metadata.labels['lumen-version']
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
