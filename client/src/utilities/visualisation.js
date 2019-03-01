@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export */
+/* eslint-disable import/prefer-default-export no-console */
 import itsSet from 'its-set';
 
 import specMappings from '../constants/Visualisation/visualisationSpecMappings';

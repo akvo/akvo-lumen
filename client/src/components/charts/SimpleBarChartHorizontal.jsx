@@ -362,7 +362,7 @@ export default class SimpleBarChart extends Component {
                 style={{ position: 'relative' }}
                 ref={(c) => {
                   this.wrap = c;
-                }}  
+                }}
               >
                 {hasRendered && visualisation && <RenderComplete id={visualisation.id} />}
 
