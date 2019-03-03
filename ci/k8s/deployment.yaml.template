@@ -53,6 +53,21 @@ spec:
             cpu: "50m"
           limits:
             cpu: "1000m"
+        env:
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: sentry.exporter_dsn        
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: environment
+        - name: VERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['lumen-version']
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:

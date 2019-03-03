@@ -19,6 +19,7 @@
       2, 
       { "capIsNewExceptions": ["Immutable.Map", "Immutable.Set", "Immutable.List", "Immutable.OrderedMap"] }
     ],
+    "no-console": "off",
     "react/forbid-prop-types": 0,
     "react/no-unused-prop-types": 0,
     "react/no-multi-comp": 0,

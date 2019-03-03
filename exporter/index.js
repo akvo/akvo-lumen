@@ -2,11 +2,11 @@ const express = require('express');
 const puppeteer = require('puppeteer'); // eslint-disable-line
 const validate = require('express-validation');
 const Joi = require('joi');
-const Raven = require('raven');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const httpCommon = require('_http_common');
 const _ = require('lodash');
+const Sentry = require('@sentry/node');
 
 const validation = {
   screenshot: {
@@ -22,18 +22,24 @@ const validation = {
 };
 
 if (process.env.SENTRY_DSN) {
-  Raven.config(process.env.SENTRY_DSN).install();
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.ENVIRONMENT,
+    release: process.env.VERSION,
+  });
 }
 
 const captureException = (error, runId = '') => {
   console.error(`Exception captured for run ID: ${runId} -`, error);
-  if (process.env.SENTRY_DSN) Raven.captureException(error);
+  if (process.env.SENTRY_DSN) Sentry.captureException(error);
 };
 
-const setContext = (contextData, callback) => {
+const configureScope = (contextData, callback) => {
   if (process.env.SENTRY_DSN) {
-    Raven.context(() => {
-      Raven.setContext(contextData);
+    Sentry.configureScope((scope) => {
+      _.map(contextData, (value, key) => {
+        scope.setExtra(key, value);
+      });
       callback();
     });
   } else {
@@ -61,7 +67,6 @@ app.use(cors());
   }
 })();
 
-
 function adaptTitle(title) {
   let r = '';
   [...title].forEach((c) => {
@@ -74,10 +79,9 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip,
   } = req.body;
-
   console.log('Starting run: ', runId, ' - ', target);
 
-  setContext({ target, format, title }, async () => {
+  configureScope({ target, format, title }, async () => {
     // Create a new incognito browser context.
     const context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
@@ -97,7 +101,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
         try {
           await page.waitFor(s);
         } catch (error) {
-          console.log('Visualisation didnt render with ID: ', s.replace('.render-completed-', ''));
+          captureException(error);
           reject(error);
         }
       }));
