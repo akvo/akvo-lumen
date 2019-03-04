@@ -12,7 +12,7 @@
  :akvo.lumen.component.error-tracker/wrap-sentry         {:dsn "dev-dsn"}
 
  :akvo.lumen.component.handler/handler {:endpoints [["/local-development" [#ig/ref :akvo.lumen.utils.local-server/endpoint]]]
-;                                        :middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]
+                                        :middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]
                                         }
 
  :akvo.lumen.component.keycloak/data  {:url         "http://auth.lumen.local:8080/auth"
