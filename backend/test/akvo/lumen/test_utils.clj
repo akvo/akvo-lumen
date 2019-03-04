@@ -121,29 +121,38 @@
 (derive :akvo.lumen.test-utils/public-path?-test :akvo.lumen.auth/public-path?)
 (derive :akvo.lumen.test-utils/wrap-jwt-mock :akvo.lumen.auth/wrap-jwt)
 
-(defn dissoc-prod-components [c]
-  (dissoc c
-          :akvo.lumen.component.emailer/mailjet-v3-emailer
-          :akvo.lumen.component.caddisfly/prod
-          :akvo.lumen.component.error-tracker/prod
-          :akvo.lumen.auth/public-path?-prod
-          :akvo.lumen.test-utils/public-path?-dev
-          :akvo.lumen.auth/wrap-jwt-prod
-))
+(defn dissoc-prod-components [c more-ks]
+  (let [ks [:akvo.lumen.component.emailer/mailjet-v3-emailer
+            :akvo.lumen.component.caddisfly/prod
+            :akvo.lumen.component.error-tracker/prod
+            :akvo.lumen.auth/public-path?-prod
+            :akvo.lumen.test-utils/public-path?-dev
+            :akvo.lumen.auth/wrap-jwt-prod]
+        ks (if more-ks (apply conj ks more-ks) ks)]
+    (apply dissoc c ks)))
+
 
 (defn prep [& paths]
-  (ig/prep (apply duct/merge-configs (map read-config paths))))
+  (ig/prep (apply duct/merge-configs (map read-config (filter some? paths)))))
 
 (defn halt-system [system]
   (when system (ig/halt! system)))
 
-(defn start-config []
-  (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn"))]
-             (ig/load-namespaces c)
-             c))
+(defn start-config
+  ([]
+   (start-config nil nil))
+  ([edn-config more-ks]
+   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn" edn-config)
+                                   more-ks)]
+     (ig/load-namespaces c)
+     c)))
 
-(defn start-system []
-  (ig/init (start-config)))
+(start-config "endpoint-tests.edn"
+              [:akvo.lumen.test-utils/public-path?-dev
+               :akvo.lumen.auth/wrap-jwt-prod])
+
+(defn start-system [config]
+  (ig/init config))
 
 (defn- seed-tenant
   "Helper function that will seed tenant to the tenants table."

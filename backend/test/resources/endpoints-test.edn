@@ -1,0 +1,3 @@
+{:akvo.lumen.test-utils/public-path?-test                    {}
+ :akvo.lumen.test-utils/wrap-jwt-mock                               {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
+

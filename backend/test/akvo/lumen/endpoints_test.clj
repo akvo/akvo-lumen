@@ -12,7 +12,10 @@
             [reitit.core :as r]
             [reitit.ring :as ring]))
 
-(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once (partial system-fixture "endpoints-test.edn"
+                             [:akvo.lumen.test-utils/public-path?-dev
+                              :akvo.lumen.auth/wrap-jwt-prod])
+  tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (def tenant-host "http://t1.lumen.local:3030")
 
