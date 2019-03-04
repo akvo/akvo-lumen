@@ -26,6 +26,9 @@
       (assoc opts :handler handler))
     opts))
 
+(defmethod ig/init-key :akvo.lumen.component.handler/handler-api  [_ {:keys [path middleware handlers] :as opts}]
+  [path {:middleware middleware} handlers])
+
 (s/def ::endpoints any? #_(s/map-of string? (s/coll-of vector? :distinct true)))
 
 (s/def ::middleware any? #_(s/coll-of fn? :distinct true))
