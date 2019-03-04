@@ -59,12 +59,12 @@ spec:
             secretKeyRef:
               name: lumen
               key: sentry.exporter_dsn        
-        - name: ENVIRONMENT
+        - name: SENTRY_ENVIRONMENT
           valueFrom:
             configMapKeyRef:
               name: akvo
               key: environment
-        - name: VERSION
+        - name: SENTRY_VERSION
           valueFrom:
             fieldRef:
               fieldPath: metadata.labels['lumen-version']
