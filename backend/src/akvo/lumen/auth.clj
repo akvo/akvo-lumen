@@ -86,10 +86,10 @@
   (s/cat :kw keyword?
          :config empty?))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-prod  [_ {:keys [keycloak]}]
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]
   (wrap-jwt keycloak))
 
 (s/def ::keycloak ::keycloak/data)
-(defmethod integrant-key :akvo.lumen.auth/wrap-jwt-prod [_]
+(defmethod integrant-key :akvo.lumen.auth/wrap-jwt [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::keycloak] )))

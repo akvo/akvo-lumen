@@ -6,7 +6,6 @@
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 (derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
-(derive :akvo.lumen.auth/wrap-jwt-prod :akvo.lumen.auth/wrap-jwt)
 
 (defn dissoc-prod-components [c]
   (dissoc c
