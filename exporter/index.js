@@ -24,11 +24,21 @@ const validation = {
 let sentryClient;
 const sentryIsEnabled = () => sentryClient == null;
 
-if (process.env.SENTRY_DSN && process.env.SENTRY_ENVIRONMENT && process.env.SENTRY_RELEASE) {
-  Sentry.init();
-  sentryClient = Sentry.getCurrentHub().getClient();
-} else {
+console.log(process.env.SENTRY_DSN);
+console.log(process.env.SENTRY_RELEASE);
+console.log(process.env.SENTRY_ENVIRONMENT);
+console.log(process.env.SENTRY_SERVER_NAME);
+if (process.env.SENTRY_DSN == null && process.env.SENTRY_RELEASE == null
+  && process.env.SENTRY_ENVIRONMENT == null && process.env.SENTRY_SERVER_NAME == null) {
   console.log('Sentry not configured');
+} else {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.SENTRY_RELEASE,
+    environment: process.env.SENTRY_ENVIRONMENT,
+    serverName: process.env.SENTRY_SERVER_NAME,
+  });
+  sentryClient = Sentry.getCurrentHub().getClient();
 }
 
 const captureException = (error, runId = '') => {
