@@ -118,7 +118,6 @@
 (derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 (derive :akvo.lumen.test-utils/public-path?-dev :akvo.lumen.auth/public-path?)
 (derive :akvo.lumen.auth/wrap-jwt-prod :akvo.lumen.auth/wrap-jwt)
-(derive :akvo.lumen.test-utils/public-path?-test :akvo.lumen.auth/public-path?)
 (derive :akvo.lumen.test-utils/wrap-jwt-mock :akvo.lumen.auth/wrap-jwt)
 
 (defn dissoc-prod-components [c more-ks]
@@ -126,7 +125,6 @@
             :akvo.lumen.component.caddisfly/prod
             :akvo.lumen.component.error-tracker/prod
             :akvo.lumen.auth/public-path?-prod
-            :akvo.lumen.test-utils/public-path?-dev
             :akvo.lumen.auth/wrap-jwt-prod]
         ks (if more-ks (apply conj ks more-ks) ks)]
     (apply dissoc c ks)))
@@ -178,15 +176,6 @@
 (defn public-path-dev? [{:keys [path-info request-method] :as data}]
   (or (auth/public-path? data)
       (str/starts-with? path-info "/local-development")))
-
-(defmethod ig/init-key :akvo.lumen.test-utils/public-path?-dev  [_ opts]
-  (log/error :akvo.lumen.test-utils/public-path?-dev)
-  public-path-dev?)
-
-(defmethod ig/init-key :akvo.lumen.test-utils/public-path?-test  [_ opts]
-  (log/error :akvo.lumen.test-utils/public-path?-test)
-  (constantly true))
-
 
 (defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [keycloak]}]
   (fn [handler]

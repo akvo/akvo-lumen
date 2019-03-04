@@ -4,7 +4,6 @@
 
  :akvo.lumen.component.keycloak/data  {:url          "http://auth.lumen.local:8080/auth"
                                        :realm       "akvo"}
- :akvo.lumen.test-utils/public-path?-test                    {}
   :akvo.lumen.test-utils/wrap-jwt-mock                               {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"

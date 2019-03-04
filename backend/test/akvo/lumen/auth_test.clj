@@ -28,23 +28,18 @@
 (deftest wrap-auth-test
 
   (testing "GET / without claims"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (immutant-request :get "/"))]
       (is (= 401 (:status response)))))
 
-  (testing "GET /api without claims"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
-                    (immutant-request :get "/api"))]
-      (is (= 200 (:status response)))))
-
   (testing "POST /api without claims"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (immutant-request :post "/api"))]
       (is (= 401 (:status response)))))
 
   (testing "GET resource with claims but no tenant"
     (check-response
-     (((m/wrap-auth m/public-path?) test-handler)
+     ((m/wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"])))
@@ -52,7 +47,7 @@
 
   (testing "GET resource with claims and tenant"
     (check-response
-     (((m/wrap-auth m/public-path?) test-handler)
+     ((m/wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"])
@@ -61,7 +56,7 @@
 
   (testing "GET resource as admin with claims and tenant"
     (check-response
-     (((m/wrap-auth m/public-path?) test-handler)
+     ((m/wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"
@@ -71,7 +66,7 @@
 
   (testing "GET admin resource as admin with claims and tenant"
     (check-response
-     (((m/wrap-auth m/public-path?) test-handler)
+     ((m/wrap-auth test-handler)
       (-> (immutant-request :get "/api/admin/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"
@@ -81,7 +76,7 @@
 
   (testing "GET admin resource as non admin with claims and tenant"
     (check-response
-     (((m/wrap-auth m/public-path?) test-handler)
+     ((m/wrap-auth test-handler)
       (-> (immutant-request :get "/api/admin/resource")
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"])
@@ -89,41 +84,41 @@
      403))
 
   (testing "GET resource without claims"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (immutant-request :get "/api/resource"))]
       (check-response response 401)))
 
   (testing "POST resource without claims"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (immutant-request :post "/api/resource"))]
       (check-response response 401)))
 
   (testing "PATCH resource without claims"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (immutant-request :patch "/api/resource"))]
       (check-response response 401)))
 
   (testing "HEAD resource without claims"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (immutant-request :patch "/api/resource"))]
       (check-response response 401)))
 
   (testing "GET resource without claim role"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (assoc-in (immutant-request :get "/api/resource")
                               [:jwt-claims "realm_access" "roles"]
                               []))]
       (check-response response 403)))
 
   (testing "POST resource without claim role"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (assoc-in (immutant-request :post "/api/resource")
                               [:jwt-claims "realm_access" "roles"]
                               []))]
       (check-response response 403)))
 
   (testing "Faulty claims should return not authenticated"
-    (let [response (((m/wrap-auth m/public-path?) test-handler)
+    (let [response ((m/wrap-auth test-handler)
                     (assoc-in (immutant-request :get "/api/resource")
                               [:jwt-claims]
                               "realm_access"))]
