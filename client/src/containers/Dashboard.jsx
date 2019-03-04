@@ -535,7 +535,6 @@ class Dashboard extends Component {
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
     const { exporting } = this.props;
-
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
@@ -552,6 +551,9 @@ class Dashboard extends Component {
                 timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
                 isExporting={get(this.props, `library.dashboards[${dashboard.id}].isExporting`)}
               />
+            )}
+            {exporting && (
+              <h1>{dashboard.title}!</h1>
             )}
             <DashboardEditor
               dashboard={dashboard}
