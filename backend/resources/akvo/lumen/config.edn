@@ -71,31 +71,31 @@
  :akvo.lumen.endpoint.visualisation/visualisation     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                        :windshaft-url             "http://localhost:4000"}
 
- :akvo.lumen.component.handler/handler-api {:path "/api"
+ :akvo.lumen.component.handler/handler-api {:path       "/api"
                                             :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                                                          #ig/ref :akvo.lumen.auth/wrap-jwt
                                                          #ig/ref :akvo.lumen.auth/wrap-auth]
-                                            :handlers [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
-                                                       #ig/ref :akvo.lumen.endpoint.collection/collection ;v
-                                                       #ig/ref :akvo.lumen.endpoint.dashboard/dashboard ;v
-                                                       #ig/ref :akvo.lumen.endpoint.dataset/dataset ;v
-                                                       #ig/ref :akvo.lumen.endpoint.data-source/data-source ;v
-                                                       #ig/ref :akvo.lumen.endpoint.export/export
-                                                       #ig/ref :akvo.lumen.endpoint.files/files
-                                                       #ig/ref :akvo.lumen.endpoint.raster/raster
-                                                       #ig/ref :akvo.lumen.endpoint.invite/invite ;v
-                                                       #ig/ref :akvo.lumen.endpoint.invite/verify
-                                                       #ig/ref :akvo.lumen.endpoint.job-execution/job-execution ;v
-                                                       #ig/ref :akvo.lumen.endpoint.library/library ;v
-                                                       #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column ;v
-                                                       #ig/ref :akvo.lumen.endpoint.split-column/endpoint ;v
-                                                       #ig/ref :akvo.lumen.endpoint.resource/resource
-                                                       #ig/ref :akvo.lumen.endpoint.share/share ;v
-                                                       #ig/ref :akvo.lumen.endpoint.tier/tier ;deprecated
-                                                       #ig/ref :akvo.lumen.endpoint.transformation/transformation 
-                                                       #ig/ref :akvo.lumen.endpoint.user/user ;v
-                                                       #ig/ref :akvo.lumen.endpoint.visualisation/visualisation ;v
-                                                       ]}
+                                            :routes     [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
+                                                         #ig/ref :akvo.lumen.endpoint.collection/collection ;v
+                                                         #ig/ref :akvo.lumen.endpoint.dashboard/dashboard ;v
+                                                         #ig/ref :akvo.lumen.endpoint.dataset/dataset ;v
+                                                         #ig/ref :akvo.lumen.endpoint.data-source/data-source ;v
+                                                         #ig/ref :akvo.lumen.endpoint.export/export
+                                                         #ig/ref :akvo.lumen.endpoint.files/files
+                                                         #ig/ref :akvo.lumen.endpoint.raster/raster
+                                                         #ig/ref :akvo.lumen.endpoint.invite/invite ;v
+                                                         #ig/ref :akvo.lumen.endpoint.invite/verify
+                                                         #ig/ref :akvo.lumen.endpoint.job-execution/job-execution ;v
+                                                         #ig/ref :akvo.lumen.endpoint.library/library ;v
+                                                         #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column ;v
+                                                         #ig/ref :akvo.lumen.endpoint.split-column/endpoint ;v
+                                                         #ig/ref :akvo.lumen.endpoint.resource/resource
+                                                         #ig/ref :akvo.lumen.endpoint.share/share ;v
+                                                         #ig/ref :akvo.lumen.endpoint.tier/tier ;deprecated
+                                                         #ig/ref :akvo.lumen.endpoint.transformation/transformation 
+                                                         #ig/ref :akvo.lumen.endpoint.user/user ;v
+                                                         #ig/ref :akvo.lumen.endpoint.visualisation/visualisation ;v
+                                                         ]}
  
  :akvo.lumen.component.handler/handler
  {:endpoints [["" [#ig/ref :akvo.lumen.endpoint.env/env           ;v

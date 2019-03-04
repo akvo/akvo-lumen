@@ -29,7 +29,7 @@
        (or ;;(= "/api" path-info)
            ;;(= "/env" path-info)
            ;;(= "/healthz" path-info)
-           (string/starts-with? path-info "/share/")
+;;           (string/starts-with? path-info "/share/")
            (string/starts-with? path-info "/verify/"))))
 
 (defn admin-path? [{:keys [path-info]}]
