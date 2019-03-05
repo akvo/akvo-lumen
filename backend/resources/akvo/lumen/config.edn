@@ -84,12 +84,12 @@
                                                          #ig/ref :akvo.lumen.endpoint.files/files
                                                          #ig/ref :akvo.lumen.endpoint.raster/raster
                                                          #ig/ref :akvo.lumen.endpoint.invite/invite ;v
-                                                         #ig/ref :akvo.lumen.endpoint.invite/verify
+                                                         #ig/ref :akvo.lumen.endpoint.invite/verify ;v
                                                          #ig/ref :akvo.lumen.endpoint.job-execution/job-execution ;v
                                                          #ig/ref :akvo.lumen.endpoint.library/library ;v
                                                          #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column ;v
                                                          #ig/ref :akvo.lumen.endpoint.split-column/endpoint ;v
-                                                         #ig/ref :akvo.lumen.endpoint.resource/resource
+                                                         #ig/ref :akvo.lumen.endpoint.resource/resource ;v
                                                          #ig/ref :akvo.lumen.endpoint.share/share ;v
                                                          #ig/ref :akvo.lumen.endpoint.tier/tier ;deprecated
                                                          #ig/ref :akvo.lumen.endpoint.transformation/transformation 

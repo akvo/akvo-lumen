@@ -174,6 +174,14 @@
                 :sentryDSN "dev-sentry-client-dsn"}
                (json/parse-string (:body r) keyword)))))
     (testing "/api"
+      (testing "/resources"
+        (let [res (h (get* (api-url "/resources")))]
+          (is (= 200 (:status res)))
+          (is (= {:plan {:tier nil},
+                  :resources
+                  {:numberOfVisualisations 0,
+                   :numberOfExternalDatasets 0,
+                   :numberOfDashboards 0}}(body-kw res)))))
       (testing "/admin/users"
         (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
           (is (clojure.set/subset? #{"jerome@t1.lumen.localhost" "salim@t1.lumen.localhost"}
