@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*system* system-fixture *tenant-conn* tenant-conn-fixture *error-tracker* error-tracker-fixture]]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.endpoints-test.commons :as commons]
             [akvo.lumen.util :as util]
             [clojure.string :as str]
             [cheshire.core :as json]
@@ -73,86 +74,6 @@
                                  status (:status job)]
                              (when (= "OK" status)
                                (:datasetId job)))))
-
-(def dataset-link-columns [{:key false,
-                            :type "text",
-                            :title "Name",
-                            :multipleId nil,
-                            :hidden false,
-                            :multipleType nil,
-                            :columnName "c1",
-                            :direction nil,
-                            :sort nil}
-                           {:key false,
-                            :type "number",
-                            :title "Age",
-                            :multipleId nil,
-                            :hidden false,
-                            :multipleType nil,
-                            :columnName "c2",
-                            :direction nil,
-                            :sort nil}
-                           {:key false,
-                            :type "number",
-                            :title "Score",
-                            :multipleId nil,
-                            :hidden false,
-                            :multipleType nil,
-                            :columnName "c3",
-                            :direction nil,
-                            :sort nil}
-                           {:key false,
-                            :type "number",
-                            :title "Temperature",
-                            :multipleId nil,
-                            :hidden false,
-                            :multipleType nil,
-                            :columnName "c4",
-                            :direction nil,
-                            :sort nil}
-                           {:key false,
-                            :type "number",
-                            :title "Humidity",
-                            :multipleId nil,
-                            :hidden false,
-                            :multipleType nil,
-                            :columnName "c5",
-                            :direction nil,
-                            :sort nil}
-                           {:key false,
-                            :type "text",
-                            :title "Cat",
-                            :multipleId nil,
-                            :hidden false,
-                            :multipleType nil,
-                            :columnName "c6",
-                            :direction nil,
-                            :sort nil}])
-
-;; Todo: generate it with current vis + aggregation specs!!
-(defn visualisation-payload [dataset-id vis-type name*]
-  {:type "visualisation",
-   :name name*,
-   :visualisationType vis-type
-   :datasetId dataset-id
-   :spec {:metricColumnX nil,
-          :horizontal false,
-          :metricAggregation "count",
-          :filters [],
-          :axisLabelYFromUser false,
-          :bucketColumn nil,
-          :showLabels false,
-          :metricColumnY nil,
-          :subBucketMethod "split",
-          :subBucketColumn nil,
-          :truncateSize nil,
-          :axisLabelX nil,
-          :legendTitle nil,
-          :axisLabelXFromUser false,
-          :axisLabelY nil,
-          :version 1,
-          :sort nil,
-          :showValueLabels false}})
 
 (defn body-kw [res]
   (-> res :body (json/parse-string keyword)))
@@ -274,7 +195,7 @@
           (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
                             :body (json/parse-string keyword))]
             (is (= {:transformations []
-                    :columns dataset-link-columns
+                    :columns commons/dataset-link-columns
                     :name title
                     ;;:author nil,
                     :rows
@@ -297,7 +218,7 @@
                       :name title
                       :status "OK"
                       :transformations []
-                      :columns dataset-link-columns}
+                      :columns commons/dataset-link-columns}
                      (select-keys meta-dataset [:id :name :status :transformations :columns]))))
             (let [update-dataset (-> (h (post* (api-url "/datasets" dataset-id "update") (:source dataset)))
                                      :body (json/parse-string keyword))
@@ -312,7 +233,7 @@
           (let [bar-vis-name "hello-bar-vis!"]
             (is (= [bar-vis-name dataset-id]
                    (-> (h (post*  (api-url "/visualisations")
-                                  (visualisation-payload dataset-id "bar" bar-vis-name)))
+                                  (commons/visualisation-payload dataset-id "bar" bar-vis-name)))
                        :body
                        (json/parse-string keyword)
                        ((juxt :name :datasetId)))))
