@@ -24,11 +24,10 @@ const validation = {
 let sentryClient;
 const sentryIsEnabled = () => sentryClient;
 
-const enableSentry = !(
-  process.env.SENTRY_DSN == null
-  && process.env.SENTRY_RELEASE == null
-  && process.env.SENTRY_ENVIRONMENT == null
-  && process.env.SENTRY_SERVER_NAME == null);
+const enableSentry = process.env.SENTRY_DSN
+  && process.env.SENTRY_RELEASE
+  && process.env.SENTRY_ENVIRONMENT
+  && process.env.SENTRY_SERVER_NAME;
 
 if (enableSentry) {
   console.log('Init Sentry');
@@ -44,7 +43,7 @@ if (enableSentry) {
 }
 
 const captureException = (error, runId = '') => {
-  console.error(`Exceptiqon captured for run ID: ${runId} -`, error);
+  console.error(`Exception captured for run ID: ${runId} -`, error);
   if (sentryIsEnabled()) Sentry.captureException(error);
 };
 
