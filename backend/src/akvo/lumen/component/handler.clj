@@ -29,6 +29,9 @@
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-api  [_ {:keys [path middleware routes] :as opts}]
   [path {:middleware middleware} routes])
 
+(defmethod ig/init-key :akvo.lumen.component.handler/handler-verify  [_ {:keys [path middleware routes] :as opts}]
+  [path {:middleware middleware} routes])
+
 (s/def ::endpoints any? #_(s/map-of string? (s/coll-of vector? :distinct true)))
 
 (s/def ::middleware any? #_(s/coll-of fn? :distinct true))

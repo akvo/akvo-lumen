@@ -24,14 +24,6 @@
   (contains? (claimed-roles jwt-claims)
              (format "akvo:lumen:%s:admin" tenant)))
 
-(defn public-path? [{:keys [path-info request-method]}]
-  (and (= :get request-method)
-       (or ;;(= "/api" path-info)
-           ;;(= "/env" path-info)
-           ;;(= "/healthz" path-info)
-;;           (string/starts-with? path-info "/share/")
-           (string/starts-with? path-info "/verify/"))))
-
 (defn admin-path? [{:keys [path-info]}]
   (string/starts-with? path-info "/api/admin/"))
 
@@ -54,7 +46,6 @@
   [handler]
   (fn [{:keys [jwt-claims] :as request}]
     (cond
-      (public-path? request) (handler request)
       (nil? jwt-claims) not-authenticated
       (admin-path? request) (if (tenant-admin? request)
                               (handler request)

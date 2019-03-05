@@ -268,7 +268,6 @@
               multipart-temp-file-part {:tempfile file
                                         :size (.length file)
                                         :filename (.getName file)}]
-          {:file multipart-temp-file-part}
           (let [res (h (update (post*  (api-url "/files") {} {:file multipart-temp-file-part})
                                :headers #(assoc % "upload-length" (str (.length file)))))
                 location (get-in res [:headers "Location"])
@@ -350,7 +349,8 @@
               (is (= 1 (count store)))
               (is (= email (-> invitation :recipients first)))
               (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))             
-              (let [url (str/replace (re-find #"https.*+" (-> invitation :email (get "Text-part"))) "https://t1.lumen.local" "")]
-                (is (= 302 (:status (h (get* (api-url url)))))))
+              (let [url (str/replace (re-find #"https.*+" (-> invitation :email (get "Text-part"))) "https://t1.lumen.local" "")
+                    res-verify (h (get* url))]
+                (is (= 302 (:status res-verify))))
               (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
                 (is (= 200 (:status (h (del* (api-url "/admin/users" (:id (first (filter #(= email (:email %)) users)))))))))))))))))

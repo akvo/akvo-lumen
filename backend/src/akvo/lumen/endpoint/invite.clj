@@ -32,12 +32,12 @@
                                 (user/delete-invite (p/connection tenant-manager tenant) id))}}]])
 
 (defn verify-routes [{:keys [config keycloak tenant-manager] :as opts}]
-  ["/verify/:id" {:get {:parameters {:path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
-                                       {:keys [id]} :path-params :as request}]
-                                   (user/verify-invite keycloak
-                                                       (p/connection tenant-manager tenant)
-                                                       tenant id (location (:invite-redirect config) request)))}}])
+  ["/:id" {:get {:parameters {:path-params {:id string?}}
+                 :handler (fn [{tenant :tenant
+                                {:keys [id]} :path-params :as request}]
+                            (user/verify-invite keycloak
+                                                (p/connection tenant-manager tenant)
+                                                tenant id (location (:invite-redirect config) request)))}}])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/invite  [_ opts]
   (admin-routes opts))

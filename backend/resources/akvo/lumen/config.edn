@@ -84,7 +84,6 @@
                                                          #ig/ref :akvo.lumen.endpoint.files/files ;v
                                                          #ig/ref :akvo.lumen.endpoint.raster/raster
                                                          #ig/ref :akvo.lumen.endpoint.invite/invite ;v
-                                                         #ig/ref :akvo.lumen.endpoint.invite/verify ;v
                                                          #ig/ref :akvo.lumen.endpoint.job-execution/job-execution ;v
                                                          #ig/ref :akvo.lumen.endpoint.library/library ;v
                                                          #ig/ref :akvo.lumen.endpoint.multiple-column/multiple-column ;v
@@ -96,16 +95,23 @@
                                                          #ig/ref :akvo.lumen.endpoint.user/user ;v
                                                          #ig/ref :akvo.lumen.endpoint.visualisation/visualisation ;v
                                                          ]}
+
+ :akvo.lumen.component.handler/handler-verify {:path    "/verify"
+                                               :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]
+                                               :routes     [#ig/ref :akvo.lumen.endpoint.invite/verify ;v
+                                                            ]}
  
  :akvo.lumen.component.handler/handler
  {:endpoints [["" [#ig/ref :akvo.lumen.endpoint.env/env           ;v
                    #ig/ref :akvo.lumen.endpoint.healthz/healthz   ;v
+                   
                    ]]
               #ig/ref :akvo.lumen.component.handler/handler-api
-
+              #ig/ref :akvo.lumen.component.handler/handler-verify
               ["/share" {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
                [#ig/ref :akvo.lumen.endpoint.public/public ;v
-                         ]]]
+                         ]]
+]
   :middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
                #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
                #ig/ref :akvo.lumen.monitoring/middleware

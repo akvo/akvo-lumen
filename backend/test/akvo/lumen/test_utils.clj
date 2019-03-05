@@ -167,11 +167,6 @@
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
-
-(defn public-path-dev? [{:keys [path-info request-method] :as data}]
-  (or (auth/public-path? data)
-      (str/starts-with? path-info "/local-development")))
-
 (defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [keycloak]}]
   (fn [handler]
     (fn [req]
