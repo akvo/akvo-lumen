@@ -45,15 +45,12 @@ class DashboardHeader extends Component {
       tooltipId: disableShare ? 'save_your_dashboard_before_sharing' : null,
     };
 
-    const queryParams = queryString.parse(location.search);
-
     const exportButton = {
       buttonText: <FormattedMessage id="export" />,
       disabled: disableShare || isExporting,
       tooltipId: disableShare ? 'save_your_dashboard_before_exporting' : null,
       onOptionSelected: format => onDashboardAction(`export_${format}`),
       icon: isExporting ? <LoadingSpinner /> : null,
-      customClass: queryParams['show-export'] === '1' ? undefined : 'notImplemented',
       subActions: [
         {
           label: <FormattedMessage id="png" />,
