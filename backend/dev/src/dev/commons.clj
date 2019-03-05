@@ -14,10 +14,11 @@
           :akvo.lumen.component.error-tracker/prod))
 
 
-(def config (let [c (dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "dev.edn"))]
-              (ir/set-prep! (fn [] c))
-              (ig/load-namespaces c)
-              c))
+(defn config []
+  (let [c (dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "dev.edn"))]
+    (ir/set-prep! (fn [] c))
+    (ig/load-namespaces c)
+    c))
 
 
-(def tenants (-> config :akvo.lumen.migrate/migrate :seed :tenants))
+(def tenants (-> (config) :akvo.lumen.migrate/migrate :seed :tenants))
