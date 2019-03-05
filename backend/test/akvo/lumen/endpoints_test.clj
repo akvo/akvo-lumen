@@ -27,7 +27,7 @@
 (defn api-url [api-url & args]
   (str  "/api" api-url (when args (str "/" (str/join "/"  args)))))
 
-(defn with-body [method uri body & [query-params]]
+(defn with-body [method uri body & [query-params multipart-params]]
   (cond->
       {:request-method method
        :uri uri
@@ -37,15 +37,16 @@
        :server-name "t1.lumen.local",
        :remote-addr "localhost",
        :scheme :http,
-;;       :body-params body
+       ;;       :body-params body
        :body (io/reader (io/input-stream (.getBytes (json/generate-string body))))}
-    query-params (assoc :query-params query-params))
-  )
+    query-params (assoc :query-params query-params)
+    multipart-params (assoc :multipart-params multipart-params)))
+
 (defn post* [uri body & args]
   (apply with-body :post uri body args))
 
 (defn put* [uri body & args]
-  (apply with-body :post uri body args))
+  (apply with-body :put uri body args))
 
 (defn >get* [method uri [query-params]]
   (cond->
@@ -61,6 +62,9 @@
 
 (defn get* [uri & more]
   (>get* :get uri more))
+
+(defn patch* [uri body & args]
+  (apply with-body :patch uri body args))
 
 (defn del* [uri & more]
   (>get* :delete uri more))
@@ -258,6 +262,25 @@
 
               ))))
 
+
+      (testing "/files "
+        (let [file (io/file (io/resource "dos.csv"))
+              multipart-temp-file-part {:tempfile file
+                                        :size (.length file)
+                                        :filename (.getName file)}]
+          {:file multipart-temp-file-part}
+          (let [res (h (update (post*  (api-url "/files") {} {:file multipart-temp-file-part})
+                               :headers #(assoc % "upload-length" (str (.length file)))))
+                location (get-in res [:headers "Location"])
+                loc (str/replace location "http://t1.lumen.local:3030/api" "")]
+            (is (= 201 (:status res)))
+            (is (= 204 (:status (h (-> (patch*  (api-url loc) {})
+                                       (assoc :body (slurp (io/file (io/resource "dos.csv"))))
+                                       (update-in [:headers "content-type"] (constantly "application/offset+octet-stream"))
+                                       (update :headers #(assoc % "upload-length" (str (.length file))
+                                                                "upload-offset" (str 0)))))))))))
+
+     
       (testing "/transformations/:id/transform & /transformations/:id/undo"
         (let [title "GDP-dataset"
               dataset-url (local-file "GDP.csv")

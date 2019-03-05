@@ -81,7 +81,7 @@
                                                          #ig/ref :akvo.lumen.endpoint.dataset/dataset ;v
                                                          #ig/ref :akvo.lumen.endpoint.data-source/data-source ;v
                                                          #ig/ref :akvo.lumen.endpoint.export/export
-                                                         #ig/ref :akvo.lumen.endpoint.files/files
+                                                         #ig/ref :akvo.lumen.endpoint.files/files ;v
                                                          #ig/ref :akvo.lumen.endpoint.raster/raster
                                                          #ig/ref :akvo.lumen.endpoint.invite/invite ;v
                                                          #ig/ref :akvo.lumen.endpoint.invite/verify ;v
@@ -92,7 +92,7 @@
                                                          #ig/ref :akvo.lumen.endpoint.resource/resource ;v
                                                          #ig/ref :akvo.lumen.endpoint.share/share ;v
                                                          #ig/ref :akvo.lumen.endpoint.tier/tier ;deprecated
-                                                         #ig/ref :akvo.lumen.endpoint.transformation/transformation 
+                                                         #ig/ref :akvo.lumen.endpoint.transformation/transformation ;v
                                                          #ig/ref :akvo.lumen.endpoint.user/user ;v
                                                          #ig/ref :akvo.lumen.endpoint.visualisation/visualisation ;v
                                                          ]}
