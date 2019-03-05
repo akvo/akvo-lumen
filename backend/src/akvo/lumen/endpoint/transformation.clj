@@ -20,8 +20,7 @@
                                   {:type :transformation
                                    :transformation body}))}}]]
    [["/undo"
-      {:post {:parameters {:path-params {:dataset-id string?}
-                           :body map?}
+      {:post {:parameters {:path-params {:dataset-id string?}}
               :handler (fn [{tenant :tenant
                              {:keys [dataset-id]} :path-params}]
                          (t/apply {:tenant-conn (p/connection tenant-manager tenant) :caddisfly caddisfly}

@@ -159,20 +159,25 @@
 
 (deftest handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
+
     (testing "/"
-      (let [r (h (get*  "/healthz"))]
-        (is (= 200 (:status r)))
-        (is (= {:healthz "ok", :pod nil, :blue-green-status nil}
-               (json/parse-string (:body r) keyword))))
-      (let [r (h (get*  "/env"))]
-        (is (= 200 (:status r)))
-        (is (= {:keycloakClient "akvo-lumen",
-                :keycloakURL "http://auth.lumen.local:8080/auth",
-                :flowApiUrl "https://api.akvotest.org/flow",
-                :piwikSiteId "165",
-                :tenant "t1",
-                :sentryDSN "dev-sentry-client-dsn"}
-               (json/parse-string (:body r) keyword)))))
+      (testing "/healthz"
+        (let [r (h (get*  "/healthz"))]
+          (is (= 200 (:status r)))
+          (is (= {:healthz "ok", :pod nil, :blue-green-status nil}
+                 (json/parse-string (:body r) keyword)))))
+
+      (testing "/env"
+        (let [r (h (get*  "/env"))]
+          (is (= 200 (:status r)))
+          (is (= {:keycloakClient "akvo-lumen",
+                  :keycloakURL "http://auth.lumen.local:8080/auth",
+                  :flowApiUrl "https://api.akvotest.org/flow",
+                  :piwikSiteId "165",
+                  :tenant "t1",
+                  :sentryDSN "dev-sentry-client-dsn"}
+                 (json/parse-string (:body r) keyword))))))
+
     (testing "/api"
       (testing "/resources"
         (let [res (h (get* (api-url "/resources")))]
@@ -182,18 +187,21 @@
                   {:numberOfVisualisations 0,
                    :numberOfExternalDatasets 0,
                    :numberOfDashboards 0}}(body-kw res)))))
+
       (testing "/admin/users"
         (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
           (is (clojure.set/subset? #{"jerome@t1.lumen.localhost" "salim@t1.lumen.localhost"}
-                 (set (map :email users))))))
-      (let [r (h (get* (api-url "/library")))]
-        (is (= 200 (:status r)))
-        (is (= {:dashboards []
-	        :datasets []
-	        :rasters []
-	        :visualisations []
-	        :collections []}
-               (json/parse-string (:body r) keyword))))
+                                   (set (map :email users))))))
+
+      (testing "/library"
+        (let [r (h (get* (api-url "/library")))]
+          (is (= 200 (:status r)))
+          (is (= {:dashboards []
+	          :datasets []
+	          :rasters []
+	          :visualisations []
+	          :collections []}
+                 (json/parse-string (:body r) keyword)))))
 
       (testing "/dashboards"
         (let [title* "dashboard-title"]
@@ -211,7 +219,6 @@
           (is (= title* (-> (h (get* (api-url "/library")))
                             :body (json/parse-string keyword) :dashboards first :title)))
           ))
-
 
       (testing "/collections"
         (let [title* "col-title"]
@@ -233,6 +240,7 @@
                            {"query" (json/encode {:multipleType "caddisfly"
                                                   :multipleId "85e9bea2-8538-4759-a46a-46459783c2d3"})}))
                  body-kw))))
+
       (testing "/data-source/job-execution/:id/status/:status"
         (let [dataset-url (local-file "sample-data-1.csv")
               import-id (-> (h (post*  (api-url "/datasets") {:source
@@ -240,7 +248,7 @@
                                                                :url              dataset-url
                                                                :hasColumnHeaders true
                                                                :guessColumnTypes true}
-                                                              :name "to-delete"}))
+                                                              :name "sample-data-1.csv"}))
                             :body
                             (json/parse-string keyword)
                             :importId)
@@ -248,6 +256,7 @@
               dataset-id (job-execution-dataset-id h import-id)
               _ (is (some? dataset-id))]
           (is (= {} (body-kw (h (del*  (api-url "/data-source/job-execution" import-id "status" "ok"))))))))
+
       (testing "/datasets"
         (let [title "dataset-title"
               dataset-url (local-file "sample-data-1.csv")
@@ -310,7 +319,7 @@
             (let [[name* id*] (-> (h (get* (api-url "/library")))
                                   :body (json/parse-string keyword) :visualisations first                        ((juxt :name :id)))]
               (is (= bar-vis-name name*))
-              (testing "/shares"
+              (testing "/api/shares && /share" 
                 (let [share-id (-> (h (post*  (api-url "/shares") {:visualisationId id*}))
                                    :body (json/parse-string keyword)
                                    :id)]
@@ -326,11 +335,45 @@
                 )
               
 
-              ))
+              ))))
 
+      (testing "/transformations/:id/transform & /transformations/:id/undo"
+        (let [title "GDP-dataset"
+              dataset-url (local-file "GDP.csv")
+              import-id (-> (h (post*  (api-url "/datasets") {:source
+                                                              {:kind "LINK"
+                                                               :url dataset-url
+                                                               :hasColumnHeaders false
+                                                               :guessColumnTypes true}
+                                                              :name title}))
+                            :body
+                            (json/parse-string keyword)
+                            :importId)
+              _           (is (some? import-id))
+              dataset-id (job-execution-dataset-id h import-id)]
+          (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
+                            :body (json/parse-string keyword))]
+            (is (= {:transformations []
+                    :name title
+                    :status "OK"
+                    :id dataset-id}
+                   (select-keys dataset [:transformations :name :status :id])))
+            (is (= 196 (count (:rows dataset))))
+            (is (= 10 (count (:columns dataset))))
+            (let [res (h (post* (api-url "/transformations" dataset-id "transform")
+                                {:args {:columnName "c5"}, :onError "fail", :op "core/trim"}))]
 
-          )
-        )
+              (is (= 200 (:status res)))
+              (let [dataset-job-id (job-execution-dataset-id h (:jobExecutionId (body-kw res)))
+                    dataset-txed (body-kw (h (get* (api-url "/datasets" dataset-job-id))))]
+                (= "17419000" (->  dataset-txed :rows (get 4)))))
+
+            (let [res (h (post* (api-url "/transformations" dataset-id "undo") {}))]
+              (is (= 200 (:status res)))
+              (let [dataset-job-id (job-execution-dataset-id h (:jobExecutionId (body-kw res)))
+                    dataset-txed (body-kw (h (get* (api-url "/datasets" dataset-job-id))))]
+                (= " 17419000 " (->  dataset-txed :rows (get 4))))))))
+      
       (testing "/split-column/:dataset-id/pattern-analysis"
         (let [dataset-url (local-file "split_column_1785.csv")
               import-id (-> (h (post*  (api-url "/datasets") {:source
@@ -338,7 +381,7 @@
                                                                :url              dataset-url
                                                                :hasColumnHeaders true
                                                                :guessColumnTypes true}
-                                                              :name "to-delete"}))
+                                                              :name "split_column_1785.csv"}))
                             :body
                             (json/parse-string keyword)
                             :importId)
