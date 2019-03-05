@@ -22,12 +22,15 @@ const validation = {
 };
 
 let sentryClient;
-const sentryIsEnabled = () => sentryClient == null;
+const sentryIsEnabled = () => sentryClient;
 
-if (process.env.SENTRY_DSN == null && process.env.SENTRY_RELEASE == null
-  && process.env.SENTRY_ENVIRONMENT == null && process.env.SENTRY_SERVER_NAME == null) {
-  console.log('Sentry not configured');
-} else {
+const enableSentry = process.env.SENTRY_DSN
+  && process.env.SENTRY_RELEASE
+  && process.env.SENTRY_ENVIRONMENT
+  && process.env.SENTRY_SERVER_NAME;
+
+if (enableSentry) {
+  console.log('Init Sentry');
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     release: process.env.SENTRY_RELEASE,
@@ -35,16 +38,17 @@ if (process.env.SENTRY_DSN == null && process.env.SENTRY_RELEASE == null
     serverName: process.env.SENTRY_SERVER_NAME,
   });
   sentryClient = Sentry.getCurrentHub().getClient();
-  console.log('Sentry initiated');
+} else {
+  console.log('Skipping Sentry');
 }
 
 const captureException = (error, runId = '') => {
   console.error(`Exception captured for run ID: ${runId} -`, error);
-  if (sentryIsEnabled) Sentry.captureException(error);
+  if (sentryIsEnabled()) Sentry.captureException(error);
 };
 
 const configureScope = (contextData, callback) => {
-  if (sentryIsEnabled) {
+  if (sentryIsEnabled()) {
     Sentry.configureScope((scope) => {
       _.map(contextData, (value, key) => {
         scope.setExtra(key, value);

@@ -25,6 +25,8 @@ import {
 } from '../constants/analytics';
 import { showNotification } from '../actions/notification';
 
+require('./Dashboard.scss');
+
 const getEditingStatus = (location) => {
   const testString = 'create';
 
@@ -553,7 +555,7 @@ class Dashboard extends Component {
               />
             )}
             {exporting && (
-              <h1>{dashboard.title}!</h1>
+              <h1 className="export-header">{dashboard.title}</h1>
             )}
             <DashboardEditor
               dashboard={dashboard}
