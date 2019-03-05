@@ -2,6 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*system* system-fixture *tenant-conn* tenant-conn-fixture *error-tracker* error-tracker-fixture]]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.util :as util]
             [clojure.string :as str]
             [cheshire.core :as json]
             [akvo.lumen.test-utils :as tu]
@@ -175,9 +176,8 @@
     (testing "/api"
       (testing "/admin/users"
         (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
-          (is (= '("jerome@t1.lumen.localhost" "salim@t1.lumen.localhost")
-                 (sort (map :email users))))))
-      
+          (is (clojure.set/subset? #{"jerome@t1.lumen.localhost" "salim@t1.lumen.localhost"}
+                 (set (map :email users))))))
       (let [r (h (get* (api-url "/library")))]
         (is (= 200 (:status r)))
         (is (= {:dashboards []
@@ -186,7 +186,6 @@
 	        :visualisations []
 	        :collections []}
                (json/parse-string (:body r) keyword))))
-
 
       (testing "/dashboards"
         (let [title* "dashboard-title"]
@@ -346,11 +345,17 @@
                      )))))
 
       (testing "/admin/invites"
-        (let [email "user1@akvo.org"]
+        (let [email (str (util/squuid) "@akvo.org")]
           (is (= {:invites []} (body-kw (h (get* (api-url  "/admin/invites"))))))
-          (is (= {} (body-kw (h (post*  (api-url "/admin/invites") {:email email})))))
-          (let [store @(:store (:akvo.lumen.component.emailer/dev-emailer *system*))
-                invitation (last store)]
-            (is (= 1 (count store)))
-            (is (= email (-> invitation :recipients first)))
-            (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))))))))
+          (let [res (h (post*  (api-url "/admin/invites") {:email email}))]
+            (is (= 200 (:status res)) )
+            (is (= {} (body-kw res)))
+            (let [store @(:store (:akvo.lumen.component.emailer/dev-emailer *system*))
+                  invitation (last store)]
+              (is (= 1 (count store)))
+              (is (= email (-> invitation :recipients first)))
+              (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))             
+              (let [url (str/replace (re-find #"https.*+" (-> invitation :email (get "Text-part"))) "https://t1.lumen.local" "")]
+                (is (= 302 (:status (h (get* (api-url url)))))))
+              (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
+                (is (= 200 (:status (h (del* (api-url "/admin/users" (:id (first (filter #(= email (:email %)) users)))))))))))))))))

@@ -66,8 +66,7 @@
     (keycloak/tenant-member?
      keycloak tenant email) (lib/bad-request
                              {"reason" "Already tenant member"})
-    (p/user?
-     keycloak email) (invite-to-tenant emailer tenant-conn location email
+    (p/user? keycloak email) (invite-to-tenant emailer tenant-conn location email
                                        author-claims)
     :else
     (create-new-account-and-invite-to-tenant
