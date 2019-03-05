@@ -22,7 +22,7 @@ const validation = {
 };
 
 let sentryClient;
-const sentryIsEnabled = () => !(sentryClient == null);
+const sentryIsEnabled = () => sentryClient;
 
 const enableSentry = !(
   process.env.SENTRY_DSN == null
