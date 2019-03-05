@@ -21,21 +21,34 @@ const validation = {
   },
 };
 
-if (process.env.SENTRY_DSN) {
+let sentryClient;
+const sentryIsEnabled = () => sentryClient;
+
+const enableSentry = process.env.SENTRY_DSN
+  && process.env.SENTRY_RELEASE
+  && process.env.SENTRY_ENVIRONMENT
+  && process.env.SENTRY_SERVER_NAME;
+
+if (enableSentry) {
+  console.log('Init Sentry');
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    environment: process.env.ENVIRONMENT,
-    release: process.env.VERSION,
+    release: process.env.SENTRY_RELEASE,
+    environment: process.env.SENTRY_ENVIRONMENT,
+    serverName: process.env.SENTRY_SERVER_NAME,
   });
+  sentryClient = Sentry.getCurrentHub().getClient();
+} else {
+  console.log('Skipping Sentry');
 }
 
 const captureException = (error, runId = '') => {
   console.error(`Exception captured for run ID: ${runId} -`, error);
-  if (process.env.SENTRY_DSN) Sentry.captureException(error);
+  if (sentryIsEnabled()) Sentry.captureException(error);
 };
 
 const configureScope = (contextData, callback) => {
-  if (process.env.SENTRY_DSN) {
+  if (sentryIsEnabled()) {
     Sentry.configureScope((scope) => {
       _.map(contextData, (value, key) => {
         scope.setExtra(key, value);

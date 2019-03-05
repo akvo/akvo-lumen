@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import queryString from 'querystringify';
 
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -45,15 +44,12 @@ class DashboardHeader extends Component {
       tooltipId: disableShare ? 'save_your_dashboard_before_sharing' : null,
     };
 
-    const queryParams = queryString.parse(location.search);
-
     const exportButton = {
       buttonText: <FormattedMessage id="export" />,
       disabled: disableShare || isExporting,
       tooltipId: disableShare ? 'save_your_dashboard_before_exporting' : null,
       onOptionSelected: format => onDashboardAction(`export_${format}`),
       icon: isExporting ? <LoadingSpinner /> : null,
-      customClass: queryParams['show-export'] === '1' ? undefined : 'notImplemented',
       subActions: [
         {
           label: <FormattedMessage id="png" />,
