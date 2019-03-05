@@ -12,7 +12,28 @@
             [clojure.tools.logging :as log]
             [diehard.core :as dh]
             [reitit.core :as r]
-            [reitit.ring :as ring]))
+            [reitit.ring :as ring])
+  (:import [java.io ByteArrayInputStream]))
+
+(defn io-file [path]
+  (io/file (io/resource path)))
+
+(defn res-to-byte-array
+  "modified version of from https://github.com/akvo/resumed/blob/master/test/org/akvo/resumed_test.clj#L12-L21
+  until https://github.com/akvo/resumed/issues/11 should be fixed"
+  ([f off len]
+   (let [ba (byte-array  len)
+         is (io/input-stream f)]
+     (.skip is off)
+     (.read is ba 0 len)
+     (.close is)
+     ba))
+  ([f]
+   (let [ba (byte-array (.length f))
+         is (io/input-stream f)]
+     (.read is ba)
+     (.close is)
+     ba)))
 
 (use-fixtures :once (partial system-fixture "endpoints-test.edn" nil)
   tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
@@ -69,15 +90,15 @@
 (defn del* [uri & more]
   (>get* :delete uri more))
 
-(defn job-execution-dataset-id [h job-id]
+(defn job-execution-dataset-id [h job-id & [k]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
-                                         :max-retries 20
-                                         :delay-ms 100}
-                           (let [job (-> (h (get* (api-url "/job_executions" job-id)))
-                                         :body (json/parse-string keyword))
-                                 status (:status job)]
-                             (when (= "OK" status)
-                               (:datasetId job)))))
+                  :max-retries 2000
+                  :delay-ms 100}
+    (let [job (-> (h (get* (api-url "/job_executions" job-id)))
+                  :body (json/parse-string keyword))
+          status (:status job)]
+      (when (= "OK" status)
+        ((if k k :datasetId) job)))))
 
 (defn body-kw [res]
   (-> res :body (json/parse-string keyword)))
@@ -264,22 +285,71 @@
 
 
       (testing "/files "
-        (let [file (io/file (io/resource "dos.csv"))
-              multipart-temp-file-part {:tempfile file
-                                        :size (.length file)
-                                        :filename (.getName file)}]
-          (let [res (h (update (post*  (api-url "/files") {} {:file multipart-temp-file-part})
-                               :headers #(assoc % "upload-length" (str (.length file)))))
+        (let [file-name "dos.csv"
+              file (io-file file-name)
+              length* (.length file)]
+          (let [res (h (update (post*  (api-url "/files") {})
+                               :headers #(assoc % "upload-length" (str length*))))
                 location (get-in res [:headers "Location"])
                 loc (str/replace location "http://t1.lumen.local:3030/api" "")]
             (is (= 201 (:status res)))
             (is (= 204 (:status (h (-> (patch*  (api-url loc) {})
                                        (assoc :body (slurp (io/file (io/resource "dos.csv"))))
                                        (update-in [:headers "content-type"] (constantly "application/offset+octet-stream"))
-                                       (update :headers #(assoc % "upload-length" (str (.length file))
+                                       (update :headers #(assoc %
+                                                                "upload-metadata" (str "filename " file-name)
+                                                                "upload-length" (str length*)
                                                                 "upload-offset" (str 0)))))))))))
 
-     
+      
+      (testing "/rasters"
+        (let [file-name "SLV_ppp_v2b_2015_UNadj.tif"
+              file (io-file file-name)
+              length* (.length file)]
+          (let [res  (h (update (post*  (api-url "/files") {})
+                                :headers #(assoc %
+                                                 "upload-metadata" (str "filename " file-name)
+                                                 "upload-length" (str length*))))
+                location  (get-in res [:headers "Location"])
+                loc (str/replace location "http://t1.lumen.local:3030/api" "")]
+            (is (= 201 (:status res)))
+            (let [content-length 1048576]
+              (loop [length length*
+                     uploaded 0
+                     it 0]
+                (when (pos? length) 
+                  (let [diff (- length content-length)
+                        content-length (if (pos? diff) content-length length)
+                        ba (-> (io-file file-name)
+                               (res-to-byte-array uploaded  content-length)
+                               (ByteArrayInputStream.))]
+                    
+                    (let [resp (h (-> (patch*  (api-url loc) {})
+                                      (assoc :content-length content-length)
+                                      (assoc :body ba)
+                                      (update :headers #(assoc %
+                                                               "content-type" "application/offset+octet-stream"
+                                                               "content-length" (str content-length)
+                                                               "upload-offset" (str uploaded)))))]
+                      (if (= 204 (:status resp))
+                        (recur diff (+ uploaded content-length) (inc it))))))))
+
+            (let [payload  {:source
+                            {:kind "GEOTIFF",
+                             :url location
+                             :fileName file-name},
+                            :name "raster1"}
+                  res (body-kw (h (post*  (api-url "/rasters") payload)))
+                  ]
+              (is (some? (:importId res)))
+              (is (= "GEOTIFF" (:kind res)))
+
+              (let [raster-id (job-execution-dataset-id h (:importId res) :rasterId)
+                    res-raster (body-kw (h (get* (api-url "/rasters" raster-id))))]
+                (is (= (:id res-raster) raster-id)))))))
+
+      ;; TODO :: aggregation
+      
       (testing "/transformations/:id/transform & /transformations/:id/undo"
         (let [title "GDP-dataset"
               dataset-url (local-file "GDP.csv")

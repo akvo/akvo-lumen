@@ -16,9 +16,7 @@
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints middleware handler] :as opts}]
   (if-not handler
-    (let [routes  endpoints #_(->> endpoints
-                       (reduce-kv (fn [c k v]
-                                    (conj c [k v])) [] ))
+    (let [routes  endpoints
           handler (ring/ring-handler
                    (ring/router routes
                                 {:data {:middleware middleware}

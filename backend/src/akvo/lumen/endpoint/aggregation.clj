@@ -31,8 +31,8 @@
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/aggregation"
    ["/:dataset-id/:visualisation-type"
-    {:get {:parameters {:path-params {:dataset-id string?, :visualisation-type string?}}
-           :responses {200 {}}
+    {:get {:parameters {:path-params {:dataset-id string?
+                                      :visualisation-type string?}}
            :handler (handler opts)}}]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.aggregation/aggregation  [_ opts]
