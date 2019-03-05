@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import queryString from 'querystringify';
 
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
