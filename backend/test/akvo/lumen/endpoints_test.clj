@@ -273,14 +273,7 @@
                                                                               body-kw)]
                     (is (= visualisationId id*))
                     (is (some? visualisations))
-                    (is (some? datasets))
-                    )
-                  )
-
-                )
-              
-
-              ))))
+                    (is (some? datasets)))))))))
 
       (testing "/files "
         (let [file-name "dos.csv"
@@ -345,20 +338,29 @@
                     res-raster (body-kw (h (get* (api-url "/rasters" raster-id))))]
                 (is (= (:id res-raster) raster-id)))))))
 
-      ;; WIP :: exports
-      #_(testing "/exports"
-        (let [[name* id*] (-> (h (get* (api-url "/library")))
-                              body-kw :visualisations first
-                              ((juxt :name :id)))
-              spec {:format "png"
-                    :title "Untitled visualisation"
-                    :selector (format ".render-completed-%s" id*)
-                    :target (format  "http://localhost:3030/visualisation/%s/export" id*)
-                    :clip {:x 0, :y 0, :width 1000, :height 600}}]
-          (log/error :exports (h  (post* (api-url "/exports") spec)))
-          ))
+      ;; "/exports" endpoint can't be tested in backend isolation endpoints thus it needs a client side too
       
-      ;; TODO :: aggregation
+      (testing "/visualisations & /aggregation/:dataset-id/:visualisation-type"
+        (let [visualisations (body-kw (h (get* (api-url "/visualisations"))))
+              [vis-id dataset-id keys*] ((juxt :id :datasetId keys) (first visualisations))
+              vis-detail (body-kw (h (get* (api-url "/visualisations" vis-id))))]
+          (is (= vis-id (:id vis-detail)))
+          (is (= 200
+                 (:status (h (put* (api-url "/visualisations" vis-id)
+                                   (-> vis-detail
+                                       (assoc-in  [:spec :axisLabelX] "Age")
+                                       (assoc-in  [:spec :bucketColumn] "c2")))))))
+          
+          (is (= []
+                 (-> (h (get* (api-url "/aggregation" dataset-id (:visualisationType vis-detail))
+                              {"query" (json/encode (:spec vis-detail))}))
+                     body-kw :series first :data)))
+          (is (= [{:value 1} {:value 1} {:value 1} {:value 1}]
+                 (-> (h (get* (api-url "/aggregation" dataset-id (:visualisationType vis-detail))
+                              {"query" (json/encode (assoc (:spec vis-detail)
+                                                           :axisLabelX "Age"
+                                                           :bucketColumn "c2"))}))
+                     body-kw :series first :data)))))
       
       (testing "/transformations/:id/transform & /transformations/:id/undo"
         (let [title "GDP-dataset"
