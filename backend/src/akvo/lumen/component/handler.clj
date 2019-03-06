@@ -96,7 +96,7 @@
         (handler request)
         (catch Throwable t
           (log/error t "500 App Error")
-          (log/info :request-on-500 request)
+          (log/info :request-on-500 (dissoc request :reitit.core/match :data :result :reitit.core/router))
           (-> (compojure.res/render error-response request)
               (ring.response/content-type "text/html")
               (ring.response/status 500)))))))
