@@ -35,7 +35,7 @@
      (.close is)
      ba)))
 
-(use-fixtures :once (partial system-fixture "endpoints-test.edn" nil)
+(use-fixtures :once (partial system-fixture "endpoints-test.edn")
   tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (def tenant-host "http://t1.lumen.local:3030")
@@ -90,18 +90,20 @@
 (defn del* [uri & more]
   (>get* :delete uri more))
 
+(defn body-kw [res]
+  (-> res :body (json/parse-string keyword)))
+
 (defn job-execution-dataset-id [h job-id & [k]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
                   :max-retries 2000
                   :delay-ms 100}
     (let [job (-> (h (get* (api-url "/job_executions" job-id)))
-                  :body (json/parse-string keyword))
+                  body-kw)
           status (:status job)]
       (when (= "OK" status)
         ((if k k :datasetId) job)))))
 
-(defn body-kw [res]
-  (-> res :body (json/parse-string keyword)))
+
 
 (deftest handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
@@ -111,7 +113,7 @@
         (let [r (h (get*  "/healthz"))]
           (is (= 200 (:status r)))
           (is (= {:healthz "ok", :pod nil, :blue-green-status nil}
-                 (json/parse-string (:body r) keyword)))))
+                 (body-kw r)))))
 
       (testing "/env"
         (let [r (h (get*  "/env"))]
@@ -122,7 +124,7 @@
                   :piwikSiteId "165",
                   :tenant "t1",
                   :sentryDSN "dev-sentry-client-dsn"}
-                 (json/parse-string (:body r) keyword))))))
+                 (body-kw r))))))
 
     (testing "/api"
       (testing "/resources"
@@ -147,7 +149,7 @@
 	          :rasters []
 	          :visualisations []
 	          :collections []}
-                 (json/parse-string (:body r) keyword)))))
+                 (body-kw r)))))
 
       (testing "/dashboards"
         (let [title* "dashboard-title"]
@@ -155,28 +157,26 @@
                                                                            :title title*
                                                                            :entities {}
                                                                            :layout {}}))
-                                       :body
-                                       (json/parse-string keyword))]
+                                       body-kw)]
 
             (is (= title* title))
             (is (= id (-> (h (get* (api-url "/dashboards" id)))
-                          :body (json/parse-string keyword) :id))))
+                          body-kw :id))))
 
           (is (= title* (-> (h (get* (api-url "/library")))
-                            :body (json/parse-string keyword) :dashboards first :title)))
+                             body-kw :dashboards first :title)))
           ))
 
       (testing "/collections"
         (let [title* "col-title"]
           (let [{:keys [title id]} (-> (h (post*  (api-url "/collections") {:title title*}))
-                                       :body
-                                       (json/parse-string keyword))]
+                                       body-kw)]
             (is (= title* title))
             (is (= id (-> (h (get* (api-url "/collections" id)))
-                          :body (json/parse-string keyword) :id))))
+                          body-kw :id))))
 
           (is (= title* (-> (h (get* (api-url "/library")))
-                            :body (json/parse-string keyword) :collections first :title)))
+                            body-kw :collections first :title)))
           ))
 
       (testing "/multiple-column"
@@ -195,8 +195,7 @@
                                                                :hasColumnHeaders true
                                                                :guessColumnTypes true}
                                                               :name "sample-data-1.csv"}))
-                            :body
-                            (json/parse-string keyword)
+                            body-kw
                             :importId)
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)
@@ -212,13 +211,12 @@
                                                                :hasColumnHeaders true
                                                                :guessColumnTypes true}
                                                               :name title}))
-                            :body
-                            (json/parse-string keyword)
+                            body-kw
                             :importId)
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)]
           (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
-                            :body (json/parse-string keyword))]
+                            body-kw)]
             (is (= {:transformations []
                     :columns commons/dataset-link-columns
                     :name title
@@ -238,7 +236,7 @@
                    (select-keys (:source dataset) [:url :kind :guessColumnTypes :hasColumnHeaders])))
 
             (let [meta-dataset (-> (h (get* (api-url "/datasets" dataset-id "meta")))
-                                   :body (json/parse-string keyword))]
+                                   body-kw)]
               (is (= {:id dataset-id
                       :name title
                       :status "OK"
@@ -246,32 +244,33 @@
                       :columns commons/dataset-link-columns}
                      (select-keys meta-dataset [:id :name :status :transformations :columns]))))
             (let [update-dataset (-> (h (post* (api-url "/datasets" dataset-id "update") (:source dataset)))
-                                     :body (json/parse-string keyword))
+                                     body-kw)
                   dataset-id (job-execution-dataset-id h (:updateId update-dataset))]
               (is (some? dataset-id))
 
               (is (< (:modified dataset ) (-> (h (get* (api-url "/datasets" dataset-id)))
-                                              :body (json/parse-string keyword)
+                                              body-kw
                                               :modified)))))
           (is (= title (-> (h (get* (api-url "/library")))
-                           :body (json/parse-string keyword) :datasets first :name)))
+                          body-kw :datasets first :name)))
           (let [bar-vis-name "hello-bar-vis!"]
             (is (= [bar-vis-name dataset-id]
                    (-> (h (post*  (api-url "/visualisations")
                                   (commons/visualisation-payload dataset-id "bar" bar-vis-name)))
-                       :body
-                       (json/parse-string keyword)
+                       body-kw
+                       
                        ((juxt :name :datasetId)))))
             (let [[name* id*] (-> (h (get* (api-url "/library")))
-                                  :body (json/parse-string keyword) :visualisations first                        ((juxt :name :id)))]
+                                  body-kw :visualisations first
+                                  ((juxt :name :id)))]
               (is (= bar-vis-name name*))
               (testing "/api/shares && /share" 
                 (let [share-id (-> (h (post*  (api-url "/shares") {:visualisationId id*}))
-                                   :body (json/parse-string keyword)
+                                   body-kw
                                    :id)]
                   (is (some? share-id))
                   (let [{:keys [visualisations datasets visualisationId]} (-> (h (get* (str "/share/" share-id)))
-                                                                              :body (json/parse-string keyword))]
+                                                                              body-kw)]
                     (is (= visualisationId id*))
                     (is (some? visualisations))
                     (is (some? datasets))
@@ -282,7 +281,6 @@
               
 
               ))))
-
 
       (testing "/files "
         (let [file-name "dos.csv"
@@ -301,7 +299,6 @@
                                                                 "upload-length" (str length*)
                                                                 "upload-offset" (str 0)))))))))))
 
-      
       (testing "/rasters"
         (let [file-name "SLV_ppp_v2b_2015_UNadj.tif"
               file (io-file file-name)
@@ -348,6 +345,19 @@
                     res-raster (body-kw (h (get* (api-url "/rasters" raster-id))))]
                 (is (= (:id res-raster) raster-id)))))))
 
+      ;; WIP :: exports
+      #_(testing "/exports"
+        (let [[name* id*] (-> (h (get* (api-url "/library")))
+                              body-kw :visualisations first
+                              ((juxt :name :id)))
+              spec {:format "png"
+                    :title "Untitled visualisation"
+                    :selector (format ".render-completed-%s" id*)
+                    :target (format  "http://localhost:3030/visualisation/%s/export" id*)
+                    :clip {:x 0, :y 0, :width 1000, :height 600}}]
+          (log/error :exports (h  (post* (api-url "/exports") spec)))
+          ))
+      
       ;; TODO :: aggregation
       
       (testing "/transformations/:id/transform & /transformations/:id/undo"
@@ -359,13 +369,12 @@
                                                                :hasColumnHeaders false
                                                                :guessColumnTypes true}
                                                               :name title}))
-                            :body
-                            (json/parse-string keyword)
+                            body-kw
                             :importId)
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)]
           (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
-                            :body (json/parse-string keyword))]
+                            body-kw)]
             (is (= {:transformations []
                     :name title
                     :status "OK"
@@ -395,8 +404,7 @@
                                                                :hasColumnHeaders true
                                                                :guessColumnTypes true}
                                                               :name "split_column_1785.csv"}))
-                            :body
-                            (json/parse-string keyword)
+                            body-kw
                             :importId)
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)

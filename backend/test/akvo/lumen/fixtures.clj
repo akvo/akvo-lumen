@@ -33,6 +33,8 @@
   "Returns a fixture that binds a connection pool to *tenant-conn*"
   ([f]
    (system-fixture nil nil f))
+  ([config-edn f]
+   (system-fixture config-edn nil f))
   ([config-edn more-ks f]
    (let [c (tu/start-config config-edn more-ks)]
      (lumen-migrate/migrate c)
