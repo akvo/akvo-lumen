@@ -12,7 +12,6 @@
 (defn routes [{:keys [windshaft-url tenant-manager] :as opts}]
   ["/visualisations"
    ["" {:get {:handler (fn [{tenant :tenant}]
-                         (log/error "HERE!")
                          (visualisation/all (p/connection tenant-manager tenant)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
