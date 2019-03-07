@@ -1,16 +1,57 @@
-{:akvo.lumen.component.hikaricp/hikaricp       {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
+{:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
 
- :akvo.lumen.component.http/http               {:port 3100}
- :akvo.lumen.component.handler/handler {:endpoints [["/local-development" [#ig/ref :akvo.lumen.utils.local-server/endpoint]]]}
+ :akvo.lumen.component.http/http {:port 3100}
 
- :akvo.lumen.component.keycloak/data  {:url          "http://auth.lumen.local:8080/auth"
-                                       :realm       "akvo"}
- :akvo.lumen.test-utils/wrap-jwt-mock {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
+ :akvo.lumen.component.tenant-manager/tenant-manager {:encryption-key "secret"}
+
+ :akvo.lumen.component.caddisfly/local {:local-schema-uri "./caddisfly/tests-schema.json"}
+
+ :akvo.lumen.component.error-tracker/local {}
+
+ :akvo.lumen.component.emailer/dev-emailer {:from-email "devops@akvo.localhost"
+                                            :from-name "Akvo Lumen"}
+
+ :akvo.lumen.component.error-tracker/wrap-sentry {:dsn "dev-dsn"}
+
+ :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
+
+ :akvo.lumen.component.keycloak/data {:url "http://auth.lumen.local:8080/auth"
+                                      :realm "akvo"}
+
+ :akvo.lumen.component.keycloak/keycloak {:credentials
+                                          {:client_id "akvo-lumen-confidential"
+                                           :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
+
+ :akvo.lumen.component.handler/wrap-stacktrace {}
+
+ :akvo.lumen.utils.local-server/endpoint {:routes-opts {}}
+
+ :akvo.lumen.endpoint.public/public {:windshaft-url "http://windshaft:4000"}
+
+ :akvo.lumen.endpoint.visualisation/visualisation {:windshaft-url "http://windshaft:4000"}
+
+ :akvo.lumen.endpoint.export/export {:exporter-api-url "http://exporter:3001"}
+
+ :akvo.lumen.endpoint.invite/invite {:invite-redirect {:client-port 3030
+                                                       :scheme :http}}
+
+ :akvo.lumen.endpoint.invite/verify {:invite-redirect {:client-port 3030
+                                                       :scheme :http}}
+
+ :akvo.lumen.upload/data {:file-upload-path "/tmp/akvo/lumen"}
+
+ :akvo.lumen.endpoint.dataset/dataset {:import-config {:flow-api-url "https://api.akvotest.org/flow"}}
+
+ :akvo.lumen.endpoint.env/env {:keycloak-public-client-id "akvo-lumen"
+                               :keycloak-url "http://auth.lumen.local:8080/auth"
+                               :flow-api-url "https://api.akvotest.org/flow"
+                               :sentry-client-dsn "dev-sentry-client-dsn"
+                               :piwik-site-id "165"}
+ 
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
                                                     :label "t1"
                                                     :title "Tenant 1"}
                                                    {:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_2?ssl=true&user=lumen&password=password"
                                                     :label "t2"
-                                                    :title "Tenant 2"}]}}
- }
+                                                    :title "Tenant 2"}]}}}

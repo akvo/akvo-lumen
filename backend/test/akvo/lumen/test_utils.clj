@@ -135,7 +135,7 @@
   ([]
    (start-config nil nil))
   ([edn-config more-ks]
-   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn" edn-config)
+   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "test.edn" edn-config)
                                    more-ks)]
      (ig/load-namespaces c)
      c)))
