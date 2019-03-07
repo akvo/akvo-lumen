@@ -3,6 +3,7 @@
   We use the first domain label e.g. t1 in t1.lumen.akvo.org to dispatch."
   (:require [akvo.lumen.component.hikaricp :as hikaricp]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.tenant :as t]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.monitoring :as monitoring]
             [akvo.lumen.protocols :as p]
@@ -27,12 +28,6 @@
   (and (= request-method :get)
        (= path-info expected-path-info)))
 
-(defn tenant-host [host]
-  (-> host
-      (str/replace-first #"^dark-" "")
-      (str/split #"\.")
-      first))
-
 (defn wrap-label-tenant
   "Parses the first dns label as tenant id and adds it to the request map as
   tenant-id."
@@ -42,7 +37,7 @@
       (cond
         (path-info? "/healthz" req) (handler req)
         (path-info? "/metrics" req) (handler req)
-        (subdomain? host) (handler (assoc req :tenant (tenant-host host)))
+        (subdomain? host) (handler (assoc req :tenant (t/tenant-host host)))
         :else (lib/bad-request "Not a tenant")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

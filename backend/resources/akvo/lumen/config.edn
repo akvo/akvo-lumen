@@ -70,7 +70,7 @@
  :akvo.lumen.endpoint.user/user                       {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
  :akvo.lumen.endpoint.visualisation/visualisation     {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                        :windshaft-url             "http://localhost:4000"}
-
+ :akvo.lumen.monitoring/endpoint {:registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
  :akvo.lumen.component.handler/handler-api {:path       "/api"
                                             :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                                                          #ig/ref :akvo.lumen.auth/wrap-jwt
@@ -101,7 +101,8 @@
                                                :routes     [#ig/ref :akvo.lumen.endpoint.invite/verify]}
  
  :akvo.lumen.component.handler/handler {:endpoints [["" [#ig/ref :akvo.lumen.endpoint.env/env
-                                                         #ig/ref :akvo.lumen.endpoint.healthz/healthz]]
+                                                         #ig/ref :akvo.lumen.endpoint.healthz/healthz
+                                                         #ig/ref :akvo.lumen.monitoring/endpoint]]
                                                     #ig/ref :akvo.lumen.component.handler/handler-api
                                                     #ig/ref :akvo.lumen.component.handler/handler-verify
                                                     ["/share" {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
