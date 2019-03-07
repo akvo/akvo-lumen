@@ -2,7 +2,6 @@
   (:require [clojure.spec.alpha :as s]
             [iapetos.collector.jvm :as jvm]
             [iapetos.collector.ring :as ring]
-            [akvo.lumen.tenant :as t]
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.tools.logging :as log]
             [iapetos.core :as prometheus]
@@ -37,8 +36,7 @@
   (fn [handler]
     (ring/wrap-metrics handler collector {:path-fn (constantly "unknown")
                                           :label-fn (fn [request response]
-                                                      (let [h (get-in request [:headers "host"])
-                                                            tenant (t/tenant-host h)
+                                                      (let [tenant (:tenant request)
                                                             path (:template (:reitit.core/match request))]
                                                         (log/debug :tenant tenant :path path)
                                                         {:path path
