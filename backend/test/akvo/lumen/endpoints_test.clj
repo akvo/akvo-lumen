@@ -361,6 +361,12 @@
                                                            :axisLabelX "Age"
                                                            :bucketColumn "c2"))}))
                      body-kw :series first :data)))))
+
+      (testing "/metrics & proper values passed: path and tenant"
+        (let [r (h (get*  "/metrics"))]
+          (is (= 200 (:status r)))
+          (is (some? (re-find #"path=\"/api/aggregation/:dataset-id/:visualisation-type\",tenant=\"t1\""
+                              (:body r))))))
       
       (testing "/transformations/:id/transform & /transformations/:id/undo"
         (let [title "GDP-dataset"
