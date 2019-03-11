@@ -17,10 +17,9 @@
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints middleware handler] :as opts}]
   (if-not handler
-    (let [routes  endpoints
-          handler (ring/ring-handler
-                   (ring/router routes
-                                {:data {:middleware middleware}
+    (let [handler (ring/ring-handler
+                   (ring/router endpoints
+                                {:data      {:middleware middleware}
                                  :conflicts (constantly nil)}))]
       (assoc opts :handler handler))
     opts))
