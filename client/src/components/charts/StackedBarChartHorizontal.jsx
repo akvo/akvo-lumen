@@ -240,6 +240,7 @@ export default class StackedBarChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      legendPosition,
       labelsVisible,
       legendTitle,
       edit,
@@ -270,6 +271,7 @@ export default class StackedBarChart extends Component {
         width={width}
         height={height}
         legendVisible={legendVisible}
+        legendPosition={legendPosition}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}
@@ -546,6 +548,7 @@ export default class StackedBarChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      legendPosition,
       labelsVisible,
       legendTitle,
       edit,
@@ -575,6 +578,7 @@ export default class StackedBarChart extends Component {
         width={width}
         height={height}
         legendVisible={legendVisible}
+        legendPosition={legendPosition}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}
@@ -846,6 +850,7 @@ export default class StackedBarChart extends Component {
       marginLeft,
       style,
       legendVisible,
+      legendPosition,
       labelsVisible,
       legendTitle,
       edit,
@@ -875,6 +880,7 @@ export default class StackedBarChart extends Component {
         width={width}
         height={height}
         legendVisible={legendVisible}
+        legendPosition={legendPosition}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}
