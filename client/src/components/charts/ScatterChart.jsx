@@ -245,9 +245,9 @@ class ScatterChart extends Component {
   }
 
   handleShowColorPicker(isPickingColor) {
-    const { interactive, print } = this.props;
+    const { interactive, print, edit } = this.props;
     if (!interactive || print) return;
-    this.setState({ isPickingColor });
+    this.setState({ isPickingColor: edit ? isPickingColor : null });
   }
 
   handleMouseLeaveNode() {
