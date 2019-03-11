@@ -4,6 +4,7 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [akvo.lumen.endpoint.commons :as commons]
             [reitit.ring :as ring]
+            [reitit.spec :as rs]
             [reitit.coercion.spec]
             [clojure.tools.logging :as log]
             [muuntaja.core :as m]
@@ -16,10 +17,9 @@
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints middleware handler] :as opts}]
   (if-not handler
-    (let [routes  endpoints
-          handler (ring/ring-handler
-                   (ring/router routes
-                                {:data {:middleware middleware}
+    (let [handler (ring/ring-handler
+                   (ring/router endpoints
+                                {:data      {:middleware middleware}
                                  :conflicts (constantly nil)}))]
       (assoc opts :handler handler))
     opts))
@@ -30,9 +30,9 @@
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-verify  [_ {:keys [path middleware routes] :as opts}]
   [path {:middleware middleware} routes])
 
-(s/def ::endpoints any? #_(s/map-of string? (s/coll-of vector? :distinct true)))
+(s/def ::endpoints  (s/coll-of ::rs/raw-routes))
 
-(s/def ::middleware any? #_(s/coll-of fn? :distinct true))
+(s/def ::middleware (s/coll-of fn? :distinct true))
 
 (s/def ::config (s/keys :req-un [::endpoints ::middleware]))
 
