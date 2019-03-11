@@ -4,7 +4,6 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.keycloak :as keycloak]
-            [compojure.core :refer :all]
             [integrant.core :as ig]))
 
 (defn- promote-user? [body]
@@ -15,29 +14,30 @@
   (and (contains? body "admin")
        (not (get body "admin"))))
 
-(defn endpoint [{:keys [keycloak]}]
-  (context "/api/admin/users" {:keys [jwt-claims tenant]}
-
-    (GET "/" _
-      (user/users keycloak tenant))
-
-    (context "/:id" [id]
-
-      (PATCH "/" {:keys [body]}
-        (cond
-          (demote-user? body)
-          (user/demote-user-from-admin keycloak tenant jwt-claims id)
-
-          (promote-user? body)
-          (user/promote-user-to-admin keycloak tenant jwt-claims id)
-
-          :else (http/not-implemented)))
-
-      (DELETE "/" _
-        (user/remove-user keycloak tenant jwt-claims id)))))
+(defn routes [{:keys [keycloak] :as opts}]
+  ["/admin/users"
+   ["" {:get {:handler (fn [{tenant :tenant}]
+                         (user/users keycloak tenant))}}]
+   ["/:id" ["" {:patch {:parameters {:body map?
+                                     :path-params {:id string?}}
+                        :handler (fn [{tenant :tenant
+                                       jwt-claims :jwt-claims
+                                       {:keys [id]} :path-params
+                                       body :body}]
+                                   (cond
+                                     (demote-user? body)
+                                     (user/demote-user-from-admin keycloak tenant jwt-claims id)
+                                     (promote-user? body)
+                                     (user/promote-user-to-admin keycloak tenant jwt-claims id)
+                                     :else (http/not-implemented)))}
+                :delete {:parameters {:path-params {:id string?}}
+                         :handler (fn [{tenant :tenant
+                                        jwt-claims :jwt-claims
+                                        {:keys [id]} :path-params}]
+                                    (user/remove-user keycloak tenant jwt-claims id))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.user/user  [_ opts]
-  (endpoint opts))
+  (routes opts))
 
 (defmethod integrant-key :akvo.lumen.endpoint.user/user [_]
   (s/cat :kw keyword?

@@ -62,16 +62,16 @@
 ;;;
 
 (defn migrate []
-  (lumen-migrate/migrate commons/config))
+  (lumen-migrate/migrate (commons/config)))
 
 (defn migrate-and-seed []
   (migrate)
-  (tu/seed commons/config)
+  (tu/seed (commons/config))
   (migrate))
 
 (defn rollback
-  ([] (lumen-migrate/rollback commons/config {}))
-  ([args] (lumen-migrate/rollback commons/config args)))
+  ([] (lumen-migrate/rollback (commons/config) {}))
+  ([args] (lumen-migrate/rollback (commons/config) args)))
 
 (defn reset-db []
   (rollback)

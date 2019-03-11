@@ -4,33 +4,34 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
-            [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [tenant-manager]}]
-
-  (context "/api/dashboards" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
-
-      (GET "/" _
-        (dashboard/all tenant-conn))
-
-      (POST "/" {:keys [body jwt-claims]}
-        (dashboard/create tenant-conn body jwt-claims))
-
-      (context "/:id" [id]
-
-        (GET "/" _
-          (dashboard/fetch tenant-conn id))
-
-        (PUT "/" {:keys [body]}
-          (dashboard/upsert tenant-conn id body))
-
-        (DELETE "/" _
-         (dashboard/delete tenant-conn id))))))
+(defn routes [{:keys [tenant-manager] :as opts}]
+  ["/dashboards"
+   ["" {:get {:handler (fn [{tenant :tenant}]
+                         (dashboard/all (p/connection tenant-manager tenant)))}
+        :post {:parameters {:body map?}
+               :handler (fn [{tenant :tenant
+                              jwt-claims :jwt-claims
+                              body :body}]
+                          (dashboard/create (p/connection tenant-manager tenant) body jwt-claims))}}]
+   ["/:id" {:get {:parameters {:path-params {:id string?}}
+                  :handler (fn [{tenant :tenant
+                                 {:keys [id]} :path-params}]
+                             (dashboard/fetch (p/connection tenant-manager tenant) id))}
+            :put {:parameters {:body map?
+                               :path-params {:id string?}}
+                  :handler (fn [{tenant :tenant
+                                 body :body
+                                 {:keys [id]} :path-params}]
+                             (dashboard/upsert (p/connection tenant-manager tenant) id body))}
+            :delete {:parameters {:path-params {:id string?}}
+                     :handler (fn [{tenant :tenant
+                                    {:keys [id]} :path-params}]
+                                (dashboard/delete (p/connection tenant-manager tenant) id))}}]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
-  (endpoint opts))
+  (routes opts))
 
 (defmethod integrant-key :akvo.lumen.endpoint.dashboard/dashboard [_]
   (s/cat :kw keyword?

@@ -1,5 +1,6 @@
 (ns akvo.lumen.test-utils
-  (:require [akvo.lumen.lib.aes :as aes]
+  (:require [akvo.lumen.auth :as auth]
+            [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
@@ -13,9 +14,10 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
+            [clojure.string :as str]
+            [clojure.test :as t]
             [clojure.tools.logging :as log]
             [diehard.core :as dh]
-            [clojure.test :as t]
             [duct.core :as duct]
             [hugsql.core :as hugsql]
             [integrant.core :as ig])
@@ -115,25 +117,35 @@
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 (derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 
-(defn dissoc-prod-components [c]
-  (dissoc c
-          :akvo.lumen.component.emailer/mailjet-v3-emailer
-          :akvo.lumen.component.caddisfly/prod
-          :akvo.lumen.component.error-tracker/prod))
+(defn dissoc-prod-components [c more-ks]
+  (let [ks [:akvo.lumen.component.emailer/mailjet-v3-emailer
+            :akvo.lumen.component.caddisfly/prod
+            :akvo.lumen.component.error-tracker/prod]
+        ks (if more-ks (apply conj ks more-ks) ks)]
+    (apply dissoc c ks)))
+
 
 (defn prep [& paths]
-  (ig/prep (apply duct/merge-configs (map read-config paths))))
+  (ig/prep (apply duct/merge-configs (map read-config (filter some? paths)))))
 
 (defn halt-system [system]
   (when system (ig/halt! system)))
 
-(defn start-config []
-  (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn"))]
-             (ig/load-namespaces c)
-             c))
+(defn start-config
+  ([]
+   (start-config nil nil))
+  ([edn-config more-ks]
+   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn" edn-config)
+                                   more-ks)]
+     (ig/load-namespaces c)
+     c)))
 
-(defn start-system []
-  (ig/init (start-config)))
+(start-config "endpoint-tests.edn"
+              [:akvo.lumen.test-utils/public-path?-dev
+               :akvo.lumen.auth/wrap-jwt-prod])
+
+(defn start-system [config]
+  (ig/init config))
 
 (defn- seed-tenant
   "Helper function that will seed tenant to the tenants table."
@@ -155,5 +167,8 @@
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
-
+(defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [keycloak]}]
+  (fn [handler]
+    (fn [req]
+      (handler (assoc req :jwt-claims {"typ" "Bearer"})))))
 

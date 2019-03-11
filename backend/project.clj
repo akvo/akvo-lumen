@@ -23,6 +23,7 @@
                  [funcool/cuerdas "2.0.5"]
                  [honeysql "0.9.3"]
                  [meta-merge "1.0.0"]
+                 [metosin/reitit "0.2.13" :exclusions [org.clojure/spec.alpha org.ow2.asm/asm ring/ring-core mvxcvi/puget ring/ring-codec org.clojure/core.rrb-vector fipp r com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "1.46.266acfa5bb52c9b484af19f0bcfbfacb60b97319"]
                  [org.apache.tika/tika-core "1.18"]

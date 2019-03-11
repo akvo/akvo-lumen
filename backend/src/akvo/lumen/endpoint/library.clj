@@ -11,23 +11,27 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
-            [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [tenant-manager]}]
-  (context "/api/library" {:keys [tenant] :as request}
-    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
-      (GET "/" _
-        (lib/ok
+(defn handler [{:keys [tenant-manager] :as opts}]
+  (fn [{tenant :tenant}]
+    (let [tenant-conn (p/connection tenant-manager tenant)]
+      (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))
           :datasets (variant/value (dataset/all tenant-conn))
           :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (visualisation/all tenant-conn))
-          :collections (variant/value (collection/all tenant-conn))})))))
-
-(defmethod ig/init-key :akvo.lumen.endpoint.library/library  [_ opts]
-  (endpoint opts))
+          :collections (variant/value (collection/all tenant-conn))}))))
 
 (defmethod integrant-key :akvo.lumen.endpoint.library/library [_]
   (s/cat :kw keyword?
          :config (s/keys :req-un [::tenant-manager/tenant-manager] )))
+
+(defn routes [{:keys [tenant-manager] :as opts}]
+  ["/library"
+   {:get {:responses {200 {}}
+          :handler (handler opts)}}])
+
+(defmethod ig/init-key :akvo.lumen.endpoint.library/library  [_ opts]
+  (routes opts))
+

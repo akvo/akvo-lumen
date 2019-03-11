@@ -4,17 +4,20 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
-            [compojure.core :refer :all]
             [integrant.core :as ig]))
 
-(defn endpoint [{:keys [tenant-manager]}]
-  (context "/api/tiers" {:keys [tenant]}
-    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
-      (GET "/" _
-        (tier/all tenant-conn)))))
+
+(defn handler [{:keys [tenant-manager]}]
+  (fn [{tenant :tenant}]
+    (tier/all (p/connection tenant-manager tenant))))
+
+(defn routes [{:keys [tenant-manager] :as opts}]
+  ["/tiers"
+   {:get {:responses {200 {}}
+          :handler (handler opts)}}])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.tier/tier  [_ opts]
-  (endpoint opts))
+  (routes opts))
 
 (defmethod integrant-key :akvo.lumen.endpoint.tier/tier [_]
   (s/cat :kw keyword?

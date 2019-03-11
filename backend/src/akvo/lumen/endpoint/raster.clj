@@ -5,28 +5,7 @@
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
-            [akvo.lumen.upload :as upload]
-            [compojure.core :refer :all]))
-
-(defn endpoint [tenant-manager file-upload-path]
-  (context "/api/rasters" {:keys [params tenant] :as request}
-    (let-routes [tenant-conn (p/connection tenant-manager tenant)]
-
-      (GET "/" _
-        (raster/all tenant-conn))
-
-      (POST "/" {:keys [tenant body jwt-claims] :as request}
-        (raster/create tenant-conn file-upload-path jwt-claims body))
-
-      (context "/:id" [id]
-        (GET "/" _
-          (raster/fetch tenant-conn id))
-
-        (DELETE "/" _
-          (raster/delete tenant-conn id))))))
-
-(defmethod ig/init-key :akvo.lumen.endpoint.raster/raster  [_ opts]
-  (endpoint (-> opts :tenant-manager) (-> opts :upload-config :file-upload-path)))
+            [akvo.lumen.upload :as upload]))
 
 (s/def ::upload-config ::upload/config)
 
@@ -34,3 +13,25 @@
   (s/cat :kw keyword?
          :config (s/keys :req-un [::tenant-manager/tenant-manager
                                   ::upload-config] )))
+
+(defn routes [{:keys [tenant-manager upload-config] :as opts}]
+  ["/rasters"
+   ["" {:get {:parameters {:body map?}
+               :handler (fn [{tenant :tenant}]
+                          (raster/all (p/connection tenant-manager tenant)))}
+        :post {:parameters {:body map?}
+               :handler (fn [{tenant :tenant
+                              jwt-claims :jwt-claims
+                              body :body}]
+                          (raster/create (p/connection tenant-manager tenant) (:file-upload-path upload-config) jwt-claims body))}}]
+   ["/:id" {:get {:parameters {:path-params {:id string?}}
+                  :handler (fn [{tenant :tenant
+                                 {:keys [id]} :path-params}]
+                             (raster/fetch (p/connection tenant-manager tenant) id))}
+            :delete {:parameters {:path-params {:id string?}}
+                     :handler (fn [{tenant :tenant
+                                    {:keys [id]} :path-params}]
+                              (raster/delete (p/connection tenant-manager tenant) id))}}]])
+
+(defmethod ig/init-key :akvo.lumen.endpoint.raster/raster  [_ opts]
+  (routes opts))
