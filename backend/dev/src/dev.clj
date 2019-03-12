@@ -38,6 +38,7 @@
   (check-specs!))
 
 (defn go []
+  (commons/config)
   (ir/go))
 
 (defn halt! []
