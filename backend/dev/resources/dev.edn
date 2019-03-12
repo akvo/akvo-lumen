@@ -1,4 +1,4 @@
-{:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
+{:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
 
  :akvo.lumen.component.http/http {:port 3000}
 
@@ -7,9 +7,6 @@
  :akvo.lumen.component.handler/handler {:endpoints [["/local-development" [#ig/ref :akvo.lumen.utils.local-server/endpoint]]
                                                     ["/spec" [#ig/ref :dev.endpoints/spec]]]}
 
- :akvo.lumen.component.keycloak/data {:url "http://auth.lumen.local:8080/auth"
-                                      :realm "akvo"}
- :akvo.lumen.test-utils/wrap-jwt-mock {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
  :akvo.lumen.migrate/migrate {:seed
                               {:tenants
                                [{:db_uri "jdbc:postgresql://postgres/lumen_tenant_1?user=lumen&password=password&ssl=true"

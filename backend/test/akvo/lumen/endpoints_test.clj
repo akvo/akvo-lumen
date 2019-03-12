@@ -40,11 +40,6 @@
 
 (def tenant-host "http://t1.lumen.local:3030")
 
-(def local-server-path "http://localhost:3100/local-development/local-server/")
-
-(defn local-file [file-name]
-  (str local-server-path file-name))
-
 (defn api-url [api-url & args]
   (str  "/api" api-url (when args (str "/" (str/join "/"  args)))))
 
@@ -103,7 +98,36 @@
       (when (= "OK" status)
         ((if k k :datasetId) job)))))
 
-
+(defn post-files [h file-name]
+  (let [file     (io-file file-name)
+        length*  (.length file)
+        res      (h (update (post*  (api-url "/files") {})
+                            :headers #(assoc %
+                                             "upload-metadata" (str "filename " file-name)
+                                             "upload-length" (str length*))))
+        location (get-in res [:headers "Location"])
+        loc      (str/replace location "http://t1.lumen.local:3030/api" "")]
+    (is (= 201 (:status res)))
+    (let [content-length 1048576]
+      (loop [length   length*
+             uploaded 0
+             it       0]
+        (when (pos? length)
+          (let [diff           (- length content-length)
+                content-length (if (pos? diff) content-length length)
+                ba             (-> (io-file file-name)
+                                   (res-to-byte-array uploaded  content-length)
+                                   (ByteArrayInputStream.))]
+            (let [resp (h (-> (patch*  (api-url loc) {})
+                              (assoc :content-length content-length)
+                              (assoc :body ba)
+                              (update :headers #(assoc %
+                                                       "content-type" "application/offset+octet-stream"
+                                                       "content-length" (str content-length)
+                                                       "upload-offset" (str uploaded)))))]
+              (if (= 204 (:status resp))
+                (recur diff (+ uploaded content-length) (inc it))))))))
+    location))
 
 (deftest handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
@@ -188,13 +212,16 @@
                  body-kw))))
 
       (testing "/data-source/job-execution/:id/status/:status"
-        (let [dataset-url (local-file "sample-data-1.csv")
-              import-id (-> (h (post*  (api-url "/datasets") {:source
-                                                              {:kind             "LINK"
-                                                               :url              dataset-url
-                                                               :hasColumnHeaders true
-                                                               :guessColumnTypes true}
-                                                              :name "sample-data-1.csv"}))
+        (let [file-name "sample-data-1.csv"
+              dataset-url (post-files h file-name)
+              import-id (-> (h (post*  (api-url "/datasets")
+                                       {:source
+                                        {:kind "DATA_FILE",
+                                         :hasColumnHeaders true,
+                                         :guessColumnTypes true,
+                                         :url dataset-url,
+                                         :fileName file-name},
+                                        :name "testing-job-status"}))
                             body-kw
                             :importId)
               _           (is (some? import-id))
@@ -204,17 +231,20 @@
 
       (testing "/datasets"
         (let [title "dataset-title"
-              dataset-url (local-file "sample-data-1.csv")
+              file-name "sample-data-1.csv"
+              dataset-url (post-files h file-name)
               import-id (-> (h (post*  (api-url "/datasets") {:source
-                                                              {:kind "LINK"
-                                                               :url dataset-url
+                                                              {:kind "DATA_FILE"
                                                                :hasColumnHeaders true
-                                                               :guessColumnTypes true}
+                                                               :guessColumnTypes true
+                                                               :url dataset-url
+                                                               :fileName file-name}
                                                               :name title}))
                             body-kw
                             :importId)
               _           (is (some? import-id))
-              dataset-id (job-execution-dataset-id h import-id)]
+              dataset-id (job-execution-dataset-id h import-id)
+              ]
           (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
                             body-kw)]
             (is (= {:transformations []
@@ -230,7 +260,7 @@
                     :id dataset-id}
                    (select-keys dataset [:transformations :columns :name :rows :status :id])))
             (is (= {:url dataset-url
-                    :kind "LINK"
+                    :kind "DATA_FILE"
                     :guessColumnTypes true
                     :hasColumnHeaders true}
                    (select-keys (:source dataset) [:url :kind :guessColumnTypes :hasColumnHeaders])))
@@ -242,15 +272,7 @@
                       :status "OK"
                       :transformations []
                       :columns commons/dataset-link-columns}
-                     (select-keys meta-dataset [:id :name :status :transformations :columns]))))
-            (let [update-dataset (-> (h (post* (api-url "/datasets" dataset-id "update") (:source dataset)))
-                                     body-kw)
-                  dataset-id (job-execution-dataset-id h (:updateId update-dataset))]
-              (is (some? dataset-id))
-
-              (is (< (:modified dataset ) (-> (h (get* (api-url "/datasets" dataset-id)))
-                                              body-kw
-                                              :modified)))))
+                     (select-keys meta-dataset [:id :name :status :transformations :columns])))))
           (is (= title (-> (h (get* (api-url "/library")))
                           body-kw :datasets first :name)))
           (let [bar-vis-name "hello-bar-vis!"]
@@ -275,68 +297,53 @@
                     (is (some? visualisations))
                     (is (some? datasets)))))))))
 
+      (testing "/datasets update"
+        (let [title "github-sample-data-1"
+              file-name "sample-data-1.csv"
+              dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
+
+              import-id (-> (h (post*  (api-url "/datasets") {:source
+                                                              {:kind "LINK"
+                                                               :hasColumnHeaders true
+                                                               :guessColumnTypes true
+                                                               :url dataset-url}
+                                                              :name title}))
+                            body-kw
+                            :importId)
+              _           (is (some? import-id))
+              dataset-id (job-execution-dataset-id h import-id)
+              dataset (-> (h (get* (api-url "/datasets" dataset-id)))
+                            body-kw)
+              update-dataset (-> (h (post* (api-url "/datasets" dataset-id "update") (:source dataset)))
+                                 body-kw)
+              dataset-id (job-execution-dataset-id h (:updateId update-dataset))]
+
+          (is (some? dataset-id))
+
+          (is (< (:modified dataset ) (-> (h (get* (api-url "/datasets" dataset-id)))
+                                          body-kw
+                                          :modified)))
+          (is (= 200 (:status (h (del*  (api-url "/datasets" dataset-id))))))))
+
       (testing "/files "
-        (let [file-name "dos.csv"
-              file (io-file file-name)
-              length* (.length file)]
-          (let [res (h (update (post*  (api-url "/files") {})
-                               :headers #(assoc % "upload-length" (str length*))))
-                location (get-in res [:headers "Location"])
-                loc (str/replace location "http://t1.lumen.local:3030/api" "")]
-            (is (= 201 (:status res)))
-            (is (= 204 (:status (h (-> (patch*  (api-url loc) {})
-                                       (assoc :body (slurp (io/file (io/resource "dos.csv"))))
-                                       (update-in [:headers "content-type"] (constantly "application/offset+octet-stream"))
-                                       (update :headers #(assoc %
-                                                                "upload-metadata" (str "filename " file-name)
-                                                                "upload-length" (str length*)
-                                                                "upload-offset" (str 0)))))))))))
+        (is (some? (post-files h "dos.csv"))))
 
       (testing "/rasters"
         (let [file-name "SLV_ppp_v2b_2015_UNadj.tif"
-              file (io-file file-name)
-              length* (.length file)]
-          (let [res  (h (update (post*  (api-url "/files") {})
-                                :headers #(assoc %
-                                                 "upload-metadata" (str "filename " file-name)
-                                                 "upload-length" (str length*))))
-                location  (get-in res [:headers "Location"])
-                loc (str/replace location "http://t1.lumen.local:3030/api" "")]
-            (is (= 201 (:status res)))
-            (let [content-length 1048576]
-              (loop [length length*
-                     uploaded 0
-                     it 0]
-                (when (pos? length) 
-                  (let [diff (- length content-length)
-                        content-length (if (pos? diff) content-length length)
-                        ba (-> (io-file file-name)
-                               (res-to-byte-array uploaded  content-length)
-                               (ByteArrayInputStream.))]
-                    
-                    (let [resp (h (-> (patch*  (api-url loc) {})
-                                      (assoc :content-length content-length)
-                                      (assoc :body ba)
-                                      (update :headers #(assoc %
-                                                               "content-type" "application/offset+octet-stream"
-                                                               "content-length" (str content-length)
-                                                               "upload-offset" (str uploaded)))))]
-                      (if (= 204 (:status resp))
-                        (recur diff (+ uploaded content-length) (inc it))))))))
+              location  (post-files h file-name)]
+          (let [payload  {:source
+                          {:kind "GEOTIFF",
+                           :url location
+                           :fileName file-name},
+                          :name "raster1"}
+                res (body-kw (h (post*  (api-url "/rasters") payload)))
+                ]
+            (is (some? (:importId res)))
+            (is (= "GEOTIFF" (:kind res)))
 
-            (let [payload  {:source
-                            {:kind "GEOTIFF",
-                             :url location
-                             :fileName file-name},
-                            :name "raster1"}
-                  res (body-kw (h (post*  (api-url "/rasters") payload)))
-                  ]
-              (is (some? (:importId res)))
-              (is (= "GEOTIFF" (:kind res)))
-
-              (let [raster-id (job-execution-dataset-id h (:importId res) :rasterId)
-                    res-raster (body-kw (h (get* (api-url "/rasters" raster-id))))]
-                (is (= (:id res-raster) raster-id)))))))
+            (let [raster-id (job-execution-dataset-id h (:importId res) :rasterId)
+                  res-raster (body-kw (h (get* (api-url "/rasters" raster-id))))]
+              (is (= (:id res-raster) raster-id))))))
 
       ;; "/exports" endpoint can't be tested in backend isolation endpoints thus it needs a client side too
       
@@ -370,10 +377,12 @@
       
       (testing "/transformations/:id/transform & /transformations/:id/undo"
         (let [title "GDP-dataset"
-              dataset-url (local-file "GDP.csv")
+              file-name "GDP.csv"
+              dataset-url (post-files h file-name)
               import-id (-> (h (post*  (api-url "/datasets") {:source
-                                                              {:kind "LINK"
+                                                              {:kind "DATA_FILE"
                                                                :url dataset-url
+                                                               :fileName file-name
                                                                :hasColumnHeaders false
                                                                :guessColumnTypes true}
                                                               :name title}))
@@ -405,13 +414,16 @@
                 (= " 17419000 " (->  dataset-txed :rows (get 4))))))))
       
       (testing "/split-column/:dataset-id/pattern-analysis"
-        (let [dataset-url (local-file "split_column_1785.csv")
+        (let [title "patter-analysis"
+              file-name "split_column_1785.csv"
+              dataset-url (post-files h file-name)
               import-id (-> (h (post*  (api-url "/datasets") {:source
-                                                              {:kind             "LINK"
+                                                              {:kind             "DATA_FILE"
                                                                :url              dataset-url
                                                                :hasColumnHeaders true
+                                                               :fileName file-name
                                                                :guessColumnTypes true}
-                                                              :name "split_column_1785.csv"}))
+                                                              :name title}))
                             body-kw
                             :importId)
               _           (is (some? import-id))
