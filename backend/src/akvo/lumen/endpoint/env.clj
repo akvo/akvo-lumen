@@ -1,14 +1,13 @@
 (ns akvo.lumen.endpoint.env
-  (:require [compojure.core :refer :all]
-            [integrant.core :as ig]
+  (:require [integrant.core :as ig]
             [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [ring.util.response :refer [response]]))
 
-(defn endpoint [{:keys [keycloak-public-client-id keycloak-url flow-api-url
-                        piwik-site-id sentry-client-dsn]}]
-  (GET "/env" request
-       (response
+(defn handler [{:keys [keycloak-public-client-id keycloak-url flow-api-url
+                        piwik-site-id sentry-client-dsn] :as opts}]
+  (fn [{tenant :tenant :as request}]
+    (response
         (cond-> {"keycloakClient" keycloak-public-client-id
                  "keycloakURL" keycloak-url
                  "flowApiUrl" flow-api-url
@@ -17,8 +16,12 @@
           (string? sentry-client-dsn)
           (assoc "sentryDSN" sentry-client-dsn)))))
 
+(defn routes [{:keys [routes-opts] :as opts}]
+  ["/env" (merge {:get {:handler (handler opts)}}
+                 (when routes-opts routes-opts))])
+
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
-  (endpoint opts))
+  (routes opts))
 
 (s/def ::keycloak-public-client-id string?)
 (s/def ::keycloak-url string?)

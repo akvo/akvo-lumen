@@ -7,9 +7,11 @@
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
-(defrecord DevEmailer []
+(defrecord DevEmailer [store]
   p/SendEmail
   (send-email [this recipients email]
+    (swap! store #(conj % {:email email
+                           :recipients recipients}))
     (log/info recipients)
     (log/info email)))
 
@@ -33,7 +35,7 @@
 
 (defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ {:keys [from-email from-name] :as opts} ]
   (log/info  "Using std out emailer" opts)
-  (map->DevEmailer opts))
+  (map->DevEmailer (assoc opts :store (atom []))))
 
 (defmethod ig/init-key :akvo.lumen.component.emailer/mailjet-v3-emailer  [_ {:keys [email-password email-user from-email from-name]}]
   (map->MailJetV3Emailer

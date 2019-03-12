@@ -32,11 +32,6 @@
                     (immutant-request :get "/"))]
       (is (= 401 (:status response)))))
 
-  (testing "GET /api without claims"
-    (let [response ((m/wrap-auth test-handler)
-                    (immutant-request :get "/api"))]
-      (is (= 200 (:status response)))))
-
   (testing "POST /api without claims"
     (let [response ((m/wrap-auth test-handler)
                     (immutant-request :post "/api"))]

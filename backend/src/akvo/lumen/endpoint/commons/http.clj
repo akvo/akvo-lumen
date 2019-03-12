@@ -3,7 +3,7 @@
 (defn- response [response-code]
   {:pre [(pos? response-code)]}
   (fn [body]
-    {:pre [(map? body)]}
+    {:pre [(coll? body)]}
     {:status response-code
      :body body}))
 
