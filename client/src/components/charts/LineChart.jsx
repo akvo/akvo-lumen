@@ -187,7 +187,6 @@ export default class LineChart extends Component {
     const axisLabelFontSize =
       getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
-
     return (
       <ChartLayout
         style={style}
@@ -210,15 +209,19 @@ export default class LineChart extends Component {
             const availableHeight = dimensions.height - margins.bottom - margins.top;
             const availableWidth = dimensions.width - margins.left - margins.right;
 
+            const xDomain = [
+              series.data[0].timestamp,
+              series.data[series.data.length - 1].timestamp,
+            ];
             const xScale = series.metadata.type === 'date' ?
               scaleTime()
-                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
+                .domain(xDomain)
                 .range([
                   margins.left,
                   dimensions.width - margins.right,
                 ]) :
               scaleLinear()
-                .domain([series.data[0].timestamp, series.data[series.data.length - 1].timestamp])
+                .domain(xDomain)
                 .range([
                   margins.left,
                   dimensions.width - margins.right,
@@ -365,7 +368,7 @@ export default class LineChart extends Component {
 
                   <AxisLeft
                     scale={yScale}
-                    left={xScale(0)}
+                    left={xScale((xDomain[0] < 0 && xDomain[1] > 0) ? 0 : xDomain[0])}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
