@@ -36,7 +36,8 @@
 
 (s/def ::middleware (s/coll-of fn? :distinct true))
 
-(s/def ::config (s/keys :req-un [::endpoints ::middleware]))
+(s/def ::config (s/keys :req-un [::endpoints]
+                        :opt-un [::middleware]))
 
 (s/def ::handler fn?)
 

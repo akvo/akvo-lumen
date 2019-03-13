@@ -59,7 +59,7 @@
                 (assoc-in [:headers "content-type"] "application/transit+json")
                 h)
 
-          res (dev.transit/transit-body (:body r))]
+          res (dev.transit/read-transit (:body r))]
       (assert (=
                {:namespace "akvo.lumen.lib.aggregation",
                 :id "dataset",
@@ -79,7 +79,7 @@
                 (assoc-in [:headers "content-type"] "application/transit+json")
                 h)
 
-          res (dev.transit/transit-body (:body r))]
+          res (dev.transit/read-transit (:body r))]
       (assert (= res (s/conform spec res)))
       res)
 
@@ -88,9 +88,9 @@
           body* {:type :undo}
           r (-> (post*  (str "/spec/conform/" spec) {})
                 (assoc-in [:headers "content-type"] "application/transit+json")
-                (assoc :body  (io/reader (dev.transit/parse-transit-stream  (dev.transit/transit-stream body*))))
+                (assoc :body  (io/reader (dev.transit/input-stream  (dev.transit/output-stream body*))))
                 h)
-          res (dev.transit/transit-body (:body r))]
+          res (dev.transit/read-transit (:body r))]
       (assert (= body* res))
       res))
   )

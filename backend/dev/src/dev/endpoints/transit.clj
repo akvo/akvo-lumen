@@ -7,19 +7,20 @@
             [ring.util.response :refer [response]]
             [integrant.core :as ig])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
+           [java.nio.charset Charset]
            [org.apache.commons.io.input ReaderInputStream]))
 
-(defn transit-stream [s]
+(defn output-stream [s]
   (let [out (ByteArrayOutputStream. 4096)
         writer (transit/writer out :json)]
     (transit/write writer s)
     out))
 
-(defn parse-transit-stream [out]
+(defn input-stream [out]
   (ByteArrayInputStream. (.toByteArray out)))
 
-(defn transit-body [body]
-  (-> body parse-transit-stream (transit/reader :json) (transit/read)))
+(defn read-transit [body]
+  (-> body input-stream (transit/reader :json) (transit/read)))
 
 (defmethod ig/init-key ::middleware  [_ opts]
   (fn [handler]
@@ -27,10 +28,10 @@
       (if (= "application/transit+json" (get-in req [:headers "content-type"]))
         (let [b (when (:body req)
                   (-> (:body req)
-                      (ReaderInputStream. )
+                      (ReaderInputStream. (Charset/forName "UTF-8"))
                       (transit/reader :json)
                       (transit/read)))
               req (assoc req :body b)
               res (handler req)]
-          (assoc res :body (transit-stream (:body res))))
+          (assoc res :body (output-stream (:body res))))
         (handler req)))))
