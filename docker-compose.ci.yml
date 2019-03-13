@@ -10,7 +10,12 @@ services:
      - LUMEN_KEYCLOAK_URL=http://auth.lumen.local:8080/auth
      - LUMEN_KEYCLOAK_CLIENT_SECRET=caed3964-09dd-4752-b0bb-22c8e8ffd631
      - LUMEN_ENCRYPTION_KEY=secret
-     - LUMEN_SENTRY_BACKEND_DSN=anything
+     - LUMEN_SENTRY_BACKEND_DSN=https://xxxx@sentry.io/111111
+     - LUMEN_SENTRY_CLIENT_DSN=https://xxxx@sentry.io/111111
+     - LUMEN_EMAIL_USER=admin@akvo.org
+     - LUMEN_EMAIL_PASSWORD=password
+     - LUMEN_FLOW_API_URL=flow-url
+     - LUMEN_PIWIK_SITE_ID=165
  client:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT}"
    expose:

@@ -1,6 +1,5 @@
 (ns akvo.lumen.endpoint.env
   (:require [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [ring.util.response :refer [response]]))
 
@@ -29,10 +28,9 @@
 (s/def ::sentry-client-dsn string?)
 (s/def ::piwik-site-id string?)
 
-(defmethod integrant-key :akvo.lumen.endpoint.env/env [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::keycloak-public-client-id
-                                  ::keycloak-url
-                                  ::flow-api-url
-                                  ::sentry-client-dsn
-                                  ::piwik-site-id])))
+(defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
+  (s/keys :req-un [::keycloak-public-client-id
+                   ::keycloak-url
+                   ::flow-api-url
+                   ::sentry-client-dsn
+                   ::piwik-site-id]))

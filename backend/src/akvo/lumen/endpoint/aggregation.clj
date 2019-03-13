@@ -3,15 +3,13 @@
             [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig])
   (:import [com.fasterxml.jackson.core JsonParseException]))
 
-(defmethod integrant-key :akvo.lumen.endpoint.aggregation/aggregation [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::tenant-manager/tenant-manager] )))
+(defmethod ig/pre-init-spec :akvo.lumen.endpoint.aggregation/aggregation [_]
+  (s/keys :req-un [::tenant-manager/tenant-manager] ))
 
 (defn handler [{:keys [tenant-manager] :as opts}]
   (fn [{{:keys [dataset-id visualisation-type]} :path-params

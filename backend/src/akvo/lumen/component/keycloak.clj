@@ -7,7 +7,6 @@
             [clj-http.client :as client]
             [integrant.core :as ig]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.set :as set]
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
@@ -287,9 +286,8 @@
 (s/def ::data (s/keys :req-un [::url
                                ::realm]))
 
-(defmethod integrant-key :akvo.lumen.component.keycloak/data [_]
-  (s/cat :kw keyword?
-         :config ::data))
+(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
+  ::data)
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data] :as opts}]
   (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
@@ -307,6 +305,5 @@
 
 (s/def ::keycloak (partial satisfies? p/KeycloakUserManagement))
 
-(defmethod integrant-key :akvo.lumen.component.keycloak/keycloak [_]
-  (s/cat :kw keyword?
-         :config ::config))
+(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/keycloak [_]
+  ::config)

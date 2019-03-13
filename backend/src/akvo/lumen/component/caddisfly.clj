@@ -3,7 +3,6 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.java.io :as io]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [integrant.core :as ig]
             [clojure.tools.logging :as log]))
@@ -39,8 +38,8 @@
 
 (s/def ::caddisfly (partial instance? Caddisfly))
 
-(defmethod integrant-key :akvo.lumen.component.caddisfly/local [_]
-  (s/cat :kw keyword? :config (s/keys :req-un [::local-schema-uri])))
+(defmethod ig/pre-init-spec :akvo.lumen.component.caddisfly/local [_]
+  (s/keys :req-un [::local-schema-uri]))
 
-(defmethod integrant-key :akvo.lumen.component.caddisfly/prod [_]
-  (s/cat :kw keyword? :config (s/keys :req-un [::schema-uri])))
+(defmethod ig/pre-init-spec :akvo.lumen.component.caddisfly/prod [_]
+  (s/keys :req-un [::schema-uri]))

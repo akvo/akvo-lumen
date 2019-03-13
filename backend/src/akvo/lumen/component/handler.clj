@@ -1,7 +1,6 @@
 (ns akvo.lumen.component.handler
   (:require [compojure.response :as compojure.res]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [akvo.lumen.endpoint.commons :as commons]
             [reitit.ring :as ring]
             [reitit.spec :as rs]
@@ -38,9 +37,8 @@
 
 (s/def ::handler fn?)
 
-(defmethod integrant-key :akvo.lumen.component.handler/handler [_]
-  (s/cat :kw keyword?
-         :config ::config))
+(defmethod ig/pre-init-spec :akvo.lumen.component.handler/handler [_]
+  ::config)
 
 (defmethod ig/halt-key! :akvo.lumen.component.handler/handler  [_ opts]
   (dissoc opts :handler))
@@ -51,9 +49,8 @@
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-json-body  [_ opts]
   ring.middleware.json/wrap-json-body)
 
-(defmethod integrant-key :akvo.lumen.component.handler/wrap-json-body [_]
-  (s/cat :kw keyword?
-         :config empty?))
+(defmethod ig/pre-init-spec :akvo.lumen.component.handler/wrap-json-body [_]
+  empty?)
 
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-json-response  [_ opts]
   ring.middleware.json/wrap-json-response)
@@ -84,9 +81,8 @@
                                     ::wrap-defaults.responses/content-types
                                     ::wrap-defaults.responses/default-charset]))
 
-(defmethod integrant-key :akvo.lumen.component.handler/wrap-defaults [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::params ::responses])))
+(defmethod ig/pre-init-spec :akvo.lumen.component.handler/wrap-defaults [_]
+  (s/keys :req-un [::params ::responses]))
 
 
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-hide-errors  [_ {:keys [error-response]}]
@@ -103,9 +99,8 @@
 
 (s/def ::error-response string?)
 
-(defmethod integrant-key :akvo.lumen.component.handler/wrap-hide-errors [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::error-response])))
+(defmethod ig/pre-init-spec :akvo.lumen.component.handler/wrap-hide-errors [_]
+  (s/keys :req-un [::error-response]))
 
 (defmethod ig/init-key :akvo.lumen.component.handler/wrap-not-found  [_ {:keys [error-response]}]
   (fn [handler]
@@ -115,9 +110,8 @@
               (ring.response/content-type "text/html")
               (ring.response/status 404))))))
 
-(defmethod integrant-key :akvo.lumen.component.handler/wrap-not-found [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::error-response])))
+(defmethod ig/pre-init-spec :akvo.lumen.component.handler/wrap-not-found [_]
+  (s/keys :req-un [::error-response]))
 
 (defmethod ig/init-key :akvo.lumen.component.handler/variant  [_ _]
   (fn [handler]

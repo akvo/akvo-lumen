@@ -2,7 +2,6 @@
   (:require [clojure.spec.alpha :as s]
             [iapetos.collector.jvm :as jvm]
             [iapetos.collector.ring :as ring]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.tools.logging :as log]
             [iapetos.core :as prometheus]
             [iapetos.registry :as registry]
@@ -15,9 +14,8 @@
 (defmethod ig/init-key ::dropwizard-registry [_ _]
   (MetricRegistry.))
 
-(defmethod integrant-key ::dropwizard-registry [_]
-  (s/cat :kw keyword?
-         :config empty?))
+(defmethod ig/pre-init-spec ::dropwizard-registry [_]
+  empty?)
 
 (defmethod ig/init-key ::collector [_ {:keys [dropwizard-registry]}]
   (-> (prometheus/collector-registry)
@@ -27,9 +25,8 @@
 
 (s/def ::dropwizard-registry ::metric-registry)
 
-(defmethod integrant-key ::collector [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::dropwizard-registry])))
+(defmethod ig/pre-init-spec ::collector [_]
+  (s/keys :req-un [::dropwizard-registry]))
 
 (s/def ::collector (partial satisfies? registry/Registry))
 (defmethod ig/init-key ::middleware [_ {:keys [collector]}]
@@ -42,9 +39,8 @@
                                                         {:path path
                                                          :tenant tenant}))})))
 
-(defmethod integrant-key ::middleware [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::collector])))
+(defmethod ig/pre-init-spec ::middleware [_]
+  (s/keys :req-un [::collector]))
 
 
 (defn routes [{:keys [registry] :as opts}]
