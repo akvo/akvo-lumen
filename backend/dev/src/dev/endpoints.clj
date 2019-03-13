@@ -2,11 +2,10 @@
   (:require [clojure.tools.logging :as log]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
-            [cognitect.transit :as transit]
+            [dev.endpoints.transit :as dev.transit]
             [akvo.lumen.specs :as lumen.s]
             [ring.util.response :refer [response]]
-            [integrant.core :as ig])
-  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
+            [integrant.core :as ig]))
 ;; working in adapt https://github.com/akvo/akvo-lumen/blob/310bd7cbc3221bf889ad592f2d9e91a572f06c00/backend/dev/src/akvo/lumen/local_server.clj
 ;; use edn middleware instead of json middleware
 
@@ -16,15 +15,11 @@
    :ns (keyword spec)
    :spec (s/describe spec)})
 
-
-
 (defn routes [opts]
   (let [params {:parameters {:path-params {:spec-ns string?
                                            :spec-id string?}}}
         read-spec (fn [{:keys [spec-ns spec-id]}]
-                    (keyword (str (apply str (next (seq spec-ns))) "/" spec-id)))
-        ]
-    
+                    (keyword (str (apply str (next (seq spec-ns))) "/" spec-id)))]    
     [["/sample"
        ["/:spec-ns/:spec-id"
         ["" {:get (merge params
@@ -34,7 +29,16 @@
        ["/:spec-ns/:spec-id"
         ["" {:get (merge params
                          {:handler (fn [{params :path-params}]
-                                     (response (describe-spec-response (read-spec params))))})}]]]]))
+                                     (response (describe-spec-response (read-spec params))))})}]]]
+     ["/conform"
+       ["/:spec-ns/:spec-id"
+        ["" {:post (merge (assoc params :body map?)
+                          {:handler (fn [{params :path-params
+                                          body :body }]
+                                      (let [res (s/conform (read-spec params) body)]
+                                        (if (not= :clojure.spec.alpha/invalid res)
+                                          (response res)
+                                          (response (s/explain-data (read-spec params) body)))))})}]]]]))
 
 (defmethod ig/init-key :dev.endpoints/spec  [_ opts]
   (routes opts))
@@ -42,32 +46,20 @@
 (defmethod ig/init-key :dev.endpoints/spec-api  [_ {:keys [path middleware routes] :as opts}]
   [path {:middleware middleware} routes])
 
-(defmethod ig/init-key :dev.endpoints/middleware  [_ opts]
-  (fn [handler]
-    (fn [req]
-      (let [res (handler req)]
-        (if (= "application/transit+json" (get-in req [:headers "content-type"]))
-          (let [out (ByteArrayOutputStream. 4096)
-                writer (transit/writer out :json)]
-            (transit/write writer (:body res))
-            (assoc res :body out))
-          res)))))
-
-
 (comment
+  "Adding some dev specs tests around here"
   (do
-    (require '[akvo.lumen.endpoints-test.commons :refer (get* patch* del* post* put* body-kw job-execution-dataset-id post-files api-url)]
+
+    (require '[akvo.lumen.endpoints-test.commons :refer (get* post*)]
              '[integrant.repl.state :as state :refer (system)])
+    
     (let [spec :akvo.lumen.lib.aggregation/dataset
           h (:handler (:akvo.lumen.component.handler/handler system))
           r (-> (get*  (str "/spec/describe/" spec))
                 (assoc-in [:headers "content-type"] "application/transit+json")
                 h)
-          f* (fn [out] (ByteArrayInputStream. (.toByteArray out)))
-          res (-> (:body r)
-                  f*
-                  (transit/reader :json)
-                  (transit/read))]
+
+          res (dev.transit/transit-body (:body r))]
       (assert (=
                {:namespace "akvo.lumen.lib.aggregation",
                 :id "dataset",
@@ -79,7 +71,29 @@
                   :akvo.lumen.specs.db.dataset-version/table-name])}
                res
                (describe-spec-response spec)))
+      res)
+    
+    (let [spec :akvo.lumen.specs.transformation/command
+          h (:handler (:akvo.lumen.component.handler/handler system))
+          r (-> (get*  (str "/spec/sample/" spec))
+                (assoc-in [:headers "content-type"] "application/transit+json")
+                h)
+
+          res (dev.transit/transit-body (:body r))]
+      (assert (= res (s/conform spec res)))
+      res)
+
+    (let [spec :akvo.lumen.specs.transformation/command
+          h (:handler (:akvo.lumen.component.handler/handler system))
+          body* {:type :undo}
+          r (-> (post*  (str "/spec/conform/" spec) {})
+                (assoc-in [:headers "content-type"] "application/transit+json")
+                (assoc :body  (io/reader (dev.transit/parse-transit-stream  (dev.transit/transit-stream body*))))
+                h)
+          res (dev.transit/transit-body (:body r))]
+      (assert (= body* res))
       res))
   )
+
 
 

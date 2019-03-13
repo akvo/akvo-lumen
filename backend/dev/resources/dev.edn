@@ -1,10 +1,10 @@
 {:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
 
  :akvo.lumen.component.http/http {:port 3000}
- :dev.endpoints/middleware {}
+ :dev.endpoints.transit/middleware {}
  :dev.endpoints/spec {}
  :dev.endpoints/spec-api {:path "/spec"
-                          :middleware [#ig/ref :dev.endpoints/middleware]
+                          :middleware [#ig/ref :dev.endpoints.transit/middleware]
                           :routes [#ig/ref :dev.endpoints/spec]}
 
  :akvo.lumen.component.handler/handler {:endpoints [["/local-development" [#ig/ref :akvo.lumen.utils.local-server/endpoint]]
