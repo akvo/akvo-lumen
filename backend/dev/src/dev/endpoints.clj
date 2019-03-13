@@ -3,10 +3,10 @@
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [cognitect.transit :as transit]
+            [akvo.lumen.specs :as lumen.s]
             [ring.util.response :refer [response]]
             [integrant.core :as ig])
-  (:import [java.io ByteArrayInputStream ByteArrayOutputStream])
-)
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 ;; working in adapt https://github.com/akvo/akvo-lumen/blob/310bd7cbc3221bf889ad592f2d9e91a572f06c00/backend/dev/src/akvo/lumen/local_server.clj
 ;; use edn middleware instead of json middleware
 
@@ -16,12 +16,25 @@
    :ns (keyword spec)
    :spec (s/describe spec)})
 
+
+
 (defn routes [opts]
-  ["/describe" ["/:spec-ns/:spec-id" ["" {:get {:parameters {:path-params {:spec-ns string?
-                                                                           :spec-id string?}}
-                                                :handler (fn [{{:keys [spec-ns spec-id]} :path-params}]
-                                                           (let [spec (keyword (str (apply str (next (seq spec-ns))) "/" spec-id))]
-                                                             (response (describe-spec-response spec))))}}]]])
+  (let [params {:parameters {:path-params {:spec-ns string?
+                                           :spec-id string?}}}
+        read-spec (fn [{:keys [spec-ns spec-id]}]
+                    (keyword (str (apply str (next (seq spec-ns))) "/" spec-id)))
+        ]
+    
+    [["/sample"
+       ["/:spec-ns/:spec-id"
+        ["" {:get (merge params
+                         {:handler (fn [{params :path-params}]
+                                     (response (lumen.s/sample (read-spec params))))})}]]]
+     ["/describe"
+       ["/:spec-ns/:spec-id"
+        ["" {:get (merge params
+                         {:handler (fn [{params :path-params}]
+                                     (response (describe-spec-response (read-spec params))))})}]]]]))
 
 (defmethod ig/init-key :dev.endpoints/spec  [_ opts]
   (routes opts))
