@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
 import get from 'lodash/get';
+import set from 'lodash/set';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
 
@@ -432,8 +433,7 @@ class Dashboard extends Component {
 
   handleToggleShareProtected(isProtected) {
     this.setState({ passwordAlert: null });
-    const dashboard = getDashboardFromState(this.state.dashboard, true);
-    this.props.dispatch(actions.setShareProtection(dashboard.shareId, { protected: isProtected }));
+    set(this.state, 'dashboard.protected', isProtected);
   }
 
   toggleShareDashboard() {
