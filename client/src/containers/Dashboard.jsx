@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
 import get from 'lodash/get';
-import set from 'lodash/set';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
 
