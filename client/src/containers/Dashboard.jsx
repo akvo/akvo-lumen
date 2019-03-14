@@ -432,8 +432,13 @@ class Dashboard extends Component {
   }
 
   handleToggleShareProtected(isProtected) {
-    this.setState({ passwordAlert: null });
-    set(this.state, 'dashboard.protected', isProtected);
+    this.setState({
+      passwordAlert: null,
+      dashboard: {
+        ...this.state.dashboard,
+        protected: isProtected,
+      },
+    });
   }
 
   toggleShareDashboard() {
