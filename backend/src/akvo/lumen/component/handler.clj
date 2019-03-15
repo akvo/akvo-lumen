@@ -18,22 +18,26 @@
   (if-not handler
     (let [handler (ring/ring-handler
                    (ring/router endpoints
-                                {:data      {:middleware middleware}
-                                 :conflicts (constantly nil)}))]
+                                (merge {:conflicts (constantly nil)}
+                                       (when middleware {:data {:middleware middleware}}))))]
       (assoc opts :handler handler))
     opts))
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-api  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware middleware} routes])
+  [path {:middleware (flatten middleware)} routes])
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-verify  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware middleware} routes])
+  [path {:middleware (flatten middleware)} routes])
+
+(defmethod ig/init-key :akvo.lumen.component.handler/handler-share  [_ {:keys [path middleware routes] :as opts}]
+  [path {:middleware (flatten middleware)} routes])
 
 (s/def ::endpoints  (s/coll-of ::rs/raw-routes))
 
 (s/def ::middleware (s/coll-of fn? :distinct true))
 
-(s/def ::config (s/keys :req-un [::endpoints ::middleware]))
+(s/def ::config (s/keys :req-un [::endpoints]
+                        :opt-un [::middleware]))
 
 (s/def ::handler fn?)
 
@@ -120,3 +124,6 @@
         (if (vector? res)
           (commons/variant->response res request)
           res)))))
+
+(defmethod ig/init-key :akvo.lumen.component.handler/common-middleware  [_ opt]
+  opt)

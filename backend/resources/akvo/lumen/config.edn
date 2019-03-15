@@ -107,6 +107,7 @@
                                             :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                                                          #ig/ref :akvo.lumen.auth/wrap-jwt
                                                          #ig/ref :akvo.lumen.auth/wrap-auth
+                                                         #ig/ref :akvo.lumen.component.handler/common-middleware
                                                          #ig/ref :akvo.lumen.monitoring/middleware]
                                             :routes [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
                                                      #ig/ref :akvo.lumen.endpoint.collection/collection
@@ -129,23 +130,31 @@
                                                      #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]}
 
  :akvo.lumen.component.handler/handler-verify {:path "/verify"
-                                               :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]
+                                               :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
+                                                            #ig/ref :akvo.lumen.component.handler/common-middleware]
                                                :routes [#ig/ref :akvo.lumen.endpoint.invite/verify]}
+
+ :akvo.lumen.component.handler/handler-share {:path "/share"
+                                              :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
+                                                           #ig/ref :akvo.lumen.component.handler/common-middleware]
+                                              :routes [#ig/ref :akvo.lumen.endpoint.public/public]}
+
  
- :akvo.lumen.component.handler/handler {:endpoints [["" [#ig/ref :akvo.lumen.endpoint.env/env
-                                                         #ig/ref :akvo.lumen.endpoint.healthz/healthz
-                                                         #ig/ref :akvo.lumen.monitoring/endpoint]]
+ :akvo.lumen.component.handler/common-middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
+                                                  #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
+                                                  #ig/ref :akvo.lumen.component.handler/wrap-defaults
+                                                  #ig/ref :akvo.lumen.component.handler/wrap-json-body
+                                                  #ig/ref :akvo.lumen.component.handler/wrap-json-response
+                                                  #ig/ref :akvo.lumen.component.handler/variant
+                                                  #ig/ref :akvo.lumen.component.handler/wrap-not-found]
+ 
+ :akvo.lumen.component.handler/handler {:endpoints [["" {:middleware  #ig/ref :akvo.lumen.component.handler/common-middleware}
+                                                     [#ig/ref :akvo.lumen.endpoint.env/env
+                                                      #ig/ref :akvo.lumen.endpoint.healthz/healthz
+                                                      #ig/ref :akvo.lumen.monitoring/endpoint]]
                                                     #ig/ref :akvo.lumen.component.handler/handler-api
                                                     #ig/ref :akvo.lumen.component.handler/handler-verify
-                                                    ["/share" {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
-                                                     [#ig/ref :akvo.lumen.endpoint.public/public]]]
-                                        :middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
-                                                     #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
-                                                     #ig/ref :akvo.lumen.component.handler/wrap-defaults
-                                                     #ig/ref :akvo.lumen.component.handler/wrap-json-body
-                                                     #ig/ref :akvo.lumen.component.handler/wrap-json-response
-                                                     #ig/ref :akvo.lumen.component.handler/variant
-                                                     #ig/ref :akvo.lumen.component.handler/wrap-not-found]}
+                                                    #ig/ref :akvo.lumen.component.handler/handler-share]}
 
  :akvo.lumen.component.http/http {:port #duct/env [ "PORT" Int :or 3000 ]
                                   :handler #ig/ref :akvo.lumen.component.handler/handler}
