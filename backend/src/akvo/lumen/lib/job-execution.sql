@@ -44,6 +44,12 @@ UPDATE job_execution
 
 
 -- :name job-execution-by-id :? :1
+SELECT j.status, j.error_log->>0 as "error-message", j.type as kind
+  FROM job_execution j
+   WHERE j.id = :id;
+
+
+-- :name datasource-job-execution-by-id :? :1
 SELECT j.dataset_id, j.data_source_id, j.status, j.error_log->>0 as "error-message", d.spec->'source'->>'kind' as kind
   FROM data_source d, job_execution j
  WHERE d.id = j.data_source_id

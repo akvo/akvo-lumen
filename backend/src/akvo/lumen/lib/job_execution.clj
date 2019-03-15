@@ -21,15 +21,15 @@
   [conn kind id]
   {:pre [(#{:raster :dataset :transformation} kind)]}
   (condp = kind
-    :dataset (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
-               (lib/ok
-                {"jobExecutionId" id
-                 "status" "OK"
-                 "datasetId" dataset_id})
-               (job-execution conn id))
     :raster (if-let [{:keys [raster_id]} (raster-id-by-job-execution-id conn {:id id})]
               (lib/ok
                {"jobExecutionId" id
                 "status" "OK"
                 "rasterId" raster_id})
-              (job-execution conn id))))
+              (job-execution conn id))
+    (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
+      (lib/ok
+       {"jobExecutionId" id
+        "status" "OK"
+        "datasetId" dataset_id})
+      (job-execution conn id))))

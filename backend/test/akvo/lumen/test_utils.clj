@@ -48,7 +48,7 @@
     (dh/with-retry {:retry-if (fn [v e] (not v))
                     :max-retries 20
                     :delay-ms 100}
-      (let [job (job-execution-by-id tenant-conn {:id importId})
+      (let [job (datasource-job-execution-by-id tenant-conn {:id importId})
             status (:status job)
             dataset (dataset-id-by-job-execution-id tenant-conn {:id importId})
             res (when (not= "PENDING" status)
@@ -71,7 +71,7 @@
     (dh/with-retry {:retry-if (fn [v e] (not v))
                     :max-retries 20
                     :delay-ms 100}
-      (let [job (job-execution-by-id tenant-conn {:id updateId})
+      (let [job (datasource-job-execution-by-id tenant-conn {:id updateId})
             status (:status job)]
         (when (not= "PENDING" status)
           (if (= "OK" status)
