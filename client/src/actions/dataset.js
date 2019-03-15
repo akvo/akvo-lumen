@@ -130,7 +130,7 @@ function pollDatasetImportStatus(importId, name, collectionId) {
       dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
     }
     api
-      .get(`/api/job_executions/${importId}`)
+      .get(`/api/job_executions/dataset/${importId}`)
       .then(({ body: { status, reason, datasetId } }) => {
         if (status === 'PENDING') {
           setTimeout(
@@ -400,7 +400,7 @@ function updateDatasetTogglePending(datasetId) {
 function pollDatasetUpdateStatus(updateId, datasetId, title) {
   return (dispatch) => {
     api
-      .get(`/api/job_executions/${updateId}`)
+      .get(`/api/job_executions/dataset/${updateId}`)
       .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(
@@ -498,7 +498,7 @@ function transformationFailure(datasetId, reason) {
 function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
     api
-      .get(`/api/job_executions/${jobExecutionId}`)
+      .get(`/api/job_executions/dataset/${jobExecutionId}`)
       .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(

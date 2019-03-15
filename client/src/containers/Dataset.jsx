@@ -126,7 +126,7 @@ class Dataset extends Component {
     return (dispatch) => {
       dispatch(txDatasetPending(jobExecutionId, name));
       api
-        .get(`/api/job_executions/${jobExecutionId}`)
+        .get(`/api/job_executions/transformation/${jobExecutionId}`)
         .then(({ body: { status, reason, datasetId } }) => {
           if (status === 'PENDING') {
             setTimeout(
