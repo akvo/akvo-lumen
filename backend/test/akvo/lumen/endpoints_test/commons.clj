@@ -101,7 +101,6 @@
        :server-name "t1.lumen.local",
        :remote-addr "localhost",
        :scheme :http,
-       ;;       :body-params body
        :body (io/reader (io/input-stream (.getBytes (json/generate-string body))))}
     query-params (assoc :query-params query-params)
     multipart-params (assoc :multipart-params multipart-params)))

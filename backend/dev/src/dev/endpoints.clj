@@ -6,8 +6,6 @@
             [akvo.lumen.specs :as lumen.s]
             [ring.util.response :refer [response]]
             [integrant.core :as ig]))
-;; working in adapt https://github.com/akvo/akvo-lumen/blob/310bd7cbc3221bf889ad592f2d9e91a572f06c00/backend/dev/src/akvo/lumen/local_server.clj
-;; use edn middleware instead of json middleware
 
 (defn describe-spec-response [spec]
   {:namespace (namespace spec)
@@ -21,24 +19,24 @@
         read-spec (fn [{:keys [spec-ns spec-id]}]
                     (keyword (str (apply str (next (seq spec-ns))) "/" spec-id)))]    
     [["/sample"
-       ["/:spec-ns/:spec-id"
-        ["" {:get (merge params
-                         {:handler (fn [{params :path-params}]
-                                     (response (lumen.s/sample (read-spec params))))})}]]]
+      ["/:spec-ns/:spec-id"
+       ["" {:get (merge params
+                        {:handler (fn [{params :path-params}]
+                                    (response (lumen.s/sample (read-spec params))))})}]]]
      ["/describe"
-       ["/:spec-ns/:spec-id"
-        ["" {:get (merge params
-                         {:handler (fn [{params :path-params}]
-                                     (response (describe-spec-response (read-spec params))))})}]]]
+      ["/:spec-ns/:spec-id"
+       ["" {:get (merge params
+                        {:handler (fn [{params :path-params}]
+                                    (response (describe-spec-response (read-spec params))))})}]]]
      ["/conform"
-       ["/:spec-ns/:spec-id"
-        ["" {:post (merge (assoc params :body map?)
-                          {:handler (fn [{params :path-params
-                                          body :body }]
-                                      (let [res (s/conform (read-spec params) body)]
-                                        (if (not= :clojure.spec.alpha/invalid res)
-                                          (response res)
-                                          (response (s/explain-data (read-spec params) body)))))})}]]]]))
+      ["/:spec-ns/:spec-id"
+       ["" {:post (merge (assoc params :body map?)
+                         {:handler (fn [{params :path-params
+                                         body :body }]
+                                     (let [res (s/conform (read-spec params) body)]
+                                       (if (not= :clojure.spec.alpha/invalid res)
+                                         (response res)
+                                         (response (s/explain-data (read-spec params) body)))))})}]]]]))
 
 (defmethod ig/init-key :dev.endpoints/spec  [_ opts]
   (routes opts))
@@ -66,9 +64,9 @@
                 :ns :akvo.lumen.lib.aggregation/dataset
                 :spec
                 '(keys
-                 :req-un
-                 [:akvo.lumen.specs.db.dataset-version/columns
-                  :akvo.lumen.specs.db.dataset-version/table-name])}
+                  :req-un
+                  [:akvo.lumen.specs.db.dataset-version/columns
+                   :akvo.lumen.specs.db.dataset-version/table-name])}
                res
                (describe-spec-response spec)))
       res)
