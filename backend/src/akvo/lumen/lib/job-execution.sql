@@ -39,8 +39,7 @@ UPDATE job_execution
 -- :doc Update successful job execution
 UPDATE job_execution
    SET status = :status,
-       dataset_id = :dataset-id,
-       data_source_id = :data-source-id
+       dataset_id = :dataset-id
  WHERE id = :id;
 
 
