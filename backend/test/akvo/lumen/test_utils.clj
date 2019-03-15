@@ -31,15 +31,15 @@
                   :max-retries 20
                   :delay-ms 100}
     (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
+          ds-job (datasource-job-execution-by-id tenant-conn {:id job-execution-id})
           status (:status job)
-          dataset (dataset-id-by-job-execution-id tenant-conn {:id job-execution-id})
-          res (when (not= "PENDING" status)
+          res (when (and status (not= "PENDING" status))
                 (if (= "OK" status)
-                  (or (:dataset_id dataset) job)
+                  (:dataset_id ds-job) ;;job
                   job-execution-id))]
       (when res
-        (if (and with-job? dataset)
-          [job dataset]
+        (if with-job?
+          [job ds-job]
           res)))))
 
 (defn spec-instrument

@@ -224,7 +224,7 @@
             (is (some? (:importId res)))
             (is (= "GEOTIFF" (:kind res)))
 
-            (let [raster-id (job-execution-dataset-id h (:importId res) :rasterId)
+            (let [raster-id (job-execution-dataset-id h (:importId res) :rasterId "raster")
                   res-raster (body-kw (h (get* (api-url "/rasters" raster-id))))]
               (is (= (:id res-raster) raster-id))))))
 
