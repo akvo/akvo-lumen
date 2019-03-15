@@ -4,12 +4,11 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, updateDatasetMeta } from '../actions/dataset';
+import { fetchDataset, updateDatasetMeta, pollTxImportStatus } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
 import * as api from '../utilities/api';
-import * as constants from '../constants/dataset';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import { TRANSFORM_DATASET } from '../constants/analytics';
@@ -18,37 +17,6 @@ import NavigationPrompt from '../components/common/NavigationPrompt';
 
 require('../components/dataset/Dataset.scss');
 
-function txDatasetPending(jobExecutionId, name) {
-  const now = Date.now();
-  return {
-    type: constants.TRANSFORMATION_DATASET_PENDING,
-    dataset: Immutable.fromJS({
-      id: jobExecutionId,
-      type: 'dataset',
-      status: 'PENDING',
-      name,
-      created: now,
-      modified: now,
-    }),
-  };
-}
-function txDatasetFailure(jobExecutionId, reason) {
-  return {
-    type: constants.TRANSFORMATION_FAILURE,
-    jobExecutionId,
-    reason,
-    modified: Date.now(),
-  };
-}
-function txDatasetSuccess(datasetId, jobExecutionId) {
-  return (dispatch) => {
-    dispatch({
-      type: constants.TRANSFORMATION_SUCCESS,
-      datasetId,
-      jobExecutionId,
-    });
-  };
-}
 
 class Dataset extends Component {
 
@@ -70,7 +38,6 @@ class Dataset extends Component {
     this.handleSaveFailure = this.handleSaveFailure.bind(this);
     this.transform = this.transform.bind(this);
     this.undo = this.undo.bind(this);
-    this.pollTxImportStatus = this.pollTxImportStatus.bind(this);
   }
 
   componentDidMount() {
@@ -122,33 +89,6 @@ class Dataset extends Component {
     });
   }
 
-  pollTxImportStatus(jobExecutionId) {
-    return (dispatch) => {
-      dispatch(txDatasetPending(jobExecutionId, name));
-      api
-        .get(`/api/job_executions/transformation/${jobExecutionId}`)
-        .then(({ body: { status, reason, datasetId } }) => {
-          if (status === 'PENDING') {
-            setTimeout(
-              () => dispatch(this.pollTxImportStatus(jobExecutionId, name)),
-              constants.POLL_INTERVAL
-            );
-          } else if (status === 'FAILED') {
-            dispatch(showNotification('error', 'Failed to transform dataset.'));
-            dispatch(txDatasetFailure(jobExecutionId, reason));
-          } else if (status === 'OK') {
-            dispatch(txDatasetSuccess(datasetId, jobExecutionId));
-            dispatch(fetchDataset(datasetId));
-          }
-        })
-        .catch((error) => {
-          dispatch(showNotification('error', 'Failed to transform dataset.'));
-          dispatch(txDatasetFailure(jobExecutionId, error.message));
-        });
-    };
-  }
-
-
   removePending(timestamp) {
     const { pendingTransformations } = this.state;
     this.setState({ pendingTransformations: pendingTransformations.delete(timestamp) });
@@ -168,7 +108,7 @@ class Dataset extends Component {
           this.removePending(now);
           throw new Error(response.body.message);
         } else {
-          dispatch(this.pollTxImportStatus(response.body.jobExecutionId));
+          dispatch(pollTxImportStatus(response.body.jobExecutionId));
         }
       })
       .then(() => this.removePending(now))
