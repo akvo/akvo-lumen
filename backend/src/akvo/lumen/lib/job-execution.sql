@@ -44,7 +44,7 @@ UPDATE job_execution
 
 
 -- :name job-execution-by-id :? :1
-SELECT j.status, j.error_log->>0 as "error-message", j.type as kind
+SELECT j.id, j.status, j.error_log->>0 as "error-message", j.type as kind
   FROM job_execution j
    WHERE j.id = :id;
 

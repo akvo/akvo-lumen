@@ -26,6 +26,22 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
+(defn retry-job-execution [tenant-conn job-execution-id with-job?]
+  (dh/with-retry {:retry-if (fn [v e] (not v))
+                  :max-retries 20
+                  :delay-ms 100}
+    (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
+          status (:status job)
+          dataset (dataset-id-by-job-execution-id tenant-conn {:id job-execution-id})
+          res (when (not= "PENDING" status)
+                (if (= "OK" status)
+                  (or (:dataset_id dataset) job)
+                  job-execution-id))]
+      (when res
+        (if (and with-job? dataset)
+          [job dataset]
+          res)))))
+
 (defn spec-instrument
   "Fixture to instrument all functions"
   [f]
@@ -45,20 +61,7 @@
                         "hasColumnHeaders" (boolean has-column-headers?)}}
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (dh/with-retry {:retry-if (fn [v e] (not v))
-                    :max-retries 20
-                    :delay-ms 100}
-      (let [job (datasource-job-execution-by-id tenant-conn {:id importId})
-            status (:status job)
-            dataset (dataset-id-by-job-execution-id tenant-conn {:id importId})
-            res (when (not= "PENDING" status)
-                  (if (= "OK" status)
-                    (:dataset_id dataset)
-                    importId))]
-        (when res
-          (if  with-job?
-            [job dataset]
-            res))))))
+    (retry-job-execution tenant-conn importId with-job?)))
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
