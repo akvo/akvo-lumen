@@ -130,10 +130,9 @@ class Dataset extends Component {
           this.removePending(now);
           throw new Error(response.body.message);
         } else {
-          dispatch(this.pollTxImportStatus(response.body.jobExecutionId));
+          dispatch(pollTxImportStatus(response.body.jobExecutionId));
         }
       })
-      .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now))
       .catch(() => {
         this.props.dispatch(showNotification('error', 'Failed to undo.'));
