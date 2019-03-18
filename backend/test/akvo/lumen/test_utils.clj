@@ -35,7 +35,7 @@
           status (:status job)
           res (when (and status (not= "PENDING" status))
                 (if (= "OK" status)
-                  (:dataset_id ds-job) ;;job
+                  (:dataset_id ds-job)
                   job-execution-id))]
       (when res
         (if with-job?
