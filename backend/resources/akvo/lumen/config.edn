@@ -41,13 +41,14 @@
  :akvo.lumen.endpoint.collection/collection {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
  
  :akvo.lumen.endpoint.dashboard/dashboard {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
- :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"}
+
+ :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
+                                 :keycloak #ig/ref :akvo.lumen.component.keycloak/data}
  
  :akvo.lumen.endpoint.dataset/dataset {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                        :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
                                        :upload-config #ig/ref :akvo.lumen.upload/data
-                                       :import-config {:flow-api #ig/ref :akvo.lumen.component.flow/api
-                                                       :keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
+                                       :import-config {:flow-api #ig/ref :akvo.lumen.component.flow/api}}
 
  :akvo.lumen.endpoint.data-source/data-source {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 

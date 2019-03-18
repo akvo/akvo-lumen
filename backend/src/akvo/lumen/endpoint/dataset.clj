@@ -54,7 +54,7 @@
 (s/def ::upload-config ::upload/config)
 (s/def ::flow-api :akvo.lumen.component.flow/config)
 (s/def ::keycloak ::keycloak/data)
-(s/def ::import-config (s/keys :req-un [::flow-api ::keycloak]))
+(s/def ::import-config (s/keys :req-un [::flow-api]))
 (s/def ::config (s/keys :req-un [::tenant-manager/tenant-manager
                                  ::error-tracker/error-tracker
                                  ::upload-config
