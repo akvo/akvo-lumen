@@ -56,7 +56,7 @@
     (let [job-execution-id (import-file *tenant-conn* *error-tracker* {:dataset-name "Mixed Column Counts"
                                                                        :file "mixed-column-counts.csv"})]
       (is (= "Invalid csv file. Varying number of columns"
-             (:error-message (datasource-job-execution-by-id *tenant-conn* {:id job-execution-id})))))))
+             (:error-message (job-execution-by-id *tenant-conn* {:id job-execution-id})))))))
 
 (deftest ^:functional test-trimmed-columns
   (testing "Testing if whitespace is removed from beginning & end of column titles"

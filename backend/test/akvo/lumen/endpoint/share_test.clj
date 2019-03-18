@@ -67,7 +67,7 @@
                         [{:value "c"} {:value 3} {:value (tu/instant-date "03/02/2019")}]
                         [{:value "c"} {:value 4} {:value (tu/instant-date "04/02/2019")}]]}
 
-        [_ job] (tu/import-file conn {} {:dataset-name "scatter"
+        [job] (tu/import-file conn {} {:dataset-name "scatter"
                                                         :kind "clj"
                                                         :with-job? true
                                                         :data data})

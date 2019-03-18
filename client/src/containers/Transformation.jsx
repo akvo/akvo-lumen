@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
-import { pollTxImportStatus } from '../actions/dataset';
+import { fetchDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
@@ -38,12 +38,12 @@ class Transformation extends Component {
     dispatch(showNotification('info', 'Applying transformation...'));
     api.post(`/api/transformations/${datasetId}/transform`, transformation)
       .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to merge dataset');
-        } else {
-          dispatch(pollTxImportStatus(response.body.jobExecutionId));
+        if (response.ok) {
+          return response.body;
         }
+        throw new Error('Failed to merge dataset');
       })
+      .then(() => dispatch(fetchDataset(datasetId)))
       .then(() => {
         this.setState({ transforming: false });
         dispatch(showNotification('info', 'Transformation success', true));

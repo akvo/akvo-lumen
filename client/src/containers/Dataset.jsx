@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, updateDatasetMeta, pollTxImportStatus } from '../actions/dataset';
+import { fetchDataset, updateDatasetMeta } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns } from '../domain/dataset';
@@ -16,7 +16,6 @@ import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 
 require('../components/dataset/Dataset.scss');
-
 
 class Dataset extends Component {
 
@@ -107,10 +106,10 @@ class Dataset extends Component {
         if (!response.ok) {
           this.removePending(now);
           throw new Error(response.body.message);
-        } else {
-          dispatch(pollTxImportStatus(response.body.jobExecutionId));
         }
+        return response.body;
       })
+      .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now))
       .catch((error) => {
         dispatch(showNotification('error', error.message));
@@ -125,14 +124,7 @@ class Dataset extends Component {
 
     this.setPendingUndo(now);
     api.post(`/api/transformations/${id}/undo`)
-      .then((response) => {
-        if (!response.ok) {
-          this.removePending(now);
-          throw new Error(response.body.message);
-        } else {
-          dispatch(pollTxImportStatus(response.body.jobExecutionId));
-        }
-      })
+      .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now))
       .catch(() => {
         this.props.dispatch(showNotification('error', 'Failed to undo.'));
