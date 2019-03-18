@@ -9,13 +9,13 @@
 
 (defmethod import/dataset-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId refreshToken version] :as spec}
-   {:keys [flow-api-url keycloak] :as config}]
+   {:keys [flow-api keycloak] :as config}]
   (let [version (if version version 1)
         token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
                                (:url keycloak)
                                (:realm keycloak))
         headers-fn #(flow-common/flow-api-headers token-endpoint refreshToken)
-        survey (delay (flow-common/survey-definition flow-api-url
+        survey (delay (flow-common/survey-definition (:url flow-api)
                                                      headers-fn
                                                      instance
                                                      surveyId))]

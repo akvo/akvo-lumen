@@ -40,11 +40,10 @@
 
  :akvo.lumen.upload/data {:file-upload-path "/tmp/akvo/lumen"}
 
- :akvo.lumen.endpoint.dataset/dataset {:import-config {:flow-api-url "https://api.akvotest.org/flow"}}
+ :akvo.lumen.component.flow/api {:url "https://api.akvotest.org/flow"}
 
  :akvo.lumen.endpoint.env/env {:keycloak-public-client-id "akvo-lumen"
                                :keycloak-url "http://auth.lumen.local:8080/auth"
-                               :flow-api-url "https://api.akvotest.org/flow"
                                :sentry-client-dsn "dev-sentry-client-dsn"
                                :piwik-site-id "165"}
  

@@ -1,6 +1,7 @@
 (ns akvo.lumen.endpoint.dataset
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.component.flow :as c.flow]
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
@@ -51,9 +52,9 @@
   (routes opts))
 
 (s/def ::upload-config ::upload/config)
-(s/def ::flow-api-url string?)
+(s/def ::flow-api :akvo.lumen.component.flow/config)
 (s/def ::keycloak ::keycloak/data)
-(s/def ::import-config (s/keys :req-un [::flow-api-url ::keycloak]))
+(s/def ::import-config (s/keys :req-un [::flow-api ::keycloak]))
 (s/def ::config (s/keys :req-un [::tenant-manager/tenant-manager
                                  ::error-tracker/error-tracker
                                  ::upload-config
