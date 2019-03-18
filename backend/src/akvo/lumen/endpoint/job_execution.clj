@@ -6,14 +6,15 @@
             [integrant.core :as ig]))
 
 (defn handler [{:keys [tenant-manager] :as opts}]
-  (fn [{{:keys [id]} :path-params
+  (fn [{{:keys [id kind]} :path-params
         tenant :tenant}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
-      (job-execution/status tenant-conn id))))
+      (job-execution/status tenant-conn (keyword kind) id))))
 
 (defn routes [{:keys [tenant-manager] :as opts}]
-  ["/job_executions/:id"
-   {:get {:parameters {:path-params {:id string?}}
+  ["/job_executions/:kind/:id"
+   {:get {:parameters {:path-params {:kind string?
+                                     :id string?}}
           :responses {200 {}}
           :handler (handler opts)}}])
 
