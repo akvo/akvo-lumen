@@ -2,6 +2,7 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.component.flow :as c.flow]
             [akvo.lumen.lib
              [dashboard :as dashboard]
              [visualisation :as visualisation]
@@ -12,18 +13,20 @@
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig]))
 
-(defn handler [{:keys [tenant-manager] :as opts}]
+(defn handler [{:keys [tenant-manager flow-api] :as opts}]
   (fn [{tenant :tenant}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
       (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))
-          :datasets (variant/value (dataset/all tenant-conn))
+          :datasets (variant/value (dataset/all tenant-conn flow-api))
           :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (visualisation/all tenant-conn))
           :collections (variant/value (collection/all tenant-conn))}))))
 
+(s/def ::flow-api :akvo.lumen.component.flow/config)
+
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.library/library [_]
-  (s/keys :req-un [::tenant-manager/tenant-manager] ))
+  (s/keys :req-un [::tenant-manager/tenant-manager ::flow-api] ))
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/library"

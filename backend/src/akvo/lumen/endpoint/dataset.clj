@@ -14,7 +14,7 @@
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
   ["/datasets"
    ["" {:get {:handler (fn [{tenant :tenant}]
-                         (dataset/all (p/connection tenant-manager tenant)))}
+                         (dataset/all (p/connection tenant-manager tenant) (:flow-api import-config)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims

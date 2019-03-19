@@ -5,6 +5,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.merge-datasets :as transformation.merge-datasets]
             [akvo.lumen.lib.update :as update]
+            [akvo.lumen.component.flow :as c.flow]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
@@ -16,8 +17,27 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn all
-  [tenant-conn]
-  (lib/ok (all-datasets tenant-conn)))
+  [tenant-conn flow-api]
+  (let [dss (all-datasets tenant-conn)]
+    (log/error (doall (->>
+                       dss
+                       (map :source)
+                       (map
+                        (fn [ds]
+                          (let [instance (get ds "instance")
+                                survey (get ds "surveyId")]
+                            [instance survey
+                             (try 
+                                  (when-let [rt (str/replace (get ds "refreshToken") #" " "")]
+                                    (c.flow/access-token flow-api rt)
+                                 #_(c.flow/api-headers flow-api rt)
+                                 #_(c.flow/check-permissions flow-api rt [[{:instance_id instance :survey_id survey}]])
+                                 )
+
+                               (catch Exception e (log/error :fail [instance survey] (.getMessage e))))]))))))
+
+
+    (lib/ok dss)))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]

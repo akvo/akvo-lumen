@@ -77,7 +77,8 @@
 
  :akvo.lumen.endpoint.job-execution/job-execution {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
- :akvo.lumen.endpoint.library/library {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
+ :akvo.lumen.endpoint.library/library {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
+                                       :flow-api #ig/ref :akvo.lumen.component.flow/api}
 
  :akvo.lumen.endpoint.multiple-column/multiple-column {:caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
