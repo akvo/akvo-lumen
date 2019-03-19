@@ -41,15 +41,13 @@ class Transformation extends Component {
         if (!response.ok) {
           throw new Error('Failed to merge dataset');
         } else {
-          dispatch(pollTxImportStatus(response.body.jobExecutionId));
+          dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
+            this.setState({ transforming: false });
+            dispatch(showNotification('info', 'Transformation success', true));
+            router.push(`/dataset/${datasetId}`);
+          }));
         }
-      })
-      .then(() => {
-        this.setState({ transforming: false });
-        dispatch(showNotification('info', 'Transformation success', true));
-        router.push(`/dataset/${datasetId}`);
-      })
-      .catch((err) => {
+      }).catch((err) => {
         this.setState({ transforming: false });
         dispatch(showNotification('error', `Transformation failed: ${err.message}`));
       });
