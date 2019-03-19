@@ -598,3 +598,21 @@ export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
       });
   };
 }
+
+export function startTx(datasetId) {
+  return {
+    type: constants.TRANSFORMATION_START,
+    payload: {
+      datasetId,
+    },
+  };
+}
+
+export function endTx(datasetId) {
+  return {
+    type: constants.TRANSFORMATION_END,
+    payload: {
+      datasetId,
+    },
+  };
+}

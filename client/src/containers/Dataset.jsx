@@ -4,10 +4,10 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, updateDatasetMeta, pollTxImportStatus } from '../actions/dataset';
+import { fetchDataset, updateDatasetMeta, pollTxImportStatus, startTx, endTx } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
-import { getTransformations, getRows, getColumns } from '../domain/dataset';
+import { getTransformations, getRows, getColumns, getIsLockedFromTransformations } from '../domain/dataset';
 import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
@@ -102,13 +102,16 @@ class Dataset extends Component {
 
     trackEvent(TRANSFORM_DATASET, transformationJs.op);
     this.setPendingTransformation(now, transformation);
+    dispatch(startTx(id));
     return api.post(`/api/transformations/${id}/transform`, transformationJs)
       .then((response) => {
         if (!response.ok) {
           this.removePending(now);
           throw new Error(response.body.message);
         } else {
-          dispatch(pollTxImportStatus(response.body.jobExecutionId));
+          dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
+            dispatch(endTx(id));
+          }));
         }
       })
       .then(() => this.removePending(now))
@@ -124,13 +127,16 @@ class Dataset extends Component {
     const now = Date.now();
 
     this.setPendingUndo(now);
+    dispatch(startTx(id));
     api.post(`/api/transformations/${id}/undo`)
       .then((response) => {
         if (!response.ok) {
           this.removePending(now);
           throw new Error(response.body.message);
         } else {
-          dispatch(pollTxImportStatus(response.body.jobExecutionId));
+          dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
+            dispatch(endTx(id));
+          }));
         }
       })
       .then(() => this.removePending(now))
@@ -237,6 +243,7 @@ class Dataset extends Component {
               columns={getColumns(dataset)}
               rows={getRows(dataset)}
               transformations={getTransformations(dataset)}
+              isLockedFromTransformations={getIsLockedFromTransformations(dataset)}
               pendingTransformations={pendingTransformations.valueSeq()}
               onTransform={transformation => this.transform(transformation)}
               onUndoTransformation={() => this.undo()}

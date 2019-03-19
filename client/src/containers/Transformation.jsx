@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
-import { pollTxImportStatus } from '../actions/dataset';
+import { pollTxImportStatus, startTx, endTx } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
@@ -36,6 +36,7 @@ class Transformation extends Component {
     const { dispatch, datasetId, router } = this.props;
     this.setState({ transforming: true });
     dispatch(showNotification('info', 'Applying transformation...'));
+    dispatch(startTx(datasetId));
     api.post(`/api/transformations/${datasetId}/transform`, transformation)
       .then((response) => {
         if (!response.ok) {
@@ -45,6 +46,7 @@ class Transformation extends Component {
             this.setState({ transforming: false });
             dispatch(showNotification('info', 'Transformation success', true));
             router.push(`/dataset/${datasetId}`);
+            dispatch(endTx(datasetId));
           }));
         }
       }).catch((err) => {

@@ -360,6 +360,7 @@ class DatasetTable extends Component {
       transformations,
       onNavigateToVisualise,
       datasetId,
+      isLockedFromTransformations,
     } = this.props;
     const {
       activeDataTypeContextMenu,
@@ -411,6 +412,7 @@ class DatasetTable extends Component {
           columns={columns}
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
+          isLockedFromTransformations={isLockedFromTransformations}
           onNavigateToVisualise={onNavigateToVisualise}
           pendingTransformationsCount={pendingTransformations.size}
           onClickMenuItem={(menuItem) => {
@@ -444,6 +446,7 @@ class DatasetTable extends Component {
               <DataTableSidebar
                 {...sidebarProps}
                 transformations={transformations}
+                isLockedFromTransformations={isLockedFromTransformations}
                 datasetId={datasetId}
                 pendingTransformations={pendingTransformations}
               />
@@ -463,6 +466,7 @@ class DatasetTable extends Component {
             {activeColumnContextMenu &&
               <ColumnContextMenu
                 column={activeColumnContextMenu.column}
+                isLockedFromTransformations={isLockedFromTransformations}
                 dimensions={activeColumnContextMenu.dimensions}
                 onContextMenuItemSelected={this.handleColumnContextMenuClicked}
                 onWindowClick={this.dismissColumnContextMenu}
@@ -496,6 +500,7 @@ DatasetTable.propTypes = {
   location: PropTypes.object.isRequired,
   router: PropTypes.object.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
 };
 
 export default withRouter(DatasetTable);

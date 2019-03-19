@@ -19,7 +19,12 @@ class DatasetControls extends Component {
     });
   }
   render() {
-    const { pendingTransformationsCount, intl, onNavigateToVisualise } = this.props;
+    const {
+      pendingTransformationsCount,
+      intl,
+      onNavigateToVisualise,
+      isLockedFromTransformations,
+    } = this.props;
     return (
       <div className="DatasetControls">
 
@@ -31,7 +36,9 @@ class DatasetControls extends Component {
             }}
           >
             <button
-              className="datasetEditorToggle datasetEditorButton clickable"
+              className={`datasetEditorToggle datasetEditorButton ${
+                isLockedFromTransformations ? 'datasetEditorToggle-disabled' : 'clickable'
+              }`}
               onClick={this.onEditorToggleClick}
               data-test-id="transform"
             >
@@ -138,6 +145,7 @@ DatasetControls.propTypes = {
   columns: PropTypes.object.isRequired,
   rowsCount: PropTypes.number.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
 };
 
 export default injectIntl(DatasetControls);

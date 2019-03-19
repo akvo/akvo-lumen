@@ -67,57 +67,75 @@ const actions = Immutable.fromJS({
   },
 });
 
-const commonOptions = [{
-  label: <FormattedMessage id="sort" />,
-  value: 'sort',
-  subMenu: [{
-    label: <FormattedMessage id="ascending" />,
-    value: 'sort-ascending',
-  }, {
-    label: <FormattedMessage id="descending" />,
-    value: 'sort-descending',
-  }],
-}, {
-  label: <FormattedMessage id="rename_column" />,
-  value: 'rename-column',
-}, {
-  label: <FormattedMessage id="delete_column" />,
-  value: 'delete-column',
-}];
+const getCommonOptions = ({ isLockedFromTransformations }) => [
+  {
+    label: <FormattedMessage id="sort" />,
+    value: 'sort',
+    subMenu: [
+      {
+        label: <FormattedMessage id="ascending" />,
+        value: 'sort-ascending',
+      },
+      {
+        label: <FormattedMessage id="descending" />,
+        value: 'sort-descending',
+      },
+    ],
+  },
+  {
+    label: <FormattedMessage id="rename_column" />,
+    value: 'rename-column',
+  },
+  {
+    label: <FormattedMessage id="delete_column" />,
+    value: 'delete-column',
+    disabled: isLockedFromTransformations,
+  },
+];
 
-const dataTypeOptions = {
-  text: [{
-    label: <FormattedMessage id="filter" />,
-    value: 'core/filter-column',
-  }, {
-    label: <FormattedMessage id="whitespace" />,
-    value: 'whitespace',
-    subMenu: [{
-      label: <FormattedMessage id="remove_leading_and_trailing_whitespace" />,
-      value: 'core/trim',
-    }, {
-      label: <FormattedMessage id="remove_double_space" />,
-      value: 'core/trim-doublespace',
-    }],
-  }, {
-    label: <FormattedMessage id="change_case" />,
-    value: 'change-case',
-    subMenu: [{
-      label: <FormattedMessage id="to_uppercase_label" />,
-      value: 'core/to-uppercase',
-    }, {
-      label: <FormattedMessage id="to_lowercase_label" />,
-      value: 'core/to-lowercase',
-    }, {
-      label: <FormattedMessage id="to_titlecase_label" />,
-      value: 'core/to-titlecase',
-    }],
-  }],
+const getDataTypeOptions = ({ isLockedFromTransformations }) => ({ // eslint-disable-line
+  text: [
+    {
+      label: <FormattedMessage id="filter" />,
+      value: 'core/filter-column',
+    },
+    {
+      label: <FormattedMessage id="whitespace" />,
+      value: 'whitespace',
+      subMenu: [{
+        label: <FormattedMessage id="remove_leading_and_trailing_whitespace" />,
+        value: 'core/trim',
+      },
+      {
+        label: <FormattedMessage id="remove_double_space" />,
+        value: 'core/trim-doublespace',
+      },
+      ],
+    },
+    {
+      label: <FormattedMessage id="change_case" />,
+      value: 'change-case',
+      subMenu: [
+        {
+          label: <FormattedMessage id="to_uppercase_label" />,
+          value: 'core/to-uppercase',
+        },
+        {
+          label: <FormattedMessage id="to_lowercase_label" />,
+          value: 'core/to-lowercase',
+        },
+        {
+          label: <FormattedMessage id="to_titlecase_label" />,
+          value: 'core/to-titlecase',
+        },
+      ],
+    },
+  ],
   number: [],
   date: [],
   geopoint: [],
   multiple: [],
-};
+});
 
 export default function ColumnContextMenu({
   column,
@@ -125,10 +143,14 @@ export default function ColumnContextMenu({
   onContextMenuItemSelected,
   onWindowClick,
   left,
+  isLockedFromTransformations,
 }) {
   return (
     <ContextMenu
-      options={commonOptions.concat(dataTypeOptions[column.get('type')])}
+      options={
+        getCommonOptions({ isLockedFromTransformations })
+          .concat(getDataTypeOptions({ isLockedFromTransformations })[column.get('type')])
+      }
       selected={null}
       subMenuSide={left ? 'left' : 'right'}
       style={{
@@ -156,4 +178,5 @@ ColumnContextMenu.propTypes = {
   onContextMenuItemSelected: PropTypes.func.isRequired,
   onWindowClick: PropTypes.func.isRequired,
   left: PropTypes.bool,
+  isLockedFromTransformations: PropTypes.bool,
 };

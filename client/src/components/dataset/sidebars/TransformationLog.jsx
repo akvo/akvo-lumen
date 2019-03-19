@@ -340,6 +340,7 @@ export default function TransformationLog({
   transformations = Immutable.List(),
   columns,
   pendingTransformations,
+  isLockedFromTransformations,
 }) {
   const allTransformations = transformationLog(transformations, pendingTransformations);
 
@@ -357,7 +358,10 @@ export default function TransformationLog({
       <SidebarControls
         positiveButtonText={<FormattedMessage id="undo" />}
         onApply={
-          allTransformations.every(transformation => transformation.get('undo')) ? null : onUndo
+          (
+            allTransformations.every(transformation => transformation.get('undo')) ||
+            isLockedFromTransformations
+          ) ? null : onUndo
         }
         onClose={onClose}
       />
@@ -371,4 +375,5 @@ TransformationLog.propTypes = {
   transformations: PropTypes.object,
   columns: PropTypes.object.isRequired,
   pendingTransformations: PropTypes.object.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
 };
