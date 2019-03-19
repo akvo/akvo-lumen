@@ -13,11 +13,13 @@ class DatasetControls extends Component {
     };
     this.onEditorToggleClick = this.onEditorToggleClick.bind(this);
   }
+
   onEditorToggleClick() {
     this.setState({
       editorMenuActive: !this.state.editorMenuActive,
     });
   }
+
   render() {
     const {
       pendingTransformationsCount,
@@ -25,6 +27,7 @@ class DatasetControls extends Component {
       onNavigateToVisualise,
       isLockedFromTransformations,
     } = this.props;
+
     return (
       <div className="DatasetControls">
 
@@ -41,8 +44,9 @@ class DatasetControls extends Component {
               }`}
               onClick={this.onEditorToggleClick}
               data-test-id="transform"
+              disabled={isLockedFromTransformations}
             >
-            + <FormattedMessage id="transform" />
+              + <FormattedMessage id="transform" />
             </button>
             {this.state.editorMenuActive &&
               <ContextMenu

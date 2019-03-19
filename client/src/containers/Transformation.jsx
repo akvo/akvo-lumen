@@ -36,7 +36,9 @@ class Transformation extends Component {
     const { dispatch, datasetId, router } = this.props;
     this.setState({ transforming: true });
     dispatch(showNotification('info', 'Applying transformation...'));
+
     dispatch(startTx(datasetId));
+
     api.post(`/api/transformations/${datasetId}/transform`, transformation)
       .then((response) => {
         if (!response.ok) {
@@ -61,6 +63,7 @@ class Transformation extends Component {
 
     const { datasetId, datasets, routeParams } = this.props;
     const TransformationComponent = transformationComponent[routeParams.transformationType];
+
     return (
       <div className="Transformation">
         <TransformationComponent

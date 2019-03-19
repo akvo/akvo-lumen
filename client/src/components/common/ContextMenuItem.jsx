@@ -11,7 +11,7 @@ export default class ContextMenuItem extends Component {
   }
 
   render() {
-    const item = this.props.item;
+    const { item } = this.props;
     const onClick = item.subMenu ? null : (event) => {
       event.stopPropagation();
       this.props.handleItemClick(item.value);

@@ -362,6 +362,7 @@ class DatasetTable extends Component {
       datasetId,
       isLockedFromTransformations,
     } = this.props;
+
     const {
       activeDataTypeContextMenu,
       activeColumnContextMenu,
@@ -369,6 +370,7 @@ class DatasetTable extends Component {
       width,
       height,
     } = this.state;
+
     const cols = columns.map((column, index) => {
       const columnHeader = (
         <ColumnHeader
@@ -463,7 +465,7 @@ class DatasetTable extends Component {
                 onContextMenuItemSelected={this.handleDataTypeContextMenuClicked}
                 onWindowClick={this.dismissDataTypeContextMenu}
               />}
-            {activeColumnContextMenu &&
+            {activeColumnContextMenu && (
               <ColumnContextMenu
                 column={activeColumnContextMenu.column}
                 isLockedFromTransformations={isLockedFromTransformations}
@@ -471,7 +473,8 @@ class DatasetTable extends Component {
                 onContextMenuItemSelected={this.handleColumnContextMenuClicked}
                 onWindowClick={this.dismissColumnContextMenu}
                 left={columns.last().get('title') === activeColumnContextMenu.column.get('title')}
-              />}
+              />
+            )}
             <Table
               headerHeight={60}
               rowHeight={30}

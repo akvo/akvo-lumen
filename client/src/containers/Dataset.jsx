@@ -101,8 +101,11 @@ class Dataset extends Component {
     const transformationJs = transformation.toJS();
 
     trackEvent(TRANSFORM_DATASET, transformationJs.op);
+
     this.setPendingTransformation(now, transformation);
+
     dispatch(startTx(id));
+
     return api.post(`/api/transformations/${id}/transform`, transformationJs)
       .then((response) => {
         if (!response.ok) {
@@ -127,7 +130,9 @@ class Dataset extends Component {
     const now = Date.now();
 
     this.setPendingUndo(now);
+
     dispatch(startTx(id));
+
     api.post(`/api/transformations/${id}/undo`)
       .then((response) => {
         if (!response.ok) {
@@ -223,6 +228,7 @@ class Dataset extends Component {
       return <LoadingSpinner />;
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
+
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dataset">
