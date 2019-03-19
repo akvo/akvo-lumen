@@ -43,25 +43,32 @@
       {:valid? false
        :message (.getMessage e)})))
 
+(defn- execute-tx [{:keys [tenant-conn] :as deps} job-execution-id dataset-id command]
+  (future
+    (try
+      (jdbc/with-db-transaction [tx-conn tenant-conn]
+        (let [tx-deps (assoc deps :tenant-conn tx-conn)]
+          (condp = (:type command)
+            :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
+            :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
+        (update-successful-job-execution tx-conn {:id job-execution-id}))
+      (catch Exception e
+        (let [msg (.getMessage e)]
+          (engine/log-ex e)
+          (update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
+          (lib/conflict {:jobExecutionId job-execution-id :datasetId dataset-id :message msg}))))))
+
 (defn apply
   [{:keys [tenant-conn] :as deps} dataset-id command]
-  (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
-    (let [v (validate command)
-          job-execution-id (str (squuid))]
-      (if (:valid? v)
-        (try
-          (new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
-          (jdbc/with-db-transaction [tx-conn tenant-conn]
-            (let [tx-deps (assoc deps :tenant-conn tx-conn)]
-              (condp = (:type command)
-                :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
-                :undo (engine/execute-undo tx-deps dataset-id job-execution-id))))
-          (update-successful-job-execution tenant-conn {:id job-execution-id})
-          (lib/ok {"jobExecutionId" job-execution-id "datasetId" dataset-id})
-          (catch Exception e
-            (let [msg (.getMessage e)]
-              (engine/log-ex e)
-              (update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
-              (lib/conflict {"jobExecutionId" job-execution-id "datasetId" dataset-id "message" msg}))))
-        (lib/bad-request {"message" (:message v)})))
-    (lib/bad-request {"message" "Dataset not found"})))
+  (if-let [current-tx-job (pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
+    (lib/bad-request {:message "A running transformation still exists, please wait to apply more ..."})
+    (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
+      (let [v (validate command)]
+        (if-not (:valid? v)
+          (lib/bad-request {:message (:message v)})
+          (let [job-execution-id (str (squuid))]
+            (new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
+            (execute-tx deps job-execution-id dataset-id command)
+            (lib/ok {:jobExecutionId job-execution-id
+                     :datasetId dataset-id}))))
+      (lib/bad-request {:message "Dataset not found"}))))

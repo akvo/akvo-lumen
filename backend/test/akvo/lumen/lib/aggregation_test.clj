@@ -41,7 +41,7 @@
                                                                   :kind "clj"
                                                                   :data data
                                                                   :with-job? true})
-        dataset-id (:dataset_id job)
+        dataset-id (:dataset_id dataset)
         data-source-id (:data_source_id job)
         query  (query* "pivot" dataset-id)]
 

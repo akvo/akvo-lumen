@@ -135,11 +135,11 @@
 (defn body-kw [res]
   (-> res :body (json/parse-string keyword)))
 
-(defn job-execution-dataset-id [h job-id & [k]]
+(defn job-execution-dataset-id [h job-id & [k jb-type]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
                   :max-retries 2000
                   :delay-ms 100}
-    (let [job (-> (h (get* (api-url "/job_executions" job-id)))
+    (let [job (-> (h (get* (api-url "/job_executions" (or jb-type "dataset") job-id)))
                   body-kw)
           status (:status job)]
       (when (= "OK" status)
