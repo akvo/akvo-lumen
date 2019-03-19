@@ -29,13 +29,16 @@
      "Accept" "application/vnd.akvo.flow.v2+json"
      "X-Akvo-Email" "akvo.flow.user.test2@gmail.com"}))
 
-(defn check-permissions [flow-api refresh-token body headers]
-  (http/post
-   (str (:url flow-api) "/check_permissions")
-   {:as :json
-    :headers (if headers headers (api-headers flow-api refresh-token))
-    :form-params body
-    :content-type :json}))
+(defn check-permissions
+  ([flow-api refresh-token body]
+   (check-permissions flow-api refresh-token body (api-headers flow-api refresh-token)))
+  ([flow-api refresh-token body headers]
+   (http/post
+    (str (:url flow-api) "/check_permissions")
+    {:as :json
+     :headers headers
+     :form-params body
+     :content-type :json})))
 
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]

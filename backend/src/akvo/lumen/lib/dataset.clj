@@ -28,11 +28,13 @@
                                 survey (get ds "surveyId")]
                             [instance survey
                              (try 
-                                  (when-let [rt (str/replace (get ds "refreshToken") #" " "")]
-                                    (c.flow/access-token flow-api rt)
-                                 #_(c.flow/api-headers flow-api rt)
-                                 #_(c.flow/check-permissions flow-api rt [[{:instance_id instance :survey_id survey}]])
-                                 )
+                               (when-let [rt (str/replace (get ds "refreshToken") #" " "")]
+                                 (:body
+                                  (c.flow/check-permissions flow-api rt
+                                                            [{:instance_id (if (= "uat1" instance)
+                                                                             (str "akvoflow-" instance)
+                                                                             instance)
+                                                              :survey_id survey}])))
 
                                (catch Exception e (log/error :fail [instance survey] (.getMessage e))))]))))))
 
