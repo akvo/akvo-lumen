@@ -17,18 +17,32 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn all
-  [tenant-conn flow-api]
-  (let [dss (all-datasets tenant-conn)]
-    (log/error (doall (->>
+  [tenant-conn flow-api token]
+  (let [dss (all-datasets tenant-conn)
+        flows (->> (map :source dss)
+                   (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
+                   (map (fn [ds-source]
+                          (let [instance (get ds-source "instance")
+                                survey (get ds-source "surveyId")]
+                            {:instance_id (if (= "uat1" instance) (str "akvoflow-" instance) instance)
+                             :survey_id survey})))
+                   vec)]
+    (log/error :token token)
+    (log/error :flows  flows)
+    (log/error :permissions (try
+                              (:body
+                               (c.flow/check-permissions flow-api flows token))
+                              (catch Exception e (log/error :fail flows (.getMessage e)))))
+    #_(log/error (doall (->>
                        dss
                        (map :source)
                        (map
-                        (fn [ds]
-                          (let [instance (get ds "instance")
-                                survey (get ds "surveyId")]
-                            [instance survey
+                        (fn [ds-source]
+                          (let [instance (get ds-source "instance")
+                                survey (get ds-source "surveyId")]
+                            [ds-source instance survey
                              (try 
-                               (when-let [rt (str/replace (get ds "refreshToken") #" " "")]
+                               (when-let [rt (str/replace (get ds-source "refreshToken") #" " "")]
                                  (:body
                                   (c.flow/check-permissions flow-api rt
                                                             [{:instance_id (if (= "uat1" instance)
@@ -37,8 +51,6 @@
                                                               :survey_id survey}])))
 
                                (catch Exception e (log/error :fail [instance survey] (.getMessage e))))]))))))
-
-
     (lib/ok dss)))
 
 (defn create

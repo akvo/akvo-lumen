@@ -2,7 +2,7 @@
 -- :doc All datasets. Including pending datasets and datasets that failed to import
 WITH
 source_data AS (
- SELECT dataset.id as dataset_id, (spec->'source')::jsonb as source
+ SELECT dataset.id as dataset_id, (spec->'source')::jsonb - 'refreshToken' as source
    FROM data_source, dataset_version, job_execution, dataset
   WHERE dataset_version.dataset_id = dataset.id
     AND dataset_version.version = 1

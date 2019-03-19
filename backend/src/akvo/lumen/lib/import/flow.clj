@@ -12,7 +12,7 @@
   [{:strs [instance surveyId formId refreshToken version] :as spec}
    {:keys [flow-api] :as config}]
   (let [version (if version version 1)
-        headers-fn #(c.flow/api-headers flow-api refreshToken)
+        headers-fn #(c.flow/api-headers (c.flow/access-token flow-api refreshToken))
         survey (delay (flow-common/survey-definition (:url flow-api)
                                                      headers-fn
                                                      instance

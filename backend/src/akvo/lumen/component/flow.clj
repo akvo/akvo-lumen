@@ -22,23 +22,19 @@
 
 
 (defn api-headers
-  [this refresh-token]
-  (let [access-token (access-token this refresh-token)]
-    {"Authorization" (format "Bearer %s" access-token)
-     "User-Agent" "lumen"
-     "Accept" "application/vnd.akvo.flow.v2+json"
-     "X-Akvo-Email" "akvo.flow.user.test2@gmail.com"}))
+  [token]
+  {"Authorization" (format "Bearer %s" token)
+   "User-Agent" "lumen"
+   "Accept" "application/vnd.akvo.flow.v2+json"})
 
 (defn check-permissions
-  ([flow-api refresh-token body]
-   (check-permissions flow-api refresh-token body (api-headers flow-api refresh-token)))
-  ([flow-api refresh-token body headers]
-   (http/post
-    (str (:url flow-api) "/check_permissions")
-    {:as :json
-     :headers headers
-     :form-params body
-     :content-type :json})))
+  [flow-api body token]
+  (http/post
+   (str (:url flow-api) "/check_permissions")
+   {:as :json
+    :headers (api-headers token)
+    :form-params body
+    :content-type :json}))
 
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]

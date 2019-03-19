@@ -9,12 +9,13 @@
             [clojure.walk :as w]
             [akvo.lumen.component.error-tracker :as error-tracker]
             [akvo.lumen.upload :as upload]
+            [akvo.commons.jwt :as jwt]
             [integrant.core :as ig]))
 
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
   ["/datasets"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (dataset/all (p/connection tenant-manager tenant) (:flow-api import-config)))}
+   ["" {:get {:handler (fn [{tenant :tenant :as request}]
+                         (dataset/all (p/connection tenant-manager tenant) (:flow-api import-config) (jwt/jwt-token request)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims

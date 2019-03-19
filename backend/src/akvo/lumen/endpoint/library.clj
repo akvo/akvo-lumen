@@ -11,14 +11,15 @@
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [akvo.commons.jwt :as jwt]
             [integrant.core :as ig]))
 
 (defn handler [{:keys [tenant-manager flow-api] :as opts}]
-  (fn [{tenant :tenant}]
+  (fn [{tenant :tenant :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
       (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))
-          :datasets (variant/value (dataset/all tenant-conn flow-api))
+          :datasets (variant/value (dataset/all tenant-conn flow-api (jwt/jwt-token request)))
           :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (visualisation/all tenant-conn))
           :collections (variant/value (collection/all tenant-conn))}))))
