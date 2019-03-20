@@ -1,6 +1,9 @@
 (ns akvo.lumen.auth
   (:require [akvo.commons.jwt :as jwt]
             [cheshire.core :as json]
+            [akvo.lumen.protocols :as p]
+            [akvo.lumen.component.flow :as c.flow]
+            [hugsql.core :as hugsql]
             [clojure.tools.logging :as log]
             [clj-http.client :as client]
             [clojure.set :as set]
@@ -69,8 +72,8 @@
        (println "Could not get cert from Keycloak")
        (throw e)))))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
-  wrap-auth)
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ {:keys [tenant-manager flow-api] :as opts}]
+ wrap-auth)
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
   empty?)
@@ -81,3 +84,41 @@
 (s/def ::keycloak ::keycloak/data)
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
   (s/keys :req-un [::keycloak]))
+
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+
+(defn wrap-ds-auth
+  "Add to the request the auth-datasets allowed to the current authenticated user,
+  using flow-api check_permissions"
+  [tenant-manager flow-api]
+  (fn [handler]
+    (fn [{:keys [jwt-claims tenant] :as request}]
+      (log/debug :before-authenticating (:template (:reitit.core/match request)))
+      (let [dss (all-datasets (p/connection tenant-manager tenant))
+            _ (log/debug :all-datasets (map :id dss))
+            request (if (contains? #{"/api/library"} (:template (:reitit.core/match request)))
+                      (let [permissions (->> (map :source dss)
+                                             (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
+                                             (map c.flow/>api-model)
+                                             (c.flow/check-permissions flow-api (jwt/jwt-token request))
+                                             :body
+                                             set)
+                            
+                            auth-datasets (->> dss
+                                               (filter
+                                                (fn [ds]
+                                                  (let [source (:source ds)]
+                                                    (if (= "AKVO_FLOW" (get source "kind"))
+                                                      (contains? permissions (c.flow/>api-model source))
+                                                      true))))
+                                               (mapv :id))]
+                        (assoc request :auth-datasets auth-datasets))
+                      request)]
+        (handler request)))))
+
+(defmethod ig/init-key :akvo.lumen.auth/wrap-ds-auth  [_ {:keys [tenant-manager flow-api] :as opts}]
+ (wrap-ds-auth tenant-manager flow-api))
+
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-ds-auth [_]
+  ;; todo
+  any?)

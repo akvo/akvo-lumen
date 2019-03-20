@@ -2,6 +2,7 @@
   (:require [akvo.lumen.auth :as auth]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
@@ -174,4 +175,16 @@
   (fn [handler]
     (fn [req]
       (handler (assoc req :jwt-claims {"typ" "Bearer"})))))
+
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+
+(defmethod ig/init-key :akvo.lumen.test-utils/wrap-ds-auth  [_ {:keys [tenant-manager] :as opts}]
+  (fn [handler]
+    (fn [{tenant :tenant
+          :as req}]
+      (let [dss (->> (all-datasets (p/connection tenant-manager tenant))
+                     (mapv :id))]
+        (handler (assoc req :auth-datasets (if (empty? dss)
+                                             [""]
+                                             dss)))))))
 

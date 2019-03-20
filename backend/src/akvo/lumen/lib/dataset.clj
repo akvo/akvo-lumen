@@ -16,37 +16,24 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
-
 (defn all
-  [tenant-conn flow-api token]
-  (let [dss (all-datasets tenant-conn)
-        permissions (->> (map :source dss)
-                         (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
-                         (map c.flow/>api-model)
-                         (c.flow/check-permissions flow-api token)
-                         :body
-                         set)
-        allowed-datasets (filter (fn [ds] (let [source (:source ds)]
-                                            (if (= "AKVO_FLOW" (get source "kind"))
-                                              (contains? permissions (c.flow/>api-model source))
-                                              true))) dss)]
-    (log/debug :dss (map :source dss))
-    (log/debug :token token)
-    (log/debug :permissions permissions)
-    (log/debug :Allowed? allowed-datasets)
-    (lib/ok allowed-datasets)))
+  [tenant-conn flow-api auth-datasets]
+  (let [dss (all-auth-datasets tenant-conn {:ids auth-datasets})]
+    (log/warn :all-dss (map :id dss))
+    (log/warn :auth? auth-datasets)
+    (lib/ok dss)))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]
   (import/handle tenant-conn import-config error-tracker claims data-source))
 
-(defn column-sort-order
+(defn- column-sort-order
   "Return this columns sort order (an integer) or nil if the dataset
   is not sorted by this column"
   [column]
   (get column "sort"))
 
-(defn select-data-sql [table-name columns]
+(defn- select-data-sql [table-name columns]
   (let [select-expr (->> columns
                          (map (fn [{:strs [type columnName]}]
                                 (condp = type
@@ -67,7 +54,7 @@
 
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
-  [conn id token]
+  [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))]
       (lib/ok
@@ -82,7 +69,7 @@
     (lib/not-found {:error "Not found"})))
 
 (defn fetch
-  [conn id token]
+  [conn id]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query conn
@@ -96,7 +83,7 @@
     (lib/not-found {:error "Not found"})))
 
 (defn delete
-  [tenant-conn id token]
+  [tenant-conn id]
   (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
     (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
                                   (str/join ", " datasets-merged-with))})
@@ -108,7 +95,7 @@
         (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id}))))))
 
 (defn update
-  [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"} token]
+  [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
@@ -120,6 +107,6 @@
     (lib/not-found {:id dataset-id})))
 
 (defn update-meta
-  [tenant-conn id {:strs [name]} token]
+  [tenant-conn id {:strs [name]}]
   (update-dataset-meta tenant-conn {:id id :title name})
   (lib/ok {}))

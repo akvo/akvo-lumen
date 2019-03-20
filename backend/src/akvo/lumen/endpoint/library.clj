@@ -15,11 +15,13 @@
             [integrant.core :as ig]))
 
 (defn handler [{:keys [tenant-manager flow-api] :as opts}]
-  (fn [{tenant :tenant :as request}]
+  (fn [{tenant :tenant
+        auth-datasets :auth-datasets
+        :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
       (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))
-          :datasets (variant/value (dataset/all tenant-conn flow-api (jwt/jwt-token request)))
+          :datasets (variant/value (dataset/all tenant-conn flow-api auth-datasets))
           :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (visualisation/all tenant-conn))
           :collections (variant/value (collection/all tenant-conn))}))))

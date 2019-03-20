@@ -1,10 +1,11 @@
--- :name all-datasets :? :*
+-- :name all-auth-datasets :? :*
 -- :doc All datasets. Including pending datasets and datasets that failed to import
 WITH
 source_data AS (
  SELECT dataset.id as dataset_id, (spec->'source')::jsonb - 'refreshToken' as source
    FROM data_source, dataset_version, job_execution, dataset
   WHERE dataset_version.dataset_id = dataset.id
+    AND dataset.id IN (:v*:ids)
     AND dataset_version.version = 1
     AND dataset_version.job_execution_id = job_execution.id
     AND job_execution.data_source_id = data_source.id
@@ -32,6 +33,23 @@ SELECT id, name, error_log as reason, status, modified, created, '{}'::jsonb AS 
 SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM pending_imports
  UNION
+SELECT id, title, NULL, 'OK', modified, created, author, source_data.source::jsonb
+  FROM dataset, source_data
+  WHERE source_data.dataset_id = dataset.id;
+
+
+
+-- :name all-datasets :? :*
+-- :doc All datasets. Including pending datasets and datasets that failed to import
+WITH
+source_data AS (
+ SELECT dataset.id as dataset_id, (spec->'source')::jsonb - 'refreshToken' as source
+   FROM data_source, dataset_version, job_execution, dataset
+  WHERE dataset_version.dataset_id = dataset.id
+    AND dataset_version.version = 1
+    AND dataset_version.job_execution_id = job_execution.id
+    AND job_execution.data_source_id = data_source.id
+)
 SELECT id, title, NULL, 'OK', modified, created, author, source_data.source::jsonb
   FROM dataset, source_data
   WHERE source_data.dataset_id = dataset.id;
