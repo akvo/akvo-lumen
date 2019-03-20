@@ -97,7 +97,7 @@
         (is (= #{ds1 ds2 vs1 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
                    variant/value :entities set)))
-        (dataset/delete *tenant-conn* ds1)
+        (dataset/delete *tenant-conn* ds1 "")
         (is (= #{ds2 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
                    variant/value :entities set)))))))

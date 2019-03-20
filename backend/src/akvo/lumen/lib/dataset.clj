@@ -67,7 +67,7 @@
 
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
-  [conn id]
+  [conn id token]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))]
       (lib/ok
@@ -82,7 +82,7 @@
     (lib/not-found {:error "Not found"})))
 
 (defn fetch
-  [conn id]
+  [conn id token]
   (if-let [dataset (dataset-by-id conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query conn
@@ -96,7 +96,7 @@
     (lib/not-found {:error "Not found"})))
 
 (defn delete
-  [tenant-conn id]
+  [tenant-conn id token]
   (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
     (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
                                   (str/join ", " datasets-merged-with))})
@@ -108,7 +108,7 @@
         (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id}))))))
 
 (defn update
-  [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"}]
+  [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"} token]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
@@ -120,6 +120,6 @@
     (lib/not-found {:id dataset-id})))
 
 (defn update-meta
-  [tenant-conn id {:strs [name]}]
+  [tenant-conn id {:strs [name]} token]
   (update-dataset-meta tenant-conn {:id id :title name})
   (lib/ok {}))

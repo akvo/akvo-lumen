@@ -14,7 +14,8 @@
 
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
   ["/datasets"
-   ["" {:get {:handler (fn [{tenant :tenant :as request}]
+   ["" {:get {:handler (fn [{tenant :tenant
+                             :as request}]
                          (dataset/all (p/connection tenant-manager tenant) (:flow-api import-config) (jwt/jwt-token request)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
@@ -24,29 +25,34 @@
                                           error-tracker jwt-claims (w/stringify-keys body)))}}]
    ["/:id" [["" {:get {:parameters {:path-params {:id string?}}
                        :handler (fn [{tenant :tenant
-                                      {:keys [id]} :path-params}]
-                                  (dataset/fetch (p/connection tenant-manager tenant) id))}
+                                      {:keys [id]} :path-params
+                                      :as request}]
+                                  (dataset/fetch (p/connection tenant-manager tenant) id (jwt/jwt-token request)))}
                  :put {:parameters {:body map?
                                     :path-params {:id string?}}
                        :handler (fn [{tenant :tenant
                                       body :body
-                                      {:keys [id]} :path-params}]
-                                  (dataset/update-meta (p/connection tenant-manager tenant) id body))}
+                                      {:keys [id]} :path-params
+                                      :as request}]
+                                  (dataset/update-meta (p/connection tenant-manager tenant) id body (jwt/jwt-token request)))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
-                                         {:keys [id]} :path-params}]
-                                     (dataset/delete (p/connection tenant-manager tenant) id))}}]
+                                         {:keys [id]} :path-params
+                                         :as request}]
+                                     (dataset/delete (p/connection tenant-manager tenant) id (jwt/jwt-token request)))}}]
             ["/meta" {:get {:parameters {:path-params {:id string?}}
                             :handler (fn [{tenant :tenant
-                                           {:keys [id]} :path-params}]
-                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
+                                           {:keys [id]} :path-params
+                                           :as request}]
+                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id (jwt/jwt-token request)))}}]
             ["/update" {:post {:parameters {:path-params {:id string?}}
                                :handler (fn [{tenant :tenant
                                               jwt-claims :jwt-claims
                                               body :body
-                                              {:keys [id]} :path-params}]
+                                              {:keys [id]} :path-params
+                                              :as request}]
                                           (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                                          error-tracker id (w/stringify-keys body)))}}]]]])
+                                                          error-tracker id (w/stringify-keys body) (jwt/jwt-token request)))}}]]]])
 
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
