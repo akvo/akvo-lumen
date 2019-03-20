@@ -16,42 +16,25 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
+
 (defn all
   [tenant-conn flow-api token]
   (let [dss (all-datasets tenant-conn)
-        flows (->> (map :source dss)
-                   (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
-                   (map (fn [ds-source]
-                          (let [instance (get ds-source "instance")
-                                survey (get ds-source "surveyId")]
-                            {:instance_id (if (= "uat1" instance) (str "akvoflow-" instance) instance)
-                             :survey_id survey})))
-                   vec)]
-    (log/error :token token)
-    (log/error :flows  flows)
-    (log/error :permissions (try
-                              (:body
-                               (c.flow/check-permissions flow-api flows token))
-                              (catch Exception e (log/error :fail flows (.getMessage e)))))
-    #_(log/error (doall (->>
-                       dss
-                       (map :source)
-                       (map
-                        (fn [ds-source]
-                          (let [instance (get ds-source "instance")
-                                survey (get ds-source "surveyId")]
-                            [ds-source instance survey
-                             (try 
-                               (when-let [rt (str/replace (get ds-source "refreshToken") #" " "")]
-                                 (:body
-                                  (c.flow/check-permissions flow-api rt
-                                                            [{:instance_id (if (= "uat1" instance)
-                                                                             (str "akvoflow-" instance)
-                                                                             instance)
-                                                              :survey_id survey}])))
-
-                               (catch Exception e (log/error :fail [instance survey] (.getMessage e))))]))))))
-    (lib/ok dss)))
+        permissions (->> (map :source dss)
+                         (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
+                         (map c.flow/>api-model)
+                         (c.flow/check-permissions flow-api token)
+                         :body
+                         set)
+        allowed-datasets (filter (fn [ds] (let [source (:source ds)]
+                                            (if (= "AKVO_FLOW" (get source "kind"))
+                                              (contains? permissions (c.flow/>api-model source))
+                                              true))) dss)]
+    (log/debug :dss (map :source dss))
+    (log/debug :token token)
+    (log/debug :permissions permissions)
+    (log/debug :Allowed? allowed-datasets)
+    (lib/ok allowed-datasets)))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]

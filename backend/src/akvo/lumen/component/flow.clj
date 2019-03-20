@@ -28,13 +28,15 @@
    "Accept" "application/vnd.akvo.flow.v2+json"})
 
 (defn check-permissions
-  [flow-api body token]
-  (http/post
-   (str (:url flow-api) "/check_permissions")
-   {:as :json
-    :headers (api-headers token)
-    :form-params body
-    :content-type :json}))
+  [flow-api token body]
+  (try
+    (http/post
+     (str (:url flow-api) "/check_permissions")
+     {:as :json
+      :headers (api-headers token)
+      :form-params body
+      :content-type :json})
+    (catch Exception e (log/error :fail body (.getMessage e)))))
 
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]
@@ -46,3 +48,9 @@
 
 (defmethod ig/pre-init-spec ::api [_]
   ::config)
+
+(defn >api-model [ds-source]
+  (let [instance (get ds-source "instance")
+        survey (get ds-source "surveyId")]
+    {:instance_id (if (= "uat1" instance) (str "akvoflow-" instance) instance)
+     :survey_id survey}))
