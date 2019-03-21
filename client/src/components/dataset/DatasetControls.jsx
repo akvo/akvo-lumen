@@ -131,7 +131,7 @@ class DatasetControls extends Component {
               className="transformationLogToggle clickable"
               onClick={this.props.onToggleTransformationLog}
             >
-              <i className="fa fa-list-ol" aria-hidden="true" /> {pendingTransformationsCount > 0 && `(${pendingTransformationsCount})`}
+              <i className="fa fa-list-ol" aria-hidden="true" />
             </button>
           </span>
         </span>

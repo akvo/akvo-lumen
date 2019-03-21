@@ -7,7 +7,7 @@
         vertical-align: top;
     }
 
-    &:after {
+    &.clickable:after {
         content: '';
         display: block;
         width: 0;

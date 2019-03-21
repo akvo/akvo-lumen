@@ -61,10 +61,11 @@ export default class ColumnHeader extends Component {
   }
 
   render() {
-    const { column } = this.props;
+    const { column, disabled } = this.props;
+
     return (
       <div
-        className={`ColumnHeader clickable
+        className={`ColumnHeader ${disabled ? '' : 'clickable'}
           ${this.props.columnMenuActive ? 'columnMenuActive' : ''}`}
         ref={(ref) => { this.columnHeaderContainer = ref; }}
         onClick={this.handleColumnMenuClick}
@@ -117,4 +118,5 @@ ColumnHeader.propTypes = {
   onToggleColumnContextMenu: PropTypes.func.isRequired,
   onRemoveSort: PropTypes.func.isRequired,
   columnMenuActive: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
 };

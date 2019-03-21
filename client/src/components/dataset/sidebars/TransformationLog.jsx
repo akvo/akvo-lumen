@@ -230,15 +230,12 @@ function transformationDescription(transformations, index, columns, dependentDat
 function TransformationListItem({ transformations, index, columns, dependentDatasets }) {
   const transformation = transformations.get(index);
   const isUndoingTransformation = transformation.get('undo');
-  const isPendingTransformation = transformation.get('pending') && !isUndoingTransformation;
 
   return (
     <div style={{ opacity: isUndoingTransformation ? 0.5 : 1 }}>
       <div>
         {transformationDescription(transformations, index, columns, dependentDatasets)}
       </div>
-      {isPendingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>APPLYING TRANSFORMATION</div>}
-      {isUndoingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>UNDOING TRANSFORMATION</div>}
     </div>);
 }
 

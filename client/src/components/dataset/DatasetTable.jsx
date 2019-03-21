@@ -98,9 +98,16 @@ class DatasetTable extends Component {
   }
 
   handleToggleColumnContextMenu({ column, dimensions }) {
+    const { isLockedFromTransformations } = this.props;
+
+    if (isLockedFromTransformations) return;
+
     const { activeColumnContextMenu } = this.state;
-    if (activeColumnContextMenu != null &&
-      column.get('title') === activeColumnContextMenu.column.get('title')) {
+
+    if (
+      activeColumnContextMenu != null &&
+      column.get('title') === activeColumnContextMenu.column.get('title')
+    ) {
       this.setState({ activeColumnContextMenu: null });
     } else {
       this.setState({
@@ -378,7 +385,8 @@ class DatasetTable extends Component {
           column={column}
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
-          columnMenuActive={activeColumnContextMenu != null &&
+          disabled={isLockedFromTransformations}
+          columnMenuActive={activeColumnContextMenu != null && !isLockedFromTransformations &&
             activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
@@ -465,10 +473,9 @@ class DatasetTable extends Component {
                 onContextMenuItemSelected={this.handleDataTypeContextMenuClicked}
                 onWindowClick={this.dismissDataTypeContextMenu}
               />}
-            {activeColumnContextMenu && (
+            {activeColumnContextMenu && !isLockedFromTransformations && (
               <ColumnContextMenu
                 column={activeColumnContextMenu.column}
-                isLockedFromTransformations={isLockedFromTransformations}
                 dimensions={activeColumnContextMenu.dimensions}
                 onContextMenuItemSelected={this.handleColumnContextMenuClicked}
                 onWindowClick={this.dismissColumnContextMenu}

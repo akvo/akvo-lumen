@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, updateDatasetMeta, pollTxImportStatus, startTx, endTx } from '../actions/dataset';
+import { fetchDataset, updateDatasetMeta, pollTxImportStatus, startTx, undoTx, endTx } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns, getIsLockedFromTransformations } from '../domain/dataset';
@@ -103,7 +103,6 @@ class Dataset extends Component {
     trackEvent(TRANSFORM_DATASET, transformationJs.op);
 
     this.setPendingTransformation(now, transformation);
-
     dispatch(startTx(id));
 
     return api.post(`/api/transformations/${id}/transform`, transformationJs)
@@ -131,7 +130,7 @@ class Dataset extends Component {
 
     this.setPendingUndo(now);
 
-    dispatch(startTx(id));
+    dispatch(undoTx(id));
 
     api.post(`/api/transformations/${id}/undo`)
       .then((response) => {

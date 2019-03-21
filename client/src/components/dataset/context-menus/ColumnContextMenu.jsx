@@ -67,7 +67,7 @@ const actions = Immutable.fromJS({
   },
 });
 
-const getCommonOptions = ({ isLockedFromTransformations }) => [
+const commonOptions = [
   {
     label: <FormattedMessage id="sort" />,
     value: 'sort',
@@ -89,11 +89,10 @@ const getCommonOptions = ({ isLockedFromTransformations }) => [
   {
     label: <FormattedMessage id="delete_column" />,
     value: 'delete-column',
-    disabled: isLockedFromTransformations,
   },
 ];
 
-const getDataTypeOptions = ({ isLockedFromTransformations }) => ({ // eslint-disable-line
+const dataTypeOptions = ({
   text: [
     {
       label: <FormattedMessage id="filter" />,
@@ -143,14 +142,10 @@ export default function ColumnContextMenu({
   onContextMenuItemSelected,
   onWindowClick,
   left,
-  isLockedFromTransformations,
 }) {
   return (
     <ContextMenu
-      options={
-        getCommonOptions({ isLockedFromTransformations })
-          .concat(getDataTypeOptions({ isLockedFromTransformations })[column.get('type')])
-      }
+      options={commonOptions.concat(dataTypeOptions[column.get('type')])}
       selected={null}
       subMenuSide={left ? 'left' : 'right'}
       style={{
@@ -178,5 +173,4 @@ ColumnContextMenu.propTypes = {
   onContextMenuItemSelected: PropTypes.func.isRequired,
   onWindowClick: PropTypes.func.isRequired,
   left: PropTypes.bool,
-  isLockedFromTransformations: PropTypes.bool,
 };

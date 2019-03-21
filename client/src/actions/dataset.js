@@ -600,19 +600,45 @@ export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
 }
 
 export function startTx(datasetId) {
-  return {
-    type: constants.TRANSFORMATION_START,
-    payload: {
-      datasetId,
-    },
+  return (dispatch) => {
+    const AUTO_HIDE = true;
+    dispatch(showNotification('info', 'Applying transformation...', AUTO_HIDE));
+
+    dispatch({
+      type: constants.TRANSFORMATION_START,
+      payload: {
+        datasetId,
+      },
+    });
+  };
+}
+
+export function undoTx(datasetId) {
+  return (dispatch) => {
+    const AUTO_HIDE = true;
+
+    dispatch(showNotification('info', 'Undoing transformation...', AUTO_HIDE));
+
+    dispatch({
+      type: constants.TRANSFORMATION_START,
+      payload: {
+        datasetId,
+      },
+    });
   };
 }
 
 export function endTx(datasetId) {
-  return {
-    type: constants.TRANSFORMATION_END,
-    payload: {
-      datasetId,
-    },
+  return (dispatch) => {
+    const AUTO_HIDE = true;
+
+    dispatch(showNotification('success', 'Transformation applied...', AUTO_HIDE));
+
+    dispatch({
+      type: constants.TRANSFORMATION_END,
+      payload: {
+        datasetId,
+      },
+    });
   };
 }
