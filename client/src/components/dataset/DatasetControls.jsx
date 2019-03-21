@@ -22,7 +22,6 @@ class DatasetControls extends Component {
 
   render() {
     const {
-      pendingTransformationsCount,
       intl,
       onNavigateToVisualise,
       isLockedFromTransformations,
