@@ -26,29 +26,34 @@
                                           error-tracker jwt-claims (w/stringify-keys body)))}}]
    ["/:id" [["" {:get {:parameters {:path-params {:id string?}}
                        :handler (fn [{tenant :tenant
+                                      auth-datasets :auth-datasets
                                       {:keys [id]} :path-params}]
-                                  (dataset/fetch (p/connection tenant-manager tenant) id))}
+                                  (dataset/fetch (p/connection tenant-manager tenant) id auth-datasets))}
                  :put {:parameters {:body map?
                                     :path-params {:id string?}}
                        :handler (fn [{tenant :tenant
+                                      auth-datasets :auth-datasets
                                       body :body
                                       {:keys [id]} :path-params}]
-                                  (dataset/update-meta (p/connection tenant-manager tenant) id body))}
+                                  (dataset/update-meta (p/connection tenant-manager tenant) id body auth-datasets))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
+                                         auth-datasets :auth-datasets
                                          {:keys [id]} :path-params}]
-                                     (dataset/delete (p/connection tenant-manager tenant) id))}}]
+                                     (dataset/delete (p/connection tenant-manager tenant) id auth-datasets))}}]
             ["/meta" {:get {:parameters {:path-params {:id string?}}
                             :handler (fn [{tenant :tenant
+                                            auth-datasets :auth-datasets
                                            {:keys [id]} :path-params}]
-                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
+                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id auth-datasets))}}]
             ["/update" {:post {:parameters {:path-params {:id string?}}
                                :handler (fn [{tenant :tenant
+                                              auth-datasets :auth-datasets
                                               jwt-claims :jwt-claims
                                               body :body
                                               {:keys [id]} :path-params}]
                                           (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                                          error-tracker id (w/stringify-keys body)))}}]]]])
+                                                          error-tracker id (w/stringify-keys body) auth-datasets))}}]]]])
 
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]

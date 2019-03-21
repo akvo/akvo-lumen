@@ -94,7 +94,9 @@
   (fn [handler]
     (let [auth-calls #{(with-meta ["/api/library"] {:methods #{:get}})
                        (with-meta ["/api/datasets"] {:methods #{:get}})
-                       (with-meta ["/api/datasets/:id"] {:methods #{:get :put :delete}})}]
+                       (with-meta ["/api/datasets/:id"] {:methods #{:get :put :delete}})
+                       (with-meta ["/api/datasets/:id/meta"] {:methods #{:get}})
+                       (with-meta ["/api/datasets/:id/update"] {:methods #{:post}})}]
       (fn [{:keys [jwt-claims tenant] :as request}]
         (log/debug :wrap-ds-auth [(:template (:reitit.core/match request)) (:request-method request)])
         (let [dss (all-datasets (p/connection tenant-manager tenant))
@@ -128,3 +130,8 @@
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-ds-auth [_]
   ;; todo
   any?)
+
+(defmacro auth-ds [id auth-datasets & body]
+  `(if (contains? (set ~auth-datasets) ~id)
+     ~@body
+     (lib/not-found {:error "Not found"})))
