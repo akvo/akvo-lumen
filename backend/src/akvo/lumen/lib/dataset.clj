@@ -18,10 +18,7 @@
 
 (defn all
   [tenant-conn flow-api auth-datasets]
-  (let [dss (all-auth-datasets tenant-conn {:ids auth-datasets})]
-    (log/warn :all-dss (map :id dss))
-    (log/warn :auth? auth-datasets)
-    (lib/ok dss)))
+  (lib/ok (all-auth-datasets tenant-conn {:ids auth-datasets})))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]

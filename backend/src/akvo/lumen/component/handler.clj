@@ -10,6 +10,7 @@
             [reitit.core :as rc]
             [reitit.ring.coercion :as rrc]
             [reitit.spec :as rs]
+            [clojure.pprint :refer (pprint)]
             [ring.middleware.defaults]
             [ring.middleware.json]
             [ring.middleware.stacktrace]
@@ -20,7 +21,7 @@
     (let [router (ring/router endpoints
                               (merge {:conflicts (constantly nil)}
                                      (when middleware {:data {:middleware middleware}})))
-          _ (clojure.pprint/pprint (map (juxt first (comp #(disj % :middleware) set keys second))
+          _ (pprint (map (juxt first (comp #(disj % :middleware) set keys second))
                                         (rc/routes router)) )
           handler (ring/ring-handler router)]
       (assoc opts :handler handler))
