@@ -128,7 +128,7 @@ function pollRasterImportStatus(importId, name, collectionId) {
       dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
     }
     api
-      .get(`/api/job_executions/${importId}`)
+      .get(`/api/job_executions/raster/${importId}`)
       .then(({ body: { status, reason, rasterId } }) => {
         if (status === 'PENDING') {
           setTimeout(
@@ -299,7 +299,7 @@ export function deletePendingRaster(id) {
   return (dispatch) => {
     dispatch(deleteRasterRequest(id));
     api
-      .del(`/api/job_executions/${id}`)
+      .del(`/api/job_executions/raster/${id}`)
       .then(() => dispatch(deletePendingRasterSuccess(id)))
       .catch((error) => {
         dispatch(showNotification('error', 'Failed to delete pending raster.'));

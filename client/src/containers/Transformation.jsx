@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
-import { fetchDataset } from '../actions/dataset';
+import { pollTxImportStatus, startTx, endTx } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
@@ -36,20 +36,22 @@ class Transformation extends Component {
     const { dispatch, datasetId, router } = this.props;
     this.setState({ transforming: true });
     dispatch(showNotification('info', 'Applying transformation...'));
+
+    dispatch(startTx(datasetId));
+
     api.post(`/api/transformations/${datasetId}/transform`, transformation)
       .then((response) => {
-        if (response.ok) {
-          return response.body;
+        if (!response.ok) {
+          throw new Error('Failed to merge dataset');
+        } else {
+          dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
+            this.setState({ transforming: false });
+            dispatch(showNotification('info', 'Transformation success', true));
+            router.push(`/dataset/${datasetId}`);
+            dispatch(endTx(datasetId));
+          }));
         }
-        throw new Error('Failed to merge dataset');
-      })
-      .then(() => dispatch(fetchDataset(datasetId)))
-      .then(() => {
-        this.setState({ transforming: false });
-        dispatch(showNotification('info', 'Transformation success', true));
-        router.push(`/dataset/${datasetId}`);
-      })
-      .catch((err) => {
+      }).catch((err) => {
         this.setState({ transforming: false });
         dispatch(showNotification('error', `Transformation failed: ${err.message}`));
       });
@@ -61,6 +63,7 @@ class Transformation extends Component {
 
     const { datasetId, datasets, routeParams } = this.props;
     const TransformationComponent = transformationComponent[routeParams.transformationType];
+
     return (
       <div className="Transformation">
         <TransformationComponent

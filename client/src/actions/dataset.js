@@ -130,7 +130,7 @@ function pollDatasetImportStatus(importId, name, collectionId) {
       dispatch(addTemporaryEntitiesToCollection(importId, collectionId));
     }
     api
-      .get(`/api/job_executions/${importId}`)
+      .get(`/api/job_executions/dataset/${importId}`)
       .then(({ body: { status, reason, datasetId } }) => {
         if (status === 'PENDING') {
           setTimeout(
@@ -400,7 +400,7 @@ function updateDatasetTogglePending(datasetId) {
 function pollDatasetUpdateStatus(updateId, datasetId, title) {
   return (dispatch) => {
     api
-      .get(`/api/job_executions/${updateId}`)
+      .get(`/api/job_executions/dataset/${updateId}`)
       .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(
@@ -498,7 +498,7 @@ function transformationFailure(datasetId, reason) {
 function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
   return (dispatch) => {
     api
-      .get(`/api/job_executions/${jobExecutionId}`)
+      .get(`/api/job_executions/dataset/${jobExecutionId}`)
       .then(({ body: { status, reason } }) => {
         if (status === 'PENDING') {
           setTimeout(
@@ -536,5 +536,106 @@ export function undoTransformation(id) {
   return {
     type: constants.UNDO_TRANSFORMATION,
     id,
+  };
+}
+
+function txDatasetPending(jobExecutionId, name) {
+  const now = Date.now();
+  return {
+    type: constants.TRANSFORMATION_DATASET_PENDING,
+    dataset: Immutable.fromJS({
+      id: jobExecutionId,
+      type: 'dataset',
+      status: 'PENDING',
+      name,
+      created: now,
+      modified: now,
+    }),
+  };
+}
+function txDatasetFailure(datasetId, jobExecutionId, reason) {
+  return {
+    type: constants.TRANSFORMATION_FAILURE,
+    jobExecutionId,
+    datasetId,
+    reason,
+    modified: Date.now(),
+  };
+}
+function txDatasetSuccess(datasetId, jobExecutionId) {
+  return (dispatch) => {
+    dispatch({
+      type: constants.TRANSFORMATION_SUCCESS,
+      datasetId,
+      jobExecutionId,
+    });
+  };
+}
+
+export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
+  return (dispatch) => {
+    dispatch(txDatasetPending(jobExecutionId, name));
+    api
+      .get(`/api/job_executions/transformation/${jobExecutionId}`)
+      .then(({ body: { status, reason, datasetId } }) => {
+        if (status === 'PENDING') {
+          setTimeout(
+            () => dispatch(pollTxImportStatus(jobExecutionId, callback)),
+            constants.POLL_INTERVAL
+          );
+        } else if (status === 'FAILED') {
+          dispatch(showNotification('error', 'Failed to transform dataset.'));
+          dispatch(txDatasetFailure(datasetId, jobExecutionId, reason));
+        } else if (status === 'OK') {
+          dispatch(txDatasetSuccess(datasetId, jobExecutionId));
+          dispatch(fetchDataset(datasetId));
+          callback();
+        }
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to transform dataset.'));
+        dispatch(txDatasetFailure(jobExecutionId, error.message));
+      });
+  };
+}
+
+export function startTx(datasetId) {
+  return (dispatch) => {
+    dispatch(showNotification('info', 'Applying transformation...'));
+
+    dispatch({
+      type: constants.TRANSFORMATION_START,
+      payload: {
+        datasetId,
+      },
+    });
+  };
+}
+
+export function undoTx(datasetId) {
+  return (dispatch) => {
+    dispatch(showNotification('info', 'Undoing transformation...'));
+
+    dispatch({
+      type: constants.TRANSFORMATION_START,
+      payload: {
+        datasetId,
+      },
+    });
+  };
+}
+
+export function endTx(datasetId) {
+  return (dispatch) => {
+    const AUTO_HIDE = true;
+
+    dispatch(showNotification('success', 'Transformation applied...', AUTO_HIDE));
+
+    dispatch({
+      type: constants.TRANSFORMATION_END,
+      payload: {
+        datasetId,
+      },
+    });
   };
 }

@@ -11,6 +11,10 @@ export function getRows(entity) {
   return entity.get('rows');
 }
 
+export function getIsLockedFromTransformations(entity) {
+  return entity.get('isLockedFromTransformations');
+}
+
 export function columnIndex(columnName, columns) {
   const res = columns.findEntry(column => column.get('columnName') === columnName);
   if (res != null) {

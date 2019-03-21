@@ -13,13 +13,20 @@ class DatasetControls extends Component {
     };
     this.onEditorToggleClick = this.onEditorToggleClick.bind(this);
   }
+
   onEditorToggleClick() {
     this.setState({
       editorMenuActive: !this.state.editorMenuActive,
     });
   }
+
   render() {
-    const { pendingTransformationsCount, intl, onNavigateToVisualise } = this.props;
+    const {
+      intl,
+      onNavigateToVisualise,
+      isLockedFromTransformations,
+    } = this.props;
+
     return (
       <div className="DatasetControls">
 
@@ -31,11 +38,14 @@ class DatasetControls extends Component {
             }}
           >
             <button
-              className="datasetEditorToggle datasetEditorButton clickable"
+              className={`datasetEditorToggle datasetEditorButton ${
+                isLockedFromTransformations ? 'datasetEditorToggle-disabled' : 'clickable'
+              }`}
               onClick={this.onEditorToggleClick}
               data-test-id="transform"
+              disabled={isLockedFromTransformations}
             >
-            + <FormattedMessage id="transform" />
+              + <FormattedMessage id="transform" />
             </button>
             {this.state.editorMenuActive &&
               <ContextMenu
@@ -120,7 +130,7 @@ class DatasetControls extends Component {
               className="transformationLogToggle clickable"
               onClick={this.props.onToggleTransformationLog}
             >
-              <i className="fa fa-list-ol" aria-hidden="true" /> {pendingTransformationsCount > 0 && `(${pendingTransformationsCount})`}
+              <i className="fa fa-list-ol" aria-hidden="true" />
             </button>
           </span>
         </span>
@@ -138,6 +148,7 @@ DatasetControls.propTypes = {
   columns: PropTypes.object.isRequired,
   rowsCount: PropTypes.number.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
 };
 
 export default injectIntl(DatasetControls);

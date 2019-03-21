@@ -3,6 +3,11 @@
 INSERT INTO job_execution (id, dataset_id, type)
 VALUES (:id, :dataset-id, 'TRANSFORMATION')
 
+-- :name pending-transformation-job-execution :? :1
+SELECT * from job_execution
+WHERE dataset_id=:dataset-id AND status='PENDING' AND type='TRANSFORMATION'
+
+
 -- :name touch-dataset :! :n
 -- :doc Updates the dataset's modified value to current_timestamp
 UPDATE dataset

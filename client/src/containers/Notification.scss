@@ -19,6 +19,13 @@
   &.error {
     background-color: $errorRed;
   }
+  &.success {
+    background-color: $lime2;
+    &,
+    .close {
+      color: white;
+    }
+  }
   &.warn {
     background-color: $warnYellow;
   }
