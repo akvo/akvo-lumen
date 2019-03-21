@@ -601,8 +601,7 @@ export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
 
 export function startTx(datasetId) {
   return (dispatch) => {
-    const AUTO_HIDE = true;
-    dispatch(showNotification('info', 'Applying transformation...', AUTO_HIDE));
+    dispatch(showNotification('info', 'Applying transformation...'));
 
     dispatch({
       type: constants.TRANSFORMATION_START,
@@ -615,9 +614,7 @@ export function startTx(datasetId) {
 
 export function undoTx(datasetId) {
   return (dispatch) => {
-    const AUTO_HIDE = true;
-
-    dispatch(showNotification('info', 'Undoing transformation...', AUTO_HIDE));
+    dispatch(showNotification('info', 'Undoing transformation...'));
 
     dispatch({
       type: constants.TRANSFORMATION_START,
