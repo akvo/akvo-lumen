@@ -45,7 +45,6 @@
 
 (defn- execute-tx [{:keys [tenant-conn] :as deps} job-execution-id dataset-id command]
   (future
-    (Thread/sleep 5000)
     (try
       (jdbc/with-db-transaction [tx-conn tenant-conn]
         (let [tx-deps (assoc deps :tenant-conn tx-conn)]
