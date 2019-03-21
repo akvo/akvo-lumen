@@ -184,7 +184,5 @@
           :as req}]
       (let [dss (->> (all-datasets (p/connection tenant-manager tenant))
                      (mapv :id))]
-        (handler (assoc req :auth-datasets (if (empty? dss)
-                                             [""]
-                                             dss)))))))
+        (handler (assoc req :auth-datasets dss))))))
 

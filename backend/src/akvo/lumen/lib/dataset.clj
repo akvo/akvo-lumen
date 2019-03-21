@@ -18,7 +18,9 @@
 
 (defn all
   [tenant-conn flow-api auth-datasets]
-  (lib/ok (all-auth-datasets tenant-conn {:ids auth-datasets})))
+  (lib/ok (if (empty? auth-datasets)
+            []
+            (all-auth-datasets tenant-conn {:ids auth-datasets}))))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]
