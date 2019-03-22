@@ -97,9 +97,10 @@
                        (with-meta ["/api/datasets/:id"] {:methods #{:get :put :delete}})
                        (with-meta ["/api/datasets/:id/meta"] {:methods #{:get}})
                        (with-meta ["/api/datasets/:id/update"] {:methods #{:post}})
-                       (with-meta ["/api/aggregation/:dataset-id/:visualisation-type"] {:methods #{:get}})}]
+                       (with-meta ["/api/aggregation/:dataset-id/:visualisation-type"] {:methods #{:get}})
+                       (with-meta ["/api/visualisations"] {:methods #{:get :post}})
+                       (with-meta ["/api/visualisations/:id"] {:methods #{:get :put :delete}})}]
       (fn [{:keys [jwt-claims tenant] :as request}]
-        (log/debug :wrap-ds-auth [(:template (:reitit.core/match request)) (:request-method request)])
         (let [dss (all-datasets (p/connection tenant-manager tenant))
               _ (log/debug :all-datasets (map :id dss))
               request (if (-> (get auth-calls [(:template (:reitit.core/match request))])

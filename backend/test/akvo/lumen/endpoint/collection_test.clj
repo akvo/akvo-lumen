@@ -24,8 +24,8 @@
    "name" ""
    "spec" {}})
 
-(defn create-visualisation [tenant-conn dataset-id]
-  (-> (visualisation/create *tenant-conn* (visualisation-body dataset-id) {})
+(defn create-visualisation [tenant-conn dataset-id auth-datasets]
+  (-> (visualisation/create *tenant-conn* (visualisation-body dataset-id) {} auth-datasets)
       variant/value
       (get "id")))
 
@@ -38,8 +38,8 @@
   (let [;; Import a few datasets
         ds1 (import-file *tenant-conn* *error-tracker* {:file "GDP.csv"})
         ds2 (import-file *tenant-conn* *error-tracker* {:file "dates.csv"})
-        vs1 (create-visualisation *tenant-conn* ds1)
-        vs2 (create-visualisation *tenant-conn* ds2)
+        vs1 (create-visualisation *tenant-conn* ds1 [ds1 ds2])
+        vs2 (create-visualisation *tenant-conn* ds2 [ds1 ds2])
         db1 (create-dashboard *tenant-conn*)
         db2 (create-dashboard *tenant-conn*)]
     (testing "Create an empty collection"

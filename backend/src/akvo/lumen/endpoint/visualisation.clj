@@ -16,9 +16,9 @@
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              auth-datasets :auth-datasets
                               body :body}]
-                          ;; TODO AUTHENTICATE DSs
-                          (visualisation/create (p/connection tenant-manager tenant) body jwt-claims))}}]
+                          (visualisation/create (p/connection tenant-manager tenant) body jwt-claims auth-datasets))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        body :body}]
@@ -34,22 +34,22 @@
    ;; todo: fix path routing inconsistency here 
    ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
                       :handler (fn [{tenant :tenant
+                                     auth-datasets :auth-datasets
                                      {:keys [id]} :path-params}]
-                                 ;; TODO AUTH dataset!
-                                 (visualisation/fetch (p/connection tenant-manager tenant) id))}
+                                 (visualisation/fetch (p/connection tenant-manager tenant) id auth-datasets))}
                 :put {:parameters {:body map?
                                    :path-params {:id string?}}
                       :handler (fn [{tenant :tenant
                                      jwt-claims :jwt-claims
+                                     auth-datasets :auth-datasets
                                      {:keys [id]} :path-params
                                      body :body}]
-                                 ;; TODO: AUTH DATASET!
-                                 (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims))}
+                                 (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims auth-datasets))}
                 :delete {:parameters {:path-params {:id string?}}
                          :handler (fn [{tenant :tenant
+                                        auth-datasets :auth-datasets
                                         {:keys [id]} :path-params}]
-                                    ;; TODO: AUTH DATASET!
-                                    (visualisation/delete (p/connection tenant-manager tenant) id))}}]]])
+                                    (visualisation/delete (p/connection tenant-manager tenant) id auth-datasets))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (routes opts))
