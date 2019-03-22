@@ -1,10 +1,11 @@
 (ns akvo.lumen.endpoint.aggregation
-  (:require [akvo.lumen.protocols :as p]
+  (:require [akvo.lumen.auth :as auth]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
+            [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig])
   (:import [com.fasterxml.jackson.core JsonParseException]))
 
@@ -28,10 +29,10 @@
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/aggregation"
-   ["/:dataset-id/:visualisation-type"
-    {:get {:parameters {:path-params {:dataset-id string?
-                                      :visualisation-type string?}}
-           :handler (handler opts)}}]])
+   ["/:dataset-id/:visualisation-type" {:middleware [(auth/authenticate-dataset :dataset-id)]}
+    ["" {:get {:parameters {:path-params {:dataset-id string?
+                                          :visualisation-type string?}}
+               :handler (handler opts)}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.aggregation/aggregation  [_ opts]
   (routes opts))

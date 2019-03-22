@@ -96,7 +96,8 @@
                        (with-meta ["/api/datasets"] {:methods #{:get}})
                        (with-meta ["/api/datasets/:id"] {:methods #{:get :put :delete}})
                        (with-meta ["/api/datasets/:id/meta"] {:methods #{:get}})
-                       (with-meta ["/api/datasets/:id/update"] {:methods #{:post}})}]
+                       (with-meta ["/api/datasets/:id/update"] {:methods #{:post}})
+                       (with-meta ["/api/aggregation/:dataset-id/:visualisation-type"] {:methods #{:get}})}]
       (fn [{:keys [jwt-claims tenant] :as request}]
         (log/debug :wrap-ds-auth [(:template (:reitit.core/match request)) (:request-method request)])
         (let [dss (all-datasets (p/connection tenant-manager tenant))
@@ -139,6 +140,7 @@
           auth-datasets :auth-datasets
           :as request}]
       (let [dataset-id (id-key path-params)]
+        (log/error :authenticate-dataset-middleware (contains? (set auth-datasets) dataset-id) dataset-id (set auth-datasets))
         (if (contains? (set auth-datasets) dataset-id)
           (handler request)
           not-authorized)))))
