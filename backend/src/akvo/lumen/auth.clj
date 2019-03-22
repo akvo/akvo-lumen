@@ -1,15 +1,15 @@
 (ns akvo.lumen.auth
   (:require [akvo.commons.jwt :as jwt]
-            [cheshire.core :as json]
-            [akvo.lumen.protocols :as p]
             [akvo.lumen.component.flow :as c.flow]
-            [hugsql.core :as hugsql]
-            [clojure.tools.logging :as log]
+            [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.protocols :as p]
+            [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.set :as set]
-            [clojure.string :as string]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.component.keycloak :as keycloak]
+            [clojure.string :as string]
+            [clojure.tools.logging :as log]
+            [hugsql.core :as hugsql]
             [integrant.core :as ig]
             [ring.util.response :as response]))
 
@@ -87,7 +87,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defn wrap-ds-auth
+(defn wrap-auth-datasets
   "Add to the request the auth-datasets allowed to the current authenticated user,
   using flow-api check_permissions"
   [tenant-manager flow-api]
@@ -124,14 +124,21 @@
                         request)]
           (handler request))))))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-ds-auth  [_ {:keys [tenant-manager flow-api] :as opts}]
- (wrap-ds-auth tenant-manager flow-api))
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api] :as opts}]
+ (wrap-auth-datasets tenant-manager flow-api))
 
-(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-ds-auth [_]
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth-datasets [_]
   ;; todo
   any?)
 
-(defmacro auth-ds [id auth-datasets & body]
-  `(if (contains? (set ~auth-datasets) ~id)
-     ~@body
-     (lib/not-found {:error "Not found"})))
+(defn authenticate-dataset
+  ""
+  [id-key]
+  (fn [handler]
+    (fn [{path-params :path-params
+          auth-datasets :auth-datasets
+          :as request}]
+      (let [dataset-id (id-key path-params)]
+        (if (contains? (set auth-datasets) dataset-id)
+          (handler request)
+          not-authorized)))))

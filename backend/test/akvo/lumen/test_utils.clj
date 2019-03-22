@@ -178,7 +178,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defmethod ig/init-key :akvo.lumen.test-utils/wrap-ds-auth  [_ {:keys [tenant-manager] :as opts}]
+(defmethod ig/init-key :akvo.lumen.test-utils/wrap-auth-datasets  [_ {:keys [tenant-manager] :as opts}]
   (fn [handler]
     (fn [{tenant :tenant
           :as req}]
