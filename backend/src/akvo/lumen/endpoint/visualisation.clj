@@ -10,41 +10,46 @@
 
 (defn routes [{:keys [windshaft-url tenant-manager] :as opts}]
   ["/visualisations"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (visualisation/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             auth-datasets :auth-datasets}]
+                         (visualisation/all (p/connection tenant-manager tenant) auth-datasets))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body}]
+                          ;; TODO AUTHENTICATE DSs
                           (visualisation/create (p/connection tenant-manager tenant) body jwt-claims))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        body :body}]
                                    (let [{:strs [spec]} body
                                          layers (get-in spec ["layers"])]
+                                     ;; TODO: AUTH dataset in layers
                                      (maps/create (p/connection tenant-manager tenant) windshaft-url (w/keywordize-keys layers))))}}]]
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
                                           body :body}]
                                       (let [{:strs [rasterId spec]} body]
-                                        (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)
-                                        ))}}]]
+                                        (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)))}}]]
    ;; todo: fix path routing inconsistency here 
    ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
-                                       {:keys [id]} :path-params}]
-                                   (visualisation/fetch (p/connection tenant-manager tenant) id))}
-                  :put {:parameters {:body map?
-                                     :path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
-                                       jwt-claims :jwt-claims
-                                       {:keys [id]} :path-params
-                                       body :body}]
-                                   (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims))}
-                  :delete {:parameters {:path-params {:id string?}}
-                           :handler (fn [{tenant :tenant
-                                          {:keys [id]} :path-params}]
-                                      (visualisation/delete (p/connection tenant-manager tenant) id))}}]]])
+                      :handler (fn [{tenant :tenant
+                                     {:keys [id]} :path-params}]
+                                 ;; TODO AUTH dataset!
+                                 (visualisation/fetch (p/connection tenant-manager tenant) id))}
+                :put {:parameters {:body map?
+                                   :path-params {:id string?}}
+                      :handler (fn [{tenant :tenant
+                                     jwt-claims :jwt-claims
+                                     {:keys [id]} :path-params
+                                     body :body}]
+                                 ;; TODO: AUTH DATASET!
+                                 (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims))}
+                :delete {:parameters {:path-params {:id string?}}
+                         :handler (fn [{tenant :tenant
+                                        {:keys [id]} :path-params}]
+                                    ;; TODO: AUTH DATASET!
+                                    (visualisation/delete (p/connection tenant-manager tenant) id))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (routes opts))

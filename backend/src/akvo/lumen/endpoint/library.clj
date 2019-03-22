@@ -23,7 +23,7 @@
          {:dashboards (variant/value (dashboard/all tenant-conn))
           :datasets (variant/value (dataset/all tenant-conn flow-api auth-datasets))
           :rasters (variant/value (raster/all tenant-conn))
-          :visualisations (variant/value (visualisation/all tenant-conn))
+          :visualisations (variant/value (visualisation/all tenant-conn auth-datasets))
           :collections (variant/value (collection/all tenant-conn))}))))
 
 (s/def ::flow-api :akvo.lumen.component.flow/config)
