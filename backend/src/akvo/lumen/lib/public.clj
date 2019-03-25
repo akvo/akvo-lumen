@@ -69,7 +69,7 @@
 
 (defn visualisation-response-data [tenant-conn id windshaft-url]
   (try
-    (let [[tag vis] (visualisation/fetch tenant-conn id)]
+    (let [[tag vis] (visualisation/public-fetch tenant-conn id)]
       (when (= tag ::lib/ok)
         (condp contains? (:visualisationType vis)
           #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)

@@ -2,6 +2,7 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
+            [akvo.lumen.auth :as auth]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [clojure.walk :as w]
@@ -21,11 +22,13 @@
                           (visualisation/create (p/connection tenant-manager tenant) body jwt-claims auth-datasets))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
+                                       auth-datasets :auth-datasets
                                        body :body}]
                                    (let [{:strs [spec]} body
                                          layers (get-in spec ["layers"])]
-                                     ;; TODO: AUTH dataset in layers
-                                     (maps/create (p/connection tenant-manager tenant) windshaft-url (w/keywordize-keys layers))))}}]]
+                                     (if (visualisation/auth-vis body auth-datasets)
+                                       (maps/create (p/connection tenant-manager tenant) windshaft-url (w/keywordize-keys layers))
+                                       auth/not-authorized)))}}]]
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
                                           body :body}]

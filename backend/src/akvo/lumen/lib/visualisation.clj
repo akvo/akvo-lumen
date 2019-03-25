@@ -4,20 +4,22 @@
             [clojure.set :as set]
             [akvo.lumen.auth :as auth]
             [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
-(defn check-vis-ds [ds-id auth-datasets]
+(defn- check-vis-ds [ds-id auth-datasets]
   (or (nil? ds-id) (contains? (set auth-datasets) ds-id)))
 
-(defn auth-vis [auth-datasets-set vis]
-  (if (= "map" (:visualisationType vis))
-    (set/superset? auth-datasets-set
-                   (set (map #(get % "datasetId")
-                             (get-in vis [:spec "layers"]))))
-    (check-vis-ds (:datasetId vis) auth-datasets-set)))
+(defn auth-vis [auth-datasets vis]
+  (let [vis (w/keywordize-keys vis)
+        auth-datasets-set (set auth-datasets)]
+    (if (= "map" (:visualisationType vis))
+      (set/superset? auth-datasets-set
+                     (set (filter some? (map :datasetId (get-in vis [:spec :layers])))))
+      (check-vis-ds (:datasetId vis) auth-datasets-set))))
 
 (defn all [tenant-conn auth-datasets]
   (lib/ok
@@ -33,7 +35,7 @@
      [])))
 
 (defn create [tenant-conn body jwt-claims auth-datasets]
-  (if (check-vis-ds (get body "datasetId") auth-datasets)
+  (if (auth-vis auth-datasets body)
     (let [id (squuid)
           v (first (upsert-visualisation tenant-conn
                                          {:id id
@@ -49,18 +51,28 @@
                      "modified" (:modified v))))
     auth/not-authorized))
 
+(defn public-fetch
+  "no auth here"
+  [tenant-conn id]
+  (if-let [v (visualisation-by-id tenant-conn
+                                  {:id id}
+                                  {}
+                                  {:identifiers identity})]
+    (lib/ok (dissoc v :author))
+    (lib/not-found {:error "Not found"})))
+
 (defn fetch [tenant-conn id auth-datasets]
   (if-let [v (visualisation-by-id tenant-conn
                                   {:id id}
                                   {}
                                   {:identifiers identity})]
-    (if (check-vis-ds (:datasetId v) auth-datasets)
+    (if (auth-vis auth-datasets v)
       (lib/ok (dissoc v :author))
       auth/not-authorized)
     (lib/not-found {:error "Not found"})))
 
 (defn upsert [tenant-conn body jwt-claims auth-datasets]
-  (if (check-vis-ds (get body "datasetId") auth-datasets)
+  (if (auth-vis auth-datasets body)
     (let [v (upsert-visualisation tenant-conn
                                   {:id (get body "id")
                                    :dataset-id (get body "datasetId")
@@ -72,8 +84,7 @@
     auth/not-authorized))
 
 (defn delete [tenant-conn id auth-datasets]
-  (if (check-vis-ds (:datasetId (visualisation-by-id tenant-conn {:id id} {} {:identifiers identity}))
-                    auth-datasets)
+  (if (auth-vis auth-datasets (visualisation-by-id tenant-conn {:id id} {} {:identifiers identity}))
     (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
       (lib/not-found {:error "Not found"})
       (lib/ok {:id id}))
