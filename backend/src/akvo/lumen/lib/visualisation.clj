@@ -28,8 +28,9 @@
                                                  {:ids auth-datasets}
                                                  {}
                                                  {:identifiers identity})
-           auth-vis* (partial auth-vis (set auth-datasets)) 
-           filtered (filter auth-vis* auth-vis-col)]
+           auth-vis* (partial auth-vis auth-datasets) 
+           filtered (filter auth-vis* auth-vis-col)
+           ]
        (log/error (count auth-vis-col) (count filtered))
        filtered)
      [])))

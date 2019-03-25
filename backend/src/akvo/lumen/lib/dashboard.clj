@@ -1,15 +1,29 @@
 (ns akvo.lumen.lib.dashboard
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
+            [akvo.lumen.lib.visualisation :as vis]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
+            [clojure.set :as set]
             [hugsql.core :as hugsql]))
 
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
-
-(defn all [tenant-conn]
-  (lib/ok (all-dashboards tenant-conn)))
+(defn all [tenant-conn auth-datasets]
+  (lib/ok
+   (let [all* (all-dashboards tenant-conn)]
+     (if (seq all*)
+       (let [all-ids    (map :id all*)
+             ds-vis-col (visualisations-by-dashboard-visualisation-id-list tenant-conn {:ids all-ids})
+             ids-diff   (set/difference (set all-ids)
+                                        (set (map :dashboard_id ds-vis-col)))
+             auth-vis*  (partial vis/auth-vis auth-datasets) 
+             filtered   (apply conj ids-diff
+                               (set (map :dashboard_id (filter auth-vis* ds-vis-col))))]
+         (filter #(contains? filtered (:id %)) all*))
+       []))))
 
 (defn dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
@@ -71,7 +85,8 @@
   Insert new dashboard and pass all text entites into the dashboard.spec. Then
   for each visualiation included in the dashboard insert an entry into
   dashboard_visualisation with it's layout data."
-  [tenant-conn spec claims]
+  [tenant-conn spec claims auth-datasets]
+  (log/error :spec spec :auth-dss auth-datasets)
   (if (dashboard-keys-match? spec)
     (let [dashboard-id (str (squuid))
           parted-spec (part-by-entity-type spec)

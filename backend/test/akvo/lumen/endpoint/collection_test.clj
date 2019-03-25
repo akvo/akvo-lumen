@@ -29,8 +29,8 @@
       variant/value
       (get "id")))
 
-(defn create-dashboard [tenant-conn]
-  (-> (dashboard/create tenant-conn {"title" ""} {})
+(defn create-dashboard [tenant-conn auth-datasets]
+  (-> (dashboard/create tenant-conn {"title" ""} {} auth-datasets)
       variant/value
       (get :id)))
 
@@ -40,8 +40,8 @@
         ds2 (import-file *tenant-conn* *error-tracker* {:file "dates.csv"})
         vs1 (create-visualisation *tenant-conn* ds1 [ds1 ds2])
         vs2 (create-visualisation *tenant-conn* ds2 [ds1 ds2])
-        db1 (create-dashboard *tenant-conn*)
-        db2 (create-dashboard *tenant-conn*)]
+        db1 (create-dashboard *tenant-conn* [ds1 ds2])
+        db2 (create-dashboard *tenant-conn* [ds1 ds2])]
     (testing "Create an empty collection"
       (let [[tag collection] (collection/create *tenant-conn*
                                                 {"title" "col1"})]
@@ -50,7 +50,7 @@
                (-> collection keys set)))
         (is (= ::lib/conflict
                (first (collection/create *tenant-conn*
-                                         {"title" "col1"}))))
+                                         {"title" "col1"} ))))
         (is (= ::lib/bad-request
                (first (collection/create *tenant-conn*
                                          {"title" nil}))))

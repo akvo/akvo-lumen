@@ -98,6 +98,7 @@
                        (with-meta ["/api/datasets/:id/meta"] {:methods #{:get}})
                        (with-meta ["/api/datasets/:id/update"] {:methods #{:post}})
                        (with-meta ["/api/aggregation/:dataset-id/:visualisation-type"] {:methods #{:get}})
+                       (with-meta ["/api/dashboards"] {:methods #{:get :post}})
                        (with-meta ["/api/visualisations/maps"] {:methods #{:post}})
                        (with-meta ["/api/visualisations"] {:methods #{:get :post}})
                        (with-meta ["/api/visualisations/:id"] {:methods #{:get :put :delete}})}]

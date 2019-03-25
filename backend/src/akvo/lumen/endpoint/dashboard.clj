@@ -7,13 +7,15 @@
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/dashboards"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (dashboard/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             auth-datasets :auth-datasets}]
+                         (dashboard/all (p/connection tenant-manager tenant) auth-datasets))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              auth-datasets :auth-datasets
                               body :body}]
-                          (dashboard/create (p/connection tenant-manager tenant) body jwt-claims))}}]
+                          (dashboard/create (p/connection tenant-manager tenant) body jwt-claims auth-datasets))}}]
    ["/:id" {:get {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]

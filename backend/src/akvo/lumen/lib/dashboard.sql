@@ -1,6 +1,6 @@
 -- :name all-dashboards :? :*
 -- :doc Return all dashboards
-SELECT id, title, 'ok' AS status, 'dashboard' AS type, created, modified, author
+SELECT id, title, 'ok' AS status, 'dashboard' AS type, created, modified, author, (spec->'entities')::jsonb AS entities
 FROM dashboard;
 
 -- :name insert-dashboard :<!

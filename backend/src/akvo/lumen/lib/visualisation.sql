@@ -15,6 +15,19 @@ SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spe
 FROM visualisation
 WHERE id = :id;
 
+-- :name visualisation-by-id-list :? :*
+-- :doc grab visualisation by id
+SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified
+FROM visualisation
+WHERE id IN (:v*:ids);
+
+-- :name visualisations-by-dashboard-visualisation-id-list :? :*
+SELECT visualisation.id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, visualisation.created, visualisation.modified, dashboard_id
+FROM visualisation
+LEFT JOIN dashboard_visualisation ON dashboard_visualisation.visualisation_id = visualisation.id
+WHERE dashboard_id IN (:v*:ids);
+
+
 -- :name delete-visualisation-by-id :! :n
 -- :doc delete visualisation by id
 DELETE FROM visualisation WHERE id = :id;

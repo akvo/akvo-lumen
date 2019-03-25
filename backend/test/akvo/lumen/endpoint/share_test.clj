@@ -79,10 +79,13 @@
 
 (defn seed
   [conn spec]
-  (seed* conn (:vis-1 spec))
-  (seed* conn (:vis-2 spec))
-  (dashboard/create conn (dashboard-spec (:id (:vis-1 spec))
-                                         (:id (:vis-2 spec))) {}))
+  (let [{:keys [visualisation-id dataset-id]} (seed* conn (:vis-1 spec))
+        [v1 d1] [visualisation-id dataset-id]
+        {:keys [visualisation-id dataset-id]} (seed* conn (:vis-2 spec))
+        [v2 d2] [visualisation-id dataset-id]
+        ]
+    (dashboard/create conn (dashboard-spec v1 v2) {} [d1 d2])
+    [d1 d2]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data

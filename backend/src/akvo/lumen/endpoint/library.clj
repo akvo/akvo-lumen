@@ -20,7 +20,7 @@
         :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
       (lib/ok
-         {:dashboards (variant/value (dashboard/all tenant-conn))
+         {:dashboards (variant/value (dashboard/all tenant-conn auth-datasets))
           :datasets (variant/value (dataset/all tenant-conn flow-api auth-datasets))
           :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (visualisation/all tenant-conn auth-datasets))
