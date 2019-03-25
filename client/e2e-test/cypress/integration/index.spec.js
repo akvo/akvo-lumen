@@ -67,16 +67,14 @@ context('Akvo Lumen', () => {
     // Import
     cy.get('button[data-test-id="next"]').click();
     cy.get(`[data-test-name="${datasetName}"]:not(.PENDING)`).should('exist');
-    setTimeout(5000, () => {
-      cy.get(`[data-test-name="${datasetName}"] > a`).click({ force: true });
-      // see if metadata is correct
-      cy.get('.columnCount').contains('6 Columns').should('exist');
-      cy.get('.rowCount').contains('4 Rows').should('exist');
-    // see if table cells exist
-      cy.get('.fixedDataTableCellLayout_main').should('have.length.of.at.least', 4);
-    // back to library
-      cy.get('[data-test-id="back-button"]').click();
-    });
+    cy.get(`[data-test-name="${datasetName}"] > a`).click({ force: true });
+    // see if metadata is correct
+    cy.get('.columnCount').contains('6 Columns').should('exist');
+    cy.get('.rowCount').contains('4 Rows').should('exist');
+  // see if table cells exist
+    cy.get('.fixedDataTableCellLayout_main').should('have.length.of.at.least', 4);
+  // back to library
+    cy.get('[data-test-id="back-button"]').click();
   });
 
   it('create visualisation (pivot table)', () => {
