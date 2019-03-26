@@ -13,19 +13,22 @@
 
 (defn all [tenant-conn auth-datasets]
   (lib/ok
-   (let [all* (all-dashboards tenant-conn)]
-     (if (seq all*)
-       (let [all-ids    (map :id all*)
-             ds-vis-col (visualisations-by-dashboard-visualisation-id-list tenant-conn {:ids all-ids})
-             ids-diff   (set/difference (set all-ids)
-                                        (set (map :dashboard_id ds-vis-col)))
-             auth-vis*  (partial vis/auth-vis auth-datasets) 
-             filtered   (apply conj ids-diff
-                               (set (map :dashboard_id (filter auth-vis* ds-vis-col))))]
-         (filter #(contains? filtered (:id %)) all*))
+   (let [all-dashs (all-dashboards tenant-conn)]
+     (if (seq all-dashs)
+       (let [dash-ids               (map :id all-dashs)
+             vizs-in-dash           (visualisations-by-dashboard-visualisation-id-list tenant-conn {:ids dash-ids})
+             auth-dash-ids-set      (let [auth-vis* (partial vis/auth-vis auth-datasets)]
+                                      (->> vizs-in-dash
+                                           (filter auth-vis*)
+                                           (map :dashboard_id)
+                                           set))
+             dashs-wiht-no-viss-set (set/difference (set dash-ids)
+                                                    (set (map :dashboard_id vizs-in-dash)))
+             filtered               (apply conj dashs-wiht-no-viss-set auth-dash-ids-set)]
+         (filter #(contains? filtered (:id %)) all-dashs))
        []))))
 
-(defn dashboard-keys-match?
+(defn- dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
   [dashboard]
   (= (keys (get dashboard "entities"))
@@ -40,11 +43,11 @@
      :layout   (keep #(if (ks (get % "i")) %)
                      (vals (get dashboard-data "layout")))}))
 
-(defn part-by-entity-type [entities]
+(defn- part-by-entity-type [entities]
   {:visualisations (filter-type entities "visualisation")
    :texts          (filter-type entities "text")})
 
-(defn all-entities
+(defn- all-entities
   "Merge text & dashboard_visualisations (dvs) entries, return an id keyed map"
   [text-entities dvs]
   (let [entries (reduce conj text-entities (map (fn [dv]
@@ -53,7 +56,7 @@
     (zipmap (map #(get % "id") entries)
             entries)))
 
-(defn all-layouts
+(defn- all-layouts
   "Merge text & dashboard_visualisations (dvs) layouts, return an id keyed map."
   [text-layout dvs]
   (let [layouts (reduce conj text-layout (map (fn [dv]
@@ -62,7 +65,7 @@
     (zipmap (map #(get % "i") layouts)
             layouts)))
 
-(defn build-dashboard-by-id
+(defn- build-dashboard-by-id
   ""
   [dashboard dvs]
   (assoc (select-keys dashboard [:author :created :id :modified :title])
@@ -72,7 +75,7 @@
          :status "OK"))
 
 
-(defn handle-dashboard-by-id
+(defn- handle-dashboard-by-id
   "Hand of packing to pure build-dashboard-by-id"
   [tenant-conn id]
   (build-dashboard-by-id
