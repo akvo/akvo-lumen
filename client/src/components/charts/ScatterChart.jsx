@@ -310,6 +310,7 @@ class ScatterChart extends Component {
         height={height}
         legendVisible={categoryExists && legendVisible}
         legendPosition={legendPosition}
+        legendHeight={122}
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}

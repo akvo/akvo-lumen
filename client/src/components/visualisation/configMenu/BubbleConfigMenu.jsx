@@ -165,8 +165,20 @@ function BarConfigMenu(props) {
                   name="legendPosition"
                   options={[
                     {
+                      label: intl.formatMessage({ id: 'legend_position_auto' }),
+                      value: null,
+                    },
+                    {
+                      label: intl.formatMessage({ id: 'legend_position_top' }),
+                      value: 'top',
+                    },
+                    {
                       label: intl.formatMessage({ id: 'legend_position_right' }),
                       value: 'right',
+                    },
+                    {
+                      label: intl.formatMessage({ id: 'legend_position_bottom' }),
+                      value: 'bottom',
                     },
                     {
                       label: intl.formatMessage({ id: 'legend_position_left' }),
