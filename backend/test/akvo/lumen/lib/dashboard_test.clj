@@ -3,6 +3,7 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          system-fixture]]
+            [clojure.walk :refer [keywordize-keys]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [clojure.test :refer :all]))
 
@@ -38,7 +39,7 @@
 
 (deftest dashboard-unit
   (testing "filter-type"
-    (is (= (dashboard/filter-type (dashboard-spec "abc123") "text")
+    (is (= (dashboard/filter-type (keywordize-keys (dashboard-spec "abc123")) "text")
            {:entities
 	   '({:id "text-1", :type "text", :content "I am a text entity."}
 	    {:id "text-2", :type "text", :content "I am another text entity."}),

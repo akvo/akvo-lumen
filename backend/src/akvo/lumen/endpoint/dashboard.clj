@@ -20,7 +20,7 @@
                   :handler (fn [{tenant :tenant
                                  auth-datasets :auth-datasets
                                  {:keys [id]} :path-params}]
-                             (dashboard/fetch (p/connection tenant-manager tenant) id auth-datasets))}
+                             (dashboard/auth-fetch (p/connection tenant-manager tenant) id auth-datasets))}
             :put {:parameters {:body map?
                                :path-params {:id string?}}
                   :handler (fn [{tenant :tenant

@@ -93,7 +93,7 @@
       (let [id (-> (collection/create *tenant-conn* {"title" "col6"
                                                      "entities" [ds1 ds2 vs1 vs2 db1 db2]})
                    variant/value :id)]
-        (dashboard/delete *tenant-conn* db1)
+        (dashboard/delete *tenant-conn* db1 [ds1 ds2])
         (is (= #{ds1 ds2 vs1 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
                    variant/value :entities set)))
