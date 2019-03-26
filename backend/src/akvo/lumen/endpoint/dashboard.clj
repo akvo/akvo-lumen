@@ -18,18 +18,21 @@
                           (dashboard/create (p/connection tenant-manager tenant) body jwt-claims auth-datasets))}}]
    ["/:id" {:get {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
+                                 auth-datasets :auth-datasets
                                  {:keys [id]} :path-params}]
-                             (dashboard/fetch (p/connection tenant-manager tenant) id))}
+                             (dashboard/fetch (p/connection tenant-manager tenant) id auth-datasets))}
             :put {:parameters {:body map?
                                :path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  body :body
+                                 auth-datasets :auth-datasets
                                  {:keys [id]} :path-params}]
-                             (dashboard/upsert (p/connection tenant-manager tenant) id body))}
+                             (dashboard/upsert (p/connection tenant-manager tenant) id body auth-datasets))}
             :delete {:parameters {:path-params {:id string?}}
                      :handler (fn [{tenant :tenant
+                                    auth-datasets :auth-datasets
                                     {:keys [id]} :path-params}]
-                                (dashboard/delete (p/connection tenant-manager tenant) id))}}]])
+                                (dashboard/delete (p/connection tenant-manager tenant) id auth-datasets))}}]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (routes opts))

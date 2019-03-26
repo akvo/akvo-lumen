@@ -115,7 +115,7 @@
         auth/not-authorized))
     (lib/bad-request {:error "Entities and layout dashboard keys does not match."})))
 
-(defn fetch [tenant-conn id]
+(defn fetch [tenant-conn id auth-datasets]
   (if-let [d (dashboard-by-id tenant-conn {:id id})]
     (lib/ok (handle-dashboard-by-id tenant-conn id))
     (lib/not-found {:error "Not found"})))
@@ -128,7 +128,7 @@
   3. Remove old dashboard_visualisations
   4. Add new dashboard_visualisations
   "
-  [tenant-conn id spec]
+  [tenant-conn id spec auth-datasets]
   (let [{:keys [texts visualisations]} (part-by-entity-type spec)
         visualisations-layouts (:layout visualisations)]
     (jdbc/with-db-transaction [tx tenant-conn]
@@ -147,7 +147,7 @@
                :layout visualisations-layout}))))
     (lib/ok (handle-dashboard-by-id tenant-conn id))))
 
-(defn delete [tenant-conn id]
+(defn delete [tenant-conn id auth-datasets]
   (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
   (if (zero? (delete-dashboard-by-id tenant-conn {:id id}))
     (lib/not-found {:error "Not round"})
