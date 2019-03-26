@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.dashboard
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.auth :as auth]
             [akvo.lumen.util :refer [squuid]]
             [akvo.lumen.lib.visualisation :as vis]
             [clojure.tools.logging :as log]
@@ -74,7 +75,6 @@
          :type "dashboard"
          :status "OK"))
 
-
 (defn- handle-dashboard-by-id
   "Hand of packing to pure build-dashboard-by-id"
   [tenant-conn id]
@@ -93,21 +93,26 @@
   (if (dashboard-keys-match? spec)
     (let [dashboard-id (str (squuid))
           parted-spec (part-by-entity-type spec)
+
           visualisation-layouts (get-in parted-spec [:visualisations :layout])]
-      (jdbc/with-db-transaction [tx tenant-conn]
-        (insert-dashboard tx {:id dashboard-id
-                              :title (get spec "title")
-                              :spec (:texts parted-spec)
-                              :author claims})
-        (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
-          (let [visualisation-id (get visualisation "id")
-                layout (first (filter #(= visualisation-id (get % "i"))
-                                      visualisation-layouts))]
-            (insert-dashboard_visualisation
-             tx {:dashboard-id dashboard-id
-                 :visualisation-id visualisation-id
-                 :layout layout}))))
-      (lib/ok (handle-dashboard-by-id tenant-conn dashboard-id)))
+      (if (let [auth-vis* (partial vis/auth-vis auth-datasets)]
+            (every? auth-vis* (visualisation-by-id-list tenant-conn {:ids (map #(get % "id") (:entities (:visualisations parted-spec)))})))
+        (do
+          (jdbc/with-db-transaction [tx tenant-conn]
+            (insert-dashboard tx {:id dashboard-id
+                                  :title (get spec "title")
+                                  :spec (:texts parted-spec)
+                                  :author claims})
+            (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
+              (let [visualisation-id (get visualisation "id")
+                    layout (first (filter #(= visualisation-id (get % "i"))
+                                          visualisation-layouts))]
+                (insert-dashboard_visualisation
+                 tx {:dashboard-id dashboard-id
+                     :visualisation-id visualisation-id
+                     :layout layout}))))
+          (lib/ok (handle-dashboard-by-id tenant-conn dashboard-id)))
+        auth/not-authorized))
     (lib/bad-request {:error "Entities and layout dashboard keys does not match."})))
 
 (defn fetch [tenant-conn id]
