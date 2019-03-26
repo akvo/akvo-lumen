@@ -147,7 +147,7 @@ spec:
                fieldPath: metadata.name
       - name: flow-maps-statsd-to-prometheus
       # If you change this version, probably you want to change the /windsahft/Dockerfile version
-        image: akvo/akvo-maps-statsd-to-prometheus:da60926a
+        image: akvo/akvo-maps-statsd-to-prometheus:f156d42c
         ports:
         - containerPort: 9125
         - containerPort: 9102

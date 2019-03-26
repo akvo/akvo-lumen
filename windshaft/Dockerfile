@@ -1,3 +1,3 @@
-FROM akvo/akvo-maps:95f75599
+FROM akvo/akvo-maps:f156d42c
 
 ADD ./config/prod /config/
