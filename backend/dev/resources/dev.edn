@@ -11,12 +11,12 @@
                                                     #ig/ref :dev.endpoints/spec-api]}
 
  :akvo.lumen.migrate/migrate {:seed
-                              {:tenants
-                               [{:db_uri "jdbc:postgresql://postgres/lumen_tenant_1?user=lumen&password=password&ssl=true"
-                                 :label "t1"
-                                 :title "Tenant 1"
-                                 :plan "standard"}
-                                {:db_uri "jdbc:postgresql://postgres/lumen_tenant_2?user=lumen&password=password&ssl=true"
-                                 :label "t2"
-                                 :title "Tenant 2"
-                                 :plan "pro"}]}}}
+                              ^:replace {:tenants
+                                         [{:db_uri "jdbc:postgresql://postgres/lumen_tenant_1?user=lumen&password=password&ssl=true"
+                                           :label "t1"
+                                           :title "Tenant 1"
+                                           :plan "standard"}
+                                          {:db_uri "jdbc:postgresql://postgres/lumen_tenant_2?user=lumen&password=password&ssl=true"
+                                           :label "t2"
+                                           :title "Tenant 2"
+                                           :plan "pro"}]}}}
