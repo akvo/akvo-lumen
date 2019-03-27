@@ -1,6 +1,5 @@
 (ns akvo.lumen.lib.dashboard
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.auth :as auth]
             [akvo.lumen.util :refer [squuid]]
             [clojure.walk :refer [keywordize-keys]]
             [akvo.lumen.lib.visualisation :as vis]
@@ -118,7 +117,7 @@
                      :visualisation-id visualisation-id
                      :layout layout}))))
           (lib/ok (handle-dashboard-by-id tenant-conn dashboard-id)))
-        auth/not-authorized))
+        (lib/not-authorized nil)))
     (lib/bad-request {:error "Entities and layout dashboard keys does not match."})))
 
 (defn auth-fetch [tenant-conn id auth-datasets]
@@ -126,7 +125,7 @@
     (let [d* (handle-dashboard-by-id tenant-conn id)]
       (if (auth-dashboard? tenant-conn d* auth-datasets)
         (lib/ok d*)
-        auth/not-authorized))
+        (lib/not-authorized nil)))
     (lib/not-found {:error "Not found"})))
 
 (defn fetch [tenant-conn id]
@@ -161,7 +160,7 @@
                  :visualisation-id visualisation-id
                  :layout visualisations-layout}))))
       (lib/ok (handle-dashboard-by-id tenant-conn id)))
-    auth/not-authorized))
+    (lib/not-authorized nil)))
 
 (defn delete [tenant-conn id auth-datasets]
   (if (auth-dashboard? tenant-conn (handle-dashboard-by-id tenant-conn id) auth-datasets)
@@ -170,4 +169,4 @@
       (if (zero? (delete-dashboard-by-id tenant-conn {:id id}))
         (lib/not-found {:error "Not round"})
         (lib/ok {:id id})))
-    auth/not-authorized))
+    (lib/not-authorized nil)))

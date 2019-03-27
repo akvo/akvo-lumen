@@ -2,7 +2,6 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
             [clojure.set :as set]
-            [akvo.lumen.auth :as auth]
             [clojure.tools.logging :as log]
             [clojure.walk :as w]
             [hugsql.core :as hugsql])
@@ -50,7 +49,7 @@
                      "status" "OK"
                      "created" (:created v)
                      "modified" (:modified v))))
-    auth/not-authorized))
+    (lib/not-authorized nil)))
 
 (defn public-fetch
   "no auth here"
@@ -69,7 +68,7 @@
                                   {:identifiers identity})]
     (if (auth-vis auth-datasets v)
       (lib/ok (dissoc v :author))
-      auth/not-authorized)
+      (lib/not-authorized nil))
     (lib/not-found {:error "Not found"})))
 
 (defn upsert [tenant-conn body jwt-claims auth-datasets]
@@ -82,11 +81,11 @@
                                    :spec (get body "spec")
                                    :author jwt-claims})]
       (lib/ok {:id (-> v first :id)}))
-    auth/not-authorized))
+    (lib/not-authorized nil)))
 
 (defn delete [tenant-conn id auth-datasets]
   (if (auth-vis auth-datasets (visualisation-by-id tenant-conn {:id id} {} {:identifiers identity}))
     (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
       (lib/not-found {:error "Not found"})
       (lib/ok {:id id}))
-    auth/not-authorized))
+    (lib/not-authorized nil)))
