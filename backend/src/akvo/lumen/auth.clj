@@ -93,10 +93,11 @@
   [tenant-manager flow-api]
   (fn [handler]
     (let [auth-calls #{(with-meta ["/api/library"] {:methods #{:get}})
-                       (with-meta ["/api/datasets"] {:methods #{:get}})
+                       (with-meta ["/api/datasets"] {:methods #{:get :post}})
                        (with-meta ["/api/datasets/:id"] {:methods #{:get :put :delete}})
                        (with-meta ["/api/datasets/:id/meta"] {:methods #{:get}})
                        (with-meta ["/api/datasets/:id/update"] {:methods #{:post}})
+;;                       (with-meta ["/job_executions/:kind/:id"] {:methods #{:get}})
                        (with-meta ["/api/aggregation/:dataset-id/:visualisation-type"] {:methods #{:get}})
                        (with-meta ["/api/dashboards"] {:methods #{:get :post}})
                        (with-meta ["/api/dashboards/:id"] {:methods #{:get :put :delete}})
@@ -104,8 +105,12 @@
                        (with-meta ["/api/visualisations"] {:methods #{:get :post}})
                        (with-meta ["/api/visualisations/:id"] {:methods #{:get :put :delete}})}]
       (fn [{:keys [jwt-claims tenant] :as request}]
+        (log/warn :AUTH??? [(:template (:reitit.core/match request)) (:request-method request)]
+                   (-> (get auth-calls [(:template (:reitit.core/match request))])
+                       meta
+                       :methods
+                       (contains? (:request-method request))))
         (let [dss (all-datasets (p/connection tenant-manager tenant))
-              _ (log/debug :all-datasets (map :id dss))
               request (if (-> (get auth-calls [(:template (:reitit.core/match request))])
                               meta
                               :methods
@@ -124,7 +129,8 @@
                                                       (if (= "AKVO_FLOW" (get source "kind"))
                                                         (contains? permissions (c.flow/>api-model source))
                                                         true))))
-                                                 (mapv :id))]
+                                                 (mapv :id))
+                              _     (log/warn :wrap-ds-auth (:request-method request) [(:template (:reitit.core/match request)) (:request-method request)] auth-datasets)]
                           (assoc request :auth-datasets auth-datasets))
                         request)]
           (handler request))))))
@@ -144,7 +150,7 @@
           auth-datasets :auth-datasets
           :as request}]
       (let [dataset-id (id-key path-params)]
-        (log/error :authenticate-dataset-middleware (contains? (set auth-datasets) dataset-id) dataset-id (set auth-datasets))
+        (log/warn :authenticate-dataset-middleware (:request-method request) (:template (:reitit.core/match request)) (contains? (set auth-datasets) dataset-id) dataset-id (set auth-datasets))
         (if (contains? (set auth-datasets) dataset-id)
           (handler request)
           not-authorized)))))

@@ -20,21 +20,21 @@
   (if-not handler
     (let [router (ring/router endpoints
                               (merge {:conflicts (constantly nil)}
-                                     (when middleware {:data {:middleware middleware}})))
-          _ (pprint (map (juxt first (comp #(disj % :middleware) set keys second))
-                                        (rc/routes router)) )
+                                     (when middleware {:data {:middleware (vec (flatten middleware))}})))
+          _ (pprint (map (juxt first (comp #(disj % :middleware) set keys second)) (rc/routes router)) )
+          _ (pprint {"/api/datasets/:id" (:middleware (:data (rc/match-by-path router "/api/datasets/:id")))})
           handler (ring/ring-handler router)]
       (assoc opts :handler handler))
     opts))
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-api  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware (flatten middleware)} routes])
+  [path {:middleware (vec (flatten middleware))} routes])
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-verify  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware (flatten middleware)} routes])
+  [path {:middleware (vec (flatten middleware))} routes])
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-share  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware (flatten middleware)} routes])
+  [path {:middleware (vec (flatten middleware))} routes])
 
 (s/def ::endpoints  (s/coll-of ::rs/raw-routes))
 
