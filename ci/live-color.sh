@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-kubectl get service lumen-live -ao jsonpath='{@.spec.selector.color}'
+kubectl get service lumen-live -o jsonpath='{@.spec.selector.color}'
