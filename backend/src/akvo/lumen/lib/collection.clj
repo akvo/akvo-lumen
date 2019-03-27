@@ -2,7 +2,12 @@
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.lib :as lib]
             [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
+            [akvo.lumen.lib.dashboard :as l.dashboard]
+            [akvo.lumen.lib.visualisation :as l.visualisation]
             [clojure.set :as set]
+            [cheshire.core :as json]
+            [cheshire.generate :refer [add-encoder]]
             [clojure.string :as str]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException Connection]))
@@ -11,13 +16,41 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
-(defn all [tenant-conn]
-  (lib/ok (mapv (fn [collection]
+(defrecord Entity [uuid type])
+
+(defn new-entity [[uuid type]]
+  (Entity. uuid (keyword type)))
+
+(add-encoder akvo.lumen.lib.collection.Entity
+             (fn [entity jsonGenerator]
+               (.writeString jsonGenerator (:uuid entity))))
+
+(defn auth-entity [tenant-conn auth-datasets e]
+  (let [res (condp = (:type e)
+              :dashboard-id (l.dashboard/auth-fetch tenant-conn (:uuid e) auth-datasets)
+              :visualisation-id (l.visualisation/fetch tenant-conn (:uuid e) auth-datasets)
+              :raster-dataset-id (lib/ok e)
+              :dataset-id (if (contains? (set auth-datasets) (:uuid e))
+                            (lib/ok e)
+                            (lib/not-authorized e)))]
+    (log/debug :auth-e e (first res))
+    (= :akvo.lumen.lib/ok (first res))))
+
+(defn all
+  "collection.entities as a result of executing sql have the following pattern 'UUID::entity-type'
+  entity-types could be: visualisation-id, dashboard-id, raster-dataset-id and dataset-id"
+  [tenant-conn auth-datasets]
+  (let [auth-e? (partial auth-entity tenant-conn auth-datasets)
+        all* (mapv (fn [collection]
                   (->> (.getArray (:entities collection))
-                       (mapv (fn [e]
-                               (first (str/split e #"::"))) )
+                       (mapv (fn [e] (new-entity (str/split e #"::"))) )
                        (core/assoc collection :entities)))
-                (all-collections tenant-conn {}))))
+                   (all-collections tenant-conn {}))]    
+    (lib/ok (filter (fn [collection]
+                      (let [res (every? auth-e? (:entities collection))]
+                        (log/error "auth-e?" (:title collection) res)
+                        res))
+                    all*))))
 
 (defn fetch [tenant-conn id]
   (if-let [collection (fetch-collection tenant-conn {:id id})]

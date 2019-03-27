@@ -97,13 +97,14 @@
                        (with-meta ["/api/datasets/:id"] {:methods #{:get :put :delete}})
                        (with-meta ["/api/datasets/:id/meta"] {:methods #{:get}})
                        (with-meta ["/api/datasets/:id/update"] {:methods #{:post}})
-;;                       (with-meta ["/job_executions/:kind/:id"] {:methods #{:get}})
                        (with-meta ["/api/aggregation/:dataset-id/:visualisation-type"] {:methods #{:get}})
                        (with-meta ["/api/dashboards"] {:methods #{:get :post}})
                        (with-meta ["/api/dashboards/:id"] {:methods #{:get :put :delete}})
                        (with-meta ["/api/visualisations/maps"] {:methods #{:post}})
                        (with-meta ["/api/visualisations"] {:methods #{:get :post}})
-                       (with-meta ["/api/visualisations/:id"] {:methods #{:get :put :delete}})}]
+                       (with-meta ["/api/visualisations/:id"] {:methods #{:get :put :delete}})
+                       (with-meta ["/api/collections"] {:methods #{:get #_:post}})
+                       #_(with-meta ["/api/collections/:id"] {:methods #{:get :put :delete}})}]
       (fn [{:keys [jwt-claims tenant] :as request}]
         (log/warn :AUTH??? [(:template (:reitit.core/match request)) (:request-method request)]
                    (-> (get auth-calls [(:template (:reitit.core/match request))])

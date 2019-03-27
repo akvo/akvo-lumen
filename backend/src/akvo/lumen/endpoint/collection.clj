@@ -10,17 +10,19 @@
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/collections"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                       (log/error tenant (collection/all (p/connection tenant-manager tenant)))
-                       (collection/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             auth-datasets :auth-datasets}]
+                         (collection/all (p/connection tenant-manager tenant) auth-datasets))}
         :post {:responses {200 {}}
-             :parameters {:body map?}
-             :handler (fn [{tenant :tenant
-                            body :body}]
-                        (collection/create (p/connection tenant-manager tenant) (stringify-keys body)))}}]
+               :parameters {:body map?}
+               :handler (fn [{tenant :tenant
+                              auth-datasets :auth-datasets
+                              body :body}]
+                          (collection/create (p/connection tenant-manager tenant) (stringify-keys body)))}}]
    ["/:id" {:get {:responses {200 {}}
                   :parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
+                                 auth-datasets :auth-datasets
                                  {:keys [id]} :path-params}]
                              (collection/fetch (p/connection tenant-manager tenant) id))}
             :put {:responses {200 {}}
@@ -28,12 +30,14 @@
                                :path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  body :body
+                                 auth-datasets :auth-datasets
                                  {:keys [id]} :path-params}]
                              (collection/update (p/connection tenant-manager tenant) id body))}
             :delete {:parameters {:path-params {:id string?}}
-                         :handler (fn [{tenant :tenant
-                                        {:keys [id]} :path-params}]
-                                    (collection/delete (p/connection tenant-manager tenant) id))}}]])
+                     :handler (fn [{tenant :tenant
+                                    auth-datasets :auth-datasets
+                                    {:keys [id]} :path-params}]
+                                (collection/delete (p/connection tenant-manager tenant) id))}}]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.collection/collection  [_ opts]
   (routes opts))
