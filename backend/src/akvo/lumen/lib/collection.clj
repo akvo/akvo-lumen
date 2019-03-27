@@ -3,6 +3,7 @@
   (:require [akvo.lumen.lib :as lib]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
+            [clojure.string :as str]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException Connection]))
 
@@ -12,7 +13,10 @@
 
 (defn all [tenant-conn]
   (lib/ok (mapv (fn [collection]
-                  (core/update collection :entities #(vec (.getArray %))))
+                  (->> (.getArray (:entities collection))
+                       (mapv (fn [e]
+                               (first (str/split e #"::"))) )
+                       (core/assoc collection :entities)))
                 (all-collections tenant-conn {}))))
 
 (defn fetch [tenant-conn id]
