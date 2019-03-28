@@ -90,7 +90,7 @@
 (defn unique-violation? [^SQLException e]
   (= (.getSQLState e) "23505"))
 
-(defn create [tenant-conn {:strs [title entities]}]
+(defn create [tenant-conn {:strs [title entities]} auth-datasets]
   (cond
     (empty? title) (lib/bad-request {:error "Title is missing"})
     (> (count title) 128) (lib/bad-request {:error "Title is too long"
@@ -102,7 +102,7 @@
           (when entities
             (doseq [entity (categorize-entities tx-conn entities)]
               (insert-collection-entity tx-conn (assoc entity :collection-id id))))
-          (lib/created (second (fetch tx-conn id))))
+          (lib/created (second (fetch tx-conn id auth-datasets))))
         (catch SQLException e
           (if (unique-violation? e)
             (lib/conflict {:title title
@@ -111,7 +111,7 @@
 
 (defn update
   "Update a collection. Updates the title and all the entities"
-  [tenant-conn id collection]
+  [tenant-conn id collection auth-datasets]
   (let [{:strs [entities title]} collection]
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (when title
@@ -123,10 +123,15 @@
         (doseq [entity (categorize-entities tx-conn entities)]
           (insert-collection-entity tx-conn (assoc entity :collection-id id))))
 
-      (fetch tx-conn id))))
+      (fetch tx-conn id auth-datasets))))
 
 (defn delete
   "Delete a collection by id"
-  [tenant-conn id]
-  (delete-collection tenant-conn {:id id})
-  (lib/no-content))
+  [tenant-conn id auth-datasets]
+  (if-let [collection (feed-entities (fetch-collection tenant-conn {:id id}))]
+    (if ((authenticate-fn tenant-conn auth-datasets) collection)
+      (do
+        (delete-collection tenant-conn {:id id})
+        (lib/no-content))
+      (lib/not-authorized nil))
+    (lib/not-found {:id id})))

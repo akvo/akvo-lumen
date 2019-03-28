@@ -18,7 +18,7 @@
                :handler (fn [{tenant :tenant
                               auth-datasets :auth-datasets
                               body :body}]
-                          (collection/create (p/connection tenant-manager tenant) (stringify-keys body)))}}]
+                          (collection/create (p/connection tenant-manager tenant) (stringify-keys body) auth-datasets))}}]
    ["/:id" {:get {:responses {200 {}}
                   :parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
@@ -32,12 +32,12 @@
                                  body :body
                                  auth-datasets :auth-datasets
                                  {:keys [id]} :path-params}]
-                             (collection/update (p/connection tenant-manager tenant) id body))}
+                             (collection/update (p/connection tenant-manager tenant) id body auth-datasets))}
             :delete {:parameters {:path-params {:id string?}}
                      :handler (fn [{tenant :tenant
                                     auth-datasets :auth-datasets
                                     {:keys [id]} :path-params}]
-                                (collection/delete (p/connection tenant-manager tenant) id))}}]])
+                                (collection/delete (p/connection tenant-manager tenant) id auth-datasets))}}]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.collection/collection  [_ opts]
   (routes opts))
