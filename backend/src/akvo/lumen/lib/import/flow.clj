@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.flow
   (:require [akvo.commons.psql-util :as pg]
             [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.component.flow :as c.flow]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2]
@@ -9,13 +10,10 @@
 
 (defmethod import/dataset-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId refreshToken version] :as spec}
-   {:keys [flow-api-url keycloak] :as config}]
+   {:keys [flow-api] :as config}]
   (let [version (if version version 1)
-        token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
-                               (:url keycloak)
-                               (:realm keycloak))
-        headers-fn #(flow-common/flow-api-headers token-endpoint refreshToken)
-        survey (delay (flow-common/survey-definition flow-api-url
+        headers-fn #(c.flow/api-headers (c.flow/access-token flow-api refreshToken))
+        survey (delay (flow-common/survey-definition (:url flow-api)
                                                      headers-fn
                                                      instance
                                                      surveyId))]

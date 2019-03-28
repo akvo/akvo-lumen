@@ -3,13 +3,13 @@
             [clojure.spec.alpha :as s]
             [ring.util.response :refer [response]]))
 
-(defn handler [{:keys [keycloak-public-client-id keycloak-url flow-api-url
+(defn handler [{:keys [keycloak-public-client-id keycloak flow-api
                         piwik-site-id sentry-client-dsn] :as opts}]
   (fn [{tenant :tenant :as request}]
     (response
         (cond-> {"keycloakClient" keycloak-public-client-id
-                 "keycloakURL" keycloak-url
-                 "flowApiUrl" flow-api-url
+                 "keycloakURL" (:url keycloak)
+                 "flowApiUrl" (:url flow-api)
                  "piwikSiteId" piwik-site-id
                  "tenant" (:tenant request)}
           (string? sentry-client-dsn)
@@ -23,14 +23,14 @@
   (routes opts))
 
 (s/def ::keycloak-public-client-id string?)
-(s/def ::keycloak-url string?)
-(s/def ::flow-api-url string?)
+(s/def ::keycloak :akvo.lumen.component.keycloak/data)
+(s/def ::flow-api :akvo.lumen.component.flow/config)
 (s/def ::sentry-client-dsn string?)
 (s/def ::piwik-site-id string?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
   (s/keys :req-un [::keycloak-public-client-id
-                   ::keycloak-url
-                   ::flow-api-url
+                   ::keycloak
+                   ::flow-api
                    ::sentry-client-dsn
                    ::piwik-site-id]))

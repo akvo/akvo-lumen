@@ -41,20 +41,22 @@
  :akvo.lumen.endpoint.collection/collection {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
  
  :akvo.lumen.endpoint.dashboard/dashboard {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
+
+ :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
+                                 :keycloak #ig/ref :akvo.lumen.component.keycloak/data}
  
  :akvo.lumen.endpoint.dataset/dataset {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                        :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
                                        :upload-config #ig/ref :akvo.lumen.upload/data
-                                       :import-config {:flow-api-url #duct/env "LUMEN_FLOW_API_URL"
-                                                       :keycloak #ig/ref :akvo.lumen.component.keycloak/data}}
+                                       :import-config {:flow-api #ig/ref :akvo.lumen.component.flow/api}}
 
  :akvo.lumen.endpoint.data-source/data-source {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.endpoint.env/env {:routes-opts
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
+                               :keycloak #ig/ref :akvo.lumen.component.keycloak/data
                                :keycloak-public-client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]
-                               :keycloak-url #duct/env "LUMEN_KEYCLOAK_URL"
-                               :flow-api-url #duct/env "LUMEN_FLOW_API_URL"
+                               :flow-api #ig/ref :akvo.lumen.component.flow/api
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"}
 

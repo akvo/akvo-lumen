@@ -6,24 +6,6 @@
             [clojure.string :as str])
   (:import [java.time Instant]))
 
-(defn access-token
-  "Fetch a new access token using a refresh token"
-  [token-endpoint refresh-token]
-  (-> (http/post token-endpoint
-                 {:form-params {"client_id" "akvo-lumen"
-                                "refresh_token" refresh-token
-                                "grant_type" "refresh_token"}
-                  :as :json})
-      :body
-      :access_token))
-
-(defn flow-api-headers
-  [token-endpoint refresh-token]
-  {"Authorization" (format "Bearer %s" (access-token token-endpoint refresh-token))
-   "User-Agent" "lumen"
-   "Accept" "application/vnd.akvo.flow.v2+json"
-   "X-Akvo-Email" "akvo.flow.user.test2@gmail.com"})
-
 (defn survey-definition
   [api-root headers-fn instance survey-id]
   (-> (format "%s/orgs/%s/surveys/%s"
