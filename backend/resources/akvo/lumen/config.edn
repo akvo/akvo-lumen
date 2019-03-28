@@ -29,6 +29,9 @@
 
  :akvo.lumen.auth/wrap-auth {}
 
+ :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
+                                          :flow-api #ig/ref :akvo.lumen.component.flow/api}
+
  :akvo.lumen.auth/wrap-jwt {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
 
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
@@ -109,6 +112,7 @@
                                             :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                                                          #ig/ref :akvo.lumen.auth/wrap-jwt
                                                          #ig/ref :akvo.lumen.auth/wrap-auth
+                                                         #ig/ref :akvo.lumen.lib.auth/wrap-auth-datasets
                                                          #ig/ref :akvo.lumen.component.handler/common-middleware
                                                          #ig/ref :akvo.lumen.monitoring/middleware]
                                             :routes [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation

@@ -2,6 +2,7 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib :as lib]
+            [clojure.tools.logging :as log]
             [akvo.lumen.lib
              [dashboard :as dashboard]
              [visualisation :as visualisation]
@@ -12,8 +13,11 @@
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig]))
 
-(defn handler [{:keys [tenant-manager] :as opts}]
-  (fn [{tenant :tenant}]
+(defn handler [{:keys [tenant-manager flow-api] :as opts}]
+  (fn [{tenant :tenant
+        auth-datasets :auth-datasets
+        :as request}]
+    (log/error :auth-datasets auth-datasets)
     (let [tenant-conn (p/connection tenant-manager tenant)]
       (lib/ok
          {:dashboards (variant/value (dashboard/all tenant-conn))
