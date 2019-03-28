@@ -1,14 +1,16 @@
 (ns akvo.lumen.component.handler
-  (:require [compojure.response :as compojure.res]
-            [integrant.core :as ig]
-            [akvo.lumen.endpoint.commons :as commons]
-            [reitit.ring :as ring]
-            [reitit.spec :as rs]
-            [reitit.coercion.spec]
-            [clojure.tools.logging :as log]
-            [muuntaja.core :as m]
-            [reitit.ring.coercion :as rrc]
+  (:require [akvo.lumen.endpoint.commons :as commons]
             [clojure.spec.alpha :as s]
+            [clojure.tools.logging :as log]
+            [compojure.response :as compojure.res]
+            [integrant.core :as ig]
+            [muuntaja.core :as m]
+            [reitit.coercion.spec]
+            [reitit.ring :as ring]
+            [reitit.core :as rc]
+            [reitit.ring.coercion :as rrc]
+            [reitit.spec :as rs]
+            [clojure.pprint :refer (pprint)]
             [ring.middleware.defaults]
             [ring.middleware.json]
             [ring.middleware.stacktrace]
@@ -16,21 +18,21 @@
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler  [_ {:keys [endpoints middleware handler] :as opts}]
   (if-not handler
-    (let [handler (ring/ring-handler
-                   (ring/router endpoints
-                                (merge {:conflicts (constantly nil)}
-                                       (when middleware {:data {:middleware middleware}}))))]
+    (let [router (ring/router endpoints
+                              (merge {:conflicts (constantly nil)}
+                                     (when middleware {:data {:middleware (vec (flatten middleware))}})))
+          handler (ring/ring-handler router)]
       (assoc opts :handler handler))
     opts))
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-api  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware (flatten middleware)} routes])
+  [path {:middleware (vec (flatten middleware))} routes])
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-verify  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware (flatten middleware)} routes])
+  [path {:middleware (vec (flatten middleware))} routes])
 
 (defmethod ig/init-key :akvo.lumen.component.handler/handler-share  [_ {:keys [path middleware routes] :as opts}]
-  [path {:middleware (flatten middleware)} routes])
+  [path {:middleware (vec (flatten middleware))} routes])
 
 (s/def ::endpoints  (s/coll-of ::rs/raw-routes))
 
