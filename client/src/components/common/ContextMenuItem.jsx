@@ -11,7 +11,7 @@ export default class ContextMenuItem extends Component {
   }
 
   render() {
-    const item = this.props.item;
+    const { item } = this.props;
     const onClick = item.subMenu ? null : (event) => {
       event.stopPropagation();
       this.props.handleItemClick(item.value);
@@ -22,9 +22,16 @@ export default class ContextMenuItem extends Component {
 
     return (
       <li
-        className={`contextMenuItem ${this.props.itemClass || ''} clickable ${this.props.selectedClassName || ''} ${this.props.customClass || ''}
-        `}
-        onClick={onClick}
+        className={`contextMenuItem ${
+          this.props.itemClass || ''
+        } ${
+          item.disabled ? 'contextMenuItem-disabled' : 'clickable'
+        } ${
+          this.props.selectedClassName || ''
+        } ${
+          this.props.customClass || ''
+        }`}
+        onClick={item.disabled ? () => {} : onClick}
         data-test-id={item.value}
         onMouseEnter={() => this.setState({ isHovered: true })}
         onMouseLeave={() => this.setState({ isHovered: false })}

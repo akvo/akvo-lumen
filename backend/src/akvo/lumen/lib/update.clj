@@ -89,19 +89,21 @@
                                  dataset-version))))))))
 
 (defn update-dataset [tenant-conn import-config error-tracker dataset-id data-source-id data-source-spec]
-  (let [job-execution-id (str (util/squuid))]
-    (insert-dataset-update-job-execution tenant-conn {:id job-execution-id
-                                                      :data-source-id data-source-id})
-    (future
-      (try
-        (do-update tenant-conn
-                   import-config
-                   dataset-id
-                   data-source-id
-                   job-execution-id
-                   data-source-spec)
-        (catch Exception e
-          (failed-update tenant-conn job-execution-id (.getMessage e))
-          (p/track error-tracker e)
-          (log/error e))))
-    (lib/ok {"updateId" job-execution-id})))
+  (if-let [current-tx-job (pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
+    (lib/bad-request {:message "A running transformation still exists, please wait to update this dataset ..."})
+    (let [job-execution-id (str (util/squuid))]
+     (insert-dataset-update-job-execution tenant-conn {:id job-execution-id
+                                                       :data-source-id data-source-id})
+     (future
+       (try
+         (do-update tenant-conn
+                    import-config
+                    dataset-id
+                    data-source-id
+                    job-execution-id
+                    data-source-spec)
+         (catch Exception e
+           (failed-update tenant-conn job-execution-id (.getMessage e))
+           (p/track error-tracker e)
+           (log/error e))))
+     (lib/ok {"updateId" job-execution-id}))))

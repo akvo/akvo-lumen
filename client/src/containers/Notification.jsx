@@ -75,7 +75,7 @@ class Notification extends Component {
 }
 
 Notification.propTypes = {
-  level: PropTypes.oneOf(['info', 'warn', 'error']).isRequired,
+  level: PropTypes.oneOf(['info', 'warn', 'error', 'success']).isRequired,
   message: PropTypes.string.isRequired,
   autohide: PropTypes.bool,
   dispatch: PropTypes.func.isRequired,

@@ -98,9 +98,16 @@ class DatasetTable extends Component {
   }
 
   handleToggleColumnContextMenu({ column, dimensions }) {
+    const { isLockedFromTransformations } = this.props;
+
+    if (isLockedFromTransformations) return;
+
     const { activeColumnContextMenu } = this.state;
-    if (activeColumnContextMenu != null &&
-      column.get('title') === activeColumnContextMenu.column.get('title')) {
+
+    if (
+      activeColumnContextMenu != null &&
+      column.get('title') === activeColumnContextMenu.column.get('title')
+    ) {
       this.setState({ activeColumnContextMenu: null });
     } else {
       this.setState({
@@ -360,7 +367,9 @@ class DatasetTable extends Component {
       transformations,
       onNavigateToVisualise,
       datasetId,
+      isLockedFromTransformations,
     } = this.props;
+
     const {
       activeDataTypeContextMenu,
       activeColumnContextMenu,
@@ -368,6 +377,7 @@ class DatasetTable extends Component {
       width,
       height,
     } = this.state;
+
     const cols = columns.map((column, index) => {
       const columnHeader = (
         <ColumnHeader
@@ -375,7 +385,8 @@ class DatasetTable extends Component {
           column={column}
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
-          columnMenuActive={activeColumnContextMenu != null &&
+          disabled={isLockedFromTransformations}
+          columnMenuActive={activeColumnContextMenu != null && !isLockedFromTransformations &&
             activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
@@ -411,6 +422,7 @@ class DatasetTable extends Component {
           columns={columns}
           rowsCount={rows.size}
           onToggleTransformationLog={this.handleToggleTransformationLog}
+          isLockedFromTransformations={isLockedFromTransformations}
           onNavigateToVisualise={onNavigateToVisualise}
           pendingTransformationsCount={pendingTransformations.size}
           onClickMenuItem={(menuItem) => {
@@ -444,6 +456,7 @@ class DatasetTable extends Component {
               <DataTableSidebar
                 {...sidebarProps}
                 transformations={transformations}
+                isLockedFromTransformations={isLockedFromTransformations}
                 datasetId={datasetId}
                 pendingTransformations={pendingTransformations}
               />
@@ -460,14 +473,15 @@ class DatasetTable extends Component {
                 onContextMenuItemSelected={this.handleDataTypeContextMenuClicked}
                 onWindowClick={this.dismissDataTypeContextMenu}
               />}
-            {activeColumnContextMenu &&
+            {activeColumnContextMenu && !isLockedFromTransformations && (
               <ColumnContextMenu
                 column={activeColumnContextMenu.column}
                 dimensions={activeColumnContextMenu.dimensions}
                 onContextMenuItemSelected={this.handleColumnContextMenuClicked}
                 onWindowClick={this.dismissColumnContextMenu}
                 left={columns.last().get('title') === activeColumnContextMenu.column.get('title')}
-              />}
+              />
+            )}
             <Table
               headerHeight={60}
               rowHeight={30}
@@ -496,6 +510,7 @@ DatasetTable.propTypes = {
   location: PropTypes.object.isRequired,
   router: PropTypes.object.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
 };
 
 export default withRouter(DatasetTable);

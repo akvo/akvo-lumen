@@ -6,7 +6,6 @@
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.monitoring :as monitoring]
             [akvo.lumen.protocols :as p]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -124,15 +123,13 @@
 (s/def ::dropwizard-registry ::monitoring/metric-registry)
 (s/def ::tenant-manager (partial instance? TenantManager))
 
-(defmethod integrant-key :akvo.lumen.component.tenant-manager/tenant-manager [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::db
-                                  ::encryption-key
-                                  ::dropwizard-registry])))
+(defmethod ig/pre-init-spec :akvo.lumen.component.tenant-manager/tenant-manager [_]
+  (s/keys :req-un [::db
+                   ::encryption-key
+                   ::dropwizard-registry]))
 
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
   wrap-label-tenant)
 
-(defmethod integrant-key :akvo.lumen.component.tenant-manager/wrap-label-tenant [_]
-  (s/cat :kw keyword?
-         :config empty?))
+(defmethod ig/pre-init-spec :akvo.lumen.component.tenant-manager/wrap-label-tenant [_]
+  empty?)

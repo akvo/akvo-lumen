@@ -230,15 +230,12 @@ function transformationDescription(transformations, index, columns, dependentDat
 function TransformationListItem({ transformations, index, columns, dependentDatasets }) {
   const transformation = transformations.get(index);
   const isUndoingTransformation = transformation.get('undo');
-  const isPendingTransformation = transformation.get('pending') && !isUndoingTransformation;
 
   return (
     <div style={{ opacity: isUndoingTransformation ? 0.5 : 1 }}>
       <div>
         {transformationDescription(transformations, index, columns, dependentDatasets)}
       </div>
-      {isPendingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>APPLYING TRANSFORMATION</div>}
-      {isUndoingTransformation && <div style={{ fontSize: '0.6em', marginTop: 4 }}>UNDOING TRANSFORMATION</div>}
     </div>);
 }
 
@@ -340,6 +337,7 @@ export default function TransformationLog({
   transformations = Immutable.List(),
   columns,
   pendingTransformations,
+  isLockedFromTransformations,
 }) {
   const allTransformations = transformationLog(transformations, pendingTransformations);
 
@@ -357,7 +355,10 @@ export default function TransformationLog({
       <SidebarControls
         positiveButtonText={<FormattedMessage id="undo" />}
         onApply={
-          allTransformations.every(transformation => transformation.get('undo')) ? null : onUndo
+          (
+            allTransformations.every(transformation => transformation.get('undo')) ||
+            isLockedFromTransformations
+          ) ? null : onUndo
         }
         onClose={onClose}
       />
@@ -371,4 +372,5 @@ TransformationLog.propTypes = {
   transformations: PropTypes.object,
   columns: PropTypes.object.isRequired,
   pendingTransformations: PropTypes.object.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
 };

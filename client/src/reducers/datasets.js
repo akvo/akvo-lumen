@@ -120,6 +120,20 @@ function toggleDatasetUpdatePending(state, id) {
   });
 }
 
+function lockDatasetFromTransformations(state, { payload: { datasetId } }) {
+  const dataset = state[datasetId];
+  return Object.assign({}, state, {
+    [datasetId]: dataset.setIn(['isLockedFromTransformations'], true),
+  });
+}
+
+function unlockDatasetFromTransformations(state, { payload: { datasetId } }) {
+  const dataset = state[datasetId];
+  return Object.assign({}, state, {
+    [datasetId]: dataset.setIn(['isLockedFromTransformations'], false),
+  });
+}
+
 export default function datasets(state = initialState, action) {
   switch (action.type) {
     case constants.CREATE:
@@ -152,6 +166,10 @@ export default function datasets(state = initialState, action) {
       return undoDatasetTransformation(state, action.id);
     case constants.TOGGLE_DATASET_UPDATE_PENDING:
       return toggleDatasetUpdatePending(state, action.id);
+    case constants.TRANSFORMATION_START:
+      return lockDatasetFromTransformations(state, action);
+    case constants.TRANSFORMATION_END:
+      return unlockDatasetFromTransformations(state, action);
     default: return state;
   }
 }

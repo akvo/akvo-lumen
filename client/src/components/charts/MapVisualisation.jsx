@@ -241,12 +241,37 @@ export default class MapVisualisation extends Component {
     this.state = {
       hasTrackedLayerTypes: false,
     };
+    this.initialLayersToLoadCount = 0;
+    this.hasAddedLayers = false;
   }
+
   componentDidMount() {
     this.renderLeafletMap(this.props);
   }
+
   componentWillReceiveProps(nextProps) {
     this.renderLeafletMap(nextProps);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.loadInterval);
+  }
+
+  addLayer(layer, map) {
+    if (!this.hasAddedLayers) {
+      this.loadInterval = setInterval(() => {
+        if (!this.initialLayersToLoadCount) {
+          this.setState({ hasRendered: true });
+          clearInterval(this.loadInterval);
+        }
+      }, 1000);
+    }
+    this.hasAddedLayers = true;
+    this.initialLayersToLoadCount += 1;
+    layer.on('load', () => {
+      this.initialLayersToLoadCount -= 1;
+    });
+    return layer.addTo(map);
   }
 
   renderLeafletLayer(layer, id, layerGroupId, layerMetadata, baseURL, map) {
@@ -369,7 +394,7 @@ export default class MapVisualisation extends Component {
     // Display or update the baselayer tiles
     if (!this.baseLayer) {
       this.baseLayer = L.tileLayer(tileUrl, { attribution: tileAttribution });
-      this.baseLayer.addTo(map);
+      this.addLayer(this.baseLayer, map);
     } else {
       const oldTileUrl = getBaseLayerAttributes(this.storedBaseLayer).tileUrl;
       const newTileUrl = tileUrl;
@@ -379,7 +404,7 @@ export default class MapVisualisation extends Component {
 
         map.removeLayer(this.baseLayer);
         this.baseLayer = L.tileLayer(tileUrl, { attribution: tileAttribution });
-        this.baseLayer.addTo(map).bringToBack();
+        this.addLayer(this.baseLayer, map).bringToBack();
       }
     }
 
@@ -428,7 +453,7 @@ export default class MapVisualisation extends Component {
     } else if (layerGroupId) {
       if (!this.dataLayer) {
         this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/all/{z}/{x}/{y}.png`);
-        this.dataLayer.addTo(map);
+        this.addLayer(this.dataLayer, map);
       } else {
         const needToUpdate = Boolean(
           layerGroupId !== this.storedLayerGroupId
@@ -436,7 +461,7 @@ export default class MapVisualisation extends Component {
         if (needToUpdate) {
           map.removeLayer(this.dataLayer);
           this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/all/{z}/{x}/{y}.png`);
-          this.dataLayer.addTo(map);
+          this.addLayer(this.dataLayer, map);
         }
       }
     }
@@ -449,13 +474,10 @@ export default class MapVisualisation extends Component {
       });
     }
     this.storedLayerGroupId = layerGroupId;
-    setTimeout(() => {
-      this.setState({ hasRendered: true });
-    }, 5000);
   }
 
   render() {
-    const { visualisation, metadata, width, height, showTitle, datasets } = this.props;
+    const { visualisation, metadata, width, height, showTitle, datasets, exporting } = this.props;
     const title = visualisation.name || '';
     const titleLength = title.toString().length;
     const titleHeight = titleLength > 48 ? 56 : 36;
@@ -531,10 +553,9 @@ export default class MapVisualisation extends Component {
               layerMetadata={metadata.layerMetadata}
             />
           }
-          {
-            visualisation.awaitingResponse &&
+          {visualisation.awaitingResponse && !exporting && (
             <Spinner />
-          }
+          )}
           {
             visualisation.failedToLoad &&
             <div className="failedIndicator" />
@@ -552,6 +573,7 @@ MapVisualisation.propTypes = {
   width: PropTypes.number,
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   showTitle: PropTypes.bool,
+  exporting: PropTypes.bool,
 };
 
 MapVisualisation.defaultProps = {

@@ -87,7 +87,8 @@
                                     [org.clojure/tools.nrepl "0.2.13"]
                                     [eftest "0.5.1"]
                                     [com.gearswithingears/shrubbery "0.4.1"]
-                                    [kerodon "0.9.0"]]
+                                    [kerodon "0.9.0"]
+                                    [com.cognitect/transit-clj "0.8.313"]]
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources" "test/resources"]
                    :repl-options   {:init-ns dev

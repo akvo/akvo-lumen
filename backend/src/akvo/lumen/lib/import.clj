@@ -52,8 +52,7 @@
                                :transformations []})
     (update-job-execution conn {:id             job-execution-id
                                 :status         "OK"
-                                :dataset-id     dataset-id
-                                :data-source-id data-source-id})))
+                                :dataset-id     dataset-id})))
 
 (defn- failed-execution [conn job-execution-id reason table-name]
   (update-failed-job-execution conn {:id job-execution-id

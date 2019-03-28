@@ -15,7 +15,7 @@
 
 
 (defn config []
-  (let [c (dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "dev.edn"))]
+  (let [c (dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "test.edn" "dev.edn"))]
     (ir/set-prep! (fn [] c))
     (ig/load-namespaces c)
     c))

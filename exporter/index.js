@@ -122,6 +122,8 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
       await page.waitFor(5000);
     }
 
+    await page.waitFor(2000);
+
     let screenshot;
     const screenshotOptions = {
       encoding: 'base64',

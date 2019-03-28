@@ -26,6 +26,22 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
+(defn retry-job-execution [tenant-conn job-execution-id with-job?]
+  (dh/with-retry {:retry-if (fn [v e] (not v))
+                  :max-retries 20
+                  :delay-ms 100}
+    (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
+          ds-job (datasource-job-execution-by-id tenant-conn {:id job-execution-id})
+          status (:status job)
+          res (when (and status (not= "PENDING" status))
+                (if (= "OK" status)
+                  (:dataset_id ds-job)
+                  job-execution-id))]
+      (when res
+        (if with-job?
+          [job ds-job]
+          res)))))
+
 (defn spec-instrument
   "Fixture to instrument all functions"
   [f]
@@ -45,20 +61,7 @@
                         "hasColumnHeaders" (boolean has-column-headers?)}}
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (dh/with-retry {:retry-if (fn [v e] (not v))
-                    :max-retries 20
-                    :delay-ms 100}
-      (let [job (job-execution-by-id tenant-conn {:id importId})
-            status (:status job)
-            dataset (dataset-id-by-job-execution-id tenant-conn {:id importId})
-            res (when (not= "PENDING" status)
-                  (if (= "OK" status)
-                    (:dataset_id dataset)
-                    importId))]
-        (when res
-          (if  with-job?
-            [job dataset]
-            res))))))
+    (retry-job-execution tenant-conn importId with-job?)))
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
@@ -71,7 +74,7 @@
     (dh/with-retry {:retry-if (fn [v e] (not v))
                     :max-retries 20
                     :delay-ms 100}
-      (let [job (job-execution-by-id tenant-conn {:id updateId})
+      (let [job (datasource-job-execution-by-id tenant-conn {:id updateId})
             status (:status job)]
         (when (not= "PENDING" status)
           (if (= "OK" status)
@@ -135,7 +138,7 @@
   ([]
    (start-config nil nil))
   ([edn-config more-ks]
-   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "dev.edn" "test.edn" edn-config)
+   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "test.edn" edn-config)
                                    more-ks)]
      (ig/load-namespaces c)
      c)))

@@ -2,15 +2,13 @@
   "Exposes the exporter proxy"
   (:require [akvo.lumen.lib.export :as export]
             [integrant.core :as ig]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]))
 
 (s/def ::exporter-api-url string?)
 
-(defmethod integrant-key :akvo.lumen.endpoint.export/export [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::exporter-api-url])))
+(defmethod ig/pre-init-spec :akvo.lumen.endpoint.export/export [_]
+  (s/keys :req-un [::exporter-api-url]))
 
 (defn routes [{:keys [exporter-api-url] :as opts}]
   ["/exports"

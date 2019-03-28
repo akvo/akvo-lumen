@@ -4,10 +4,10 @@ import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { showModal } from '../actions/activeModal';
-import { fetchDataset, updateDatasetMeta } from '../actions/dataset';
+import { fetchDataset, updateDatasetMeta, pollTxImportStatus, startTx, undoTx, endTx } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
-import { getTransformations, getRows, getColumns } from '../domain/dataset';
+import { getTransformations, getRows, getColumns, getIsLockedFromTransformations } from '../domain/dataset';
 import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
@@ -16,6 +16,7 @@ import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 
 require('../components/dataset/Dataset.scss');
+
 
 class Dataset extends Component {
 
@@ -100,16 +101,21 @@ class Dataset extends Component {
     const transformationJs = transformation.toJS();
 
     trackEvent(TRANSFORM_DATASET, transformationJs.op);
+
     this.setPendingTransformation(now, transformation);
+    dispatch(startTx(id));
+
     return api.post(`/api/transformations/${id}/transform`, transformationJs)
       .then((response) => {
         if (!response.ok) {
           this.removePending(now);
           throw new Error(response.body.message);
+        } else {
+          dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
+            dispatch(endTx(id));
+          }));
         }
-        return response.body;
       })
-      .then(() => dispatch(fetchDataset(id)))
       .then(() => this.removePending(now))
       .catch((error) => {
         dispatch(showNotification('error', error.message));
@@ -123,8 +129,20 @@ class Dataset extends Component {
     const now = Date.now();
 
     this.setPendingUndo(now);
+
+    dispatch(undoTx(id));
+
     api.post(`/api/transformations/${id}/undo`)
-      .then(() => dispatch(fetchDataset(id)))
+      .then((response) => {
+        if (!response.ok) {
+          this.removePending(now);
+          throw new Error(response.body.message);
+        } else {
+          dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
+            dispatch(endTx(id));
+          }));
+        }
+      })
       .then(() => this.removePending(now))
       .catch(() => {
         this.props.dispatch(showNotification('error', 'Failed to undo.'));
@@ -209,6 +227,7 @@ class Dataset extends Component {
       return <LoadingSpinner />;
     }
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
+
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dataset">
@@ -229,6 +248,7 @@ class Dataset extends Component {
               columns={getColumns(dataset)}
               rows={getRows(dataset)}
               transformations={getTransformations(dataset)}
+              isLockedFromTransformations={getIsLockedFromTransformations(dataset)}
               pendingTransformations={pendingTransformations.valueSeq()}
               onTransform={transformation => this.transform(transformation)}
               onUndoTransformation={() => this.undo()}

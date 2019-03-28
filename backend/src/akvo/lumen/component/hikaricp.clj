@@ -2,7 +2,6 @@
   (:require [clojure.set]
             [integrant.core :as ig]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.specs.components :refer [integrant-key]]
             [duct.database.sql.hikaricp]
             [akvo.lumen.monitoring :as monitoring])
   (:import [duct.database.sql Boundary]))
@@ -18,10 +17,10 @@
 (s/def ::maximum-pool-size pos-int?)
 (s/def ::minimum-idle pos-int?)
 (s/def ::hikaricp (partial instance? Boundary))
-(defmethod integrant-key :akvo.lumen.component.hikaricp/hikaricp [_]
-  (s/cat :kw keyword?
-         :config (s/keys :req-un [::uri
-                                  ::pool-name
-                                  ::maximum-pool-size
-                                  ::minimum-idle
-                                  ::monitoring/metric-registry])))
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.hikaricp/hikaricp [_]
+  (s/keys :req-un [::uri
+                   ::pool-name
+                   ::maximum-pool-size
+                   ::minimum-idle
+                   ::monitoring/metric-registry]))
