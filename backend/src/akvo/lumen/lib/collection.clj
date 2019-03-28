@@ -25,36 +25,41 @@
              (fn [entity jsonGenerator]
                (.writeString jsonGenerator (:uuid entity))))
 
-(defn auth-entity [tenant-conn auth-datasets e]
-  (let [res (condp = (:type e)
-              :dashboard-id (l.dashboard/auth-fetch tenant-conn (:uuid e) auth-datasets)
-              :visualisation-id (l.visualisation/fetch tenant-conn (:uuid e) auth-datasets)
-              :raster-dataset-id (lib/ok e)
-              :dataset-id (if (contains? (set auth-datasets) (:uuid e))
-                            (lib/ok e)
-                            (lib/not-authorized e)))]
-    (log/debug :auth-e e (first res))
-    (= :akvo.lumen.lib/ok (first res))))
+(defn feed-entities [collection]
+  (when collection
+    (->> (.getArray (:entities collection))
+         (mapv (fn [e] (new-entity (str/split e #"::"))) )
+         (core/assoc collection :entities))))
+
+(defn authenticate-fn [tenant-conn auth-datasets]
+  (letfn [(auth-fun [e]
+            (let [res (condp = (:type e)
+                        :dashboard-id (l.dashboard/auth-fetch tenant-conn (:uuid e) auth-datasets)
+                        :visualisation-id (l.visualisation/fetch tenant-conn (:uuid e) auth-datasets)
+                        :raster-dataset-id (lib/ok e)
+                        :dataset-id (if (contains? (set auth-datasets) (:uuid e))
+                                      (lib/ok e)
+                                      (lib/not-authorized e)))]
+              (log/debug :auth-e e (first res))
+              (= :akvo.lumen.lib/ok (first res))))]
+    (fn [collection]
+      (let [res (every? auth-fun (:entities collection))]
+        (log/error "auth-e?" (:title collection) res)
+        res))))
 
 (defn all
   "collection.entities as a result of executing sql have the following pattern 'UUID::entity-type'
   entity-types could be: visualisation-id, dashboard-id, raster-dataset-id and dataset-id"
   [tenant-conn auth-datasets]
-  (let [auth-e? (partial auth-entity tenant-conn auth-datasets)
-        all* (mapv (fn [collection]
-                  (->> (.getArray (:entities collection))
-                       (mapv (fn [e] (new-entity (str/split e #"::"))) )
-                       (core/assoc collection :entities)))
-                   (all-collections tenant-conn {}))]    
-    (lib/ok (filter (fn [collection]
-                      (let [res (every? auth-e? (:entities collection))]
-                        (log/error "auth-e?" (:title collection) res)
-                        res))
-                    all*))))
+  (let [auth? (authenticate-fn tenant-conn auth-datasets)
+        all* (mapv feed-entities (all-collections tenant-conn {}))]    
+    (lib/ok (filter auth? all*))))
 
-(defn fetch [tenant-conn id]
-  (if-let [collection (fetch-collection tenant-conn {:id id})]
-    (lib/ok (core/update collection :entities #(vec (.getArray %))))
+(defn fetch [tenant-conn id auth-datasets]
+  (if-let [collection (feed-entities (fetch-collection tenant-conn {:id id}))]
+    (if ((authenticate-fn tenant-conn auth-datasets) collection)
+      (lib/ok collection)
+      (lib/not-authorized nil))
     (lib/not-found {:id id})))
 
 (defn- text-array

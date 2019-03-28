@@ -24,7 +24,7 @@
                   :handler (fn [{tenant :tenant
                                  auth-datasets :auth-datasets
                                  {:keys [id]} :path-params}]
-                             (collection/fetch (p/connection tenant-manager tenant) id))}
+                             (collection/fetch (p/connection tenant-manager tenant) id auth-datasets))}
             :put {:responses {200 {}}
                   :parameters {:body map?
                                :path-params {:id string?}}

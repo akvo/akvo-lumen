@@ -104,7 +104,7 @@
                        (with-meta ["/api/visualisations"] {:methods #{:get :post}})
                        (with-meta ["/api/visualisations/:id"] {:methods #{:get :put :delete}})
                        (with-meta ["/api/collections"] {:methods #{:get #_:post}})
-                       #_(with-meta ["/api/collections/:id"] {:methods #{:get :put :delete}})}]
+                       (with-meta ["/api/collections/:id"] {:methods #{:get}})}]
       (fn [{:keys [jwt-claims tenant] :as request}]
         (log/warn :AUTH??? [(:template (:reitit.core/match request)) (:request-method request)]
                    (-> (get auth-calls [(:template (:reitit.core/match request))])
