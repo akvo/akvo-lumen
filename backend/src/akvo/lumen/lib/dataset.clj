@@ -3,6 +3,7 @@
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.transformation.merge-datasets :as transformation.merge-datasets]
             [akvo.lumen.lib.update :as update]
             [clojure.tools.logging :as log]
@@ -12,12 +13,13 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/auth-dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn all
-  [tenant-conn]
-  (lib/ok (all-datasets tenant-conn)))
+  [dbqs]
+  (lib/ok (p/query dbqs ::all-datasets)))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]

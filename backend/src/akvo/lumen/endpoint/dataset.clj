@@ -13,8 +13,9 @@
 
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
   ["/datasets"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (dataset/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             db-query-service :db-query-service}]
+                         (dataset/all db-query-service))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
