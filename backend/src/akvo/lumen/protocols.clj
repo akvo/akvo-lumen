@@ -98,11 +98,6 @@
 (defprotocol CoerceToSql
   (coerce [this]))
 
-
-(defprotocol FeedDataService
-  ;;feed-data-service validates data that is feeded into the backend from the outside
-  (auth? [_ payload object-types-paths-spec]))
-
 (defprotocol DBQueryService
   (query
     [_ qqname param-data options command-options]

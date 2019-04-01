@@ -13,13 +13,12 @@
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/auth-dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn all
   [dbqs]
-  (lib/ok (p/query dbqs ::all-datasets)))
+  (lib/ok (p/query dbqs #'all-datasets)))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]
