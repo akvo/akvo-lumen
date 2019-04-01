@@ -15,7 +15,6 @@
 
 (defn handler [{:keys [tenant-manager flow-api] :as opts}]
   (fn [{tenant :tenant
-        auth-datasets :auth-datasets
         db-query-service :db-query-service
         :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]

@@ -42,31 +42,30 @@
   [tenant-manager flow-api]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
-      (let [dss (all-datasets (p/connection tenant-manager tenant))
-            request (if (and (match-by-jwt-family-name? request)
-                             (contains? #{"/api/datasets" "/api/library"}
-                                        (:template (:reitit.core/match request))))
-                      (let [permissions (->> (map :source dss)
-                                             (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
-                                             (map c.flow/>api-model)
-                                             (c.flow/check-permissions flow-api (jwt/jwt-token request))
-                                             :body
-                                             set)
-                            
-                            auth-datasets (->> dss
-                                               (filter
-                                                (fn [ds]
-                                                  (let [source (:source ds)]
-                                                    (if (= "AKVO_FLOW" (get source "kind"))
-                                                      (contains? permissions (c.flow/>api-model source))
-                                                      true))))
-                                               (mapv :id))]
-                        (assoc request
-                               :auth-datasets auth-datasets
-                               :db-query-service (new-dbqs (p/connection tenant-manager tenant)
-                                                           {:auth-datasets auth-datasets})))
-                      (assoc request :db-query-service (new-dbqs (p/connection tenant-manager tenant) {})))]
-        (handler request)))))
+      (let [dss            (all-datasets (p/connection tenant-manager tenant))
+            auth-uuid-tree (if (and (match-by-jwt-family-name? request)
+                                    (contains? #{"/api/datasets" "/api/library"}
+                                               (:template (:reitit.core/match request))))
+                             (let [permissions   (->> (map :source dss)
+                                                      (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
+                                                      (map c.flow/>api-model)
+                                                      (c.flow/check-permissions flow-api (jwt/jwt-token request))
+                                                      :body
+                                                      set)
+                                   auth-datasets (->> dss
+                                                      (filter
+                                                       (fn [ds]
+                                                         (let [source (:source ds)]
+                                                           (if (= "AKVO_FLOW" (get source "kind"))
+                                                             (contains? permissions (c.flow/>api-model source))
+                                                             true))))
+                                                      (mapv :id))]
+                               {:auth-datasets auth-datasets})
+                             {})]
+        (handler (assoc request
+                        :db-query-service
+                        (new-dbqs (p/connection tenant-manager tenant)
+                                  auth-uuid-tree)))))))
 
 (defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api] :as opts}]
   (wrap-auth-datasets tenant-manager flow-api))
