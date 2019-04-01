@@ -99,6 +99,7 @@
   (coerce [this]))
 
 (defprotocol DBQueryService
+  (get-conn [_])
   (query
     [_ qqname param-data options command-options]
     [_ qqname param-data options]

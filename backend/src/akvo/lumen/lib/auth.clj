@@ -13,6 +13,8 @@
 
 (defrecord AuthorisedDBQueryService [tenant-conn authorised-uuid-tree]
   p/DBQueryService
+  (p/get-conn [this]
+    (:tenant-conn this))
   (p/query [this fun param-data options command-options]
     (log/info :AuthorisedDBQueryService :query fun :param-data param-data :options options :command-options command-options :authorised-uuid-tree authorised-uuid-tree)
     (apply fun [(:tenant-conn this) (merge param-data authorised-uuid-tree)
