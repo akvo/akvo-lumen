@@ -53,7 +53,9 @@ SELECT * from dataset WHERE id IN (:v*:ids);
 
 -- :name update-dataset-meta :! :n
 -- :doc update dataset meta
-UPDATE dataset SET title = :title WHERE id = :id;
+UPDATE dataset SET title = :title WHERE id = :id
+--~ (when (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)")
+;
 
 -- :name dataset-by-id :? :1
 WITH

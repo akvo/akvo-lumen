@@ -104,6 +104,7 @@
     (lib/not-found {:id dataset-id})))
 
 (defn update-meta
-  [tenant-conn id {:strs [name]}]
-  (update-dataset-meta tenant-conn {:id id :title name})
-  (lib/ok {}))
+  [dbqs id {:strs [name]}]
+  (if (pos? (p/query dbqs #'update-dataset-meta {:id id :title name}))
+    (lib/ok {})
+    (lib/unprocessable-entity {})))

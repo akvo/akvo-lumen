@@ -30,9 +30,10 @@
                  :put {:parameters {:body map?
                                     :path-params {:id string?}}
                        :handler (fn [{tenant :tenant
+                                      db-query-service :db-query-service
                                       body :body
                                       {:keys [id]} :path-params}]
-                                  (dataset/update-meta (p/connection tenant-manager tenant) id body))}
+                                  (dataset/update-meta db-query-service id body))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
                                          {:keys [id]} :path-params}]
