@@ -24,8 +24,9 @@
                                           error-tracker jwt-claims (w/stringify-keys body)))}}]
    ["/:id" [["" {:get {:parameters {:path-params {:id string?}}
                        :handler (fn [{tenant :tenant
+                                      db-query-service :db-query-service
                                       {:keys [id]} :path-params}]
-                                  (dataset/fetch (p/connection tenant-manager tenant) id))}
+                                  (dataset/fetch db-query-service id))}
                  :put {:parameters {:body map?
                                     :path-params {:id string?}}
                        :handler (fn [{tenant :tenant

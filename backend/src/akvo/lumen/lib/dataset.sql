@@ -78,6 +78,7 @@ SELECT dataset_version.table_name AS "table-name",
        dataset_version.transformations
   FROM dataset_version, dataset, source_data
  WHERE dataset_version.dataset_id=:id
+--~ (when (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)")
    AND dataset.id=dataset_version.dataset_id
    AND version=(SELECT max(version)
                   FROM dataset_version

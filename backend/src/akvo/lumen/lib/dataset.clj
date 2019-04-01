@@ -66,10 +66,10 @@
     (lib/not-found {:error "Not found"})))
 
 (defn fetch
-  [conn id]
-  (if-let [dataset (dataset-by-id conn {:id id})]
+  [dbqs id]
+  (if-let [dataset (p/query dbqs #'dataset-by-id {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
-          data (rest (jdbc/query conn
+          data (rest (jdbc/query (p/get-conn dbqs)
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
       (lib/ok

@@ -48,6 +48,7 @@
       (contains? (:request-method request))))
 
 (def auth-calls {"/api/library" {:methods #{:get}}
+                 "/api/datasets/:id" {:methods #{:get}}
                  "/api/datasets" {:methods #{:get}}})
 
 (defn wrap-auth-datasets
