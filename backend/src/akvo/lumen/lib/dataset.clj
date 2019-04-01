@@ -51,8 +51,8 @@
 
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
-  [conn id]
-  (if-let [dataset (dataset-by-id conn {:id id})]
+  [dbqs id]
+  (if-let [dataset (p/query dbqs #'dataset-by-id {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))]
       (lib/ok
        {:id id

@@ -41,8 +41,9 @@
                                      (dataset/delete db-query-service id))}}]
             ["/meta" {:get {:parameters {:path-params {:id string?}}
                             :handler (fn [{tenant :tenant
+                                           db-query-service :db-query-service
                                            {:keys [id]} :path-params}]
-                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
+                                       (dataset/fetch-metadata db-query-service id))}}]
             ["/update" {:post {:parameters {:path-params {:id string?}}
                                :handler (fn [{tenant :tenant
                                               jwt-claims :jwt-claims
