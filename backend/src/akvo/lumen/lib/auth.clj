@@ -51,6 +51,16 @@
                  "/api/datasets/:id" {:methods #{:get :put}}
                  "/api/datasets" {:methods #{:get}}})
 
+(defn- auth-datasets [all-datasets permissions]
+  (->> all-datasets
+       (filter
+        (fn [ds]
+          (let [source (:source ds)]
+            (if (= "AKVO_FLOW" (get source "kind"))
+              (contains? permissions (c.flow/>api-model source))
+              true))))
+       (mapv :id)))
+
 (defn wrap-auth-datasets
   "Add to the request a db-query-service with a authorised-uuid-tree validated using flow-api check_permissions"
   [tenant-manager flow-api]
@@ -65,14 +75,7 @@
                                                       (c.flow/check-permissions flow-api (jwt/jwt-token request))
                                                       :body
                                                       set)
-                                   auth-datasets (->> dss
-                                                      (filter
-                                                       (fn [ds]
-                                                         (let [source (:source ds)]
-                                                           (if (= "AKVO_FLOW" (get source "kind"))
-                                                             (contains? permissions (c.flow/>api-model source))
-                                                             true))))
-                                                      (mapv :id))]
+                                   auth-datasets (auth-datasets dss permissions)]
                                {:auth-datasets auth-datasets})
                              {})]
         (handler (assoc request
