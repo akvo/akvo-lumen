@@ -30,7 +30,7 @@
     text-align: center;
     
     .vx-legend {
-      display: block !important;
+      display: inline-block !important;
     }
 
     .vx-legend-item {
@@ -57,5 +57,11 @@
       display: inline-block !important;
       white-space: nowrap !important;
     }
+
+    .BubbleLegend,
+    .vx-legend {
+      display: inline-block;
+      vertical-align: top;
+    }   
   }
 }

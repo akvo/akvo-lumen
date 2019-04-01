@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const calculateDimensions = ({ width, height, legendVisible, legendPosition }) => {
+const calculateDimensions = ({ width, height, legendVisible, legendPosition, legendHeight }) => {
   if (!legendVisible) {
     return { horizontal: true, chart: width };
   }
@@ -11,7 +11,7 @@ const calculateDimensions = ({ width, height, legendVisible, legendPosition }) =
     case 'top': {
       dimensions.horizontal = false;
       dimensions.chartBeforeLegend = false;
-      dimensions.legend = 100;
+      dimensions.legend = legendHeight || 100;
       dimensions.chart = height - dimensions.legend;
       break;
     }
@@ -34,7 +34,7 @@ const calculateDimensions = ({ width, height, legendVisible, legendPosition }) =
     case 'bottom': {
       dimensions.horizontal = false;
       dimensions.chartBeforeLegend = true;
-      dimensions.legend = 100;
+      dimensions.legend = legendHeight || 100;
       dimensions.chart = height - dimensions.legend;
       break;
     }
@@ -59,9 +59,9 @@ const calculateDimensions = ({ width, height, legendVisible, legendPosition }) =
       dimensions.chartBeforeLegend = true;
       const biggerDimension = Math.max(width, height);
       if (biggerDimension >= 600) {
-        dimensions.legend = dimensions.horizontal ? 250 : 150;
+        dimensions.legend = dimensions.horizontal ? 250 : legendHeight || 150;
       } else if (biggerDimension >= 400) {
-        dimensions.legend = dimensions.horizontal ? 200 : 150;
+        dimensions.legend = dimensions.horizontal ? 200 : legendHeight || 150;
       }
       if (biggerDimension < 400) {
         dimensions.legend = biggerDimension / 2;
@@ -82,10 +82,18 @@ const ChartLayout = ({
   chart,
   children,
   legendPosition,
+  legendHeight,
   style = {},
   ...rest
 }) => {
-  const dimensions = calculateDimensions({ width, height, legendVisible, legendPosition });
+  const dimensions = calculateDimensions({
+    width,
+    height,
+    legendVisible,
+    legendPosition,
+    legendHeight,
+  });
+
   return dimensions.horizontal ? (
     <div style={{ display: 'flex', height, width, flexGrow: 1, ...style }} {...rest}>
       {children}
@@ -142,6 +150,7 @@ ChartLayout.propTypes = {
     'left',
     undefined,
   ]),
+  legendHeight: PropTypes.number,
 };
 
 export default ChartLayout;
