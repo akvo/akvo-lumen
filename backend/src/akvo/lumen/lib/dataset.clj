@@ -80,16 +80,18 @@
     (lib/not-found {:error "Not found"})))
 
 (defn delete
-  [tenant-conn id]
-  (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
-    (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
-                                  (str/join ", " datasets-merged-with))})
-    (let [c (delete-dataset-by-id tenant-conn {:id id})]
-      (if (zero? c)
-        (do
-          (delete-failed-job-execution-by-id tenant-conn {:id id})
-          (lib/not-found {:error "Not found"}))
-        (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id}))))))
+  [dbqs id]
+  (if-let [dataset (p/query dbqs #'dataset-by-id {:id id})]
+    (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related (p/get-conn dbqs) id)]
+      (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
+                                    (str/join ", " datasets-merged-with))})
+      (let [c (p/query dbqs #'delete-dataset-by-id {:id id})]
+        (if (zero? c)
+          (do
+            (delete-failed-job-execution-by-id (p/get-conn dbqs) {:id id})
+            (lib/not-found {:error "Not found"}))
+          (let [v (delete-maps-by-dataset-id (p/get-conn dbqs) {:id id})](lib/ok {:id id})))))
+    (lib/not-found {:error "Not found"})))
 
 (defn update
   [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"}]

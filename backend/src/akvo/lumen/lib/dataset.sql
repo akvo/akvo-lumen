@@ -45,7 +45,9 @@ VALUES (:id, :title, :description, :author);
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
-DELETE FROM dataset WHERE id=:id;
+DELETE FROM dataset WHERE id=:id
+--~ (when (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)")
+;
 
 -- :name select-datasets-by-id :? :*
 -- :doc select datasets by id

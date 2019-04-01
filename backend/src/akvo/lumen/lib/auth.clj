@@ -48,7 +48,7 @@
       (contains? (:request-method request))))
 
 (def auth-calls {"/api/library" {:methods #{:get}}
-                 "/api/datasets/:id" {:methods #{:get :put}}
+                 "/api/datasets/:id" {:methods #{:get :put :delete}}
                  "/api/datasets" {:methods #{:get}}})
 
 (defn- auth-datasets [all-datasets permissions]

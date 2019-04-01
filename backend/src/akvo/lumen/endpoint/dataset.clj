@@ -36,8 +36,9 @@
                                   (dataset/update-meta db-query-service id body))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
+                                         db-query-service :db-query-service
                                          {:keys [id]} :path-params}]
-                                     (dataset/delete (p/connection tenant-manager tenant) id))}}]
+                                     (dataset/delete db-query-service id))}}]
             ["/meta" {:get {:parameters {:path-params {:id string?}}
                             :handler (fn [{tenant :tenant
                                            {:keys [id]} :path-params}]
