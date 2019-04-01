@@ -37,6 +37,17 @@
   [request]
   (str/includes? (get (:jwt-claims request) "given_name") "$auth$"))
 
+(defn match-by-template-and-method?
+  "`data` is a map following this structure {\"/api/library\" {:methods #{:get}}}
+  `request` is a `reitit` request that contains reitit data such as :template"
+  [data request]
+  (-> (get data (:template (:reitit.core/match request)))
+      :methods
+      (contains? (:request-method request))))
+
+(def auth-calls {"/api/library" {:methods #{:get}}
+                 "/api/datasets" {:methods #{:get}}})
+
 (defn wrap-auth-datasets
   "Add to the request a db-query-service with a authorised-uuid-tree validated using flow-api check_permissions"
   [tenant-manager flow-api]
@@ -44,8 +55,7 @@
     (fn [{:keys [jwt-claims tenant] :as request}]
       (let [dss            (all-datasets (p/connection tenant-manager tenant))
             auth-uuid-tree (if (and (match-by-jwt-family-name? request)
-                                    (contains? #{"/api/datasets" "/api/library"}
-                                               (:template (:reitit.core/match request))))
+                                    (match-by-template-and-method? auth-calls request))
                              (let [permissions   (->> (map :source dss)
                                                       (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
                                                       (map c.flow/>api-model)
