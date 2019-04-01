@@ -108,6 +108,7 @@ SELECT dataset_version.columns
 SELECT data_source.*
   FROM data_source, dataset_version, job_execution
  WHERE dataset_version.dataset_id = :dataset-id
+ --~ (when (seq (:auth-datasets params)) "AND dataset_version.dataset_id IN (:v*:auth-datasets)")
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.type = 'IMPORT'
    AND job_execution.status = 'OK'

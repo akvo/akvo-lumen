@@ -48,8 +48,9 @@
                                :handler (fn [{tenant :tenant
                                               jwt-claims :jwt-claims
                                               body :body
+                                              db-query-service :db-query-service
                                               {:keys [id]} :path-params}]
-                                          (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
+                                          (dataset/update db-query-service (merge import-config upload-config)
                                                           error-tracker id (w/stringify-keys body)))}}]]]])
 
 

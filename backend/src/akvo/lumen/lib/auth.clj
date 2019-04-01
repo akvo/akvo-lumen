@@ -50,6 +50,7 @@
 (def auth-calls {"/api/library" {:methods #{:get}}
                  "/api/datasets/:id" {:methods #{:get :put :delete}}
                  "/api/datasets/:id/meta" {:methods #{:get}}
+                 "/api/datasets/:id/update" {:methods #{:post}}
                  "/api/datasets" {:methods #{:get}}})
 
 (defn- auth-datasets [all-datasets permissions]

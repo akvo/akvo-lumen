@@ -6,6 +6,7 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
@@ -97,7 +98,7 @@
         (is (= #{ds1 ds2 vs1 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
                    variant/value :entities set)))
-        (dataset/delete *tenant-conn* ds1)
+        (dataset/delete (l.auth/new-dbqs *tenant-conn* {:auth-datasets [ds1]}) ds1)
         (is (= #{ds2 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
                    variant/value :entities set)))))))

@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.public
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
@@ -30,7 +31,8 @@
 (defn run-visualisation 
   [tenant-conn visualisation]
   (let [visualisation (walk/keywordize-keys visualisation)
-        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
+        dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [(:datasetId visualisation)]})
+        [dataset-tag dataset] (dataset/fetch-metadata dbqs (:datasetId visualisation))
         aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
         [tag query-result] (aggregation/query tenant-conn
                                               (:datasetId visualisation)
@@ -46,8 +48,9 @@
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
-              [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
-              [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
+            [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
+            dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [dataset-id]})
+            [dataset-tag dataset] (dataset/fetch-metadata dbqs dataset-id)]
           (when (and (= map-data-tag ::lib/ok)
                      (= dataset-tag ::lib/ok))
             {:datasets {dataset-id dataset}
@@ -61,7 +64,8 @@
 (defn run-unknown-type-visualisation 
   [tenant-conn visualisation]
   (let [dataset-id (:datasetId visualisation)
-        [tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
+        dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [dataset-id]})
+        [tag dataset] (dataset/fetch-metadata dbqs dataset-id)]
     (when (= tag ::lib/ok)
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))
