@@ -61,7 +61,7 @@
                                                              true))))
                                                       (mapv :id))]
                                {:auth-datasets auth-datasets})
-                             {:auth-datasets (mapv dss :id)})]
+                             {:auth-datasets (mapv :id dss)})]
         (handler (assoc request
                         :db-query-service
                         (new-dbqs (p/connection tenant-manager tenant)
