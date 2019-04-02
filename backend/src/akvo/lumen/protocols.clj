@@ -97,3 +97,12 @@
 
 (defprotocol CoerceToSql
   (coerce [this]))
+
+(defprotocol DBQueryService
+  (query
+    [_ qqname param-data options command-options]
+    [_ qqname param-data options]
+    [_ qqname param-data]
+    [_ qqname ]))
+
+
