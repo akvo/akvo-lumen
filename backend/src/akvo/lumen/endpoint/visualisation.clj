@@ -16,7 +16,7 @@
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body}]
-                          (visualisation/create (p/connection tenant-manager tenant) body jwt-claims))}}]
+                          (visualisation/create (p/connection tenant-manager tenant) (w/keywordize-keys body) jwt-claims))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        body :body}]
@@ -40,7 +40,7 @@
                                        jwt-claims :jwt-claims
                                        {:keys [id]} :path-params
                                        body :body}]
-                                   (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims))}
+                                   (visualisation/upsert (p/connection tenant-manager tenant) (assoc (w/keywordize-keys body) :id id) jwt-claims))}
                   :delete {:parameters {:path-params {:id string?}}
                            :handler (fn [{tenant :tenant
                                           {:keys [id]} :path-params}]
