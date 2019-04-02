@@ -5,7 +5,7 @@ source_data AS (
  SELECT dataset.id as dataset_id, (spec->'source')::jsonb - 'refreshToken' as source
    FROM data_source, dataset_version, job_execution, dataset
   WHERE dataset_version.dataset_id = dataset.id
---~ (when (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)")
+--~ (when (coll? (:auth-datasets params)) (if (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)" "AND dataset.id = 'no-ds-id'"))
     AND dataset_version.version = 1
     AND dataset_version.job_execution_id = job_execution.id
     AND job_execution.data_source_id = data_source.id
