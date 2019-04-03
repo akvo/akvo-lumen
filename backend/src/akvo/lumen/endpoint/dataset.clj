@@ -4,6 +4,7 @@
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [akvo.lumen.component.flow]
             [akvo.lumen.component.keycloak :as keycloak]
             [clojure.walk :as w]
             [akvo.lumen.component.error-tracker :as error-tracker]
@@ -12,8 +13,9 @@
 
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
   ["/datasets"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (dataset/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             db-query-service :db-query-service}]
+                         (dataset/all db-query-service))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
@@ -51,9 +53,8 @@
   (routes opts))
 
 (s/def ::upload-config ::upload/config)
-(s/def ::flow-api-url string?)
-(s/def ::keycloak ::keycloak/data)
-(s/def ::import-config (s/keys :req-un [::flow-api-url ::keycloak]))
+(s/def ::flow-api :akvo.lumen.component.flow/config)
+(s/def ::import-config (s/keys :req-un [::flow-api]))
 (s/def ::config (s/keys :req-un [::tenant-manager/tenant-manager
                                  ::error-tracker/error-tracker
                                  ::upload-config

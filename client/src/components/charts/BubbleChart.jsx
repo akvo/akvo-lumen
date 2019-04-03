@@ -232,6 +232,7 @@ class BubbleChart extends Component {
         height={height}
         legendVisible={legendVisible}
         legendPosition={legendPosition}
+        legendHeight={122}
         onClick={() => {
           this.setState({ isPickingColor: undefined, tooltipVisible: false });
         }}

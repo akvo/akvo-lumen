@@ -1,10 +1,12 @@
 (ns akvo.lumen.test-utils
   (:require [akvo.lumen.auth :as auth]
+            [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.specs.transformation]
             [cheshire.core :as json]
             [clj-time.coerce :as tcc]
@@ -173,5 +175,11 @@
 (defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [keycloak]}]
   (fn [handler]
     (fn [req]
-      (handler (assoc req :jwt-claims {"typ" "Bearer"})))))
+      (handler (assoc req :jwt-claims {"typ" "Bearer"
+                                       "given_name" "User$auth$"})))))
 
+(defmethod ig/init-key :akvo.lumen.test-utils/wrap-auth-datasets  [_ {:keys [tenant-manager] :as opts}]
+  (fn [handler]
+    (fn [{tenant :tenant
+          :as req}]
+      (handler (assoc req :db-query-service (l.auth/new-dbqs (p/connection tenant-manager tenant) {}))))))
