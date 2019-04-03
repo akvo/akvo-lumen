@@ -79,7 +79,7 @@
                                                       set)
                                    auth-datasets (auth-datasets dss permissions)]
                                {:auth-datasets auth-datasets})
-                             {})]
+                             {:auth-datasets (mapv :id dss)})]
         (handler (assoc request
                         :db-query-service
                         (new-dbqs (p/connection tenant-manager tenant)
