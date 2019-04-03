@@ -24,28 +24,33 @@
                                           error-tracker jwt-claims (w/stringify-keys body)))}}]
    ["/:id" [["" {:get {:parameters {:path-params {:id string?}}
                        :handler (fn [{tenant :tenant
+                                      db-query-service :db-query-service
                                       {:keys [id]} :path-params}]
-                                  (dataset/fetch (p/connection tenant-manager tenant) id))}
+                                  (dataset/fetch db-query-service id))}
                  :put {:parameters {:body map?
                                     :path-params {:id string?}}
                        :handler (fn [{tenant :tenant
+                                      db-query-service :db-query-service
                                       body :body
                                       {:keys [id]} :path-params}]
-                                  (dataset/update-meta (p/connection tenant-manager tenant) id body))}
+                                  (dataset/update-meta db-query-service id body))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
+                                         db-query-service :db-query-service
                                          {:keys [id]} :path-params}]
-                                     (dataset/delete (p/connection tenant-manager tenant) id))}}]
+                                     (dataset/delete db-query-service id))}}]
             ["/meta" {:get {:parameters {:path-params {:id string?}}
                             :handler (fn [{tenant :tenant
+                                           db-query-service :db-query-service
                                            {:keys [id]} :path-params}]
-                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
+                                       (dataset/fetch-metadata db-query-service id))}}]
             ["/update" {:post {:parameters {:path-params {:id string?}}
                                :handler (fn [{tenant :tenant
                                               jwt-claims :jwt-claims
                                               body :body
+                                              db-query-service :db-query-service
                                               {:keys [id]} :path-params}]
-                                          (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
+                                          (dataset/update db-query-service (merge import-config upload-config)
                                                           error-tracker id (w/stringify-keys body)))}}]]]])
 
 
