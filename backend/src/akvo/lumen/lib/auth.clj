@@ -35,7 +35,7 @@
   "Feature flag condition based on `First Name` jwt-claims
   To match just add `$auth` to your `First Name` in your related auth system user profile"
   [request]
-  (str/includes? (get (:jwt-claims request) "given_name") "$auth$"))
+  (str/includes? (get (:jwt-claims request) "given_name" "") "$auth$"))
 
 (defn wrap-auth-datasets
   "Add to the request a db-query-service with a authorised-uuid-tree validated using flow-api check_permissions"
