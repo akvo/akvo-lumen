@@ -37,10 +37,10 @@
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
 
  :akvo.lumen.component.error-tracker/wrap-sentry {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
-                                                  :server-name #duct/env "SENTRY_SERVER_NAME"
-                                                  :release #duct/env "SENTRY_RELEASE"
-                                                  :environment #duct/env "SENTRY_ENVIRONMENT"
-                                                  :opts {:namespaces ["org.akvo" "akvo"]}}
+                                                  :opts {:environment #duct/env "SENTRY_ENVIRONMENT"
+                                                         :namespaces ["org.akvo" "akvo"]
+                                                         :release #duct/env "SENTRY_RELEASE"
+                                                         :server_name #duct/env "SENTRY_SERVER_NAME"}}
 
  :akvo.lumen.endpoint.aggregation/aggregation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
@@ -182,7 +182,11 @@
                                                    :from-email "noreply@akvo.org"
                                                    :from-name "Akvo Lumen"}
 
- :akvo.lumen.component.error-tracker/prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"}
+ :akvo.lumen.component.error-tracker/prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
+                                           :opts [:environment #duct/env "SENTRY_ENVIRONMENT"
+                                                  :namespaces ["org.akvo" "akvo"]
+                                                  :release #duct/env "SENTRY_RELEASE"
+                                                  :server_name #duct/env "SENTRY_SERVER_NAME"]}
 
  :akvo.lumen.migrate/migrate {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                            :tenants "akvo/lumen/migrations/tenants"}}

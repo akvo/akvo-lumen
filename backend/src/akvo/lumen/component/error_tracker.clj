@@ -40,10 +40,13 @@
 (extend-protocol p/IErrorTracker
 
   SentryErrorTracker
-  (track [{:keys [dsn]} error]
-    (let [app-namespaces ["org.akvo" "akvo"]
+  (track [{:keys [dsn opts]} error]
+    (let [{keys [environment namespaces release server_name]} opts
           event-map (event-map error)
-          event-info (raven-interface/stacktrace event-map error app-namespaces)]
+          event-info (assoc (raven-interface/stacktrace event-map error namespaces)
+                            :environment environment
+                            :release release
+                            :server_name server_name)]
       (future (raven/capture dsn event-info))))
 
   LocalErrorTracker
