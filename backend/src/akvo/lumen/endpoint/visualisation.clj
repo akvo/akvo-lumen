@@ -20,10 +20,11 @@
                           (visualisation/create (p/connection tenant-manager tenant) (w/keywordize-keys body) jwt-claims))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
+                                       db-query-service :db-query-service
                                        body :body}]
                                    (let [{:strs [spec]} body
                                          layers (w/keywordize-keys (get-in spec ["layers"]))]
-                                     (maps/create (p/connection tenant-manager tenant) windshaft-url layers)))}}]]
+                                     (maps/create db-query-service windshaft-url layers)))}}]]
    ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant

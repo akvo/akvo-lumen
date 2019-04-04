@@ -5,6 +5,7 @@
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
+            [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.core.match :refer [match]]
@@ -96,17 +97,17 @@
     (lib/ok {:layerGroupId layer-group-id
              :layerMetadata layer-meta})))
 
-(defn metadata-layers [tenant-conn layers]
+(defn metadata-layers [dbqs layers]
   (map (fn [current-layer]
          (let [current-layer-type (:layerType current-layer)
                current-dataset-id (if (= current-layer-type "raster")
                                     (:rasterId current-layer)
                                     (:datasetId current-layer))
                {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
-                                                           (raster-by-id tenant-conn {:id current-dataset-id})
-                                                           (dataset-by-id tenant-conn {:id current-dataset-id}))
+                                                           (raster-by-id (p/get-conn dbqs) {:id current-dataset-id})
+                                                           (p/query dbqs #'dataset-by-id {:id current-dataset-id}))
                current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
-           (map-metadata/build tenant-conn
+           (map-metadata/build (p/get-conn dbqs)
                                (or raster_table
                                    table-name
                                    (when (not= current-layer-type "raster")
@@ -116,14 +117,14 @@
        layers))
 
 (defn create
-  [tenant-conn windshaft-url layers]
+  [dbqs windshaft-url layers]
   (try
     (conform-create-args layers)
-    (let [metadata-array (metadata-layers tenant-conn layers)
-          map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
+    (let [metadata-array (metadata-layers dbqs layers)
+          map-config (map-config/build (p/get-conn dbqs) "todo: remove this" layers metadata-array)
           layer-group-id (-> (client/post (format "%s/layergroup" windshaft-url)
                                           {:body (json/encode map-config)
-                                           :headers (headers tenant-conn)
+                                           :headers (headers (p/get-conn dbqs))
                                            :content-type :json})
                              :body json/decode (get "layergroupid"))]
       (lib/ok {:layerGroupId layer-group-id
