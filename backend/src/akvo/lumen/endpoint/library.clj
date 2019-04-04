@@ -22,7 +22,7 @@
          {:dashboards (variant/value (dashboard/all tenant-conn))
           :datasets (variant/value (dataset/all db-query-service))
           :rasters (variant/value (raster/all tenant-conn))
-          :visualisations (variant/value (visualisation/all tenant-conn))
+          :visualisations (variant/value (visualisation/all db-query-service))
           :collections (variant/value (collection/all tenant-conn))}))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.library/library [_]

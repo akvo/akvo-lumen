@@ -5,6 +5,7 @@
    [akvo.lumen.component.tenant-manager :as tenant-manager]
    [akvo.lumen.protocols :as p]
    [clojure.spec.alpha :as s]
+   [clojure.set :as set]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [hugsql.core :as hugsql]
@@ -31,6 +32,7 @@
   [tenant-conn authorised-uuid-tree]
   (AuthorisedDBQueryService. tenant-conn authorised-uuid-tree))
 
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn match-by-jwt-family-name?
@@ -51,7 +53,8 @@
                  "/api/datasets/:id" {:methods #{:get :put :delete}}
                  "/api/datasets/:id/meta" {:methods #{:get}}
                  "/api/datasets/:id/update" {:methods #{:post}}
-                 "/api/datasets" {:methods #{:get}}})
+                 "/api/datasets" {:methods #{:get}}
+                 "/api/visualisations" {:methods #{:get}}})
 
 (defn- auth-datasets [all-datasets permissions]
   (->> all-datasets
@@ -63,12 +66,23 @@
               true))))
        (mapv :id)))
 
+(defn- auth-visualisations [tenant-conn auth-datasets-set]
+  (let [maps* (->> (all-maps-visualisations-with-dataset-id tenant-conn {} {} {:identifiers identity})
+                   (reduce (fn [c {:keys [id datasetId]}] (update c id #(set (conj % datasetId)))) {})
+                   (filter #(set/superset? auth-datasets-set (val %)))
+                   (mapv first))
+        others* (mapv :id (all-no-maps-visualisations tenant-conn {} {} {:identifiers identity}))]
+    (log/debug :vis-maps* maps*)
+    (log/debug :vis-others* others*)
+    (apply conj others* maps*)))
+
 (defn wrap-auth-datasets
   "Add to the request a db-query-service with a authorised-uuid-tree validated using flow-api check_permissions"
   [tenant-manager flow-api]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
-      (let [dss            (all-datasets (p/connection tenant-manager tenant))
+      (let [tenant-conn    (p/connection tenant-manager tenant)
+            dss            (all-datasets tenant-conn)
             auth-uuid-tree (if (and (match-by-jwt-family-name? request)
                                     (match-by-template-and-method? auth-calls request))
                              (let [permissions   (->> (map :source dss)
@@ -78,8 +92,10 @@
                                                       :body
                                                       set)
                                    auth-datasets (auth-datasets dss permissions)]
-                               {:auth-datasets auth-datasets})
-                             {:auth-datasets (mapv :id dss)})]
+                               {:auth-datasets       auth-datasets
+                                :auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))})
+                             {:auth-datasets       (mapv :id dss)
+                              :auth-visualisations (mapv :id (all-visualisations tenant-conn))})]
         (handler (assoc request
                         :db-query-service
                         (new-dbqs (p/connection tenant-manager tenant)

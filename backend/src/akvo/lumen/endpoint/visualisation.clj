@@ -10,8 +10,9 @@
 
 (defn routes [{:keys [windshaft-url tenant-manager] :as opts}]
   ["/visualisations"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (visualisation/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             db-query-service :db-query-service}]
+                         (visualisation/all db-query-service))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims

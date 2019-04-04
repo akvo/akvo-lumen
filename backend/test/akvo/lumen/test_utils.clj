@@ -27,6 +27,8 @@
            [org.postgresql.util PSQLException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn retry-job-execution [tenant-conn job-execution-id with-job?]
   (dh/with-retry {:retry-if (fn [v e] (not v))
@@ -182,4 +184,8 @@
   (fn [handler]
     (fn [{tenant :tenant
           :as req}]
-      (handler (assoc req :db-query-service (l.auth/new-dbqs (p/connection tenant-manager tenant) {}))))))
+      (let [tenant-conn (p/connection tenant-manager tenant)
+            dbqs (l.auth/new-dbqs tenant-conn
+                                  {:auth-datasets       (mapv :id (all-datasets tenant-conn))
+                                   :auth-visualisations (mapv :id (all-visualisations tenant-conn))})]
+       (handler (assoc req :db-query-service dbqs))))))
