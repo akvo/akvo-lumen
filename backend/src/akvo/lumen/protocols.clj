@@ -100,6 +100,7 @@
 
 (defprotocol DBQueryService
   (get-conn [_])
+  (authorised? [_ type* uuid])
   (query
     [_ qqname param-data options command-options]
     [_ qqname param-data options]

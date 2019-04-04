@@ -14,6 +14,12 @@
 
 (defrecord AuthorisedDBQueryService [tenant-conn authorised-uuid-tree]
   p/DBQueryService
+  (p/authorised? [this type* uuid]
+    (condp = type*
+      :dataset (contains? (set (:auth-datasets authorised-uuid-tree)) uuid)
+      :visualisation (contains? (set (:auth-visualisations authorised-uuid-tree)) uuid)
+      :dashboard (contains? (set (:auth-dashboards authorised-uuid-tree)) uuid)
+      :collection (contains? (set (:auth-collections authorised-uuid-tree)) uuid)))
   (p/get-conn [this]
     (:tenant-conn this))
   (p/query [this fun param-data options command-options]
