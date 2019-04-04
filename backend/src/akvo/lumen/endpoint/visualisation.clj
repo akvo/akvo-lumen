@@ -24,12 +24,12 @@
                                    (let [{:strs [spec]} body
                                          layers (w/keywordize-keys (get-in spec ["layers"]))]
                                      (maps/create (p/connection tenant-manager tenant) windshaft-url layers)))}}]]
+   ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
                                           body :body}]
                                       (let [{:strs [rasterId spec]} body]
-                                        (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)
-                                        ))}}]]
+                                        (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)))}}]]
    ;; todo: fix path routing inconsistency here 
    ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
                       :handler (fn [{tenant :tenant
