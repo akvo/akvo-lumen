@@ -20,6 +20,9 @@
     (assert (:lumen-email-user env) (error-msg "LUMEN_EMAIL_USER"))
     (assert (:lumen-sentry-backend-dsn env) (error-msg "LUMEN_SENTRY_BACKEND_DSN"))
     (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN"))
+    (assert (:sentry-server-name env) (error-msg "SENTRY_SERVER_NAME"))
+    (assert (:sentry-release env) (error-msg "SENTRY_RELEASE"))
+    (assert (:sentry-environment env) (error-msg "SENTRY_ENVIRONMENT"))
     (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))))
 
 (defn construct
@@ -27,5 +30,3 @@
   ([] (construct "akvo/lumen/config.edn"))
   ([config-path]
    (ig/prep (duct/read-config (io/resource config-path)))))
-
-
