@@ -26,7 +26,7 @@
    :spec {}})
 
 (defn create-visualisation [tenant-conn dataset-id]
-  (-> (visualisation/create *tenant-conn* (visualisation-body dataset-id) {})
+  (-> (visualisation/create (l.auth/new-dbqs *tenant-conn* {:auth-datasets [dataset-id] :auth-visualisations []}) (visualisation-body dataset-id) {})
       variant/value
       (get "id")))
 

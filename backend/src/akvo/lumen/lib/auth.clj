@@ -60,7 +60,7 @@
                  "/api/datasets/:id/meta" {:methods #{:get}}
                  "/api/datasets/:id/update" {:methods #{:post}}
                  "/api/datasets" {:methods #{:get}}
-                 "/api/visualisations" {:methods #{:get}}
+                 "/api/visualisations" {:methods #{:get :post}}
                  "/api/visualisations/:id" {:methods #{:get :put :delete}}
                  "/api/visualisations/maps" {:methods #{:post}}})
 

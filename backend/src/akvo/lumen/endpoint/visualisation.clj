@@ -16,8 +16,9 @@
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              db-query-service :db-query-service
                               body :body}]
-                          (visualisation/create (p/connection tenant-manager tenant) (w/keywordize-keys body) jwt-claims))}}]
+                          (visualisation/create db-query-service (w/keywordize-keys body) jwt-claims))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        db-query-service :db-query-service

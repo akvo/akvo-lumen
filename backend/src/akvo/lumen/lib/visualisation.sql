@@ -46,4 +46,7 @@ DO UPDATE SET dataset_id = :dataset-id,
               "name" = :name,
               "type" = :type,
               spec = :spec
+	      WHERE true
+	      --~ (when (and :dataset-id (coll? (:auth-datasets params))) (if (seq (:auth-datasets params)) "AND visualisation.dataset_id IN (:v*:auth-datasets)" "AND visualisation.dataset_id = 'no-ds-id'"))
+
 RETURNING *;

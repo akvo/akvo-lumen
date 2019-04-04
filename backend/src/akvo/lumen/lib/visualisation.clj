@@ -11,20 +11,22 @@
 (defn all [dbqs]
   (lib/ok (p/query dbqs #'all-visualisations {} {} {:identifiers identity})))
 
-(defn create [tenant-conn body jwt-claims]
-  (let [id (squuid)
-        v (first (upsert-visualisation tenant-conn
-                                       {:id id
-                                        :dataset-id (:datasetId body)
-                                        :type (:visualisationType body )
-                                        :name (:name body)
-                                        :spec (:spec body)
-                                        :author jwt-claims}))]
-    (lib/ok (assoc body
-                   "id" (str id)
-                   "status" "OK"
-                   "created" (:created v)
-                   "modified" (:modified v)))))
+(defn create [dbqs body jwt-claims]
+  (if (or (nil? (:datasetId body)) (p/authorised? dbqs :dataset (:datasetId body)))
+      (let [id (squuid)
+            query-res (p/query dbqs #'upsert-visualisation {:id id
+                                                            :dataset-id (:datasetId body)
+                                                            :type (:visualisationType body )
+                                                            :name (:name body)
+                                                            :spec (:spec body)
+                                                            :author jwt-claims})
+            v (first query-res)]
+        (lib/ok (assoc body
+                       "id" (str id)
+                       "status" "OK"
+                       "created" (:created v)
+                       "modified" (:modified v))))
+    (lib/unprocessable-entity {})))
 
 (defn fetch [dbqs id]
   (if-let [v (p/query dbqs #'visualisation-by-id {:id id} {} {:identifiers identity})]
