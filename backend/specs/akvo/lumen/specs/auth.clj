@@ -1,6 +1,7 @@
 (ns akvo.lumen.specs.auth
   (:require [clojure.tools.logging :as log]
             [akvo.lumen.lib.auth :as l.auth]
+            [akvo.lumen.specs.protocols :as protocols.s]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.dataset :as dataset.s] 
             [akvo.lumen.specs.visualisation :as visualisation.s]
@@ -14,4 +15,4 @@
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :auth-uuid-tree ::auth-uuid-tree)
-  :ret any?)
+  :ret ::protocols.s/db-query-service)

@@ -112,7 +112,7 @@
 
 (s/fdef visualisation/upsert
   :args (s/cat
-         :db-conn ::db.s/tenant-connection
+         :db-query-service ::protocols.s/db-query-service
 	 :body ::visualisation
 	 :jwt-claims map?)
   :ret any?)

@@ -31,7 +31,7 @@
 (defn run-visualisation 
   [tenant-conn visualisation]
   (let [visualisation (walk/keywordize-keys visualisation)
-        dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [(:datasetId visualisation)]})
+        dbqs (l.auth/new-dbqs tenant-conn {:auth-visualisations [(:id visualisation)] :auth-datasets [(:datasetId visualisation)]})
         [dataset-tag dataset] (dataset/fetch-metadata dbqs (:datasetId visualisation))
         aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
         [tag query-result] (aggregation/query tenant-conn
@@ -73,7 +73,8 @@
 
 (defn visualisation-response-data [tenant-conn id windshaft-url]
   (try
-    (let [[tag vis] (visualisation/fetch tenant-conn id)]
+    (let [dbqs (l.auth/new-dbqs tenant-conn {:auth-visualisations [id] :auth-datasets []})
+          [tag vis] (visualisation/fetch dbqs id)]
       (when (= tag ::lib/ok)
         (condp contains? (:visualisationType vis)
           #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)

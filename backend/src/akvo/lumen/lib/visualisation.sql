@@ -14,24 +14,28 @@ select  id, replace(((jsonb_array_elements(spec->'layers')->'datasetId')::text),
 -- :doc All no maps visualisations with dataset-ids.
 select id, dataset_id as "datasetId" from visualisation where type!='map'
 --~ (when (coll? (:auth-datasets params)) (if (seq (:auth-datasets params)) "AND dataset_id IN (:v*:auth-datasets)" "AND dataset_id = 'no-ds-id'"))
-
 ;
-
-
 
 -- :name visualisation-by-id :? :1
 -- :doc grab visualisation by id
 SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified
 FROM visualisation
-WHERE id = :id;
+WHERE id = :id 
+--~ (when (coll? (:auth-visualisations params)) (if (seq (:auth-visualisations params)) "AND id IN (:v*:auth-visualisations)" "AND id = 'no-ds-id'"))
+
+;
 
 -- :name delete-visualisation-by-id :! :n
 -- :doc delete visualisation by id
-DELETE FROM visualisation WHERE id = :id;
+DELETE FROM visualisation WHERE id = :id 
+--~ (when (coll? (:auth-visualisations params)) (if (seq (:auth-visualisations params)) "AND id IN (:v*:auth-visualisations)" "AND id = 'no-ds-id'"))
+;
 
 -- :name delete-maps-by-dataset-id :! :n
 -- :doc delete maps by dataset id
-DELETE FROM visualisation WHERE spec::varchar LIKE concat('%', :id, '%');
+DELETE FROM visualisation WHERE spec::varchar LIKE concat('%', :id, '%')
+--~ (when (coll? (:auth-visualisations params)) (if (seq (:auth-visualisations params)) "AND id IN (:v*:auth-visualisations)" "AND id = 'no-ds-id'"))
+;
 
 -- :name upsert-visualisation :<!
 -- :doc Upsert a single visualisation

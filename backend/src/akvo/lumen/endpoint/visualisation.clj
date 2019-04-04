@@ -22,8 +22,8 @@
                         :handler (fn [{tenant :tenant
                                        body :body}]
                                    (let [{:strs [spec]} body
-                                         layers (get-in spec ["layers"])]
-                                     (maps/create (p/connection tenant-manager tenant) windshaft-url (w/keywordize-keys layers))))}}]]
+                                         layers (w/keywordize-keys (get-in spec ["layers"]))]
+                                     (maps/create (p/connection tenant-manager tenant) windshaft-url layers)))}}]]
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
                                           body :body}]
@@ -32,20 +32,23 @@
                                         ))}}]]
    ;; todo: fix path routing inconsistency here 
    ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
+                      :handler (fn [{tenant :tenant
+                                     db-query-service :db-query-service
                                        {:keys [id]} :path-params}]
-                                   (visualisation/fetch (p/connection tenant-manager tenant) id))}
+                                   (visualisation/fetch db-query-service id))}
                   :put {:parameters {:body map?
                                      :path-params {:id string?}}
                         :handler (fn [{tenant :tenant
                                        jwt-claims :jwt-claims
+                                       db-query-service :db-query-service
                                        {:keys [id]} :path-params
                                        body :body}]
-                                   (visualisation/upsert (p/connection tenant-manager tenant) (assoc (w/keywordize-keys body) :id id) jwt-claims))}
+                                   (visualisation/upsert db-query-service (assoc (w/keywordize-keys body) :id id) jwt-claims))}
                   :delete {:parameters {:path-params {:id string?}}
                            :handler (fn [{tenant :tenant
+                                          db-query-service :db-query-service
                                           {:keys [id]} :path-params}]
-                                      (visualisation/delete (p/connection tenant-manager tenant) id))}}]]])
+                                      (visualisation/delete db-query-service id))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (routes opts))

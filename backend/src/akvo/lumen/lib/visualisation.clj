@@ -26,25 +26,22 @@
                    "created" (:created v)
                    "modified" (:modified v)))))
 
-(defn fetch [tenant-conn id]
-  (if-let [v (visualisation-by-id tenant-conn
-                                  {:id id}
-                                  {}
-                                  {:identifiers identity})]
+(defn fetch [dbqs id]
+  (if-let [v (p/query dbqs #'visualisation-by-id {:id id} {} {:identifiers identity})]
     (lib/ok (dissoc v :author))
     (lib/not-found {:error "Not found"})))
 
-(defn upsert [tenant-conn body jwt-claims]
-  (let [v (upsert-visualisation tenant-conn
-                                {:id (:id body)
-                                 :dataset-id (:datasetId body)
-                                 :type (:visualisationType body)
-                                 :name (:name body)
-                                 :spec (:spec body)
-                                 :author jwt-claims})]
+(defn upsert [dbqs body jwt-claims]
+  (let [v (p/query dbqs #'upsert-visualisation 
+                   {:id (:id body)
+                    :dataset-id (:datasetId body)
+                    :type (:visualisationType body)
+                    :name (:name body)
+                    :spec (:spec body)
+                    :author jwt-claims})]
     (lib/ok {:id (-> v first :id)})))
 
-(defn delete [tenant-conn id]
-  (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
+(defn delete [dbqs id]
+  (if (zero? (p/query dbqs #'delete-visualisation-by-id {:id id}) )
     (lib/not-found {:error "Not found"})
     (lib/ok {:id id})))
