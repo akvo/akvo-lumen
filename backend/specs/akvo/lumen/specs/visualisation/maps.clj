@@ -2,6 +2,7 @@
   (:require [akvo.lumen.lib.visualisation.maps :as lib.vis.maps]
             [akvo.lumen.postgres.filter :as postgres.filter]
             [akvo.lumen.specs :as lumen.s]
+            [akvo.lumen.specs.protocols :as protocols.s]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.visualisation.maps.layer :as layer.s]
             [clojure.spec.alpha :as s]))
@@ -46,7 +47,7 @@
 
 (s/fdef lib.vis.maps/create
   :args (s/cat
-         :db-conn ::db.s/tenant-connection
+         :db-query-service ::protocols.s/db-query-service
 	 :windshaft-url string?
 	 :layers (s/coll-of ::layer :kind vector? :distinct true))
   :ret any?)

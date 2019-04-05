@@ -49,15 +49,16 @@
 (s/def ::aggregation.bar/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.bar/subBucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.bar/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
-(s/def ::aggregation.bar/metricAggregation (s/nilable #{"mean"
-                                                        "sum"
-                                                        "min"
-                                                        "max"
-                                                        "count"
-                                                        "median"
-                                                        "distinct"
-                                                        "q1"
-                                                        "q3"}))
+(s/def ::metricAggregation #{"mean"
+                             "sum"
+                             "min"
+                             "max"
+                             "count"
+                             "median"
+                             "distinct"
+                             "q1"
+                             "q3"})
+(s/def ::aggregation.bar/metricAggregation (s/nilable ::metricAggregation))
 (s/def ::aggregation.bar/sort (s/nilable #{"asc" "dsc"}))
 (s/def ::aggregation.bar/truncateSize (s/nilable string?))
 
@@ -77,7 +78,7 @@
 
 (s/def ::aggregation.bubble/bucketColumn ::db.dsv.column.s/columnName)
 (s/def ::aggregation.bubble/metricColumn (s/nilable ::db.dsv.column.s/columnName))
-(s/def ::aggregation.bubble/metricAggregation ::aggregation.bar/metricAggregation)
+(s/def ::aggregation.bubble/metricAggregation (s/nilable ::metricAggregation))
 
 (s/def ::aggregation.bubble/query (s/keys :req-un [::postgres.filter/filters
                                                    ::aggregation.bubble/bucketColumn
@@ -93,7 +94,7 @@
 
 (s/def ::aggregation.line/metricColumnX ::db.dsv.column.s/columnName)
 (s/def ::aggregation.line/metricColumnY ::db.dsv.column.s/columnName)
-(s/def ::aggregation.line/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
+(s/def ::aggregation.line/metricAggregation (s/nilable ::metricAggregation))
 
 (s/def ::aggregation.line/query (s/keys :req-un [::postgres.filter/filters
                                                  ::aggregation.line/metricColumnX
@@ -113,7 +114,7 @@
 (s/def ::aggregation.scatter/bucketColumnCategory (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.scatter/datapointLabelColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.scatter/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
-(s/def ::aggregation.scatter/metricAggregation (s/nilable ::aggregation.bar/metricAggregation))
+(s/def ::aggregation.scatter/metricAggregation (s/nilable ::metricAggregation))
 
 (s/def ::aggregation.scatter/query (s/keys :req-un [::postgres.filter/filters
                                                     ::aggregation.scatter/metricAggregation
