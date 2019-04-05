@@ -74,7 +74,7 @@
         dataset-id (:dataset_id job)
         data-source-id (:data_source_id job)]
 
-    (upsert-visualisation conn (merge vis-spec {:dataset-id dataset-id}))
+    (create-visualisation conn (merge vis-spec {:dataset-id dataset-id :auth-datasets [dataset-id]}))
     {:visualisation-id (:id vis-spec) :dataset-id dataset-id :data-source-id data-source-id}))
 
 (defn seed

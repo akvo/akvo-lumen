@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.visualisation
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
+            [clojure.tools.logging :as log]
             [akvo.lumen.protocols :as p]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException]))
@@ -14,7 +15,7 @@
 (defn create [dbqs body jwt-claims]
   (if (or (nil? (:datasetId body)) (p/authorised? dbqs :dataset (:datasetId body)))
       (let [id (squuid)
-            query-res (p/query dbqs #'upsert-visualisation {:id id
+            query-res (p/query dbqs #'create-visualisation {:id id
                                                             :dataset-id (:datasetId body)
                                                             :type (:visualisationType body )
                                                             :name (:name body)
@@ -33,8 +34,9 @@
     (lib/ok (dissoc v :author))
     (lib/not-found {:error "Not found"})))
 
-(defn upsert [dbqs body jwt-claims]
-  (let [v (p/query dbqs #'upsert-visualisation 
+(defn update* [dbqs body jwt-claims]
+  ;; TODO: verify (:spec body) layers in case "map" (:visualisationType body)
+  (let [v (p/query dbqs #'update-visualisation 
                    {:id (:id body)
                     :dataset-id (:datasetId body)
                     :type (:visualisationType body)

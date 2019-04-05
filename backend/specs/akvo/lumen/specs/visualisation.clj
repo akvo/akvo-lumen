@@ -110,7 +110,7 @@
 	 :jwt-claims map?)
   :ret any?)
 
-(s/fdef visualisation/upsert
+(s/fdef visualisation/update*
   :args (s/cat
          :db-query-service ::protocols.s/db-query-service
 	 :body ::visualisation

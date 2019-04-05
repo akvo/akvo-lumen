@@ -48,16 +48,18 @@
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
-            [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
             dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [dataset-id]
                                                :auth-visualisations [(:id visualisation)]})
+            [map-data-tag map-data] (maps/create dbqs windshaft-url (walk/keywordize-keys layers))
             [dataset-tag dataset] (dataset/fetch-metadata dbqs dataset-id)]
           (when (and (= map-data-tag ::lib/ok)
                      (= dataset-tag ::lib/ok))
             {:datasets {dataset-id dataset}
              :visualisations {(:id visualisation) (merge visualisation map-data)}
              :metadata {(:id visualisation) map-data}}))
-      (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))]
+      (let [dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets []
+                                               :auth-visualisations [(:id visualisation)]})
+            [map-data-tag map-data] (maps/create dbqs windshaft-url (walk/keywordize-keys layers))]
           (when (= map-data-tag ::lib/ok)
             {:visualisations {(:id visualisation) (merge visualisation map-data)}
              :metadata {(:id visualisation) map-data}})))))

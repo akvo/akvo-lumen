@@ -37,16 +37,32 @@ DELETE FROM visualisation WHERE spec::varchar LIKE concat('%', :id, '%')
 --~ (when (coll? (:auth-visualisations params)) (if (seq (:auth-visualisations params)) "AND id IN (:v*:auth-visualisations)" "AND id = 'no-ds-id'"))
 ;
 
--- :name upsert-visualisation :<!
--- :doc Upsert a single visualisation
+
+-- :name create-visualisation :<!
+-- :doc Create a single visualisation
+/*~(if (:dataset-id params) (if (contains? (set (:auth-datasets params)) (:dataset-id params)) */
 INSERT INTO visualisation (id, dataset_id, "name", "type", spec, author)
 VALUES (:id, :dataset-id, :name, :type, :spec, :author)
-ON CONFLICT (id)
-DO UPDATE SET dataset_id = :dataset-id,
-              "name" = :name,
-              "type" = :type,
-              spec = :spec
-	      WHERE true
-	      --~ (when (and :dataset-id (coll? (:auth-datasets params))) (if (seq (:auth-datasets params)) "AND visualisation.dataset_id IN (:v*:auth-datasets)" "AND visualisation.dataset_id = 'no-ds-id'"))
+RETURNING *;
+/*~*/
+SELECT NULL;
+/*~ ) */
+INSERT INTO visualisation (id, "name", "type", spec, author)
+VALUES (:id, :name, :type, :spec, :author)
+RETURNING *;
 
+/*~ ) ~*/
+
+-- :name update-visualisation :<!
+-- :doc Upsert a single visualisation
+WITH auth AS (
+--~ (if (:dataset-id params) (if (coll? (:auth-datasets params)) "select count (*) where :dataset-id = ANY(ARRAY [:v*:auth-datasets]::text[])" "select 1 as count") "select 1 as count")
+)
+UPDATE visualisation
+SET dataset_id = :dataset-id,
+    "name" = :name,
+    "type" = :type,
+    spec = :spec
+    FROM auth
+    where id=:id and auth.count>0
 RETURNING *;

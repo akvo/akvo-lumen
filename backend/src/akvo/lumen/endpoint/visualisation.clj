@@ -45,7 +45,7 @@
                                        db-query-service :db-query-service
                                        {:keys [id]} :path-params
                                        body :body}]
-                                   (visualisation/upsert db-query-service (assoc (w/keywordize-keys body) :id id) jwt-claims))}
+                                   (visualisation/update* db-query-service (assoc (w/keywordize-keys body) :id id) jwt-claims))}
                   :delete {:parameters {:path-params {:id string?}}
                            :handler (fn [{tenant :tenant
                                           db-query-service :db-query-service
