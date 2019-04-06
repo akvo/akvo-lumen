@@ -18,18 +18,20 @@ select id, dataset_id as "datasetId" from visualisation where type!='map'
 
 -- :name visualisation-by-id :? :1
 -- :doc grab visualisation by id
+WITH auth AS (
+--~ (if (coll? (:auth-visualisations params)) "select count (*) where :id = ANY(ARRAY [:v*:auth-visualisations]::text[])" "select 1 as count")
+)
 SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified
-FROM visualisation
-WHERE id = :id 
---~ (when (coll? (:auth-visualisations params)) (if (seq (:auth-visualisations params)) "AND id IN (:v*:auth-visualisations)" "AND id = 'no-ds-id'"))
-
-;
+FROM visualisation, auth
+WHERE id = :id and auth.count>0;
 
 -- :name delete-visualisation-by-id :! :n
 -- :doc delete visualisation by id
-DELETE FROM visualisation WHERE id = :id 
---~ (when (coll? (:auth-visualisations params)) (if (seq (:auth-visualisations params)) "AND id IN (:v*:auth-visualisations)" "AND id = 'no-ds-id'"))
-;
+WITH auth AS (
+--~ (if (coll? (:auth-visualisations params)) "select count (*) where :id = ANY(ARRAY [:v*:auth-visualisations]::text[])" "select 1 as count")
+)
+DELETE FROM visualisation USING auth WHERE id = :id and auth.count>0;
+
 
 -- :name delete-maps-by-dataset-id :! :n
 -- :doc delete maps by dataset id
