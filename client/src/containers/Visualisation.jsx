@@ -294,7 +294,6 @@ class Visualisation extends Component {
     this.handleChangeVisualisation({
       visualisationType,
       spec: {
-        ...this.state.visualisation.spec,
         ...getSpecFromVisualisationType(visualisationType),
         ...remapVisualisationDataColumnMappings(this.state.visualisation, visualisationType),
       },
