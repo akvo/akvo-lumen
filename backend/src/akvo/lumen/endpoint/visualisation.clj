@@ -4,6 +4,7 @@
             [akvo.lumen.lib.visualisation.maps :as maps]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [akvo.lumen.specs.db.dataset-version :as dataset-version.s]
             [clojure.walk :as w]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
@@ -18,14 +19,16 @@
                               jwt-claims :jwt-claims
                               db-query-service :db-query-service
                               body :body}]
-                          (visualisation/create db-query-service (w/keywordize-keys body) jwt-claims))}}]
+                          (binding [dataset-version.s/*dataset-id?* (partial p/authorised? db-query-service :dataset)]
+                            (visualisation/create db-query-service (w/keywordize-keys body) jwt-claims)))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        db-query-service :db-query-service
                                        body :body}]
                                    (let [{:strs [spec]} body
                                          layers (w/keywordize-keys (get-in spec ["layers"]))]
-                                     (maps/create db-query-service windshaft-url layers)))}}]]
+                                     (binding [dataset-version.s/*dataset-id?* (partial p/authorised? db-query-service :dataset)]
+                                       (maps/create db-query-service windshaft-url layers))))}}]]
    ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
@@ -45,7 +48,8 @@
                                        db-query-service :db-query-service
                                        {:keys [id]} :path-params
                                        body :body}]
-                                   (visualisation/update* db-query-service (assoc (w/keywordize-keys body) :id id) jwt-claims))}
+                                   (binding [dataset-version.s/*dataset-id?* (partial p/authorised? db-query-service :dataset)]
+                                     (visualisation/update* db-query-service (w/keywordize-keys body) jwt-claims)))}
                   :delete {:parameters {:path-params {:id string?}}
                            :handler (fn [{tenant :tenant
                                           db-query-service :db-query-service

@@ -7,9 +7,13 @@
             [akvo.lumen.specs :as lumen.s]))
 
 (s/def ::id ::lumen.s/str-uuid)
+
+(def ^:dynamic *dataset-id?*  lumen.s/str-uuid?)
+
 (s/def ::dataset-id (s/with-gen
-                             lumen.s/str-uuid?
-                             lumen.s/str-uuid-gen))
+                      #'*dataset-id?*
+                      lumen.s/str-uuid-gen))
+
 (s/def ::job-execution-id (s/nilable ::lumen.s/str-uuid))
 
 (defn- ds-table-name? [s]
