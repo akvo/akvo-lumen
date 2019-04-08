@@ -5,27 +5,21 @@ An open-source, easy to use data mashup, analysis and publishing platform.
 
 ## PM
 
+- [Board](https://github.com/orgs/akvo/projects/2)
 - [Issues](https://github.com/akvo/akvo-lumen/issues)
-- [Board](http://waffle.io/akvo/akvo-lumen)
 
-## Client
-[Readme](client/README.md)
-
-## Backend
-[Readme](backend/README.md)
-
-## Integration
-[Data import - Readme](doc/integration/InputFormat.md)
-
-## Development 
+## Development
 
 See [how to setup a development environment](README.dev.md)
 
-## Legal
-Copyright © 2016 - present Akvo Foundation
+## Integration
 
+[Data import - Readme](doc/integration/InputFormat.md)
 
 ### Thanks
 <img src="http://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="280"/>
 
 [BrowserStack](http://www.browserstack.com) is supporting Akvo, allowing us to use their service and infrastructure to test the code in this repository. Thank you for supporting the open source community!
+
+## Legal
+Copyright © 2016 - present Akvo Foundation
