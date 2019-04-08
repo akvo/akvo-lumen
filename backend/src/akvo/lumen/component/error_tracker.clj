@@ -41,7 +41,7 @@
 
   SentryErrorTracker
   (track [{:keys [dsn opts]} error]
-    (let [{keys [environment namespaces release server_name]} opts
+    (let [{:keys [environment namespaces release server_name]} opts
           event-map (event-map error)
           event-info (assoc (raven-interface/stacktrace event-map error namespaces)
                             :environment environment
