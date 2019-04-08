@@ -83,7 +83,7 @@
 
       :else [(if (not dataset-id) raster-id dataset-id)])))
 
-(defn do-create [tenant-conn windshaft-url dataset-id layers]
+(defn do-create [tenant-conn windshaft-url layers]
   (let [metadata-array (map (fn [current-layer]
                               (let [current-layer-type (:layerType current-layer)
                                     current-dataset-id (if (= current-layer-type "raster")
@@ -121,8 +121,8 @@
 (defn create
   [tenant-conn windshaft-url layers]
   (try
-    (let [[dataset-id] (conform-create-args layers)]
-      (do-create tenant-conn windshaft-url dataset-id layers))
+    (conform-create-args layers)
+    (do-create tenant-conn windshaft-url layers)
     (catch Exception e
       (println e)
       (lib/bad-request (ex-data e)))))
