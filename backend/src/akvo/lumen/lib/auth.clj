@@ -18,16 +18,14 @@
 
 (defrecord AuthServiceImpl [auth-datasets-set]
   p/AuthService
-  (auth? [this {:keys [dataset-ids visualisation-ids]}]
-    (set/superset? auth-datasets-set (set dataset-ids)))
+  (auth? [this {:keys [dataset-ids]}]
+    {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))})
   (auth? [this type* uuid]
     (condp = type*
-      :dataset (contains? auth-datasets-set uuid)))
-  )
+      :dataset (when (contains? auth-datasets-set uuid) uuid))))
 
 (defn new-auth-service [{:keys [auth-datasets] :as auth-uuid-tree}]
-  (AuthServiceImpl. (set auth-datasets))
-  )
+  (AuthServiceImpl. (set auth-datasets)))
 
 (defn match-by-jwt-family-name?
   "Feature flag condition based on `First Name` jwt-claims

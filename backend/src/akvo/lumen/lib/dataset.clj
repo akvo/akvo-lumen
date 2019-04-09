@@ -16,9 +16,9 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
-(defn all
+(defn all*
   [tenant-conn]
-  (lib/ok (all-datasets tenant-conn)))
+  (all-datasets tenant-conn))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]

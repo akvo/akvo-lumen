@@ -1,20 +1,31 @@
 (ns akvo.lumen.endpoint.dataset
-  (:require [akvo.lumen.protocols :as p]
-            [akvo.lumen.lib.dataset :as dataset]
-            [clojure.tools.logging :as log]
-            [clojure.spec.alpha :as s]
-            [akvo.lumen.component.tenant-manager :as tenant-manager]
+  (:require [akvo.lumen.component.error-tracker :as error-tracker]
             [akvo.lumen.component.flow]
             [akvo.lumen.component.keycloak :as keycloak]
-            [clojure.walk :as w]
-            [akvo.lumen.component.error-tracker :as error-tracker]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.auth :as l.auth]
+            [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.protocols :as p]
+            [akvo.lumen.specs.dataset :as dataset.s]
             [akvo.lumen.upload :as upload]
+            [clojure.spec.alpha :as s]
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [integrant.core :as ig]))
+
+(defn all-datasets [auth-service tenant-conn]
+  (let [res (dataset/all* tenant-conn)
+        ids (l.auth/ids ::dataset.s/datasets res)
+        auth-datasets (:auth-datasets (p/auth? auth-service ids))
+        auth-res (filter #(contains? auth-datasets (:id %)) res)]
+    (lib/ok auth-res)))
 
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
   ["/datasets"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (dataset/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             auth-service :auth-service}]
+                         (all-datasets auth-service (p/connection tenant-manager tenant)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
