@@ -72,7 +72,7 @@
             auth-uuid-tree (if (and (match-by-jwt-family-name? request)
                                     (match-by-template-and-method? auth-calls request))
                              (let [permissions   (->> (map :source dss)
-                                                      (filter #(and (= (get % "instance") "uat1") (= "AKVO_FLOW" (get % "kind"))))
+                                                      (filter #(= "AKVO_FLOW" (get % "kind")))
                                                       (map c.flow/>api-model)
                                                       (c.flow/check-permissions flow-api (jwt/jwt-token request))
                                                       :body
