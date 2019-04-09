@@ -9,11 +9,25 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
+   [clojure.set :as set]
    [hugsql.core :as hugsql]
    [integrant.core :as ig]
    [reitit.core :as rc]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+
+(defrecord AuthServiceImpl [auth-datasets-set]
+  p/AuthService
+  (auth? [this {:keys [dataset-ids visualisation-ids]}]
+    (set/superset? auth-datasets-set (set dataset-ids)))
+  (auth? [this type* uuid]
+    (condp = type*
+      :dataset (contains? auth-datasets-set uuid)))
+  )
+
+(defn new-auth-service [{:keys [auth-datasets] :as auth-uuid-tree}]
+  (AuthServiceImpl. (set auth-datasets))
+  )
 
 (defn match-by-jwt-family-name?
   "Feature flag condition based on `First Name` jwt-claims
@@ -46,7 +60,7 @@
        (mapv :id)))
 
 (defn wrap-auth-datasets
-  "Add to the request an auth-uuid-tree validated using flow-api check_permissions"
+  "Add to the request an auth-service protocol impl using flow-api check_permissions"
   [tenant-manager flow-api]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
@@ -63,7 +77,7 @@
                                {:auth-datasets auth-datasets})
                              {:auth-datasets (mapv :id dss)})]
         (handler (assoc request
-                        :auth-uuid-tree auth-uuid-tree))))))
+                        :auth-service (new-auth-service auth-uuid-tree)))))))
 
 (defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api] :as opts}]
   (wrap-auth-datasets tenant-manager flow-api))
@@ -76,15 +90,15 @@
 
 (defn ids [spec data]
   (let [ids (atom {:dataset-ids #{}
-                     :visualisation-ids #{}})
-         ds-fun (fn [id]
-                   (swap! ids update-in [:dataset-ids] conj id)
-                   true)
-         vis-fun (fn [id]
-                   (swap! ids update-in [:visualisation-ids] conj id)
-                   true)]
-     (binding [visualisation.s/*id?* vis-fun
-               dataset.s/*id?* ds-fun]
-       (let [explain (s/explain-str spec data)]
-         (swap! ids assoc :spec-valid? (= "Success!\n" explain))
-         (deref ids)))))
+                   :visualisation-ids #{}})
+        ds-fun (fn [id]
+                 (swap! ids update-in [:dataset-ids] conj id)
+                 true)
+        vis-fun (fn [id]
+                  (swap! ids update-in [:visualisation-ids] conj id)
+                  true)]
+    (binding [visualisation.s/*id?* vis-fun
+              dataset.s/*id?* ds-fun]
+      (let [explain (s/explain-str spec data)]
+        (swap! ids assoc :spec-valid? (= "Success!\n" explain))
+        (deref ids)))))

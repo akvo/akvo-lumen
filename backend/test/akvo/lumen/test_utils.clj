@@ -27,6 +27,7 @@
            [org.postgresql.util PSQLException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn retry-job-execution [tenant-conn job-execution-id with-job?]
   (dh/with-retry {:retry-if (fn [v e] (not v))
@@ -182,4 +183,4 @@
   (fn [handler]
     (fn [{tenant :tenant
           :as req}]
-      (handler (assoc req :auth-uuid-tree {})))))
+      (handler (assoc req :auth-service (l.auth/new-auth-service {:auth-datasets (map :id (all-datasets (p/connection tenant-manager tenant)))}))))))
