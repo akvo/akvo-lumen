@@ -3,35 +3,30 @@
    [akvo.commons.jwt :as jwt]
    [akvo.lumen.component.flow :as c.flow]
    [akvo.lumen.component.tenant-manager :as tenant-manager]
+   [akvo.lumen.specs :as lumen.s]
+   [akvo.lumen.specs.dataset :as dataset.s]
+   [akvo.lumen.specs.visualisation :as visualisation.s]
    [akvo.lumen.protocols :as p]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
+   [clojure.set :as set]
    [hugsql.core :as hugsql]
    [integrant.core :as ig]
    [reitit.core :as rc]))
 
-(defrecord AuthorisedDBQueryService [tenant-conn authorised-uuid-tree]
-  p/DBQueryService
-  (p/get-conn [this]
-    (:tenant-conn this))
-  (p/query [this fun param-data options command-options]
-    (log/info :AuthorisedDBQueryService :query fun :param-data param-data :options options :command-options command-options :authorised-uuid-tree authorised-uuid-tree)
-    (apply fun [(:tenant-conn this) (merge param-data authorised-uuid-tree)
-                options command-options]))
-  (p/query [this fun param-data options]
-    (p/query this fun param-data options nil))
-  (p/query [this fun param-data]
-    (p/query this fun param-data nil))
-  (p/query [this fun]
-    (p/query this fun nil)))
-
-(defn new-dbqs
-  "`authorised-uuid-tree`: {:auth-datasets [] :auth-visualisations [] :auth-dashboards [] :auth-collections []}"
-  [tenant-conn authorised-uuid-tree]
-  (AuthorisedDBQueryService. tenant-conn authorised-uuid-tree))
-
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+
+(defrecord AuthServiceImpl [auth-datasets-set]
+  p/AuthService
+  (auth? [this {:keys [dataset-ids]}]
+    {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))})
+  (auth? [this type* uuid]
+    (condp = type*
+      :dataset (when (contains? auth-datasets-set uuid) uuid))))
+
+(defn new-auth-service [{:keys [auth-datasets] :as auth-uuid-tree}]
+  (AuthServiceImpl. (set auth-datasets)))
 
 (defn match-by-jwt-family-name?
   "Feature flag condition based on `First Name` jwt-claims
@@ -64,7 +59,7 @@
        (mapv :id)))
 
 (defn wrap-auth-datasets
-  "Add to the request a db-query-service with a authorised-uuid-tree validated using flow-api check_permissions"
+  "Add to the request an auth-service protocol impl using flow-api check_permissions"
   [tenant-manager flow-api]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
@@ -81,9 +76,7 @@
                                {:auth-datasets auth-datasets})
                              {:auth-datasets (mapv :id dss)})]
         (handler (assoc request
-                        :db-query-service
-                        (new-dbqs (p/connection tenant-manager tenant)
-                                  auth-uuid-tree)))))))
+                        :auth-service (new-auth-service auth-uuid-tree)))))))
 
 (defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api] :as opts}]
   (wrap-auth-datasets tenant-manager flow-api))
@@ -93,3 +86,24 @@
 (defmethod ig/pre-init-spec :akvo.lumen.lib.auth/wrap-auth-datasets [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
                    ::flow-api]))
+
+(defn ids [spec data]
+  (let [ids (atom {:dataset-ids #{}
+                   :visualisation-ids #{}})
+        original-vis-id? visualisation.s/*id?*
+        original-ds-id? dataset.s/*id?*
+        ds-fun (fn [id]
+                 (swap! ids update :dataset-ids conj id)
+                 (try
+                   (original-vis-id? id)
+                   (catch Exception e false)))
+        vis-fun (fn [id]
+                  (swap! ids update :visualisation-ids conj id)
+                  (try
+                    (original-ds-id? id)
+                    (catch Exception e false)))]
+    (binding [visualisation.s/*id?* vis-fun
+              dataset.s/*id?* ds-fun]
+      (let [explain (s/explain-str spec data)]
+        (swap! ids assoc :spec-valid? (s/valid? spec data))
+        (deref ids)))))
