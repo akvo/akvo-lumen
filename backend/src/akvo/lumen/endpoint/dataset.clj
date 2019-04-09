@@ -13,9 +13,8 @@
 
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
   ["/datasets"
-   ["" {:get {:handler (fn [{tenant :tenant
-                             db-query-service :db-query-service}]
-                         (dataset/all db-query-service))}
+   ["" {:get {:handler (fn [{tenant :tenant}]
+                         (dataset/all (p/connection tenant-manager tenant)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
@@ -24,33 +23,28 @@
                                           error-tracker jwt-claims (w/stringify-keys body)))}}]
    ["/:id" [["" {:get {:parameters {:path-params {:id string?}}
                        :handler (fn [{tenant :tenant
-                                      db-query-service :db-query-service
                                       {:keys [id]} :path-params}]
-                                  (dataset/fetch db-query-service id))}
+                                  (dataset/fetch (p/connection tenant-manager tenant) id))}
                  :put {:parameters {:body map?
                                     :path-params {:id string?}}
                        :handler (fn [{tenant :tenant
-                                      db-query-service :db-query-service
                                       body :body
                                       {:keys [id]} :path-params}]
-                                  (dataset/update-meta db-query-service id body))}
+                                  (dataset/update-meta (p/connection tenant-manager tenant) id body))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
-                                         db-query-service :db-query-service
                                          {:keys [id]} :path-params}]
-                                     (dataset/delete db-query-service id))}}]
+                                     (dataset/delete (p/connection tenant-manager tenant) id))}}]
             ["/meta" {:get {:parameters {:path-params {:id string?}}
                             :handler (fn [{tenant :tenant
-                                           db-query-service :db-query-service
                                            {:keys [id]} :path-params}]
-                                       (dataset/fetch-metadata db-query-service id))}}]
+                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
             ["/update" {:post {:parameters {:path-params {:id string?}}
                                :handler (fn [{tenant :tenant
                                               jwt-claims :jwt-claims
                                               body :body
-                                              db-query-service :db-query-service
                                               {:keys [id]} :path-params}]
-                                          (dataset/update db-query-service (merge import-config upload-config)
+                                          (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
                                                           error-tracker id (w/stringify-keys body)))}}]]]])
 
 

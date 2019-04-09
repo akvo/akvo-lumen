@@ -182,4 +182,4 @@
   (fn [handler]
     (fn [{tenant :tenant
           :as req}]
-      (handler (assoc req :db-query-service (l.auth/new-dbqs (p/connection tenant-manager tenant) {}))))))
+      (handler (assoc req :auth-uuid-tree {})))))

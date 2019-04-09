@@ -11,26 +11,6 @@
    [integrant.core :as ig]
    [reitit.core :as rc]))
 
-(defrecord AuthorisedDBQueryService [tenant-conn authorised-uuid-tree]
-  p/DBQueryService
-  (p/get-conn [this]
-    (:tenant-conn this))
-  (p/query [this fun param-data options command-options]
-    (log/info :AuthorisedDBQueryService :query fun :param-data param-data :options options :command-options command-options :authorised-uuid-tree authorised-uuid-tree)
-    (apply fun [(:tenant-conn this) (merge param-data authorised-uuid-tree)
-                options command-options]))
-  (p/query [this fun param-data options]
-    (p/query this fun param-data options nil))
-  (p/query [this fun param-data]
-    (p/query this fun param-data nil))
-  (p/query [this fun]
-    (p/query this fun nil)))
-
-(defn new-dbqs
-  "`authorised-uuid-tree`: {:auth-datasets [] :auth-visualisations [] :auth-dashboards [] :auth-collections []}"
-  [tenant-conn authorised-uuid-tree]
-  (AuthorisedDBQueryService. tenant-conn authorised-uuid-tree))
-
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn match-by-jwt-family-name?
@@ -64,7 +44,7 @@
        (mapv :id)))
 
 (defn wrap-auth-datasets
-  "Add to the request a db-query-service with a authorised-uuid-tree validated using flow-api check_permissions"
+  "Add to the request an auth-uuid-tree validated using flow-api check_permissions"
   [tenant-manager flow-api]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
@@ -81,9 +61,7 @@
                                {:auth-datasets auth-datasets})
                              {:auth-datasets (mapv :id dss)})]
         (handler (assoc request
-                        :db-query-service
-                        (new-dbqs (p/connection tenant-manager tenant)
-                                  auth-uuid-tree)))))))
+                        :auth-uuid-tree auth-uuid-tree))))))
 
 (defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api] :as opts}]
   (wrap-auth-datasets tenant-manager flow-api))

@@ -5,7 +5,6 @@ source_data AS (
  SELECT dataset.id as dataset_id, (spec->'source')::jsonb - 'refreshToken' as source
    FROM data_source, dataset_version, job_execution, dataset
   WHERE dataset_version.dataset_id = dataset.id
---~ (when (coll? (:auth-datasets params)) (if (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)" "AND dataset.id = 'no-ds-id'"))
     AND dataset_version.version = 1
     AND dataset_version.job_execution_id = job_execution.id
     AND job_execution.data_source_id = data_source.id
@@ -45,9 +44,7 @@ VALUES (:id, :title, :description, :author);
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
-DELETE FROM dataset WHERE id=:id
---~ (when (coll? (:auth-datasets params)) (if (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)" "AND dataset.id = 'no-ds-id'"))
-;
+DELETE FROM dataset WHERE id=:id;
 
 -- :name select-datasets-by-id :? :*
 -- :doc select datasets by id
@@ -55,9 +52,7 @@ SELECT * from dataset WHERE id IN (:v*:ids);
 
 -- :name update-dataset-meta :! :n
 -- :doc update dataset meta
-UPDATE dataset SET title = :title WHERE id = :id
---~ (when (coll? (:auth-datasets params)) (if (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)" "AND dataset.id = 'no-ds-id'"))
-;
+UPDATE dataset SET title = :title WHERE id = :id;
 
 -- :name dataset-by-id :? :1
 WITH
@@ -82,7 +77,6 @@ SELECT dataset_version.table_name AS "table-name",
        dataset_version.transformations
   FROM dataset_version, dataset, source_data
  WHERE dataset_version.dataset_id=:id
---~ (when (coll? (:auth-datasets params)) (if (seq (:auth-datasets params)) "AND dataset.id IN (:v*:auth-datasets)" "AND dataset.id = 'no-ds-id'"))
    AND dataset.id=dataset_version.dataset_id
    AND version=(SELECT max(version)
                   FROM dataset_version
@@ -108,7 +102,6 @@ SELECT dataset_version.columns
 SELECT data_source.*
   FROM data_source, dataset_version, job_execution
  WHERE dataset_version.dataset_id = :dataset-id
- --~ (when (coll? (:auth-datasets params)) (if (seq (:auth-datasets params)) "AND dataset_version.dataset_id IN (:v*:auth-datasets)" "AND dataset_version.dataset_id = 'no-ds-id'"))
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.type = 'IMPORT'
    AND job_execution.status = 'OK'
