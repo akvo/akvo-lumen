@@ -60,8 +60,12 @@
 (s/def ::error-tracker (partial satisfies? p/IErrorTracker))
 
 (s/def ::dsn string?)
+(s/def ::environment string?)
 (s/def ::namespaces (s/coll-of string?))
-(s/def ::opts (s/keys :req-un [::namespaces]))
+(s/def ::release string?)
+(s/def ::server_name #{"blue" "green"})
+
+(s/def ::opts (s/keys :req-un [::environment ::namespaces ::release ::server_name]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
   (s/keys :req-un [::dsn ::opts] ))
