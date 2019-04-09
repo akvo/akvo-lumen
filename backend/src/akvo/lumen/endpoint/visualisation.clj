@@ -31,23 +31,24 @@
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body}]
-                          (visualisation/create (p/connection tenant-manager tenant) body jwt-claims))}}]
+                          (let [vis-payload (w/keywordize-keys body)]
+                            (visualisation/create (p/connection tenant-manager tenant) vis-payload jwt-claims)))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        body :body}]
                                    (let [{:strs [spec]} body
-                                         layers (get-in spec ["layers"])]
-                                     (maps/create (p/connection tenant-manager tenant) windshaft-url (w/keywordize-keys layers))))}}]]
+                                         layers (w/keywordize-keys (get-in spec ["layers"]))]
+                                     (maps/create (p/connection tenant-manager tenant) windshaft-url layers)))}}]]
+   ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
                                           body :body}]
                                       (let [{:strs [rasterId spec]} body]
-                                        (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)
-                                        ))}}]]
+                                        (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)))}}]]
    ;; todo: fix path routing inconsistency here 
    ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
-                                       {:keys [id]} :path-params}]
+                      :handler (fn [{tenant :tenant
+                                     {:keys [id]} :path-params}]
                                    (visualisation/fetch (p/connection tenant-manager tenant) id))}
                   :put {:parameters {:body map?
                                      :path-params {:id string?}}
@@ -55,7 +56,8 @@
                                        jwt-claims :jwt-claims
                                        {:keys [id]} :path-params
                                        body :body}]
-                                   (visualisation/upsert (p/connection tenant-manager tenant) (assoc body "id" id) jwt-claims))}
+                                   (let [vis-payload (w/keywordize-keys body)]
+                                     (visualisation/upsert (p/connection tenant-manager tenant) vis-payload jwt-claims)))}
                   :delete {:parameters {:path-params {:id string?}}
                            :handler (fn [{tenant :tenant
                                           {:keys [id]} :path-params}]

@@ -20,13 +20,13 @@
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (defn visualisation-body [dataset-id]
-  {"datasetId" dataset-id
-   "visualisationType" ""
-   "name" ""
-   "spec" {}})
+  {:datasetId dataset-id
+   :visualisationType "bar"
+   :name ""
+   :spec {}})
 
 (defn create-visualisation [tenant-conn dataset-id]
-  (-> (visualisation/create *tenant-conn* (visualisation-body dataset-id) {})
+  (-> (visualisation/create tenant-conn (visualisation-body dataset-id) {})
       variant/value
       (get "id")))
 

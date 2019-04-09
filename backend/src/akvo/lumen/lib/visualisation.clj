@@ -17,10 +17,10 @@
   (let [id (squuid)
         v (first (upsert-visualisation tenant-conn
                                        {:id id
-                                        :dataset-id (get body "datasetId")
-                                        :type (get body "visualisationType")
-                                        :name (get body "name")
-                                        :spec (get body "spec")
+                                        :dataset-id (:datasetId body)
+                                        :type (:visualisationType body)
+                                        :name (:name body)
+                                        :spec (:spec body)
                                         :author jwt-claims}))]
     (lib/ok (assoc body
                    "id" (str id)
@@ -38,11 +38,11 @@
 
 (defn upsert [tenant-conn body jwt-claims]
   (let [v (upsert-visualisation tenant-conn
-                                {:id (get body "id")
-                                 :dataset-id (get body "datasetId")
-                                 :type (get body "visualisationType")
-                                 :name (get body "name")
-                                 :spec (get body "spec")
+                                {:id (:id body)
+                                 :dataset-id (:datasetId body)
+                                 :type (:visualisationType body)
+                                 :name (:name body)
+                                 :spec (:spec body)
                                  :author jwt-claims})]
     (lib/ok {:id (-> v first :id)})))
 
