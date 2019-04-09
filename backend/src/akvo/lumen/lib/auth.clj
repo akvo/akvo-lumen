@@ -3,6 +3,8 @@
    [akvo.commons.jwt :as jwt]
    [akvo.lumen.component.flow :as c.flow]
    [akvo.lumen.component.tenant-manager :as tenant-manager]
+   [akvo.lumen.specs.dataset :as dataset.s]
+   [akvo.lumen.specs.visualisation :as visualisation.s]
    [akvo.lumen.protocols :as p]
    [clojure.spec.alpha :as s]
    [clojure.set :as set]
@@ -117,3 +119,18 @@
 (defmethod ig/pre-init-spec :akvo.lumen.lib.auth/wrap-auth-datasets [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
                    ::flow-api]))
+
+(defn ids [spec data]
+  (let [ids (atom {:dataset-ids #{}
+                     :visualisation-ids #{}})
+         ds-fun (fn [id]
+                   (swap! ids update-in [:dataset-ids] conj id)
+                   true)
+         vis-fun (fn [id]
+                   (swap! ids update-in [:visualisation-ids] conj id)
+                   true)]
+     (binding [visualisation.s/*id?* vis-fun
+               dataset.s/*id?* ds-fun]
+       (let [explain (s/explain-str spec data)]
+         (swap! ids assoc :spec-valid? (= "Success!\n" explain))
+         (deref ids)))))

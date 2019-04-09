@@ -1,10 +1,12 @@
 (ns akvo.lumen.endpoint.visualisation
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.specs.visualisation :as visualisation.s]
+            [akvo.lumen.specs.visualisation.maps :as visualisation.maps.s]
             [akvo.lumen.lib.visualisation.maps :as maps]
+            [akvo.lumen.lib.auth :as l.auth]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
-            [akvo.lumen.specs.db.dataset-version :as dataset-version.s]
             [clojure.walk :as w]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
@@ -19,16 +21,17 @@
                               jwt-claims :jwt-claims
                               db-query-service :db-query-service
                               body :body}]
-                          (binding [dataset-version.s/*dataset-id?* (partial p/authorised? db-query-service :dataset)]
-                            (visualisation/create db-query-service (w/keywordize-keys body) jwt-claims)))}}]
+                          (let [vis-payload (w/keywordize-keys body)]
+                            (log/error :ids (l.auth/ids ::visualisation.s/visualisation vis-payload))
+                            (visualisation/create db-query-service vis-payload jwt-claims)))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        db-query-service :db-query-service
                                        body :body}]
                                    (let [{:strs [spec]} body
                                          layers (w/keywordize-keys (get-in spec ["layers"]))]
-                                     (binding [dataset-version.s/*dataset-id?* (partial p/authorised? db-query-service :dataset)]
-                                       (maps/create db-query-service windshaft-url layers))))}}]]
+                                     (log/error :ids (l.auth/ids ::visualisation.maps.s/layers layers))
+                                     (maps/create db-query-service windshaft-url layers)))}}]]
    ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
@@ -48,8 +51,9 @@
                                        db-query-service :db-query-service
                                        {:keys [id]} :path-params
                                        body :body}]
-                                   (binding [dataset-version.s/*dataset-id?* (partial p/authorised? db-query-service :dataset)]
-                                     (visualisation/update* db-query-service (w/keywordize-keys body) jwt-claims)))}
+                                   (let [vis-payload (w/keywordize-keys body)]
+                                     (log/error :ids (l.auth/ids ::visualisation.s/visualisation vis-payload))
+                                     (visualisation/update* db-query-service vis-payload jwt-claims)))}
                   :delete {:parameters {:path-params {:id string?}}
                            :handler (fn [{tenant :tenant
                                           db-query-service :db-query-service
