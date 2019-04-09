@@ -11,7 +11,7 @@
 (s/def ::auth-datasets (s/coll-of ::dataset.s/id :distinct true))
 (s/def ::auth-uuid-tree (s/keys :req-un [::auth-datasets ::auth-visualisations]))
 
-(s/fdef l.auth/new-dbqs
+#_(s/fdef l.auth/new-dbqs
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :auth-uuid-tree ::auth-uuid-tree)

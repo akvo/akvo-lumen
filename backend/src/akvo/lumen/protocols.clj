@@ -98,13 +98,7 @@
 (defprotocol CoerceToSql
   (coerce [this]))
 
-(defprotocol DBQueryService
-  (get-conn [_])
-  (authorised? [_ type* uuid])
-  (query
-    [_ qqname param-data options command-options]
-    [_ qqname param-data options]
-    [_ qqname param-data]
-    [_ qqname ]))
-
-
+(defprotocol AuthService
+  (auth?
+    [_ uuid-tree]
+    [_ type* uuid]))

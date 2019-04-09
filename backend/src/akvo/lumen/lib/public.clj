@@ -31,8 +31,7 @@
 (defn run-visualisation 
   [tenant-conn visualisation]
   (let [visualisation (walk/keywordize-keys visualisation)
-        dbqs (l.auth/new-dbqs tenant-conn {:auth-visualisations [(:id visualisation)] :auth-datasets [(:datasetId visualisation)]})
-        [dataset-tag dataset] (dataset/fetch-metadata dbqs (:datasetId visualisation))
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
         aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
         [tag query-result] (aggregation/query tenant-conn
                                               (:datasetId visualisation)
@@ -48,10 +47,8 @@
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
-            dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [dataset-id]
-                                               :auth-visualisations [(:id visualisation)]})
-            [map-data-tag map-data] (maps/create dbqs windshaft-url (walk/keywordize-keys layers))
-            [dataset-tag dataset] (dataset/fetch-metadata dbqs dataset-id)]
+            [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
+            [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
           (when (and (= map-data-tag ::lib/ok)
                      (= dataset-tag ::lib/ok))
             {:datasets {dataset-id dataset}
@@ -67,8 +64,7 @@
 (defn run-unknown-type-visualisation 
   [tenant-conn visualisation]
   (let [dataset-id (:datasetId visualisation)
-        dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [dataset-id]})
-        [tag dataset] (dataset/fetch-metadata dbqs dataset-id)]
+        [tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
     (when (= tag ::lib/ok)
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))

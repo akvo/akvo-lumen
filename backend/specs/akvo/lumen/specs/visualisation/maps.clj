@@ -48,7 +48,7 @@
 
 (s/fdef lib.vis.maps/create
   :args (s/cat
-         :db-query-service ::protocols.s/db-query-service
+         :db-conn ::db.s/tenant-connection
 	 :windshaft-url string?
 	 :layers ::layers)
   :ret any?)

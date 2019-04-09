@@ -52,5 +52,5 @@
 (defn >api-model [ds-source]
   (let [instance (get ds-source "instance")
         survey (get ds-source "surveyId")]
-    {:instance_id (if (= "uat1" instance) (str "akvoflow-" instance) instance)
+    {:instance_id instance
      :survey_id survey}))

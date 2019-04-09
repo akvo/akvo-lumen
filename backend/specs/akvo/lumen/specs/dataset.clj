@@ -7,3 +7,8 @@
 (s/def ::id (s/with-gen
               #'*id?*
               lumen.s/str-uuid-gen))
+
+(s/def ::dataset (s/keys :req-un [::id]))
+
+(s/def ::datasets (s/coll-of ::dataset :distinct true))
+

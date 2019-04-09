@@ -583,12 +583,12 @@
                                            :data         target-data})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} origin-dataset-id)
         tx                   (gen-transformation "core/merge-datasets"
-                                                 {::transformation.merge-datasets.source.s/datasetId            target-dataset-id
-                                                  ::transformation.merge-datasets.source.s/mergeColumn          "c1"
+                                                 {::transformation.merge-datasets.source.s/mergeColumn          "c1"
                                                   ::transformation.merge-datasets.source.s/aggregationDirection "DESC"
                                                   ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]
                                                   ::transformation.merge-datasets.target.s/mergeColumn          "c1"}
-                                                 [:source :aggregationColumn] nil)
+                                                 [:source :aggregationColumn] nil
+                                                 [:source :datasetId] target-dataset-id)
         [tag _ :as res] (apply-transformation {:type           :transformation
                                                :transformation tx})]
     (is (= ::lib/ok tag))

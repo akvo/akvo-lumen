@@ -30,6 +30,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
+
 (defn retry-job-execution [tenant-conn job-execution-id with-job?]
   (dh/with-retry {:retry-if (fn [v e] (not v))
                   :max-retries 20
@@ -184,8 +185,6 @@
   (fn [handler]
     (fn [{tenant :tenant
           :as req}]
-      (let [tenant-conn (p/connection tenant-manager tenant)
-            dbqs (l.auth/new-dbqs tenant-conn
-                                  {:auth-datasets       (mapv :id (all-datasets tenant-conn))
-                                   :auth-visualisations (mapv :id (all-visualisations tenant-conn))})]
-       (handler (assoc req :db-query-service dbqs))))))
+      (handler (assoc req :auth-service
+                      (l.auth/new-auth-service {:auth-datasets (map :id (all-datasets (p/connection tenant-manager tenant)))
+                                                :auth-visualisations (mapv :id (all-visualisations tenant-conn))}))))))
