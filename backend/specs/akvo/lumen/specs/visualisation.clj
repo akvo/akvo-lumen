@@ -43,7 +43,7 @@
 
 (s/def ::visualisation
   (s/multi-spec vis :visualisationType))
-
+(s/def ::visualisations (s/coll-of ::visualisation :distinct true))
 (create-ns  'akvo.lumen.specs.visualisation.pie)
 (alias 'pie.s 'akvo.lumen.specs.visualisation.pie)
 
