@@ -54,9 +54,7 @@
             {:datasets {dataset-id dataset}
              :visualisations {(:id visualisation) (merge visualisation map-data)}
              :metadata {(:id visualisation) map-data}}))
-      (let [dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets []
-                                               :auth-visualisations [(:id visualisation)]})
-            [map-data-tag map-data] (maps/create dbqs windshaft-url (walk/keywordize-keys layers))]
+      (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))]
           (when (= map-data-tag ::lib/ok)
             {:visualisations {(:id visualisation) (merge visualisation map-data)}
              :metadata {(:id visualisation) map-data}})))))
@@ -71,8 +69,7 @@
 
 (defn visualisation-response-data [tenant-conn id windshaft-url]
   (try
-    (let [dbqs (l.auth/new-dbqs tenant-conn {:auth-visualisations [id] :auth-datasets []})
-          [tag vis] (visualisation/fetch dbqs id)]
+    (let [[tag vis] (visualisation/fetch tenant-conn id)]
       (when (= tag ::lib/ok)
         (condp contains? (:visualisationType vis)
           #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)

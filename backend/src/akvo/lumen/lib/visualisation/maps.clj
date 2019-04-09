@@ -97,17 +97,17 @@
     (lib/ok {:layerGroupId layer-group-id
              :layerMetadata layer-meta})))
 
-(defn metadata-layers [dbqs layers]
+(defn metadata-layers [tenant-conn layers]
   (map (fn [current-layer]
          (let [current-layer-type (:layerType current-layer)
                current-dataset-id (if (= current-layer-type "raster")
                                     (:rasterId current-layer)
                                     (:datasetId current-layer))
                {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
-                                                           (raster-by-id (p/get-conn dbqs) {:id current-dataset-id})
-                                                           (p/query dbqs #'dataset-by-id {:id current-dataset-id}))
+                                                           (raster-by-id tenant-conn {:id current-dataset-id})
+                                                           (dataset-by-id tenant-conn {:id current-dataset-id}))
                current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
-           (map-metadata/build (p/get-conn dbqs)
+           (map-metadata/build tenant-conn
                                (or raster_table
                                    table-name
                                    (when (not= current-layer-type "raster")
@@ -117,14 +117,14 @@
        layers))
 
 (defn create
-  [dbqs windshaft-url layers]
+  [tenant-conn windshaft-url layers]
   (try
     (conform-create-args layers)
-    (let [metadata-array (metadata-layers dbqs layers)
-          map-config (map-config/build (p/get-conn dbqs) "todo: remove this" layers metadata-array)
+    (let [metadata-array (metadata-layers tenant-conn layers)
+          map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
           layer-group-id (-> (client/post (format "%s/layergroup" windshaft-url)
                                           {:body (json/encode map-config)
-                                           :headers (headers (p/get-conn dbqs))
+                                           :headers (headers tenant-conn)
                                            :content-type :json})
                              :body json/decode (get "layergroupid"))]
       (lib/ok {:layerGroupId layer-group-id

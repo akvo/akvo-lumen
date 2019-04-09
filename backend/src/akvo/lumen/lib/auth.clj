@@ -19,16 +19,18 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defrecord AuthServiceImpl [auth-datasets-set]
+(defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set]
   p/AuthService
-  (auth? [this {:keys [dataset-ids]}]
-    {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))})
+  (auth? [this {:keys [dataset-ids visualisation-ids]}]
+    {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))
+     :auth-visualisations (set/intersection auth-visualisations-set (set visualisation-ids))})
   (auth? [this type* uuid]
     (condp = type*
-      :dataset (when (contains? auth-datasets-set uuid) uuid))))
+      :dataset (when (contains? auth-datasets-set uuid) uuid)
+      :visualisation (when (contains? auth-visualisations-set uuid) uuid))))
 
-(defn new-auth-service [{:keys [auth-datasets] :as auth-uuid-tree}]
-  (AuthServiceImpl. (set auth-datasets)))
+(defn new-auth-service [{:keys [auth-datasets auth-visualisations] :as auth-uuid-tree}]
+  (AuthServiceImpl. (set auth-datasets) (set auth-visualisations)))
 
 (defn match-by-jwt-family-name?
   "Feature flag condition based on `First Name` jwt-claims

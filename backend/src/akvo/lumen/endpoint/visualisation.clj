@@ -3,6 +3,7 @@
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.specs.visualisation :as visualisation.s]
             [akvo.lumen.specs.visualisation.maps :as visualisation.maps.s]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [akvo.lumen.lib.auth :as l.auth]
             [clojure.spec.alpha :as s]
@@ -11,27 +12,30 @@
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
+(defn all-visualisations [auth-service tenant-conn]
+  (let [vis-col (visualisation/all tenant-conn)
+        ids (l.auth/ids ::visualisation.s/visualisations vis-col)
+        auth-vis-col (:auth-visualisations (p/auth? auth-service ids))
+        auth-res (filter #(contains? auth-vis-col (:id %)) vis-col)]
+    (lib/ok auth-res)))
+
 (defn routes [{:keys [windshaft-url tenant-manager] :as opts}]
   ["/visualisations"
    ["" {:get {:handler (fn [{tenant :tenant
-                             db-query-service :db-query-service}]
-                         (visualisation/all db-query-service))}
+                             auth-service :auth-service}]
+                         (all-visualisations auth-service (p/connection tenant-manager tenant)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
-                              db-query-service :db-query-service
                               body :body}]
                           (let [vis-payload (w/keywordize-keys body)]
-                            (log/error :ids (l.auth/ids ::visualisation.s/visualisation vis-payload))
-                            (visualisation/create db-query-service vis-payload jwt-claims)))}}]
+                            (visualisation/create (p/connection tenant-manager tenant) vis-payload jwt-claims)))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
-                                       db-query-service :db-query-service
                                        body :body}]
                                    (let [{:strs [spec]} body
                                          layers (w/keywordize-keys (get-in spec ["layers"]))]
-                                     (log/error :ids (l.auth/ids ::visualisation.maps.s/layers layers))
-                                     (maps/create db-query-service windshaft-url layers)))}}]]
+                                     (maps/create (p/connection tenant-manager tenant) windshaft-url layers)))}}]]
    ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
@@ -41,24 +45,20 @@
    ;; todo: fix path routing inconsistency here 
    ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
                       :handler (fn [{tenant :tenant
-                                     db-query-service :db-query-service
-                                       {:keys [id]} :path-params}]
-                                   (visualisation/fetch db-query-service id))}
+                                     {:keys [id]} :path-params}]
+                                   (visualisation/fetch (p/connection tenant-manager tenant) id))}
                   :put {:parameters {:body map?
                                      :path-params {:id string?}}
                         :handler (fn [{tenant :tenant
                                        jwt-claims :jwt-claims
-                                       db-query-service :db-query-service
                                        {:keys [id]} :path-params
                                        body :body}]
                                    (let [vis-payload (w/keywordize-keys body)]
-                                     (log/error :ids (l.auth/ids ::visualisation.s/visualisation vis-payload))
-                                     (visualisation/update* db-query-service vis-payload jwt-claims)))}
+                                     (visualisation/upsert (p/connection tenant-manager tenant) vis-payload jwt-claims)))}
                   :delete {:parameters {:path-params {:id string?}}
                            :handler (fn [{tenant :tenant
-                                          db-query-service :db-query-service
                                           {:keys [id]} :path-params}]
-                                      (visualisation/delete db-query-service id))}}]]])
+                                      (visualisation/delete (p/connection tenant-manager tenant) id))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (routes opts))

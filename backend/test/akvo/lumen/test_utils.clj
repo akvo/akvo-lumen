@@ -187,4 +187,4 @@
           :as req}]
       (handler (assoc req :auth-service
                       (l.auth/new-auth-service {:auth-datasets (map :id (all-datasets (p/connection tenant-manager tenant)))
-                                                :auth-visualisations (mapv :id (all-visualisations tenant-conn))}))))))
+                                                :auth-visualisations (mapv :id (all-visualisations (p/connection tenant-manager tenant)))}))))))

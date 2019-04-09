@@ -43,7 +43,7 @@
 
 (s/def ::visualisation
   (s/multi-spec vis :visualisationType))
-
+(s/def ::visualisations (s/coll-of ::visualisation :distinct true))
 (create-ns  'akvo.lumen.specs.visualisation.pie)
 (alias 'pie.s 'akvo.lumen.specs.visualisation.pie)
 
@@ -108,14 +108,14 @@
 
 (s/fdef visualisation/create
   :args (s/cat
-         :db-query-service ::protocols.s/db-query-service
+         :db-conn ::db.s/tenant-connection
 	 :body ::visualisation
 	 :jwt-claims map?)
   :ret any?)
 
 (s/fdef visualisation/update*
   :args (s/cat
-         :db-query-service ::protocols.s/db-query-service
+         :db-conn ::db.s/tenant-connection
 	 :body ::visualisation
 	 :jwt-claims map?)
   :ret any?)
