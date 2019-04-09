@@ -3,6 +3,7 @@
    [akvo.commons.jwt :as jwt]
    [akvo.lumen.component.flow :as c.flow]
    [akvo.lumen.component.tenant-manager :as tenant-manager]
+   [akvo.lumen.specs :as lumen.s]
    [akvo.lumen.specs.dataset :as dataset.s]
    [akvo.lumen.specs.visualisation :as visualisation.s]
    [akvo.lumen.protocols :as p]
@@ -91,10 +92,15 @@
                    :visualisation-ids #{}})
         ds-fun (fn [id]
                  (swap! ids update-in [:dataset-ids] conj id)
-                 true)
+                 (try
+                   (lumen.s/str-uuid? id)
+                   (catch Exception e false)))
         vis-fun (fn [id]
                   (swap! ids update-in [:visualisation-ids] conj id)
-                  true)]
+                  (try
+                    (lumen.s/str-uuid? id)
+                    (catch Exception e false)
+                    ))]
     (binding [visualisation.s/*id?* vis-fun
               dataset.s/*id?* ds-fun]
       (let [explain (s/explain-str spec data)]
