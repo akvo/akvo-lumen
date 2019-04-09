@@ -91,16 +91,15 @@
   (let [ids (atom {:dataset-ids #{}
                    :visualisation-ids #{}})
         ds-fun (fn [id]
-                 (swap! ids update-in [:dataset-ids] conj id)
+                 (swap! ids update :dataset-ids conj id)
                  (try
                    (lumen.s/str-uuid? id)
                    (catch Exception e false)))
         vis-fun (fn [id]
-                  (swap! ids update-in [:visualisation-ids] conj id)
+                  (swap! ids update :visualisation-ids conj id)
                   (try
                     (lumen.s/str-uuid? id)
-                    (catch Exception e false)
-                    ))]
+                    (catch Exception e false)))]
     (binding [visualisation.s/*id?* vis-fun
               dataset.s/*id?* ds-fun]
       (let [explain (s/explain-str spec data)]
