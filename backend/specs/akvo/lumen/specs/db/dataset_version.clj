@@ -1,6 +1,7 @@
 (ns akvo.lumen.specs.db.dataset-version
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
+            [akvo.lumen.specs.dataset :as dataset.s]
             [akvo.lumen.specs.import.column :as import.column.s]
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column]
             [akvo.lumen.util :as u]
@@ -8,11 +9,7 @@
 
 (s/def ::id ::lumen.s/str-uuid)
 
-(def ^:dynamic *dataset-id?*  lumen.s/str-uuid?)
-
-(s/def ::dataset-id (s/with-gen
-                      #'*dataset-id?*
-                      lumen.s/str-uuid-gen))
+(s/def ::dataset-id ::dataset.s/id)
 
 (s/def ::job-execution-id (s/nilable ::lumen.s/str-uuid))
 

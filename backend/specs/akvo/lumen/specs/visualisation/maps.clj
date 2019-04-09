@@ -44,10 +44,11 @@
                             ::layer.geo-location.s/geom])))
 
 (s/def ::layer (s/multi-spec layer-type :layerType))
+(s/def ::layers (s/coll-of ::layer :kind vector? :distinct true))
 
 (s/fdef lib.vis.maps/create
   :args (s/cat
          :db-query-service ::protocols.s/db-query-service
 	 :windshaft-url string?
-	 :layers (s/coll-of ::layer :kind vector? :distinct true))
+	 :layers ::layers)
   :ret any?)

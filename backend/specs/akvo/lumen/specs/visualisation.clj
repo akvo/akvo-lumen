@@ -25,8 +25,11 @@
 (s/def ::modified ::date-number)
 (s/def ::datasetId (s/nilable ::db.dsv.s/dataset-id))
 (s/def ::status #{"OK"})
+
+(def ^:dynamic *id?*  lumen.s/str-uuid?)
+
 (s/def ::id (s/with-gen
-              lumen.s/str-uuid?
+              #'*id?*
               lumen.s/str-uuid-gen))
 
 (s/def ::version int?)
