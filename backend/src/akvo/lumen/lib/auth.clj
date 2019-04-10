@@ -21,8 +21,12 @@
 (defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set]
   p/AuthService
   (allow? [this d]
-    (and (set/subset? auth-visualisations-set (:auth-visualisations (p/auth? this d)))
-         (set/subset? auth-datasets-set (:auth-datasets (p/auth? this d)))))
+    (let [res (p/auth? this d)]
+      (log/error :res res)
+      (log/error :vis (set/subset? (:auth-visualisations res) auth-visualisations-set))
+      (log/error :ds (set/subset? (:auth-datasets res) auth-datasets-set))
+      (and (set/subset? (:auth-visualisations res) auth-visualisations-set)
+           (set/subset? (:auth-datasets res) auth-datasets-set))))
   (auth? [this {:keys [dataset-ids visualisation-ids]}]
     {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))
      :auth-visualisations (set/intersection auth-visualisations-set (set visualisation-ids))})
