@@ -17,7 +17,7 @@
 (defn all-datasets [auth-service tenant-conn]
   (let [res (dataset/all* tenant-conn)
         ids (l.auth/ids ::dataset.s/datasets res)
-        auth-datasets (:auth-datasets (p/auth? auth-service ids))
+        auth-datasets (:auth-datasets (p/auth auth-service ids))
         auth-res (filter #(contains? auth-datasets (:id %)) res)]
     (lib/ok auth-res)))
 

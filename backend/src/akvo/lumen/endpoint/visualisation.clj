@@ -16,7 +16,7 @@
   (let [visualisations      (visualisation/all tenant-conn)
         auth-visualisations (->> visualisations
                                  (l.auth/ids ::visualisation.s/visualisations)
-                                 (p/auth? auth-service)
+                                 (p/auth auth-service)
                                  :auth-visualisations)]
     (->> visualisations
          (filter #(contains? auth-visualisations (:id %)))
