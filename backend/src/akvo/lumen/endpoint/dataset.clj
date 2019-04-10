@@ -42,9 +42,13 @@
                         (lib/not-authorized {:id id}))))]}
     [["" {:get {:parameters {:path-params {:id string?}}
                 :handler (fn [{tenant :tenant
+                               auth-service :auth-service
                                {:keys [id]} :path-params}]
                            (if-let [res (dataset/fetch (p/connection tenant-manager tenant) id)]
-                             (lib/ok res)
+                             (let [ids (l.auth/ids ::dataset.s/dataset res)]
+                               (if (p/allow? auth-service ids)
+                                 (lib/ok res)
+                                 (lib/not-authorized ids)))
                              (lib/not-found {:error "Not found"})))}
           :put {:parameters {:body map?
                              :path-params {:id string?}}
