@@ -67,17 +67,15 @@
 
 (defn fetch
   [tenant-conn id]
-  (if-let [dataset (dataset-by-id tenant-conn {:id id})]
+  (when-let [dataset (dataset-by-id tenant-conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query tenant-conn
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
-      (lib/ok
-       (-> dataset
-           (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
-           (rename-keys {:title :name})
-           (assoc :rows data :columns columns :status "OK"))))
-    (lib/not-found {:error "Not found"})))
+      (-> dataset
+          (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
+          (rename-keys {:title :name})
+          (assoc :rows data :columns columns :status "OK")))))
 
 (defn delete
   [tenant-conn id]
