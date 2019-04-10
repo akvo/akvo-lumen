@@ -30,9 +30,13 @@
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              auth-service :auth-service
                               body :body}]
-                          (let [vis-payload (w/keywordize-keys body)]
-                            (lib/ok (visualisation/create (p/connection tenant-manager tenant) vis-payload jwt-claims))))}}]
+                          (let [vis-payload (w/keywordize-keys body)
+                                ids (l.auth/ids ::visualisation.s/visualisation vis-payload)]
+                            (if (p/allow? auth-service ids)
+                              (lib/ok (visualisation/create (p/connection tenant-manager tenant) vis-payload jwt-claims))
+                              (lib/not-authorized {:ids ids}))))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        body :body}]
