@@ -27,8 +27,7 @@
 
 (defn create-visualisation [tenant-conn dataset-id]
   (-> (visualisation/create tenant-conn (visualisation-body dataset-id) {})
-      variant/value
-      (get "id")))
+      :id))
 
 (defn create-dashboard [tenant-conn]
   (-> (dashboard/create tenant-conn {"title" ""} {})

@@ -22,11 +22,11 @@
                                         :name (:name body)
                                         :spec (:spec body)
                                         :author jwt-claims}))]
-    (lib/ok (assoc body
-                   "id" (str id)
-                   "status" "OK"
-                   "created" (:created v)
-                   "modified" (:modified v)))))
+    (assoc body
+           :id (str id)
+           :status "OK"
+           :created (:created v)
+           :modified (:modified v))))
 
 (defn fetch [tenant-conn id]
   (if-let [v (visualisation-by-id tenant-conn

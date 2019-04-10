@@ -32,7 +32,7 @@
                               jwt-claims :jwt-claims
                               body :body}]
                           (let [vis-payload (w/keywordize-keys body)]
-                            (visualisation/create (p/connection tenant-manager tenant) vis-payload jwt-claims)))}}]
+                            (lib/ok (visualisation/create (p/connection tenant-manager tenant) vis-payload jwt-claims))))}}]
    ["/maps" ["" {:post {:parameters {:body map?}
                         :handler (fn [{tenant :tenant
                                        body :body}]
