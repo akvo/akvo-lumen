@@ -50,30 +50,36 @@
                                       (let [{:strs [rasterId spec]} body]
                                         (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)))}}]]
    ;; todo: fix path routing inconsistency here 
-   ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
-                      :handler (fn [{tenant :tenant
-                                     auth-service :auth-service
-                                     {:keys [id]} :path-params}]
-                                 (if (p/allow? auth-service (l.auth/ids ::visualisation.s/id id))
-                                   (if-let [res (visualisation/fetch (p/connection tenant-manager tenant) id)]
-                                     (let [ids (l.auth/ids ::visualisation.s/visualisation res)]
-                                       (if (p/allow? auth-service ids)
-                                        (lib/ok res)
-                                        (lib/not-authorized ids)))
-                                     (lib/not-found {:error "Not found"}))
-                                   (lib/not-authorized {:id id})))}
-                  :put {:parameters {:body map?
-                                     :path-params {:id string?}}
-                        :handler (fn [{tenant :tenant
-                                       jwt-claims :jwt-claims
-                                       {:keys [id]} :path-params
-                                       body :body}]
-                                   (let [vis-payload (w/keywordize-keys body)]
-                                     (visualisation/upsert (p/connection tenant-manager tenant) vis-payload jwt-claims)))}
-                  :delete {:parameters {:path-params {:id string?}}
-                           :handler (fn [{tenant :tenant
-                                          {:keys [id]} :path-params}]
-                                      (visualisation/delete (p/connection tenant-manager tenant) id))}}]]])
+   ["/:id"
+    {:middleware [(fn [handler]
+                    (fn [{{:keys [id]} :path-params
+                          auth-service :auth-service
+                          :as req}]
+                      (if (p/allow? auth-service (l.auth/ids ::visualisation.s/id id))
+                        (handler req)
+                        (lib/not-authorized {:id id}))))]}
+    ["" {:get {:parameters {:path-params {:id string?}}
+               :handler (fn [{tenant :tenant
+                              auth-service :auth-service
+                              {:keys [id]} :path-params}]
+                          (if-let [res (visualisation/fetch (p/connection tenant-manager tenant) id)]
+                            (let [ids (l.auth/ids ::visualisation.s/visualisation res)]
+                              (if (p/allow? auth-service ids)
+                                (lib/ok res)
+                                (lib/not-authorized ids)))
+                            (lib/not-found {:error "Not found"})))}
+         :put {:parameters {:body map?
+                            :path-params {:id string?}}
+               :handler (fn [{tenant :tenant
+                              jwt-claims :jwt-claims
+                              {:keys [id]} :path-params
+                              body :body}]
+                          (let [vis-payload (w/keywordize-keys body)]
+                            (visualisation/upsert (p/connection tenant-manager tenant) vis-payload jwt-claims)))}
+         :delete {:parameters {:path-params {:id string?}}
+                  :handler (fn [{tenant :tenant
+                                 {:keys [id]} :path-params}]
+                             (visualisation/delete (p/connection tenant-manager tenant) id))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.visualisation/visualisation  [_ opts]
   (routes opts))
