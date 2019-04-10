@@ -43,7 +43,9 @@
     [["" {:get {:parameters {:path-params {:id string?}}
                 :handler (fn [{tenant :tenant
                                {:keys [id]} :path-params}]
-                           (dataset/fetch (p/connection tenant-manager tenant) id))}
+                           (if-let [res (dataset/fetch (p/connection tenant-manager tenant) id)]
+                             (lib/ok res)
+                             (lib/not-found {:error "Not found"})))}
           :put {:parameters {:body map?
                              :path-params {:id string?}}
                 :handler (fn [{tenant :tenant
