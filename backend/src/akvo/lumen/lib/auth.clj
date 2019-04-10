@@ -22,9 +22,6 @@
   p/AuthService
   (allow? [this d]
     (let [res (p/auth? this d)]
-      (log/error :res res)
-      (log/error :vis (set/subset? (:auth-visualisations res) auth-visualisations-set))
-      (log/error :ds (set/subset? (:auth-datasets res) auth-datasets-set))
       (and (set/subset? (:auth-visualisations res) auth-visualisations-set)
            (set/subset? (:auth-datasets res) auth-datasets-set))))
   (auth? [this {:keys [dataset-ids visualisation-ids]}]
