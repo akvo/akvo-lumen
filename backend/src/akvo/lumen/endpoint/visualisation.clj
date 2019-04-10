@@ -52,10 +52,16 @@
    ;; todo: fix path routing inconsistency here 
    ["/:id" ["" {:get {:parameters {:path-params {:id string?}}
                       :handler (fn [{tenant :tenant
+                                     auth-service :auth-service
                                      {:keys [id]} :path-params}]
-                                 (if-let [res (visualisation/fetch (p/connection tenant-manager tenant) id)]
-                                     (lib/ok res)
-                                     (lib/not-found {:error "Not found"})))}
+                                 (if (p/allow? auth-service (l.auth/ids ::visualisation.s/id id))
+                                   (if-let [res (visualisation/fetch (p/connection tenant-manager tenant) id)]
+                                     (let [ids (l.auth/ids ::visualisation.s/visualisation res)]
+                                       (if (p/allow? auth-service ids)
+                                        (lib/ok res)
+                                        (lib/not-authorized ids)))
+                                     (lib/not-found {:error "Not found"}))
+                                   (lib/not-authorized {:id id})))}
                   :put {:parameters {:body map?
                                      :path-params {:id string?}}
                         :handler (fn [{tenant :tenant
