@@ -8,10 +8,10 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn all [tenant-conn]
-  (lib/ok (all-visualisations tenant-conn
-                              {}
-                              {}
-                              {:identifiers identity})))
+  (all-visualisations tenant-conn
+                      {}
+                      {}
+                      {:identifiers identity}))
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)

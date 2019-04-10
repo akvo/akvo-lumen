@@ -3,6 +3,14 @@
 SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified, author
 FROM visualisation;
 
+-- :name all-maps-visualisations-with-dataset-id :? :*
+-- :doc All maps visualisations with dataset-ids.
+select  id, replace(((jsonb_array_elements(spec->'layers')->'datasetId')::text), '"', '') as "datasetId"  from visualisation where type='map';
+
+-- :name all-no-maps-visualisations :? :*
+-- :doc All no maps visualisations with dataset-ids.
+select id, dataset_id as "datasetId" from visualisation where type!='map';
+
 -- :name visualisation-by-id :? :1
 -- :doc grab visualisation by id
 SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified

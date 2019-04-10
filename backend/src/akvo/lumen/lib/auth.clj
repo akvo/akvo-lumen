@@ -15,18 +15,21 @@
    [integrant.core :as ig]
    [reitit.core :as rc]))
 
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defrecord AuthServiceImpl [auth-datasets-set]
+(defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set]
   p/AuthService
-  (auth? [this {:keys [dataset-ids]}]
-    {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))})
+  (auth? [this {:keys [dataset-ids visualisation-ids]}]
+    {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))
+     :auth-visualisations (set/intersection auth-visualisations-set (set visualisation-ids))})
   (auth? [this type* uuid]
     (condp = type*
-      :dataset (when (contains? auth-datasets-set uuid) uuid))))
+      :dataset (when (contains? auth-datasets-set uuid) uuid)
+      :visualisation (when (contains? auth-visualisations-set uuid) uuid))))
 
-(defn new-auth-service [{:keys [auth-datasets] :as auth-uuid-tree}]
-  (AuthServiceImpl. (set auth-datasets)))
+(defn new-auth-service [{:keys [auth-datasets auth-visualisations] :as auth-uuid-tree}]
+  (AuthServiceImpl. (set auth-datasets) (set auth-visualisations)))
 
 (defn match-by-jwt-family-name?
   "Feature flag condition based on `First Name` jwt-claims
@@ -46,7 +49,10 @@
                  "/api/datasets/:id" {:methods #{:get :put :delete}}
                  "/api/datasets/:id/meta" {:methods #{:get}}
                  "/api/datasets/:id/update" {:methods #{:post}}
-                 "/api/datasets" {:methods #{:get}}})
+                 "/api/datasets" {:methods #{:get}}
+                 "/api/visualisations" {:methods #{:get :post}}
+                 "/api/visualisations/:id" {:methods #{:get :put :delete}}
+                 "/api/visualisations/maps" {:methods #{:post}}})
 
 (defn- auth-datasets [all-datasets permissions]
   (->> all-datasets
@@ -58,12 +64,23 @@
               true))))
        (mapv :id)))
 
+(defn- auth-visualisations [tenant-conn auth-datasets-set]
+  (let [maps* (->> (all-maps-visualisations-with-dataset-id tenant-conn {} {} {:identifiers identity})
+                   (reduce (fn [c {:keys [id datasetId]}] (update c id #(set (conj % datasetId)))) {})
+                   (filter #(set/superset? auth-datasets-set (val %)))
+                   (mapv first))
+        others* (mapv :id (all-no-maps-visualisations tenant-conn {} {} {:identifiers identity}))]
+    (log/debug :vis-maps* maps*)
+    (log/debug :vis-others* others*)
+    (apply conj others* maps*)))
+
 (defn wrap-auth-datasets
   "Add to the request an auth-service protocol impl using flow-api check_permissions"
   [tenant-manager flow-api]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
-      (let [dss            (all-datasets (p/connection tenant-manager tenant))
+      (let [tenant-conn    (p/connection tenant-manager tenant)
+            dss            (all-datasets tenant-conn)
             auth-uuid-tree (if (and (match-by-jwt-family-name? request)
                                     (match-by-template-and-method? auth-calls request))
                              (let [permissions   (->> (map :source dss)
@@ -73,8 +90,10 @@
                                                       :body
                                                       set)
                                    auth-datasets (auth-datasets dss permissions)]
-                               {:auth-datasets auth-datasets})
-                             {:auth-datasets (mapv :id dss)})]
+                               {:auth-datasets       auth-datasets
+                                :auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))})
+                             {:auth-datasets       (mapv :id dss)
+                              :auth-visualisations (mapv :id (all-visualisations tenant-conn))})]
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 

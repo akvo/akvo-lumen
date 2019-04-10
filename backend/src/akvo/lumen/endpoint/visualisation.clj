@@ -1,17 +1,32 @@
 (ns akvo.lumen.endpoint.visualisation
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.specs.visualisation :as visualisation.s]
+            [akvo.lumen.specs.visualisation.maps :as visualisation.maps.s]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.visualisation.maps :as maps]
+            [akvo.lumen.lib.auth :as l.auth]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [clojure.walk :as w]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
+(defn all-visualisations [auth-service tenant-conn]
+  (let [visualisations      (visualisation/all tenant-conn)
+        auth-visualisations (->> visualisations
+                                 (l.auth/ids ::visualisation.s/visualisations)
+                                 (p/auth? auth-service)
+                                 :auth-visualisations)]
+    (->> visualisations
+         (filter #(contains? auth-visualisations (:id %)))
+         (lib/ok))))
+
 (defn routes [{:keys [windshaft-url tenant-manager] :as opts}]
   ["/visualisations"
-   ["" {:get {:handler (fn [{tenant :tenant}]
-                         (visualisation/all (p/connection tenant-manager tenant)))}
+   ["" {:get {:handler (fn [{tenant :tenant
+                             auth-service :auth-service}]
+                         (all-visualisations auth-service (p/connection tenant-manager tenant)))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
