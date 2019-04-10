@@ -101,4 +101,7 @@
 (defprotocol AuthService
   (auth?
     [_ uuid-tree]
-    [_ type* uuid]))
+    [_ type* uuid]
+    )
+  (allow? [_ d]))
+
