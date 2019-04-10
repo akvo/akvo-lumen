@@ -69,12 +69,11 @@
 
 (defn visualisation-response-data [tenant-conn id windshaft-url]
   (try
-    (let [[tag vis] (visualisation/fetch tenant-conn id)]
-      (when (= tag ::lib/ok)
-        (condp contains? (:visualisationType vis)
-          #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
-          (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
-          (run-unknown-type-visualisation tenant-conn vis))))
+    (when-let [vis (visualisation/fetch tenant-conn id)]
+      (condp contains? (:visualisationType vis)
+        #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
+        (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
+        (run-unknown-type-visualisation tenant-conn vis)))
     (catch Exception e
       (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
 

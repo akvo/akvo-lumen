@@ -29,12 +29,11 @@
            :modified (:modified v))))
 
 (defn fetch [tenant-conn id]
-  (if-let [v (visualisation-by-id tenant-conn
-                                  {:id id}
-                                  {}
-                                  {:identifiers identity})]
-    (lib/ok (dissoc v :author))
-    (lib/not-found {:error "Not found"})))
+  (when-let [v (visualisation-by-id tenant-conn
+                                    {:id id}
+                                    {}
+                                    {:identifiers identity})]
+    (dissoc v :author)))
 
 (defn upsert [tenant-conn body jwt-claims]
   (let [v (upsert-visualisation tenant-conn
