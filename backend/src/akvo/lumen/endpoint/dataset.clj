@@ -32,31 +32,39 @@
                               body :body}]
                           (dataset/create (p/connection tenant-manager tenant) (merge import-config upload-config)
                                           error-tracker jwt-claims (w/stringify-keys body)))}}]
-   ["/:id" [["" {:get {:parameters {:path-params {:id string?}}
-                       :handler (fn [{tenant :tenant
-                                      {:keys [id]} :path-params}]
-                                  (dataset/fetch (p/connection tenant-manager tenant) id))}
-                 :put {:parameters {:body map?
-                                    :path-params {:id string?}}
-                       :handler (fn [{tenant :tenant
-                                      body :body
-                                      {:keys [id]} :path-params}]
-                                  (dataset/update-meta (p/connection tenant-manager tenant) id body))}
-                 :delete {:parameters {:path-params {:id string?}}
-                          :handler (fn [{tenant :tenant
-                                         {:keys [id]} :path-params}]
-                                     (dataset/delete (p/connection tenant-manager tenant) id))}}]
-            ["/meta" {:get {:parameters {:path-params {:id string?}}
-                            :handler (fn [{tenant :tenant
-                                           {:keys [id]} :path-params}]
-                                       (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
-            ["/update" {:post {:parameters {:path-params {:id string?}}
-                               :handler (fn [{tenant :tenant
-                                              jwt-claims :jwt-claims
-                                              body :body
-                                              {:keys [id]} :path-params}]
-                                          (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                                          error-tracker id (w/stringify-keys body)))}}]]]])
+   ["/:id"
+    {:middleware [(fn [handler]
+                    (fn [{{:keys [id]} :path-params
+                          auth-service :auth-service
+                          :as req}]
+                      (if (p/allow? auth-service (l.auth/ids ::dataset.s/id id))
+                        (handler req)
+                        (lib/not-authorized {:id id}))))]}
+    [["" {:get {:parameters {:path-params {:id string?}}
+                :handler (fn [{tenant :tenant
+                               {:keys [id]} :path-params}]
+                           (dataset/fetch (p/connection tenant-manager tenant) id))}
+          :put {:parameters {:body map?
+                             :path-params {:id string?}}
+                :handler (fn [{tenant :tenant
+                               body :body
+                               {:keys [id]} :path-params}]
+                           (dataset/update-meta (p/connection tenant-manager tenant) id body))}
+          :delete {:parameters {:path-params {:id string?}}
+                   :handler (fn [{tenant :tenant
+                                  {:keys [id]} :path-params}]
+                              (dataset/delete (p/connection tenant-manager tenant) id))}}]
+     ["/meta" {:get {:parameters {:path-params {:id string?}}
+                     :handler (fn [{tenant :tenant
+                                    {:keys [id]} :path-params}]
+                                (dataset/fetch-metadata (p/connection tenant-manager tenant) id))}}]
+     ["/update" {:post {:parameters {:path-params {:id string?}}
+                        :handler (fn [{tenant :tenant
+                                       jwt-claims :jwt-claims
+                                       body :body
+                                       {:keys [id]} :path-params}]
+                                   (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
+                                                   error-tracker id (w/stringify-keys body)))}}]]]])
 
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
