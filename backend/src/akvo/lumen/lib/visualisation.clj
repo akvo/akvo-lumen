@@ -43,7 +43,7 @@
                                  :name (:name body)
                                  :spec (:spec body)
                                  :author jwt-claims})]
-    (lib/ok {:id (-> v first :id)})))
+    {:id (-> v first :id)}))
 
 (defn delete [tenant-conn id]
   (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))

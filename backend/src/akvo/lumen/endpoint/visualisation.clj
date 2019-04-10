@@ -72,10 +72,14 @@
                             :path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              auth-service :auth-service
                               {:keys [id]} :path-params
                               body :body}]
-                          (let [vis-payload (w/keywordize-keys body)]
-                            (visualisation/upsert (p/connection tenant-manager tenant) vis-payload jwt-claims)))}
+                          (let [vis-payload (w/keywordize-keys body)
+                                ids (l.auth/ids ::visualisation.s/visualisation vis-payload)]
+                            (if (p/allow? auth-service ids)
+                              (lib/ok (visualisation/upsert (p/connection tenant-manager tenant) vis-payload jwt-claims))
+                              (lib/not-authorized ids))))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
