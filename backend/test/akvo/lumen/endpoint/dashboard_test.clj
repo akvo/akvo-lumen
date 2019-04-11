@@ -6,6 +6,8 @@
                                          system-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.endpoint.commons.variant :as variant]
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql]))
@@ -15,34 +17,35 @@
 ;;;
 
 (defn dashboard-spec [v-id]
-  {"type"     "dashboard"
-   "title"    "My first Dashboard"
-   ;; "id"       dashboard-id ;; Not present on new
-   "entities" {v-id     {"id"   v-id
-                         "type" "visualisation"
-                         ;;"visualisation" v-id ;; data?
-                         }
-               "text-1" {"id"      "text-1"
-                         "type"    "text"
-                         "content" "I am a text entity."}
-               "text-2" {"id"      "text-2"
-                         "type"    "text"
-                         "content" "I am another text entity."}}
-   "layout"   {v-id     {"x" 1
-                         "y" 0
-                         "w" 0
-                         "h" 0
-                         "i" v-id}
-               "text-1" {"x" 2
-                         "y" 0
-                         "w" 0
-                         "h" 0
-                         "i" "text-1"}
-               "text-2" {"x" 3
-                         "y" 0
-                         "w" 0
-                         "h" 0
-                         "i" "text-2"}}})
+  (w/keywordize-keys
+   {"type"     "dashboard"
+    "title"    "My first Dashboard"
+    ;; "id"       dashboard-id ;; Not present on new
+    "entities" {v-id     {"id"   v-id
+                          "type" "visualisation"
+                          ;;"visualisation" v-id ;; data?
+                          }
+                "text-1" {"id"      "text-1"
+                          "type"    "text"
+                          "content" "I am a text entity."}
+                "text-2" {"id"      "text-2"
+                          "type"    "text"
+                          "content" "I am another text entity."}}
+    "layout"   {v-id     {"x" 1
+                          "y" 0
+                          "w" 0
+                          "h" 0
+                          "i" v-id}
+                "text-1" {"x" 2
+                          "y" 0
+                          "w" 0
+                          "h" 0
+                          "i" "text-1"}
+                "text-2" {"x" 3
+                          "y" 0
+                          "w" 0
+                          "h" 0
+                          "i" "text-2"}}}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -59,13 +62,11 @@
   (testing "filter-type"
     (is (= (dashboard/filter-type (dashboard-spec "abc123") "text")
            {:entities
-            '({"id" "text-1", "type" "text", "content" "I am a text entity."}
-             {"id" "text-2",
-              "type" "text",
-              "content" "I am another text entity."}),
+            '({:id "text-1", :type "text", :content "I am a text entity."}
+              {:id "text-2", :type "text", :content "I am another text entity."})
             :layout
-            '({"x" 2, "y" 0, "w" 0, "h" 0, "i" "text-1"}
-             {"x" 3, "y" 0, "w" 0, "h" 0, "i" "text-2"})}))))
+            '({:x 2, :y 0, :w 0, :h 0, :i "text-1"}
+              {:x 3, :y 0, :w 0, :h 0, :i "text-2"})}))))
 
 
 (deftest ^:functional dashboard
@@ -83,29 +84,28 @@
           (is (every? #(contains? d %)
                       [:id :title :entities :layout :type :status :created
                        :modified]))
-          (is (= (get d-spec "title")
+          (is (= (get d-spec :title)
                  (get d :title)))
-
           (is (= (set (mapv name (keys (:entities d))))
-                 (set (mapv name (keys (get d-spec "entities"))))))
-
+                 (set (mapv name (keys (:entities d-spec))))))
           (is (= (set (mapv name (keys (:layout d))))
-                 (set (mapv name (keys (get d-spec "layout"))))))))
+                 (set (mapv name (keys (:layout d-spec))))))))
 
       (testing "Update dashboard"
         (let [new-spec (-> d-spec
-                           (assoc "title" "My updated dashboard")
-                           (assoc-in ["entities" "text-1" "content"]
+                           (assoc :title "My updated dashboard")
+                           (assoc-in [:entities :text-1 :content]
                                      "Updated text entity")
-                           (assoc-in ["layout" "text-1" "h"] 1))]
+                           (assoc-in [:layout :text-1 :h] 1))]
 
           (dashboard/upsert *tenant-conn* dashboard-id new-spec)
           (let [updated-d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
             (is (= (:title updated-d)
                    "My updated dashboard"))
-            (is (= (get-in updated-d [:entities "text-1" "content"])
+            (log/error :updated-d updated-d)
+            (is (= (get-in updated-d [:entities :text-1 :content])
                    "Updated text entity"))
-            (is (= (get-in updated-d [:layout "text-1" "h"])
+            (is (= (get-in updated-d [:layout :text-1 :h])
                    1)))))
 
       (testing "Delete dashboard"

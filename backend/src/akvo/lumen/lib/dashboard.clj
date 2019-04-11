@@ -1,6 +1,8 @@
 (ns akvo.lumen.lib.dashboard
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
+            [clojure.walk :as w]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
@@ -13,17 +15,17 @@
 (defn dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
   [dashboard]
-  (= (keys (get dashboard "entities"))
-     (keys (get dashboard "layout"))))
+  (= (keys (:entities dashboard))
+     (keys (:layout dashboard))))
 
 (defn filter-type
   [dashboard-data kind]
-  (let [entities (filter #(= kind (get % "type"))
-                         (vals (get dashboard-data "entities")))
-        ks     (set (map #(get % "id") entities))]
+  (let [entities (filter #(= kind (:type %))
+                         (vals (:entities dashboard-data)))
+        ks     (set (map :id entities))]
     {:entities entities
-     :layout   (keep #(if (ks (get % "i")) %)
-                     (vals (get dashboard-data "layout")))}))
+     :layout   (keep #(if (ks (:i %)) %)
+                     (vals (:layout dashboard-data)))}))
 
 (defn part-by-entity-type [entities]
   {:visualisations (filter-type entities "visualisation")
@@ -33,35 +35,35 @@
   "Merge text & dashboard_visualisations (dvs) entries, return an id keyed map"
   [text-entities dvs]
   (let [entries (reduce conj text-entities (map (fn [dv]
-                                                  {"id"   (:visualisation_id dv)
-                                                   "type" "visualisation"}) dvs ))]
-    (zipmap (map #(get % "id") entries)
-            entries)))
+                                                  {:id   (:visualisation_id dv)
+                                                   :type "visualisation"}) dvs ))]
+    (zipmap (map :id entries) entries)))
 
 (defn all-layouts
   "Merge text & dashboard_visualisations (dvs) layouts, return an id keyed map."
   [text-layout dvs]
   (let [layouts (reduce conj text-layout (map (fn [dv]
-                                                (:layout dv))
-                                              dvs))]
-    (zipmap (map #(get % "i") layouts)
+                                                (w/keywordize-keys (:layout dv)))
+                                               dvs))]
+    (zipmap (map :i layouts)
             layouts)))
 
 (defn build-dashboard-by-id
   ""
   [dashboard dvs]
-  (assoc (select-keys dashboard [:author :created :id :modified :title])
-         :entities (all-entities (get-in dashboard [:spec "entities"]) dvs)
-         :layout (all-layouts (get-in dashboard [:spec "layout"]) dvs)
-         :type "dashboard"
-         :status "OK"))
+  (w/keywordize-keys
+   (assoc (select-keys dashboard [:author :created :id :modified :title])
+          :entities (all-entities (get-in dashboard [:spec :entities]) dvs)
+          :layout (all-layouts (get-in dashboard [:spec :layout]) dvs)
+          :type "dashboard"
+          :status "OK")))
 
 
 (defn handle-dashboard-by-id
   "Hand of packing to pure build-dashboard-by-id"
   [tenant-conn id]
   (build-dashboard-by-id
-   (dashboard-by-id tenant-conn {:id id})
+   (update (dashboard-by-id tenant-conn {:id id}) :spec #(when % (w/keywordize-keys %)))
    (dashboard_visualisation-by-dashboard-id tenant-conn
                                             {:dashboard-id id})))
 
@@ -77,12 +79,12 @@
           visualisation-layouts (get-in parted-spec [:visualisations :layout])]
       (jdbc/with-db-transaction [tx tenant-conn]
         (insert-dashboard tx {:id dashboard-id
-                              :title (get spec "title")
+                              :title (:title spec)
                               :spec (:texts parted-spec)
                               :author claims})
         (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
-          (let [visualisation-id (get visualisation "id")
-                layout (first (filter #(= visualisation-id (get % "i"))
+          (let [visualisation-id (:id visualisation)
+                layout (first (filter #(= visualisation-id (:i %))
                                       visualisation-layouts))]
             (insert-dashboard_visualisation
              tx {:dashboard-id dashboard-id
@@ -109,13 +111,13 @@
         visualisations-layouts (:layout visualisations)]
     (jdbc/with-db-transaction [tx tenant-conn]
       (update-dashboard tx {:id id
-                            :title (get spec "title")
+                            :title (:title spec)
                             :spec texts})
       (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
       (doseq [visualisation-entity (:entities visualisations)]
-        (let [visualisation-id (get visualisation-entity "id")
+        (let [visualisation-id (:id visualisation-entity)
               visualisations-layout (first (filter #(= visualisation-id
-                                                       (get % "i"))
+                                                       (:i %))
                                                    visualisations-layouts))]
           (insert-dashboard_visualisation
            tx {:dashboard-id id
