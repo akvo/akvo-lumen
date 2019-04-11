@@ -64,6 +64,7 @@
                  "/api/visualisations/:id" {:methods #{:get :put :delete}}
                  "/api/visualisations/maps" {:methods #{:post}}
                  "/api/dashboards" {:methods #{:get}}
+                 "/api/dashboards/:id" {:methods #{:get :put :delete}}
                  })
 
 (defn- auth-datasets [all-datasets permissions]

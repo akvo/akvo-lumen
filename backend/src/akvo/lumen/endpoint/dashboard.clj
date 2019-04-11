@@ -30,20 +30,28 @@
                               jwt-claims :jwt-claims
                               body :body}]
                           (dashboard/create (p/connection tenant-manager tenant) body jwt-claims))}}]
-   ["/:id" {:get {:parameters {:path-params {:id string?}}
+   ["/:id"
+    {:middleware [(fn [handler]
+                    (fn [{{:keys [id]} :path-params
+                          auth-service :auth-service
+                          :as req}]
+                      (if (p/allow? auth-service (l.auth/ids ::dashboard.s/id id))
+                        (handler req)
+                        (lib/not-authorized {:id id}))))]}
+    ["" {:get {:parameters {:path-params {:id string?}}
+               :handler (fn [{tenant :tenant
+                              {:keys [id]} :path-params}]
+                          (dashboard/fetch (p/connection tenant-manager tenant) id))}
+         :put {:parameters {:body map?
+                            :path-params {:id string?}}
+               :handler (fn [{tenant :tenant
+                              body :body
+                              {:keys [id]} :path-params}]
+                          (dashboard/upsert (p/connection tenant-manager tenant) id body))}
+         :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
-                             (dashboard/fetch (p/connection tenant-manager tenant) id))}
-            :put {:parameters {:body map?
-                               :path-params {:id string?}}
-                  :handler (fn [{tenant :tenant
-                                 body :body
-                                 {:keys [id]} :path-params}]
-                             (dashboard/upsert (p/connection tenant-manager tenant) id body))}
-            :delete {:parameters {:path-params {:id string?}}
-                     :handler (fn [{tenant :tenant
-                                    {:keys [id]} :path-params}]
-                                (dashboard/delete (p/connection tenant-manager tenant) id))}}]])
+                             (dashboard/delete (p/connection tenant-manager tenant) id))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (routes opts))
