@@ -20,9 +20,8 @@
 (s/def ::name string?)
 (s/def ::visualisationType #{"pie" "area" "bar" "line" "polararea" "donut" "pivot table" "scatter" "bubble" "map"})
 (s/def ::type #{"visualisation"})
-(s/def ::date-number (s/nilable number?))
-(s/def ::created ::date-number)
-(s/def ::modified ::date-number)
+(s/def ::created ::lumen.s/date-number)
+(s/def ::modified ::lumen.s/date-number)
 (s/def ::datasetId (s/nilable ::db.dsv.s/dataset-id))
 (s/def ::status #{"OK"})
 

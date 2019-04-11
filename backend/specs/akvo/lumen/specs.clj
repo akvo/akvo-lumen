@@ -58,3 +58,4 @@
 (defmethod ig/pre-init-spec :akvo.lumen.specs/specs [_]
   (s/keys :req-un [::conform-specs]))
 
+(s/def ::date-number (s/nilable number?))

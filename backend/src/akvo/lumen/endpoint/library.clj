@@ -2,10 +2,10 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.endpoint.dataset :as e.dataset]
             [akvo.lumen.endpoint.visualisation :as e.visualisation]
+            [akvo.lumen.endpoint.dashboard :as e.dashboard]
             [akvo.lumen.lib :as lib]
             [clojure.tools.logging :as log]
             [akvo.lumen.lib
-             [dashboard :as dashboard]
              [collection :as collection]
              [raster :as raster]]
             [akvo.lumen.endpoint.commons.variant :as variant]
@@ -19,7 +19,7 @@
         :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
       (lib/ok
-         {:dashboards (variant/value (dashboard/all tenant-conn))
+         {:dashboards (variant/value (e.dashboard/all-dashboards auth-service tenant-conn))
           :datasets (variant/value (e.dataset/all-datasets auth-service tenant-conn))
           :rasters (variant/value (raster/all tenant-conn))
           :visualisations (variant/value (e.visualisation/all-visualisations auth-service tenant-conn))
