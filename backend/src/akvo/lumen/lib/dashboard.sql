@@ -3,6 +3,13 @@
 SELECT id, title, 'ok' AS status, 'dashboard' AS type, created, modified, author
 FROM dashboard;
 
+-- :name all-dashboards-with-visualisations :? :*
+-- :doc Return all dashboards with visualisations, no distinct result, so need some processing in case
+ SELECT dashboard.id AS id, visualisation_id AS "visualisationId" --, title, 'ok' AS status, 'dashboard' AS type , dashboard.created, dashboard.modified, dashboard.author
+ FROM dashboard
+ LEFT JOIN dashboard_visualisation on dashboard_visualisation.dashboard_id = dashboard.id
+ LEFT JOIN visualisation  ON dashboard_visualisation.visualisation_id = visualisation.id;
+
 -- :name insert-dashboard :<!
 -- :doc Insert dashboard.
 INSERT INTO dashboard (id, title, spec, author)
