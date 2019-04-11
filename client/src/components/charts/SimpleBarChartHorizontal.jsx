@@ -30,9 +30,9 @@ import RenderComplete from './RenderComplete';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
-const getLabelText = (label, type) => type === 'date' ?
+const getLabelText = (label, type) => (type === 'date' ?
   `${new Date(label * 1000)}` :
-  replaceLabelIfValueEmpty(label);
+  replaceLabelIfValueEmpty(label));
 
 const getPaddingBottom = (data, type) => {
   const labelCutoffLength = 16;
