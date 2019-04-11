@@ -12,23 +12,27 @@ import { GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
 import { isLight } from '../../utilities/color';
-import { heuristicRound, replaceLabelIfValueEmpty, calculateMargins, getLabelFontSize } from '../../utilities/chart';
+import { abbr } from '../../utilities/utils';
+import {
+  heuristicRound,
+  replaceLabelIfValueEmpty,
+  calculateMargins,
+  getLabelFontSize,
+  labelFitsWidth,
+} from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE, LABEL_CHAR_WIDTH } from '../../constants/chart';
 import RenderComplete from './RenderComplete';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
-const getLabelText = (label, type) => {
-  const o = type === 'date' ?
-    `${new Date(label * 1000)}` : replaceLabelIfValueEmpty(label);
-
-  return o;
-};
+const getLabelText = (label, type) => type === 'date' ?
+  `${new Date(label * 1000)}` :
+  replaceLabelIfValueEmpty(label);
 
 const getPaddingBottom = (data, type) => {
   const labelCutoffLength = 16;
@@ -44,9 +48,6 @@ const getPaddingBottom = (data, type) => {
 
   return Math.ceil(longestLabelLength * pixelsPerChar);
 };
-
-const LABEL_CHAR_WIDTH = 10;
-const labelFitsBar = (text, height) => `${text}`.length * LABEL_CHAR_WIDTH < height;
 
 export default class SimpleBarChart extends Component {
 
@@ -107,6 +108,7 @@ export default class SimpleBarChart extends Component {
     padding: 0.1,
     colorMapping: {},
     grid: true,
+    xAxisLabel: '',
   }
 
   static contextTypes = {
@@ -142,6 +144,14 @@ export default class SimpleBarChart extends Component {
     }
 
     return numColors > colors.length ? defaultColor : colors[index];
+  }
+
+  getMarginLeft(series) {
+    const { xAxisLabel, marginLeft, width } = this.props;
+    const longestLabel = series.data.concat(xAxisLabel).reduce((acc, { label }) =>
+      Math.max(acc, `${label}`.length)
+    , 0);
+    return Math.min(Math.min(marginLeft, longestLabel * LABEL_CHAR_WIDTH), width / 2);
   }
 
   handleShowTooltip(event, content) {
@@ -194,14 +204,12 @@ export default class SimpleBarChart extends Component {
     });
   }
 
-  renderLabel({ key, nodeHeight, x, y, value, type, index, nodeCount }) {
+  renderLabel({ key, nodeHeight, x, y, value, type, index, nodeCount, maxChars }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
       (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
-    let labelText = String(getLabelText(key, type));
-    labelText = labelText.length <= 16 ?
-      labelText : `${labelText.substring(0, 13)}…`;
+    const labelText = abbr(String(getLabelText(key, type)), maxChars);
 
     const labelY = y + (nodeHeight / 2);
     const labelX = x + (value >= 0 ? -10 : 10);
@@ -233,7 +241,7 @@ export default class SimpleBarChart extends Component {
     if (!valueLabelsVisible) return null;
     const labelText = heuristicRound(value);
     const OFFSET = 5;
-    if (!labelFitsBar(labelText, width)) return null;
+    if (!labelFitsWidth(labelText, width)) return null;
 
     const labelY = y + (nodeHeight / 2);
     const labelX = x + (value >= 0 ? -OFFSET : OFFSET);
@@ -270,7 +278,6 @@ export default class SimpleBarChart extends Component {
       onChangeVisualisationSpec,
       marginTop,
       marginRight,
-      marginLeft,
       marginBottom,
       style,
       legendVisible,
@@ -289,10 +296,13 @@ export default class SimpleBarChart extends Component {
 
     if (!series) return null;
 
+    const marginLeft = this.getMarginLeft(series);
     const dataType = series.metadata.type;
     const paddingBottom = getPaddingBottom(series.data, dataType);
     const axisLabelFontSize =
       getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+    const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
+    const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
 
     return (
       <ChartLayout
@@ -429,7 +439,8 @@ export default class SimpleBarChart extends Component {
                               height={nodeHeight - (nodeHeight * padding * 2)}
                               width={normalizedWidth}
                               fill={color}
-                              stroke={color}
+                              stroke="white"
+                              strokeWidth={0.1}
                               cursor={edit ? 'pointer' : 'default'}
                               onClick={(event) => {
                                 this.handleClickNode({ key }, event);
@@ -454,6 +465,7 @@ export default class SimpleBarChart extends Component {
                               domain,
                               margins,
                               x: origin,
+                              maxChars: maxLabelChars,
                             })}
                             {this.renderValueLabel({
                               key,
@@ -500,7 +512,7 @@ export default class SimpleBarChart extends Component {
                     fontSize={axisLabelFontSize}
                     fontWeight={400}
                   >
-                    {xAxisLabel || ''}
+                    {abbr(xAxisLabel, maxLabelChars * labelSizeToAxisLabelSize)}
                   </Text>
 
                 </Svg>
