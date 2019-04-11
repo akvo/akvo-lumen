@@ -7,9 +7,8 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
-
 (defn all [tenant-conn]
-  (lib/ok (all-dashboards tenant-conn)))
+  (all-dashboards tenant-conn))
 
 (defn dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
