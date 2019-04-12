@@ -19,6 +19,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
 (declare ids)
 
@@ -116,7 +117,12 @@
                                                       set)
                                    auth-datasets (auth-datasets dss permissions)
                                    auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))
-                                   auth-dashboards (auth-dashboards tenant-conn (set auth-visualisations))]
+                                   auth-dashboards (auth-dashboards tenant-conn (set auth-visualisations))
+                                   auth-collections (mapv :id (auth-collection-ids tenant-conn
+                                                                                   {:dataset-ids auth-datasets
+                                                                                    :visualisation-ids auth-visualisations
+                                                                                    :dashboard-ids auth-dashboards}))]
+                               (log/error :auth-collections auth-collections)
                                {:auth-datasets       auth-datasets
                                 :auth-visualisations auth-visualisations
                                 :auth-dashboards auth-dashboards})
