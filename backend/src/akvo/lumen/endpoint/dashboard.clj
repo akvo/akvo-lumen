@@ -42,7 +42,9 @@
     ["" {:get {:parameters {:path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               {:keys [id]} :path-params}]
-                          (dashboard/fetch (p/connection tenant-manager tenant) id))}
+                          (if-let [d (dashboard/fetch (p/connection tenant-manager tenant) id)]
+                            (lib/ok d)
+                            (lib/not-found {:error "Not found"})))}
          :put {:parameters {:body map?
                             :path-params {:id string?}}
                :handler (fn [{tenant :tenant

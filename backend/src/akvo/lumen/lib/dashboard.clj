@@ -87,9 +87,8 @@
     (lib/bad-request {:error "Entities and layout dashboard keys does not match."})))
 
 (defn fetch [tenant-conn id]
-  (if-let [d (dashboard-by-id tenant-conn {:id id})]
-    (lib/ok (handle-dashboard-by-id tenant-conn id))
-    (lib/not-found {:error "Not found"})))
+  (when-let [d (dashboard-by-id tenant-conn {:id id})]
+    (handle-dashboard-by-id tenant-conn id)))
 
 (defn upsert
   "We update a dashboard via upsert of dashboard and clean - insert of
