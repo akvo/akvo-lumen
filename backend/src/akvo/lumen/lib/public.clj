@@ -83,8 +83,8 @@
       (let [deps (->> dashboard
                       :entities
                       vals
-                      (filter #(= "visualisation" (get % "type")))
-                      (map #(get % "id"))
+                      (filter #(= "visualisation" (:type %)))
+                      (map :id)
                       (map #(visualisation-response-data tenant-conn % windshaft-url))
                       (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
                       (apply merge-with merge))]

@@ -6,6 +6,7 @@
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs.dashboard :as dashboard.s]
             [clojure.spec.alpha :as s]
+            [clojure.walk :as w]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
@@ -29,7 +30,7 @@
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body}]
-                          (dashboard/create (p/connection tenant-manager tenant) body jwt-claims))}}]
+                          (dashboard/create (p/connection tenant-manager tenant) (w/keywordize-keys body) jwt-claims))}}]
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
@@ -47,7 +48,7 @@
                :handler (fn [{tenant :tenant
                               body :body
                               {:keys [id]} :path-params}]
-                          (dashboard/upsert (p/connection tenant-manager tenant) id body))}
+                          (dashboard/upsert (p/connection tenant-manager tenant) id (w/keywordize-keys body)))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
