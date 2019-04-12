@@ -63,7 +63,7 @@
                  "/api/visualisations" {:methods #{:get :post}}
                  "/api/visualisations/:id" {:methods #{:get :put :delete}}
                  "/api/visualisations/maps" {:methods #{:post}}
-                 "/api/dashboards" {:methods #{:get}}
+                 "/api/dashboards" {:methods #{:get :post}}
                  "/api/dashboards/:id" {:methods #{:get :put :delete}}
                  })
 

@@ -29,8 +29,14 @@
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              auth-service :auth-service
                               body :body}]
-                          (dashboard/create (p/connection tenant-manager tenant) (w/keywordize-keys body) jwt-claims))}}]
+                          (let [payload (w/keywordize-keys body)
+                                ids (l.auth/ids ::dashboard.s/dashboard-post-payload payload)]
+                            (log/debug :POST_BODY payload :ids ids :post-allow (p/allow? auth-service ids))
+                            (if (p/allow? auth-service ids)
+                              (dashboard/create (p/connection tenant-manager tenant) payload jwt-claims)
+                              (lib/not-authorized {:ids ids}))))}}]
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
