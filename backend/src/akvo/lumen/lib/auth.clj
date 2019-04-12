@@ -137,6 +137,7 @@
 
 (defn ids [spec data]
   (let [ids (atom {:dataset-ids #{}
+                   :dashboard-ids #{}
                    :visualisation-ids #{}})
         original-vis-id? visualisation.s/*id?*
         original-ds-id? dataset.s/*id?*
