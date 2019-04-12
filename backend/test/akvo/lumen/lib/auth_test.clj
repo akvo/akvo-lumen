@@ -29,13 +29,13 @@
               :bucketColumn "c4"},
              :status "OK",
              :id v-id})
-           {:dataset-ids #{ds-id}, :visualisation-ids #{v-id}, :spec-valid? spec-valid?})))
+           {:dashboard-ids #{}, :dataset-ids #{ds-id}, :visualisation-ids #{v-id}, :spec-valid? spec-valid?})))
   (let [ds-id "1"
         spec-valid? false]
     (is (= (auth/ids
             :akvo.lumen.specs.visualisation.maps/layers
             [{:aggregationMethod "avg", :popup [], :filters [], :layerType "geo-location", :legend {:title "latitude", :visible true}, :rasterId nil, :pointSize 3, :pointColorMapping [], :longitude nil, :datasetId ds-id, :title "Untitled layer 1", :geom "d1", :pointColorColumn "c2", :latitude nil, :visible true}])
-           {:dataset-ids #{ds-id}, :visualisation-ids #{}, :spec-valid? spec-valid?})))
+           {:dashboard-ids #{} :dataset-ids #{ds-id}, :visualisation-ids #{}, :spec-valid? spec-valid?})))
   (let [ds-id "5cac541e-ba6c-4c78-969a-c55d624fc5ba"
         spec-valid? true]
     (is (= (auth/ids
@@ -86,6 +86,7 @@
               :latitude nil,
               :visible true}])
            {:dataset-ids #{ds-id},
+            :dashboard-ids #{}
             :visualisation-ids #{},
             :spec-valid? spec-valid?}))))
 
