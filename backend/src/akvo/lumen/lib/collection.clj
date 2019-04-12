@@ -10,10 +10,13 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
-(defn all [tenant-conn & [ids]]
-  (mapv (fn [collection]
-          (core/update collection :entities #(vec (.getArray %))))
-        (all-collections tenant-conn (if ids {:ids ids} {}))))
+(defn all
+  ([tenant-conn]
+   (all tenant-conn nil))
+  ([tenant-conn ids]
+   (mapv (fn [collection]
+           (core/update collection :entities #(vec (.getArray %))))
+         (all-collections tenant-conn (if ids {:ids ids} {})))))
 
 (defn fetch [tenant-conn id]
   (if-let [collection (fetch-collection tenant-conn {:id id})]
