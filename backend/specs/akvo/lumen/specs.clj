@@ -29,7 +29,9 @@
 
 (defn str-uuid? [v]
   (when (some? v)
-    (uuid? (read-string (format "#uuid \"%s\"" v)))))
+    (try
+      (uuid? (read-string (format "#uuid \"%s\"" v)))
+      (catch Throwable t false))))
 
 (s/def ::str-uuid
   (s/with-gen
