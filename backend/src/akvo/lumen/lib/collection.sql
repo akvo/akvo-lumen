@@ -11,6 +11,7 @@ SELECT collection.id,
            collection_entity.raster_dataset_id
        )), NULL) AS entities
 FROM collection
+--~ (when (seq (:cols params)) " WHERE collection.id IN (:v*:ids) ")
 LEFT JOIN collection_entity ON collection_entity.collection_id = collection.id
 GROUP BY collection.id;
 

@@ -7,6 +7,7 @@
    [akvo.lumen.specs.dataset :as dataset.s]
    [akvo.lumen.specs.visualisation :as visualisation.s]
    [akvo.lumen.specs.dashboard :as dashboard.s]
+   [akvo.lumen.specs.collection :as collection.s]
    [akvo.lumen.protocols :as p]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
@@ -23,24 +24,27 @@
 
 (declare ids)
 
-(defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set]
+(defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set]
   p/AuthService
   (allow? [this ids]
     (and (set/subset? (:visualisation-ids ids) auth-visualisations-set)
          (set/subset? (:dataset-ids ids) auth-datasets-set)
-         (set/subset? (:dashboard-ids ids) auth-dashboards-set)))
-  (auth [this {:keys [dataset-ids visualisation-ids dashboard-ids]}]
+         (set/subset? (:dashboard-ids ids) auth-dashboards-set)
+         (set/subset? (:collection-ids ids) auth-collections-set)))
+  (auth [this {:keys [dataset-ids visualisation-ids dashboard-ids collections-ids]}]
     {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))
      :auth-visualisations (set/intersection auth-visualisations-set (set visualisation-ids))
-     :auth-dashboards (set/intersection auth-dashboards-set (set dashboard-ids))})
+     :auth-dashboards (set/intersection auth-dashboards-set (set dashboard-ids))
+     :auth-collections (set/intersection auth-collections-set (set collections-ids))})
   (auth [this type* uuid]
     (condp = type*
       :dataset (when (contains? auth-datasets-set uuid) uuid)
       :visualisation (when (contains? auth-visualisations-set uuid) uuid)
-      :dashboard (when (contains? auth-dashboards-set uuid) uuid))))
+      :dashboard (when (contains? auth-dashboards-set uuid) uuid)
+      :collection (when (contains? auth-collections-set uuid) uuid))))
 
-(defn new-auth-service [{:keys [auth-datasets auth-visualisations auth-dashboards] :as auth-uuid-tree}]
-  (AuthServiceImpl. (set auth-datasets) (set auth-visualisations) (set auth-dashboards)))
+(defn new-auth-service [{:keys [auth-datasets auth-visualisations auth-dashboards auth-collections] :as auth-uuid-tree}]
+  (AuthServiceImpl. (set auth-datasets) (set auth-visualisations) (set auth-dashboards) (set auth-collections)))
 
 (defn match-by-jwt-family-name?
   "Feature flag condition based on `First Name` jwt-claims
@@ -66,7 +70,7 @@
                  "/api/visualisations/maps" {:methods #{:post}}
                  "/api/dashboards" {:methods #{:get :post}}
                  "/api/dashboards/:id" {:methods #{:get :put :delete}}
-                 })
+                 "/api/collections" {:methods #{:get}}})
 
 (defn- auth-datasets [all-datasets permissions]
   (->> all-datasets
@@ -122,13 +126,14 @@
                                                                                    {:dataset-ids auth-datasets
                                                                                     :visualisation-ids auth-visualisations
                                                                                     :dashboard-ids auth-dashboards}))]
-                               (log/error :auth-collections auth-collections)
                                {:auth-datasets       auth-datasets
                                 :auth-visualisations auth-visualisations
-                                :auth-dashboards auth-dashboards})
+                                :auth-dashboards auth-dashboards
+                                :auth-collections auth-collections})
                              {:auth-datasets       (mapv :id dss)
                               :auth-visualisations (mapv :id (all-visualisations tenant-conn))
-                              :auth-dashboards (mapv :id (all-dashboards tenant-conn))})]
+                              :auth-dashboards (mapv :id (all-dashboards tenant-conn))
+                              :auth-collections (mapv :id (all-collections tenant-conn))})]
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 
@@ -144,10 +149,12 @@
 (defn ids [spec data]
   (let [ids (atom {:dataset-ids #{}
                    :dashboard-ids #{}
-                   :visualisation-ids #{}})
+                   :visualisation-ids #{}
+                   :collection-ids #{}})
         original-vis-id? visualisation.s/*id?*
         original-ds-id? dataset.s/*id?*
         original-dash-id? dashboard.s/*id?*
+        original-col-id? collection.s/*id?*
         ds-fun (fn [id]
                  (swap! ids update :dataset-ids conj id)
                  (try
@@ -162,10 +169,16 @@
                   (swap! ids update :dashboard-ids conj id)
                   (try
                     (original-dash-id? id)
+                    (catch Exception e false)))
+        col-fun (fn [id]
+                  (swap! ids update :collection-ids conj id)
+                  (try
+                    (original-col-id? id)
                     (catch Exception e false)))]
     (binding [visualisation.s/*id?* vis-fun
               dataset.s/*id?* ds-fun
-              dashboard.s/*id?* dash-fun]
+              dashboard.s/*id?* dash-fun
+              collection.s/*id?* col-fun]
       (let [explain (s/explain-str spec data)]
         (swap! ids assoc :spec-valid? (s/valid? spec data))
         (deref ids)))))
