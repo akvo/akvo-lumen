@@ -24,10 +24,10 @@
 
 (defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set]
   p/AuthService
-  (allow? [this d]
-    (and (set/subset? (:visualisation-ids d) auth-visualisations-set)
-         (set/subset? (:dataset-ids d) auth-datasets-set)
-         (set/subset? (:dashboard-ids d) auth-dashboards-set)))
+  (allow? [this ids]
+    (and (set/subset? (:visualisation-ids ids) auth-visualisations-set)
+         (set/subset? (:dataset-ids ids) auth-datasets-set)
+         (set/subset? (:dashboard-ids ids) auth-dashboards-set)))
   (auth [this {:keys [dataset-ids visualisation-ids dashboard-ids]}]
     {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))
      :auth-visualisations (set/intersection auth-visualisations-set (set visualisation-ids))
