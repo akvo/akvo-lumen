@@ -33,7 +33,6 @@
                               body :body}]
                           (let [payload (w/keywordize-keys body)
                                 ids (l.auth/ids ::dashboard.s/dashboard-post-payload payload)]
-                            (log/debug :POST_BODY payload :ids ids :post-allow (p/allow? auth-service ids))
                             (if (p/allow? auth-service ids)
                               (dashboard/create (p/connection tenant-manager tenant) payload jwt-claims)
                               (lib/not-authorized {:ids ids}))))}}]
@@ -54,9 +53,14 @@
          :put {:parameters {:body map?
                             :path-params {:id string?}}
                :handler (fn [{tenant :tenant
+                              auth-service :auth-service
                               body :body
                               {:keys [id]} :path-params}]
-                          (dashboard/upsert (p/connection tenant-manager tenant) id (w/keywordize-keys body)))}
+                          (let [payload (w/keywordize-keys body)
+                                ids (l.auth/ids ::dashboard.s/dashboard-payload payload)]
+                            (if (p/allow? auth-service ids)
+                              (dashboard/upsert (p/connection tenant-manager tenant) id payload)
+                              (lib/not-authorized {:ids ids}))))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
