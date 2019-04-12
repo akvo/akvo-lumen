@@ -104,6 +104,11 @@
                                       auth-visualisations-set)))
                (mapv :id)))
 
+(defn- auth-collections [tenant-conn auth-datasets auth-visualisations auth-dashboards]
+  (mapv :id (auth-collection-ids tenant-conn
+                                 {:dataset-ids auth-datasets
+                                  :visualisation-ids auth-visualisations
+                                  :dashboard-ids auth-dashboards})))
 (defn wrap-auth-datasets
   "Add to the request an auth-service protocol impl using flow-api check_permissions"
   [tenant-manager flow-api]
@@ -122,10 +127,7 @@
                                    auth-datasets (auth-datasets dss permissions)
                                    auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))
                                    auth-dashboards (auth-dashboards tenant-conn (set auth-visualisations))
-                                   auth-collections (mapv :id (auth-collection-ids tenant-conn
-                                                                                   {:dataset-ids auth-datasets
-                                                                                    :visualisation-ids auth-visualisations
-                                                                                    :dashboard-ids auth-dashboards}))]
+                                   auth-collections (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)]
                                {:auth-datasets       auth-datasets
                                 :auth-visualisations auth-visualisations
                                 :auth-dashboards auth-dashboards
