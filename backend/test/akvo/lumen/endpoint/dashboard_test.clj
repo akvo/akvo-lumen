@@ -6,7 +6,6 @@
                                          system-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.endpoint.commons.variant :as variant]
-            [clojure.tools.logging :as log]
             [clojure.walk :as w]
             [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
@@ -17,35 +16,34 @@
 ;;;
 
 (defn dashboard-spec [v-id]
-  (w/keywordize-keys
-   {"type"     "dashboard"
-    "title"    "My first Dashboard"
-    ;; "id"       dashboard-id ;; Not present on new
-    "entities" {v-id     {"id"   v-id
-                          "type" "visualisation"
-                          ;;"visualisation" v-id ;; data?
-                          }
-                "text-1" {"id"      "text-1"
-                          "type"    "text"
-                          "content" "I am a text entity."}
-                "text-2" {"id"      "text-2"
-                          "type"    "text"
-                          "content" "I am another text entity."}}
-    "layout"   {v-id     {"x" 1
-                          "y" 0
-                          "w" 0
-                          "h" 0
-                          "i" v-id}
-                "text-1" {"x" 2
-                          "y" 0
-                          "w" 0
-                          "h" 0
-                          "i" "text-1"}
-                "text-2" {"x" 3
-                          "y" 0
-                          "w" 0
-                          "h" 0
-                          "i" "text-2"}}}))
+  {:type     "dashboard"
+   :title    "My first Dashboard"
+   ;; :id       dashboard-id ;; Not present on new
+   :entities {(keyword  v-id) {:id   v-id
+                               :type "visualisation"
+                               ;; :visualisation v-id ;; data?
+                               }
+              :text-1         {:id      "text-1"
+                               :type    "text"
+                               :content "I am a text entity."}
+              :text-2         {:id      "text-2"
+                               :type    "text"
+                               :content "I am another text entity."}}
+   :layout   {(keyword  v-id) {:x 1
+                               :y 0
+                               :w 0
+                               :h 0
+                               :i v-id}
+              :text-1         {:x 2
+                               :y 0
+                               :w 0
+                               :h 0
+                               :i "text-1"}
+              :text-2         {:x 3
+                               :y 0
+                               :w 0
+                               :h 0
+                               :i "text-2"}}})
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -102,7 +100,6 @@
           (let [updated-d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
             (is (= (:title updated-d)
                    "My updated dashboard"))
-            (log/error :updated-d updated-d)
             (is (= (get-in updated-d [:entities :text-1 :content])
                    "Updated text entity"))
             (is (= (get-in updated-d [:layout :text-1 :h])

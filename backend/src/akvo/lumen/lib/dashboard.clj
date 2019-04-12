@@ -2,17 +2,15 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]]
             [clojure.walk :as w]
-            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
-
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
 (defn all [tenant-conn]
   (all-dashboards tenant-conn))
 
-(defn dashboard-keys-match?
+(defn- dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
   [dashboard]
   (= (keys (:entities dashboard))
@@ -37,35 +35,30 @@
   (let [entries (reduce conj text-entities (map (fn [dv]
                                                   {:id   (:visualisation_id dv)
                                                    :type "visualisation"}) dvs ))]
-    (zipmap (map :id entries) entries)))
+    (zipmap (map (comp keyword :id) entries) entries)))
 
 (defn all-layouts
   "Merge text & dashboard_visualisations (dvs) layouts, return an id keyed map."
   [text-layout dvs]
-  (let [layouts (reduce conj text-layout (map (fn [dv]
-                                                (w/keywordize-keys (:layout dv)))
-                                               dvs))]
-    (zipmap (map :i layouts)
-            layouts)))
+  (let [layouts (reduce conj text-layout (map :layout dvs))]
+    (zipmap (map (comp keyword :i) layouts) layouts)))
 
 (defn build-dashboard-by-id
-  ""
   [dashboard dvs]
-  (w/keywordize-keys
-   (assoc (select-keys dashboard [:author :created :id :modified :title])
-          :entities (all-entities (get-in dashboard [:spec :entities]) dvs)
-          :layout (all-layouts (get-in dashboard [:spec :layout]) dvs)
-          :type "dashboard"
-          :status "OK")))
-
+  (assoc (select-keys dashboard [:author :created :id :modified :title])
+         :entities (all-entities (get-in dashboard [:spec :entities]) dvs)
+         :layout (all-layouts (get-in dashboard [:spec :layout]) dvs)
+         :type "dashboard"
+         :status "OK"))
 
 (defn handle-dashboard-by-id
   "Hand of packing to pure build-dashboard-by-id"
   [tenant-conn id]
   (build-dashboard-by-id
-   (update (dashboard-by-id tenant-conn {:id id}) :spec #(when % (w/keywordize-keys %)))
-   (dashboard_visualisation-by-dashboard-id tenant-conn
-                                            {:dashboard-id id})))
+   (-> (dashboard-by-id tenant-conn {:id id})
+       (update :spec w/keywordize-keys))
+   (->> (dashboard_visualisation-by-dashboard-id tenant-conn {:dashboard-id id})
+        (map #(update % :layout w/keywordize-keys)))))
 
 (defn create
   "With a dashboard spec, first split into visualisation and text entities.
