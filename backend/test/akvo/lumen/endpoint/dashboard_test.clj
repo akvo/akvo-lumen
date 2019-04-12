@@ -77,7 +77,7 @@
       (is (not (nil? dashboard-id)))
 
       (testing "Get dashboard"
-        (let [d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
+        (let [d (dashboard/fetch *tenant-conn* dashboard-id)]
           (is (not (nil? d)))
           (is (every? #(contains? d %)
                       [:id :title :entities :layout :type :status :created
@@ -97,7 +97,7 @@
                            (assoc-in [:layout :text-1 :h] 1))]
 
           (dashboard/upsert *tenant-conn* dashboard-id new-spec)
-          (let [updated-d (variant/value (dashboard/fetch *tenant-conn* dashboard-id))]
+          (let [updated-d (dashboard/fetch *tenant-conn* dashboard-id)]
             (is (= (:title updated-d)
                    "My updated dashboard"))
             (is (= (get-in updated-d [:entities :text-1 :content])
