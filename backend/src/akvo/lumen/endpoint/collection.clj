@@ -10,15 +10,13 @@
             [integrant.core :as ig]))
 
 (defn all [auth-service tenant-conn]
-  (let [collections (collection/all tenant-conn (:auth-collections-set auth-service))]
-    (log/error :collections collections)
-    (lib/ok collections)))
+  (lib/ok (collection/all tenant-conn (:auth-collections-set auth-service))))
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/collections"
    ["" {:get {:handler (fn [{tenant :tenant
                              auth-service :auth-service}]
-                       (all auth-service (p/connection tenant-manager tenant)))}
+                         (all auth-service (p/connection tenant-manager tenant)))}
         :post {:responses {200 {}}
              :parameters {:body map?}
              :handler (fn [{tenant :tenant
