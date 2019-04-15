@@ -7,6 +7,7 @@
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.auth :as l.auth]
+            [cheshire.core :as json]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
             [akvo.lumen.lib.dataset :as dataset]
@@ -18,6 +19,11 @@
 
 
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+
+(defn adapt-entity-response [r]
+  (-> r
+      (json/generate-string )
+      (json/parse-string keyword)))
 
 (defn visualisation-body [dataset-id]
   {:datasetId dataset-id
@@ -46,7 +52,7 @@
       (let [[tag collection] (collection/create *tenant-conn*
                                                 {"title" "col1"})]
         (is (= ::lib/created tag))
-        (is (= #{:id :title :modified :created :entities}
+        (is (= #{:id :title :modified :created :entities :datasets :rasters :visualisations :dashboards}
                (-> collection keys set)))
         (is (= ::lib/conflict
                (first (collection/create *tenant-conn*
@@ -61,28 +67,28 @@
       (let [[tag collection] (collection/create *tenant-conn* {"title" "col2"
                                                                "entities" [ds1 vs1 db1]})]
         (is (= ::lib/created tag))
-        (is (= #{ds1 vs1 db1} (-> collection :entities set)))))
+        (is (= #{ds1 vs1 db1} (-> collection :entities adapt-entity-response set)))))
 
     (testing "Fetch collection"
       (let [id (-> (collection/create *tenant-conn*
                                       {"title" "col3" "entities" [ds2 vs2 db2]})
                    variant/value :id)
             coll (variant/value (collection/fetch *tenant-conn* id))]
-        (is (= #{ds2 vs2 db2} (-> coll :entities set)))))
+        (is (= #{ds2 vs2 db2} (-> coll :entities adapt-entity-response set)))))
 
     (testing "Update collection"
       (let [id (-> (collection/create *tenant-conn* {"title" "col4" "entities" [ds2 vs2 db2]})
                    variant/value :id)]
         (let [coll (variant/value (collection/update *tenant-conn* id {"title" "col4 renamed"}))]
           (is (= (:title coll) "col4 renamed"))
-          (is (= (-> coll :entities set)
+          (is (= (-> coll :entities adapt-entity-response set)
                  #{ds2 vs2 db2}))
           (collection/update *tenant-conn* id {"entities" []})
           (is (= [] (-> (collection/fetch *tenant-conn* id) variant/value :entities)))
           (collection/update *tenant-conn* id {"entities" [ds1 vs1]})
-          (is (= #{ds1 vs1} (-> (collection/fetch *tenant-conn* id) variant/value :entities set)))
+          (is (= #{ds1 vs1} (-> (collection/fetch *tenant-conn* id) variant/value :entities adapt-entity-response set)))
           (collection/update *tenant-conn* id {"entities" [vs1 vs2]})
-          (is (= #{vs1 vs2} (-> (collection/fetch *tenant-conn* id) variant/value :entities set))))))
+          (is (= #{vs1 vs2} (-> (collection/fetch *tenant-conn* id) variant/value :entities adapt-entity-response set))))))
 
     (testing "Delete collection"
       (let [id (-> (collection/create *tenant-conn* {"title" "col5"}) variant/value :id)]
@@ -96,8 +102,8 @@
         (dashboard/delete *tenant-conn* db1)
         (is (= #{ds1 ds2 vs1 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
-                   variant/value :entities set)))
+                   variant/value :entities adapt-entity-response set)))
         (dataset/delete *tenant-conn* ds1)
         (is (= #{ds2 vs2 db2}
                (-> (collection/fetch *tenant-conn* id)
-                   variant/value :entities set)))))))
+                   variant/value :entities adapt-entity-response set)))))))

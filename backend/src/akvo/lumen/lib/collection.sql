@@ -5,10 +5,10 @@ SELECT collection.id,
        collection.created,
        collection.modified,
        array_remove(array_agg(coalesce(
-           collection_entity.visualisation_id,
-           collection_entity.dataset_id,
-           collection_entity.dashboard_id,
-           collection_entity.raster_dataset_id
+           collection_entity.visualisation_id || '::visualisation-id',
+           collection_entity.dataset_id || '::dataset-id',
+           collection_entity.dashboard_id || '::dashboard-id',
+           collection_entity.raster_dataset_id || '::raster-dataset-id'
        )), NULL) AS entities
 FROM collection
 LEFT JOIN collection_entity ON collection_entity.collection_id = collection.id
@@ -34,10 +34,10 @@ SELECT collection.id,
        collection.created,
        collection.modified,
        array_remove(array_agg(coalesce(
-           collection_entity.visualisation_id,
-           collection_entity.dataset_id,
-           collection_entity.dashboard_id,
-           collection_entity.raster_dataset_id
+           collection_entity.visualisation_id || '::visualisation-id',
+           collection_entity.dataset_id || '::dataset-id',
+           collection_entity.dashboard_id || '::dashboard-id',
+           collection_entity.raster_dataset_id || '::raster-dataset-id'
        )), NULL) AS entities
 FROM collection
 LEFT JOIN collection_entity ON collection_entity.collection_id = collection.id

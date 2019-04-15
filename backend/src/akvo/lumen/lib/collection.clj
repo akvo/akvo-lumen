@@ -1,8 +1,10 @@
 (ns akvo.lumen.lib.collection
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.lib :as lib]
+            [cheshire.generate :refer [add-encoder]]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
+            [clojure.string :as str]
             [hugsql.core :as hugsql])
   (:import [java.sql SQLException Connection]))
 
@@ -10,17 +12,41 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
+(defrecord Entity [uuid type])
+
+(defn new-entity [[uuid type]]
+  (Entity. uuid (keyword type)))
+
+(add-encoder akvo.lumen.lib.collection.Entity
+             (fn [entity jsonGenerator]
+               (.writeString jsonGenerator (:uuid entity))))
+
+(defn feed-entities [collection]
+  (when collection
+    (let [model (->> (.getArray (:entities collection))
+                     (mapv (fn [e] (new-entity (str/split e #"::")))))
+          collection (core/assoc collection :entities model)
+          data (reduce (fn [m e]
+                         (condp = (:type e)
+                           :raster-dataset-id (core/update m :rasters #(conj % e))
+                           :dataset-id (core/update m :datasets #(conj % e))
+                           :visualisation-id (core/update m :visualisations #(conj % e))
+                           :dashboard-id (core/update m :dashboards #(conj % e))))
+                       {:dashboards []
+                        :datasets []
+                        :rasters []
+                        :visualisations []} model)]
+      (merge collection data))))
+
 (defn all
   ([tenant-conn]
    (all tenant-conn nil))
   ([tenant-conn ids]
-   (mapv (fn [collection]
-           (core/update collection :entities #(vec (.getArray %))))
-         (all-collections tenant-conn (if ids {:ids ids} {})))))
+   (mapv feed-entities (all-collections tenant-conn (if ids {:ids ids} {})))))
 
 (defn fetch [tenant-conn id]
-  (if-let [collection (fetch-collection tenant-conn {:id id})]
-    (lib/ok (core/update collection :entities #(vec (.getArray %))))
+  (if-let [collection (feed-entities (fetch-collection tenant-conn {:id id}))]
+    (lib/ok collection)
     (lib/not-found {:id id})))
 
 (defn- text-array
