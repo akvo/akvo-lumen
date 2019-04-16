@@ -94,12 +94,12 @@ export function addEntitiesToCollection(entityIds, collectionId) {
   };
 }
 
-export function addTemporaryEntitiesToCollection(entityIds, collectionId) {
+export function addTemporaryEntitiesToCollection(importId, collectionId) {
   return (dispatch, getState) => {
     const collection = getState().library.collections[collectionId];
 
     // Convenience conversion so that "entityIds" can be a naked single ID
-    const newEntities = Array.isArray(entityIds) ? entityIds : [entityIds];
+    const newEntities = [importId];
     const oldEntities = collection.entities || [];
 
     const updatedEntityArray = oldEntities.slice(0);
@@ -116,7 +116,7 @@ export function addTemporaryEntitiesToCollection(entityIds, collectionId) {
   };
 }
 
-export function removeTemporaryEntitiesFromCollection(entityIds, collectionId) {
+export function removeTemporaryEntitiesFromCollection(importId, collectionId) {
   return (dispatch, getState) => {
     const collection = getState().library.collections[collectionId];
 
@@ -124,13 +124,7 @@ export function removeTemporaryEntitiesFromCollection(entityIds, collectionId) {
 
     const newCollection = { ...collection };
 
-    if (Array.isArray(entityIds)) {
-      entityIds.forEach((entityId) => {
-        delete newCollection[entityId];
-      });
-    } else {
-      delete newCollection[entityIds];
-    }
+    delete newCollection[importId];
 
     dispatch(editCollectionSuccess(newCollection));
   };
