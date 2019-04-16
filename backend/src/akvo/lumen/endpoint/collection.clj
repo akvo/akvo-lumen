@@ -6,7 +6,9 @@
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.specs.collection :as collection.s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [clojure.walk :as w]
             [clojure.tools.logging :as log]
+            [clojure.set :as set]
             [akvo.lumen.lib.collection :as collection]
             [clojure.walk :refer (stringify-keys)]
             [integrant.core :as ig]))
@@ -43,8 +45,14 @@
                             :path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               body :body
+                              auth-service :auth-service
                               {:keys [id]} :path-params}]
-                          (collection/update (p/connection tenant-manager tenant) id body))}
+                        (let [vis-payload (w/keywordize-keys body)
+                              ids (l.auth/ids ::collection.s/collection-payload vis-payload)
+                              all-ids (apply set/union (vals (dissoc ids :spec-valid?)))]
+                          (if (p/optimistic-allow? auth-service all-ids)
+                            (collection/update (p/connection tenant-manager tenant) id body)
+                            (lib/not-authorized {:ids all-ids}))))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]

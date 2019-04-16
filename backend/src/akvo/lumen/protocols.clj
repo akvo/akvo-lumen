@@ -102,5 +102,6 @@
   (auth
     [_ uuid-tree]
     [_ type* uuid])
-  (allow? [_ d]))
+  (allow? [_ d])
+  (optimistic-allow? [_ d]))
 
