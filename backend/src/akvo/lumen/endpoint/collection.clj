@@ -25,8 +25,7 @@
              :parameters {:body map?}
              :handler (fn [{tenant :tenant
                             body :body}]
-                        (log/error :POST-body body)
-                        (collection/create (p/connection tenant-manager tenant) (stringify-keys body)))}}]
+                        (collection/create (p/connection tenant-manager tenant) (w/keywordize-keys body)))}}]
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
@@ -51,7 +50,7 @@
                               ids (l.auth/ids ::collection.s/collection-payload vis-payload)
                               all-ids (apply set/union (vals (dissoc ids :spec-valid?)))]
                           (if (p/optimistic-allow? auth-service all-ids)
-                            (collection/update (p/connection tenant-manager tenant) id body)
+                            (collection/update (p/connection tenant-manager tenant) id vis-payload)
                             (lib/not-authorized {:ids all-ids}))))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant

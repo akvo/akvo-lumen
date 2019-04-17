@@ -51,7 +51,7 @@
 (defn unique-violation? [^SQLException e]
   (= (.getSQLState e) "23505"))
 
-(defn create [tenant-conn {:strs [title entities]}]
+(defn create [tenant-conn {:keys [title entities]}]
   (cond
     (empty? title) (lib/bad-request {:error "Title is missing"})
     (> (count title) 128) (lib/bad-request {:error "Title is too long"
@@ -73,7 +73,7 @@
 (defn update
   "Update a collection. Updates the title and all the entities"
   [tenant-conn id collection]
-  (let [{:strs [entities title]} collection]
+  (let [{:keys [entities title]} collection]
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (when title
         (update-collection-title tx-conn {:id id :title title}))
