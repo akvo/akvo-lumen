@@ -102,6 +102,11 @@
   (auth
     [_ uuid-tree]
     [_ type* uuid])
-  (allow? [_ d])
-  (optimistic-allow? [_ d]))
+  (allow? [_ d]))
+
+(defprotocol AuthService2080
+  (optimistic-allow? [_ d]
+    "Provisional workaround for
+     https://github.com/akvo/akvo-lumen/issues/2080
+    'Refactor api/collections payload'"))
 
