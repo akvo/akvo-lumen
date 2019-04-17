@@ -23,26 +23,39 @@
 
 (declare ids)
 
+(defn- optimistic-allow?* [this ids]
+  {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
+              (set (keys ids)))]}
+  (set/subset? (set/union (:dataset-ids ids) (:visualisation-ids ids)
+                            (:dashboard-ids ids) (:collection-ids ids))
+                 (set/union (:auth-datasets-set this) (:auth-visualisations-set this)
+                            (:auth-dashboards-set this) (:auth-collections-set this))))
+
+(defn- allow?* [this ids]
+  {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
+              (set (keys ids)))]}
+  (and (set/subset? (:visualisation-ids ids) (:auth-visualisations-set this))
+       (set/subset? (:dataset-ids ids) (:auth-datasets-set this))
+       (set/subset? (:dashboard-ids ids) (:auth-dashboards-set this))
+       (set/subset? (:collection-ids ids) (:auth-collections-set this))))
+
+(defn- auth* [this ids]
+  {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
+            (set (keys ids)))]}
+  {:auth-datasets       (set/intersection (:auth-datasets-set this) (set (:dataset-ids ids)))
+   :auth-visualisations (set/intersection (:auth-visualisations-set this) (set (:visualisation-ids ids)))
+   :auth-dashboards     (set/intersection (:auth-dashboards-set this) (set (:dashboard-ids ids)))
+   :auth-collections    (set/intersection (:auth-collections-set this) (set (:collections-ids ids)))})
+
 (defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set]
   p/AuthService2080
   (optimistic-allow? [this ids]
-    (set/subset? (set/union (:dataset-ids ids) (:visualisation-ids ids)
-                            (:dashboard-ids ids) (:collection-ids ids))
-                 (set/union auth-datasets-set auth-visualisations-set
-                            auth-dashboards-set auth-collections-set)))
+    (optimistic-allow?* this ids))
   p/AuthService
   (allow? [this ids]
-    (and (set/subset? (:visualisation-ids ids) auth-visualisations-set)
-         (set/subset? (:dataset-ids ids) auth-datasets-set)
-         (set/subset? (:dashboard-ids ids) auth-dashboards-set)
-         (set/subset? (:collection-ids ids) auth-collections-set)))
-
-  (auth [this {:keys [dataset-ids visualisation-ids dashboard-ids collections-ids]}]
-    {:auth-datasets       (set/intersection auth-datasets-set (set dataset-ids))
-     :auth-visualisations (set/intersection auth-visualisations-set (set visualisation-ids))
-     :auth-dashboards     (set/intersection auth-dashboards-set (set dashboard-ids))
-     :auth-collections    (set/intersection auth-collections-set (set collections-ids))})
-
+    (allow?* this ids))
+  (auth [this ids]
+    (auth* this ids))
   (auth [this type* uuid]
     (let [f* (fn [s u] (when (contains? s u) u))]
       (condp = type*
