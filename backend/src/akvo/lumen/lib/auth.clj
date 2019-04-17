@@ -27,7 +27,7 @@
 (defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set]
   p/AuthService2080
   (optimistic-allow? [this ids]
-    (set/subset? (set ids)
+    (set/subset? (set/union (:dataset-ids ids) (:visualisation-ids ids) (:dashboard-ids ids) (:collection-ids ids))
                  (set/union auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set)))
   p/AuthService
   (allow? [this ids]

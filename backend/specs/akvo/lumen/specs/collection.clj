@@ -25,8 +25,8 @@
 (s/def ::entities (s/coll-of ::entity :distinct true))
 
 (s/def ::collection (s/keys :req-un [::id ::created ::modified ::entities]))
-(s/def ::collection-post-payload (s/keys :req-un [::title]))
+
+(s/def ::collection-post-payload (s/keys :req-un [::title]
+                                         :opt-un [::entities]))
 
 (s/def ::collection-payload (s/merge ::collection ::collection-post-payload))
-
-#_(s/valid? ::collection-payload {:id "3fceb475-fe78-4764-8302-3467ae990fd5", :title "pickachu", :created 1555079216460, :modified 1555079216460, :entities ["5cb0887f-2843-4a3f-9991-a50a0e5da987"]})
