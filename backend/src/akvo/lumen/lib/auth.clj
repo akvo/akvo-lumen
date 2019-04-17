@@ -14,8 +14,7 @@
    [clojure.tools.logging :as log]
    [clojure.set :as set]
    [hugsql.core :as hugsql]
-   [integrant.core :as ig]
-   [reitit.core :as rc]))
+   [integrant.core :as ig]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
@@ -24,24 +23,46 @@
 
 (declare ids)
 
+(defn- optimistic-allow?* [this ids]
+  {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
+              (set (keys ids)))]}
+  (set/subset? (set/union (:dataset-ids ids) (:visualisation-ids ids)
+                            (:dashboard-ids ids) (:collection-ids ids))
+                 (set/union (:auth-datasets-set this) (:auth-visualisations-set this)
+                            (:auth-dashboards-set this) (:auth-collections-set this))))
+
+(defn- allow?* [this ids]
+  {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
+              (set (keys ids)))]}
+  (and (set/subset? (:visualisation-ids ids) (:auth-visualisations-set this))
+       (set/subset? (:dataset-ids ids) (:auth-datasets-set this))
+       (set/subset? (:dashboard-ids ids) (:auth-dashboards-set this))
+       (set/subset? (:collection-ids ids) (:auth-collections-set this))))
+
+(defn- auth* [this ids]
+  {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
+            (set (keys ids)))]}
+  {:auth-datasets       (set/intersection (:auth-datasets-set this) (set (:dataset-ids ids)))
+   :auth-visualisations (set/intersection (:auth-visualisations-set this) (set (:visualisation-ids ids)))
+   :auth-dashboards     (set/intersection (:auth-dashboards-set this) (set (:dashboard-ids ids)))
+   :auth-collections    (set/intersection (:auth-collections-set this) (set (:collections-ids ids)))})
+
 (defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set]
+  p/AuthService2080
+  (optimistic-allow? [this ids]
+    (optimistic-allow?* this ids))
   p/AuthService
   (allow? [this ids]
-    (and (set/subset? (:visualisation-ids ids) auth-visualisations-set)
-         (set/subset? (:dataset-ids ids) auth-datasets-set)
-         (set/subset? (:dashboard-ids ids) auth-dashboards-set)
-         (set/subset? (:collection-ids ids) auth-collections-set)))
-  (auth [this {:keys [dataset-ids visualisation-ids dashboard-ids collections-ids]}]
-    {:auth-datasets (set/intersection auth-datasets-set (set dataset-ids))
-     :auth-visualisations (set/intersection auth-visualisations-set (set visualisation-ids))
-     :auth-dashboards (set/intersection auth-dashboards-set (set dashboard-ids))
-     :auth-collections (set/intersection auth-collections-set (set collections-ids))})
+    (allow?* this ids))
+  (auth [this ids]
+    (auth* this ids))
   (auth [this type* uuid]
-    (condp = type*
-      :dataset (when (contains? auth-datasets-set uuid) uuid)
-      :visualisation (when (contains? auth-visualisations-set uuid) uuid)
-      :dashboard (when (contains? auth-dashboards-set uuid) uuid)
-      :collection (when (contains? auth-collections-set uuid) uuid))))
+    (let [f* (fn [s u] (when (contains? s u) u))]
+      (condp = type*
+        :dataset       (f* auth-datasets-set uuid)
+        :visualisation (f* auth-visualisations-set uuid)
+        :dashboard     (f* auth-dashboards-set uuid)
+        :collection    (f* auth-collections-set uuid)))))
 
 (defn new-auth-service [{:keys [auth-datasets auth-visualisations auth-dashboards auth-collections] :as auth-uuid-tree}]
   (AuthServiceImpl. (set auth-datasets) (set auth-visualisations) (set auth-dashboards) (set auth-collections)))
@@ -109,6 +130,7 @@
                                  {:dataset-ids auth-datasets
                                   :visualisation-ids auth-visualisations
                                   :dashboard-ids auth-dashboards})))
+
 (defn wrap-auth-datasets
   "Add to the request an auth-service protocol impl using flow-api check_permissions"
   [tenant-manager flow-api]
@@ -148,39 +170,42 @@
   (s/keys :req-un [::tenant-manager/tenant-manager
                    ::flow-api]))
 
-(defn ids [spec data]
-  (let [ids (atom {:dataset-ids #{}
-                   :dashboard-ids #{}
-                   :visualisation-ids #{}
-                   :collection-ids #{}})
-        original-vis-id? visualisation.s/*id?*
-        original-ds-id? dataset.s/*id?*
+(defn ids
+  "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec` 
+  
+   Based on dynamic thread binding."
+  [spec data]
+  (let [ids               (atom {:dataset-ids       #{}
+                                 :dashboard-ids     #{}
+                                 :visualisation-ids #{}
+                                 :collection-ids    #{}})
+        original-vis-id?  visualisation.s/*id?*
+        original-ds-id?   dataset.s/*id?*
         original-dash-id? dashboard.s/*id?*
-        original-col-id? collection.s/*id?*
-        ds-fun (fn [id]
-                 (swap! ids update :dataset-ids conj id)
-                 (try
-                   (original-vis-id? id)
-                   (catch Exception e false)))
-        vis-fun (fn [id]
-                  (swap! ids update :visualisation-ids conj id)
-                  (try
-                    (original-ds-id? id)
-                    (catch Exception e false)))
-        dash-fun (fn [id]
-                  (swap! ids update :dashboard-ids conj id)
-                  (try
-                    (original-dash-id? id)
-                    (catch Exception e false)))
-        col-fun (fn [id]
-                  (swap! ids update :collection-ids conj id)
-                  (try
-                    (original-col-id? id)
-                    (catch Exception e false)))]
+        original-col-id?  collection.s/*id?*
+        ds-fun            (fn [id]
+                            (swap! ids update :dataset-ids conj id)
+                            (try
+                              (original-vis-id? id)
+                              (catch Exception e false)))
+        vis-fun           (fn [id]
+                            (swap! ids update :visualisation-ids conj id)
+                            (try
+                              (original-ds-id? id)
+                              (catch Exception e false)))
+        dash-fun          (fn [id]
+                            (swap! ids update :dashboard-ids conj id)
+                            (try
+                              (original-dash-id? id)
+                              (catch Exception e false)))
+        col-fun           (fn [id]
+                            (swap! ids update :collection-ids conj id)
+                            (try
+                              (original-col-id? id)
+                              (catch Exception e false)))]
     (binding [visualisation.s/*id?* vis-fun
-              dataset.s/*id?* ds-fun
-              dashboard.s/*id?* dash-fun
-              collection.s/*id?* col-fun]
-      (let [explain (s/explain-str spec data)]
-        (swap! ids assoc :spec-valid? (s/valid? spec data))
-        (deref ids)))))
+              dataset.s/*id?*       ds-fun
+              dashboard.s/*id?*     dash-fun
+              collection.s/*id?*    col-fun]
+      (s/explain spec data)
+      (deref ids))))
