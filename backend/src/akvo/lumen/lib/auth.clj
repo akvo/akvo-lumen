@@ -158,7 +158,11 @@
   (s/keys :req-un [::tenant-manager/tenant-manager
                    ::flow-api]))
 
-(defn ids [spec data]
+(defn ids
+  "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec` 
+  
+   Based on dynamic thread binding."
+  [spec data]
   (let [ids               (atom {:dataset-ids       #{}
                                  :dashboard-ids     #{}
                                  :visualisation-ids #{}
