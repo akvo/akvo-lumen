@@ -14,8 +14,7 @@
    [clojure.tools.logging :as log]
    [clojure.set :as set]
    [hugsql.core :as hugsql]
-   [integrant.core :as ig]
-   [reitit.core :as rc]))
+   [integrant.core :as ig]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
