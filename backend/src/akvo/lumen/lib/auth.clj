@@ -207,6 +207,5 @@
               dataset.s/*id?*       ds-fun
               dashboard.s/*id?*     dash-fun
               collection.s/*id?*    col-fun]
-      (let [explain (s/explain-str spec data)]
-        (swap! ids assoc :spec-valid? (s/valid? spec data))
-        (deref ids)))))
+      (s/explain spec data)
+      (deref ids))))
