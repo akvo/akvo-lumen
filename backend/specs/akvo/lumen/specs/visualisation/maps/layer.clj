@@ -38,7 +38,7 @@
 
 (s/def ::layer.point-color-mapping.s/op #{"equals"})
 
-(s/def ::layer.point-color-mapping.s/value double?)
+(s/def ::layer.point-color-mapping.s/value (s/or :d double? :s string?))
 
 (defn valid-hex? [s] (try
                        (Color/decode s)
