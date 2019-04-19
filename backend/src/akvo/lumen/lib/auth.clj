@@ -18,6 +18,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
@@ -25,15 +26,16 @@
 
 (defn- optimistic-allow?* [this ids]
   {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
-              (set (keys ids)))]}
+            (set (keys ids)))]}
   (set/subset? (set/union (:dataset-ids ids) (:visualisation-ids ids)
-                            (:dashboard-ids ids) (:collection-ids ids))
-                 (set/union (:auth-datasets-set this) (:auth-visualisations-set this)
-                            (:auth-dashboards-set this) (:auth-collections-set this))))
+                          (:dashboard-ids ids) (:collection-ids ids))
+               (set/union (:auth-datasets-set this) (:auth-visualisations-set this)
+                          (:auth-dashboards-set this) (:auth-collections-set this)
+                          (:rasters-set this))))
 
 (defn- allow?* [this ids]
   {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
-              (set (keys ids)))]}
+            (set (keys ids)))]}
   (and (set/subset? (:visualisation-ids ids) (:auth-visualisations-set this))
        (set/subset? (:dataset-ids ids) (:auth-datasets-set this))
        (set/subset? (:dashboard-ids ids) (:auth-dashboards-set this))
@@ -47,7 +49,7 @@
    :auth-dashboards     (set/intersection (:auth-dashboards-set this) (set (:dashboard-ids ids)))
    :auth-collections    (set/intersection (:auth-collections-set this) (set (:collections-ids ids)))})
 
-(defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set]
+(defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set rasters-set]
   p/AuthService2080
   (optimistic-allow? [this ids]
     (optimistic-allow?* this ids))
@@ -64,8 +66,8 @@
         :dashboard     (f* auth-dashboards-set uuid)
         :collection    (f* auth-collections-set uuid)))))
 
-(defn new-auth-service [{:keys [auth-datasets auth-visualisations auth-dashboards auth-collections] :as auth-uuid-tree}]
-  (AuthServiceImpl. (set auth-datasets) (set auth-visualisations) (set auth-dashboards) (set auth-collections)))
+(defn new-auth-service [{:keys [auth-datasets auth-visualisations auth-dashboards auth-collections rasters] :as auth-uuid-tree}]
+  (AuthServiceImpl. (set auth-datasets) (set auth-visualisations) (set auth-dashboards) (set auth-collections) (set rasters)))
 
 (defn match-by-jwt-family-name?
   "Feature flag condition based on `First Name` jwt-claims
@@ -138,26 +140,29 @@
     (fn [{:keys [jwt-claims tenant] :as request}]
       (let [tenant-conn    (p/connection tenant-manager tenant)
             dss            (all-datasets tenant-conn)
+            rasters        (mapv :id (all-rasters tenant-conn))
             auth-uuid-tree (if (and (match-by-jwt-family-name? request)
                                     (match-by-template-and-method? auth-calls request))
-                             (let [permissions   (->> (map :source dss)
-                                                      (filter #(= "AKVO_FLOW" (get % "kind")))
-                                                      (map c.flow/>api-model)
-                                                      (c.flow/check-permissions flow-api (jwt/jwt-token request))
-                                                      :body
-                                                      set)
-                                   auth-datasets (auth-datasets dss permissions)
+                             (let [permissions         (->> (map :source dss)
+                                                            (filter #(= "AKVO_FLOW" (get % "kind")))
+                                                            (map c.flow/>api-model)
+                                                            (c.flow/check-permissions flow-api (jwt/jwt-token request))
+                                                            :body
+                                                            set)
+                                   auth-datasets       (auth-datasets dss permissions)
                                    auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))
-                                   auth-dashboards (auth-dashboards tenant-conn (set auth-visualisations))
-                                   auth-collections (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)]
-                               {:auth-datasets       auth-datasets
+                                   auth-dashboards     (auth-dashboards tenant-conn (set auth-visualisations))
+                                   auth-collections    (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)]
+                               {:rasters             rasters
+                                :auth-datasets       auth-datasets
                                 :auth-visualisations auth-visualisations
-                                :auth-dashboards auth-dashboards
-                                :auth-collections auth-collections})
-                             {:auth-datasets       (mapv :id dss)
+                                :auth-dashboards     auth-dashboards
+                                :auth-collections    auth-collections})
+                             {:rasters             rasters
+                              :auth-datasets       (mapv :id dss)
                               :auth-visualisations (mapv :id (all-visualisations tenant-conn))
-                              :auth-dashboards (mapv :id (all-dashboards tenant-conn))
-                              :auth-collections (mapv :id (all-collections tenant-conn))})]
+                              :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
+                              :auth-collections    (mapv :id (all-collections tenant-conn))})]
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 
