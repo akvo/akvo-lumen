@@ -113,14 +113,14 @@
 (defmethod vis "map"  [_]
   (s/merge ::base-viz (s/keys :req-un [::map.s/spec])) )
 
-(s/fdef visualisation/create
+#_(s/fdef visualisation/create
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :body ::visualisation
 	 :jwt-claims map?)
   :ret any?)
 
-(s/fdef visualisation/upsert
+#_(s/fdef visualisation/upsert
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :body ::visualisation

@@ -46,7 +46,7 @@
 (s/def ::layer (s/multi-spec layer-type :layerType))
 (s/def ::layers (s/coll-of ::layer :kind vector? :distinct true))
 
-(s/fdef lib.vis.maps/create
+#_(s/fdef lib.vis.maps/create
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :windshaft-url string?
