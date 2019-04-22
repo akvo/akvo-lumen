@@ -103,8 +103,15 @@
 (defmethod vis "bubble"  [_]
   (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
 
+(create-ns  'akvo.lumen.specs.visualisation.map)
+(alias 'map.s 'akvo.lumen.specs.visualisation.map)
+
+(s/def ::map.s/baseLayer #{"street" "satellite" "terrain"})
+
+(s/def ::map.s/spec (s/keys :req-un [::version ::map.s/baseLayer ::visualisation.maps.s/layers]))
+
 (defmethod vis "map"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::map.s/spec])) )
 
 (s/fdef visualisation/create
   :args (s/cat
