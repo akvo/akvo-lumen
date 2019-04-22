@@ -177,40 +177,15 @@
 
 (defn ids
   "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec` 
-  
    Based on dynamic thread binding."
   [spec data]
-  (let [ids               (atom {:dataset-ids       #{}
-                                 :dashboard-ids     #{}
-                                 :visualisation-ids #{}
-                                 :collection-ids    #{}})
-        original-vis-id?  visualisation.s/*id?*
-        original-ds-id?   dataset.s/*id?*
-        original-dash-id? dashboard.s/*id?*
-        original-col-id?  collection.s/*id?*
-        ds-fun            (fn [id]
-                            (swap! ids update :dataset-ids conj id)
-                            (try
-                              (original-vis-id? id)
-                              (catch Exception e false)))
-        vis-fun           (fn [id]
-                            (swap! ids update :visualisation-ids conj id)
-                            (try
-                              (original-ds-id? id)
-                              (catch Exception e false)))
-        dash-fun          (fn [id]
-                            (swap! ids update :dashboard-ids conj id)
-                            (try
-                              (original-dash-id? id)
-                              (catch Exception e false)))
-        col-fun           (fn [id]
-                            (swap! ids update :collection-ids conj id)
-                            (try
-                              (original-col-id? id)
-                              (catch Exception e false)))]
-    (binding [visualisation.s/*id?* vis-fun
-              dataset.s/*id?*       ds-fun
-              dashboard.s/*id?*     dash-fun
-              collection.s/*id?*    col-fun]
+  (let [ids      (atom {:collection-ids    #{}
+                        :dashboard-ids     #{}
+                        :dataset-ids       #{}
+                        :visualisation-ids #{}})]
+    (binding [collection.s/*id?*    #(swap! ids update :collection-ids conj %)
+              dashboard.s/*id?*     #(swap! ids update :dashboard-ids conj %)
+              dataset.s/*id?*       #(swap! ids update :dataset-ids conj %)
+              visualisation.s/*id?* #(swap! ids update :visualisation-ids conj %)]
       (s/explain-data spec data)
       (deref ids))))
