@@ -2,6 +2,7 @@
   (:require [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.db.dataset-version :as db.dataset-version.s]
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
+            [akvo.lumen.specs.dataset :as dataset.s]
             [clojure.spec.alpha :as s]
             [clojure.string :as str])
   (:import [java.awt Color]))
@@ -59,7 +60,7 @@
 
 (s/def ::pointColorColumn (s/nilable ::db.dsv.column.s/columnName))
 
-(s/def ::datasetId ::db.dataset-version.s/dataset-id)
+(s/def ::datasetId ::dataset.s/id)
 
 (s/def ::rasterId  (s/with-gen
                      lumen.s/str-uuid?
