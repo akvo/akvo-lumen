@@ -212,5 +212,5 @@
               dataset.s/*id?*       ds-fun
               dashboard.s/*id?*     dash-fun
               collection.s/*id?*    col-fun]
-      (s/explain spec data)
+      (s/explain-data spec data)
       (deref ids))))
