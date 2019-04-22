@@ -2,6 +2,7 @@
   (:require [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.db.dataset-version :as db.dataset-version.s]
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
+            [akvo.lumen.specs.dataset :as dataset.s]
             [clojure.spec.alpha :as s]
             [clojure.string :as str])
   (:import [java.awt Color]))
@@ -31,7 +32,10 @@
 (defn string-pos-int? [s] (try (pos-int? (Integer/parseInt s))
                           (catch Exception e false)))
 
-(s/def ::pointSize  (s/or :s string-pos-int? :i pos-int?)) ;; only in geo-location we receive a string :!
+(s/def ::pointSize  (s/with-gen
+                      (s/or :s string-pos-int? :i pos-int?)
+                      #(s/gen #{"1" 1 "2" 2})
+                      )) ;; only in geo-location we receive a string :!
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.point-color-mapping)
 (alias 'layer.point-color-mapping.s 'akvo.lumen.specs.visualisation.maps.layer.point-color-mapping)
@@ -44,7 +48,9 @@
                        (Color/decode s)
                        (catch Exception e false)))
 
-(s/def ::layer.point-color-mapping.s/color valid-hex?)
+(s/def ::layer.point-color-mapping.s/color (s/with-gen
+                                             valid-hex?
+                                             #(s/gen #{"000" "256256256" "101010"})))
 
 (s/def ::point-color-mapping-item (s/keys :req-un [::layer.point-color-mapping.s/op
                                                    ::layer.point-color-mapping.s/value
@@ -54,7 +60,7 @@
 
 (s/def ::pointColorColumn (s/nilable ::db.dsv.column.s/columnName))
 
-(s/def ::datasetId ::db.dataset-version.s/dataset-id)
+(s/def ::datasetId ::dataset.s/id)
 
 (s/def ::rasterId  (s/with-gen
                      lumen.s/str-uuid?
