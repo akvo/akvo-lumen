@@ -135,7 +135,7 @@
 
 (defn wrap-auth-datasets
   "Add to the request an auth-service protocol impl using flow-api check_permissions"
-  [tenant-manager flow-api]
+  [tenant-manager flow-api collector]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
       (let [tenant-conn    (p/connection tenant-manager tenant)
@@ -166,14 +166,18 @@
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 
-(defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api] :as opts}]
-  (wrap-auth-datasets tenant-manager flow-api))
+
+(defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api monitoring] :as opts}]
+  (wrap-auth-datasets tenant-manager flow-api (:collector monitoring)))
 
 (s/def ::flow-api ::c.flow/config)
 
+(s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
+
 (defmethod ig/pre-init-spec :akvo.lumen.lib.auth/wrap-auth-datasets [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
-                   ::flow-api]))
+                   ::flow-api
+                   ::monitoring]))
 
 (defn ids
   "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec` 

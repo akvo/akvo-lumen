@@ -30,7 +30,8 @@
  :akvo.lumen.auth/wrap-auth {}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                          :flow-api #ig/ref :akvo.lumen.component.flow/api}
+                                          :flow-api #ig/ref :akvo.lumen.component.flow/api
+                                          :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
 
  :akvo.lumen.auth/wrap-jwt {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
 
