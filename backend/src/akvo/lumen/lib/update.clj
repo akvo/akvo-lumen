@@ -36,13 +36,17 @@
                                 (cond-> {:id (get column "columnName")
                                          :type (get column "type")}
                                   (contains? column "key") (assoc :key (boolean (get column "key")))))
-                              imported-columns)]
-    (set/subset? (set (map #(select-keys % [:id :type]) imported-columns))
-                 (set (map #(select-keys % [:id :type])
-                           ;; https://github.com/akvo/akvo-lumen/issues/1923
-                           ;; https://github.com/akvo/akvo-lumen/issues/1926
-                           ;; remove this map conversion logic once #1926 is finished
-                           (map #(update % :id name) columns))))))
+                              imported-columns)
+        compatible? (set/subset? (set (map #(select-keys % [:id :type]) imported-columns))
+                         (set (map #(select-keys % [:id :type])
+                                   ;; https://github.com/akvo/akvo-lumen/issues/1923
+                                   ;; https://github.com/akvo/akvo-lumen/issues/1926
+                                   ;; remove this map conversion logic once #1926 is finished
+                                   (map #(update % :id name) columns))))]
+    (if compatible?
+      compatible?
+      (do (log/error :imported-columns imported-columns)
+          (log/error :columns columns)))))
 
 (defn- do-update [tenant-conn import-config dataset-id data-source-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
