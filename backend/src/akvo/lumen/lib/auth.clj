@@ -16,6 +16,7 @@
    [clojure.tools.logging :as log]
    [hugsql.core :as hugsql]
    [iapetos.core :as prometheus]
+   [iapetos.registry :as registry]
    [integrant.core :as ig]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
@@ -136,10 +137,8 @@
                                   :dashboard-ids auth-dashboards})))
 
 (defn- flow-check-permissions [flow-api request collector tenant data]
-  (let [t (prometheus/start-timer collector :app/flow-check-permissions {"tenant" tenant})
-        res (c.flow/check-permissions flow-api (jwt/jwt-token request) data)]
-    (t)
-    res))
+  (prometheus/with-duration (registry/get collector :app/flow-check-permissions {"tenant" tenant})
+    (c.flow/check-permissions flow-api (jwt/jwt-token request) data)))
 
 (defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
   (let [permissions         (->> (map :source dss)
