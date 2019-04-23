@@ -169,11 +169,14 @@
             auth-uuid-tree (if (and (match-by-jwt-family-name? request)
                                     (match-by-template-and-method? auth-calls request))
                              (load-auth-data dss rasters tenant-conn flow-api request collector tenant)
-                             {:rasters             rasters
-                              :auth-datasets       (mapv :id dss)
-                              :auth-visualisations (mapv :id (all-visualisations tenant-conn))
-                              :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
-                              :auth-collections    (mapv :id (all-collections tenant-conn))})]
+                             (do
+                               (future
+                                 (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
+                               {:rasters             rasters
+                                :auth-datasets       (mapv :id dss)
+                                :auth-visualisations (mapv :id (all-visualisations tenant-conn))
+                                :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
+                                :auth-collections    (mapv :id (all-collections tenant-conn))}))]
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 
