@@ -204,5 +204,5 @@
               dashboard.s/*id?*     #(swap! ids update :dashboard-ids conj %)
               dataset.s/*id?*       #(swap! ids update :dataset-ids conj %)
               visualisation.s/*id?* #(swap! ids update :visualisation-ids conj %)]
-      (s/explain-data spec data)
+      (s/explain-str spec data)
       (deref ids))))
