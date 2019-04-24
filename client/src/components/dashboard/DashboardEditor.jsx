@@ -148,9 +148,9 @@ export default class DashboardEditor extends Component {
   }
 
   getLayout() {
-    const { exporting } = this.props;
+    const { exporting, preventPageOverlaps } = this.props;
     const { propLayout } = this.state;
-    return exporting ?
+    return (exporting && preventPageOverlaps) ?
       groupIntoPages()(propLayout) :
       propLayout;
   }
@@ -385,4 +385,10 @@ DashboardEditor.propTypes = {
   onUpdateName: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   exporting: PropTypes.bool,
+  preventPageOverlaps: PropTypes.bool,
+};
+
+DashboardEditor.defaultProps = {
+  exporting: false,
+  preventPageOverlaps: false,
 };

@@ -13,7 +13,7 @@ import Resources from '../components/Resources';
 import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
-import withExport from '../utilities/withExport';
+import withProps from '../utilities/withProps';
 
 export default function App({ history, location }) {
   return (
@@ -53,7 +53,7 @@ export default function App({ history, location }) {
           />
           <Route
             path="visualisation/:visualisationId/export"
-            components={{ sidebar: WorkspaceNav, content: withExport(Visualisation) }}
+            components={{ sidebar: WorkspaceNav, content: withProps(Visualisation, { exporting: true }) }}
             location={location}
           />
           <Route
@@ -67,8 +67,16 @@ export default function App({ history, location }) {
             location={location}
           />
           <Route
+            path="dashboard/:dashboardId/export_pages"
+            components={{
+              sidebar: WorkspaceNav,
+              content: withProps(Dashboard, { exporting: true, preventPageOverlaps: true }),
+            }}
+            location={location}
+          />
+          <Route
             path="dashboard/:dashboardId/export"
-            components={{ sidebar: WorkspaceNav, content: withExport(Dashboard) }}
+            components={{ sidebar: WorkspaceNav, content: withProps(Dashboard, { exporting: true }) }}
             location={location}
           />
           <Route
