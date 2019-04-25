@@ -8,9 +8,21 @@ import {
   tryFitToPage,
   groupIntoPages,
   ROWS_PER_PAGE,
+  isOverlappingInAxis,
 } from '../../src/utilities/dashboard';
 
 describe('Utility: Dashboard', () => {
+  describe('isOverlappingInAxis()', () => {
+    it('from top', () => {
+      const result = isOverlappingInAxis(
+        'y',
+        { y: 1, h: 2, index: 0 },
+        { y: 2, h: 2, index: 1 }
+      );
+      assert(result);
+    });
+  });
+
   describe('isColliding()', () => {
 
     it('from left', () => {
@@ -45,6 +57,13 @@ describe('Utility: Dashboard', () => {
       assert.equal(result, false);
     });
 
+    it('from top', () => {
+      const result = isColliding(
+        { y: 1, h: 2, x: 0, w: 2, index: 0 },
+        { y: 2, h: 2, x: 0, w: 2, index: 1 }
+      );
+      assert(result);
+    });
   });
 
   it('getCollidedItems()', () => {
@@ -68,24 +87,24 @@ describe('Utility: Dashboard', () => {
   describe('getDiffYToAvoidCollision()', () => {
     it('below', () => {
       const result = getDiffYToAvoidCollision(
-        [{ y: 1, h: 2, index: 0 }],
-        { y: 2, h: 2, index: 1 }
+        [{ y: 1, h: 2, x: 0, w: 2, index: 0 }],
+        { y: 2, h: 2, x: 0, w: 2, index: 1 }
       );
       assert.equal(result, 1);
     });
 
     it('inside', () => {
       const result = getDiffYToAvoidCollision(
-        [{ y: 1, h: 4, index: 0 }],
-        { y: 2, h: 2, index: 1 }
+        [{ y: 1, h: 4, x: 0, w: 2, index: 0 }],
+        { y: 2, h: 2, x: 0, w: 2, index: 1 }
       );
       assert.equal(result, 3);
     });
 
     it('above', () => {
       const result = getDiffYToAvoidCollision(
-        [{ y: 4, h: 4, index: 0 }],
-        { y: 2, h: 3, index: 1 }
+        [{ y: 4, h: 4, x: 0, w: 2, index: 0 }],
+        { y: 2, h: 3, x: 0, w: 2, index: 1 }
       );
       assert.equal(result, 6);
     });
@@ -103,12 +122,26 @@ describe('Utility: Dashboard', () => {
         [
           { x: 0, y: 1, h: 4, w: 2, index: 0 },
           { x: 0, y: 2, h: 4, w: 2, index: 1 },
-          { x: 0, y: 4, h: 4, w: 2 },
+          { x: 0, y: 7, h: 4, w: 2, index: 2 },
         ],
         { x: 0, y: 2, h: 4, w: 2, index: 1 }
       );
       assert.equal(result, 3);
     });
+
+    it('special 1', () => {
+      const result = getDiffYToAvoidCollision(
+        [
+          { x: 0, y: 1, h: 4, w: 2, index: 0 },
+          { x: 0, y: 2, h: 4, w: 2, index: 1 },
+          { x: 0, y: 4, h: 4, w: 2, index: 2 },
+          { x: 0, y: 4, h: 4, w: 2, index: 3 },
+        ],
+        { x: 0, y: 2, h: 4, w: 2, index: 1 }
+      );
+      assert.equal(result, 3);
+    });
+
   });
 
   describe('moveCollidedItems()', () => {
@@ -137,7 +170,7 @@ describe('Utility: Dashboard', () => {
     });
 
     it('fits 2', () => {
-      const result = tryFitToPage({ x: 0, y: ROWS_PER_PAGE - 2, h: 2, w: 2 }, 0);
+      const result = tryFitToPage({ x: 0, y: ROWS_PER_PAGE - 3, h: 2, w: 2 }, 0);
       assert(result);
     });
 
@@ -167,7 +200,7 @@ describe('Utility: Dashboard', () => {
     });
 
     it('fits 8', () => {
-      const result = tryFitToPage({ x: 4, y: 11, h: 5, w: 4 }, 0);
+      const result = tryFitToPage({ x: 4, y: 10, h: 5, w: 4 }, 0);
       assert(result);
     });
 

@@ -30,31 +30,35 @@ export const getCollidedItems = items =>
     isColliding(item, items[i - 1] || {})
   );
 
-export const getDiffYToAvoidCollision = (items, item) =>
-  items.reduce((maxOverlap, { index, h, y }) => (
-    (item.index === index || y > item.y) ?
-      maxOverlap :
-      Math.max(maxOverlap, (y + h) - item.y)
-  ), 0);
+export const getDiffYToAvoidCollision = (collidedItems, item) =>
+  collidedItems.reduce((maxOverlap, collidedItem) => {
+    const { index, h, y } = collidedItem;
+    return (
+      (item.index === index || !isColliding(item, collidedItem) || maxOverlap > 0) ?
+        maxOverlap :
+        Math.max(maxOverlap, (y + h) - item.y)
+    );
+  }, 0);
 
 export const moveCollidedItems = (items) => {
   let sortedItems = sort(items).slice().map((item, index) => ({ ...item, index }));
-  const collidedItems = getCollidedItems(sortedItems);
-  if (collidedItems.length) {
-    collidedItems.forEach((collidedItem) => {
-      const diffY = getDiffYToAvoidCollision(sortedItems, collidedItem);
-      sortedItems[collidedItem.index].y += diffY; // eslint-disable-line no-param-reassign
-    });
+  let collidedItems = getCollidedItems(sortedItems);
+  const moveCollidedItem = (collidedItem) => {
+    const diffY = getDiffYToAvoidCollision(sortedItems, collidedItem);
+    sortedItems[collidedItem.index].y += diffY; // eslint-disable-line no-param-reassign
+  };
+  while (collidedItems.length) {
+    collidedItems.forEach(moveCollidedItem);
     sortedItems = moveCollidedItems(sortedItems);
+    collidedItems = getCollidedItems(sortedItems);
   }
-  return sortedItems
-    .map(({ index, ...rest }) => ({ ...rest })); // eslint-disable-line no-unused-vars
+  return sortedItems.map(({ index, ...rest }) => ({ ...rest })); // eslint-disable-line no-unused-vars, max-len
 };
 
 export const tryFitToPage = (item, pageIndex) => {
   const pageStart = pageIndex * ROWS_PER_PAGE;
   const pageEnd = (pageStart + ROWS_PER_PAGE) - 1;
-  return item.y <= pageEnd && (item.y + item.h <= pageEnd || item.h > ROWS_PER_PAGE);
+  return item.y <= pageEnd && (item.y + item.h <= pageEnd || item.h > ROWS_PER_PAGE - 1);
 };
 
 export const groupIntoPages = (pages = []) => (items, pageIndex = 0) => {
