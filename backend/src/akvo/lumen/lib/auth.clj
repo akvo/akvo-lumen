@@ -113,7 +113,8 @@
                    (reduce (fn [c {:keys [id datasetId]}] (update c id #(set (conj % datasetId)))) {})
                    (filter #(set/superset? auth-datasets-set (val %)))
                    (mapv first))
-        others* (mapv :id (all-no-maps-visualisations tenant-conn {} {} {:identifiers identity}))]
+        others* (mapv :id (->>  (all-no-maps-visualisations tenant-conn {} {} {:identifiers identity})
+                                (filter #(contains? auth-datasets-set (:datasetId %)))))]
     (log/debug :vis-maps* maps*)
     (log/debug :vis-others* others*)
     (apply conj others* maps*)))
