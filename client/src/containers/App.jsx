@@ -53,7 +53,10 @@ export default function App({ history, location }) {
           />
           <Route
             path="visualisation/:visualisationId/export"
-            components={{ sidebar: WorkspaceNav, content: withProps(Visualisation, { exporting: true }) }}
+            components={{
+              sidebar: WorkspaceNav,
+              content: withProps(Visualisation, { exporting: true }),
+            }}
             location={location}
           />
           <Route
@@ -76,7 +79,10 @@ export default function App({ history, location }) {
           />
           <Route
             path="dashboard/:dashboardId/export"
-            components={{ sidebar: WorkspaceNav, content: withProps(Dashboard, { exporting: true }) }}
+            components={{
+              sidebar: WorkspaceNav,
+              content: withProps(Dashboard, { exporting: true }),
+            }}
             location={location}
           />
           <Route
