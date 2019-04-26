@@ -4,6 +4,7 @@
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -107,11 +108,13 @@
 
 (defn create-raster [tenant-conn windshaft-url raster-id]
   (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id raster-id})
-        headers (headers tenant-conn)
+        headers* (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
+          _ (log/warn :map-config map-config)
+          _ (log/warn :headers headers)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
-                                             :headers headers
+                                             :headers headers*
                                              :content-type :json})
                            :body json/decode (get "layergroupid"))
         layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil)]
