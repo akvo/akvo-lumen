@@ -7,6 +7,13 @@
             [integrant.core :as ig]
             [clojure.tools.logging :as log]))
 
+
+(def v2-count 109)
+
+(def missed-v1-uuids-in-v2 ["f0f3c1dd-89af-49f1-83e7-bcc31c3006cf"
+                            "a2413119-38eb-4959-92ee-cc169fdbb0fc"
+                            "c3535e72-ff77-4225-9f4a-41d3288780c6"
+                            "d488672f-9a4c-4aa4-82eb-8a95c40d0296"])
 (defrecord Caddisfly [local-schema-uri schema-uri schema])
 
 (defmethod clojure.core/print-method Caddisfly

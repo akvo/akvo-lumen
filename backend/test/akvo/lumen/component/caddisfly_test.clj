@@ -43,29 +43,13 @@
                                        (update :results (partial mapv #(select-keys % [:id])))
                                        (select-keys [:uuid :hasImage :results]))
                                    )) {}  d))
-          diff  (data/diff (adapt* d1) (adapt* d2))
-          ]
-      (is (= (mapv #(get d1 %) (map first (first ddd)))
-             [{:name "Water - Colorimetry - Caddisfly - Fluoride (0 - 2 mg/l F)",
-               :uuid "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf",
-               :brand "Caddisfly",
-               :hasImage true,
-               :results [{:id 1, :name "Fluoride", :unit "mg/l"}]}
-              {:name
-               "Water - Colorimetry - Caddisfly - Free Chlorine (0 - 3 mg/l Cl2)",
-               :uuid "a2413119-38eb-4959-92ee-cc169fdbb0fc",
-               :brand "Caddisfly",
-               :hasImage true,
-               :results [{:id 1, :name "Free Chlorine", :unit "mg/l"}]}
-              {:name
-               "Water - Colorimetry - Caddisfly - Free Chlorine (0 - 1 mg/l Cl2)",
-               :uuid "c3535e72-ff77-4225-9f4a-41d3288780c6",
-               :brand "Caddisfly",
-               :hasImage true,
-               :results [{:id 1, :name "Free Chlorine", :unit "mg/l"}]}
-              {:name "Water - Colorimetry - Caddisfly - Chromium",
-               :uuid "d488672f-9a4c-4aa4-82eb-8a95c40d0296",
-               :brand "Caddisfly",
-               :hasImage true,
-               :results [{:id 1, :name "Chromium", :unit "mg/l"}]}]))
-      )))
+          diff  (data/diff (adapt* d1) (adapt* d2))]
+      (is (= (mapv #(:uuid (get d1 %)) (map first (first ddd)))
+             c/missed-v1-uuids-in-v2))
+      (testing "testing compatibility backwards"
+        (let [d3 (reduce (fn [c t]
+                           (assoc c t (get d1 t)))
+                         d2 c/missed-v1-uuids-in-v2)
+              diff2 (data/diff (adapt* d1) (adapt* d3))]
+          (is (= c/v2-count (count (adapt* d3))) )
+          (is (nil? (first diff2))))))))
