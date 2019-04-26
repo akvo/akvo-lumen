@@ -535,7 +535,7 @@
                                                 {:dataset-name "multiple caddisfly"
                                                  :kind         "clj"
                                                  :data         data})
-        apply-transformation       (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+        apply-transformation       (partial async-tx-apply {:tenant-conn *tenant-conn* :caddisfly *caddisfly*} dataset-id)
         selected-column            (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
                                                              {::import.values.s/multipleType          "caddisfly"
                                                               ::import.values.s/multipleId            import.values.s/cad1-id
