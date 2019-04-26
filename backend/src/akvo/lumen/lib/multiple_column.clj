@@ -3,16 +3,19 @@
             [akvo.lumen.component.caddisfly :as c.caddisfly]
             [ring.util.response :refer [response not-found]]))
 
+(defn adapt-schema [schema]
+  (-> (select-keys schema [:hasImage])
+      (assoc :columns (map (fn [r]
+                             {:id   (:id r)
+                              :name (format "%s (%s)" (:name r) (:unit r))
+                              :type "text" ;; TODO will be improved after design discussions
+                              }) (:results schema)))))
+
 (defn- extract
   [caddisfly id]
   (when id
     (if-let [schema (c.caddisfly/get-schema caddisfly id)]
-      (-> (select-keys schema [:hasImage])
-          (assoc :columns (map (fn [r]
-                                 {:id   (:id r)
-                                  :name (format "%s (%s)" (:name r) (:unit r))
-                                  :type "text" ;; TODO will be improved after design discussions
-                                  }) (:results schema)))))))
+      (adapt-schema schema))))
 
 (defn details
   "depending of type of multiple columns we dispatch to different logic impls"
