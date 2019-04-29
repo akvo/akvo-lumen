@@ -14,6 +14,7 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
+   [clojure.walk :as w]
    [hugsql.core :as hugsql]
    [iapetos.core :as prometheus]
    [iapetos.registry :as registry]
@@ -109,15 +110,26 @@
        (mapv :id)))
 
 (defn- auth-visualisations [tenant-conn auth-datasets-set]
-  (let [maps* (->> (all-maps-visualisations-with-dataset-id tenant-conn {} {} {:identifiers identity})
-                   (reduce (fn [c {:keys [id datasetId]}] (update c id #(set (conj % datasetId)))) {})
-                   (filter #(set/superset? auth-datasets-set (val %)))
-                   (mapv first))
-        others* (mapv :id (->>  (all-no-maps-visualisations tenant-conn {} {} {:identifiers identity})
-                                (filter #(contains? auth-datasets-set (:datasetId %)))))]
+  (let [[maps nomaps] (split-with #(= "map" (:visualisationType %))
+                                  (w/keywordize-keys (all-visualisations tenant-conn {} {} {:identifiers identity})))
+        maps*         (->> maps
+                           (reduce (fn [c m]
+                                     (let [datasets (reduce (fn [c l]
+                                                              (if-let [ds (let [ds (:datasetId l)]
+                                                                            (and ds (not= "null" ds)))]
+                                                                (conj c ds)
+                                                                c)) #{} (:layers m))]
+                                       (conj c {:id       (:id m)
+                                                :datasets datasets}))) [])
+                           (filter (fn [{:keys [id datasets]}]
+                                     (set/superset? auth-datasets-set datasets)))
+                           (mapv :id))
+        nomaps*       (mapv :id (->> nomaps
+                                     (filter #(or (contains? auth-datasets-set (:datasetId %))
+                                                  (nil? (:datasetId %))))))]
     (log/debug :vis-maps* maps*)
-    (log/debug :vis-others* others*)
-    (apply conj others* maps*)))
+    (log/debug :vis-others* nomaps*)
+    (apply conj nomaps* maps*)))
 
 (defn- auth-dashboards [tenant-conn auth-visualisations-set]
   (->> (all-dashboards-with-visualisations tenant-conn {} {} {:identifiers identity})
