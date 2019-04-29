@@ -53,7 +53,7 @@
                                          :id (:id c)
                                          :imported-type (:type (nth (first diff) idx nil))
                                          :updated-type (:type (nth (second diff) idx nil))})) f1)]
-    {:wrong-types column-types-problems :columns-missed columns-id-problems}))
+    {:wrong-types column-types-problems :missed-columns columns-id-problems}))
 
 (defn compatible-columns-error? [imported-columns* columns]
   (let [imported-columns (->> imported-columns*
@@ -87,7 +87,12 @@
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)]
         (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns importer-columns)]
-          (failed-update conn job-execution-id (str "Column mismatch" compatible-errors))
+          (failed-update conn job-execution-id
+                         (cond-> "Column mismatch"
+                           (seq (:missed-columns compatible-errors))
+                           (str ".\n Following columns are missed in new data version: " (:missed-columns compatible-errors))
+                           (seq (:wrong-types compatible-errors))
+                           (str ".\n Following columns have changed the column type in new data version: " (:wrong-types compatible-errors))))
           (let [table-name          (util/gen-table-name "ds")
                 imported-table-name (util/gen-table-name "imported")]
             (postgres/create-dataset-table conn table-name importer-columns)

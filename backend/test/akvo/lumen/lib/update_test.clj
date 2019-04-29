@@ -21,7 +21,7 @@
     (let [imported-columns [{:id "c1", :type "number"} {:id "c2", :type "text"} {:id "c3", :type "text"} {:id "c4", :type "text"}]
           columns [{:id "c1", :type "text"} {:id "c2", :type "text"} {:id "c3", :type "text"}]]
       (is (= [{:title "name", :id "c4"}]
-             (:columns-missed (update/compatible-columns-errors dict imported-columns columns)))))))
+             (:missed-columns (update/compatible-columns-errors dict imported-columns columns)))))))
 
 (deftest compatible-columns
   (let [imported-columns [{"sort" nil,
