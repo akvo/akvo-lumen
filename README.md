@@ -23,3 +23,4 @@ See [how to setup a development environment](README.dev.md)
 
 ## Legal
 Copyright © 2016 - present Akvo Foundation
+
