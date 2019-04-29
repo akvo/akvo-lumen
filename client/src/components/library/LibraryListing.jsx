@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+
 import LibraryListingGroup from './LibraryListingGroup';
 import * as entity from '../../domain/entity';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 require('./LibraryListing.scss');
 
@@ -131,7 +133,7 @@ export default function LibraryListing({
           <p>Please update your search and try again.</p>
         </div>
       }
-      {results &&
+      {results ? (
         <ul>
           {sortedListGroups.map((listGroup, index) =>
             <LibraryListingGroup
@@ -148,7 +150,9 @@ export default function LibraryListing({
             />
           )}
         </ul>
-      }
+      ) : (
+        <LoadingSpinner />
+      )}
     </div>
   );
 }
