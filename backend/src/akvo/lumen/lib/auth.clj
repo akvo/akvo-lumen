@@ -197,13 +197,16 @@
   "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec` 
    Based on dynamic thread binding."
   [spec data]
-  (let [ids      (atom {:collection-ids    #{}
-                        :dashboard-ids     #{}
-                        :dataset-ids       #{}
-                        :visualisation-ids #{}})]
-    (binding [collection.s/*id?*    #(swap! ids update :collection-ids conj %)
-              dashboard.s/*id?*     #(swap! ids update :dashboard-ids conj %)
-              dataset.s/*id?*       #(swap! ids update :dataset-ids conj %)
-              visualisation.s/*id?* #(swap! ids update :visualisation-ids conj %)]
+  (let [ids    (atom {:collection-ids    #{}
+                      :dashboard-ids     #{}
+                      :dataset-ids       #{}
+                      :visualisation-ids #{}})
+        add-id (fn [k id]
+                 (when id
+                   (swap! ids update k conj id)))]
+    (binding [collection.s/*id?*    (partial add-id :collection-ids)
+              dashboard.s/*id?*     (partial add-id :dashboard-ids)
+              dataset.s/*id?*       (partial add-id :dataset-ids)
+              visualisation.s/*id?* (partial add-id :visualisation-ids)]
       (s/explain-str spec data)
       (deref ids))))
