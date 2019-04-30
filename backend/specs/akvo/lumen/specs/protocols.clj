@@ -3,4 +3,4 @@
             [akvo.lumen.protocols :as p]
             [clojure.spec.alpha :as s]))
 
-(s/def ::db-query-service (partial satisfies? p/DBQueryService))
+(s/def ::auth-service (partial satisfies? p/AuthService))

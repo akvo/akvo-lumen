@@ -12,6 +12,7 @@ import { stack } from 'd3-shape';
 import { GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
+import { abbr } from '../../utilities/utils';
 import {
   heuristicRound,
   replaceLabelIfValueEmpty,
@@ -25,7 +26,7 @@ import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
 import ChartLayout from './ChartLayout';
 import Tooltip from './Tooltip';
-import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE, LABEL_CHAR_WIDTH } from '../../constants/chart';
 import RenderComplete from './RenderComplete';
 import { isLight } from '../../utilities/color';
 
@@ -91,6 +92,7 @@ export default class StackedBarChart extends Component {
     colorMapping: {},
     grouped: false,
     grid: true,
+    xAxisLabel: '',
   }
 
   static contextTypes = {
@@ -148,6 +150,14 @@ export default class StackedBarChart extends Component {
   getColor(key, index) {
     const { colorMapping, colors } = this.props;
     return colorMapping[key] || colors[index];
+  }
+
+  getMarginLeft(series) {
+    const { xAxisLabel, marginLeft, width } = this.props;
+    const longestLabel = series.data.concat(xAxisLabel).reduce((acc, { label }) =>
+      Math.max(acc, `${label}`.length)
+    , 0);
+    return Math.min(Math.min(marginLeft, longestLabel * LABEL_CHAR_WIDTH), width / 2);
   }
 
   handleShowTooltip(event, content) {
@@ -212,14 +222,12 @@ export default class StackedBarChart extends Component {
     });
   }
 
-  renderLabel({ nodeHeight, x, y, node, index, nodeCount }) {
+  renderLabel({ nodeHeight, x, y, node, index, nodeCount, maxChars }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
       (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
-    let labelText = String(replaceLabelIfValueEmpty(node.key));
-    labelText = labelText.length <= 16 ?
-      labelText : `${labelText.substring(0, 13)}…`;
+    const labelText = abbr(String(replaceLabelIfValueEmpty(node.key)), maxChars);
 
     const labelX = x - 10;
     const labelY = y + (nodeHeight / 2);
@@ -307,7 +315,6 @@ export default class StackedBarChart extends Component {
       marginTop,
       marginRight,
       marginBottom,
-      marginLeft,
       style,
       legendVisible,
       legendPosition,
@@ -328,12 +335,21 @@ export default class StackedBarChart extends Component {
 
     if (!series) return null;
 
+    const marginLeft = this.getMarginLeft(series);
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const seriesCount = this.props.data.series.length;
     const paddingBottom = getPaddingBottom(series.data);
-    const axisLabelFontSize =
-      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+    const axisLabelFontSize = getLabelFontSize(
+      yAxisLabel,
+      xAxisLabel,
+      MAX_FONT_SIZE,
+      MIN_FONT_SIZE,
+      height,
+      width
+    );
+    const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
+    const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
 
     return (
       <ChartLayout
@@ -508,7 +524,8 @@ export default class StackedBarChart extends Component {
                                     height={barHeight}
                                     width={normalizedWidth}
                                     fill={color}
-                                    stroke={color}
+                                    stroke="white"
+                                    strokeWidth={0.1}
                                     opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
@@ -570,6 +587,7 @@ export default class StackedBarChart extends Component {
                               height: 100,
                               node,
                               labelsVisible,
+                              maxChars: maxLabelChars,
                             })}
                           </Group>
                         );
@@ -607,7 +625,7 @@ export default class StackedBarChart extends Component {
                     fontSize={axisLabelFontSize}
                     fontWeight={400}
                   >
-                    {xAxisLabel || ''}
+                    {abbr(xAxisLabel, maxLabelChars * labelSizeToAxisLabelSize)}
                   </Text>
 
                 </Svg>
@@ -628,7 +646,6 @@ export default class StackedBarChart extends Component {
       marginTop,
       marginRight,
       marginBottom,
-      marginLeft,
       style,
       legendVisible,
       legendPosition,
@@ -649,11 +666,20 @@ export default class StackedBarChart extends Component {
 
     if (!series) return null;
 
+    const marginLeft = this.getMarginLeft(series);
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const paddingBottom = getPaddingBottom(series.data);
-    const axisLabelFontSize =
-      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+    const axisLabelFontSize = getLabelFontSize(
+      yAxisLabel,
+      xAxisLabel,
+      MAX_FONT_SIZE,
+      MIN_FONT_SIZE,
+      height,
+      width
+    );
+    const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
+    const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
 
     return (
       <ChartLayout
@@ -823,7 +849,8 @@ export default class StackedBarChart extends Component {
                                     height={barHeight}
                                     width={normalizedWidth}
                                     fill={color}
-                                    stroke={color}
+                                    stroke="white"
+                                    strokeWidth={0.1}
                                     opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
@@ -885,6 +912,7 @@ export default class StackedBarChart extends Component {
                               height: 100,
                               node,
                               labelsVisible,
+                              maxChars: maxLabelChars,
                             })}
                           </Group>
                         );
@@ -922,7 +950,7 @@ export default class StackedBarChart extends Component {
                     fontSize={axisLabelFontSize}
                     fontWeight={400}
                   >
-                    {xAxisLabel || ''}
+                    {abbr(xAxisLabel, maxLabelChars * labelSizeToAxisLabelSize)}
                   </Text>
 
                 </Svg>
@@ -943,7 +971,6 @@ export default class StackedBarChart extends Component {
       marginTop,
       marginRight,
       marginBottom,
-      marginLeft,
       style,
       legendVisible,
       legendPosition,
@@ -964,11 +991,20 @@ export default class StackedBarChart extends Component {
 
     if (!series) return null;
 
+    const marginLeft = this.getMarginLeft(series);
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const paddingBottom = getPaddingBottom(series.data);
-    const axisLabelFontSize =
-      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+    const axisLabelFontSize = getLabelFontSize(
+      yAxisLabel,
+      xAxisLabel,
+      MAX_FONT_SIZE,
+      MIN_FONT_SIZE,
+      height,
+      width
+    );
+    const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
+    const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
 
     return (
       <ChartLayout
@@ -1140,7 +1176,8 @@ export default class StackedBarChart extends Component {
                                     height={barHeight}
                                     width={normalizedWidth}
                                     fill={color}
-                                    stroke={color}
+                                    stroke="white"
+                                    strokeWidth={0.1}
                                     opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
@@ -1202,6 +1239,7 @@ export default class StackedBarChart extends Component {
                               height: 100,
                               node,
                               labelsVisible,
+                              maxChars: maxLabelChars,
                             })}
                           </Group>
                         );
@@ -1239,7 +1277,7 @@ export default class StackedBarChart extends Component {
                     fontSize={axisLabelFontSize}
                     fontWeight={400}
                   >
-                    {xAxisLabel || ''}
+                    {abbr(xAxisLabel, maxLabelChars * labelSizeToAxisLabelSize)}
                   </Text>
 
                 </Svg>

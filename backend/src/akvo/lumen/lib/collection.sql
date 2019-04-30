@@ -12,6 +12,22 @@ SELECT collection.id,
        )), NULL) AS entities
 FROM collection
 LEFT JOIN collection_entity ON collection_entity.collection_id = collection.id
+--~ (when (seq (:ids params)) " WHERE collection.id IN (:v*:ids) ")
+GROUP BY collection.id;
+
+-- :name auth-collection-ids
+-- :doc List all authed-collections ids Collection entities are not included.
+select collection.id
+from  collection
+LEFT JOIN collection_entity ON collection_entity.collection_id = collection.id
+where dataset_id IN
+--~ (if (seq (:dataset-ids params)) " (:v*:dataset-ids) " "('')")
+OR visualisation_id IN
+--~ (if (seq (:visualisation-ids params)) " (:v*:visualisation-ids) " "('')")
+OR dashboard_id IN
+--~ (if (seq (:dashboard-ids params)) " (:v*:dashboard-ids) " "('')")
+OR raster_dataset_id IS NOT  NULL 
+OR (dataset_id IS NULL AND visualisation_id IS NULL and dashboard_id IS NULL AND raster_dataset_id IS NULL) 
 GROUP BY collection.id;
 
 -- :name create-collection :<! :1

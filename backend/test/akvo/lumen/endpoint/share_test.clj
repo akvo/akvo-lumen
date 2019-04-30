@@ -7,6 +7,7 @@
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.util :refer [gen-table-name squuid]]
             [akvo.lumen.endpoint.commons.variant :as variant]
+            [clojure.walk :as w]
             [clojure.java.jdbc :as jdbc]
             [akvo.lumen.test-utils :as tu]
             [clojure.test :refer :all]
@@ -23,39 +24,40 @@
 
 
 (defn dashboard-spec [v1-id v2-id]
-  {"type"     "dashboard"
-   "title"    "My first Dashboard"
-   ;; "id"       dashboard-id ;; Not present on new
-   "entities" {v1-id    {"id"   v1-id
-                         "type" "visualisation"}
-               v2-id    {"id"   v2-id
-                         "type" "visualisation"}
-               "text-1" {"id"      "text-1"
-                         "type"    "text"
-                         "content" "I am a text entity."}
-               "text-2" {"id"      "text-2"
-                         "type"    "text"
-                         "content" "I am another text entity."}}
-   "layout"   {v1-id    {"x" 1
-                         "y" 0
-                         "w" 0
-                         "h" 0
-                         "i" v1-id}
-               v2-id    {"x" 1
-                         "y" 0
-                         "w" 0
-                         "h" 0
-                         "i" v2-id}
-               "text-1" {"x" 2
-                         "y" 0
-                         "w" 0
-                         "h" 0
-                         "i" "text-1"}
-               "text-2" {"x" 3
-                         "y" 0
-                         "w" 0
-                         "h" 0
-                         "i" "text-2"}}})
+  (w/keywordize-keys
+   {"type"     "dashboard"
+    "title"    "My first Dashboard"
+    ;; "id"       dashboard-id ;; Not present on new
+    "entities" {v1-id    {"id"   v1-id
+                          "type" "visualisation"}
+                v2-id    {"id"   v2-id
+                          "type" "visualisation"}
+                "text-1" {"id"      "text-1"
+                          "type"    "text"
+                          "content" "I am a text entity."}
+                "text-2" {"id"      "text-2"
+                          "type"    "text"
+                          "content" "I am another text entity."}}
+    "layout"   {v1-id    {"x" 1
+                          "y" 0
+                          "w" 0
+                          "h" 0
+                          "i" v1-id}
+                v2-id    {"x" 1
+                          "y" 0
+                          "w" 0
+                          "h" 0
+                          "i" v2-id}
+                "text-1" {"x" 2
+                          "y" 0
+                          "w" 0
+                          "h" 0
+                          "i" "text-1"}
+                "text-2" {"x" 3
+                          "y" 0
+                          "w" 0
+                          "h" 0
+                          "i" "text-2"}}}))
 
 
 (defn seed* [conn vis-spec]

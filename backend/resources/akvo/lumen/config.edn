@@ -30,7 +30,8 @@
  :akvo.lumen.auth/wrap-auth {}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                          :flow-api #ig/ref :akvo.lumen.component.flow/api}
+                                          :flow-api #ig/ref :akvo.lumen.component.flow/api
+                                          :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
 
  :akvo.lumen.auth/wrap-jwt {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
 
@@ -165,7 +166,7 @@
  :akvo.lumen.component.http/http {:port #duct/env [ "PORT" Int :or 3000 ]
                                   :handler #ig/ref :akvo.lumen.component.handler/handler}
 
- :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json" ]}
+ :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://s3-eu-west-1.amazonaws.com/akvoflow-public/caddisfly-tests-v2.json"]}
 
  :akvo.lumen.component.keycloak/data {:url #duct/env "LUMEN_KEYCLOAK_URL"
                                       :realm "akvo"}

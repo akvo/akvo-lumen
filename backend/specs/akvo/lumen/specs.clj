@@ -29,7 +29,9 @@
 
 (defn str-uuid? [v]
   (when (some? v)
-    (uuid? (read-string (format "#uuid \"%s\"" v)))))
+    (try
+      (uuid? (read-string (format "#uuid \"%s\"" v)))
+      (catch Throwable t false))))
 
 (s/def ::str-uuid
   (s/with-gen
@@ -58,3 +60,4 @@
 (defmethod ig/pre-init-spec :akvo.lumen.specs/specs [_]
   (s/keys :req-un [::conform-specs]))
 
+(s/def ::date-number (s/nilable number?))

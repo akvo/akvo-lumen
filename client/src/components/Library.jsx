@@ -216,6 +216,7 @@ class Library extends Component {
 
     return (
       <div className="Library" data-test-id="library">
+
         {this.state.pendingDeleteEntity && (
           <DeleteConfirmationModal
             isOpen
@@ -229,6 +230,7 @@ class Library extends Component {
             }}
           />
         )}
+
         <LibraryHeader
           location={collection ? collection.title : <FormattedMessage id="library" />}
           onCreateCollection={this.handleCreateCollection}
@@ -287,6 +289,7 @@ class Library extends Component {
             }
           }}
         />
+
         <LibraryListing
           displayMode={displayMode}
           sortOrder={sortOrder}
@@ -300,7 +303,9 @@ class Library extends Component {
           onCheckEntity={this.handleCheckEntity}
           onEntityAction={this.handleEntityAction}
         />
+
         {this.props.children}
+
         {this.state.checkboxEntities.length > 0 && (
           <CheckboxEntityMenu
             collections={collections}

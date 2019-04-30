@@ -16,9 +16,9 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
-(defn all
-  [dbqs]
-  (lib/ok (p/query dbqs #'all-datasets)))
+(defn all*
+  [tenant-conn]
+  (all-datasets tenant-conn))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]
@@ -51,8 +51,8 @@
 
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
-  [dbqs id]
-  (if-let [dataset (p/query dbqs #'dataset-by-id {:id id})]
+  [tenant-conn id]
+  (if-let [dataset (dataset-by-id tenant-conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))]
       (lib/ok
        {:id id
@@ -66,47 +66,44 @@
     (lib/not-found {:error "Not found"})))
 
 (defn fetch
-  [dbqs id]
-  (if-let [dataset (p/query dbqs #'dataset-by-id {:id id})]
+  [tenant-conn id]
+  (when-let [dataset (dataset-by-id tenant-conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
-          data (rest (jdbc/query (p/get-conn dbqs)
+          data (rest (jdbc/query tenant-conn
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
-      (lib/ok
-       (-> dataset
-           (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
-           (rename-keys {:title :name})
-           (assoc :rows data :columns columns :status "OK"))))
-    (lib/not-found {:error "Not found"})))
+      (-> dataset
+          (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
+          (rename-keys {:title :name})
+          (assoc :rows data :columns columns :status "OK")))))
 
 (defn delete
-  [dbqs id]
-  (if-let [dataset (p/query dbqs #'dataset-by-id {:id id})]
-    (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related (p/get-conn dbqs) id)]
+  [tenant-conn id]
+  (if-let [dataset (dataset-by-id tenant-conn {:id id})]
+    (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
       (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
                                     (str/join ", " datasets-merged-with))})
-      (let [c (p/query dbqs #'delete-dataset-by-id {:id id})]
+      (let [c (delete-dataset-by-id tenant-conn {:id id})]
         (if (zero? c)
           (do
-            (delete-failed-job-execution-by-id (p/get-conn dbqs) {:id id})
+            (delete-failed-job-execution-by-id tenant-conn {:id id})
             (lib/not-found {:error "Not found"}))
-          (let [v (delete-maps-by-dataset-id (p/get-conn dbqs) {:id id})](lib/ok {:id id})))))
+          (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
     (lib/not-found {:error "Not found"})))
 
 (defn update
-  [dbqs import-config error-tracker dataset-id {refresh-token "refreshToken"}]
+  [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
-            data-source-id   :id} (p/query dbqs #'data-source-by-dataset-id {:dataset-id dataset-id})]
-    (if-let [error (transformation.merge-datasets/consistency-error? (p/get-conn dbqs) dataset-id)]
+            data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+    (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
       (lib/conflict error)
       (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
-        (update/update-dataset (p/get-conn dbqs) import-config error-tracker dataset-id data-source-id
+        (update/update-dataset tenant-conn import-config error-tracker dataset-id data-source-id
                                (assoc-in data-source-spec ["source" "refreshToken"] refresh-token))
         (lib/bad-request {:error "Can't update uploaded dataset"})))
     (lib/not-found {:id dataset-id})))
 
 (defn update-meta
-  [dbqs id {:strs [name]}]
-  (if (pos? (p/query dbqs #'update-dataset-meta {:id id :title name}))
-    (lib/ok {})
-    (lib/unprocessable-entity {})))
+  [tenant-conn id {:strs [name]}]
+  (update-dataset-meta tenant-conn {:id id :title name})
+  (lib/ok {}))

@@ -20,7 +20,8 @@
 (defmethod ig/init-key ::collector [_ {:keys [dropwizard-registry]}]
   (-> (prometheus/collector-registry)
       (jvm/initialize)
-      (prometheus/register (DropwizardExports. dropwizard-registry))
+      (prometheus/register (DropwizardExports. dropwizard-registry)
+                           (prometheus/histogram :app/flow-check-permissions {:labels [:tenant]}))
       (ring/initialize {:labels [:tenant]})))
 
 (s/def ::dropwizard-registry ::metric-registry)

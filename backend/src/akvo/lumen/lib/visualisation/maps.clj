@@ -84,28 +84,6 @@
 
       :else [(if (not dataset-id) raster-id dataset-id)])))
 
-(defn do-create [tenant-conn windshaft-url layers]
-  (let [metadata-array (map (fn [current-layer]
-                              (let [current-layer-type (:layerType current-layer)
-                                    current-dataset-id (if (= current-layer-type "raster")
-                                                         (:rasterId current-layer)
-                                                         (:datasetId current-layer))
-                                    {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
-                                                                                (raster-by-id tenant-conn {:id current-dataset-id})
-                                                                                (dataset-by-id tenant-conn {:id current-dataset-id}))
-                                    current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
-                                (map-metadata/build tenant-conn (or raster_table table-name) current-layer current-where-clause)))
-                            layers)
-        headers (headers tenant-conn)
-        url (format "%s/layergroup" windshaft-url)
-        map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
-        layer-group-id (-> (client/post url {:body (json/encode map-config)
-                                             :headers headers
-                                             :content-type :json})
-                           :body json/decode (get "layergroupid"))]
-    (lib/ok {:layerGroupId layer-group-id
-             :layerMetadata metadata-array})))
-
 (defn create-raster [tenant-conn windshaft-url raster-id]
   (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id raster-id})
         headers* (headers tenant-conn)
@@ -121,11 +99,41 @@
     (lib/ok {:layerGroupId layer-group-id
              :layerMetadata layer-meta})))
 
+(defn metadata-layers [tenant-conn layers]
+  (map (fn [current-layer]
+         (let [current-layer-type (:layerType current-layer)
+               current-dataset-id (if (= current-layer-type "raster")
+                                    (:rasterId current-layer)
+                                    (:datasetId current-layer))
+               {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
+                                                           (raster-by-id tenant-conn {:id current-dataset-id})
+                                                           (dataset-by-id tenant-conn {:id current-dataset-id}))
+               current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
+           (map-metadata/build tenant-conn
+                               (or raster_table
+                                   table-name
+                                   (when (not= current-layer-type "raster")
+                                     (throw
+                                      (ex-info "no authorised to create a map visualisation with current dataset associated" {:datasetId current-dataset-id}))))
+                               current-layer current-where-clause)))
+       layers))
+
 (defn create
   [tenant-conn windshaft-url layers]
   (try
     (conform-create-args layers)
-    (do-create tenant-conn windshaft-url layers)
+    (let [metadata-array (metadata-layers tenant-conn layers)
+          map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
+          headers* (headers tenant-conn)
+          _ (log/warn :map-config map-config)
+          _ (log/warn :headers headers)
+          layer-group-id (-> (client/post (format "%s/layergroup" windshaft-url)
+                                          {:body (json/encode map-config)
+                                           :headers headers*
+                                           :content-type :json})
+                             :body json/decode (get "layergroupid"))]
+      (lib/ok {:layerGroupId layer-group-id
+               :layerMetadata metadata-array}))
     (catch Exception e
       (println e)
       (lib/bad-request (ex-data e)))))

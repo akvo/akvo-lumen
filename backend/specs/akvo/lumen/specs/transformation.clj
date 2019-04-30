@@ -179,9 +179,7 @@
 
 
 
-(s/def ::transformation.merge-datasets.source/datasetId (s/with-gen
-                                                          lumen.s/str-uuid?
-                                                          lumen.s/str-uuid-gen))
+(s/def ::transformation.merge-datasets.source/datasetId ::db.dsv.s/dataset-id)
 (s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable columnName?))
 
 (s/def ::transformation.merge-datasets.source/aggregationDirection lumen.s/sort?)
