@@ -1,12 +1,12 @@
 (ns akvo.lumen.endpoint.library
   (:require [akvo.lumen.protocols :as p]
-            [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.endpoint.dataset :as e.dataset]
+            [akvo.lumen.endpoint.visualisation :as e.visualisation]
+            [akvo.lumen.endpoint.dashboard :as e.dashboard]
+            [akvo.lumen.endpoint.collection :as e.collection]
             [akvo.lumen.lib :as lib]
             [clojure.tools.logging :as log]
             [akvo.lumen.lib
-             [dashboard :as dashboard]
-             [visualisation :as visualisation]
-             [collection :as collection]
              [raster :as raster]]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.spec.alpha :as s]
@@ -15,15 +15,15 @@
 
 (defn handler [{:keys [tenant-manager flow-api] :as opts}]
   (fn [{tenant :tenant
-        db-query-service :db-query-service
+        auth-service :auth-service
         :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
       (lib/ok
-         {:dashboards (variant/value (dashboard/all tenant-conn))
-          :datasets (variant/value (dataset/all db-query-service))
+         {:dashboards (variant/value (e.dashboard/all-dashboards auth-service tenant-conn))
+          :datasets (variant/value (e.dataset/all-datasets auth-service tenant-conn))
           :rasters (variant/value (raster/all tenant-conn))
-          :visualisations (variant/value (visualisation/all tenant-conn))
-          :collections (variant/value (collection/all tenant-conn))}))))
+          :visualisations (variant/value (e.visualisation/all-visualisations auth-service tenant-conn))
+          :collections (variant/value (e.collection/all auth-service tenant-conn))}))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.library/library [_]
   (s/keys :req-un [::tenant-manager/tenant-manager] ))

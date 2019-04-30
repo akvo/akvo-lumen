@@ -31,8 +31,7 @@
 (defn run-visualisation 
   [tenant-conn visualisation]
   (let [visualisation (walk/keywordize-keys visualisation)
-        dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [(:datasetId visualisation)]})
-        [dataset-tag dataset] (dataset/fetch-metadata dbqs (:datasetId visualisation))
+        [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
         aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
         [tag query-result] (aggregation/query tenant-conn
                                               (:datasetId visualisation)
@@ -49,8 +48,7 @@
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
             [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
-            dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [dataset-id]})
-            [dataset-tag dataset] (dataset/fetch-metadata dbqs dataset-id)]
+            [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
           (when (and (= map-data-tag ::lib/ok)
                      (= dataset-tag ::lib/ok))
             {:datasets {dataset-id dataset}
@@ -64,35 +62,32 @@
 (defn run-unknown-type-visualisation 
   [tenant-conn visualisation]
   (let [dataset-id (:datasetId visualisation)
-        dbqs (l.auth/new-dbqs tenant-conn {:auth-datasets [dataset-id]})
-        [tag dataset] (dataset/fetch-metadata dbqs dataset-id)]
+        [tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
     (when (= tag ::lib/ok)
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url]
   (try
-    (let [[tag vis] (visualisation/fetch tenant-conn id)]
-      (when (= tag ::lib/ok)
-        (condp contains? (:visualisationType vis)
-          #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
-          (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
-          (run-unknown-type-visualisation tenant-conn vis))))
+    (when-let [vis (visualisation/fetch tenant-conn id)]
+      (condp contains? (:visualisationType vis)
+        #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
+        (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
+        (run-unknown-type-visualisation tenant-conn vis)))
     (catch Exception e
       (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
 
 (defn dashboard-response-data [tenant-conn id windshaft-url]
-  (let [[tag dashboard] (dashboard/fetch tenant-conn id)]
-    (when (= tag ::lib/ok)
-      (let [deps (->> dashboard
-                      :entities
-                      vals
-                      (filter #(= "visualisation" (get % "type")))
-                      (map #(get % "id"))
-                      (map #(visualisation-response-data tenant-conn % windshaft-url))
-                      (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
-                      (apply merge-with merge))]
-        (assoc deps :dashboards {id dashboard})))))
+  (when-let [dashboard (dashboard/fetch tenant-conn id)]
+    (let [deps (->> dashboard
+                    :entities
+                    vals
+                    (filter #(= "visualisation" (:type %)))
+                    (map :id)
+                    (map #(visualisation-response-data tenant-conn % windshaft-url))
+                    (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
+                    (apply merge-with merge))]
+      (assoc deps :dashboards {id dashboard}))))
 
 (defn response-data [tenant-conn share windshaft-url]
   (if-let [dashboard-id (:dashboard-id share)]

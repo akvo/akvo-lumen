@@ -27,7 +27,7 @@
     (log/debug :sql sql)
     (jdbc/execute! conn sql)))
 
-(defn- columns-to-extract [columns selected-column caddisfly-schema extractImage]
+(defn columns-to-extract [columns selected-column caddisfly-schema extractImage]
   (let [columns   (filter :extract columns)
         base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title)]
     (cond->>
