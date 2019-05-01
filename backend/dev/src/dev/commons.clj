@@ -13,7 +13,8 @@
           :akvo.lumen.component.emailer/mailjet-v3-emailer
           :akvo.lumen.component.caddisfly/prod
           ;; :akvo.lumen.component.error-tracker/prod
-          :akvo.lumen.component.error-tracker/config-prod))
+          :akvo.lumen.component.error-tracker/config-prod
+          ))
 
 (defn config []
   (let [c (dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "test.edn" "dev.edn"))]

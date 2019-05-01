@@ -1,5 +1,8 @@
 {:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
 
+ :akvo.lumen.component.error-tracker/config-local {:dsn ""
+                                                   :opts {:namespaces ["org.akvo" "akvo"]}}
+
  :akvo.lumen.component.http/http {:port 3100}
 
  :akvo.lumen.component.tenant-manager/tenant-manager {:encryption-key "secret"}
@@ -46,7 +49,7 @@
                                :keycloak-url "http://auth.lumen.local:8080/auth"
                                :sentry-client-dsn "dev-sentry-client-dsn"
                                :piwik-site-id "165"}
- 
+
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
                                                     :label "t1"
