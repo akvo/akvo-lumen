@@ -7,6 +7,10 @@
             [clojure.spec.alpha :as s]
             [raven-clj.interfaces :as raven-interface]))
 
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/config-local [_ config]
+  config)
+
 (defrecord SentryErrorTracker [dsn])
 
 (defn sentry-error-tracker [dsn]
@@ -14,23 +18,22 @@
 
 (defrecord LocalErrorTracker [])
 
-(defn local-error-tracker [_]
+(defn local-error-tracker []
   (->LocalErrorTracker))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
-  (local-error-tracker nil))
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ {:keys [config]}]
+  (local-error-tracker))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod [_]
   empty?)
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [dsn] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {{:keys [dsn opts]} :config}]
   (sentry-error-tracker dsn))
 
 (s/def ::dsn string?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod [_]
   (s/keys :req-un [::dsn]))
-
 
 (defn event-map [error]
   (let [text (str (ex-data error))]

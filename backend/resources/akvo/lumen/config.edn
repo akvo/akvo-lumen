@@ -10,6 +10,9 @@
                                                       :encryption-key #duct/env "LUMEN_ENCRYPTION_KEY"
                                                       :db #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
+ :akvo.lumen.component.error-tracker/config-prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
+                                                  :opts {:namespaces ["org.akvo" "akvo"]}}
+
  :akvo.lumen.component.handler/wrap-hide-errors {:error-response "Internal Server Error"}
 
  :akvo.lumen.component.handler/wrap-not-found {:error-response "Resource Not Found"}
@@ -37,17 +40,19 @@
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
 
  :akvo.lumen.component.error-tracker/wrap-sentry {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
-                                                  :opts {:namespaces ["org.akvo" "akvo"]}}
+                                                  :opts {:namespaces ["org.akvo" "akvo"]
+
+                                                         }}
 
  :akvo.lumen.endpoint.aggregation/aggregation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
- 
+
  :akvo.lumen.endpoint.collection/collection {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
- 
+
  :akvo.lumen.endpoint.dashboard/dashboard {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
                                  :keycloak #ig/ref :akvo.lumen.component.keycloak/data}
- 
+
  :akvo.lumen.endpoint.dataset/dataset {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                        :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
                                        :upload-config #ig/ref :akvo.lumen.upload/data
@@ -67,7 +72,7 @@
 
  :akvo.lumen.upload/data {:file-upload-path #duct/env [ "LUMEN_FILE_UPLOAD_PATH" :or "/tmp/akvo/lumen" ]
                           :max-upload-size 100}
- 
+
  :akvo.lumen.endpoint.files/files {:upload-config #ig/ref :akvo.lumen.upload/data}
  :akvo.lumen.endpoint.healthz/healthz {}
 
@@ -145,7 +150,7 @@
                                                            #ig/ref :akvo.lumen.component.handler/common-middleware]
                                               :routes [#ig/ref :akvo.lumen.endpoint.public/public]}
 
- 
+
  :akvo.lumen.component.handler/common-middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
                                                   #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
                                                   #ig/ref :akvo.lumen.component.handler/wrap-defaults
@@ -153,7 +158,7 @@
                                                   #ig/ref :akvo.lumen.component.handler/wrap-json-response
                                                   #ig/ref :akvo.lumen.component.handler/variant
                                                   #ig/ref :akvo.lumen.component.handler/wrap-not-found]
- 
+
  :akvo.lumen.component.handler/handler {:endpoints [["" {:middleware  #ig/ref :akvo.lumen.component.handler/common-middleware}
                                                      [#ig/ref :akvo.lumen.endpoint.env/env
                                                       #ig/ref :akvo.lumen.endpoint.healthz/healthz
@@ -177,9 +182,9 @@
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
                                                    :email-user #duct/env "LUMEN_EMAIL_USER"
                                                    :from-email "noreply@akvo.org"
-                                                   :from-name "Akvo Lumen"}
+                                                   :from-name "Akvo Lu men"}
 
- :akvo.lumen.component.error-tracker/prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"}
+ :akvo.lumen.component.error-tracker/error-tracker {:config #ig/ref :akvo.lumen.component.error-tracker/config}
 
  :akvo.lumen.migrate/migrate {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                            :tenants "akvo/lumen/migrations/tenants"}}
