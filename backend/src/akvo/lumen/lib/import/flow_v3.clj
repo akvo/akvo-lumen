@@ -20,7 +20,7 @@
   `:key` is optional"
   [form]
   (into (flow-common/commons-columns form)
-        (into [{:title "Device Id" :type "text" :id :device_id}]
+        (into [{:title "Device Id" :type "text" :id "device_id"}]
               (common/coerce question-type->lumen-type (flow-common/questions form)))))
 
 (defn render-response
