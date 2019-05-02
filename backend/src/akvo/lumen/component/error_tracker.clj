@@ -83,34 +83,5 @@
 
 (s/def ::error-tracker (partial satisfies? p/IErrorTracker))
 
-#_(s/def ::dsn string?)
-#_(s/def ::namespaces (s/coll-of string?))
-#_(s/def ::opts (s/keys :req-un [::namespaces]))
-
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
-  (s/keys :req-un [::dsn ::opts] ))
-
-
-(comment
-  (def prod-config-a {:dsn "abc123"
-                      :opts {:environment "production"
-                             :namespaces ["org.akvo" "akvo"]
-                             :release "abc123"
-                             :server-name "blue"}})
-
-  (def prod-config-fail-a {:opts {:environment "production"
-                                  :namespaces ["org.akvo" "akvo"]
-                                  :release "abc123"
-                                  :server-name "blue"}})
-
-  (def prod-config-fail-b {:dsn "abc123"
-                           :opts {:namespaces ["org.akvo" "akvo"]
-                                  :release "abc123"
-                                  :server-name "blue"}})
-
-  (def local-config-a {:opts {:namespaces ["org.akvo" "akvo"]}})
-
-  (def local-config-fail-a {:opts {:namespaces 1}})
-
-
-  )
+  (s/keys :req-un [::dsn ::opts]))
