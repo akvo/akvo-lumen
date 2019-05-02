@@ -128,7 +128,7 @@ export default function LibraryListing({
       {(!results && !currentCollection && !searchString) && (
         <ErrorScreen
           code="Welcome"
-          title="Get started by adding a datasets, visualisations and dashboards to your library from the top menu." 
+          title="Get started by adding datasets, visualisations and dashboards to your library from the top menu." 
         />
       )}
       
