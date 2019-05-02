@@ -20,7 +20,10 @@ const ErrorScreen = ({ title, children, code, codeVisible = true }) => (
 
 ErrorScreen.propTypes = {
   title: PropTypes.string,
-  code: PropTypes.number,
+  code: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
   children: PropTypes.node,
   codeVisible: PropTypes.bool,
 };

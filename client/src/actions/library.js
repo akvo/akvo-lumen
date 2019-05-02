@@ -22,6 +22,12 @@ function fetchLibraryFailure() {
   };
 }
 
+function fetchLibrarySuccess() {
+  return {
+    type: constants.FETCH_LIBRARY_SUCCESS,
+  };
+}
+
 // Fetch the library, store it in the redux store and returns a promise¨
 // that resolves to the library when all is complete.
 export function fetchLibrary() {
@@ -35,6 +41,7 @@ export function fetchLibrary() {
         dispatch(fetchVisualisationsSuccess(library.visualisations));
         dispatch(fetchDashboardsSuccess(library.dashboards));
         dispatch(fetchCollectionsSuccess(library.collections));
+        dispatch(fetchLibrarySuccess());
         return getState().library;
       })
       .catch((error) => {
@@ -50,7 +57,6 @@ export function ensureLibraryLoaded() {
   return (dispatch, getState) => {
     const { library } = getState();
     if (
-      // TODO What's a good way to check if library has been loaded?
       isEmpty(library.datasets) ||
       isEmpty(library.visualisations) ||
       isEmpty(library.dashboards) ||
