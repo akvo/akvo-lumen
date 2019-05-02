@@ -128,21 +128,21 @@ export default function LibraryListing({
       {(!results && !currentCollection && !searchString) && (
         <ErrorScreen
           code="Welcome"
-          title="Get started by adding datasets, visualisations and dashboards to your library from the top menu." 
+          title="Get started by adding datasets, visualisations and dashboards to your library from the top menu."
         />
       )}
-      
+
       {(!results && currentCollection && !searchString) && (
         <ErrorScreen
           code="Empty"
-          title="There are no items in this collection." 
+          title="There are no items in this collection."
         />
       )}
 
       {(!results && searchString) && (
         <ErrorScreen
           code="No Results"
-          title="Please update your search and try again." 
+          title="Please update your search and try again."
         />
       )}
 
