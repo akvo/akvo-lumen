@@ -9,7 +9,7 @@
 
  :akvo.lumen.component.caddisfly/local {:local-schema-uri "./caddisfly/tests-schema.json"}
 
- :akvo.lumen.component.error-tracker/local {}
+ ;; :akvo.lumen.component.error-tracker/local {}
 
  :akvo.lumen.component.emailer/dev-emailer {:from-email "devops@akvo.localhost"
                                             :from-name "Akvo Lumen"}
