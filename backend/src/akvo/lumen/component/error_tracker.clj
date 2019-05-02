@@ -7,12 +7,26 @@
             [clojure.spec.alpha :as s]
             [raven-clj.interfaces :as raven-interface]))
 
+(s/def ::dsn string?)
+
+(s/def ::namespaces
+  (s/coll-of string?))
+
+(s/def ::opts
+  (s/keys :req-un [::namespaces]))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config-local [_ config]
   config)
 
+(s/def ::config-local
+  (s/keys :req-un [::opts]))
+
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config-prod [_ config]
   config)
+
+(s/def ::config-prod
+  (s/keys :req-un [::dsn ::opts]))
+
 
 (defrecord SentryErrorTracker [dsn])
 
@@ -33,7 +47,7 @@
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {{:keys [dsn opts]} :config}]
   (sentry-error-tracker dsn))
 
-(s/def ::dsn string?)
+
 
 #_(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod [_]
     (s/keys :req-un [::dsn ::opts]))
@@ -62,9 +76,9 @@
 
 (s/def ::error-tracker (partial satisfies? p/IErrorTracker))
 
-(s/def ::dsn string?)
-(s/def ::namespaces (s/coll-of string?))
-(s/def ::opts (s/keys :req-un [::namespaces]))
+#_(s/def ::dsn string?)
+#_(s/def ::namespaces (s/coll-of string?))
+#_(s/def ::opts (s/keys :req-un [::namespaces]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
   (s/keys :req-un [::dsn ::opts] ))
