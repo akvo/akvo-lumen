@@ -7,13 +7,22 @@
             [clojure.spec.alpha :as s]
             [raven-clj.interfaces :as raven-interface]))
 
+(defn blue-green?
+  [server-name]
+  (and (string? server-name)
+       (or (= "blue" server-name)
+           (= "green" server-name))))
+
 (s/def ::dsn string?)
 
-(s/def ::namespaces
-  (s/coll-of string?))
+(s/def ::environment string?)
+(s/def ::namespaces (s/coll-of string?))
+(s/def ::release string?)
+(s/def ::server-name blue-green?)
 
 (s/def ::opts
-  (s/keys :req-un [::namespaces]))
+  (s/keys :req-un [::namespaces]
+          :opt-un [::environment ::release ::server-name]))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config-local [_ config]
   config)
@@ -26,7 +35,6 @@
 
 (s/def ::config-prod
   (s/keys :req-un [::dsn ::opts]))
-
 
 (defrecord SentryErrorTracker [dsn])
 
@@ -46,7 +54,6 @@
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {{:keys [dsn opts]} :config}]
   (sentry-error-tracker dsn))
-
 
 
 #_(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod [_]
@@ -82,3 +89,28 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
   (s/keys :req-un [::dsn ::opts] ))
+
+
+(comment
+  (def prod-config-a {:dsn "abc123"
+                      :opts {:environment "production"
+                             :namespaces ["org.akvo" "akvo"]
+                             :release "abc123"
+                             :server-name "blue"}})
+
+  (def prod-config-fail-a {:opts {:environment "production"
+                                  :namespaces ["org.akvo" "akvo"]
+                                  :release "abc123"
+                                  :server-name "blue"}})
+
+  (def prod-config-fail-b {:dsn "abc123"
+                           :opts {:namespaces ["org.akvo" "akvo"]
+                                  :release "abc123"
+                                  :server-name "blue"}})
+
+  (def local-config-a {:opts {:namespaces ["org.akvo" "akvo"]}})
+
+  (def local-config-fail-a {:opts {:namespaces 1}})
+
+
+  )
