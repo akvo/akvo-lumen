@@ -184,7 +184,7 @@
                                                    :from-email "noreply@akvo.org"
                                                    :from-name "Akvo Lu men"}
 
- :akvo.lumen.component.error-tracker/error-tracker {:config #ig/ref :akvo.lumen.component.error-tracker/config}
+ :akvo.lumen.component.error-tracker/prod {:config #ig/ref :akvo.lumen.component.error-tracker/config}
 
  :akvo.lumen.migrate/migrate {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                            :tenants "akvo/lumen/migrations/tenants"}}
