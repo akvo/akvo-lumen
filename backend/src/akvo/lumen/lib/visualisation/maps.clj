@@ -89,8 +89,7 @@
         headers* (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
-          _ (log/warn :map-config map-config)
-          _ (log/warn :headers headers)
+        _ (log/debug :map-config map-config)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers*
                                              :content-type :json})
