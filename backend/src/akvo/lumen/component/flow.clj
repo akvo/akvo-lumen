@@ -34,10 +34,11 @@
      (str (:url flow-api) "/check_permissions")
      {:as :json
       :headers (api-headers token)
+      :throw-entire-message? true
+      :unexceptional-status #(<= 200 % 299) 
       :form-params body
       :content-type :json})
-    (catch Exception e (log/error e :fail :body body :headers (api-headers token) :error-message (.getMessage e)))))
-
+    (catch Exception e (log/error :fail :body body :response (ex-data e)))))
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]
   opts)
