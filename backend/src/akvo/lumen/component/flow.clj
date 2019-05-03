@@ -36,7 +36,7 @@
       :headers (api-headers token)
       :form-params body
       :content-type :json})
-    (catch Exception e (log/error :fail body (.getMessage e)))))
+    (catch Exception e (log/error e :fail :body body :headers (api-headers token) :error-message (.getMessage e)))))
 
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]
