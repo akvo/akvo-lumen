@@ -40,7 +40,7 @@
                  [org.immutant/web "2.1.10" :exclusions [ch.qos.logback/logback-classic]]
                  [org.postgresql/postgresql "42.2.2"]
                  [ragtime/ragtime.jdbc "0.6.4"]
-                 [raven-clj "1.5.2"]
+                 [raven-clj "1.6.0-alpha3"]
                  [ring "1.6.3" :exclusions [ring/ring-core]]
                  [ring/ring-core "1.6.3"]
                  [ring/ring-defaults "0.3.2"]
