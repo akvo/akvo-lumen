@@ -171,7 +171,7 @@
   (let [dataset-ids (mapv :datasetId merged-dataset-sources)
         diff        (set/difference (set dataset-ids)
                                     (set (map :id (select-datasets-by-id tenant-conn {:ids dataset-ids}))))]
-    (when (not-empty diff)
+    (when (not-empty (filter some? diff))
       {:diff diff})))
 
 (defn distinct-columns
