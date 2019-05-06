@@ -54,6 +54,11 @@ const handleResponse = (response) => {
           throw error;
         });
       }
+      case 409: {
+        return response.json().then((body) => {
+          throw new Error(body.error);
+        });
+      }
       case 404:
       case 500: {
         const error = new Error(statusText);

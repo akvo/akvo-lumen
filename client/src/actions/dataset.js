@@ -443,8 +443,8 @@ export function updateDataset(id) {
           dispatch(showNotification('error', `Update failed: ${error}`));
         }
       })
-      .catch(() => {
-        dispatch(showNotification('error', 'Failed to update dataset.'));
+      .catch((error) => {
+        dispatch(showNotification('error', error.message || 'Failed to update dataset.'));
       });
   };
 }
