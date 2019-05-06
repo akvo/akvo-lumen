@@ -5,10 +5,11 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn job-execution [conn id]
-  (if-let [{:keys [status error-message kind]} (job-execution-by-id conn {:id id})]
+  (if-let [{:keys [status error-message kind dataset-id]} (job-execution-by-id conn {:id id} {:identifiers identity})]
     (lib/ok
      {"jobExecutionId" id
       "status" status
+      "datasetId" dataset-id
       "kind" kind
       "reason" error-message})
     (lib/not-found {:error "not-found"})))
