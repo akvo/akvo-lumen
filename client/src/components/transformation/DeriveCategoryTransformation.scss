@@ -1,0 +1,32 @@
+@import "../../styles/modules/importAll";
+
+.DeriveCategoryTransformation {
+  .container {
+    display: flex;
+    justify-content: space-around;
+    position: absolute;
+    top: 4em;
+    right: 0;
+    left: 0;
+    line-height: 2.5em;
+    padding: 2rem 0;
+
+    .separator {
+      position: relative;
+      background-color: $lightBlueGrey;
+      width: 1px;
+      position: relative;
+      min-height: 200px;
+    }
+
+    .separator:before {
+      $size: 64px;
+      content: '+';
+      color: 'grey';
+    }
+
+    h1 {
+      margin-top: 1em;
+    }
+  }
+}
