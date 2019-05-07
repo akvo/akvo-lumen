@@ -1,20 +1,16 @@
 {:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
 
- :akvo.lumen.component.error-tracker/config-local {:opts {:namespaces ["org.akvo" "akvo"]}}
-
- :akvo.lumen.component.error-tracker/local {:config #ig/ref :akvo.lumen.component.error-tracker/config-local}
-
  :akvo.lumen.component.http/http {:port 3100}
 
  :akvo.lumen.component.tenant-manager/tenant-manager {:encryption-key "secret"}
 
  :akvo.lumen.component.caddisfly/local {:local-schema-uri "./caddisfly/tests-schema.json"}
 
+ :akvo.lumen.component.error-tracker/config-test {}
+ :akvo.lumen.component.error-tracker/void #ig/ref :akvo.lumen.component.error-tracker/config-test
 
  :akvo.lumen.component.emailer/dev-emailer {:from-email "devops@akvo.localhost"
                                             :from-name "Akvo Lumen"}
-
- :akvo.lumen.component.error-tracker/wrap-sentry {:dsn "dev-dsn"}
 
  :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 

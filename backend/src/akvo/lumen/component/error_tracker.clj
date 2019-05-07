@@ -12,6 +12,14 @@
 ;;; Error tracker config
 ;;;
 
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config
+  [_]
+  map?)
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/config
+  [_ config]
+  config)
+
 (defn blue-green?
   [server-name]
   (and (string? server-name)
@@ -28,60 +36,72 @@
   (s/keys :req-un [::namespaces]
           :opt-un [::environment ::release ::server-name]))
 
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/config-local
-  [_ config]
-  config)
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config-local
-  [_]
-  (s/keys :req-un [::opts]))
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/config-prod
-  [_ config]
-  config)
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config-prod
-  [_]
-  (s/keys :req-un [::dsn ::opts]))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Error tracker component
 ;;;
 
-;; Local component
-(defrecord LocalErrorTracker [])
-
-(defn local-error-tracker []
-  (->LocalErrorTracker))
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/local
-  [_ {:keys [config]}]
-  (local-error-tracker))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/local
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/error-tracker
   [_]
   (partial satisfies? p/IErrorTracker))
 
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/error-tracker
+  [_ tracker]
+  tracker)
 
-;; Production component
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Sentry client
+;;;
+
 (defrecord SentryErrorTracker [dsn])
 
 (defn sentry-error-tracker [dsn]
   (SentryErrorTracker. dsn))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod
-  [_ {{:keys [dsn opts]} :config}]
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/sentry
+  [_]
+  (s/keys :req-un [::dsn ::opts]))
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/sentry
+  [_ {{:keys [dsn opts]} :tracker :as config}]
   (sentry-error-tracker dsn))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Local client (print to std out)
+;;;
+
+(defrecord LocalErrorTracker [])
+
+(defn local-error-tracker []
+  (->LocalErrorTracker))
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/local
   [_]
-  (partial satisfies? p/IErrorTracker))
+  (s/keys :req-un [::opts]))
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/local
+  [_ {{:keys [opts]} :tracker :as config}]
+  (local-error-tracker))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Error tracker protocol implementations
+;;; Local client (no output)
+;;;
+
+(defrecord VoidErrorTracker [])
+
+(defn void-error-tracker []
+  (->VoidErrorTracker))
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/void
+  [_]
+  map?)
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/void
+  [_ _]
+  (void-error-tracker))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; IErrorTracker implementations
 ;;;
 
 (defn event-map
@@ -93,13 +113,6 @@
             :extra {:ex-data (subs text 0 (min (count text) 4096))}
             :message (.getMessage error)))))
 
-(comment
-  (event-map (Exception. "Dummy error"))
-  ;; {:extra {:ex-data ""}, :message "Dummy error"}
-
-  (event-map (ex-info "Dummy error" {:foolish true}))
-  ;; {:extra {:ex-data "{:foolish true}"}, :message "Dummy error"}
-  )
 
 (extend-protocol p/IErrorTracker
 
@@ -114,18 +127,18 @@
 
   LocalErrorTracker
   (track [this error]
-    (println "LocalErrorTracker:" (.getMessage error))))
+    (println "LocalErrorTracker:" (.getMessage error)))
+
+  VoidErrorTracker
+  (tracker [this error]
+    ;; Into the void
+    ))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Wrap Sentry (Ring error tracker component)
+;;; Ring Sentry tracker wrapper
 ;;;
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry
-  [_ {:keys [dsn opts]}]
+  [_ {:keys [dsn opts] :as config}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
-
-#_(s/def ::error-tracker (partial satisfies? p/IErrorTracker))
-
-#_(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
-    (s/keys :req-un [::dsn ::opts]))

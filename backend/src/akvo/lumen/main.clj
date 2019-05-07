@@ -14,10 +14,17 @@
   (config/assert-bindings)
 
   (do
-    (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer)
-    (derive :akvo.lumen.component.caddisfly/prod :akvo.lumen.component.caddisfly/caddisfly)
-    (derive :akvo.lumen.component.error-tracker/config-prod :akvo.lumen.component.error-tracker/config)
-    (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
+    (derive :akvo.lumen.component.emailer/mailjet-v3-emailer
+            :akvo.lumen.component.emailer/emailer)
+
+    (derive :akvo.lumen.component.caddisfly/prod
+            :akvo.lumen.component.caddisfly/caddisfly)
+
+    (derive :akvo.lumen.component.error-tracker/config-prod
+            :akvo.lumen.component.error-tracker/config)
+
+    (derive :akvo.lumen.component.error-tracker/sentry
+            :akvo.lumen.component.error-tracker/client)
 
     (let [config (config/construct config-file)
           _   (migrate/migrate config)

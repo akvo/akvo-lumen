@@ -16,7 +16,9 @@
                                                          :release #duct/env "LUMEN_SENTRY_RELEASE"
                                                          :server_name #duct/env "LUMEN_SENTRY_SERVER_NAME"}}
 
- :akvo.lumen.component.error-tracker/prod {:config #ig/ref :akvo.lumen.component.error-tracker/config}
+ :akvo.lumen.component.error-tracker/sentry #ig/ref :akvo.lumen.component.error-tracker/config
+
+ :akvo.lumen.component.error-tracker/error-tracker #ig/ref :akvo.lumen.component.error-tracker/client
 
  :akvo.lumen.component.handler/wrap-hide-errors {:error-response "Internal Server Error"}
 
@@ -44,10 +46,7 @@
 
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
 
- :akvo.lumen.component.error-tracker/wrap-sentry {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
-                                                  :opts {:namespaces ["org.akvo" "akvo"]
-
-                                                         }}
+ :akvo.lumen.component.error-tracker/wrap-sentry #ig/ref :akvo.lumen.component.error-tracker/config
 
  :akvo.lumen.endpoint.aggregation/aggregation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
