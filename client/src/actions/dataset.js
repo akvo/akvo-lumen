@@ -290,8 +290,9 @@ export function deleteDataset(id) {
           dispatch(deleteDatasetSuccess(id));
         }
       })
-      .catch(() => {
-        dispatch(showNotification('error', 'Failed to delete dataset.'));
+      .catch((error) => {
+        dispatch(deleteDatasetFailure(id));
+        dispatch(showNotification('error', error.message || 'Failed to delete dataset.'));
       });
   };
 }
