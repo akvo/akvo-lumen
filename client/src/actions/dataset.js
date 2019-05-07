@@ -507,8 +507,8 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
-          dispatch(showNotification('error', 'Failed to transform dataset.'));
-          dispatch(transformationFailure(datasetId, reason));
+          dispatch(showNotification('error', reason));
+          dispatch(transformationFailure(datasetId, 'Failed to transform dataset.'));
         } else if (status === 'OK') {
           dispatch(transformationSuccess(datasetId));
         }
