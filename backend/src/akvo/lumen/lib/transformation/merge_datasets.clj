@@ -211,7 +211,7 @@
                                                            (filter some?))]
                                  (when (not-empty column-diff-coll)
                                    column-diff-coll)))]
-        {:error(format "This version of the dataset isn't consistent thus it has merge transformations with datasets columns which were already removed from their datasets: %s" (reduce str column-diff))
+        {:error(format "Update failed. This dataset has merged columns that no longer exist in their dataset, %s" (mapv :title (select-datasets-by-id tenant-conn {:ids (mapv :dataset-id column-diff)})))
          :column-diff column-diff}))))
 
 (defn sources-related
