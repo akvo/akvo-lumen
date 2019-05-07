@@ -1,3 +1,4 @@
+// TODO dataset not fetched if navigate straight to page
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -8,12 +9,14 @@ import { pollTxImportStatus, startTx, endTx } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
+import DeriveCategoryTransformation from '../components/transformation/DeriveCategoryTransformation';
 import { trackEvent } from '../utilities/analytics';
 import { TRANSFORM_DATASET } from '../constants/analytics';
 
 const transformationComponent = {
   merge: MergeTransformation,
   'reverse-geocode': ReverseGeocodeTransformation,
+  'derive-category': DeriveCategoryTransformation,
 };
 
 class Transformation extends Component {

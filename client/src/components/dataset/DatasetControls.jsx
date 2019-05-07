@@ -72,6 +72,10 @@ class DatasetControls extends Component {
                     value: 'deriveColumn',
                     subMenu: [
                       {
+                        label: <FormattedMessage id="derive_column_category" />,
+                        value: 'deriveColumnCategory',
+                      },
+                      {
                         label: <FormattedMessage id="derive_column_javascript" />,
                         value: 'deriveColumnJavascript',
                       },
