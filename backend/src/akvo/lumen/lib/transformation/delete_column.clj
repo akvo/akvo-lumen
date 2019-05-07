@@ -35,5 +35,5 @@
          :columns       (into (vec (take column-idx columns))
                               (drop (inc column-idx) columns))})
       {:success? false
-       :message  (format "Following datasets have merge operations based on this column %s "
-                         (str/join "," (map second merged-sources)))})))
+       :message  (format "Cannot delete column. It is used in merge transformations of dataset, [%s]"
+                         (str/join "," (map (comp :title second) merged-sources)))})))
