@@ -70,6 +70,12 @@ class DatasetControls extends Component {
                   }, {
                     label: <FormattedMessage id="derive_column" />,
                     value: 'deriveColumn',
+                    subMenu: [
+                      {
+                        label: <FormattedMessage id="derive_column_javascript" />,
+                        value: 'deriveColumnJavascript',
+                      },
+                    ],
                   }, {
                     label: <FormattedMessage id="merge_datasets" />,
                     value: 'mergeDatasets',
