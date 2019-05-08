@@ -18,12 +18,13 @@
         auth-service :auth-service
         :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
+      (throw (Exception. "Throwing @ Library to test error tracker"))
       (lib/ok
-         {:dashboards (variant/value (e.dashboard/all-dashboards auth-service tenant-conn))
-          :datasets (variant/value (e.dataset/all-datasets auth-service tenant-conn))
-          :rasters (variant/value (raster/all tenant-conn))
-          :visualisations (variant/value (e.visualisation/all-visualisations auth-service tenant-conn))
-          :collections (variant/value (collection/all tenant-conn))}))))
+       {:dashboards (variant/value (e.dashboard/all-dashboards auth-service tenant-conn))
+        :datasets (variant/value (e.dataset/all-datasets auth-service tenant-conn))
+        :rasters (variant/value (raster/all tenant-conn))
+        :visualisations (variant/value (e.visualisation/all-visualisations auth-service tenant-conn))
+        :collections (variant/value (collection/all tenant-conn))}))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.library/library [_]
   (s/keys :req-un [::tenant-manager/tenant-manager] ))
@@ -35,4 +36,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.library/library  [_ opts]
   (routes opts))
-

@@ -6,8 +6,6 @@ set -o nounset
 CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY:-}"
 DOCKER_COMPOSE_PROJECT="${1:-akvolumen}"
 LUMEN_PASSWORD="${4:-password}"
-LUMEN_SENTRY_ENVIRONMENT="Travis E2E tests"
-LUMEN_SENTRY_SERVER_NAME="green"
 LUMEN_URL="${2:-http://t1.lumen.local:3030/}"
 LUMEN_USER="${3:-jerome}"
 
