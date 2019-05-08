@@ -27,5 +27,6 @@ else
 	-e CYPRESS_LUMEN_USER="${LUMEN_USER}" \
 	-e CYPRESS_LUMEN_PASSWORD="${LUMEN_PASSWORD}" \
 	-e CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY}" \
+	-e DEBUG="cypress:*" \
 	fe-e2e-tests run.sh
 fi
