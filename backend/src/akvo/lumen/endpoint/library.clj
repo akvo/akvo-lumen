@@ -18,7 +18,6 @@
         auth-service :auth-service
         :as request}]
     (let [tenant-conn (p/connection tenant-manager tenant)]
-      (throw (Exception. "Throwing @ Library to test error tracker"))
       (lib/ok
        {:dashboards (variant/value (e.dashboard/all-dashboards auth-service tenant-conn))
         :datasets (variant/value (e.dataset/all-datasets auth-service tenant-conn))
