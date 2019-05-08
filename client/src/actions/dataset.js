@@ -585,7 +585,7 @@ export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
-          dispatch(showNotification('error', 'Failed to transform dataset.'));
+          dispatch(showNotification('error', reason));
           dispatch(txDatasetFailure(datasetId, jobExecutionId, reason));
         } else if (status === 'OK') {
           dispatch(txDatasetSuccess(datasetId, jobExecutionId));
