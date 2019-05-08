@@ -1,4 +1,7 @@
+@import "../styles/modules/importAll";
+
 .export-header {
     padding: 10px 30px;
     font-size: 2em;
+    border-bottom: 1px solid $midLightGrey;
   }
