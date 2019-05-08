@@ -27,6 +27,7 @@
    "User-Agent" "lumen"
    "Accept" "application/vnd.akvo.flow.v2+json"})
 
+
 (defn check-permissions
   [flow-api token body]
   (let [start (. System (nanoTime))
