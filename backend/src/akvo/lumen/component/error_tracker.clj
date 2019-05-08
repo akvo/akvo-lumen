@@ -18,6 +18,8 @@
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config
   [_ config]
+  (prn "@ig/init-key :akvo.lumen.component.error-tracker/config")
+  (prn config)
   config)
 
 (defn blue-green?

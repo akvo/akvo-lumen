@@ -12,6 +12,7 @@ LUMEN_URL="${2:-http://t1.lumen.local:3030/}"
 LUMEN_USER="${3:-jerome}"
 
 if [[ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]]; then
+    echo "@ akvolumen"
     docker-compose \
         run --no-deps \
         -e CYPRESS_LUMEN_URL="${LUMEN_URL}" \
@@ -20,6 +21,7 @@ if [[ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]]; then
         -e CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY}" \
         fe-e2e-tests run.sh
 else
+    echo "@ Not akvolumen"
     docker-compose \
         -p akvo-lumen-ci \
         -f docker-compose.yml \
