@@ -77,6 +77,14 @@
           (rename-keys {:title :name})
           (assoc :rows data :columns columns :status "OK")))))
 
+(defn sort*
+  [tenant-conn id column-name offset]
+  (when-let [dataset (table-name-by-dataset-id tenant-conn {:id id})]
+    (log/debug ::sort* :id id :table-name (:table-name dataset) :column-name column-name :offset offset)
+    (->> {:column-name column-name :table-name (:table-name dataset) :offset (or offset 100)}
+         (count-vals-by-column-name tenant-conn)
+         (map (juxt :counter :coincidence)))))
+
 (defn delete
   [tenant-conn id]
   (if-let [dataset (dataset-by-id tenant-conn {:id id})]
