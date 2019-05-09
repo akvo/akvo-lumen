@@ -1,15 +1,13 @@
 @import "../../../styles/modules/importAll";
 
-.SourceMergeOptions {
-  flex: 1;
-  padding-left: 3em;
-  padding-right: 3em;
-  
+.SourceDeriveCategoryOptions {
   .SourceDeriveCategoryOptions__title {
     font-weight: bold;
   }
   
   .SourceDeriveCategoryOptions__type {
-    text-align: right;
+    float: right;
+    text-transform: uppercase;
+    font-size: 0.9em;
   }
 }

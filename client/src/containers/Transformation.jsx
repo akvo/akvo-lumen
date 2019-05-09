@@ -12,6 +12,7 @@ import ReverseGeocodeTransformation from '../components/transformation/ReverseGe
 import DeriveCategoryTransformation from '../components/transformation/DeriveCategoryTransformation';
 import { trackEvent } from '../utilities/analytics';
 import { TRANSFORM_DATASET } from '../constants/analytics';
+import './Transformation.scss';
 
 const transformationComponent = {
   merge: MergeTransformation,

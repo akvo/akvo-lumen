@@ -1,10 +1,11 @@
 // TODO i18n
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { findIndex } from 'lodash';
+
 import TransformationHeader from './TransformationHeader';
 import SourceDeriveCategoryOptions from './derive-category/SourceDeriveCategoryOptions';
 import DeriveCategoryMappings from './derive-category/DeriveCategoryMappings';
-
 import './DeriveCategoryTransformation.scss';
 
 export default class DeriveCategoryTransformation extends Component {
@@ -12,6 +13,7 @@ export default class DeriveCategoryTransformation extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      selectingSourceColumn: false,
       transformation: {
         op: '',
         args: {},
@@ -43,10 +45,11 @@ export default class DeriveCategoryTransformation extends Component {
 
   render() {
     const { datasetId, datasets, onApplyTransformation, transforming } = this.props;
-    const { transformation } = this.state;
+    const { transformation, selectingSourceColumn } = this.state;
     const dataset = datasets[datasetId].toJS();
     return (
       <div className="DeriveCategoryTransformation">
+
         <TransformationHeader
           datasetId={datasetId}
           isValidTransformation={this.isValidTransformation() && !transforming}
@@ -54,29 +57,46 @@ export default class DeriveCategoryTransformation extends Component {
           buttonText="Derive Column"
           titleText="New Category Column"
         />
-        <div className="container">
-          {!transformation.args.sourceColumn && (
+
+        <div className="DeriveCategoryTransformation__container">
+
+          {(!transformation.args.sourceColumn || selectingSourceColumn) && (
             <SourceDeriveCategoryOptions
               dataset={dataset}
+              selected={transformation.args.sourceColumn}
               onChange={(sourceColumn) => {
-                this.setState({
-                  transformation: {
-                    ...this.state.transformation,
-                    args: {
-                      ...this.state.transformation.args,
-                      sourceColumn,
+                if (sourceColumn !== transformation.args.sourceColumn) {
+                  this.setState({
+                    selectingSourceColumn: false,
+                    transformation: {
+                      ...this.state.transformation,
+                      args: {
+                        ...this.state.transformation.args,
+                        sourceColumn,
+                        mappings: [],
+                      },
                     },
-                  },
-                });
+                  });
+                } else {
+                  this.setState({
+                    selectingSourceColumn: false,
+                  });
+                }
               }}
             />
           )}
-          {transformation.args.sourceColumn && (
+
+          {transformation.args.sourceColumn && !selectingSourceColumn && (
             <DeriveCategoryMappings
-              values={dataset.rows}
-              mappings={transformation.args.mappings}
-              sourceColumn={transformation.args.sourceColumn}
+              mappings={transformation.args.mappings || []}
+              sourceColumnIndex={findIndex(
+                dataset.columns,
+                ({ columnName }) => columnName === transformation.args.sourceColumn
+              )}
               dataset={dataset}
+              onReselectSourceColumn={() => {
+                this.setState({ selectingSourceColumn: true });
+              }}
               onChange={(mappings) => {
                 this.setState({
                   transformation: {
@@ -90,6 +110,7 @@ export default class DeriveCategoryTransformation extends Component {
               }}
             />
           )}
+
         </div>
       </div>
     );
