@@ -109,6 +109,22 @@
         .DashboardEditorCanvasContainer {
             height: auto;
         }
+
+        .DashboardEditorCanvas {
+            background-color: white;
+        }
+
+        .DashboardCanvasItem {
+            border: 1px solid $midLightGrey;
+
+            .deleteButton {
+                display: none;
+            }
+        }
+
+        .react-resizable-handle {
+            display: none;
+        }
     }
 }
 

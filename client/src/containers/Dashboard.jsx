@@ -573,6 +573,7 @@ class Dashboard extends Component {
               onUpdateName={this.onUpdateName}
               print={this.props.print}
               exporting={exporting}
+              preventPageOverlaps={this.props.preventPageOverlaps}
             />
             {!exporting && (
               <ShareEntity
@@ -603,6 +604,7 @@ Dashboard.propTypes = {
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
   exporting: PropTypes.bool,
+  preventPageOverlaps: PropTypes.bool,
   print: printShape,
 };
 

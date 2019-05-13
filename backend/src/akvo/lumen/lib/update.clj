@@ -64,11 +64,10 @@
                                    )
                               (mapv #(select-keys % [:id :type])))
         columns (->> columns
-                     (map #(update % :id name))
                      (mapv #(select-keys % [:id :type])
-                       ;; https://github.com/akvo/akvo-lumen/issues/1923
-                       ;; https://github.com/akvo/akvo-lumen/issues/1926
-                       ;; remove this map conversion logic once #1926 is finished
+                           ;; https://github.com/akvo/akvo-lumen/issues/1923
+                           ;; https://github.com/akvo/akvo-lumen/issues/1926
+                           ;; remove this map conversion logic once #1926 is finished
                            ))
         compatible? (set/subset? (set imported-columns) (set columns))]
     (if-not compatible?
@@ -104,9 +103,9 @@
                               {:transaction? false})
             (let [dataset-version  (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
                   coerce-column-fn (fn [{:keys [title id type key multipleId multipleType] :as column}]
-                                     (cond-> {"type" (name type)
+                                     (cond-> {"type" type
                                               "title" title
-                                              "columnName" (name id)
+                                              "columnName" id
                                               "sort" nil
                                               "direction" nil
                                               "hidden" false}

@@ -92,6 +92,15 @@ SELECT dataset_version.table_name AS "table-name",
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
 
+-- :name table-name-by-dataset-id :? :1
+SELECT dataset_version.table_name AS "table-name"
+  FROM dataset_version, dataset
+ WHERE dataset_version.dataset_id=:id
+   AND dataset.id=dataset_version.dataset_id
+   AND version=(SELECT max(version)
+                  FROM dataset_version
+                 WHERE dataset_version.dataset_id=:id);
+
 -- :name imported-dataset-columns-by-dataset-id :? :1
 SELECT dataset_version.columns
   FROM dataset_version
@@ -106,3 +115,10 @@ SELECT data_source.*
    AND job_execution.type = 'IMPORT'
    AND job_execution.status = 'OK'
    AND job_execution.data_source_id = data_source.id;
+
+-- :name count-vals-by-column-name :? :*
+SELECT COUNT(*) as counter, :i:column-name as coincidence
+  FROM :i:table-name
+  GROUP BY coincidence
+  ORDER BY counter DESC
+  LIMIT :offset

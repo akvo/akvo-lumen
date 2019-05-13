@@ -27,18 +27,22 @@
    "User-Agent" "lumen"
    "Accept" "application/vnd.akvo.flow.v2+json"})
 
+
 (defn check-permissions
   [flow-api token body]
-  (try
-    (http/post
-     (str (:url flow-api) "/check_permissions")
-     {:as :json
-      :headers (api-headers token)
-      :throw-entire-message? true
-      :unexceptional-status #(<= 200 % 299) 
-      :form-params body
-      :content-type :json})
-    (catch Exception e (log/error :fail :body body :response (ex-data e)))))
+  (let [start (. System (nanoTime))
+        res (try
+              (http/post
+               (str (:url flow-api) "/check_permissions")
+               {:as :json
+                :headers (api-headers token)
+                :throw-entire-message? true
+                :unexceptional-status #(<= 200 % 299) 
+                :form-params body
+                :content-type :json})
+              (catch Exception e (log/error :fail :body body :response (ex-data e))))]
+    (log/info ::check-permissions :body body :res res :elapsed-time (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start)) 1000000.0) " msecs"))
+    res))
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]
   opts)

@@ -529,39 +529,63 @@
                                               (assoc :extract %3))
                                          columns (range) bols)
         new-columns                (filter :extract columns-payload)
-        data                       (import.s/sample-imported-dataset [[:multiple {::import.values.s/multipleId    #(s/gen #{import.values.s/cad1-id})
-                                                                                  ::import.column.multiple.s/value #(s/gen #{import.values.s/cad1})}]] 2)
+        data                       (import.s/sample-imported-dataset [[:multiple {::import.values.s/multipleId     #(s/gen #{import.values.s/cad1-id})
+                                                                                  ::import.column.multiple.s/value #(s/gen #{import.values.s/cad1})}]
+                                                                      [:multiple {::import.values.s/multipleId     #(s/gen #{import.values.s/cad2-id})
+                                                                                  ::import.column.multiple.s/value #(s/gen #{import.values.s/cad2})}]] 2)
         dataset-id                 (import-file *tenant-conn* *error-tracker*
                                                 {:dataset-name "multiple caddisfly"
                                                  :kind         "clj"
                                                  :data         data})
-        apply-transformation       (partial async-tx-apply {:tenant-conn *tenant-conn* :caddisfly *caddisfly*} dataset-id)
-        selected-column            (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
-                                                             {::import.values.s/multipleType          "caddisfly"
-                                                              ::import.values.s/multipleId            import.values.s/cad1-id
-                                                              ::db.dataset-version.column.s/columnName "c1"
-                                                              ::import.values.s/id                     :c1
-                                                              ::import.column.s/header                 #(s/gen ::import.column.multiple.s/header)})
-        [tag _ :as res]            (apply-transformation
-                                    {:type :transformation
-                                     :transformation
-                                     (-> (gen-transformation :core/extract-multiple
-                                                             {::db.dataset-version.column.s/columnName "c1"
-                                                              ::transformation.split-column.s/pattern  "-"
-                                                              ::transformation.engine.s/onError        "fail"}
-                                                             :selectedColumn selected-column)
-                                         (update-in ["args" "extractImage"] (constantly false))
-                                         (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
-    (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-      
-      (is (= (apply conj ["c1"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (count new-columns)))))
-             (map #(get % "columnName") columns)))
-      (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d1"])]
-        (is (nil? before))
-        (is (= 1 (get after "caddisfly-test-id")))
-        (is (= (:name (nth new-columns 0)) (get after "title")))
-        (is (= "d1" (get after "columnName")))))))
+        apply-transformation       (partial async-tx-apply {:tenant-conn *tenant-conn* :caddisfly *caddisfly*} dataset-id)]
+    (let [selected-column (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
+                                                    {::import.values.s/multipleType           "caddisfly"
+                                                     ::import.values.s/multipleId             import.values.s/cad1-id
+                                                     ::db.dataset-version.column.s/columnName "c1"
+                                                     ::import.values.s/id                     :c1
+                                                     ::import.column.s/header                 #(s/gen ::import.column.multiple.s/header)})
+          [tag _ :as res] (apply-transformation
+                           {:type :transformation
+                            :transformation
+                            (-> (gen-transformation :core/extract-multiple
+                                                    {::db.dataset-version.column.s/columnName "c1"
+                                                     ::transformation.split-column.s/pattern  "-"
+                                                     ::transformation.engine.s/onError        "fail"}
+                                                    :selectedColumn selected-column)
+                                (update-in ["args" "extractImage"] (constantly true))
+                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+        
+        (is (= (apply conj ["c1" "c2"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (inc (count new-columns))))))
+               (map #(get % "columnName") columns)))
+        (is (= ["https://akvoflow-uat1.s3.amazonaws.com/images/b1961e99-bc1c-477c-9309-ae5e8d2374e8.png"
+                "https://akvoflow-uat1.s3.amazonaws.com/images/b1961e99-bc1c-477c-9309-ae5e8d2374e8.png"]
+               (mapv :d1 (get-data *tenant-conn* {:table-name table-name}))))
+        (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d2"])]
+          (is (nil? before))
+          (is (= 1 (get after "caddisfly-test-id")))
+          (is (= (:name (nth new-columns 0)) (get after "title")))
+          (is (= "d2" (get after "columnName"))))))
+    (let [selected-column (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
+                                                    {::import.values.s/multipleType           "caddisfly"
+                                                     ::import.values.s/multipleId             import.values.s/cad2-id
+                                                     ::db.dataset-version.column.s/columnName "c2"
+                                                     ::import.values.s/id                     :c2
+                                                     ::import.column.s/header                 #(s/gen ::import.column.multiple.s/header)})
+          [tag _ :as res] (apply-transformation
+                           {:type :transformation
+                            :transformation
+                            (-> (gen-transformation :core/extract-multiple
+                                                    {::db.dataset-version.column.s/columnName "c2"
+                                                     ::transformation.split-column.s/pattern  "-"
+                                                     ::transformation.engine.s/onError        "fail"}
+                                                    :selectedColumn selected-column)
+                                (update-in ["args" "extractImage"] (constantly true))
+                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+        (is (= ["" ""] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
 
 (defn- replace-column
   "utility to have same column in other generated dataset"

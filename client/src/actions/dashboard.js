@@ -174,7 +174,7 @@ export function exportDashboard(dashboard, options) {
 
     if (dashboard.id === null) throw new Error('dashboard.id not set');
 
-    const target = `${window.location.origin}/dashboard/${dashboard.id}/export`;
+    const target = `${window.location.origin}/dashboard/${dashboard.id}/export${format === 'pdf' ? '_pages' : ''}`;
 
     return api
       .post('/api/exports', {
