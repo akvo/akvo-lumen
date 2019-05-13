@@ -21,34 +21,32 @@
 
 (defmethod engine/apply-operation "core/derive-category"
   [{:keys [tenant-conn]} table-name columns op-spec]
-  (let [op-spec (walk/keywordize-keys op-spec)
-        source-column-name (get-in op-spec [:args :source :column :columnName])
-        column-title (get-in op-spec [:args :target :column :title])
-        uncategorized-value (get-in op-spec [:args :derivation :uncategorizedValue])
-        mappings (->> (get-in op-spec [:args :derivation :mappings])
-                      (into {}))
-        new-column-name (engine/next-column-name columns)
-        all-data (all-data tenant-conn {:table-name table-name})]
+  (let [op-spec             (walk/keywordize-keys op-spec)
+        source-column-name  (get-in op-spec [:args :source :column :columnName])
+        column-title        (get-in op-spec [:args :target :column :title])
+        uncategorized-value (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
+        mappings            (->> (get-in op-spec [:args :derivation :mappings])
+                                 (into {}))
+        new-column-name     (engine/next-column-name columns)
+        all-data            (all-data tenant-conn {:table-name table-name})]
     (jdbc/with-db-transaction [tenant-conn tenant-conn]
       (add-column tenant-conn {:table-name      table-name
                                :column-type     "text"
                                :new-column-name new-column-name})
-      (->> all-data
-           (map (fn [i]
-                  (set-cell-value tenant-conn
-                                  {:value (get mappings (get i (keyword source-column-name)) uncategorized-value)
-                                   :rnum (:rnum i)
-                                   :column-name new-column-name
-                                   :table-name table-name} )))
-           doall)
-      {:success? true
+      (doseq [i all-data]
+        (set-cell-value tenant-conn
+                        {:value       (get mappings (get i (keyword source-column-name)) uncategorized-value)
+                         :rnum        (:rnum i)
+                         :column-name new-column-name
+                         :table-name  table-name}))
+      {:success?      true
        :execution-log [(format "Derived category '%s' using column: '%s' and mappings: '%s'"
                                column-title
                                (:title (dataset.utils/find-column (walk/keywordize-keys columns) source-column-name))
                                mappings)]
-       :columns (conj columns {"title"      column-title
-                               "type"       "text"
-                               "sort"       nil
-                               "hidden"     false
-                               "direction"  nil
-                               "columnName" new-column-name})})))
+       :columns       (conj columns {"title"      column-title
+                                     "type"       "text"
+                                     "sort"       nil
+                                     "hidden"     false
+                                     "direction"  nil
+                                     "columnName" new-column-name})})))

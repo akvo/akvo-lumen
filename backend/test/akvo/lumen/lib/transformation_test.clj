@@ -599,37 +599,36 @@
       (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
 
 (deftest ^:functional derive-category-test
-  (let [column-vals ["v1" "v2" "v3" "v4"]
-        mapped-vals (mapv (partial str "mapped-") (next column-vals))
-        origin-data (import.s/sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
-        dataset-id    (import-file *tenant-conn* *error-tracker*
-                                   {:dataset-name "origin-dataset"
-                                    :kind         "clj"
-                                    :data         origin-data})
+  (let [column-vals          ["v1" "v2" "v3" "v4"]
+        mapped-vals          (mapv (partial str "mapped-") (next column-vals))
+        origin-data          (import.s/sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
+        dataset-id           (import-file *tenant-conn* *error-tracker*
+                                          {:dataset-name "origin-dataset"
+                                           :kind         "clj"
+                                           :data         origin-data})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-        new-column-name "Derived column name"
-        uncategorized-value "uncategorized value"
-        new-derived-column {:sort                nil,
-	                    :type       "text",
-	                    :title      new-column-name
-	                    :hidden     false,
-	                    :direction  nil,
-	                    :columnName "d1"}
-        mappings* (apply assoc {} (interleave (next column-vals)
-                                              mapped-vals))
-        tx (gen-transformation "core/derive-category"
-                               {}
-                               [:source :column :columnName] "c1"
-                               [:target :column :title] new-column-name
-                               [:derivation :mappings] (vec mappings*)
-                               [:derivation :uncategorizedValue] uncategorized-value)
+        new-column-name      "Derived column name"
+        uncategorized-value  "Uncategorised value"
+        new-derived-column   {:sort       nil,
+	                      :type       "text",
+	                      :title      new-column-name
+	                      :hidden     false,
+	                      :direction  nil,
+	                      :columnName "d1"}
+        mappings*            (apply assoc {} (interleave (next column-vals)
+                                                         mapped-vals))
+        tx                   (gen-transformation "core/derive-category"
+                                                 {}
+                                                 [:source :column :columnName] "c1"
+                                                 [:target :column :title] new-column-name
+                                                 [:derivation :mappings] (vec mappings*)
+                                                 [:derivation :uncategorizedValue] uncategorized-value)
 
-        [tag _ :as res] (apply-transformation {:type :transformation
+        [tag _ :as res] (apply-transformation {:type           :transformation
                                                :transformation tx})]
     (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
 
     (is (= ::lib/ok tag))
-    (log/error :res res)
     (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
       (is (every? #(= (:d1 %) (get mappings* (:c1 %) uncategorized-value)) data-db))
