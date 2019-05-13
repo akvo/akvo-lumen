@@ -40,6 +40,7 @@
 				    "core/filter-column"
 				    "core/generate-geopoints"
 				    "core/merge-datasets"
+                                    "core/derive-category"
 				    "core/remove-sort"
 				    "core/rename-column"
 				    "core/reverse-geocode"
@@ -177,8 +178,6 @@
 (create-ns  'akvo.lumen.specs.transformation.merge-datasets.target)
 (alias 'transformation.merge-datasets.target 'akvo.lumen.specs.transformation.merge-datasets.target)
 
-
-
 (s/def ::transformation.merge-datasets.source/datasetId ::db.dsv.s/dataset-id)
 (s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable columnName?))
 
@@ -207,6 +206,42 @@
    :req-un [::transformation.merge-datasets/args
             ::transformation.engine/op]))
 
+(create-ns  'akvo.lumen.specs.transformation.derive-category)
+(alias 'transformation.derive-category 'akvo.lumen.specs.transformation.derive-category)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.source)
+(alias 'transformation.derive-category.source 'akvo.lumen.specs.transformation.derive-category.source)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.target)
+(alias 'transformation.derive-category.target 'akvo.lumen.specs.transformation.derive-category.target)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.derivation)
+(alias 'transformation.derive-category.derivation 'akvo.lumen.specs.transformation.derive-category.derivation)
+
+(s/def ::transformation.derive-category.source/columnName ::i.values.s/id)
+(s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName]))
+
+(s/def ::transformation.derive-category/source (s/keys
+                                               :req-un [::transformation.derive-category.source/column]))
+
+(s/def ::transformation.derive-category.target/column (s/keys :req-un [::i.values.s/title]))
+(s/def ::transformation.derive-category/target (s/keys
+                                               :req-un [::transformation.derive-category.target/column]))
+
+(s/def ::transformation.derive-category.derivation/mappings (s/coll-of (s/tuple string? string?) :kind vector?))
+
+(s/def ::transformation.derive-category/derivation
+  (s/keys :req-un [::transformation.derive-category.derivation/mappings]))
+
+(s/def ::transformation.derive-category/args
+  (s/keys :req-un [::transformation.derive-category/source
+                   ::transformation.derive-category/target
+                   ::transformation.derive-category/derivation]))
+
+(defmethod op-spec "core/derive-category"  [_]
+  (s/keys
+   :req-un [::transformation.derive-category/args
+            ::transformation.engine/op]))
 
 (create-ns 'akvo.lumen.specs.transformation.extract-multiple)
 (alias 'transformation.extract-multiple 'akvo.lumen.specs.transformation.extract-multiple)
