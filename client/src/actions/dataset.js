@@ -290,8 +290,9 @@ export function deleteDataset(id) {
           dispatch(deleteDatasetSuccess(id));
         }
       })
-      .catch(() => {
-        dispatch(showNotification('error', 'Failed to delete dataset.'));
+      .catch((error) => {
+        dispatch(deleteDatasetFailure(id));
+        dispatch(showNotification('error', error.message || 'Failed to delete dataset.'));
       });
   };
 }
@@ -443,8 +444,8 @@ export function updateDataset(id) {
           dispatch(showNotification('error', `Update failed: ${error}`));
         }
       })
-      .catch(() => {
-        dispatch(showNotification('error', 'Failed to update dataset.'));
+      .catch((error) => {
+        dispatch(showNotification('error', error.message || 'Failed to update dataset.'));
       });
   };
 }
@@ -506,8 +507,8 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
-          dispatch(showNotification('error', 'Failed to transform dataset.'));
-          dispatch(transformationFailure(datasetId, reason));
+          dispatch(showNotification('error', reason));
+          dispatch(transformationFailure(datasetId, 'Failed to transform dataset.'));
         } else if (status === 'OK') {
           dispatch(transformationSuccess(datasetId));
         }
@@ -584,7 +585,7 @@ export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
-          dispatch(showNotification('error', 'Failed to transform dataset.'));
+          dispatch(showNotification('error', reason));
           dispatch(txDatasetFailure(datasetId, jobExecutionId, reason));
         } else if (status === 'OK') {
           dispatch(txDatasetSuccess(datasetId, jobExecutionId));

@@ -39,7 +39,7 @@
                                :imported-table-name imported-table-name
                                :version 1
                                :columns (mapv (fn [{:keys [title id type key multipleType multipleId]}]
-                                                {:columnName (name id)
+                                                {:columnName id
                                                  :direction nil
                                                  :hidden false
                                                  :key (boolean key)
@@ -47,7 +47,7 @@
                                                  :multipleType multipleType
                                                  :sort nil
                                                  :title (string/trim title)
-                                                 :type (name type)})
+                                                 :type type})
                                               columns)
                                :transformations []})
     (update-job-execution conn {:id             job-execution-id

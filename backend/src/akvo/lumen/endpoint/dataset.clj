@@ -60,6 +60,14 @@
                    :handler (fn [{tenant :tenant
                                   {:keys [id]} :path-params}]
                               (dataset/delete (p/connection tenant-manager tenant) id))}}]
+     ["/sort"
+      [["/:column-name" {:get {:parameters {:path-params {:id string?
+                                                          :column-name string?}
+                                            :query-params {:offset (s/nilable string?)}}
+                               :handler (fn [{tenant :tenant
+                                              {:keys [id column-name]} :path-params
+                                              query-params :query-params}]
+                                          (lib/ok (dataset/sort* (p/connection tenant-manager tenant) id column-name (get query-params "offset"))))}}]]]
      ["/meta" {:get {:parameters {:path-params {:id string?}}
                      :handler (fn [{tenant :tenant
                                     {:keys [id]} :path-params}]

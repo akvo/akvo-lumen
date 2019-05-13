@@ -154,12 +154,15 @@
     (c.flow/check-permissions flow-api (jwt/jwt-token request) data)))
 
 (defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
-  (let [permissions         (->> (map :source dss)
-                                 (filter #(= "AKVO_FLOW" (get % "kind")))
-                                 (map c.flow/>api-model)
-                                 (flow-check-permissions flow-api request collector tenant)
-                                 :body
-                                 set)
+  (let [permissions         (let [flow-data (->> (map :source dss)
+                                                 (filter #(= "AKVO_FLOW" (get % "kind")))
+                                                 (map c.flow/>api-model))]
+                              (if (seq flow-data)
+                                (->> flow-data
+                                     (flow-check-permissions flow-api request collector tenant)
+                                     :body
+                                     set)
+                                #{}))
         auth-datasets       (auth-datasets dss permissions)
         auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))
         auth-dashboards     (auth-dashboards tenant-conn (set auth-visualisations))

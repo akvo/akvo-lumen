@@ -119,7 +119,7 @@ docker-compose exec backend lein test
 
 To connect to the postgres server connect using something like:
 ```sh
-psql --host=akvolumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
+docker-compose exec backend psql --host=akvo-lumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
 ```
 
 ## Windshaft

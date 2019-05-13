@@ -7,6 +7,7 @@ import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
 import { checkUndefined } from '../../utilities/utils';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getTitle, getDataLastUpdated } from '../../utilities/chart';
+import { ROW_COUNT } from './DashboardEditor';
 
 require('./DashboardCanvasItem.scss');
 
@@ -88,7 +89,7 @@ export default class DashboardCanvasItem extends Component {
     if (layout !== null) {
       return ({
         width: (layout.w * unit) - 60,
-        height: (layout.h * unit) - 60,
+        height: (layout.h * this.props.rowHeight) - 60,
       });
     }
 
@@ -118,13 +119,20 @@ export default class DashboardCanvasItem extends Component {
       this.titleEl.getBoundingClientRect().height :
       TITLE_HEIGHT;
 
-    const { item, exporting } = this.props;
+    const { item, exporting, canvasLayout } = this.props;
+    let marginTop = 0;
+
+    if (exporting) {
+      const layoutItem = canvasLayout.filter(({ i }) => i === item.id)[0];
+      marginTop = layoutItem.y >= ROW_COUNT ? -40 : 10;
+    }
 
     return (
       <div
         data-test-id="dashboard-canvas-item"
         className="DashboardCanvasItem"
         ref={(c) => { this.el = c; }}
+        style={{ marginTop }}
       >
         {item.type === 'visualisation' && (
           <div className="itemContainerWrap">
@@ -186,6 +194,7 @@ DashboardCanvasItem.propTypes = {
   canvasLayout: PropTypes.array.isRequired,
   item: PropTypes.object.isRequired,
   canvasWidth: PropTypes.number.isRequired,
+  rowHeight: PropTypes.number.isRequired,
   datasets: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   onEntityUpdate: PropTypes.func.isRequired,
