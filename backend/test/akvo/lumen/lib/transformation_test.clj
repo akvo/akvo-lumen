@@ -30,7 +30,7 @@
             [clojure.string :as string]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
-            [clojure.walk :refer (stringify-keys)]
+            [clojure.walk :refer (stringify-keys keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [akvo.lumen.postgres Geoshape Geopoint]))
 
@@ -599,48 +599,48 @@
       (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
 
 (deftest ^:functional derive-category-test
-  (let [column-vals ["v1" "v2" "v3"]
-        mapped-vals (mapv (partial str "mapped-") column-vals)
-        origin-data (import.s/sample-imported-dataset [[:text {::import.column.text.s/value     #(s/gen (set column-vals))}]] 100)
+  (let [column-vals ["v1" "v2" "v3" "v4"]
+        mapped-vals (mapv (partial str "mapped-") (next column-vals))
+        origin-data (import.s/sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
         dataset-id    (import-file *tenant-conn* *error-tracker*
                                    {:dataset-name "origin-dataset"
                                     :kind         "clj"
                                     :data         origin-data})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-        
+        new-column-name "Derived column name"
+        uncategorized-value "uncategorized value"
+        new-derived-column {:sort                nil,
+	                    :type       "text",
+	                    :title      new-column-name
+	                    :hidden     false,
+	                    :direction  nil,
+	                    :columnName "d1"}
+        mappings* (apply assoc {} (interleave (next column-vals)
+                                              mapped-vals))
         tx (gen-transformation "core/derive-category"
                                {}
                                [:source :column :columnName] "c1"
-                               [:target :column :title] "Derived column name"
-                               [:derivation :mappings] (vec (apply assoc {} (interleave column-vals
-                                                                                         mapped-vals))))
+                               [:target :column :title] new-column-name
+                               [:derivation :mappings] (vec mappings*)
+                               [:derivation :uncategorizedValue] uncategorized-value)
 
-        [tag _ :as res] (apply-transformation {:type           :transformation
-                                               :transformation tx})
-        ]
-
-;;    (log/error :origin-data-freq  (->> origin-data :rows (map (comp :value first)) frequencies))
-,;    (log/error :tx tx)
+        [tag _ :as res] (apply-transformation {:type :transformation
+                                               :transformation tx})]
     (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
-    origin-data
-    (is (= ::lib/ok tag))
 
+    (is (= ::lib/ok tag))
+    (log/error :res res)
     (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
-      (is (some? data-db))
-      ;; (is (=  (map (comp name :type) (apply conj
-      ;;                                       (:columns origin-data)
-      ;;                                       (next (:columns target-data))))
-      ;;         (map #(get % "type") columns)))
-      ;; (is (= '(:c1 :c2 :d1 :d2 :d3) (map #(keyword (get % "columnName")) columns)))
-      ;; (is (= 2 (count data-db)))
-      ;; (is (= (map (comp :value first) (:rows origin-data)) (map :c1 data-db)))
-      ;; (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db)))
-      )
-    )
-
-
-  )
+      (is (every? #(= (:d1 %) (get mappings* (:c1 %) uncategorized-value)) data-db))
+      (is (= new-derived-column
+             (keywordize-keys (last columns))))
+      (let [applied-tx (keywordize-keys (last transformations))]
+        (is (= (keywordize-keys tx) (select-keys applied-tx [:op :args])))
+        (is (= {:d1
+	        {:after
+	         new-derived-column,
+	         :before nil}} (:changedColumns applied-tx)))))))
 
 (deftest ^:functional merge-datasets-test
   (let [origin-data          (import.s/sample-imported-dataset [:text :date] 2)
