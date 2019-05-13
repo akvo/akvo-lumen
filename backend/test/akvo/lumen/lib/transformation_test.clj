@@ -50,6 +50,10 @@
 (alias 'transformation.merge-datasets.source.s  'akvo.lumen.specs.transformation.merge-datasets.source)
 (alias 'transformation.merge-datasets.target.s  'akvo.lumen.specs.transformation.merge-datasets.target)
 (alias 'transformation.merge-datasets.s         'akvo.lumen.specs.transformation.merge-datasets)
+(alias 'transformation.derive-category.derivation.s 'akvo.lumen.specs.transformation.derive-category.derivation)
+(alias 'transformation.derive-category.target.s 'akvo.lumen.specs.transformation.derive-category.target)
+(alias 'transformation.derive-category.source.s 'akvo.lumen.specs.transformation.derive-category.source)
+(alias 'transformation.derive-category.s 'akvo.lumen.specs.transformation.derive-category)
 (alias 'transformation.reverse-geocode.source.s 'akvo.lumen.specs.transformation.reverse-geocode.source)
 (alias 'transformation.reverse-geocode.target.s 'akvo.lumen.specs.transformation.reverse-geocode.target)
 (alias 'transformation.reverse-geocode.s        'akvo.lumen.specs.transformation.reverse-geocode)
@@ -593,6 +597,50 @@
   (-> target-data
       (assoc-in [:columns column-idx]  (nth (:columns origin-data) column-idx))
       (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
+
+(deftest ^:functional derive-category-test
+  (let [column-vals ["v1" "v2" "v3"]
+        mapped-vals (mapv (partial str "mapped-") column-vals)
+        origin-data (import.s/sample-imported-dataset [[:text {::import.column.text.s/value     #(s/gen (set column-vals))}]] 100)
+        dataset-id    (import-file *tenant-conn* *error-tracker*
+                                   {:dataset-name "origin-dataset"
+                                    :kind         "clj"
+                                    :data         origin-data})
+        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+        
+        tx (gen-transformation "core/derive-category"
+                               {}
+                               [:source :column :columnName] "c1"
+                               [:target :column :title] "Derived column name"
+                               [:derivation :mappings] (vec (apply assoc {} (interleave column-vals
+                                                                                         mapped-vals))))
+
+        [tag _ :as res] (apply-transformation {:type           :transformation
+                                               :transformation tx})
+        ]
+
+;;    (log/error :origin-data-freq  (->> origin-data :rows (map (comp :value first)) frequencies))
+,;    (log/error :tx tx)
+    (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
+    origin-data
+    (is (= ::lib/ok tag))
+
+    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+          data-db                                      (get-data *tenant-conn* {:table-name table-name})]
+      (is (some? data-db))
+      ;; (is (=  (map (comp name :type) (apply conj
+      ;;                                       (:columns origin-data)
+      ;;                                       (next (:columns target-data))))
+      ;;         (map #(get % "type") columns)))
+      ;; (is (= '(:c1 :c2 :d1 :d2 :d3) (map #(keyword (get % "columnName")) columns)))
+      ;; (is (= 2 (count data-db)))
+      ;; (is (= (map (comp :value first) (:rows origin-data)) (map :c1 data-db)))
+      ;; (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db)))
+      )
+    )
+
+
+  )
 
 (deftest ^:functional merge-datasets-test
   (let [origin-data          (import.s/sample-imported-dataset [:text :date] 2)
