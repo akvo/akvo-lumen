@@ -12,6 +12,7 @@
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.derive-category :as derive-category]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.import :as import.s]
@@ -600,7 +601,6 @@
 
 (deftest ^:functional derive-category-test
   (let [column-vals          ["v1" "v2" "v3" "v4"]
-        mapped-vals          (mapv (partial str "mapped-") (next column-vals))
         origin-data          (import.s/sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
         dataset-id           (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
@@ -615,13 +615,13 @@
 	                      :hidden     false,
 	                      :direction  nil,
 	                      :columnName "d1"}
-        mappings*            (apply assoc {} (interleave (next column-vals)
-                                                         mapped-vals))
+        mappings*            [[["v2" "v3"] "mapped-1"]
+                              [["v4"] "mapped-2"]]
         tx                   (gen-transformation "core/derive-category"
                                                  {}
                                                  [:source :column :columnName] "c1"
                                                  [:target :column :title] new-column-name
-                                                 [:derivation :mappings] (vec mappings*)
+                                                 [:derivation :mappings] mappings*
                                                  [:derivation :uncategorizedValue] uncategorized-value)
 
         [tag _ :as res] (apply-transformation {:type           :transformation
@@ -631,7 +631,7 @@
     (is (= ::lib/ok tag))
     (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
-      (is (every? #(= (:d1 %) (get mappings* (:c1 %) uncategorized-value)) data-db))
+      (is (every? #(= (:d1 %) (get (derive-category/mappings-dict mappings*) (:c1 %) uncategorized-value)) data-db))
       (is (= new-derived-column
              (keywordize-keys (last columns))))
       (let [applied-tx (keywordize-keys (last transformations))]

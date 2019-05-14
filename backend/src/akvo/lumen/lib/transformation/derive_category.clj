@@ -19,14 +19,17 @@
   [op-spec]
   (s/valid? (transformation.s/op-spec {:op "core/derive-category"}) (walk/keywordize-keys op-spec)))
 
+(defn mappings-dict [mappings]
+       (reduce (fn [c [source-vals mapped-val]]
+                 (reduce #(assoc % %2 mapped-val) c source-vals)) {} mappings))
+
 (defmethod engine/apply-operation "core/derive-category"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [op-spec             (walk/keywordize-keys op-spec)
         source-column-name  (get-in op-spec [:args :source :column :columnName])
         column-title        (get-in op-spec [:args :target :column :title])
         uncategorized-value (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
-        mappings            (->> (get-in op-spec [:args :derivation :mappings])
-                                 (into {}))
+        mappings            (mappings-dict (get-in op-spec [:args :derivation :mappings]))
         new-column-name     (engine/next-column-name columns)
         all-data            (all-data tenant-conn {:table-name table-name})]
     (jdbc/with-db-transaction [tenant-conn tenant-conn]
