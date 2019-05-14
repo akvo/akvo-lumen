@@ -5,9 +5,9 @@ export const initialState = {
   currentPage: 'select-data-source-type',
   dataset: {
     source: {
-      kind: 'DATA_FILE',
-      hasColumnHeaders: true,
-      guessColumnTypes: true,
+      kind: 'AKVO_FLOW',
+      instance: null,
+      surveyId: null,
     },
     name: '',
   },
