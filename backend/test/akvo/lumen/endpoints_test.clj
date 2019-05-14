@@ -264,7 +264,7 @@
           (is (some? (re-find #"path=\"/api/aggregation/:dataset-id/:visualisation-type\",tenant=\"t1\""
                               (:body r))))))
       
-      (testing "/transformations/:id/transform & /transformations/:id/undo"
+      (testing "/transformations/:id/transform/:op1/:op2 & /transformations/:id/undo"
         (let [title "GDP-dataset"
               file-name "GDP.csv"
               dataset-url (post-files h file-name)
@@ -288,7 +288,7 @@
                    (select-keys dataset [:transformations :name :status :id])))
             (is (= 196 (count (:rows dataset))))
             (is (= 10 (count (:columns dataset))))
-            (let [res (h (post* (api-url "/transformations" dataset-id "transform")
+            (let [res (h (post* (api-url "/transformations" dataset-id "transform" "core/trim")
                                 {:args {:columnName "c5"}, :onError "fail", :op "core/trim"}))]
 
               (is (= 200 (:status res)))
