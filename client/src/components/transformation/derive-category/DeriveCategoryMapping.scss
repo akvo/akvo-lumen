@@ -1,5 +1,51 @@
+@import "../../../styles/modules/importAll";
+
 .DeriveCategoryMapping {
+  position: relative;
+  padding: 1rem 0;
+
+  .DeriveCategoryMapping__tag {
+    border: 1px solid $midLightGrey;
+    background: $lightGrey;
+    padding: 0.2rem 0.5rem;
+    position: relative;
+    display: inline-block;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+    @include border-radius(4px);
+
+    &--with-btn {
+      padding-right: 1.5rem;
+    }
+  }
+
+  .DeriveCategoryMapping__tag__btn {
+    position: absolute;
+    right: 0.2rem;
+    top: 0.4rem;
+  }
+
   .DeriveCategoryMapping__group {
+    position: absolute;
     border: 1px grey solid;
+  }
+
+  .DeriveCategoryMapping__action_btn {
+    visibility: hidden;
+    color: $anchorLinkLight;
+    cursor: pointer;
+    padding: 0 0.5rem;
+  }
+
+  &:hover {
+    .DeriveCategoryMapping__action_btn {
+      visibility: visible; 
+    }
+  }
+
+  .Popover-header {
+    // input {
+    //   clear: both;
+    // }
   }
 }

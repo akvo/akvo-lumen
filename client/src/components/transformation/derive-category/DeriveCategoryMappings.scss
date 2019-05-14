@@ -1,7 +1,7 @@
 @import "../../../styles/modules/importAll";
 
 .DeriveCategoryMappings {
-  flex: 1;
-  padding-left: 3em;
-  padding-right: 3em;
+  .DeriveCategoryMappings__row {
+    padding: 1rem 0;
+  }
 }
