@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [iapetos.collector.jvm :as jvm]
             [iapetos.collector.ring :as ring]
+            [clojure.string :as string]
             [clojure.tools.logging :as log]
             [iapetos.core :as prometheus]
             [iapetos.registry :as registry]
@@ -35,7 +36,11 @@
     (ring/wrap-metrics handler collector {:path-fn (constantly "unknown")
                                           :label-fn (fn [request response]
                                                       (let [tenant (:tenant request)
-                                                            path (:template (:reitit.core/match request))]
+                                                            path (if-let [unwrap-params (get-in request [:reitit.core/match :data :monitoring :unwrap?])]
+                                                                   (reduce (fn [c [k v]] (string/replace c (re-pattern (str k)) v))
+                                                                           (:template (:reitit.core/match request))
+                                                                           (select-keys (:path-params request) unwrap-params))
+                                                                   (:template (:reitit.core/match request)))]
                                                         (log/debug :tenant tenant :path path)
                                                         {:path path
                                                          :tenant tenant}))})))

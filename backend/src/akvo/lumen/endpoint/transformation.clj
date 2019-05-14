@@ -8,12 +8,13 @@
 
 (defn routes [{:keys [tenant-manager caddisfly] :as opts}]
   ["/transformations/:dataset-id"
-   [["/transform"
-      {:post {:parameters {:path-params {:dataset-id string?}
+   [["/transform/:op1/:op2"
+     {:monitoring {:unwrap? [:op1 :op2]}
+      :post {:parameters {:path-params {:dataset-id string?}
                            :body map?}
               :handler (fn [{tenant :tenant
                              body :body
-                             {:keys [dataset-id]} :path-params}]
+                             {:keys [dataset-id op1 op2]} :path-params}]
                          (t/apply {:tenant-conn (p/connection tenant-manager tenant) :caddisfly caddisfly}
                                   dataset-id
                                   {:type :transformation
