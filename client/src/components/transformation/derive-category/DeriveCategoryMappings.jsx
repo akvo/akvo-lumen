@@ -1,9 +1,11 @@
+/* eslint-disable jsx-a11y/anchor-has-content */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { findIndex } from 'lodash';
 import { Container, Row, Col } from 'react-grid-system';
 
 import DeriveCategoryMapping from './DeriveCategoryMapping';
+import './DeriveCategoryMappings.scss';
 
 export default class DeriveCategoryMappings extends Component {
 
@@ -15,9 +17,11 @@ export default class DeriveCategoryMappings extends Component {
   static propTypes = {
     mappings: PropTypes.array,
     onChange: PropTypes.func,
+    onChangeTargetColumnName: PropTypes.func,
     sourceColumnIndex: PropTypes.number,
     dataset: PropTypes.object.isRequired,
     onReselectSourceColumn: PropTypes.func,
+    derivedColumnName: PropTypes.string,
   }
 
   constructor(props) {
@@ -32,7 +36,7 @@ export default class DeriveCategoryMappings extends Component {
 
   getExistingMappingIndex(value) {
     const { mappings } = this.props;
-    return findIndex(mappings, ({ sourceValues }) => sourceValues.includes(value));
+    return findIndex(mappings, ([sourceValues]) => sourceValues.includes(value));
   }
 
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
@@ -40,12 +44,12 @@ export default class DeriveCategoryMappings extends Component {
     const existingMappingIndex = this.getExistingMappingIndex(sourceValues[0]);
     const newMappings = [...mappings];
     if (existingMappingIndex > -1) {
-      newMappings[existingMappingIndex].targetCategoryName = targetCategoryName;
+      newMappings[existingMappingIndex][1] = targetCategoryName;
     } else {
-      newMappings.push({
+      newMappings.push([
         sourceValues,
         targetCategoryName,
-      });
+      ]);
     }
     onChange(newMappings);
   }
@@ -55,21 +59,28 @@ export default class DeriveCategoryMappings extends Component {
     const existingMappingIndex = this.getExistingMappingIndex(currentSourceValues[0]);
     const newMappings = [...mappings];
     if (existingMappingIndex > -1) {
-      if (nextSourceValues.length === 1 && !newMappings[existingMappingIndex].targetCategoryName) {
+      if (nextSourceValues.length === 1 && !newMappings[existingMappingIndex][1]) {
         newMappings.splice(existingMappingIndex, 1);
       } else {
-        newMappings[existingMappingIndex].sourceValues = nextSourceValues;
+        newMappings[existingMappingIndex][0] = nextSourceValues;
       }
     } else {
-      newMappings.push({
-        sourceValues: nextSourceValues,
-      });
+      newMappings.push([
+        nextSourceValues,
+      ]);
     }
     onChange(newMappings);
   }
 
   render() {
-    const { dataset, mappings, sourceColumnIndex, onReselectSourceColumn } = this.props;
+    const {
+      dataset,
+      mappings,
+      sourceColumnIndex,
+      onReselectSourceColumn,
+      derivedColumnName,
+      onChangeTargetColumnName,
+    } = this.props;
     const { search } = this.state;
 
     const unassignedValues = dataset.rows
@@ -77,27 +88,44 @@ export default class DeriveCategoryMappings extends Component {
       .filter(value => this.getExistingMappingIndex(value) === -1);
 
     const searchedValues = unassignedValues.filter(value =>
-      (!search.length || value.toLowerCase().indexOf(search.toLowerCase()) > -1)
+      (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
     );
 
-    const potentialMappings = mappings.concat(searchedValues.map(value => ({
-      sourceValues: [value],
-    })));
+    const potentialMappings = mappings.concat(searchedValues.map(value => [[value]]));
 
     return (
       <Container className="DeriveCategoryMappings container">
-        <Row>
+        <Row className="DeriveCategoryMappings__row">
           <Col md={6}>
             <a onClick={onReselectSourceColumn}>
               Source column: {dataset.columns[sourceColumnIndex].title}
             </a>
           </Col>
+          <Col md={6}>
+            <input
+              value={derivedColumnName}
+              placeholder="target column name"
+              onChange={(event) => {
+                onChangeTargetColumnName(event.target.value);
+              }}
+            />
+          </Col>
         </Row>
-        <Row>
+        <Row className="DeriveCategoryMappings__row">
           <Col md={6}>
             6 Unique values
-            <a className="fa fa-sort-numeric-down" />
-            <a className="fa fa-sort-alpha-down" />
+            <a
+              className="fa fa-sort-numeric-desc"
+              onClick={() => {
+                this.setState({ sortBy: 'numeric' });
+              }}
+            />
+            <a
+              className="fa fa-sort-alpha-desc"
+              onClick={() => {
+                this.setState({ sortBy: 'alpha' });
+              }}
+            />
             <input
               placeholder="Search..."
               value={search}
@@ -110,31 +138,22 @@ export default class DeriveCategoryMappings extends Component {
             6 categories
           </Col>
         </Row>
-        <Row>
-          <Col>
-            <ul>
-              {potentialMappings.map(({ sourceValues, targetCategoryName }, i) => (
-                <li key={i}>
-                  <Col md={6}>
-                    <DeriveCategoryMapping
-                      unassignedValues={unassignedValues}
-                      sourceValues={sourceValues}
-                      targetCategoryName={targetCategoryName}
-                      onChangeCategoryName={(event) => {
-                        this.handleTargetCategoryNameUpdate(sourceValues, event.target.value);
-                      }}
-                      onSourceValuesUpdate={this.handleSourceValuesUpdate}
-                      isGrouping={sourceValues.includes(this.state.isGroupingValue)}
-                      onToggleGrouping={(isGroupingValue) => {
-                        this.setState({ isGroupingValue });
-                      }}
-                    />
-                  </Col>
-                </li>
-              ))}
-            </ul>
-          </Col>
-        </Row>
+        {potentialMappings.map(([sourceValues, targetCategoryName], i) => (
+          <DeriveCategoryMapping
+            key={i}
+            unassignedValues={unassignedValues}
+            sourceValues={sourceValues}
+            targetCategoryName={targetCategoryName}
+            onChangeCategoryName={(event) => {
+              this.handleTargetCategoryNameUpdate(sourceValues, event.target.value);
+            }}
+            onSourceValuesUpdate={this.handleSourceValuesUpdate}
+            isGrouping={sourceValues.includes(this.state.isGroupingValue)}
+            onToggleGrouping={(isGroupingValue) => {
+              this.setState({ isGroupingValue });
+            }}
+          />
+        ))}
       </Container>
     );
   }

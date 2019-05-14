@@ -15,8 +15,18 @@ export default class DeriveCategoryTransformation extends Component {
     this.state = {
       selectingSourceColumn: false,
       transformation: {
-        op: '',
-        args: {},
+        op: 'core/derive-category',
+        args: {
+          source: {
+            column: {},
+          },
+          target: {
+            column: {},
+          },
+          derivation: {
+            mappings: [],
+          },
+        },
       },
     };
   }
@@ -31,7 +41,10 @@ export default class DeriveCategoryTransformation extends Component {
   }
 
   isValidTransformation() {
-    // const { transformation: { args: {} } } = this.state;
+    const { source, target, derivation } = this.state.transformation.args;
+    if (source.column.columnName && target.column.columnName && derivation.mappings.length) {
+      return true;
+    }
     return false;
   }
 
@@ -60,20 +73,29 @@ export default class DeriveCategoryTransformation extends Component {
 
         <div className="DeriveCategoryTransformation__container">
 
-          {(!transformation.args.sourceColumn || selectingSourceColumn) && (
+          {(!transformation.args.source.column.columnName || selectingSourceColumn) && (
             <SourceDeriveCategoryOptions
               dataset={dataset}
-              selected={transformation.args.sourceColumn}
-              onChange={(sourceColumn) => {
-                if (sourceColumn !== transformation.args.sourceColumn) {
+              selected={transformation.args.source.column.columnName}
+              onChange={(columnName) => {
+                if (columnName !== transformation.args.source.column.columnName) {
                   this.setState({
                     selectingSourceColumn: false,
                     transformation: {
                       ...this.state.transformation,
                       args: {
                         ...this.state.transformation.args,
-                        sourceColumn,
-                        mappings: [],
+                        source: {
+                          ...this.state.transformation.args.source,
+                          column: {
+                            ...this.state.transformation.args.source.column,
+                            columnName,
+                          },
+                        },
+                        derivation: {
+                          ...this.state.transformation.args.derivation,
+                          mappings: [],
+                        },
                       },
                     },
                   });
@@ -86,12 +108,12 @@ export default class DeriveCategoryTransformation extends Component {
             />
           )}
 
-          {transformation.args.sourceColumn && !selectingSourceColumn && (
+          {transformation.args.source.column.columnName && !selectingSourceColumn && (
             <DeriveCategoryMappings
-              mappings={transformation.args.mappings || []}
+              mappings={transformation.args.derivation.mappings || []}
               sourceColumnIndex={findIndex(
                 dataset.columns,
-                ({ columnName }) => columnName === transformation.args.sourceColumn
+                ({ columnName }) => columnName === transformation.args.source.column.columnName
               )}
               dataset={dataset}
               onReselectSourceColumn={() => {
@@ -103,7 +125,27 @@ export default class DeriveCategoryTransformation extends Component {
                     ...this.state.transformation,
                     args: {
                       ...this.state.transformation.args,
-                      mappings,
+                      derivation: {
+                        ...this.state.transformation.args.derivation,
+                        mappings,
+                      },
+                    },
+                  },
+                });
+              }}
+              onChangeTargetColumnName={(columnName) => {
+                this.setState({
+                  transformation: {
+                    ...this.state.transformation,
+                    args: {
+                      ...this.state.transformation.args,
+                      target: {
+                        ...this.state.transformation.args.target,
+                        column: {
+                          ...this.state.transformation.args.target.column,
+                          columnName,
+                        },
+                      },
                     },
                   },
                 });
