@@ -5,6 +5,11 @@ import { FormattedMessage } from 'react-intl';
 require('./SourceSelection.scss');
 
 const supportedFormats = [{
+  kind: 'AKVO_FLOW',
+  icon: '/assets/akvo-flow.png',
+  label: <FormattedMessage id="akvo_flow" />,
+  disabled: false,
+}, {
   kind: 'DATA_FILE',
   icon: '/assets/data-file.png',
   label: <FormattedMessage id="data_file" />,
@@ -29,11 +34,6 @@ const supportedFormats = [{
   icon: '/assets/akvo-rsr.png',
   label: <FormattedMessage id="akvo_rsr" />,
   disabled: true,
-}, {
-  kind: 'AKVO_FLOW',
-  icon: '/assets/akvo-flow.png',
-  label: <FormattedMessage id="akvo_flow" />,
-  disabled: false,
 }, {
   kind: 'GITHUB',
   icon: '/assets/github.png',
