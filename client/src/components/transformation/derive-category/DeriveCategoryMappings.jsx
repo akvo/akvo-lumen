@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { findIndex } from 'lodash';
-import { Container, Row, Col } from 'react-grid-system';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Col, Container, Row } from 'react-grid-system';
 
 import DeriveCategoryMapping from './DeriveCategoryMapping';
 import './DeriveCategoryMappings.scss';
@@ -21,7 +21,9 @@ export default class DeriveCategoryMappings extends Component {
     sourceColumnIndex: PropTypes.number,
     dataset: PropTypes.object.isRequired,
     onReselectSourceColumn: PropTypes.func,
+    onChangeUncategorizedValue: PropTypes.func,
     derivedColumnName: PropTypes.string,
+    uncategorizedValue: PropTypes.string,
   }
 
   constructor(props) {
@@ -80,6 +82,8 @@ export default class DeriveCategoryMappings extends Component {
       onReselectSourceColumn,
       derivedColumnName,
       onChangeTargetColumnName,
+      onChangeUncategorizedValue,
+      uncategorizedValue,
     } = this.props;
     const { search } = this.state;
 
@@ -138,6 +142,7 @@ export default class DeriveCategoryMappings extends Component {
             6 categories
           </Col>
         </Row>
+
         {potentialMappings.map(([sourceValues, targetCategoryName], i) => (
           <DeriveCategoryMapping
             key={i}
@@ -154,6 +159,21 @@ export default class DeriveCategoryMappings extends Component {
             }}
           />
         ))}
+
+        <Row className="DeriveCategoryMappings__row">
+          <Col xs={6}>
+            Uncategorized Values
+          </Col>
+
+          <Col xs={6}>
+            <input
+              value={uncategorizedValue || ''}
+              onChange={(event) => {
+                onChangeUncategorizedValue(event.target.value);
+              }}
+            />
+          </Col>
+        </Row>
       </Container>
     );
   }
