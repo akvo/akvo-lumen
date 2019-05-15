@@ -1,12 +1,12 @@
 // TODO i18n
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { findIndex } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
-import TransformationHeader from './TransformationHeader';
-import SourceDeriveCategoryOptions from './derive-category/SourceDeriveCategoryOptions';
 import DeriveCategoryMappings from './derive-category/DeriveCategoryMappings';
+import SourceDeriveCategoryOptions from './derive-category/SourceDeriveCategoryOptions';
 import './DeriveCategoryTransformation.scss';
+import TransformationHeader from './TransformationHeader';
 
 export default class DeriveCategoryTransformation extends Component {
 
@@ -25,6 +25,7 @@ export default class DeriveCategoryTransformation extends Component {
           },
           derivation: {
             mappings: [],
+            uncategorizedValue: 'Uncategorized',
           },
         },
       },
@@ -111,6 +112,7 @@ export default class DeriveCategoryTransformation extends Component {
           {transformation.args.source.column.columnName && !selectingSourceColumn && (
             <DeriveCategoryMappings
               mappings={transformation.args.derivation.mappings || []}
+              uncategorizedValue={transformation.args.derivation.uncategorizedValue}
               sourceColumnIndex={findIndex(
                 dataset.columns,
                 ({ columnName }) => columnName === transformation.args.source.column.columnName
@@ -145,6 +147,20 @@ export default class DeriveCategoryTransformation extends Component {
                           ...this.state.transformation.args.target.column,
                           columnName,
                         },
+                      },
+                    },
+                  },
+                });
+              }}
+              onChangeUncategorizedValue={(uncategorizedValue) => {
+                this.setState({
+                  transformation: {
+                    ...this.state.transformation,
+                    args: {
+                      ...this.state.transformation.args,
+                      derivation: {
+                        ...this.state.transformation.args.derivation,
+                        uncategorizedValue,
                       },
                     },
                   },
