@@ -35,7 +35,6 @@
         (let [ds-id "1"
               data (assoc data :datasetId ds-id)]
           (is (not (s/valid? ::visualisation.s/visualisation data)))
-          (clojure.pprint/pprint data)
           (is (= (auth/ids ::visualisation.s/visualisation data)
                  {:dashboard-ids #{}, :collection-ids #{}, :dataset-ids #{ds-id}, :visualisation-ids #{v-id}}))))))
   (testing "visualisation map types, could have datasetId(s) in layer collection"
