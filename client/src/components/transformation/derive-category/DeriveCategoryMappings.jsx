@@ -38,12 +38,15 @@ export default class DeriveCategoryMappings extends Component {
 
   getExistingMappingIndex(value) {
     const { mappings } = this.props;
-    return findIndex(mappings, ([sourceValues]) => sourceValues.includes(value));
+    return findIndex(mappings, ([sourceValues]) =>
+      // eslint-disable-next-line no-unused-vars
+      sourceValues.map(([c, v]) => v).includes(value)
+    );
   }
 
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
     const { onChange, mappings } = this.props;
-    const existingMappingIndex = this.getExistingMappingIndex(sourceValues[0]);
+    const existingMappingIndex = this.getExistingMappingIndex(sourceValues[0][1]);
     const newMappings = [...mappings];
     if (existingMappingIndex > -1) {
       newMappings[existingMappingIndex][1] = targetCategoryName;
@@ -58,7 +61,7 @@ export default class DeriveCategoryMappings extends Component {
 
   handleSourceValuesUpdate(currentSourceValues, nextSourceValues) {
     const { onChange, mappings } = this.props;
-    const existingMappingIndex = this.getExistingMappingIndex(currentSourceValues[0]);
+    const existingMappingIndex = this.getExistingMappingIndex(currentSourceValues[0][1]);
     const newMappings = [...mappings];
     if (existingMappingIndex > -1) {
       if (nextSourceValues.length === 1 && !newMappings[existingMappingIndex][1]) {
@@ -87,11 +90,14 @@ export default class DeriveCategoryMappings extends Component {
     } = this.props;
     const { search } = this.state;
 
-    const unassignedValues = dataset.rows
-      .map(row => row[sourceColumnIndex])
-      .filter(value => this.getExistingMappingIndex(value) === -1);
+    if (!dataset.sortedValues) return null;
 
-    const searchedValues = unassignedValues.filter(value =>
+    const unassignedValues = dataset.sortedValues // rows
+      // eslint-disable-next-line no-unused-vars
+      .filter(([count, value]) => this.getExistingMappingIndex(value) === -1);
+
+    // eslint-disable-next-line no-unused-vars
+    const searchedValues = unassignedValues.filter(([count, value]) =>
       (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
     );
 
@@ -153,7 +159,8 @@ export default class DeriveCategoryMappings extends Component {
               this.handleTargetCategoryNameUpdate(sourceValues, event.target.value);
             }}
             onSourceValuesUpdate={this.handleSourceValuesUpdate}
-            isGrouping={sourceValues.includes(this.state.isGroupingValue)}
+            // eslint-disable-next-line no-unused-vars
+            isGrouping={sourceValues.map(([count, value]) => value).includes(this.state.isGroupingValue)}
             onToggleGrouping={(isGroupingValue) => {
               this.setState({ isGroupingValue });
             }}

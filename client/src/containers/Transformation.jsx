@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
-import { pollTxImportStatus, startTx, endTx, fetchDataset } from '../actions/dataset';
+import { pollTxImportStatus, startTx, endTx, fetchDataset, fetchSortedDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
@@ -77,6 +77,9 @@ class Transformation extends Component {
           onApplyTransformation={transformation => this.handleApplyTransformation(transformation)}
           onFetchDataset={(id) => {
             this.props.dispatch(fetchDataset(id));
+          }}
+          onFetchSortedDataset={(id, columnName) => {
+            this.props.dispatch(fetchSortedDataset(id, columnName));
           }}
         />
       </div>

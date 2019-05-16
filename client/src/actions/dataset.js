@@ -58,6 +58,46 @@ export function fetchDataset(id, metaOnly) {
   };
 }
 
+function fetchSortedDatasetRequest(id) {
+  return {
+    type: constants.FETCH_SORTED_DATASET_REQUEST,
+    id,
+  };
+}
+
+function fetchSortedDatasetSuccess(sortedValues) {
+  return {
+    type: constants.FETCH_SORTED_DATASET_SUCCESS,
+    payload: sortedValues,
+  };
+}
+
+function fetchSortedDatasetFailure(error, id) {
+  return {
+    type: constants.FETCH_SORTED_DATASET_FAILURE,
+    id,
+  };
+}
+
+export function fetchSortedDataset(id, columnName) {
+  return (dispatch) => {
+    dispatch(fetchSortedDatasetRequest(id));
+    return api.get(`/api/datasets/${id}/sort/${columnName}`)
+      .then(({ body }) => {
+        dispatch(fetchSortedDatasetSuccess({
+          id,
+          columnName,
+          sortedValues: body,
+        }));
+        return body;
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch dataset.'));
+        dispatch(fetchSortedDatasetFailure(error, id));
+      });
+  };
+}
+
 export function ensureDatasetFullyLoaded(id) {
   return (dispatch, getState) => {
     const { datasets } = getState().library;

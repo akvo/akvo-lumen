@@ -58,9 +58,16 @@ export default class DeriveCategoryTransformation extends Component {
   }
 
   render() {
-    const { datasetId, datasets, onApplyTransformation, transforming } = this.props;
+    const {
+      datasetId,
+      datasets,
+      onApplyTransformation,
+      transforming,
+      onFetchSortedDataset,
+    } = this.props;
     const { transformation, selectingSourceColumn } = this.state;
     const dataset = datasets[datasetId].toJS();
+
     return (
       <div className="DeriveCategoryTransformation">
 
@@ -80,6 +87,7 @@ export default class DeriveCategoryTransformation extends Component {
               selected={transformation.args.source.column.columnName}
               onChange={(columnName) => {
                 if (columnName !== transformation.args.source.column.columnName) {
+                  onFetchSortedDataset(datasetId, columnName);
                   this.setState({
                     selectingSourceColumn: false,
                     transformation: {
@@ -180,6 +188,7 @@ DeriveCategoryTransformation.propTypes = {
   datasetId: PropTypes.string.isRequired,
   onApplyTransformation: PropTypes.func.isRequired,
   onFetchDataset: PropTypes.func.isRequired,
+  onFetchSortedDataset: PropTypes.func.isRequired,
   // Are we currently applying a transformation.
   transforming: PropTypes.bool.isRequired,
 };

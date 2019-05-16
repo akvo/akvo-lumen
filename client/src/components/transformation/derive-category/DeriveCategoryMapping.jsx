@@ -33,7 +33,8 @@ export default class DeriveCategoryMapping extends Component {
     } = this.props;
     const { search } = this.state;
 
-    const searchedValues = unassignedValues.filter(value =>
+     // eslint-disable-next-line no-unused-vars
+    const searchedValues = unassignedValues.filter(([count, value]) =>
       (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
     );
 
@@ -47,7 +48,6 @@ export default class DeriveCategoryMapping extends Component {
             }}
           >
             <Popover
-              // className="DeriveCategoryMapping__group"
               title={(
                 <div>
                   <h4>Select values to group</h4>
@@ -64,44 +64,49 @@ export default class DeriveCategoryMapping extends Component {
               left={30}
               top={50}
             >
-              {(sourceValues.length > 1) && sourceValues.map(value => (
+              {(sourceValues.length > 1) && sourceValues.map(([count, value]) => (
                 <div
                   className="DeriveCategoryMapping__tag DeriveCategoryMapping__tag--with-btn"
                   key={value}
                 >
-                  {value}
+                  {value} ({count})
                   <a
                     className="DeriveCategoryMapping__tag__btn fa fa-close"
                     onClick={() => {
-                      onSourceValuesUpdate(sourceValues, sourceValues.filter(v => v !== value));
+                      // eslint-disable-next-line no-unused-vars
+                      onSourceValuesUpdate(sourceValues, sourceValues.filter(([c, v]) => v !== value));
                     }}
                   />
                 </div>
               ))}
 
               <div>
-                {searchedValues.filter(value => !sourceValues.includes(value)).map(value => (
-                  <a
-                    key={value}
-                    onClick={() => {
-                      onSourceValuesUpdate(sourceValues, [...sourceValues, value]);
-                    }}
-                    className="DeriveCategoryMapping__tag DeriveCategoryMapping__tag"
-                  >
-                    {value}
-                  </a>
-                ))}
+                {searchedValues
+                 // eslint-disable-next-line no-unused-vars
+                  .filter(([count, value]) => !sourceValues.map(([c, v]) => v).includes(value))
+                  .map(([count, value]) => (
+                    <a
+                      key={value}
+                      onClick={() => {
+                        onSourceValuesUpdate(sourceValues, [...sourceValues, [count, value]]);
+                      }}
+                      className="DeriveCategoryMapping__tag DeriveCategoryMapping__tag"
+                    >
+                      {value}
+                    </a>
+                  ))
+                }
               </div>
             </Popover>
           </ClickAway>
         )}
 
         <Col xs={6}>
-          {sourceValues.join(', ')}
+          {sourceValues.map(([count, value]) => `${value} (${count})`).join(', ')}
 
           <a
             onClick={() => {
-              onToggleGrouping(isGrouping ? null : sourceValues[0]);
+              onToggleGrouping(isGrouping ? null : sourceValues[0][1]);
             }}
             className="DeriveCategoryMapping__action_btn"
           >
