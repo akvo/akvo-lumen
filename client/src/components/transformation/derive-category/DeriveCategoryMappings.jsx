@@ -1,11 +1,13 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
-import { findIndex } from 'lodash';
+import { findIndex, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Col, Container, Row } from 'react-grid-system';
 
 import DeriveCategoryMapping from './DeriveCategoryMapping';
 import './DeriveCategoryMappings.scss';
+
+const MAPPING_COUNT_LIMIT = 50;
 
 export default class DeriveCategoryMappings extends Component {
 
@@ -88,18 +90,28 @@ export default class DeriveCategoryMappings extends Component {
       onChangeUncategorizedValue,
       uncategorizedValue,
     } = this.props;
-    const { search } = this.state;
+    const { search, sort } = this.state;
 
     if (!dataset.sortedValues) return null;
 
-    const unassignedValues = dataset.sortedValues // rows
+    const unassignedValues = dataset.sortedValues
       // eslint-disable-next-line no-unused-vars
       .filter(([count, value]) => this.getExistingMappingIndex(value) === -1);
 
-    // eslint-disable-next-line no-unused-vars
-    const searchedValues = unassignedValues.filter(([count, value]) =>
-      (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
+    let searchedValues = sortBy(
+      unassignedValues
+        // eslint-disable-next-line no-unused-vars
+        .filter(([count, value]) =>
+          (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
+        ),
+      ([count, value]) => (sort === 'numeric' ? count : value)
     );
+
+    if (sort === 'numeric') {
+      searchedValues = searchedValues.reverse();
+    }
+
+    searchedValues = searchedValues.slice(0, MAPPING_COUNT_LIMIT);
 
     const potentialMappings = mappings.concat(searchedValues.map(value => [[value]]));
 
@@ -123,17 +135,17 @@ export default class DeriveCategoryMappings extends Component {
         </Row>
         <Row className="DeriveCategoryMappings__row">
           <Col md={6}>
-            6 Unique values
+            {dataset.sortedValues.length} Unique values
             <a
               className="fa fa-sort-numeric-desc"
               onClick={() => {
-                this.setState({ sortBy: 'numeric' });
+                this.setState({ sort: 'numeric' });
               }}
             />
             <a
               className="fa fa-sort-alpha-desc"
               onClick={() => {
-                this.setState({ sortBy: 'alpha' });
+                this.setState({ sort: 'alpha' });
               }}
             />
             <input
@@ -145,13 +157,13 @@ export default class DeriveCategoryMappings extends Component {
             />
           </Col>
           <Col md={6}>
-            6 categories
+            {mappings.length} categories
           </Col>
         </Row>
 
-        {potentialMappings.map(([sourceValues, targetCategoryName], i) => (
+        {potentialMappings.map(([sourceValues, targetCategoryName]) => (
           <DeriveCategoryMapping
-            key={i}
+            key={sourceValues[0][1]}
             unassignedValues={unassignedValues}
             sourceValues={sourceValues}
             targetCategoryName={targetCategoryName}

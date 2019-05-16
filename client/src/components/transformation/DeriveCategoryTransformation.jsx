@@ -43,7 +43,7 @@ export default class DeriveCategoryTransformation extends Component {
 
   isValidTransformation() {
     const { source, target, derivation } = this.state.transformation.args;
-    if (source.column.columnName && target.column.columnName && derivation.mappings.length) {
+    if (source.column.columnName && target.column.title && derivation.mappings.length) {
       return true;
     }
     return false;
@@ -74,7 +74,22 @@ export default class DeriveCategoryTransformation extends Component {
         <TransformationHeader
           datasetId={datasetId}
           isValidTransformation={this.isValidTransformation() && !transforming}
-          onApply={() => onApplyTransformation(transformation)}
+          onApply={() => onApplyTransformation({
+            ...transformation,
+            args: {
+              ...transformation.args,
+              derivation: {
+                ...transformation.args.derivation,
+                mappings: transformation.args.derivation.mappings.map(([sourceValues, target]) =>
+                  [
+                    // eslint-disable-next-line no-unused-vars
+                    sourceValues.map(([count, value]) => value),
+                    target,
+                  ]
+                ),
+              },
+            },
+          })}
           buttonText="Derive Column"
           titleText="New Category Column"
         />
@@ -143,7 +158,7 @@ export default class DeriveCategoryTransformation extends Component {
                   },
                 });
               }}
-              onChangeTargetColumnName={(columnName) => {
+              onChangeTargetColumnName={(title) => {
                 this.setState({
                   transformation: {
                     ...this.state.transformation,
@@ -153,7 +168,7 @@ export default class DeriveCategoryTransformation extends Component {
                         ...this.state.transformation.args.target,
                         column: {
                           ...this.state.transformation.args.target.column,
-                          columnName,
+                          title,
                         },
                       },
                     },
