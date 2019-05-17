@@ -7,6 +7,8 @@ import './DeriveCategoryMapping.scss';
 import Popover from '../../common/Popover';
 import ClickAway from '../../common/ClickAway';
 
+const SEARCH_RESULTS_LIMIT = 10;
+
 export default class DeriveCategoryMapping extends Component {
 
   static propTypes = {
@@ -36,7 +38,7 @@ export default class DeriveCategoryMapping extends Component {
      // eslint-disable-next-line no-unused-vars
     const searchedValues = unassignedValues.filter(([count, value]) =>
       (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
-    );
+    ).slice(0, SEARCH_RESULTS_LIMIT);
 
     return (
       <Row className="DeriveCategoryMapping">
@@ -50,9 +52,10 @@ export default class DeriveCategoryMapping extends Component {
             <Popover
               title={(
                 <div>
-                  <h4>Select values to group</h4>
+                  <p>Select values to group</p>
                   <input
                     placeholder="Search..."
+                    className="DeriveCategoryMappings__search-input"
                     value={search}
                     onChange={(event) => {
                       this.setState({ search: event.target.value });
@@ -66,15 +69,18 @@ export default class DeriveCategoryMapping extends Component {
             >
               {(sourceValues.length > 1) && sourceValues.map(([count, value]) => (
                 <div
-                  className="DeriveCategoryMapping__tag DeriveCategoryMapping__tag--with-btn"
+                  className="DeriveCategoryMapping__tag DeriveCategoryMapping__tag--with-btn DeriveCategoryMapping__tag--active"
                   key={value}
                 >
                   {value} ({count})
                   <a
                     className="DeriveCategoryMapping__tag__btn fa fa-close"
                     onClick={() => {
-                      // eslint-disable-next-line no-unused-vars
-                      onSourceValuesUpdate(sourceValues, sourceValues.filter(([c, v]) => v !== value));
+                      onSourceValuesUpdate(
+                        sourceValues,
+                        // eslint-disable-next-line no-unused-vars
+                        sourceValues.filter(([c, v]) => v !== value)
+                      );
                     }}
                   />
                 </div>
@@ -101,7 +107,7 @@ export default class DeriveCategoryMapping extends Component {
           </ClickAway>
         )}
 
-        <Col xs={6}>
+        <Col xs={7} className="DeriveCategoryMapping__text">
           {sourceValues.map(([count, value]) => `${value} (${count})`).join(', ')}
 
           <a
@@ -114,7 +120,7 @@ export default class DeriveCategoryMapping extends Component {
           </a>
         </Col>
 
-        <Col xs={6}>
+        <Col xs={5} className="DeriveCategoryMapping__input-wrap">
           <input
             value={targetCategoryName || ''}
             onChange={onChangeCategoryName}

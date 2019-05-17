@@ -36,6 +36,7 @@ export default class DeriveCategoryMappings extends Component {
 
   state = {
     search: '',
+    sort: 'numeric',
   }
 
   getExistingMappingIndex(value) {
@@ -117,46 +118,51 @@ export default class DeriveCategoryMappings extends Component {
 
     return (
       <Container className="DeriveCategoryMappings container">
-        <Row className="DeriveCategoryMappings__row">
-          <Col md={6}>
+
+        <Row className="DeriveCategoryMapping DeriveCategoryMapping--lg">
+          <Col xs={7} className="DeriveCategoryMapping__text">
             <a onClick={onReselectSourceColumn}>
               Source column: {dataset.columns[sourceColumnIndex].title}
             </a>
           </Col>
-          <Col md={6}>
+          <Col xs={5} className="DeriveCategoryMapping__input-wrap">
             <input
               value={derivedColumnName}
-              placeholder="target column name"
+              placeholder="Derived Column Title"
               onChange={(event) => {
                 onChangeTargetColumnName(event.target.value);
               }}
             />
           </Col>
         </Row>
-        <Row className="DeriveCategoryMappings__row">
-          <Col md={6}>
-            {dataset.sortedValues.length} Unique values
+
+        <Row className="DeriveCategoryMapping DeriveCategoryMeta">
+          <Col xs={7} className="DeriveCategoryMapping__text">
+            <span>
+              {dataset.sortedValues.length} Unique values
+            </span>
             <a
-              className="fa fa-sort-numeric-desc"
+              className={`fa fa-sort-numeric-desc DeriveCategoryMapping__sort-btn ${sort === 'numeric' ? 'DeriveCategoryMapping__sort-btn--selected' : ''}`}
               onClick={() => {
                 this.setState({ sort: 'numeric' });
               }}
             />
             <a
-              className="fa fa-sort-alpha-desc"
+              className={`fa fa-sort-alpha-desc DeriveCategoryMapping__sort-btn ${sort === 'alpha' ? 'DeriveCategoryMapping__sort-btn--selected' : ''}`}
               onClick={() => {
                 this.setState({ sort: 'alpha' });
               }}
             />
             <input
               placeholder="Search..."
+              className="DeriveCategoryMappings__search-input"
               value={search}
               onChange={(event) => {
                 this.setState({ search: event.target.value });
               }}
             />
           </Col>
-          <Col md={6}>
+          <Col xs={5} className="DeriveCategoryMapping__text">
             {mappings.length} categories
           </Col>
         </Row>
@@ -171,20 +177,23 @@ export default class DeriveCategoryMappings extends Component {
               this.handleTargetCategoryNameUpdate(sourceValues, event.target.value);
             }}
             onSourceValuesUpdate={this.handleSourceValuesUpdate}
-            // eslint-disable-next-line no-unused-vars
-            isGrouping={sourceValues.map(([count, value]) => value).includes(this.state.isGroupingValue)}
+            isGrouping={
+              // eslint-disable-next-line no-unused-vars
+              sourceValues.map(([count, value]) => value)
+                .includes(this.state.isGroupingValue)
+            }
             onToggleGrouping={(isGroupingValue) => {
               this.setState({ isGroupingValue });
             }}
           />
         ))}
 
-        <Row className="DeriveCategoryMappings__row">
-          <Col xs={6}>
+        <Row className="DeriveCategoryMapping">
+          <Col xs={7} className="DeriveCategoryMapping__text">
             Uncategorized Values
           </Col>
 
-          <Col xs={6}>
+          <Col xs={5} className="DeriveCategoryMapping__input-wrap">
             <input
               value={uncategorizedValue || ''}
               onChange={(event) => {

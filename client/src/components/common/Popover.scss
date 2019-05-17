@@ -32,6 +32,13 @@
         right: 0%;
       }
     }
+    &.popover-bottom-right {
+      .popover-header {
+        &:before {
+          left: 14px;
+        }
+      }
+    }
     &.popover-top-right,
     &.popover-bottom-right {
       .arrow {
