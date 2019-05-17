@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col } from 'react-grid-system';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import './DeriveCategoryMapping.scss';
 import Popover from '../../common/Popover';
@@ -9,7 +10,7 @@ import ClickAway from '../../common/ClickAway';
 
 const SEARCH_RESULTS_LIMIT = 10;
 
-export default class DeriveCategoryMapping extends Component {
+class DeriveCategoryMapping extends Component {
 
   static propTypes = {
     sourceValues: PropTypes.array,
@@ -52,7 +53,9 @@ export default class DeriveCategoryMapping extends Component {
             <Popover
               title={(
                 <div>
-                  <p>Select values to group</p>
+                  <p>
+                    <FormattedMessage id="select_values_to_group" />
+                  </p>
                   <input
                     placeholder="Search..."
                     className="DeriveCategoryMappings__search-input"
@@ -116,7 +119,7 @@ export default class DeriveCategoryMapping extends Component {
             }}
             className="DeriveCategoryMapping__action_btn"
           >
-            Group
+            <FormattedMessage id="group" />
           </a>
         </Col>
 
@@ -130,3 +133,5 @@ export default class DeriveCategoryMapping extends Component {
     );
   }
 }
+
+export default injectIntl(DeriveCategoryMapping);

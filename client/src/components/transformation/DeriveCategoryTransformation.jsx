@@ -2,13 +2,14 @@
 import { findIndex } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 
 import DeriveCategoryMappings from './derive-category/DeriveCategoryMappings';
 import SourceDeriveCategoryOptions from './derive-category/SourceDeriveCategoryOptions';
 import './DeriveCategoryTransformation.scss';
 import TransformationHeader from './TransformationHeader';
 
-export default class DeriveCategoryTransformation extends Component {
+class DeriveCategoryTransformation extends Component {
 
   constructor(props) {
     super(props);
@@ -25,7 +26,7 @@ export default class DeriveCategoryTransformation extends Component {
           },
           derivation: {
             mappings: [],
-            uncategorizedValue: 'Uncategorized',
+            uncategorizedValue: props.intl.formatMessage({ id: 'uncategorized' }),
           },
         },
       },
@@ -64,6 +65,7 @@ export default class DeriveCategoryTransformation extends Component {
       onApplyTransformation,
       transforming,
       onFetchSortedDataset,
+      intl,
     } = this.props;
     const { transformation, selectingSourceColumn } = this.state;
     const dataset = datasets[datasetId].toJS();
@@ -90,8 +92,8 @@ export default class DeriveCategoryTransformation extends Component {
               },
             },
           })}
-          buttonText="Derive Column"
-          titleText="New Category Column"
+          buttonText={intl.formatMessage({ id: 'derive_column' })}
+          titleText={intl.formatMessage({ id: 'new_category_column' })}
         />
 
         <div className="DeriveCategoryTransformation__container">
@@ -199,6 +201,7 @@ export default class DeriveCategoryTransformation extends Component {
 }
 
 DeriveCategoryTransformation.propTypes = {
+  intl: intlShape,
   datasets: PropTypes.object.isRequired,
   datasetId: PropTypes.string.isRequired,
   onApplyTransformation: PropTypes.func.isRequired,
@@ -207,3 +210,5 @@ DeriveCategoryTransformation.propTypes = {
   // Are we currently applying a transformation.
   transforming: PropTypes.bool.isRequired,
 };
+
+export default injectIntl(DeriveCategoryTransformation);

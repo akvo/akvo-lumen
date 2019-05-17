@@ -3,13 +3,14 @@ import { findIndex, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Col, Container, Row } from 'react-grid-system';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
 import DeriveCategoryMapping from './DeriveCategoryMapping';
 import './DeriveCategoryMappings.scss';
 
 const MAPPING_COUNT_LIMIT = 50;
 
-export default class DeriveCategoryMappings extends Component {
+class DeriveCategoryMappings extends Component {
 
   static defaultProps = {
     mappings: [],
@@ -17,6 +18,7 @@ export default class DeriveCategoryMappings extends Component {
   }
 
   static propTypes = {
+    intl: intlShape,
     mappings: PropTypes.array,
     onChange: PropTypes.func,
     onChangeTargetColumnName: PropTypes.func,
@@ -90,6 +92,7 @@ export default class DeriveCategoryMappings extends Component {
       onChangeTargetColumnName,
       onChangeUncategorizedValue,
       uncategorizedValue,
+      intl,
     } = this.props;
     const { search, sort } = this.state;
 
@@ -122,13 +125,13 @@ export default class DeriveCategoryMappings extends Component {
         <Row className="DeriveCategoryMapping DeriveCategoryMapping--lg">
           <Col xs={7} className="DeriveCategoryMapping__text">
             <a onClick={onReselectSourceColumn}>
-              Source column: {dataset.columns[sourceColumnIndex].title}
+              <FormattedMessage id="source_column" />: {dataset.columns[sourceColumnIndex].title}
             </a>
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__input-wrap">
             <input
               value={derivedColumnName}
-              placeholder="Derived Column Title"
+              placeholder={intl.formatMessage({ id: 'derived_column_title' })}
               onChange={(event) => {
                 onChangeTargetColumnName(event.target.value);
               }}
@@ -139,7 +142,10 @@ export default class DeriveCategoryMappings extends Component {
         <Row className="DeriveCategoryMapping DeriveCategoryMeta">
           <Col xs={7} className="DeriveCategoryMapping__text">
             <span>
-              {dataset.sortedValues.length} Unique values
+              <FormattedMessage
+                id="unique_values_count"
+                values={{ count: dataset.sortedValues.length }}
+              />
             </span>
             <a
               className={`fa fa-sort-numeric-desc DeriveCategoryMapping__sort-btn ${sort === 'numeric' ? 'DeriveCategoryMapping__sort-btn--selected' : ''}`}
@@ -163,7 +169,10 @@ export default class DeriveCategoryMappings extends Component {
             />
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__text">
-            {mappings.length} categories
+            <FormattedMessage
+              id="categories_count"
+              values={{ count: mappings.length }}
+            />
           </Col>
         </Row>
 
@@ -190,7 +199,7 @@ export default class DeriveCategoryMappings extends Component {
 
         <Row className="DeriveCategoryMapping">
           <Col xs={7} className="DeriveCategoryMapping__text">
-            Uncategorized Values
+            <FormattedMessage id="uncategorized_values" />
           </Col>
 
           <Col xs={5} className="DeriveCategoryMapping__input-wrap">
@@ -206,3 +215,5 @@ export default class DeriveCategoryMappings extends Component {
     );
   }
 }
+
+export default injectIntl(DeriveCategoryMappings);
