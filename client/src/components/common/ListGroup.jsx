@@ -27,6 +27,7 @@ export const ListGroupItem = ({ children, lg, onClick, status, icon }) => (
 );
 
 ListGroupItem.propTypes = {
+  icon: PropTypes.string,
   children: PropTypes.node,
   lg: PropTypes.bool,
   onClick: PropTypes.func,

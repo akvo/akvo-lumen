@@ -54,7 +54,8 @@ class DatasetTable extends Component {
       this.handleToggleExtractMultipleColumnSidebar.bind(this);
     this.handleToggleSplitColumnSidebar =
       this.handleToggleSplitColumnSidebar.bind(this);
-    this.handleToggleDeriveColumnJavascriptSidebar = this.handleToggleDeriveColumnJavascriptSidebar.bind(this);
+    this.handleToggleDeriveColumnJavascriptSidebar =
+      this.handleToggleDeriveColumnJavascriptSidebar.bind(this);
     this.handleToggleGeoColumnSidebar = this.handleToggleGeoColumnSidebar.bind(this);
     this.handleClickDatasetControlItem = this.handleClickDatasetControlItem.bind(this);
   }
