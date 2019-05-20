@@ -47,4 +47,4 @@
                        lumen.s/str-uuid?
                        #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
 
-(s/def ::multipleType #{"caddisfly"})
+(s/def ::multipleType #{"caddisfly" "geo-shape-features" "geo-multi-point-features" "geo-line-string-features"})
