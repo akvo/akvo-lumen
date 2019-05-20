@@ -37,6 +37,6 @@
               (if (:caddisflyResourceUuid q)
                 {:multipleType "caddisfly"
                  :multipleId (:caddisflyResourceUuid q)}
-                {:multipleType "unknown"
-                 :multipleId nil})))))
+                {:multipleType (:multipleType q)
+                 :multipleId (:multipleId q)})))))
        questions))
