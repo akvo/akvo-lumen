@@ -10,14 +10,16 @@
             [clojure.walk :as walk]
             [hugsql.core :as hugsql]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.specs.transformation :as transformation.s]))
+            [akvo.lumen.specs.transformation]))
+
+(alias 'transformation.engine.s 'akvo.lumen.specs.transformation.engine)
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/derive.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defmethod engine/valid? "core/derive-category"
   [op-spec]
-  (s/valid? (transformation.s/op-spec {:op "core/derive-category"}) (walk/keywordize-keys op-spec)))
+  (s/valid? ::transformation.engine.s/op-spec (walk/keywordize-keys op-spec)))
 
 (defn mappings-dict [mappings]
        (reduce (fn [c [source-vals mapped-val]]
