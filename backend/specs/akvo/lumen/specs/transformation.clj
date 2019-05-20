@@ -463,7 +463,9 @@
 (s/def ::db.dsv.transformation/changedColumns* (s/keys :req-un [::db.dsv.transformation/changedColumns]))
 
 (s/def ::db.dsv.s/transformation (s/merge ::transformation.engine.s/op-spec ::db.dsv.transformation/changedColumns*))
-(lumen.s/sample ::transformation.engine.s/op-spec)
+
+(s/def ::op-spec ::transformation.engine.s/op-spec)
+
 (s/def ::db.dsv.s/transformations (s/coll-of ::db.dsv.s/transformation :kind vector? :distinct true))
 
 (s/def ::next-dataset-version (s/keys :req-un [::db.dsv.s/id ::db.dsv.s/dataset-id
