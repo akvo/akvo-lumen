@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import queryString from 'querystringify';
+
 import ContextMenu from '../common/ContextMenu';
 
 require('./DatasetControls.scss');
@@ -26,6 +28,23 @@ class DatasetControls extends Component {
       onNavigateToVisualise,
       isLockedFromTransformations,
     } = this.props;
+
+    const queryParams = queryString.parse(location.search);
+    const showCategoryTransform = queryParams['show-category-transform'];
+
+    const deriveColumnSubMenu = [
+      {
+        label: <FormattedMessage id="derive_column_javascript" />,
+        value: 'deriveColumnJavascript',
+      },
+    ];
+
+    if (showCategoryTransform === '1') {
+      deriveColumnSubMenu.unshift({
+        label: <FormattedMessage id="derive_column_category" />,
+        value: 'deriveColumnCategory',
+      });
+    }
 
     return (
       <div className="DatasetControls">
@@ -70,6 +89,7 @@ class DatasetControls extends Component {
                   }, {
                     label: <FormattedMessage id="derive_column" />,
                     value: 'deriveColumn',
+                    subMenu: deriveColumnSubMenu,
                   }, {
                     label: <FormattedMessage id="merge_datasets" />,
                     value: 'mergeDatasets',
