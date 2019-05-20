@@ -17,6 +17,7 @@
 
 (defmethod engine/valid? "core/derive-category"
   [op-spec]
+  (log/info :valid? (s/valid? ::transformation.s/op-spec (walk/keywordize-keys op-spec)))
   (s/valid? ::transformation.s/op-spec (walk/keywordize-keys op-spec)))
 
 (defn mappings-dict [mappings]
