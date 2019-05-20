@@ -17,6 +17,10 @@
     (if-let [schema (c.caddisfly/get-schema caddisfly id)]
       (adapt-schema schema))))
 
+(def geo-shape-columns [{:id 1 :name "length" :type "number"}
+                        {:id 2 :name "pointCount" :type "number"}
+                        {:id 3 :name "area" :type "number"}])
+
 (defn details
   "depending of type of multiple columns we dispatch to different logic impls"
   [{:keys [caddisfly] :as deps} multipleType multipleId]
@@ -26,4 +30,6 @@
                   (response res)
                   (not-found {:message "caddisfly id not found"
                               :multipleId multipleId}))
+    "geo-shape-features" (response {:hasImage false
+                                    :columns geo-shape-columns})
     (not-found {:type multipleType})))

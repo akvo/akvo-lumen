@@ -59,18 +59,22 @@
                    (format "ALTER TABLE \"%s\" ALTER COLUMN %s SET NOT NULL"
                            table-name
                            (name (:id column))))))
+(defn colum-type-fn* [type]
+  (condp = type
+    "date" "timestamptz"
+    "number" "double precision"
+    ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
+    "geoshape" "geometry(GEOMETRY, 4326)"
+    "geomultipoint" "geometry(MULTIPOINT, 4326)"
+    "geoline" "geometry(LINE, 4326)"
+    "geopoint" "geometry(POINT, 4326)"
+    "multiple" "text"
+    "text" "text"))
 
 (defn- column-type-fn [{:keys [id type]}]
   (format "%s %s"
           (name id)
-          (condp = type
-            "date" "timestamptz"
-            "number" "double precision"
-            ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
-            "geoshape" "geometry(GEOMETRY, 4326)"
-            "geopoint" "geometry(POINT, 4326)"
-            "multiple" "text"
-            "text" "text")))
+          (colum-type-fn* type)))
 
 (defn create-dataset-table [conn table-name columns]
   (jdbc/execute! conn [(format "create table %s (rnum serial primary key, %s);"
