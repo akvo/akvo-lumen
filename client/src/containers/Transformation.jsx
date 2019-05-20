@@ -43,6 +43,7 @@ class Transformation extends Component {
 
     dispatch(startTx(datasetId));
 
+    // TODO move this into an action instead of here
     api.post(`/api/transformations/${datasetId}/transform/${transformation.op}`, transformation)
       .then((response) => {
         if (!response.ok) {
@@ -58,6 +59,7 @@ class Transformation extends Component {
       }).catch((err) => {
         this.setState({ transforming: false });
         dispatch(showNotification('error', `Transformation failed: ${err.message}`));
+        dispatch(endTx(datasetId));
       });
   }
 
