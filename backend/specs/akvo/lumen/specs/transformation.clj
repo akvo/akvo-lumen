@@ -215,8 +215,13 @@
 (create-ns  'akvo.lumen.specs.transformation.derive-category.target)
 (alias 'transformation.derive-category.target 'akvo.lumen.specs.transformation.derive-category.target)
 
+
 (create-ns  'akvo.lumen.specs.transformation.derive-category.derivation)
 (alias 'transformation.derive-category.derivation 'akvo.lumen.specs.transformation.derive-category.derivation)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.derivation.text)
+(alias 'transformation.derive-category.derivation.text 'akvo.lumen.specs.transformation.derive-category.derivation.text)
+
 
 (s/def ::transformation.derive-category.source/columnName ::i.values.s/id)
 (s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName]))
@@ -228,18 +233,27 @@
 (s/def ::transformation.derive-category/target (s/keys
                                                :req-un [::transformation.derive-category.target/column]))
 
-(s/def ::transformation.derive-category.derivation/mappings (s/coll-of (s/tuple (s/coll-of ::lumen.s/non-empty-string :kind vector? :min-count 1) ::lumen.s/non-empty-string) :kind vector? :min-count 1))
+(s/def ::transformation.derive-category.derivation.text/mappings (s/coll-of (s/tuple (s/coll-of ::lumen.s/non-empty-string :kind vector? :min-count 1) ::lumen.s/non-empty-string) :kind vector? :min-count 1))
 
 (s/def ::transformation.derive-category.derivation/uncategorizedValue ::lumen.s/non-empty-string)
+(s/def ::transformation.derive-category.derivation/type #{"text"})
+
+(defmulti derivation :type)
+
+(defmethod derivation "text" [_]
+  (s/keys :req-un [::transformation.derive-category.derivation.text/mappings
+                   ::transformation.derive-category.derivation/type]))
 
 (s/def ::transformation.derive-category/derivation
-  (s/keys :req-un [::transformation.derive-category.derivation/mappings
-                   ::transformation.derive-category.derivation/uncategorizedValue]))
+  (s/merge (s/keys :req-un [::transformation.derive-category.derivation/uncategorizedValue])
+           (s/multi-spec derivation :type)))
 
 (s/def ::transformation.derive-category/args
   (s/keys :req-un [::transformation.derive-category/source
                    ::transformation.derive-category/target
                    ::transformation.derive-category/derivation]))
+
+(lumen.s/sample ::transformation.derive-category/derivation)
 
 (defmethod op-spec "core/derive-category"  [_]
   (s/keys
