@@ -82,6 +82,7 @@ class DeriveCategoryTransformation extends Component {
               ...transformation.args,
               derivation: {
                 ...transformation.args.derivation,
+                type: 'text',
                 mappings: transformation.args.derivation.mappings.map(([sourceValues, target]) =>
                   [
                     // eslint-disable-next-line no-unused-vars
