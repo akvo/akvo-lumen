@@ -61,12 +61,18 @@
 (s/def ::c.multiple.geo-shape-features/multipleId ::v/id)
 (defmulti column-multiple :multipleType)
 
-(defmethod column-multiple "caddisfly" [_] (s/keys :req-un [::c.multiple/type ::v/multipleType ::c.multiple.caddisfly/multipleId]))
+(s/def ::c.multiple.caddisfly/multipleType #{"caddisfly"})
 
+(defmethod column-multiple "caddisfly" [_] (s/keys :req-un [::c.multiple/type ::c.multiple.caddisfly/multipleType ::c.multiple.caddisfly/multipleId]))
 
-(defmethod column-multiple "geo-shape-features" [_] (s/keys :req-un [::c.multiple/type ::v/multipleType ::c.multiple.geo-shape-features/multipleId]))
+(s/def ::c.multiple.geo-shape-features/multipleType #{"geo-shape-features"})
+
+(defmethod column-multiple "geo-shape-features" [_] (s/keys :req-un [::c.multiple/type ::c.multiple.geo-shape-features/multipleType ::c.multiple.geo-shape-features/multipleId]))
+
 
 (s/def ::c.multiple/header* (s/multi-spec column-multiple :multipleType))
+
+(s/def ::c.multiple.caddisfly/header* (s/merge ::column-header (column-multiple {:multipleType "caddisfly"})))
 
 (s/def ::c.multiple/header (s/merge ::column-header ::c.multiple/header*))
 
