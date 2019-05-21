@@ -245,8 +245,6 @@
   (s/tuple ::transformation.derive-category.derivation.number/op
            number?))
 
-(lumen.s/sample ::transformation.derive-category.derivation.number/op*)
-
 (s/def ::transformation.derive-category.derivation.number/mappings
   (s/coll-of
    (s/tuple
@@ -254,9 +252,6 @@
     (s/nilable ::transformation.derive-category.derivation.number/op*)
     ::lumen.s/non-empty-string)
    :kind vector? :min-count 1))
-
-(lumen.s/sample ::transformation.derive-category.derivation.number/mappings)
-
 
 (s/def ::transformation.derive-category.derivation/uncategorizedValue ::lumen.s/non-empty-string)
 
@@ -272,6 +267,8 @@
   (s/keys :req-un [::transformation.derive-category.derivation.number/mappings
                    ::transformation.derive-category.derivation/type]))
 
+(defmethod derivation :default [_]
+  (s/keys :req-un [::transformation.derive-category.derivation.text/mappings]))
 
 (s/def ::transformation.derive-category/derivation
   (s/merge (s/keys :req-un [::transformation.derive-category.derivation/uncategorizedValue])
@@ -281,8 +278,6 @@
   (s/keys :req-un [::transformation.derive-category/source
                    ::transformation.derive-category/target
                    ::transformation.derive-category/derivation]))
-
-(lumen.s/sample ::transformation.derive-category/derivation)
 
 (defmethod op-spec "core/derive-category"  [_]
   (s/keys

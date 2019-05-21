@@ -53,7 +53,7 @@
         new-column-name       (engine/next-column-name columns)
         all-data              (all-data tenant-conn {:table-name table-name})
         mappings              (get-in op-spec [:args :derivation :mappings])
-        derivation-type       (get-in op-spec [:args :derivation :type])
+        derivation-type       (get-in op-spec [:args :derivation :type] "text")
         execution-log-message (format "Derived %s category '%s' using column: '%s' and mappings: '%s'"
                                       derivation-type
                                       column-title
