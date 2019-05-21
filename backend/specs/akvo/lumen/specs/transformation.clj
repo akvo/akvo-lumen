@@ -228,9 +228,9 @@
 (s/def ::transformation.derive-category/target (s/keys
                                                :req-un [::transformation.derive-category.target/column]))
 
-(s/def ::transformation.derive-category.derivation/mappings (s/coll-of (s/tuple (s/coll-of string? :kind vector? :min-count 1) string?) :kind vector? :min-count 1))
+(s/def ::transformation.derive-category.derivation/mappings (s/coll-of (s/tuple (s/coll-of ::lumen.s/non-empty-string :kind vector? :min-count 1) ::lumen.s/non-empty-string) :kind vector? :min-count 1))
 
-(s/def ::transformation.derive-category.derivation/uncategorizedValue (s/nilable string?))
+(s/def ::transformation.derive-category.derivation/uncategorizedValue ::lumen.s/non-empty-string)
 
 (s/def ::transformation.derive-category/derivation
   (s/keys :req-un [::transformation.derive-category.derivation/mappings
