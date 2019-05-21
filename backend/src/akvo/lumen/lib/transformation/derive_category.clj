@@ -17,8 +17,11 @@
 
 (defmethod engine/valid? "core/derive-category"
   [op-spec]
-  (log/info :valid? (s/valid? ::transformation.s/op-spec (walk/keywordize-keys op-spec)))
-  (s/valid? ::transformation.s/op-spec (walk/keywordize-keys op-spec)))
+  (let [op-spec (walk/keywordize-keys op-spec)]
+    (and (s/valid? ::transformation.s/op-spec op-spec)
+         (let [mappings (get-in op-spec [:args :derivation :mappings])
+               cats (map last mappings)]
+           (= (count (distinct cats)) (count cats))))))
 
 (defn mappings-dict [mappings]
        (reduce (fn [c [source-vals mapped-val]]
