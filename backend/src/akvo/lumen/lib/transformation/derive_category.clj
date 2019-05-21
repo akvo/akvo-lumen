@@ -24,35 +24,58 @@
            (= (count (distinct cats)) (count cats))))))
 
 (defn mappings-dict [mappings]
-       (reduce (fn [c [source-vals mapped-val]]
-                 (reduce #(assoc % %2 mapped-val) c source-vals)) {} mappings))
+  (reduce (fn [c [source-vals mapped-val]]
+            (reduce #(assoc % %2 mapped-val) c source-vals)) {} mappings))
+
+(defn find-text-cat [mappings v uncategorized-value]
+  (get mappings v uncategorized-value))
+
+(defn find-number-cat [mappings v uncategorized-value]
+  (or
+   (some (fn [[[a b :as x] [c d :as y] cat]]
+           (let [exp (read-string (format "(%s %s %s)" a v b))
+                 eval1 (eval exp)]
+             (if y
+               (let [exp2 (read-string (format "(%s %s %s)" c v d))
+                     eval1&2 (and eval1 (eval exp2))]
+                 (when eval1&2 cat))
+               (when eval1 cat))))
+         mappings)
+   uncategorized-value))
+
 
 (defmethod engine/apply-operation "core/derive-category"
   [{:keys [tenant-conn]} table-name columns op-spec]
-  (let [op-spec             (walk/keywordize-keys op-spec)
-        source-column-name  (get-in op-spec [:args :source :column :columnName])
-        column-title        (get-in op-spec [:args :target :column :title])
-        uncategorized-value (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
-        mappings            (mappings-dict (get-in op-spec [:args :derivation :mappings]))
-        new-column-name     (engine/next-column-name columns)
-        all-data            (all-data tenant-conn {:table-name table-name})]
+  (let [op-spec               (walk/keywordize-keys op-spec)
+        source-column-name    (get-in op-spec [:args :source :column :columnName])
+        column-title          (get-in op-spec [:args :target :column :title])
+        uncategorized-value   (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
+        new-column-name       (engine/next-column-name columns)
+        all-data              (all-data tenant-conn {:table-name table-name})
+        mappings              (get-in op-spec [:args :derivation :mappings])
+        derivation-type       (get-in op-spec [:args :derivation :type])
+        execution-log-message (format "Derived %s category '%s' using column: '%s' and mappings: '%s'"
+                                      derivation-type
+                                      column-title
+                                      (:title (dataset.utils/find-column (walk/keywordize-keys columns) source-column-name))
+                                      mappings)]
     (jdbc/with-db-transaction [tenant-conn tenant-conn]
       (add-column tenant-conn {:table-name      table-name
                                :column-type     "text"
                                :new-column-name new-column-name})
       (doseq [i all-data]
-        (set-cell-value tenant-conn
-                        {:value       (get mappings (get i (keyword source-column-name)) uncategorized-value)
-                         :rnum        (:rnum i)
-                         :column-name new-column-name
-                         :table-name  table-name}))
+        (let [v (get i (keyword source-column-name))]
+          (set-cell-value tenant-conn
+                          {:rnum        (:rnum i)
+                           :value       (condp = derivation-type
+                                          "text"   (find-text-cat (mappings-dict mappings) v uncategorized-value)
+                                          "number" (find-number-cat mappings v uncategorized-value))
+                           :column-name new-column-name
+                           :table-name  table-name})))
       {:success?      true
-       :execution-log [(format "Derived category '%s' using column: '%s' and mappings: '%s'"
-                               column-title
-                               (:title (dataset.utils/find-column (walk/keywordize-keys columns) source-column-name))
-                               mappings)]
+       :execution-log [execution-log-message]
        :columns       (conj columns {"title"      column-title
-                                     "type"       "text"
+                                     "type"       derivation-type
                                      "sort"       nil
                                      "hidden"     false
                                      "direction"  nil

@@ -36,6 +36,7 @@
   (:import [akvo.lumen.postgres Geoshape Geopoint]))
 
 (alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
+(alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
 (alias 'import.column.geoshape.s                'akvo.lumen.specs.import.column.geoshape)
 (alias 'import.column.multiple.s                'akvo.lumen.specs.import.column.multiple)
 (alias 'transformation.engine.s                 'akvo.lumen.specs.transformation.engine)
@@ -599,7 +600,50 @@
       (assoc-in [:columns column-idx]  (nth (:columns origin-data) column-idx))
       (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
 
-(deftest ^:functional derive-category-test
+(deftest ^:functional derive-category-number-test
+  (let [column-vals          [1.0 2.0 3.0 4.0]
+        origin-data          (import.s/sample-imported-dataset [[:number {::import.column.number.s/value #(s/gen (set column-vals))}]] 100)
+        dataset-id           (import-file *tenant-conn* *error-tracker*
+                                          {:dataset-name "origin-dataset"
+                                           :kind         "clj"
+                                           :data         origin-data})
+        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+        new-column-name      "Derived column name"
+        uncategorized-value  "Uncategorised value"
+        new-derived-column   {:sort       nil,
+	                      :type       "number",
+	                      :title      new-column-name
+	                      :hidden     false,
+	                      :direction  nil,
+	                      :columnName "d1"}
+        mappings*            [[[">=" 0] ["<=" 1] "one"]
+                              [["=" 2] nil "two"]]
+        tx                   (gen-transformation "core/derive-category"
+                                                 {}
+                                                 [:source :column :columnName] "c1"
+                                                 [:target :column :title] new-column-name
+                                                 [:derivation :mappings] mappings*
+                                                 [:derivation :type] "number"
+                                                 [:derivation :uncategorizedValue] uncategorized-value)
+
+        [tag _ :as res] (apply-transformation {:type           :transformation
+                                               :transformation tx})]
+    (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
+
+    (is (= ::lib/ok tag))
+    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+          data-db                                      (get-data *tenant-conn* {:table-name table-name})]
+      (is (every? #(= (:d1 %) (derive-category/find-number-cat mappings* (:c1 %) uncategorized-value)) data-db))
+      (is (= new-derived-column
+             (keywordize-keys (last columns))))
+      (let [applied-tx (keywordize-keys (last transformations))]
+        (is (= (keywordize-keys tx) (select-keys applied-tx [:op :args])))
+        (is (= {:d1
+	        {:after
+	         new-derived-column,
+	         :before nil}} (:changedColumns applied-tx)))))))
+
+(deftest ^:functional derive-category-text-test
   (let [column-vals          ["v1" "v2" "v3" "v4"]
         origin-data          (import.s/sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
         dataset-id           (import-file *tenant-conn* *error-tracker*
@@ -632,7 +676,7 @@
     (is (= ::lib/ok tag))
     (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
-      (is (every? #(= (:d1 %) (get (derive-category/mappings-dict mappings*) (:c1 %) uncategorized-value)) data-db))
+      (is (every? #(= (:d1 %) (derive-category/find-text-cat (derive-category/mappings-dict mappings*) (:c1 %) uncategorized-value)) data-db))
       (is (= new-derived-column
              (keywordize-keys (last columns))))
       (let [applied-tx (keywordize-keys (last transformations))]
