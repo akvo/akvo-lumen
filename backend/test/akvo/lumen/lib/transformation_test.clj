@@ -622,6 +622,7 @@
                                                  [:source :column :columnName] "c1"
                                                  [:target :column :title] new-column-name
                                                  [:derivation :mappings] mappings*
+                                                 [:derivation :type] "text"
                                                  [:derivation :uncategorizedValue] uncategorized-value)
 
         [tag _ :as res] (apply-transformation {:type           :transformation

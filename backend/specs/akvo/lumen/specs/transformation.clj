@@ -222,6 +222,9 @@
 (create-ns  'akvo.lumen.specs.transformation.derive-category.derivation.text)
 (alias 'transformation.derive-category.derivation.text 'akvo.lumen.specs.transformation.derive-category.derivation.text)
 
+(create-ns  'akvo.lumen.specs.transformation.derive-category.derivation.number)
+(alias 'transformation.derive-category.derivation.number 'akvo.lumen.specs.transformation.derive-category.derivation.number)
+
 
 (s/def ::transformation.derive-category.source/columnName ::i.values.s/id)
 (s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName]))
@@ -235,14 +238,40 @@
 
 (s/def ::transformation.derive-category.derivation.text/mappings (s/coll-of (s/tuple (s/coll-of ::lumen.s/non-empty-string :kind vector? :min-count 1) ::lumen.s/non-empty-string) :kind vector? :min-count 1))
 
+
+(s/def ::transformation.derive-category.derivation.number/op #{">" "<" ">=" "<=" "="})
+
+(s/def ::transformation.derive-category.derivation.number/op*
+  (s/tuple ::transformation.derive-category.derivation.number/op
+           number?))
+
+(lumen.s/sample ::transformation.derive-category.derivation.number/op*)
+
+(s/def ::transformation.derive-category.derivation.number/mappings
+  (s/coll-of
+   (s/tuple
+    ::transformation.derive-category.derivation.number/op*
+    (s/nilable ::transformation.derive-category.derivation.number/op*)
+    ::lumen.s/non-empty-string)
+   :kind vector? :min-count 1))
+
+(lumen.s/sample ::transformation.derive-category.derivation.number/mappings)
+
+
 (s/def ::transformation.derive-category.derivation/uncategorizedValue ::lumen.s/non-empty-string)
-(s/def ::transformation.derive-category.derivation/type #{"text"})
+
+(s/def ::transformation.derive-category.derivation/type #{"text" "number"})
 
 (defmulti derivation :type)
 
 (defmethod derivation "text" [_]
   (s/keys :req-un [::transformation.derive-category.derivation.text/mappings
                    ::transformation.derive-category.derivation/type]))
+
+(defmethod derivation "number" [_]
+  (s/keys :req-un [::transformation.derive-category.derivation.number/mappings
+                   ::transformation.derive-category.derivation/type]))
+
 
 (s/def ::transformation.derive-category/derivation
   (s/merge (s/keys :req-un [::transformation.derive-category.derivation/uncategorizedValue])
