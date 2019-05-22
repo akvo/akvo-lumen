@@ -100,7 +100,7 @@
   "extract": "Extract",
   "extract_multiple": "Extract multiple values",
   "extract_multiple_global_error": "Ups, an unexpected error here :!, please contact to the admin",
-  "extract_multiple_log": "Extract multiple values from: {extractedColumnTitle} to {newColumnsTitle}",
+  "extract_multiple_log": "Extract multiple values from: {extractedColumnTitle} to: {newColumnsTitle}",
   "extract_multiple_not_found_error": "we found a problem with the data inside this multiple column",
   "field_required": "Field required",
   "file_has_column_headers": "File has column headers",

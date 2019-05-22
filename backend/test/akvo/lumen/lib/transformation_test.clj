@@ -597,7 +597,7 @@
                                 (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-        (is (= ["" ""] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
+        (is (= [nil nil] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
 
 (defn- replace-column
   "utility to have same column in other generated dataset"

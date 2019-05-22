@@ -1,3 +1,4 @@
+import queryString from 'querystringify';
 import { merge, cloneDeep } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -11,7 +12,6 @@ import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import { showNotification } from '../../../actions/notification';
-import queryString from 'querystringify';
 
 require('./ExtractMultiple.scss');
 

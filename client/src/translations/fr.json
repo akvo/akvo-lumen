@@ -100,7 +100,7 @@
   "extract": "Extrait",
   "extract_multiple": "Extraire plusieurs valeurs",
   "extract_multiple_global_error": "Oups, une erreure est survenue, contactez votre administrateur",
-  "extract_multiple_log": "Extraire plusieurs valeurs de: {extractedColumnTitle} à {newColumnsTitle}",
+  "extract_multiple_log": "Extraire plusieurs valeurs de: {extractedColumnTitle} à: {newColumnsTitle}",
   "extract_multiple_not_found_error": "Il y’a un problème avec les données à l’intérieur de cette colonne multiple",
   "file_has_column_headers": "File has column headers",
   "file_name": "Nom de fichier",
