@@ -2,6 +2,8 @@
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.util :as util]
+            [clojure.string :as string]
+            [clojure.tools.logging :as log]
             [clojure.walk :as w]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2])
@@ -13,6 +15,7 @@
     "NUMBER" "number"
     "DATE" "date"
     "GEO" "geopoint"
+    "GEOSHAPE" "geoshape"
     "GEO-SHAPE-FEATURES" "multiple"
     "CADDISFLY" "multiple"
     "text"))
@@ -43,11 +46,33 @@
 
 (defn render-response
   [type response]
-  (if (= type "GEO")
-    (let [{:strs [long lat]} response]
-      (when (and long lat)
-        (postgres/->Geopoint
-         (format "POINT (%s %s)" long lat))))
+  (condp = type
+    "GEO" (let [{:strs [long lat]} response]
+            (when (and long lat)
+              (postgres/->Geopoint
+               (format "POINT (%s %s)" long lat))))
+    "GEOSHAPE" (let [feature (-> (w/keywordize-keys response) :features first)
+                     geom-type (-> feature :geometry :type)
+                     points (-> feature :geometry :coordinates)]
+                 (log/debug :geom-type geom-type :points points )
+                 (if points
+                   (condp = geom-type
+                     "LineString" (when (> (count points) 1)
+                                    (postgres/->Geoline
+                                     (format "LINESTRING (%s)" (->> points
+                                                                    (map (partial string/join " " ))
+                                                                    (string/join ", " )))))
+                     "Polygon"    (let [points (->> (first points)
+                                                    (map (partial string/join " " )))]
+                                    (when (> (count points) 3)
+                                      (postgres/->Geoshape
+                                       (format "POLYGON ((%s))" (->> points                                                                                                           (string/join ", " ))))))
+                     "MultiPoint" (postgres/->Multipoint
+                                   (format "MULTIPOINT (%s)" (->> points
+                                                                  (map (partial string/join " " ))
+                                                                  (string/join ", " ))))
+                     
+                     (log/warn :unmapped-geoshape! geom-type))))
     (v2/render-response type response)))
 
 (defn response-data

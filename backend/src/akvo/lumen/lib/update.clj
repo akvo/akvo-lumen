@@ -69,6 +69,12 @@
                            ;; https://github.com/akvo/akvo-lumen/issues/1926
                            ;; remove this map conversion logic once #1926 is finished
                            ))
+        columns-dict (reduce (fn [c x] (assoc c (:id x) x)) {} columns)
+        imported-columns (map (fn [{:keys [id type] :as x}]
+                                (if (and (= type "text")
+                                         (= "geoshape" (-> (get columns-dict id) :type)))
+                                  (assoc x :type "geoshape")
+                                  x)) imported-columns)
         compatible? (set/subset? (set imported-columns) (set columns))]
     (if-not compatible?
       (do
