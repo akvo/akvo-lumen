@@ -1,8 +1,9 @@
 (ns akvo.lumen.postgres
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [akvo.lumen.protocols :as p])
-  (:import [org.postgis Polygon MultiPolygon PGgeometry]
+  (:import [org.postgis Polygon MultiPolygon PGgeometry LineString MultiPoint]
            [org.postgresql.util PGobject]))
 
 (defn escape-string [s]
@@ -26,6 +27,10 @@
   org.postgis.MultiPolygon
   (sql-value [v] (val->geometry-pgobj v))
   org.postgis.Point
+  (sql-value [v] (val->geometry-pgobj v))
+  org.postgis.LineString
+  (sql-value [v] (val->geometry-pgobj v))
+  org.postgis.MultiPoint
   (sql-value [v] (val->geometry-pgobj v)))
 
 (defn- index-name [table-name column-name]
@@ -65,6 +70,8 @@
     "number" "double precision"
     ;; Note not `POLYGON` so we can support `MULTIPOLYGON` as well
     "geoshape" "geometry(GEOMETRY, 4326)"
+    "geomultipoint" "geometry(MULTIPOINT, 4326)"
+    "geoline" "geometry(LINE, 4326)"
     "geopoint" "geometry(POINT, 4326)"
     "multiple" "text"
     "text" "text"))
@@ -85,6 +92,10 @@
 
 (defrecord Geopoint [wkt-string])
 
+(defrecord Geoline [wkt-string])
+
+(defrecord Multipoint [wkt-string])
+
 (defmethod clojure.core/print-method Geopoint
      [system ^java.io.Writer writer]
   (.write writer "#<Geopoint>"))
@@ -92,6 +103,14 @@
 (defmethod clojure.core/print-method Geoshape
      [system ^java.io.Writer writer]
      (.write writer "#<Geoshape>"))
+
+(defmethod clojure.core/print-method Geoline
+     [system ^java.io.Writer writer]
+     (.write writer "#<Geoline>"))
+
+(defmethod clojure.core/print-method Multipoint
+     [system ^java.io.Writer writer]
+  (.write writer "#<Multipoint>"))
 
 (extend-protocol p/CoerceToSql
   java.lang.String
@@ -102,6 +121,16 @@
   (coerce [value]
     (java.sql.Timestamp. (.toEpochMilli value)))
   Geoshape
+  (coerce [value]
+    (let [geom (PGgeometry/geomFromString (:wkt-string value))]
+      (.setSrid geom 4326)
+      geom))
+  Geoline
+  (coerce [value]
+    (let [geom (PGgeometry/geomFromString (:wkt-string value))]
+      (.setSrid geom 4326)
+      geom))
+  Multipoint
   (coerce [value]
     (let [geom (PGgeometry/geomFromString (:wkt-string value))]
       (.setSrid geom 4326)
