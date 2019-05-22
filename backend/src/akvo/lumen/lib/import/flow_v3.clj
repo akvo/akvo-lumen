@@ -2,6 +2,7 @@
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.util :as util]
+            [clojure.string :as string]
             [clojure.tools.logging :as log]
             [clojure.walk :as w]
             [akvo.lumen.lib.import.flow-common :as flow-common]
@@ -58,16 +59,16 @@
                    (condp = geom-type
                      "LineString" (postgres/->Geoline
                                    (format "LINESTRING (%s)" (->> points
-                                                                  (map (partial clojure.string/join " " ))
-                                                                  (clojure.string/join ", " ))))
+                                                                  (map (partial string/join " " ))
+                                                                  (string/join ", " ))))
                      "Polygon"    (postgres/->Geoshape
                                    (format "POLYGON ((%s))" (->> (first points)
-                                                                 (map (partial clojure.string/join " " ))
-                                                                 (clojure.string/join ", " ))))
+                                                                 (map (partial string/join " " ))
+                                                                 (string/join ", " ))))
                      "MultiPoint" (postgres/->Multipoint
                                    (format "MULTIPOINT ((%s))" (->> points
-                                                                    (map (partial clojure.string/join " " ))
-                                                                    (clojure.string/join " " ))))
+                                                                    (map (partial string/join " " ))
+                                                                    (string/join " " ))))
                      
                      (log/warn :unmapped-geoshape! geom-type))))
     (v2/render-response type response)))
