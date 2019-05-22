@@ -57,18 +57,20 @@
                  (log/debug :geom-type geom-type :points points )
                  (if points
                    (condp = geom-type
-                     "LineString" (postgres/->Geoline
-                                   (format "LINESTRING (%s)" (->> points
+                     "LineString" (when (> (count points) 1)
+                                    (postgres/->Geoline
+                                     (format "LINESTRING (%s)" (->> points
+                                                                    (map (partial string/join " " ))
+                                                                    (string/join ", " )))))
+                     "Polygon"    (let [points (->> (first points)
+                                                    (map (partial string/join " " )))]
+                                    (when (> (count points) 3)
+                                      (postgres/->Geoshape
+                                       (format "POLYGON ((%s))" (->> points                                                                                                           (string/join ", " ))))))
+                     "MultiPoint" (postgres/->Multipoint
+                                   (format "MULTIPOINT (%s)" (->> points
                                                                   (map (partial string/join " " ))
                                                                   (string/join ", " ))))
-                     "Polygon"    (postgres/->Geoshape
-                                   (format "POLYGON ((%s))" (->> (first points)
-                                                                 (map (partial string/join " " ))
-                                                                 (string/join ", " ))))
-                     "MultiPoint" (postgres/->Multipoint
-                                   (format "MULTIPOINT ((%s))" (->> points
-                                                                    (map (partial string/join " " ))
-                                                                    (string/join " " ))))
                      
                      (log/warn :unmapped-geoshape! geom-type))))
     (v2/render-response type response)))
