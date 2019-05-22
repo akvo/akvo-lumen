@@ -74,8 +74,8 @@ function MultipleColumnImage(props) {
 
 MultipleColumnImage.propTypes = {
   hasImage: PropTypes.bool.isRequired,
-  extractImage: PropTypes.func.isRequired,
-  onExtractImage: PropTypes.object.isRequired,
+  extractImage: PropTypes.bool.isRequired,
+  onExtractImage: PropTypes.func.isRequired,
 };
 
 class Column extends Component {
