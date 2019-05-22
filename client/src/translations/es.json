@@ -100,7 +100,7 @@
   "extract": "Extraer",
   "extract_multiple": "Extraer múltiples valores",
   "extract_multiple_global_error": "Surgió un error inesperado!, por favor contacte con el administrador del sistema",
-  "extract_multiple_log": "Extraer múltiples valores desde: {extractedColumnTitle} a {newColumnsTitle}",
+  "extract_multiple_log": "Extraer múltiples valores desde: {extractedColumnTitle} a: {newColumnsTitle}",
   "extract_multiple_not_found_error": "Hemos encontrado un problema con los datos relacionados con esta columna múltiple",
   "file_has_column_headers": "El fichero tiene encabezados de columna",
   "file_name": "Nombre del archivo",

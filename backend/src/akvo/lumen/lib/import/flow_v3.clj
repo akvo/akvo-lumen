@@ -20,13 +20,29 @@
     "CADDISFLY" "multiple"
     "text"))
 
+(defn flow-questions [form]
+  (reduce
+   (fn [c  i]
+     (if (= "GEOSHAPE" (:type i))
+       (apply conj c (reduce #(conj % (let [id (str (:id i) "_" %2)]
+                                        (->  i
+                                             (assoc :type "GEO-SHAPE-FEATURES")
+                                             (assoc :multipleType "geo-shape-features")
+                                             (assoc :multipleId (:id i))
+                                             (assoc :derived-id (:id i))
+                                             (assoc :derived-fn (fn [x] (-> x (w/keywordize-keys) :features first :properties)))
+                                             (update :name (fn [o] (str o " Features" )))
+                                             (assoc :id id)))) [i] (range 1)))
+       (conj c i))) [] (flow-common/questions form)))
+
 (defn dataset-columns
   "returns a vector of [{:title :type :id :key}]
   `:key` is optional"
   [form]
-  (into (flow-common/commons-columns form)
-        (into [{:title "Device Id" :type "text" :id "device_id"}]
-              (common/coerce question-type->lumen-type (flow-common/questions form)))))
+  (let [questions (flow-questions form)]
+    (into (flow-common/commons-columns form)
+          (into [{:title "Device Id" :type "text" :id "device_id"}]
+                (common/coerce question-type->lumen-type questions)))))
 
 (defn render-response
   [type response]
@@ -62,14 +78,14 @@
 (defn response-data
   [form responses]
   (let [responses (flow-common/question-responses responses)]
-    (reduce (fn [response-data {:keys [type id]}]
-              (if-let [response (get responses id)]
+    (reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
+              (if-let [response ((or derived-fn identity) (get responses (or derived-id id)))]
                 (assoc response-data
                        (format "c%s" id)
                        (render-response type response))
                 response-data))
             {}
-            (flow-common/questions form))))
+            (flow-questions form))))
 
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form

@@ -39,6 +39,8 @@
 (alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
 (alias 'import.column.geoshape.s                'akvo.lumen.specs.import.column.geoshape)
 (alias 'import.column.multiple.s                'akvo.lumen.specs.import.column.multiple)
+(alias 'import.column.multiple.caddisfly.s      'akvo.lumen.specs.import.column.multiple.caddisfly)
+(alias 'import.column.multiple.geo-shape-features.s  'akvo.lumen.specs.import.column.multiple.geo-shape-features)
 (alias 'transformation.engine.s                 'akvo.lumen.specs.transformation.engine)
 (alias 'transformation.combine.s                'akvo.lumen.specs.transformation.combine)
 (alias 'transformation.filter-column.s          'akvo.lumen.specs.transformation.filter-column)
@@ -535,21 +537,24 @@
                                               (assoc :extract %3))
                                          columns (range) bols)
         new-columns                (filter :extract columns-payload)
-        data                       (import.s/sample-imported-dataset [[:multiple {::import.values.s/multipleId     #(s/gen #{import.values.s/cad1-id})
-                                                                                  ::import.column.multiple.s/value #(s/gen #{import.values.s/cad1})}]
-                                                                      [:multiple {::import.values.s/multipleId     #(s/gen #{import.values.s/cad2-id})
-                                                                                  ::import.column.multiple.s/value #(s/gen #{import.values.s/cad2})}]] 2)
+        data                       (-> (import.s/sample-imported-dataset
+                                        [[:multiple {::import.column.multiple.s/header* #(s/gen ::import.column.multiple.caddisfly.s/header*)
+                                                     ::import.column.multiple.s/value   #(s/gen #{import.values.s/cad1})}]
+                                         [:multiple {::import.column.multiple.s/header* #(s/gen ::import.column.multiple.caddisfly.s/header*)
+                                                     ::import.column.multiple.s/value #(s/gen #{import.values.s/cad2})}]] 2)
+                                       (assoc-in [:columns 0 :multipleId] import.values.s/cad1-id)
+                                       (assoc-in [:columns 1 :multipleId] import.values.s/cad2-id))
         dataset-id                 (import-file *tenant-conn* *error-tracker*
                                                 {:dataset-name "multiple caddisfly"
                                                  :kind         "clj"
                                                  :data         data})
         apply-transformation       (partial async-tx-apply {:tenant-conn *tenant-conn* :caddisfly *caddisfly*} dataset-id)]
-    (let [selected-column (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
-                                                    {::import.values.s/multipleType           "caddisfly"
-                                                     ::import.values.s/multipleId             import.values.s/cad1-id
-                                                     ::db.dataset-version.column.s/columnName "c1"
-                                                     ::import.values.s/id                     :c1
-                                                     ::import.column.s/header                 #(s/gen ::import.column.multiple.s/header)})
+    (let [selected-column (merge
+                           (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
+                                                     {::db.dataset-version.column.s/columnName "c1"})
+                           (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
+                                                     {::import.values.s/multipleId import.values.s/cad1-id
+                                                      ::import.values.s/id         "c1"}))
           [tag _ :as res] (apply-transformation
                            {:type :transformation
                             :transformation
@@ -573,12 +578,13 @@
           (is (= 1 (get after "caddisfly-test-id")))
           (is (= (:name (nth new-columns 0)) (get after "title")))
           (is (= "d2" (get after "columnName"))))))
-    (let [selected-column (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
-                                                    {::import.values.s/multipleType           "caddisfly"
-                                                     ::import.values.s/multipleId             import.values.s/cad2-id
-                                                     ::db.dataset-version.column.s/columnName "c2"
-                                                     ::import.values.s/id                     :c2
-                                                     ::import.column.s/header                 #(s/gen ::import.column.multiple.s/header)})
+    (let [selected-column
+          (merge
+           (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
+                                     {::db.dataset-version.column.s/columnName "c2"})
+           (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
+                                     {::import.values.s/multipleId import.values.s/cad2-id
+                                      ::import.values.s/id         "c2"}))
           [tag _ :as res] (apply-transformation
                            {:type :transformation
                             :transformation
@@ -591,7 +597,7 @@
                                 (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-        (is (= ["" ""] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
+        (is (= [nil nil] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
 
 (defn- replace-column
   "utility to have same column in other generated dataset"

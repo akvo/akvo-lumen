@@ -78,6 +78,10 @@
   [_ response]
   (json/generate-string response))
 
+(defmethod render-response "GEO-SHAPE-FEATURES"
+  [_ response]
+  (json/generate-string response))
+
 (defmethod render-response :default
   [type response]
   nil)
