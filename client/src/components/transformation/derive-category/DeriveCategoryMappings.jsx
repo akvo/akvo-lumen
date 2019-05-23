@@ -41,6 +41,12 @@ class DeriveCategoryMappings extends Component {
     sort: 'numeric',
   }
 
+  componentDidMount() {
+    if (this.derivedColumnTitleInput) {
+      this.derivedColumnTitleInput.focus();
+    }
+  }
+
   getExistingMappingIndex(value) {
     const { mappings } = this.props;
     return findIndex(mappings, ([sourceValues]) =>
@@ -125,11 +131,15 @@ class DeriveCategoryMappings extends Component {
         <Row className="DeriveCategoryMapping DeriveCategoryMapping--lg">
           <Col xs={7} className="DeriveCategoryMapping__text">
             <a onClick={onReselectSourceColumn}>
+              <i className="fa fa-edit" />
               <FormattedMessage id="source_column" />: {dataset.columns[sourceColumnIndex].title}
             </a>
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__input-wrap">
             <input
+              ref={(c) => {
+                this.derivedColumnTitleInput = c;
+              }}
               value={derivedColumnName}
               placeholder={intl.formatMessage({ id: 'derived_column_title' })}
               onChange={(event) => {
@@ -171,7 +181,7 @@ class DeriveCategoryMappings extends Component {
           <Col xs={5} className="DeriveCategoryMapping__text">
             <FormattedMessage
               id="categories_count"
-              values={{ count: mappings.length }}
+              values={{ count: mappings.length + 1 }}
             />
           </Col>
         </Row>

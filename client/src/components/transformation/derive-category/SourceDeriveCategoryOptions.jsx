@@ -16,20 +16,23 @@ const SourceDeriveCategoryOptions = ({ dataset, onChange, selected }) => (
           <FormattedMessage id="select_source_column" />
         </h2>
         <ListGroup>
-          {dataset.columns && dataset.columns.map(({ columnName, title, type }) => (
-            <ListGroupItem
-              key={columnName}
-              lg
-              onClick={() => onChange(columnName)}
-              status={columnName === selected ? STATUS.SUCCESS : undefined}
-              icon={columnName === selected ? 'check' : undefined}
-            >
-              <span className="SourceDeriveCategoryOptions__title">{title}</span>
-              <span className="SourceDeriveCategoryOptions__type">
-                <FormattedMessage id={type} />
-              </span>
-            </ListGroupItem>
-          ))}
+          {dataset.columns &&
+            dataset.columns.filter(({ type }) => type === 'text')
+              .map(({ columnName, title, type }) => (
+                <ListGroupItem
+                  key={columnName}
+                  lg
+                  onClick={() => onChange(columnName)}
+                  status={columnName === selected ? STATUS.SUCCESS : undefined}
+                  icon={columnName === selected ? 'check' : undefined}
+                >
+                  <span className="SourceDeriveCategoryOptions__title">{title}</span>
+                  <span className="SourceDeriveCategoryOptions__type">
+                    <FormattedMessage id={type} />
+                  </span>
+                </ListGroupItem>
+              ))
+          }
         </ListGroup>
       </Col>
     </Row>
