@@ -3,6 +3,7 @@
             [akvo.lumen.lib.transformation.engine :as t.engine]
             [akvo.lumen.util :as util]
             [akvo.lumen.lib.transformation.multiple-column.caddisfly :as t.m-c.caddisfly]
+            [akvo.lumen.lib.transformation.multiple-column.geo-shape-features :as t.m-c.geo-shape-features]
             [clojure.tools.logging :as log]
             [clojure.walk :as walk]))
 
@@ -19,7 +20,8 @@
   (let [{:keys [onError op args] :as op-spec} (walk/keywordize-keys op-spec)]
     ;; so far we only implement `caddisfly` in other case we throw exception based on core/condp impl
     (condp = (-> args :selectedColumn :multipleType)
-      "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec))))
+      "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec)
+      "geo-shape-features" (t.m-c.geo-shape-features/apply-operation deps table-name columns op-spec))))
 
 (defmethod t.engine/apply-operation "core/extract-multiple"
   [deps table-name columns op-spec]

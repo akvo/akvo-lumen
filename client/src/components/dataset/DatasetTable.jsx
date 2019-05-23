@@ -54,8 +54,10 @@ class DatasetTable extends Component {
       this.handleToggleExtractMultipleColumnSidebar.bind(this);
     this.handleToggleSplitColumnSidebar =
       this.handleToggleSplitColumnSidebar.bind(this);
-    this.handleToggleDeriveColumnSidebar = this.handleToggleDeriveColumnSidebar.bind(this);
+    this.handleToggleDeriveColumnJavascriptSidebar =
+      this.handleToggleDeriveColumnJavascriptSidebar.bind(this);
     this.handleToggleGeoColumnSidebar = this.handleToggleGeoColumnSidebar.bind(this);
+    this.handleClickDatasetControlItem = this.handleClickDatasetControlItem.bind(this);
   }
 
   componentDidMount() {
@@ -231,9 +233,9 @@ class DatasetTable extends Component {
     }
   }
 
-  handleToggleDeriveColumnSidebar() {
+  handleToggleDeriveColumnJavascriptSidebar() {
     if (this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'deriveColumn') {
+      this.state.sidebarProps.type === 'deriveColumnJavascript') {
       this.hideSidebar();
     } else {
       this.setState({
@@ -241,7 +243,7 @@ class DatasetTable extends Component {
         activeColumnContextMenu: null,
       });
       this.showSidebar({
-        type: 'deriveColumn',
+        type: 'deriveColumnJavascript',
         displayRight: false,
         onClose: this.hideSidebar,
         onApply: (transformation) => {
@@ -258,6 +260,12 @@ class DatasetTable extends Component {
   handleMergeDataset() {
     const { location, router } = this.props;
     router.push(`${location.pathname}/transformation/merge`);
+  }
+
+  // Redirect to derive column transform page: category
+  handleDeriveColumnCategory() {
+    const { location, router } = this.props;
+    router.push(`${location.pathname}/transformation/derive-category`);
   }
 
   handleReverseGeocode() {
@@ -351,6 +359,28 @@ class DatasetTable extends Component {
     });
   }
 
+  handleClickDatasetControlItem(menuItem) {
+    if (menuItem === 'combineColumns') {
+      this.handleToggleCombineColumnSidebar();
+    } else if (menuItem === 'extractMultiple') {
+      this.handleToggleExtractMultipleColumnSidebar();
+    } else if (menuItem === 'splitColumn') {
+      this.handleToggleSplitColumnSidebar();
+    } else if (menuItem === 'deriveColumnJavascript') {
+      this.handleToggleDeriveColumnJavascriptSidebar();
+    } else if (menuItem === 'deriveColumnCategory') {
+      this.handleDeriveColumnCategory();
+    } else if (menuItem === 'generateGeopoints') {
+      this.handleToggleGeoColumnSidebar();
+    } else if (menuItem === 'mergeDatasets') {
+      this.handleMergeDataset();
+    } else if (menuItem === 'reverseGeocode') {
+      this.handleReverseGeocode();
+    } else {
+      throw new Error(`Not yet implemented: ${menuItem}`);
+    }
+  }
+
   dismissDataTypeContextMenu() {
     this.setState({ activeDataTypeContextMenu: null });
   }
@@ -425,25 +455,7 @@ class DatasetTable extends Component {
           isLockedFromTransformations={isLockedFromTransformations}
           onNavigateToVisualise={onNavigateToVisualise}
           pendingTransformationsCount={pendingTransformations.size}
-          onClickMenuItem={(menuItem) => {
-            if (menuItem === 'combineColumns') {
-              this.handleToggleCombineColumnSidebar();
-            } else if (menuItem === 'extractMultiple') {
-              this.handleToggleExtractMultipleColumnSidebar();
-            } else if (menuItem === 'splitColumn') {
-              this.handleToggleSplitColumnSidebar();
-            } else if (menuItem === 'deriveColumn') {
-              this.handleToggleDeriveColumnSidebar();
-            } else if (menuItem === 'generateGeopoints') {
-              this.handleToggleGeoColumnSidebar();
-            } else if (menuItem === 'mergeDatasets') {
-              this.handleMergeDataset();
-            } else if (menuItem === 'reverseGeocode') {
-              this.handleReverseGeocode();
-            } else {
-              throw new Error(`Not yet implemented: ${menuItem}`);
-            }
-          }}
+          onClickMenuItem={this.handleClickDatasetControlItem}
         />
         <div
           style={{

@@ -1,8 +1,7 @@
-(ns akvo.lumen.lib.transformation.multiple-column.caddisfly
+(ns akvo.lumen.lib.transformation.multiple-column.geo-shape-features
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
-            [akvo.lumen.component.caddisfly :refer (get-schema)]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [clojure.walk :as walk]
             [clojure.java.jdbc :as jdbc]
@@ -14,27 +13,20 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
-
-
-(defn columns-to-extract [columns selected-column caddisfly-schema extractImage]
+(defn columns-to-extract [columns selected-column extractImage]
   (let [columns   (filter :extract columns)
         base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title)]
-    (cond->>
-        (map #(assoc base-column :title (:name %) :type (:type %) :caddisfly-test-id (:id %)) columns)
-      (and (:hasImage caddisfly-schema) extractImage)
-      (cons (with-meta (assoc base-column :type "text" :title (str (:title selected-column) "| Image"))
-              {:image true})))))
+    (map #(assoc base-column :title (:name %) :type (:type %) :internal-id (:id %)) columns)))
 
-(defn- test-results
-  "`test`-results in caddisfly terminology means the values extracted of caddisfly samples.
-  This function assoc values from json parsed data to selected columns to extract."
+(defn- extract-values
   [cell-value columns-to-extract]
+  (log/debug :cell-value cell-value :columns-to-extract columns-to-extract)
   (map (fn [c]
-         (if (:image (meta c))
-           (when (:image cell-value)
-             (format "https://akvoflow-uat1.s3.amazonaws.com/images/%s" (:image cell-value)))
-           (:value (some #(when (= (:caddisfly-test-id c) (:id %)) %) (:result cell-value)))))
-   columns-to-extract))
+         (when-let [v ((keyword (:name
+                                 (some  #(when (= (:id %) (:internal-id c)) %) multiple-column/geo-shape-columns)))
+                       cell-value)]
+           (Double/parseDouble (string/replace v "," "."))))
+       columns-to-extract))
 
 (defn apply-operation 
   [{:keys [tenant-conn caddisfly] :as deps} table-name current-columns op-spec]
@@ -42,14 +34,7 @@
     (let [{:keys [onError op args]} op-spec
           selected-column (find-column (walk/keywordize-keys current-columns) (-> args :selectedColumn :columnName))
 
-          caddisfly-schema (if-let [multipleId (:multipleId selected-column)]
-                             (get-schema caddisfly multipleId)
-                             (throw
-                              (ex-info "this column doesn't have a caddisflyResourceUuid currently associated!"
-                                       {:message
-                                        {:possible-reason "maybe you don't update the flow dataset!? (via client dashboard ...)"}})))
-
-          new-columns (->> (columns-to-extract (:columns args) selected-column caddisfly-schema (:extractImage args))
+          new-columns (->> (columns-to-extract (:columns args) selected-column (:extractImage args))
                            (multiple-column/add-name-to-new-columns current-columns))
           
           _ (log/debug ::apply-operation table-name (:columnName selected-column) onError)
@@ -57,20 +42,21 @@
 
           add-db-columns (doseq [c new-columns]
                            (add-column conn {:table-name      table-name
-                                             :column-type     (:type c)
+                                             :column-type     (postgres/colum-type-fn* (:type c))
                                              :new-column-name (:id c)}))
           update-db-columns (->> (select-rnum-and-column conn {:table-name table-name :column-name (:columnName selected-column)})
                                  (map
-                                  (fn [m]
+                                  (fn [m] 
                                     (let [cell-value (multiple-column/multiple-cell-value m (:columnName selected-column))
-                                          cad-results (or (test-results cell-value new-columns)
+                                          cad-results (or (extract-values cell-value new-columns)
                                                           (repeat nil))
                                           update-vals (->> (map
                                                             (fn [new-column-name new-column-val]
                                                               [(keyword new-column-name) new-column-val])
                                                             (map :id new-columns)
                                                             cad-results)
-                                                           (reduce #(apply assoc % %2) {}))]
+                                                           (reduce #(apply assoc % %2) {})
+                                                           (filter (fn [[k v :as x]] (when v x))))]
                                       (log/debug :update-vals update-vals)
                                       (multiple-column/update-row conn table-name (:rnum m) update-vals))))
                                  doall)]
