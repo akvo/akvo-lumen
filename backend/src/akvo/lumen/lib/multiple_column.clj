@@ -50,12 +50,13 @@
   [row column-name]
   (json/parse-string ((keyword column-name) row) keyword))
 
-(defn update-row [conn table-name row-id vals-map]
+(defn update-row [conn table-name row-id vals-map default-null-value]
   (let [r (string/join "," (doall (map (fn [[k v]]
-                                         (str (name k) "=" (when v
+                                         (str (name k) "=" (if v
                                                              (if (string? v)
                                                                (postgres/adapt-string-value v)
-                                                               v)))) vals-map)))
+                                                               v)
+                                                             default-null-value))) vals-map)))
         sql (str  "update " table-name " SET "  r " where rnum=" row-id)]
     (log/debug :sql sql)
     (when (seq vals-map)
