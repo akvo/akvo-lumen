@@ -61,11 +61,12 @@
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
   [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]
   (let [spec {"name" (or dataset-name file)
-              "source" {"path" (when file (.getAbsolutePath (io/file (io/resource file))))
-                        "kind" (or kind "DATA_FILE")
-                        "fileName" (or dataset-name file)
-                        "data" data
-                        "hasColumnHeaders" (boolean has-column-headers?)}}
+              "source" (with-meta
+                         {"path" (when file (.getAbsolutePath (io/file (io/resource file))))
+                          "kind" (or kind "DATA_FILE")
+                          "fileName" (or dataset-name file)
+                          "hasColumnHeaders" (boolean has-column-headers?)}
+                         {:data data})}
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
