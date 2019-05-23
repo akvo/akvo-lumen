@@ -129,6 +129,7 @@
   "google_drive": "Google Drive",
   "gradient": "Gradient",
   "group": "Groupe",
+  "hyphen": "Trait d'union",
   "if_cell_format_is_invalid": "Si le format de cellule est invalide",
   "if_transformation_fails": "Si la transformation echoue",
   "import": "Importer",

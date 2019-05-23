@@ -6,7 +6,8 @@
             [clojure.string :as str]
             [clojure.tools.logging :as log])
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
-           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]))
+           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]
+           [java.lang Double]))
 
 (defn- throw-invalid-return-type [value]
   (throw (ex-info "Invalid return type"
@@ -21,9 +22,9 @@
     (condp = type
       "number" (if (and (number? value)
                         (if (float? value)
-                          (java.lang.Double/isFinite value)
+                          (Double/isFinite value)
                           true))
-                 value
+                 (Double/parseDouble (format "%.3f" value))
                  (throw-invalid-return-type value))
       "text" (if (string? value)
                value

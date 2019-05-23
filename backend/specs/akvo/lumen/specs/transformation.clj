@@ -94,7 +94,7 @@
 
 (s/def ::transformation.combine/newColumnTitle string?)
 
-(s/def ::transformation.combine/separator string?)
+(s/def ::transformation.combine/separator #{" " "," "" "-"})
 
 (s/def ::transformation.combine/columnNames (s/coll-of ::db.dsv.column.s/columnName :kind vector? :distinct true)) 
 (s/def ::transformation.combine/args
