@@ -57,6 +57,15 @@
     background-color: $white;
     padding: 0.75rem 1rem;
     width: 100%;
+    position: relative;
+
+    .caret {
+      position: absolute;
+      right: 9px;
+      top: 13px;
+      display: none;
+    }
+
     &:hover {
       background-color: rgba($textSecondary, 0.2);
     }
@@ -76,12 +85,17 @@
       opacity: 0.3;
       cursor: not-allowed;
     }
+    &-with-submenu {
+      > .caret {
+        display: block;
+      }
+    }
   }
   .subMenu {
     background-color: $white;
     position: absolute;
-    width: 10rem;
-    right: -10rem;
+    width: 12rem;
+    right: -12rem;
     display: inline-block;
     margin-right: 0;
     /* Offset padding of this + padding of parent + border*/
@@ -89,7 +103,7 @@
   }
   &.leftSubMenu .subMenu {
     right: 0;
-    left: -10rem;
+    left: -12rem;
   }
   .newCollection {
     border-top: 1px solid;
