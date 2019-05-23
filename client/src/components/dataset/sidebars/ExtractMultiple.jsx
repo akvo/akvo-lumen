@@ -1,3 +1,4 @@
+import queryString from 'querystringify';
 import { merge, cloneDeep } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -14,9 +15,20 @@ import { showNotification } from '../../../actions/notification';
 
 require('./ExtractMultiple.scss');
 
+const queryParams = queryString.parse(location.search);
+const multipleTypes = new Set(['caddisfly', 'geo-shape-features']);
+
+function multipleTypeCondition(column) {
+  let cond = column.get('multipleType') === 'caddisfly';
+  if (queryParams['show-multiple-geoshape'] === '1') {
+    cond = multipleTypes.has(column.get('multipleType'));
+  }
+  return cond;
+}
+
 function textColumnOptions(columns) {
   return columns
-    .filter(column => column.get('type') === 'multiple')
+    .filter(column => column.get('type') === 'multiple' && multipleTypeCondition(column))
     .map(column => ({
       label: column.get('title'),
       value: column.get('columnName'),
@@ -26,7 +38,7 @@ function textColumnOptions(columns) {
 
 function filterByMultipleAndColumnName(columns, columnName) {
   return columns
-    .filter(column => column.get('type') === 'multiple' && column.get('columnName') === columnName)
+    .filter(column => column.get('type') === 'multiple' && multipleTypeCondition(column) && column.get('columnName') === columnName)
     .toJS()[0];
 }
 
@@ -74,8 +86,8 @@ function MultipleColumnImage(props) {
 
 MultipleColumnImage.propTypes = {
   hasImage: PropTypes.bool.isRequired,
-  extractImage: PropTypes.func.isRequired,
-  onExtractImage: PropTypes.object.isRequired,
+  extractImage: PropTypes.bool.isRequired,
+  onExtractImage: PropTypes.func.isRequired,
 };
 
 class Column extends Component {

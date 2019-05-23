@@ -1,0 +1,74 @@
+@import "../../styles/modules/importAll";
+
+.ListGroup {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+
+  .ListGroupItem {
+    position: relative;
+    display: block;
+    padding: .75rem 1.25rem;
+    margin-bottom: -1px;
+    background-color: white;
+    border: 1px solid $lightGrey;
+
+    &--lg {
+      padding: 2rem 1.25rem;
+    }
+
+    &--clickable {
+      &:hover {
+        background-color: $lightGrey;
+        cursor: pointer;
+      }
+    }
+
+    &--success {
+      background-color: scale-color($success, $lightness: 90%);
+      .ListGroupItem__icon {
+        color: $success;
+      }
+    }
+
+    &--warning {
+      background-color: scale-color($warning, $lightness: 90%);
+      .ListGroupItem__icon {
+        color: $warning;
+      }
+    }
+
+    &--danger {
+      background-color: scale-color($danger, $lightness: 90%);
+      .ListGroupItem__icon {
+        color: $danger;
+      }
+    }
+
+    &--info {
+      background-color: scale-color($info, $lightness: 90%);
+      .ListGroupItem__icon {
+        color: $info;
+      }
+    }
+
+    &:first-child {
+      border-top-left-radius: .25rem;
+      border-top-right-radius: .25rem;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+      border-bottom-right-radius: .25rem;
+      border-bottom-left-radius: .25rem;
+    }
+
+    &__icon {
+      font-size: 1.4em;
+      position: relative;
+      top: 0.1em;
+      margin-right: 0.5em;
+    }
+  }
+}

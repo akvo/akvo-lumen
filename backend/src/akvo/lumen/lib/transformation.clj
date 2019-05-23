@@ -12,6 +12,7 @@
 
 (def transformation-namespaces
   '[akvo.lumen.lib.transformation.change-datatype
+    akvo.lumen.lib.transformation.derive-category
     akvo.lumen.lib.transformation.text
     akvo.lumen.lib.transformation.sort-column
     akvo.lumen.lib.transformation.split-column

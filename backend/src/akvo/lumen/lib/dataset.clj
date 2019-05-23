@@ -81,7 +81,7 @@
   [tenant-conn id column-name offset]
   (when-let [dataset (table-name-by-dataset-id tenant-conn {:id id})]
     (log/debug ::sort* :id id :table-name (:table-name dataset) :column-name column-name :offset offset)
-    (->> {:column-name column-name :table-name (:table-name dataset) :offset (or offset 100)}
+    (->> {:column-name column-name :table-name (:table-name dataset) :offset (or offset 1000)}
          (count-vals-by-column-name tenant-conn)
          (map (juxt :counter :coincidence)))))
 

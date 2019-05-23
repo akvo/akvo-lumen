@@ -18,6 +18,8 @@
 (create-ns  'akvo.lumen.specs.import.column.geoshape)
 (create-ns  'akvo.lumen.specs.import.column.geopoint)
 (create-ns  'akvo.lumen.specs.import.column.multiple)
+(create-ns  'akvo.lumen.specs.import.column.multiple.caddisfly)
+(create-ns 'akvo.lumen.specs.import.column.multiple.geo-shape-features)
 
 (alias 'c.text 'akvo.lumen.specs.import.column.text)
 (alias 'c.number 'akvo.lumen.specs.import.column.number)
@@ -25,6 +27,8 @@
 (alias 'c.geoshape 'akvo.lumen.specs.import.column.geoshape)
 (alias 'c.geopoint 'akvo.lumen.specs.import.column.geopoint)
 (alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
+(alias 'c.multiple.caddisfly 'akvo.lumen.specs.import.column.multiple.caddisfly)
+(alias 'c.multiple.geo-shape-features 'akvo.lumen.specs.import.column.multiple.geo-shape-features)
 
 (s/def ::type #{"text" "number" "date" "geoshape" "geopoint" "multiple"})
 
@@ -53,10 +57,24 @@
 (s/def ::c.geopoint/header* (s/keys :req-un [::c.geopoint/type]))
 (s/def ::c.geopoint/header (s/merge ::column-header ::c.geopoint/header*))
 
-(s/def ::c.multiple/header* (s/keys :req-un [::c.multiple/type ::v/multipleType ::v/multipleId]))
+(s/def ::c.multiple.caddisfly/multipleId ::v/multipleId)
+(s/def ::c.multiple.geo-shape-features/multipleId ::v/id)
+(defmulti column-multiple :multipleType)
+
+(s/def ::c.multiple.caddisfly/multipleType #{"caddisfly"})
+
+(defmethod column-multiple "caddisfly" [_] (s/keys :req-un [::c.multiple/type ::c.multiple.caddisfly/multipleType ::c.multiple.caddisfly/multipleId]))
+
+(s/def ::c.multiple.geo-shape-features/multipleType #{"geo-shape-features"})
+
+(defmethod column-multiple "geo-shape-features" [_] (s/keys :req-un [::c.multiple/type ::c.multiple.geo-shape-features/multipleType ::c.multiple.geo-shape-features/multipleId]))
+
+
+(s/def ::c.multiple/header* (s/multi-spec column-multiple :multipleType))
+
+(s/def ::c.multiple.caddisfly/header* (s/merge ::column-header (column-multiple {:multipleType "caddisfly"})))
 
 (s/def ::c.multiple/header (s/merge ::column-header ::c.multiple/header*))
-
 
 (defmulti column-header :type)
 (defmethod column-header "text" [_] ::c.text/header)
