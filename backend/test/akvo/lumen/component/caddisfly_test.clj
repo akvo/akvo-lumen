@@ -49,5 +49,5 @@
       (testing "testing compatibility backwards"
         (let [d3 (c/version-schema-backwards-adapt d1 d2)
               diff2 (data/diff (adapt* d1) (adapt* d3))]
-          (is (= c/v2-count (count (adapt* d3))) )
+          (is (= c/v2-count (inc (count (adapt* d3)))) )
           (is (nil? (first diff2))))))))
