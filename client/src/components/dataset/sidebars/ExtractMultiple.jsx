@@ -19,11 +19,7 @@ const queryParams = queryString.parse(location.search);
 const multipleTypes = new Set(['caddisfly', 'geo-shape-features']);
 
 function multipleTypeCondition(column) {
-  let cond = column.get('multipleType') === 'caddisfly';
-  if (queryParams['show-multiple-geoshape'] === '1') {
-    cond = multipleTypes.has(column.get('multipleType'));
-  }
-  return cond;
+  return multipleTypes.has(column.get('multipleType'));
 }
 
 function textColumnOptions(columns) {
