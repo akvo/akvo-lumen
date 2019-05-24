@@ -7,7 +7,7 @@
             [integrant.core :as ig]
             [clojure.tools.logging :as log]))
 
-(def v2-count 109)
+(def v2-count 110)
 
 (def missed-v1-uuids-in-v2
   ["f0f3c1dd-89af-49f1-83e7-bcc31c3006cf"
