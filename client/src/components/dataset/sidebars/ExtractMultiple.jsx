@@ -1,4 +1,3 @@
-import queryString from 'querystringify';
 import { merge, cloneDeep } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -15,7 +14,6 @@ import { showNotification } from '../../../actions/notification';
 
 require('./ExtractMultiple.scss');
 
-const queryParams = queryString.parse(location.search);
 const multipleTypes = new Set(['caddisfly', 'geo-shape-features']);
 
 function multipleTypeCondition(column) {
