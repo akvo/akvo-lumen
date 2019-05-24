@@ -1,2372 +1,2401 @@
 {
-  "tests": [
-    {
-      "name": "Alkalinity-m",
-      "uuid": "85e9bea2-8538-4759-a46a-46459783c2d3",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
+    "tests": [
         {
-          "code": "513210BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Alkalinity-m",
-          "unit": "mg/l",
-          "range": "5-200"
-        }
-      ]
-    },
-    {
-      "name": "Alkalinity-m",
-      "uuid": "403af73f-377f-42ea-bba3-f9c88cfe97d2",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "513240BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Alkalinity-m",
-          "unit": "mg/l",
-          "range": "5-500"
-        }
-      ]
-    },
-    {
-      "name": "Aluminium",
-      "uuid": "76defb64-592f-405c-b491-77ffa76fbad8",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515460BT"
+            "name": "Alkalinity-m",
+            "uuid": "85e9bea2-8538-4759-a46a-46459783c2d3",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "513210BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Alkalinity-m",
+                    "unit": "mg/l",
+                    "range": "5-200"
+                }
+            ]
         },
         {
-          "code": "515470BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Aluminium",
-          "unit": "mg/l",
-          "range": "0.01-0.3"
-        }
-      ]
-    },
-    {
-      "name": "Ammonia",
-      "uuid": "f0d60451-a220-4113-821d-3a658167cc9f",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "512580BT"
+            "name": "Alkalinity-m",
+            "uuid": "403af73f-377f-42ea-bba3-f9c88cfe97d2",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "513240BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Alkalinity-m",
+                    "unit": "mg/l",
+                    "range": "5-500"
+                }
+            ]
         },
         {
-          "code": "512590BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Ammonia",
-          "unit": "mg/l",
-          "range": "0.02-1"
-        }
-      ]
-    },
-    {
-      "name": "Ammonia",
-      "uuid": "538ab4d3-706b-4c5e-93a9-adb5c13b1be9",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "535500"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Ammonia",
-          "unit": "mg/l",
-          "range": "0.01-0.8"
-        }
-      ]
-    },
-    {
-      "name": "Ammonia",
-      "uuid": "3221bdba-8898-4ae2-958f-5f6a1f949c8f",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "535600"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Ammonia",
-          "unit": "mg/l",
-          "range": "0.02-2.5"
-        }
-      ]
-    },
-    {
-      "name": "Ammonia",
-      "uuid": "17ca9214-23d4-49bf-99cc-c0463db03a90",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "535650"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Ammonia",
-          "unit": "mg/l",
-          "range": "1-50"
-        }
-      ]
-    },
-    {
-      "name": "Chloride",
-      "uuid": "4f8fcb4b-35f6-40df-aa1c-c3f4a96352d4",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515910BT"
+            "name": "Aluminium",
+            "uuid": "76defb64-592f-405c-b491-77ffa76fbad8",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515460BT"
+                },
+                {
+                    "code": "515470BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Aluminium",
+                    "unit": "mg/l",
+                    "range": "0.01-0.3"
+                }
+            ]
         },
         {
-          "code": "515920BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Chloride",
-          "unit": "mg/l",
-          "range": "0.5-25"
-        }
-      ]
-    },
-    {
-      "name": "Chloride",
-      "uuid": "e2849dba-6486-4ceb-b5fd-58472d61fe5e",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "56L025165"
+            "name": "Ammonia",
+            "uuid": "f0d60451-a220-4113-821d-3a658167cc9f",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "512580BT"
+                },
+                {
+                    "code": "512590BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l",
+                    "range": "0.02-1"
+                }
+            ]
         },
         {
-          "code": "56L025365"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Chloride",
-          "unit": "mg/l",
-          "range": "0.5-20"
-        }
-      ]
-    },
-    {
-      "name": "Total, Free & Combined Chlorine",
-      "uuid": "69f3e1f9-0d74-4ab5-aa32-6431b8d3b088",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "511050BT"
+            "name": "Ammonia",
+            "uuid": "538ab4d3-706b-4c5e-93a9-adb5c13b1be9",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "535500"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l",
+                    "range": "0.01-0.8"
+                }
+            ]
         },
         {
-          "code": "511080BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.01-6"
+            "name": "Ammonia",
+            "uuid": "3221bdba-8898-4ae2-958f-5f6a1f949c8f",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "535600"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l",
+                    "range": "0.02-2.5"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Combined Chlorine",
-          "unit": "mg/l",
-          "range": "0.01-6"
+            "name": "Ammonia",
+            "uuid": "17ca9214-23d4-49bf-99cc-c0463db03a90",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "535650"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "unit": "mg/l",
+                    "range": "1-50"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Chlorine",
-          "unit": "mg/l",
-          "range": "0.01-6"
-        }
-      ]
-    },
-    {
-      "name": "Free Chlorine",
-      "uuid": "6450764c-4a97-4d45-adeb-ffd15786c8c3",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "511050BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.01-6"
-        }
-      ]
-    },
-    {
-      "name": "Total, Free & Combined Chlorine",
-      "uuid": "6ae5a50f-06cd-4869-89b3-313b26ca8b54",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "471056"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-4"
+            "name": "Chloride",
+            "uuid": "4f8fcb4b-35f6-40df-aa1c-c3f4a96352d4",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515910BT"
+                },
+                {
+                    "code": "515920BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chloride",
+                    "unit": "mg/l",
+                    "range": "0.5-25"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Combined Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-4"
+            "name": "Chloride",
+            "uuid": "e2849dba-6486-4ceb-b5fd-58472d61fe5e",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "56L025165"
+                },
+                {
+                    "code": "56L025365"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chloride",
+                    "unit": "mg/l",
+                    "range": "0.5-20"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-4"
-        }
-      ]
-    },
-    {
-      "name": "Free Chlorine",
-      "uuid": "e4996792-33e7-46d3-a348-6f37f6f56af1",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "471010, 471020"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-4"
-        }
-      ]
-    },
-    {
-      "name": "Total, Free & Combined Chlorine",
-      "uuid": "280b6b7b-1781-4923-b0da-60c2a8f2f711",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "511500BT"
+            "name": "Chlorine",
+            "uuid": "69f3e1f9-0d74-4ab5-aa32-6431b8d3b088",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "511050BT"
+                },
+                {
+                    "code": "511080BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.01-6"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.01-6"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.01-6"
+                }
+            ]
         },
         {
-          "code": "511590BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-10"
+            "name": "Chlorine",
+            "uuid": "6450764c-4a97-4d45-adeb-ffd15786c8c3",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "511050BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.01-6"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Combined Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-10"
+            "name": "Chlorine",
+            "uuid": "6ae5a50f-06cd-4869-89b3-313b26ca8b54",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "471056"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-4"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-4"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-4"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-10"
-        }
-      ]
-    },
-    {
-      "name": "Free Chlorine",
-      "uuid": "7c6efb6a-bc98-4c00-a9f9-1fee29ebb460",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "511500BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-10"
-        }
-      ]
-    },
-    {
-      "name": "Total, Free & Combined Chlorine",
-      "uuid": "925a8f1e-3d0c-4cd7-b9c2-0bfe7f37779d",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "530100"
+            "name": "Chlorine",
+            "uuid": "e4996792-33e7-46d3-a348-6f37f6f56af1",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "471010, 471020"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-4"
+                }
+            ]
         },
         {
-          "code": "530120"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-2"
+            "name": "Chlorine",
+            "uuid": "280b6b7b-1781-4923-b0da-60c2a8f2f711",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "511500BT"
+                },
+                {
+                    "code": "511590BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-10"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-10"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-10"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Combined Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-2"
+            "name": "Chlorine",
+            "uuid": "7c6efb6a-bc98-4c00-a9f9-1fee29ebb460",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "511500BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-10"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-2"
-        }
-      ]
-    },
-    {
-      "name": "Free Chlorine",
-      "uuid": "c1159ae9-dd68-4e25-ba86-5167d31c2f9e",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "530100"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.02-2"
-        }
-      ]
-    },
-    {
-      "name": "Total, Free & Combined Chlorine",
-      "uuid": "3934797e-8d83-4d2c-96e8-ad0e52a77be2",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "530100"
+            "name": "Chlorine",
+            "uuid": "925a8f1e-3d0c-4cd7-b9c2-0bfe7f37779d",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "530100"
+                },
+                {
+                    "code": "530120"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                }
+            ]
         },
         {
-          "code": "530120"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-8"
+            "name": "Chlorine",
+            "uuid": "c1159ae9-dd68-4e25-ba86-5167d31c2f9e",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "530100"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Combined Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-8"
+            "name": "Chlorine",
+            "uuid": "3934797e-8d83-4d2c-96e8-ad0e52a77be2",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "530100"
+                },
+                {
+                    "code": "530120"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-8"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-8"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-8"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-8"
-        }
-      ]
-    },
-    {
-      "name": "Free Chlorine",
-      "uuid": "cf4822db-15cc-4aaa-91f5-cfb2ea45aabc",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "530100"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Chlorine",
-          "unit": "mg/l",
-          "range": "0.1-8"
-        }
-      ]
-    },
-    {
-      "name": "Chromium (VI, III, Total)",
-      "uuid": "b6b46404-3392-4718-ac35-d2379c0f7d6d",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "537300"
+            "name": "Chlorine",
+            "uuid": "cf4822db-15cc-4aaa-91f5-cfb2ea45aabc",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "530100"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Chlorine",
+                    "unit": "mg/l",
+                    "range": "0.1-8"
+                }
+            ]
         },
         {
-          "code": "537310"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Chromium (VI)",
-          "unit": "mg/l",
-          "range": "0.02-2"
+            "name": "Chromium",
+            "uuid": "b6b46404-3392-4718-ac35-d2379c0f7d6d",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "537300"
+                },
+                {
+                    "code": "537310"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chromium (VI)",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                },
+                {
+                    "id": 2,
+                    "name": "Chromium (III)",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Chromium",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Chromium (III)",
-          "unit": "mg/l",
-          "range": "0.02-2"
+            "name": "Chromium",
+            "uuid": "b6b12955-46ae-4be7-8c57-e2ccb417bd7b",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "537310"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chromium (VI)",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Chromium",
-          "unit": "mg/l",
-          "range": "0.02-2"
-        }
-      ]
-    },
-    {
-      "name": "Chromium (VI)",
-      "uuid": "b6b12955-46ae-4be7-8c57-e2ccb417bd7b",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "537310"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Chromium (VI)",
-          "unit": "mg/l",
-          "range": "0.02-2"
-        }
-      ]
-    },
-    {
-      "name": "Total Chromium (III+VI)",
-      "uuid": "cdbbd63a-2740-4e42-9b4b-5a3d490d9df3",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "537300"
+            "name": "Chromium",
+            "uuid": "cdbbd63a-2740-4e42-9b4b-5a3d490d9df3",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "537300"
+                },
+                {
+                    "code": "537310"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Chromium",
+                    "unit": "mg/l",
+                    "range": "0.02-2"
+                }
+            ]
         },
         {
-          "code": "537310"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Total Chromium",
-          "unit": "mg/l",
-          "range": "0.02-2"
-        }
-      ]
-    },
-    {
-      "name": "COD",
-      "uuid": "f15575d4-141e-4696-9c99-59cc2d3153b9",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "results": [
-        {
-          "id": 1,
-          "name": "COD",
-          "unit": "mg/l",
-          "range": "0-150"
-        }
-      ]
-    },
-    {
-      "name": "COD",
-      "uuid": "c99c85fa-ab1a-4065-b959-9991fb84dd90",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "results": [
-        {
-          "id": 1,
-          "name": "COD",
-          "unit": "mg/l",
-          "range": "0-1500"
-        }
-      ]
-    },
-    {
-      "name": "COD",
-      "uuid": "cf6a1ce4-0e5d-42a9-827d-606b771e0ffe",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "results": [
-        {
-          "id": 1,
-          "name": "COD",
-          "unit": "g/l",
-          "range": "0-15"
-        }
-      ]
-    },
-    {
-      "name": "Copper",
-      "uuid": "dd4c2d20-0a23-4e2c-9a6a-1dfdf7533b50",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "513550BT"
+            "name": "COD",
+            "uuid": "f15575d4-141e-4696-9c99-59cc2d3153b9",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "COD",
+                    "unit": "mg/l",
+                    "range": "0-150"
+                }
+            ]
         },
         {
-          "code": "513560BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free Copper",
-          "unit": "mg/l",
-          "range": "0.05-5"
+            "name": "COD",
+            "uuid": "c99c85fa-ab1a-4065-b959-9991fb84dd90",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "COD",
+                    "unit": "mg/l",
+                    "range": "0-1500"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Combined Copper",
-          "unit": "mg/l",
-          "range": "0.05-5"
+            "name": "COD",
+            "uuid": "cf6a1ce4-0e5d-42a9-827d-606b771e0ffe",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "COD",
+                    "unit": "g/l",
+                    "range": "0-15"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Copper",
-          "unit": "mg/l",
-          "range": "0.05-5"
-        }
-      ]
-    },
-    {
-      "name": "Cyanide",
-      "uuid": "6ecb41e7-b962-4a50-8408-b5c608bf86e4",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "2418875"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Cyanide",
-          "unit": "mg/l",
-          "range": "0.01-0.5"
-        }
-      ]
-    },
-    {
-      "name": "Fluoride",
-      "uuid": "d839537b-8106-44e8-953a-6060e4dbe59d",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "467481"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Fluoride",
-          "unit": "mg/l",
-          "range": "0.05-2"
-        }
-      ]
-    },
-    {
-      "name": "Calcium Hardness",
-      "uuid": "3e7c94de-1963-4b59-b196-de40aa126a24",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515650"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Calcium Hardness",
-          "unit": "mg/l",
-          "range": "50-900"
-        }
-      ]
-    },
-    {
-      "name": "Calcium Hardness",
-      "uuid": "072cab32-3e4c-41f3-8378-e14626afa5b0",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "517761BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Calcium Hardness",
-          "unit": "mg/l",
-          "range": "0-500"
-        }
-      ]
-    },
-    {
-      "name": "Total Hardness",
-      "uuid": "d4d57975-5e87-4ba9-b9d1-09ec2eb8f500",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515660BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Total Hardness",
-          "unit": "mg/l",
-          "range": "2-50"
-        }
-      ]
-    },
-    {
-      "name": "Total Hardness",
-      "uuid": "5d82d3a3-cfb3-40fb-a739-49e308b0f9b4",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515660BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Total Hardness",
-          "unit": "mg/l",
-          "range": "20-500"
-        }
-      ]
-    },
-    {
-      "name": "Iron",
-      "uuid": "ac65e12d-632a-439d-b841-383b1b9b7026",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515370BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Iron",
-          "unit": "mg/l",
-          "range": "0.02-1"
-        }
-      ]
-    },
-    {
-      "name": "Iron",
-      "uuid": "7a9457b0-96c2-487d-b3d3-c52c50fb2279",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "530560"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Iron",
-          "unit": "mg/l",
-          "range": "0.02-3"
-        }
-      ]
-    },
-    {
-      "name": "Total Iron",
-      "uuid": "928f2cf7-7c98-4707-af3b-2e12e0d2d46b",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "530550"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Iron",
-          "unit": "mg/l",
-          "range": "0.02-1.8"
-        }
-      ]
-    },
-    {
-      "name": "Iron",
-      "uuid": "1f704c37-9dbe-4ca7-a3da-00adc1e5fa0b",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "56L006165"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Iron",
-          "unit": "mg/l",
-          "range": "0.03-2"
-        }
-      ]
-    },
-    {
-      "name": "Iron",
-      "uuid": "bdcf8941-f7df-4c04-9242-fc8a5b3af672",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "56L006365"
+            "name": "Copper",
+            "uuid": "dd4c2d20-0a23-4e2c-9a6a-1dfdf7533b50",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "513550BT"
+                },
+                {
+                    "code": "513560BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free Copper",
+                    "unit": "mg/l",
+                    "range": "0.05-5"
+                },
+                {
+                    "id": 2,
+                    "name": "Combined Copper",
+                    "unit": "mg/l",
+                    "range": "0.05-5"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Copper",
+                    "unit": "mg/l",
+                    "range": "0.05-5"
+                }
+            ]
         },
         {
-          "code": "56L016065"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Iron",
-          "unit": "mg/l",
-          "range": "0.1-10"
-        }
-      ]
-    },
-    {
-      "name": "Manganese",
-      "uuid": "21c1bc13-51c2-4770-8fae-7d0685b49370",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "SDT349-50"
+            "name": "Cyanide",
+            "uuid": "6ecb41e7-b962-4a50-8408-b5c608bf86e4",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "2418875"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Cyanide",
+                    "unit": "mg/l",
+                    "range": "0.01-0.5"
+                }
+            ]
         },
         {
-          "code": "SDT350-50"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Manganese",
-          "unit": "mg/l",
-          "range": "0.2-4"
-        }
-      ]
-    },
-    {
-      "name": "Nickel",
-      "uuid": "01b9ddba-c93c-416f-9420-a444a7fbd36f",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515630BT"
+            "name": "Fluoride",
+            "uuid": "d839537b-8106-44e8-953a-6060e4dbe59d",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "467481"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Fluoride",
+                    "unit": "mg/l",
+                    "range": "0.05-2"
+                }
+            ]
         },
         {
-          "code": "515640BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Nickel",
-          "unit": "mg/l",
-          "range": "0.1-10"
-        }
-      ]
-    },
-    {
-      "name": "Nitrate",
-      "uuid": "a213cf40-7cb8-4828-872e-25bf2b8b12aa",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "535580"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrate",
-          "unit": "mg/l",
-          "range": "1-30"
-        }
-      ]
-    },
-    {
-      "name": "Nitrate",
-      "uuid": "252298b1-5c2b-4b7d-9385-cc25d617725d",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "465230"
+            "name": "Calcium Hardness",
+            "uuid": "3e7c94de-1963-4b59-b196-de40aa126a24",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515650"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Calcium Hardness",
+                    "unit": "mg/l",
+                    "range": "50-900"
+                }
+            ]
         },
         {
-          "code": "502810"
+            "name": "Calcium Hardness",
+            "uuid": "072cab32-3e4c-41f3-8378-e14626afa5b0",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "517761BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Calcium Hardness",
+                    "unit": "mg/l",
+                    "range": "0-500"
+                }
+            ]
         },
         {
-          "code": "512310BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrate",
-          "unit": "mg/l",
-          "range": "0.08-1"
-        }
-      ]
-    },
-    {
-      "name": "Nitrite",
-      "uuid": "22963cac-e81d-43db-a84b-e71c27a3dd60",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "512310BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrite",
-          "unit": "mg/l",
-          "range": "0.01-0.5"
-        }
-      ]
-    },
-    {
-      "name": "Nitrite",
-      "uuid": "1ad51f5d-bfea-4a49-8797-efd899d7f484",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "530980"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrite",
-          "unit": "mg/l",
-          "range": "0.01-0.3"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate (ortho)",
-      "uuid": "8e096f48-19bf-4446-8fc7-a824d0b00f7c",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "513040BT"
+            "name": "Total Hardness",
+            "uuid": "d4d57975-5e87-4ba9-b9d1-09ec2eb8f500",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515660BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Hardness",
+                    "unit": "mg/l",
+                    "range": "2-50"
+                }
+            ]
         },
         {
-          "code": "513050BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate (ortho)",
-          "unit": "mg/l",
-          "range": "0.05-4"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate (ortho)",
-      "uuid": "853d210d-647d-4482-b57e-f24ff0422bd3",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515810BT"
+            "name": "Total Hardness",
+            "uuid": "5d82d3a3-cfb3-40fb-a739-49e308b0f9b4",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515660BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Hardness",
+                    "unit": "mg/l",
+                    "range": "20-500"
+                }
+            ]
         },
         {
-          "code": "515820BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate (ortho)",
-          "unit": "mg/l",
-          "range": "1-80"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate (ortho)",
-      "uuid": "ef94c4fc-be81-4a25-b879-7c0ab18efe43",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "531550"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate (ortho)",
-          "unit": "mg/l",
-          "range": "0.06-2.5"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate",
-      "uuid": "eb1f2bd6-a505-43b2-ba67-73f866e8d1ac",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "56L022865"
+            "name": "Iron",
+            "uuid": "ac65e12d-632a-439d-b841-383b1b9b7026",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515370BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l",
+                    "range": "0.02-1"
+                }
+            ]
         },
         {
-          "code": "56L022965"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate",
-          "unit": "mg/l",
-          "range": "5-80"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "58bd3f92-7092-4bfa-ac4a-1f3f24b85b6c",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515700BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "5.2-6.8"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "6b6e9183-215f-4dc2-94a9-68444b1ec0df",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "511770BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "6.5-8.4"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "976a33ff-a5cd-4a21-98ed-f07cd94f018e",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "471040"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "6.5-8.4"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "635fe6af-b66b-48b4-aa62-0b6a8db0a493",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515710"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "8-9.6"
-        }
-      ]
-    },
-    {
-      "name": "Potassium",
-      "uuid": "6b485134-e6e5-4db1-88b3-d96ff081e629",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515670"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Potassium",
-          "unit": "mg/l",
-          "range": "0.7-12"
-        }
-      ]
-    },
-    {
-      "name": "Sulfate",
-      "uuid": "4275391e-1498-4623-a068-e3f40dea8c29",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "515450BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Sulfate",
-          "unit": "mg/l",
-          "range": "5-100"
-        }
-      ]
-    },
-    {
-      "name": "Sulfate",
-      "uuid": "64248882-405c-4ec2-b433-5977bf505ffb",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "532160"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Sulfate",
-          "unit": "mg/l",
-          "range": "5-100"
-        }
-      ]
-    },
-    {
-      "name": "Suspended Solids",
-      "uuid": "51c6bbf7-f027-478d-8a60-37404537d819",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "results": [
-        {
-          "id": 1,
-          "name": "Suspended Solids",
-          "unit": "mg/l",
-          "range": "0-750"
-        }
-      ]
-    },
-    {
-      "name": "Turbidity",
-      "uuid": "90d6c006-2646-4c79-aa17-bb0ec47e2007",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "results": [
-        {
-          "id": 1,
-          "name": "Turbidity",
-          "unit": "FAU",
-          "range": "0-1000"
-        }
-      ]
-    },
-    {
-      "name": "Zinc",
-      "uuid": "b662c6f2-9718-4276-9e67-1d3ae0c1651d",
-      "sample": "Water",
-      "device": "Photometer",
-      "brand": "Lovibond",
-      "model": "MD610",
-      "reagents": [
-        {
-          "code": "512620BT"
+            "name": "Iron",
+            "uuid": "7a9457b0-96c2-487d-b3d3-c52c50fb2279",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "530560"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l",
+                    "range": "0.02-3"
+                }
+            ]
         },
         {
-          "code": "512390BT"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Zinc",
-          "unit": "mg/l",
-          "range": "0.02-0.9"
-        }
-      ]
-    },
-    {
-      "name": "E.coli",
-      "uuid": "e40d4764-e73f-46dd-a598-ed4db0fd3386",
-      "sample": "Water",
-      "device": "Microbiology",
-      "brand": "Aquagenx",
-      "model": "CBT",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Health Risk Category (Based on MPN and Confidence Interval)"
+            "name": "Iron",
+            "uuid": "928f2cf7-7c98-4707-af3b-2e12e0d2d46b",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "530550"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l",
+                    "range": "0.02-1.8"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "MPN",
-          "unit": "MPN/100ml",
-          "range": "0-100"
+            "name": "Iron",
+            "uuid": "1f704c37-9dbe-4ca7-a3da-00adc1e5fa0b",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "56L006165"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l",
+                    "range": "0.03-2"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Upper 95% Confidence Interval"
-        }
-      ]
-    },
-    {
-      "name": "E.coli",
-      "uuid": "5baa9d29-b271-4521-b05f-4bfd645c26cf",
-      "sample": "Water",
-      "device": "Microbiology",
-      "brand": "Aquagenx",
-      "model": "CBT",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "US EPA Recreational Health Risk Category Based on MPN and Upper 95% Confidence Level"
+            "name": "Iron",
+            "uuid": "bdcf8941-f7df-4c04-9242-fc8a5b3af672",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "56L006365"
+                },
+                {
+                    "code": "56L016065"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "unit": "mg/l",
+                    "range": "0.1-10"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "MPN",
-          "unit": "MPN/100ml",
-          "range": "0-1000"
+            "name": "Manganese",
+            "uuid": "21c1bc13-51c2-4770-8fae-7d0685b49370",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "SDT349-50"
+                },
+                {
+                    "code": "SDT350-50"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Manganese",
+                    "unit": "mg/l",
+                    "range": "0.2-4"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Upper 95% Confidence Interval"
-        }
-      ]
-    },
-    {
-      "name": "Alkalinity Total M",
-      "uuid": "cbcad2d6-0266-429a-a6dd-340d80c7833e",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "513200"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Alkalinity Total M)",
-          "chemical": "CaCO3",
-          "unit": "mg/l",
-          "range": "20-240"
-        }
-      ]
-    },
-    {
-      "name": "Aluminium",
-      "uuid": "d6ab94a9-e048-4c1a-a152-a885cd2180fa",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "51 54 60"
+            "name": "Nickel",
+            "uuid": "01b9ddba-c93c-416f-9420-a444a7fbd36f",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515630BT"
+                },
+                {
+                    "code": "515640BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nickel",
+                    "unit": "mg/l",
+                    "range": "0.1-10"
+                }
+            ]
         },
         {
-          "code": "51 57 70"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Aluminium",
-          "chemical": "Al",
-          "unit": "mg/l",
-          "range": "0-0.3"
-        }
-      ]
-    },
-    {
-      "name": "Ammonia",
-      "uuid": "07dbd69d-64e7-46bc-898f-a9773fd1de64",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "51 25 80"
+            "name": "Nitrate",
+            "uuid": "a213cf40-7cb8-4828-872e-25bf2b8b12aa",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "535580"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate",
+                    "unit": "mg/l",
+                    "range": "1-30"
+                }
+            ]
         },
         {
-          "code": "51 25 90"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Ammonia",
-          "chemical": "N",
-          "unit": "mg/l",
-          "range": "0-1"
-        }
-      ]
-    },
-    {
-      "name": "Chlorine",
-      "uuid": "57130c69-c39a-42de-8b0a-cd66ecab2794",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "511310"
+            "name": "Nitrate",
+            "uuid": "252298b1-5c2b-4b7d-9385-cc25d617725d",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "465230"
+                },
+                {
+                    "code": "502810"
+                },
+                {
+                    "code": "512310BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate",
+                    "unit": "mg/l",
+                    "range": "0.08-1"
+                }
+            ]
         },
         {
-          "code": "511290"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free chlorine",
-          "chemical": "Cl",
-          "unit": "mg/l",
-          "range": "0-1"
+            "name": "Nitrite",
+            "uuid": "22963cac-e81d-43db-a84b-e71c27a3dd60",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "512310BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrite",
+                    "unit": "mg/l",
+                    "range": "0.01-0.5"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Total chlorine",
-          "chemical": "Cl",
-          "unit": "mg/l",
-          "range": "0-1"
-        }
-      ]
-    },
-    {
-      "name": "Chlorine",
-      "uuid": "485a7b84-ba54-4cc8-a222-79586d9319c8",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "511310"
+            "name": "Nitrite",
+            "uuid": "1ad51f5d-bfea-4a49-8797-efd899d7f484",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "530980"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrite",
+                    "unit": "mg/l",
+                    "range": "0.01-0.3"
+                }
+            ]
         },
         {
-          "code": "511290"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Free chlorine",
-          "chemical": "Cl",
-          "unit": "mg/l",
-          "range": "0-4"
+            "name": "Phosphate",
+            "uuid": "8e096f48-19bf-4446-8fc7-a824d0b00f7c",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "513040BT"
+                },
+                {
+                    "code": "513050BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate (ortho)",
+                    "unit": "mg/l",
+                    "range": "0.05-4"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Total chlorine",
-          "chemical": "Cl",
-          "unit": "mg/l",
-          "range": "0-4"
-        }
-      ]
-    },
-    {
-      "name": "Copper",
-      "uuid": "472e5a45-42b4-4712-93bb-5c79e970402d",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "512620"
+            "name": "Phosphate",
+            "uuid": "853d210d-647d-4482-b57e-f24ff0422bd3",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515810BT"
+                },
+                {
+                    "code": "515820BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate (ortho)",
+                    "unit": "mg/l",
+                    "range": "1-80"
+                }
+            ]
         },
         {
-          "code": "512350"
+            "name": "Phosphate",
+            "uuid": "ef94c4fc-be81-4a25-b879-7c0ab18efe43",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "531550"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate (ortho)",
+                    "unit": "mg/l",
+                    "range": "0.06-2.5"
+                }
+            ]
         },
         {
-          "code": "512390"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Copper",
-          "chemical": "Cu",
-          "unit": "mg/l",
-          "range": "0-1"
-        }
-      ]
-    },
-    {
-      "name": "Fluoride",
-      "uuid": "ac6410bf-b5a3-4040-8048-ddf381223a3b",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "467481"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Fluoride",
-          "chemical": "F",
-          "unit": "mg/l",
-          "range": "0.2-2"
-        }
-      ]
-    },
-    {
-      "name": "Iron",
-      "uuid": "d37cb613-9489-485b-bca6-ffe95e0c3fad",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "515370"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Iron",
-          "chemical": "Fe",
-          "unit": "mg/l",
-          "range": "0-1"
-        }
-      ]
-    },
-    {
-      "name": "Iron",
-      "uuid": "66f5badc-fa4b-474e-9e0a-0de4bd9a8243",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "515380"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Iron",
-          "chemical": "Fe",
-          "unit": "mg/l",
-          "range": "1-10"
-        }
-      ]
-    },
-    {
-      "name": "Manganese",
-      "uuid": "01f43523-7eb8-4c19-8790-6add5d36b6a3",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "535090"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Manganese",
-          "chemical": "Mn",
-          "unit": "mg/l",
-          "range": "0.1-0.7"
-        }
-      ]
-    },
-    {
-      "name": "Nitrate",
-      "uuid": "e4934b9f-bdc7-41a3-aca6-883bf6e9ff63",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "465230"
+            "name": "Phosphate",
+            "uuid": "eb1f2bd6-a505-43b2-ba67-73f866e8d1ac",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "56L022865"
+                },
+                {
+                    "code": "56L022965"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "unit": "mg/l",
+                    "range": "5-80"
+                }
+            ]
         },
         {
-          "code": "502810"
+            "name": "pH",
+            "uuid": "58bd3f92-7092-4bfa-ac4a-1f3f24b85b6c",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515700BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "5.2-6.8"
+                }
+            ]
         },
         {
-          "code": "512310"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrate",
-          "chemical": "NO3",
-          "unit": "mg/l",
-          "range": "0-1"
-        }
-      ]
-    },
-    {
-      "name": "Nitrite",
-      "uuid": "8fe520e7-aca7-4691-b7b5-9abfd8788c66",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "512310"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrite",
-          "chemical": "N",
-          "unit": "mg/l",
-          "range": "0-0.5"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "5e2910c9-01e4-43c9-bb81-65bd28a52df0",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "515440"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "0-14"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate",
-      "uuid": "7108f891-1c79-4b0f-8e0a-adc7ce5a4348",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "531550"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate",
-          "chemical": "PO4",
-          "unit": "mg/l",
-          "range": "0-2.5"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate",
-      "uuid": "bec2a100-6fa1-4f3a-82f1-52cd7f2938b0",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "513040"
+            "name": "pH",
+            "uuid": "6b6e9183-215f-4dc2-94a9-68444b1ec0df",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "511770BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "6.5-8.4"
+                }
+            ]
         },
         {
-          "code": "513050"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate",
-          "chemical": "PO4",
-          "unit": "mg/l",
-          "range": "0-4"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate",
-      "uuid": "5191f203-d60c-4f47-a38b-569c34f5fc54",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "CHECKIT Comparator",
-      "hasImage": true,
-      "reagents": [
-        {
-          "code": "511980"
-        }
-      ],
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate",
-          "chemical": "PO4",
-          "unit": "mg/l",
-          "range": "0-80"
-        }
-      ]
-    },
-    {
-      "name": "Ammonium",
-      "uuid": "99abf0cd-4697-4880-bde0-933d32d3972c",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "91315",
-      "brand": "Quantofix",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Ammonium",
-          "chemical": "NH4+",
-          "unit": "mg/l",
-          "range": "0-400"
-        }
-      ]
-    },
-    {
-      "name": "Arsenic",
-      "uuid": "32b6d11b-c7f3-475f-adf9-32d9b8f4aecf",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "2822800-500",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Arsenic",
-          "chemical": "As",
-          "unit": "ug/l",
-          "range": "0-500"
-        }
-      ]
-    },
-    {
-      "name": "Arsenic",
-      "uuid": "beca9731-63f4-434f-a3c2-ac33b44f9992",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "2822800-4000",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Arsenic",
-          "chemical": "As",
-          "unit": "ug/l",
-          "range": "0-4000"
-        }
-      ]
-    },
-    {
-      "name": "Chloride",
-      "uuid": "4c3a4192-c484-4329-8240-71e4c7cd2280",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "91321",
-      "brand": "Quantofix",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Chloride",
-          "chemical": "Cl",
-          "unit": "mg/l",
-          "range": "0-3000"
-        }
-      ]
-    },
-    {
-      "name": "Chlorine, Hardness, Alkalinity, pH",
-      "uuid": "2456d482-dbec-466c-8387-411a4093f6b6",
-      "multiParameter": "true",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "2755250",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Total Chlorine",
-          "chemical": "Cl2",
-          "unit": "mg/l",
-          "range": "0-10"
+            "name": "pH",
+            "uuid": "976a33ff-a5cd-4a21-98ed-f07cd94f018e",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "471040"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "6.5-8.4"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Free Chlorine",
-          "chemical": "Cl2",
-          "unit": "mg/l",
-          "range": "0-10"
+            "name": "pH",
+            "uuid": "635fe6af-b66b-48b4-aa62-0b6a8db0a493",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515710"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "8-9.6"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Total Hardness",
-          "chemical": "CaCO3",
-          "unit": "mg/l",
-          "range": "0-425"
+            "name": "Potassium",
+            "uuid": "6b485134-e6e5-4db1-88b3-d96ff081e629",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515670"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Potassium",
+                    "unit": "mg/l",
+                    "range": "0.7-12"
+                }
+            ]
         },
         {
-          "id": 4,
-          "name": "Total Alkalinity",
-          "chemical": "CaCO3",
-          "unit": "mg/l",
-          "range": "0-240"
+            "name": "Sulfate",
+            "uuid": "4275391e-1498-4623-a068-e3f40dea8c29",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "515450BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Sulfate",
+                    "unit": "mg/l",
+                    "range": "5-100"
+                }
+            ]
         },
         {
-          "id": 5,
-          "name": "pH",
-          "range": "6.2-8.4"
-        }
-      ]
-    },
-    {
-      "name": "Mercury",
-      "uuid": "af98ac35-dc55-4d86-bbdc-aa4a4e3100c9",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "480048",
-      "brand": "SenSafe",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Mercury",
-          "chemical": "Hg",
-          "unit": "mg/l",
-          "range": "0-0.08"
-        }
-      ]
-    },
-    {
-      "name": "Nitrate - N & Nitrite - N",
-      "uuid": "c801b70c-39e4-493a-b20e-6843158b47b4",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "27454",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrate Nitrogen",
-          "chemical": "NO3-N",
-          "unit": "mg/l",
-          "range": "0-50"
+            "name": "Sulfate",
+            "uuid": "64248882-405c-4ec2-b433-5977bf505ffb",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "532160"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Sulfate",
+                    "unit": "mg/l",
+                    "range": "5-100"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Nitrite Nitrogen",
-          "chemical": "NO2-N",
-          "unit": "mg/l",
-          "range": "0-3"
-        }
-      ]
-    },
-    {
-      "name": "Nitrate 100",
-      "uuid": "77957656-3b72-4f0f-9507-d555f04db952",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "91351",
-      "brand": "Quantofix",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrate",
-          "chemical": "NO3",
-          "unit": "mg/l",
-          "range": "0-100"
+            "name": "Suspended Solids",
+            "uuid": "51c6bbf7-f027-478d-8a60-37404537d819",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Suspended Solids",
+                    "unit": "mg/l",
+                    "range": "0-750"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Nitrite",
-          "chemical": "NO2",
-          "unit": "mg/l",
-          "range": "0-50"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "debbbf5e-fe0c-4b9c-be1f-6ed8142b6b07",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "27456",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "4-9"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "c2669bb7-ad63-4a69-a16a-798b81d2b019",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "1095350001",
-      "brand": "Merck",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "0-14"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate",
-      "uuid": "39e7ea7e-9884-407d-a99a-ac3b4d9c9599",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "91320",
-      "brand": "Quantofix",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate",
-          "chemical": "PO4",
-          "unit": "mg/l",
-          "range": "0-100"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate",
-      "uuid": "f4c57d34-dd17-4750-9fcd-fe26af2621a7",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "27571",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate",
-          "chemical": "PO4",
-          "unit": "mg/l",
-          "range": "0-50"
-        }
-      ]
-    },
-    {
-      "name": "Potassium",
-      "uuid": "a18118e7-6382-4d16-b5fb-55f97cd99083",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "117985",
-      "brand": "Merck",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Potassium",
-          "chemical": "K",
-          "unit": "mg/l",
-          "range": "0-1000"
-        }
-      ]
-    },
-    {
-      "name": "Total & Free Chlorine",
-      "uuid": "bf1c19c0-9788-4e26-999e-1b5c6ca28111",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "27450",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Total Chlorine",
-          "chemical": "Cl2",
-          "unit": "mg/l",
-          "range": "0-10"
+            "name": "Turbidity",
+            "uuid": "90d6c006-2646-4c79-aa17-bb0ec47e2007",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Turbidity",
+                    "unit": "FAU",
+                    "range": "0-1000"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Free Chlorine",
-          "chemical": "Cl2",
-          "unit": "mg/l",
-          "range": "0-10"
-        }
-      ]
-    },
-    {
-      "name": "Total Iron",
-      "uuid": "459a42d9-0834-4656-9e5a-e3bde46bdcff",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "2745348",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Total Iron",
-          "chemical": "Fe",
-          "unit": "mg/l",
-          "range": "0-5"
-        }
-      ]
-    },
-    {
-      "name": "Total Iron",
-      "uuid": "5c90472e-9c06-4c7c-9f62-4c5cbcf6b1c1",
-      "sample": "Water",
-      "device": "Test Strip",
-      "productCode": "91344",
-      "brand": "Quantofix",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Total Iron",
-          "chemical": "Fe2+/3+",
-          "unit": "mg/l",
-          "range": "0-100"
-        }
-      ]
-    },
-    {
-      "name": "Nitrogen",
-      "uuid": "53a1649a-be67-4a13-8cba-1b7db640037c",
-      "sample": "Soil",
-      "device": "Test Strip",
-      "productCode": "27454",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Nitrogen",
-          "chemical": "N2",
-          "unit": "mg/l"
+            "name": "Zinc",
+            "uuid": "b662c6f2-9718-4276-9e67-1d3ae0c1651d",
+            "sample": "Water",
+            "device": "Photometer",
+            "brand": "Lovibond",
+            "model": "MD610",
+            "reagents": [
+                {
+                    "code": "512620BT"
+                },
+                {
+                    "code": "512390BT"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Zinc",
+                    "unit": "mg/l",
+                    "range": "0.02-0.9"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Nitrate Nitrogen",
-          "chemical": "NO3-N",
-          "unit": "mg/l",
-          "range": "0-50"
+            "name": "E.coli",
+            "uuid": "e40d4764-e73f-46dd-a598-ed4db0fd3386",
+            "sample": "Water",
+            "device": "Microbiology",
+            "brand": "Aquagenx",
+            "model": "CBT",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Health Risk Category (Based on MPN and Confidence Interval)"
+                },
+                {
+                    "id": 2,
+                    "name": "MPN",
+                    "unit": "MPN/100ml",
+                    "range": "0-100"
+                },
+                {
+                    "id": 3,
+                    "name": "Upper 95% Confidence Interval"
+                }
+            ]
         },
         {
-          "id": 3,
-          "name": "Nitrite Nitrogen",
-          "chemical": "NO2-N",
-          "unit": "mg/l",
-          "range": "0-3.0"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "895845dd-9990-49f3-b611-420551851acd",
-      "sample": "Soil",
-      "device": "Test Strip",
-      "productCode": "27456",
-      "brand": "Hach",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "4-9"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "e4d8a391-6ee4-4bd5-8e90-321bbbd9876b",
-      "sample": "Soil",
-      "device": "Test Strip",
-      "productCode": "1095350001",
-      "brand": "Merck",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "0-14"
-        }
-      ]
-    },
-    {
-      "name": "Phosphate",
-      "uuid": "5613d944-c10b-4b59-a779-cc7349dc8fa9",
-      "sample": "Soil",
-      "device": "Test Strip",
-      "productCode": "91320",
-      "brand": "Quantofix",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphate",
-          "chemical": "PO4",
-          "unit": "mg/l",
-          "range": "0-100"
-        }
-      ]
-    },
-    {
-      "name": "Phosphorous",
-      "uuid": "7cb666ea-7913-4511-9ae4-18f78e67aa09",
-      "sample": "Soil",
-      "device": "Test Strip",
-      "productCode": "91320",
-      "brand": "Quantofix",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Phosphorous",
-          "chemical": "P2",
-          "unit": "mg/l",
-          "range": "0-100"
-        }
-      ]
-    },
-    {
-      "name": "Potassium",
-      "uuid": "ac533acc-8ffc-48e1-a66e-2394f9a54050",
-      "sample": "Soil",
-      "device": "Test Strip",
-      "productCode": "117985",
-      "brand": "Merck",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Potassium",
-          "chemical": "K",
-          "unit": "mg/l",
-          "range": "0-1000"
-        }
-      ]
-    },
-    {
-      "name": "Electrical Conductivity",
-      "uuid": "80697cd1-acc9-4a15-8358-f32b4257dfaf",
-      "sample": "Soil",
-      "device": "Sensor",
-      "brand": "Caddisfly",
-      "results": [
-        {
-          "id": 1,
-          "name": "Soil Electrical Conductivity",
-          "unit": "μS/cm",
-          "range": "50-12800"
+            "name": "E.coli",
+            "uuid": "5baa9d29-b271-4521-b05f-4bfd645c26cf",
+            "sample": "Water",
+            "device": "Microbiology",
+            "brand": "Aquagenx",
+            "model": "CBT",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "US EPA Recreational Health Risk Category Based on MPN and Upper 95% Confidence Level"
+                },
+                {
+                    "id": 2,
+                    "name": "MPN",
+                    "unit": "MPN/100ml",
+                    "range": "0-1000"
+                },
+                {
+                    "id": 3,
+                    "name": "Upper 95% Confidence Interval"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Temperature",
-          "unit": "°Celsius"
-        }
-      ]
-    },
-    {
-      "name": "Moisture",
-      "uuid": "0b4a0aaa-f556-4c11-a539-c4626582cca6",
-      "sample": "Soil",
-      "device": "Sensor",
-      "brand": "Caddisfly",
-      "results": [
-        {
-          "id": 1,
-          "name": "Soil Moisture",
-          "unit": "VWC",
-          "range": "0-100"
-        }
-      ]
-    },
-    {
-      "name": "Electrical Conductivity",
-      "uuid": "f88237b7-be3d-4fac-bbee-ab328eefcd14",
-      "sample": "Water",
-      "device": "Sensor",
-      "brand": "Caddisfly",
-      "results": [
-        {
-          "id": 1,
-          "name": "Water Electrical Conductivity",
-          "unit": "μS/cm",
-          "range": "0-12500"
+            "name": "Alkalinity-m",
+            "uuid": "cbcad2d6-0266-429a-a6dd-340d80c7833e",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "513200"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Alkalinity Total M)",
+                    "chemical": "CaCO3",
+                    "unit": "mg/l",
+                    "range": "20-240"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Temperature",
-          "unit": "°Celsius"
-        }
-      ]
-    },
-    {
-      "name": "pH",
-      "uuid": "dbd058b6-29ed-4c7f-8b11-fcdae725a518",
-      "sample": "Water",
-      "device": "Sensor",
-      "brand": "Lovibond",
-      "model": "SD 50",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "0-14"
-        }
-      ]
-    },
-    {
-      "name": "Electrical Conductivity",
-      "uuid": "578c5768-273d-455f-ba12-57a6ced96c17",
-      "sample": "Water",
-      "device": "Sensor",
-      "brand": "Lovibond",
-      "model": "SD 70",
-      "hasImage": true,
-      "results": [
-        {
-          "id": 1,
-          "name": "Electrical Conductivity",
-          "unit": "μS/cm",
-          "range": "0-20000"
-        }
-      ]
-    },
-    {
-      "name": "Turbidity",
-      "uuid": "7af4cbcc-f1f5-4fa5-9416-3752f1af4519",
-      "sample": "Water",
-      "device": "Turbidity Tube",
-      "brand": "DelAgua",
-      "model": "Tube",
-      "results": [
-        {
-          "id": 1,
-          "name": "Turbidity",
-          "unit": "NTU",
-          "range": "0-2000"
-        }
-      ]
-    },
-    {
-      "name": "Chlorine, pH",
-      "uuid": "520ba67c-233f-4dc7-a2ad-17d86047d7c4",
-      "multiParameter": "true",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "Tester",
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "6.8-8.2"
+            "name": "Aluminium",
+            "uuid": "d6ab94a9-e048-4c1a-a152-a885cd2180fa",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "51 54 60"
+                },
+                {
+                    "code": "51 57 70"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Aluminium",
+                    "chemical": "Al",
+                    "unit": "mg/l",
+                    "range": "0-0.3"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Chlorine",
-          "chemical": "Cl",
-          "unit": "mg/l",
-          "range": "0.1-3.0"
-        }
-      ]
-    },
-    {
-      "name": "Chlorine, pH",
-      "uuid": "63e0e106-6ff6-4f57-a169-a32a4a821d42",
-      "multiParameter": "true",
-      "sample": "Water",
-      "device": "Tester",
-      "brand": "Lovibond",
-      "model": "Tester",
-      "results": [
-        {
-          "id": 1,
-          "name": "pH",
-          "range": "6.8-8.2"
+            "name": "Ammonia",
+            "uuid": "07dbd69d-64e7-46bc-898f-a9773fd1de64",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "51 25 80"
+                },
+                {
+                    "code": "51 25 90"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonia",
+                    "chemical": "N",
+                    "unit": "mg/l",
+                    "range": "0-1"
+                }
+            ]
         },
         {
-          "id": 2,
-          "name": "Chlorine",
-          "chemical": "Cl",
-          "unit": "mg/l",
-          "range": "0.5-6.0"
+            "name": "Chlorine",
+            "uuid": "57130c69-c39a-42de-8b0a-cd66ecab2794",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "511310"
+                },
+                {
+                    "code": "511290"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free chlorine",
+                    "chemical": "Cl",
+                    "unit": "mg/l",
+                    "range": "0-1"
+                },
+                {
+                    "id": 2,
+                    "name": "Total chlorine",
+                    "chemical": "Cl",
+                    "unit": "mg/l",
+                    "range": "0-1"
+                }
+            ]
+        },
+        {
+            "name": "Chlorine",
+            "uuid": "485a7b84-ba54-4cc8-a222-79586d9319c8",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "511310"
+                },
+                {
+                    "code": "511290"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Free chlorine",
+                    "chemical": "Cl",
+                    "unit": "mg/l",
+                    "range": "0-4"
+                },
+                {
+                    "id": 2,
+                    "name": "Total chlorine",
+                    "chemical": "Cl",
+                    "unit": "mg/l",
+                    "range": "0-4"
+                }
+            ]
+        },
+        {
+            "name": "Copper",
+            "uuid": "472e5a45-42b4-4712-93bb-5c79e970402d",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "512620"
+                },
+                {
+                    "code": "512350"
+                },
+                {
+                    "code": "512390"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Copper",
+                    "chemical": "Cu",
+                    "unit": "mg/l",
+                    "range": "0-1"
+                }
+            ]
+        },
+        {
+            "name": "Fluoride",
+            "uuid": "ac6410bf-b5a3-4040-8048-ddf381223a3b",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "467481"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Fluoride",
+                    "chemical": "F",
+                    "unit": "mg/l",
+                    "range": "0.2-2"
+                }
+            ]
+        },
+        {
+            "name": "Iron",
+            "uuid": "d37cb613-9489-485b-bca6-ffe95e0c3fad",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "515370"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "chemical": "Fe",
+                    "unit": "mg/l",
+                    "range": "0-1"
+                }
+            ]
+        },
+        {
+            "name": "Iron",
+            "uuid": "66f5badc-fa4b-474e-9e0a-0de4bd9a8243",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "515380"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Iron",
+                    "chemical": "Fe",
+                    "unit": "mg/l",
+                    "range": "1-10"
+                }
+            ]
+        },
+        {
+            "name": "Manganese",
+            "uuid": "01f43523-7eb8-4c19-8790-6add5d36b6a3",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "535090"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Manganese",
+                    "chemical": "Mn",
+                    "unit": "mg/l",
+                    "range": "0.1-0.7"
+                }
+            ]
+        },
+        {
+            "name": "Nitrate",
+            "uuid": "e4934b9f-bdc7-41a3-aca6-883bf6e9ff63",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "465230"
+                },
+                {
+                    "code": "502810"
+                },
+                {
+                    "code": "512310"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate",
+                    "chemical": "NO3",
+                    "unit": "mg/l",
+                    "range": "0-1"
+                }
+            ]
+        },
+        {
+            "name": "Nitrite",
+            "uuid": "8fe520e7-aca7-4691-b7b5-9abfd8788c66",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "512310"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrite",
+                    "chemical": "N",
+                    "unit": "mg/l",
+                    "range": "0-0.5"
+                }
+            ]
+        },
+        {
+            "name": "pH",
+            "uuid": "5e2910c9-01e4-43c9-bb81-65bd28a52df0",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "515440"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "0-14"
+                }
+            ]
+        },
+        {
+            "name": "Phosphate",
+            "uuid": "7108f891-1c79-4b0f-8e0a-adc7ce5a4348",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "531550"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "chemical": "PO4",
+                    "unit": "mg/l",
+                    "range": "0-2.5"
+                }
+            ]
+        },
+        {
+            "name": "Phosphate",
+            "uuid": "bec2a100-6fa1-4f3a-82f1-52cd7f2938b0",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "513040"
+                },
+                {
+                    "code": "513050"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "chemical": "PO4",
+                    "unit": "mg/l",
+                    "range": "0-4"
+                }
+            ]
+        },
+        {
+            "name": "Phosphate",
+            "uuid": "5191f203-d60c-4f47-a38b-569c34f5fc54",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "511980"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "chemical": "PO4",
+                    "unit": "mg/l",
+                    "range": "0-80"
+                }
+            ]
+        },
+        {
+            "name": "Zinc",
+            "uuid": "90cd957c-b40a-4c88-8881-4fb1cc6c12c6",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "CHECKIT Comparator",
+            "hasImage": true,
+            "reagents": [
+                {
+                    "code": "512620"
+                },
+                {
+                    "code": "512350"
+                },
+                {
+                    "code": "512390"
+                }
+            ],
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Zinc",
+                    "chemical": "Zn",
+                    "unit": "mg/l",
+                    "range": "0-1"
+                }
+            ]
+        },
+        {
+            "name": "Ammonium",
+            "uuid": "99abf0cd-4697-4880-bde0-933d32d3972c",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "91315",
+            "brand": "Quantofix",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Ammonium",
+                    "chemical": "NH4+",
+                    "unit": "mg/l",
+                    "range": "0-400"
+                }
+            ]
+        },
+        {
+            "name": "Arsenic",
+            "uuid": "32b6d11b-c7f3-475f-adf9-32d9b8f4aecf",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "2822800-500",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Arsenic",
+                    "chemical": "As",
+                    "unit": "ug/l",
+                    "range": "0-500"
+                }
+            ]
+        },
+        {
+            "name": "Arsenic",
+            "uuid": "beca9731-63f4-434f-a3c2-ac33b44f9992",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "2822800-4000",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Arsenic",
+                    "chemical": "As",
+                    "unit": "ug/l",
+                    "range": "0-4000"
+                }
+            ]
+        },
+        {
+            "name": "Chloride",
+            "uuid": "4c3a4192-c484-4329-8240-71e4c7cd2280",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "91321",
+            "brand": "Quantofix",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Chloride",
+                    "chemical": "Cl",
+                    "unit": "mg/l",
+                    "range": "0-3000"
+                }
+            ]
+        },
+        {
+            "name": "Chlorine, Hardness, Alkalinity, pH",
+            "uuid": "2456d482-dbec-466c-8387-411a4093f6b6",
+            "multiParameter": "true",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "2755250",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Chlorine",
+                    "chemical": "Cl2",
+                    "unit": "mg/l",
+                    "range": "0-10"
+                },
+                {
+                    "id": 2,
+                    "name": "Free Chlorine",
+                    "chemical": "Cl2",
+                    "unit": "mg/l",
+                    "range": "0-10"
+                },
+                {
+                    "id": 3,
+                    "name": "Total Hardness",
+                    "chemical": "CaCO3",
+                    "unit": "mg/l",
+                    "range": "0-425"
+                },
+                {
+                    "id": 4,
+                    "name": "Total Alkalinity",
+                    "chemical": "CaCO3",
+                    "unit": "mg/l",
+                    "range": "0-240"
+                },
+                {
+                    "id": 5,
+                    "name": "pH",
+                    "range": "6.2-8.4"
+                }
+            ]
+        },
+        {
+            "name": "Mercury",
+            "uuid": "af98ac35-dc55-4d86-bbdc-aa4a4e3100c9",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "480048",
+            "brand": "SenSafe",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Mercury",
+                    "chemical": "Hg",
+                    "unit": "mg/l",
+                    "range": "0-0.08"
+                }
+            ]
+        },
+        {
+            "name": "Nitrate, Nitrite",
+            "uuid": "c801b70c-39e4-493a-b20e-6843158b47b4",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "27454",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate Nitrogen",
+                    "chemical": "NO3-N",
+                    "unit": "mg/l",
+                    "range": "0-50"
+                },
+                {
+                    "id": 2,
+                    "name": "Nitrite Nitrogen",
+                    "chemical": "NO2-N",
+                    "unit": "mg/l",
+                    "range": "0-3"
+                }
+            ]
+        },
+        {
+            "name": "Nitrate, Nitrite",
+            "uuid": "77957656-3b72-4f0f-9507-d555f04db952",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "91351",
+            "brand": "Quantofix",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrate",
+                    "chemical": "NO3",
+                    "unit": "mg/l",
+                    "range": "0-100"
+                },
+                {
+                    "id": 2,
+                    "name": "Nitrite",
+                    "chemical": "NO2",
+                    "unit": "mg/l",
+                    "range": "0-50"
+                }
+            ]
+        },
+        {
+            "name": "pH",
+            "uuid": "debbbf5e-fe0c-4b9c-be1f-6ed8142b6b07",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "27456",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "4-9"
+                }
+            ]
+        },
+        {
+            "name": "pH",
+            "uuid": "c2669bb7-ad63-4a69-a16a-798b81d2b019",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "1095350001",
+            "brand": "Merck",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "0-14"
+                }
+            ]
+        },
+        {
+            "name": "Phosphate",
+            "uuid": "39e7ea7e-9884-407d-a99a-ac3b4d9c9599",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "91320",
+            "brand": "Quantofix",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "chemical": "PO4",
+                    "unit": "mg/l",
+                    "range": "0-100"
+                }
+            ]
+        },
+        {
+            "name": "Phosphate",
+            "uuid": "f4c57d34-dd17-4750-9fcd-fe26af2621a7",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "27571",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "chemical": "PO4",
+                    "unit": "mg/l",
+                    "range": "0-50"
+                }
+            ]
+        },
+        {
+            "name": "Potassium",
+            "uuid": "a18118e7-6382-4d16-b5fb-55f97cd99083",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "117985",
+            "brand": "Merck",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Potassium",
+                    "chemical": "K",
+                    "unit": "mg/l",
+                    "range": "0-1000"
+                }
+            ]
+        },
+        {
+            "name": "Chlorine",
+            "uuid": "bf1c19c0-9788-4e26-999e-1b5c6ca28111",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "27450",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Chlorine",
+                    "chemical": "Cl2",
+                    "unit": "mg/l",
+                    "range": "0-10"
+                },
+                {
+                    "id": 2,
+                    "name": "Free Chlorine",
+                    "chemical": "Cl2",
+                    "unit": "mg/l",
+                    "range": "0-10"
+                }
+            ]
+        },
+        {
+            "name": "Iron",
+            "uuid": "459a42d9-0834-4656-9e5a-e3bde46bdcff",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "2745348",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Iron",
+                    "chemical": "Fe",
+                    "unit": "mg/l",
+                    "range": "0-5"
+                }
+            ]
+        },
+        {
+            "name": "Iron",
+            "uuid": "5c90472e-9c06-4c7c-9f62-4c5cbcf6b1c1",
+            "sample": "Water",
+            "device": "Test Strip",
+            "productCode": "91344",
+            "brand": "Quantofix",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Total Iron",
+                    "chemical": "Fe2+/3+",
+                    "unit": "mg/l",
+                    "range": "0-100"
+                }
+            ]
+        },
+        {
+            "name": "Nitrogen",
+            "uuid": "53a1649a-be67-4a13-8cba-1b7db640037c",
+            "sample": "Soil",
+            "device": "Test Strip",
+            "productCode": "27454",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Nitrogen",
+                    "chemical": "N2",
+                    "unit": "mg/l"
+                },
+                {
+                    "id": 2,
+                    "name": "Nitrate Nitrogen",
+                    "chemical": "NO3-N",
+                    "unit": "mg/l",
+                    "range": "0-50"
+                },
+                {
+                    "id": 3,
+                    "name": "Nitrite Nitrogen",
+                    "chemical": "NO2-N",
+                    "unit": "mg/l",
+                    "range": "0-3.0"
+                }
+            ]
+        },
+        {
+            "name": "pH",
+            "uuid": "895845dd-9990-49f3-b611-420551851acd",
+            "sample": "Soil",
+            "device": "Test Strip",
+            "productCode": "27456",
+            "brand": "Hach",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "4-9"
+                }
+            ]
+        },
+        {
+            "name": "pH",
+            "uuid": "e4d8a391-6ee4-4bd5-8e90-321bbbd9876b",
+            "sample": "Soil",
+            "device": "Test Strip",
+            "productCode": "1095350001",
+            "brand": "Merck",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "0-14"
+                }
+            ]
+        },
+        {
+            "name": "Phosphate",
+            "uuid": "5613d944-c10b-4b59-a779-cc7349dc8fa9",
+            "sample": "Soil",
+            "device": "Test Strip",
+            "productCode": "91320",
+            "brand": "Quantofix",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphate",
+                    "chemical": "PO4",
+                    "unit": "mg/l",
+                    "range": "0-100"
+                }
+            ]
+        },
+        {
+            "name": "Phosphorous",
+            "uuid": "7cb666ea-7913-4511-9ae4-18f78e67aa09",
+            "sample": "Soil",
+            "device": "Test Strip",
+            "productCode": "91320",
+            "brand": "Quantofix",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Phosphorous",
+                    "chemical": "P2",
+                    "unit": "mg/l",
+                    "range": "0-100"
+                }
+            ]
+        },
+        {
+            "name": "Potassium",
+            "uuid": "ac533acc-8ffc-48e1-a66e-2394f9a54050",
+            "sample": "Soil",
+            "device": "Test Strip",
+            "productCode": "117985",
+            "brand": "Merck",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Potassium",
+                    "chemical": "K",
+                    "unit": "mg/l",
+                    "range": "0-1000"
+                }
+            ]
+        },
+        {
+            "name": "Electrical Conductivity",
+            "uuid": "80697cd1-acc9-4a15-8358-f32b4257dfaf",
+            "sample": "Soil",
+            "device": "Sensor",
+            "brand": "Caddisfly",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Soil Electrical Conductivity",
+                    "unit": "μS/cm",
+                    "range": "50-12800"
+                },
+                {
+                    "id": 2,
+                    "name": "Temperature",
+                    "unit": "°Celsius"
+                }
+            ]
+        },
+        {
+            "name": "Moisture",
+            "uuid": "0b4a0aaa-f556-4c11-a539-c4626582cca6",
+            "sample": "Soil",
+            "device": "Sensor",
+            "brand": "Caddisfly",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Soil Moisture",
+                    "unit": "VWC",
+                    "range": "0-100"
+                }
+            ]
+        },
+        {
+            "name": "Electrical Conductivity",
+            "uuid": "f88237b7-be3d-4fac-bbee-ab328eefcd14",
+            "sample": "Water",
+            "device": "Sensor",
+            "brand": "Caddisfly",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Water Electrical Conductivity",
+                    "unit": "μS/cm",
+                    "range": "0-12500"
+                },
+                {
+                    "id": 2,
+                    "name": "Temperature",
+                    "unit": "°Celsius"
+                }
+            ]
+        },
+        {
+            "name": "pH",
+            "uuid": "dbd058b6-29ed-4c7f-8b11-fcdae725a518",
+            "sample": "Water",
+            "device": "Sensor",
+            "brand": "Lovibond",
+            "model": "SD 50",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "0-14"
+                }
+            ]
+        },
+        {
+            "name": "Electrical Conductivity",
+            "uuid": "578c5768-273d-455f-ba12-57a6ced96c17",
+            "sample": "Water",
+            "device": "Sensor",
+            "brand": "Lovibond",
+            "model": "SD 70",
+            "hasImage": true,
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Electrical Conductivity",
+                    "unit": "μS/cm",
+                    "range": "0-20000"
+                }
+            ]
+        },
+        {
+            "name": "Turbidity",
+            "uuid": "7af4cbcc-f1f5-4fa5-9416-3752f1af4519",
+            "sample": "Water",
+            "device": "Turbidity Tube",
+            "brand": "DelAgua",
+            "model": "Tube",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "Turbidity",
+                    "unit": "NTU",
+                    "range": "5-2000"
+                }
+            ]
+        },
+        {
+            "name": "Chlorine, pH",
+            "uuid": "520ba67c-233f-4dc7-a2ad-17d86047d7c4",
+            "multiParameter": "true",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "Tester",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "6.8-8.2"
+                },
+                {
+                    "id": 2,
+                    "name": "Chlorine",
+                    "chemical": "Cl",
+                    "unit": "mg/l",
+                    "range": "0.1-3.0"
+                }
+            ]
+        },
+        {
+            "name": "Chlorine, pH",
+            "uuid": "63e0e106-6ff6-4f57-a169-a32a4a821d42",
+            "multiParameter": "true",
+            "sample": "Water",
+            "device": "Tester",
+            "brand": "Lovibond",
+            "model": "Tester",
+            "results": [
+                {
+                    "id": 1,
+                    "name": "pH",
+                    "range": "6.8-8.2"
+                },
+                {
+                    "id": 2,
+                    "name": "Chlorine",
+                    "chemical": "Cl",
+                    "unit": "mg/l",
+                    "range": "0.5-6.0"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
