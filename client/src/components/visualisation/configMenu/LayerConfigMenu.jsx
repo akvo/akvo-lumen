@@ -256,7 +256,7 @@ const GeoshapeDataTab = injectIntl((props) => {
         value={layer.aggregationColumn != null ?
           layer.aggregationColumn.toString() : null}
         name="aggregationColumn"
-        options={filterColumns(aggregationColumns, ['number'])}
+        options={filterColumns(aggregationColumns, ['number', 'text'])}
         clearable
         onChange={value => onChangeMapLayer(layerIndex, {
           aggregationColumn: value,
