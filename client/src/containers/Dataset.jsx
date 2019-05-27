@@ -119,6 +119,7 @@ class Dataset extends Component {
       .then(() => this.removePending(now))
       .catch((error) => {
         dispatch(showNotification('error', error.message));
+        dispatch(endTx(id));
         throw error;
       });
   }

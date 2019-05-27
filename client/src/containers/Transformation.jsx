@@ -83,6 +83,9 @@ class Transformation extends Component {
           onFetchSortedDataset={(id, columnName) => {
             this.props.dispatch(fetchSortedDataset(id, columnName));
           }}
+          onAlert={(alert) => {
+            this.props.dispatch(alert);
+          }}
         />
       </div>
     );

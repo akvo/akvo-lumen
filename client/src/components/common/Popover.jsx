@@ -51,6 +51,7 @@ const Popover = ({
   className = '',
   style = {},
   hideArrow = false,
+  footer,
 }) => (
   <div className="Popover">
     <div
@@ -67,6 +68,7 @@ const Popover = ({
       {!hideArrow && <div className="arrow" />}
       {title && <h3 className="popover-header">{title}</h3>}
       <div className="popover-body">{children}</div>
+      {footer && <div className="popover-footer">{footer}</div>}
     </div>
   </div>
 );
@@ -74,6 +76,7 @@ const Popover = ({
 Popover.propTypes = {
   title: PropTypes.node,
   children: PropTypes.node,
+  footer: PropTypes.node,
   placement: PropTypes.string,
   className: PropTypes.string,
   left: PropTypes.number,
