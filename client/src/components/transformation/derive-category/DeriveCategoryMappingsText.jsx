@@ -5,8 +5,8 @@ import React, { Component } from 'react';
 import { Col, Container, Row } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
-import DeriveCategoryMapping from './DeriveCategoryMapping';
-import './DeriveCategoryMappings.scss';
+import DeriveCategoryMapping from './DeriveCategoryMappingText';
+import './DeriveCategoryMappingsText.scss';
 import ContextMenu from '../../common/ContextMenu';
 
 const MAPPING_COUNT_LIMIT = 50;

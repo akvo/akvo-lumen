@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Row, Col } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
-import './DeriveCategoryMapping.scss';
+import './DeriveCategoryMappingText.scss';
 import Popover from '../../common/Popover';
 import Button from '../../common/Button';
 import ClickAway from '../../common/ClickAway';

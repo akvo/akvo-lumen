@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 
-import DeriveCategoryMappings from './derive-category/DeriveCategoryMappings';
+import DeriveCategoryMappingsText from './derive-category/DeriveCategoryMappingsText';
 import SourceDeriveCategoryOptions from './derive-category/SourceDeriveCategoryOptions';
 import './DeriveCategoryTransformation.scss';
 import TransformationHeader from './TransformationHeader';
@@ -163,7 +163,7 @@ class DeriveCategoryTransformation extends Component {
           )}
 
           {transformation.args.source.column.columnName && !selectingSourceColumn && (
-            <DeriveCategoryMappings
+            <DeriveCategoryMappingsText
               mappings={transformation.args.derivation.mappings || []}
               uncategorizedValue={transformation.args.derivation.uncategorizedValue}
               sourceColumnIndex={findIndex(
