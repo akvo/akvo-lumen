@@ -7,7 +7,7 @@
             [integrant.core :as ig]
             [clojure.tools.logging :as log]))
 
-(def v2-count 109)
+(def v2-count 110)
 
 (def missed-v1-uuids-in-v2
   ["f0f3c1dd-89af-49f1-83e7-bcc31c3006cf"
@@ -42,7 +42,7 @@
         tests (version-schema-backwards-adapt
                v0-tests
                (-> local-schema-uri io/resource slurp (json/parse-string keyword) extract-tests-v2))]
-    (assert (= v2-count (count tests)))
+    (when-not (= v2-count (count tests))(log/error :failed-caddisfly-expectations :v2-count v2-count :tests-count (count tests)))
     (log/warn ::start "Using caddisfly LOCAL schema-uri:" local-schema-uri)
     (map->Caddisfly (assoc opts :schema tests))))
 
@@ -53,7 +53,7 @@
         tests (version-schema-backwards-adapt
                v0-tests
                (-> schema-uri client/get :body (json/decode keyword) extract-tests-v2))]
-    (assert (= v2-count (count tests)))
+    (when-not (= v2-count (count tests))(log/error :failed-caddisfly-expectations :v2-count v2-count :tests-count (count tests)))
     (log/info ::start "Using caddisfly ONLINE schema-uri" schema-uri)
     (map->Caddisfly (assoc opts :schema tests))))
 

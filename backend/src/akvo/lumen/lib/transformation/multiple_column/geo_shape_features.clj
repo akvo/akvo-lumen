@@ -58,7 +58,7 @@
                                                            (reduce #(apply assoc % %2) {})
                                                            (filter (fn [[k v :as x]] (when v x))))]
                                       (log/debug :update-vals update-vals)
-                                      (multiple-column/update-row conn table-name (:rnum m) update-vals))))
+                                      (multiple-column/update-row conn table-name (:rnum m) update-vals nil))))
                                  doall)]
       (log/debug :db-txs selected-column add-db-columns update-db-columns)
       {:success?      true

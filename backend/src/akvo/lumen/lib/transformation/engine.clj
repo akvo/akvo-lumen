@@ -231,7 +231,7 @@
             op             (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
         (when-not (:success? op)
           (throw
-           (ex-info (format "Failed to update due to transformation mismatch: %s" (:message op)) {})))
+           (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
         (let [applied-txs (conj applied-txs
                                 (assoc transformation "changedColumns"
                                        (diff-columns columns (:columns op))))]
