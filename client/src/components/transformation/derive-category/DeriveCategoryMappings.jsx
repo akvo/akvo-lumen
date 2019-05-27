@@ -7,6 +7,7 @@ import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
 import DeriveCategoryMapping from './DeriveCategoryMapping';
 import './DeriveCategoryMappings.scss';
+import ContextMenu from '../../common/ContextMenu';
 
 const MAPPING_COUNT_LIMIT = 50;
 
@@ -20,6 +21,7 @@ class DeriveCategoryMappings extends Component {
   static propTypes = {
     intl: intlShape,
     mappings: PropTypes.array,
+    duplicatedCategoryNames: PropTypes.array,
     onChange: PropTypes.func,
     onChangeTargetColumnName: PropTypes.func,
     sourceColumnIndex: PropTypes.number,
@@ -39,6 +41,7 @@ class DeriveCategoryMappings extends Component {
   state = {
     search: '',
     sort: 'numeric',
+    showSourceColumnContextMenu: false,
   }
 
   componentDidMount() {
@@ -99,6 +102,7 @@ class DeriveCategoryMappings extends Component {
       onChangeUncategorizedValue,
       uncategorizedValue,
       intl,
+      duplicatedCategoryNames,
     } = this.props;
     const { search, sort } = this.state;
 
@@ -124,16 +128,39 @@ class DeriveCategoryMappings extends Component {
     searchedValues = searchedValues.slice(0, MAPPING_COUNT_LIMIT);
 
     const potentialMappings = mappings.concat(searchedValues.map(value => [[value]]));
+    const uncategorizedValueIsInvalid = duplicatedCategoryNames.includes(uncategorizedValue);
 
     return (
       <Container className="DeriveCategoryMappings container">
 
         <Row className="DeriveCategoryMapping DeriveCategoryMapping--lg">
           <Col xs={7} className="DeriveCategoryMapping__text">
-            <a onClick={onReselectSourceColumn}>
-              <i className="fa fa-edit" />
-              <FormattedMessage id="source_column" />: {dataset.columns[sourceColumnIndex].title}
-            </a>
+            <FormattedMessage id="source_column" />: {dataset.columns[sourceColumnIndex].title}
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <a
+                className="fa fa-ellipsis-v"
+                onClick={() => {
+                  this.setState({
+                    showSourceColumnContextMenu: !this.state.showSourceColumnContextMenu,
+                  });
+                }}
+              />
+              {this.state.showSourceColumnContextMenu && (
+                <ContextMenu
+                  onOptionSelected={(optionValue) => {
+                    if (optionValue === 'reselect_source_column') {
+                      onReselectSourceColumn();
+                    }
+                  }}
+                  options={[
+                    {
+                      label: <FormattedMessage id="reselect_source_column" />,
+                      value: 'reselect_source_column',
+                    },
+                  ]}
+                />
+              )}
+            </div>
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__input-wrap">
             <input
@@ -198,16 +225,16 @@ class DeriveCategoryMappings extends Component {
             onSourceValuesUpdate={this.handleSourceValuesUpdate}
             isGrouping={
               // eslint-disable-next-line no-unused-vars
-              sourceValues.map(([count, value]) => value)
-                .includes(this.state.isGroupingValue)
+              sourceValues.map(([count, value]) => value).includes(this.state.isGroupingValue)
             }
             onToggleGrouping={(isGroupingValue) => {
               this.setState({ isGroupingValue });
             }}
+            isInvalid={duplicatedCategoryNames.includes(targetCategoryName)}
           />
         ))}
 
-        <Row className="DeriveCategoryMapping">
+        <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="uncategorized_values" />
           </Col>
@@ -218,6 +245,7 @@ class DeriveCategoryMappings extends Component {
               onChange={(event) => {
                 onChangeUncategorizedValue(event.target.value);
               }}
+              title={uncategorizedValueIsInvalid ? intl.formatMessage({ id: 'categories_must_be_unique' }) : undefined}
             />
           </Col>
         </Row>

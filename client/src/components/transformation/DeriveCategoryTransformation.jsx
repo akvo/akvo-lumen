@@ -1,5 +1,5 @@
 // TODO i18n
-import { findIndex } from 'lodash';
+import { findIndex, countBy } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { injectIntl, intlShape } from 'react-intl';
@@ -8,12 +8,14 @@ import DeriveCategoryMappings from './derive-category/DeriveCategoryMappings';
 import SourceDeriveCategoryOptions from './derive-category/SourceDeriveCategoryOptions';
 import './DeriveCategoryTransformation.scss';
 import TransformationHeader from './TransformationHeader';
+import { showNotification } from '../../actions/notification';
 
 class DeriveCategoryTransformation extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      duplicatedCategoryNames: [],
       selectingSourceColumn: false,
       transformation: {
         op: 'core/derive-category',
@@ -31,6 +33,8 @@ class DeriveCategoryTransformation extends Component {
         },
       },
     };
+    this.handleValidate = this.handleValidate.bind(this);
+    this.handleApplyTransformation = this.handleApplyTransformation.bind(this);
   }
 
   componentDidMount() {
@@ -55,19 +59,58 @@ class DeriveCategoryTransformation extends Component {
     const { args } = transformation;
     const newArgs = Object.assign({}, args, changedArgs);
     const newTransformation = Object.assign({}, transformation, { args: newArgs });
-    this.setState({ transformation: newTransformation });
+    this.setState({ transformation: newTransformation }, this.handleValidate);
+  }
+
+  handleValidate() {
+    const { mappings, uncategorizedValue } = this.state.transformation.args.derivation;
+    // eslint-disable-next-line no-unused-vars
+    const categoryCounts = countBy(mappings, ([sv, categoryName]) => categoryName);
+    categoryCounts[uncategorizedValue] = categoryCounts[uncategorizedValue] || 0;
+    categoryCounts[uncategorizedValue] += 1;
+    const duplicatedCategoryNames = Object.keys(categoryCounts).reduce((acc, categoryName) =>
+      (categoryCounts[categoryName] > 1 ? acc.concat(categoryName) : acc)
+    , []);
+    this.setState({ duplicatedCategoryNames });
+  }
+
+  handleApplyTransformation() {
+    const { onApplyTransformation, intl, onAlert } = this.props;
+    const { transformation, duplicatedCategoryNames } = this.state;
+
+    if (duplicatedCategoryNames.length) {
+      onAlert(showNotification('error', intl.formatMessage({ id: 'categories_must_be_unique' })));
+      return;
+    }
+
+    onApplyTransformation({
+      ...transformation,
+      args: {
+        ...transformation.args,
+        derivation: {
+          ...transformation.args.derivation,
+          type: 'text',
+          mappings: transformation.args.derivation.mappings.map(([sourceValues, target]) =>
+            [
+              // eslint-disable-next-line no-unused-vars
+              sourceValues.map(([count, value]) => value),
+              target,
+            ]
+          ),
+        },
+      },
+    });
   }
 
   render() {
     const {
       datasetId,
       datasets,
-      onApplyTransformation,
       transforming,
       onFetchSortedDataset,
       intl,
     } = this.props;
-    const { transformation, selectingSourceColumn } = this.state;
+    const { transformation, selectingSourceColumn, duplicatedCategoryNames } = this.state;
     const dataset = datasets[datasetId].toJS();
 
     return (
@@ -76,23 +119,7 @@ class DeriveCategoryTransformation extends Component {
         <TransformationHeader
           datasetId={datasetId}
           isValidTransformation={this.isValidTransformation() && !transforming}
-          onApply={() => onApplyTransformation({
-            ...transformation,
-            args: {
-              ...transformation.args,
-              derivation: {
-                ...transformation.args.derivation,
-                type: 'text',
-                mappings: transformation.args.derivation.mappings.map(([sourceValues, target]) =>
-                  [
-                    // eslint-disable-next-line no-unused-vars
-                    sourceValues.map(([count, value]) => value),
-                    target,
-                  ]
-                ),
-              },
-            },
-          })}
+          onApply={this.handleApplyTransformation}
           buttonText={intl.formatMessage({ id: 'derive_column' })}
           titleText={intl.formatMessage({ id: 'new_category_column' })}
         />
@@ -145,8 +172,9 @@ class DeriveCategoryTransformation extends Component {
               )}
               dataset={dataset}
               onReselectSourceColumn={() => {
-                this.setState({ selectingSourceColumn: true });
+                this.setState({ selectingSourceColumn: true }, this.handleValidate);
               }}
+              duplicatedCategoryNames={duplicatedCategoryNames}
               onChange={(mappings) => {
                 this.setState({
                   transformation: {
@@ -159,7 +187,7 @@ class DeriveCategoryTransformation extends Component {
                       },
                     },
                   },
-                });
+                }, this.handleValidate);
               }}
               onChangeTargetColumnName={(title) => {
                 this.setState({
@@ -176,7 +204,7 @@ class DeriveCategoryTransformation extends Component {
                       },
                     },
                   },
-                });
+                }, this.handleValidate);
               }}
               onChangeUncategorizedValue={(uncategorizedValue) => {
                 this.setState({
@@ -190,7 +218,7 @@ class DeriveCategoryTransformation extends Component {
                       },
                     },
                   },
-                });
+                }, this.handleValidate);
               }}
             />
           )}
@@ -210,6 +238,7 @@ DeriveCategoryTransformation.propTypes = {
   onFetchSortedDataset: PropTypes.func.isRequired,
   // Are we currently applying a transformation.
   transforming: PropTypes.bool.isRequired,
+  onAlert: PropTypes.func.isRequired,
 };
 
 export default injectIntl(DeriveCategoryTransformation);
