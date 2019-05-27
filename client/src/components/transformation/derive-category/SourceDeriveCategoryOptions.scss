@@ -1,13 +1,7 @@
 @import "../../../styles/modules/importAll";
 
 .SourceDeriveCategoryOptions {
-  .SourceDeriveCategoryOptions__title {
-    font-weight: bold;
-  }
-  
-  .SourceDeriveCategoryOptions__type {
-    float: right;
-    text-transform: uppercase;
-    font-size: 0.9em;
+  .Select {
+    height: auto;
   }
 }
