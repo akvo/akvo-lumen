@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'react-grid-system';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
-import { ListGroup, ListGroupItem } from '../../common/ListGroup';
-import STATUS from '../../../constants/status';
+import SelectMenu from '../../common/SelectMenu';
 
 import './SourceDeriveCategoryOptions.scss';
 
@@ -15,25 +14,21 @@ const SourceDeriveCategoryOptions = ({ dataset, onChange, selected }) => (
         <h2>
           <FormattedMessage id="select_source_column" />
         </h2>
-        <ListGroup>
-          {dataset.columns &&
-            dataset.columns.filter(({ type }) => type === 'text')
-              .map(({ columnName, title, type }) => (
-                <ListGroupItem
-                  key={columnName}
-                  lg
-                  onClick={() => onChange(columnName)}
-                  status={columnName === selected ? STATUS.SUCCESS : undefined}
-                  icon={columnName === selected ? 'check' : undefined}
-                >
-                  <span className="SourceDeriveCategoryOptions__title">{title}</span>
-                  <span className="SourceDeriveCategoryOptions__type">
-                    <FormattedMessage id={type} />
-                  </span>
-                </ListGroupItem>
-              ))
-          }
-        </ListGroup>
+        {dataset.columns && (
+          <SelectMenu
+            name="sourceColumnName"
+            value={selected}
+            searchable
+            options={
+              dataset.columns.filter(({ type }) => type === 'text')
+                .map(({ columnName, title, type }) => ({
+                  value: columnName,
+                  label: `${title} (${type})`,
+                }))
+            }
+            onChange={onChange}
+          />
+        )}
       </Col>
     </Row>
   </Container>

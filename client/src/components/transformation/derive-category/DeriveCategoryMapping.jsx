@@ -109,16 +109,6 @@ class DeriveCategoryMapping extends Component {
                       }}
                     />
                     {value} ({count})
-                    {/* <a
-                      className="DeriveCategoryMapping__tag__btn fa fa-close"
-                      onClick={() => {
-                        onSourceValuesUpdate(
-                          sourceValues,
-                          // eslint-disable-next-line no-unused-vars
-                          sourceValues.filter(([c, v]) => v !== value)
-                        );
-                      }}
-                    /> */}
                   </li>
                 ))}
 
@@ -134,15 +124,6 @@ class DeriveCategoryMapping extends Component {
                         }}
                       />
                       {value} ({count})
-                      {/* <a
-                        key={value}
-                        onClick={() => {
-                          onSourceValuesUpdate(sourceValues, [...sourceValues, [count, value]]);
-                        }}
-                        className="DeriveCategoryMapping__tag DeriveCategoryMapping__tag"
-                      >
-                        {value}
-                      </a> */}
                     </li>
                   ))
                 }
