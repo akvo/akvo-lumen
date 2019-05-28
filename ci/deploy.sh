@@ -67,4 +67,4 @@ log Waiting for k8s to be healthy
 ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh
 
 # log Running end to end tests against the Kubernetes TEST environment
-# ./ci/e2e-test.sh akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"
+./ci/e2e-test.sh akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"
