@@ -18,7 +18,7 @@
                  [compojure "1.6.1" :exclusions [medley]]
                  [duct/core "0.7.0" :exclusions [org.clojure/clojure]]
                  [duct/module.logging "0.4.0" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha com.stuartsierra/dependency]]
-                 [duct/database.sql.hikaricp "0.3.3" :exclusions [org.slf4j/slf4j-nop integrant]]
+                 [duct/database.sql.hikaricp "0.4.0" :exclusions [org.clojure/spec.alpha org.slf4j/slf4j-nop org.clojure/clojure integrant org.clojure/core.specs.alpha]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.5"]
                  [honeysql "0.9.3"]
