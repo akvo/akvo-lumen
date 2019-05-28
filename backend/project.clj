@@ -23,7 +23,7 @@
                  [funcool/cuerdas "2.2.0" :exclusions [org.clojure/spec.alpha com.google.protobuf/protobuf-java com.google.errorprone/error_prone_annotations org.clojure/clojure com.google.guava/guava org.clojure/core.specs.alpha com.google.code.findbugs/jsr305 org.clojure/tools.reader]]
                  [honeysql "0.9.4"]
                  [meta-merge "1.0.0"]
-                 [metosin/reitit "0.3.6" :exclusions [com.cognitect/transit-java org.clojure/spec.alpha org.ow2.asm/asm ring/ring-core mvxcvi/puget org.clojure/clojure ring/ring-codec org.clojure/core.rrb-vector mvxcvi/arrangement fipp r org.clojure/core.specs.alpha com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]
+                 [metosin/reitit "0.3.7" :exclusions [com.cognitect/transit-java org.clojure/spec.alpha org.ow2.asm/asm ring/ring-core mvxcvi/puget org.clojure/clojure ring/ring-codec org.clojure/core.rrb-vector mvxcvi/arrangement fipp r org.clojure/core.specs.alpha com.cognitect/transit-clj com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "1.46.266acfa5bb52c9b484af19f0bcfbfacb60b97319"]
                  [org.apache.tika/tika-core "1.18"]
