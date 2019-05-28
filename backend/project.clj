@@ -29,7 +29,7 @@
                  [org.apache.tika/tika-core "1.21"]
                  [org.apache.tika/tika-parsers "1.21" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
                  ;; explicit versions of commons deps used by tika-parsers and clj-http
-                 [com.fasterxml.jackson.core/jackson-core "2.9.6"]
+                 [com.fasterxml.jackson.core/jackson-core "2.9.9"]
                  [org.apache.httpcomponents/httpcore "4.4.10"]
                  [org.apache.httpcomponents/httpclient "4.5.5"]
                  [org.apache.httpcomponents/httpmime "4.5.5"]
