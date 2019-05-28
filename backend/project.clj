@@ -21,7 +21,7 @@
                  [duct/database.sql.hikaricp "0.4.0" :exclusions [org.clojure/spec.alpha org.slf4j/slf4j-nop org.clojure/clojure integrant org.clojure/core.specs.alpha]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.2.0" :exclusions [org.clojure/spec.alpha com.google.protobuf/protobuf-java com.google.errorprone/error_prone_annotations org.clojure/clojure com.google.guava/guava org.clojure/core.specs.alpha com.google.code.findbugs/jsr305 org.clojure/tools.reader]]
-                 [honeysql "0.9.3"]
+                 [honeysql "0.9.4"]
                  [meta-merge "1.0.0"]
                  [metosin/reitit "0.3.6" :exclusions [com.cognitect/transit-java org.clojure/spec.alpha org.ow2.asm/asm ring/ring-core mvxcvi/puget org.clojure/clojure ring/ring-codec org.clojure/core.rrb-vector mvxcvi/arrangement fipp r org.clojure/core.specs.alpha com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]
                  [org.akvo/commons "0.4.5" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
