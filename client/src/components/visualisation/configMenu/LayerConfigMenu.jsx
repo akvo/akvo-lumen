@@ -258,9 +258,12 @@ const GeoshapeDataTab = injectIntl((props) => {
         name="aggregationColumn"
         options={filterColumns(aggregationColumns, ['number', 'text'])}
         clearable
-        onChange={value => onChangeMapLayer(layerIndex, {
-          aggregationColumn: value,
-        })}
+        onChange={(value) => {
+          const t = aggregationColumns.filter(column => column.value === value)[0].type;
+          onChangeMapLayer(layerIndex, { aggregationColumn: value,
+            aggregationColumnType: t,
+          });
+        }}
       />
       {Boolean(layer.aggregationGeomColumn) &&
         <ButtonRowInput

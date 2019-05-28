@@ -167,18 +167,22 @@
                    shape-table-name
                    aggregation-method
                    aggregationColumn
+                   aggregationColumnType
                    point-table-name
                    geom
                    aggregationGeomColumn]
   (format "(select %s
                    %s.rnum AS shapeRowNum,
-                   %s(pointTable.%s::decimal) AS aggregation
+                   %s(pointTable.%s%s) AS aggregation
                    from %s
                    left join (select * from %s)pointTable on
                    st_contains(%s.%s, pointTable.%s)
                    GROUP BY %s.rnum %s)"
           (shape-aggregagation-extra-cols-sql cols shape-table-name "" ",")
-          shape-table-name aggregation-method aggregationColumn shape-table-name
+          shape-table-name aggregation-method
+          aggregationColumn
+          (if (#{"number"} aggregationColumnType) "::decimal" "::text")
+          shape-table-name
           point-table-name shape-table-name geom aggregationGeomColumn shape-table-name
           (shape-aggregagation-extra-cols-sql cols shape-table-name "," "")))
 
@@ -228,20 +232,25 @@
               row_query.shapeRowNum = %s.rnum
             ;
             "
-            (shape-aggregagation-extra-cols-sql extra-cols "row_query" "" ",")
-            (format "%s.%s" shape-table-name (:geom current-layer ))
-            (temp-table*
-             extra-cols
-             shape-table-name
-             aggregation-method
-             (:aggregationColumn current-layer)
-             point-table-name
-             (:geom current-layer)
-             (:aggregationGeomColumn current-layer))
-            (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
-            (shape-fill hue)
-            shape-table-name
-            shape-table-name)))
+                    (shape-aggregagation-extra-cols-sql extra-cols "row_query" "" ",")
+                    (format "%s.%s" shape-table-name (:geom current-layer ))
+                    (temp-table*
+                     extra-cols
+                     shape-table-name
+                     aggregation-method
+                     (:aggregationColumn current-layer)
+                     (:aggregationColumnType current-layer)
+                     point-table-name
+                     (:geom current-layer)
+                     (:aggregationGeomColumn current-layer))
+                    (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
+                    (shape-fill hue)
+                    shape-table-name
+                    shape-table-name)]
+    (log/error :SQL sql)
+    sql
+
+    ))
 
 (defn point-sql [tenant-conn columns table-name geom-column popup-columns
                  point-color-column where-clause {:keys [datasetId] :as layer}]
