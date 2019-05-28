@@ -26,8 +26,8 @@
                  [metosin/reitit "0.3.7" :exclusions [com.cognitect/transit-java org.clojure/spec.alpha org.ow2.asm/asm ring/ring-core mvxcvi/puget org.clojure/clojure ring/ring-codec org.clojure/core.rrb-vector mvxcvi/arrangement fipp r org.clojure/core.specs.alpha com.cognitect/transit-clj com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]
                  [org.akvo/commons "0.4.6" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "1.46.266acfa5bb52c9b484af19f0bcfbfacb60b97319"]
-                 [org.apache.tika/tika-core "1.18"]
-                 [org.apache.tika/tika-parsers "1.18" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
+                 [org.apache.tika/tika-core "1.21"]
+                 [org.apache.tika/tika-parsers "1.21" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
                  ;; explicit versions of commons deps used by tika-parsers and clj-http
                  [com.fasterxml.jackson.core/jackson-core "2.9.6"]
                  [org.apache.httpcomponents/httpcore "4.4.10"]
