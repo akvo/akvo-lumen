@@ -35,7 +35,7 @@
                  [org.apache.httpcomponents/httpmime "4.5.8"]
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/data.csv "0.1.4"]
-                 [org.clojure/core.match "0.3.0-alpha5"]
+                 [org.clojure/core.match "0.3.0"]
                  [org.clojure/java.jdbc "0.7.7"]
                  [org.immutant/web "2.1.10" :exclusions [ch.qos.logback/logback-classic]]
                  [org.postgresql/postgresql "42.2.2"]
