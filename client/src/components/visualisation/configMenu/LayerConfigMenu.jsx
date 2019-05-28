@@ -262,6 +262,7 @@ const GeoshapeDataTab = injectIntl((props) => {
           const t = aggregationColumns.filter(column => column.value === value)[0].type;
           onChangeMapLayer(layerIndex, { aggregationColumn: value,
             aggregationColumnType: t,
+            aggregationMethod: t === 'text' ? 'count' : layer.aggregationMethod,
           });
         }}
       />
