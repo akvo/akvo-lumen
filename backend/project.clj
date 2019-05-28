@@ -17,7 +17,7 @@
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
                  [duct/core "0.7.0" :exclusions [org.clojure/clojure]]
-                 [duct/module.logging "0.3.1" :exclusions [com.stuartsierra/dependency]]
+                 [duct/module.logging "0.4.0" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha com.stuartsierra/dependency]]
                  [duct/database.sql.hikaricp "0.3.3" :exclusions [org.slf4j/slf4j-nop integrant]]
                  [environ "1.1.0"]
                  [funcool/cuerdas "2.0.5"]
