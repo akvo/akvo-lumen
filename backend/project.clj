@@ -11,7 +11,7 @@
                  [org.slf4j/jcl-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [org.slf4j/jul-to-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [cheshire "5.8.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [clj-http "3.9.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
+                 [clj-http "3.10.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
                  [clj-time "0.14.4"]
                  [com.layerware/hugsql "0.4.9"]
                  [commons-io/commons-io "2.6"]
