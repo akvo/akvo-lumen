@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { uniqBy } from 'lodash';
 
 import './DeriveCategoryMappingText.scss';
 import Popover from '../../common/Popover';
@@ -25,13 +26,50 @@ class DeriveCategoryMapping extends Component {
     intl: intlShape,
   }
 
+  constructor(props) {
+    super(props);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
+  }
+
   state = { search: '' }
+
+  getSearchResults() {
+    const { unassignedValues } = this.props;
+    const { search } = this.state;
+
+     // eslint-disable-next-line no-unused-vars
+    return unassignedValues.filter(([count, value]) =>
+      (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
+    ).slice(0, SEARCH_RESULTS_LIMIT);
+  }
+
+  handleSelectAll(event) {
+    const { checked } = event.target;
+    const {
+      sourceValues,
+      onSourceValuesUpdate,
+    } = this.props;
+
+    if (checked) {
+      const searchResults = this.getSearchResults();
+      onSourceValuesUpdate(
+        sourceValues,
+        uniqBy(
+          [...sourceValues, ...searchResults],
+          // eslint-disable-next-line no-unused-vars
+          ([count, value]) => value
+        )
+      );
+    } else {
+      onSourceValuesUpdate(sourceValues, [sourceValues[0]]);
+    }
+  }
+
 
   render() {
     const {
       sourceValues,
       targetCategoryName,
-      unassignedValues,
       onChangeCategoryName,
       onSourceValuesUpdate,
       onToggleGrouping,
@@ -40,11 +78,7 @@ class DeriveCategoryMapping extends Component {
       intl,
     } = this.props;
     const { search } = this.state;
-
-     // eslint-disable-next-line no-unused-vars
-    const searchedValues = unassignedValues.filter(([count, value]) =>
-      (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
-    ).slice(0, SEARCH_RESULTS_LIMIT);
+    const searchResults = this.getSearchResults();
 
     return (
       <Row className={`DeriveCategoryMapping ${isInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
@@ -70,7 +104,11 @@ class DeriveCategoryMapping extends Component {
               footer={(
                 <Row>
                   <Col xs={6}>
-                    <input type="checkbox" id="select-all-checkbox" />
+                    <input
+                      type="checkbox"
+                      id="select-all-checkbox"
+                      onChange={this.handleSelectAll}
+                    />
                     <label htmlFor="select-all-checkbox">
                       <FormattedMessage id="select_all" />
                     </label>
@@ -95,7 +133,7 @@ class DeriveCategoryMapping extends Component {
                 }}
               />
               <ul className="DeriveCategoryMappings__list">
-                {(sourceValues.length > 1) && sourceValues.map(([count, value]) => (
+                {(sourceValues.length > 1) && sourceValues.slice(1).map(([count, value]) => (
                   <li key={value}>
                     <input
                       type="checkbox"
@@ -112,7 +150,7 @@ class DeriveCategoryMapping extends Component {
                   </li>
                 ))}
 
-                {searchedValues
+                {searchResults
                  // eslint-disable-next-line no-unused-vars
                   .filter(([count, value]) => !sourceValues.map(([c, v]) => v).includes(value))
                   .map(([count, value]) => (
