@@ -33,7 +33,7 @@
                  [org.apache.httpcomponents/httpcore "4.4.11"]
                  [org.apache.httpcomponents/httpclient "4.5.8"]
                  [org.apache.httpcomponents/httpmime "4.5.8"]
-                 [org.clojure/clojure "1.9.0"]
+                 [org.clojure/clojure "1.10.0"]
                  [org.clojure/data.csv "0.1.4"]
                  [org.clojure/core.match "0.3.0"]
                  [org.clojure/java.jdbc "0.7.9"]

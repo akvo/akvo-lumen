@@ -20,11 +20,11 @@
 
 (deftest component-versions-test
   (testing "prod component version"
-    (is (= (-> (caddisfly :prod) :schema first val keys)
-           '(:name :uuid :sample :device :brand :model :reagents :results :hasImage))))
+    (is (= (-> (caddisfly :prod) :schema first val keys set)
+           #{:name :uuid :sample :device :brand :model :reagents :results :hasImage})))
   (testing "dev component version"
-    (is (= (-> (caddisfly :dev) :schema first val keys)
-           '(:name :uuid :sample :device :brand :model :reagents :results :hasImage)))))
+    (is (= (-> (caddisfly :dev) :schema first val keys set)
+           #{:name :uuid :sample :device :brand :model :reagents :results :hasImage}))))
 
 (defn load-local-file [uri]
   (-> uri io/resource slurp (json/parse-string keyword)))
