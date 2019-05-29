@@ -84,7 +84,7 @@
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.13"]
-                                    [eftest "0.5.1"]
+                                    [eftest "0.5.8" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.rrb-vector fipp org.clojure/core.specs.alpha]]
                                     [com.gearswithingears/shrubbery "0.4.1"]
                                     [kerodon "0.9.0"]
                                     [com.cognitect/transit-clj "0.8.313"]]
