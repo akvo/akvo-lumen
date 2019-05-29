@@ -42,7 +42,7 @@
                  [ragtime/ragtime.jdbc "0.6.4"]
                  [raven-clj "1.5.2"]
                  [ring "1.7.1" :exclusions [ring/ring-core]]
-                 [ring/ring-core "1.6.3"]
+                 [ring/ring-core "1.7.1" :exclusions [ring/ring-codec]]
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.4.0"]
                  [selmer "1.11.8"]
