@@ -41,15 +41,15 @@
                  [org.postgresql/postgresql "42.2.2"]
                  [ragtime/ragtime.jdbc "0.6.4"]
                  [raven-clj "1.5.2"]
-                 [ring "1.6.3" :exclusions [ring/ring-core]]
-                 [ring/ring-core "1.6.3"]
+                 [ring "1.7.1" :exclusions [ring/ring-core]]
+                 [ring/ring-core "1.7.1" :exclusions [ring/ring-codec]]
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.4.0"]
-                 [selmer "1.11.8"]
-                 [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
+                 [selmer "1.12.12" :exclusions [com.fasterxml.jackson.dataformat/jackson-dataformat-smile com.fasterxml.jackson.dataformat/jackson-dataformat-cbor cheshire]]
+                 [net.postgis/postgis-jdbc "2.3.0" :exclusions [org.postgresql/postgresql]]
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
-                 [io.prometheus/simpleclient_hotspot "0.5.0"]
-                 [io.prometheus/simpleclient_dropwizard "0.5.0"]
+                 [io.prometheus/simpleclient_hotspot "0.6.0"]
+                 [io.prometheus/simpleclient_dropwizard "0.6.0"]
                  [org.clojure/test.check "0.10.0-alpha3"]]
   :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
@@ -78,13 +78,13 @@
    :uberjar       {:aot :all}
    :profiles/dev  {}
    :profiles/test  {}
-   :project/dev   {:dependencies   [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
+   :project/dev   {:dependencies   [[diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]
                                     [duct/generate "0.8.2"]
                                     [integrant/repl "0.3.1" :exclusions [com.stuartsierra/dependency]]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
                                     [org.clojure/tools.nrepl "0.2.13"]
-                                    [eftest "0.5.1"]
+                                    [eftest "0.5.8" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.rrb-vector fipp org.clojure/core.specs.alpha]]
                                     [com.gearswithingears/shrubbery "0.4.1"]
                                     [kerodon "0.9.0"]
                                     [com.cognitect/transit-clj "0.8.313"]]
@@ -100,6 +100,6 @@
                                     :port 47480}
                    :env            {:port "3000"}}
    :project/test  {:resource-paths ["test/resources"]
-                   :dependencies [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]]
+                   :dependencies [[diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]]
                    :env
                    {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})
