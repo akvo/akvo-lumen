@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import { uniqBy } from 'lodash';
+import { uniqBy, sortBy } from 'lodash';
 
 import './DeriveCategoryMappingText.scss';
 import Popover from '../../common/Popover';
@@ -37,10 +37,14 @@ class DeriveCategoryMapping extends Component {
     const { unassignedValues } = this.props;
     const { search } = this.state;
 
+    return sortBy(
+      // eslint-disable-next-line no-unused-vars
+      unassignedValues.filter(([count, value]) =>
+        (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
+      ).slice(0, SEARCH_RESULTS_LIMIT),
      // eslint-disable-next-line no-unused-vars
-    return unassignedValues.filter(([count, value]) =>
-      (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
-    ).slice(0, SEARCH_RESULTS_LIMIT);
+      ([count, value]) => value.toLowerCase()
+    );
   }
 
   handleSelectAll(event) {
