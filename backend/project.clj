@@ -45,7 +45,7 @@
                  [ring/ring-core "1.7.1" :exclusions [ring/ring-codec]]
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.4.0"]
-                 [selmer "1.11.8"]
+                 [selmer "1.12.12" :exclusions [com.fasterxml.jackson.dataformat/jackson-dataformat-smile com.fasterxml.jackson.dataformat/jackson-dataformat-cbor cheshire]]
                  [net.postgis/postgis-jdbc "2.2.1" :exclusions [org.postgresql/postgresql]]
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
                  [io.prometheus/simpleclient_hotspot "0.5.0"]
