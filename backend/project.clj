@@ -78,7 +78,7 @@
    :uberjar       {:aot :all}
    :profiles/dev  {}
    :profiles/test  {}
-   :project/dev   {:dependencies   [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]
+   :project/dev   {:dependencies   [[diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]
                                     [duct/generate "0.8.2"]
                                     [integrant/repl "0.3.1" :exclusions [com.stuartsierra/dependency]]
                                     [reloaded.repl "0.2.4"]
@@ -100,6 +100,6 @@
                                     :port 47480}
                    :env            {:port "3000"}}
    :project/test  {:resource-paths ["test/resources"]
-                   :dependencies [[diehard "0.7.2" :exclusions [org.clojure/spec.alpha]]]
+                   :dependencies [[diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]]
                    :env
                    {:db {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password"}}}})
