@@ -118,7 +118,7 @@ class DeriveCategoryMappings extends Component {
         .filter(([count, value]) =>
           (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
         ),
-      ([count, value]) => (sort === 'numeric' ? count : value)
+      ([count, value]) => (sort === 'numeric' ? count : value.toLowerCase())
     );
 
     if (sort === 'numeric') {
