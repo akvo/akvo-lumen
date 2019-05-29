@@ -41,7 +41,7 @@
                  [org.postgresql/postgresql "42.2.2"]
                  [ragtime/ragtime.jdbc "0.6.4"]
                  [raven-clj "1.5.2"]
-                 [ring "1.6.3" :exclusions [ring/ring-core]]
+                 [ring "1.7.1" :exclusions [ring/ring-core]]
                  [ring/ring-core "1.6.3"]
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.4.0"]
