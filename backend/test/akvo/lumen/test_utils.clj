@@ -1,5 +1,6 @@
 (ns akvo.lumen.test-utils
   (:require [akvo.lumen.auth :as auth]
+            [akvo.lumen.component.hikaricp :as hikaricp]
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
@@ -174,7 +175,7 @@
 (defn seed
   "At the moment only support seed of tenants table."
   [config]
-  (let [db-uri (-> config :akvo.lumen.component.hikaricp/hikaricp :uri)]
+  (let [db-uri (hikaricp/ssl-url (-> config :akvo.lumen.component.hikaricp/hikaricp :uri))]
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
