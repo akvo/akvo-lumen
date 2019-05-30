@@ -59,7 +59,8 @@ class Transformation extends Component {
       }).catch((err) => {
         this.setState({ transforming: false });
         dispatch(showNotification('error', `Transformation failed: ${err.message}`));
-        dispatch(endTx(datasetId));
+        const DONT_SHOW_SUCCESS_NOTIF = false;
+        dispatch(endTx(datasetId, DONT_SHOW_SUCCESS_NOTIF));
       });
   }
 
