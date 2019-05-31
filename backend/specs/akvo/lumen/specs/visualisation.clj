@@ -28,9 +28,11 @@
 
 (def ^:dynamic *id?*  lumen.s/str-uuid?)
 
-(s/def ::id (s/with-gen
-              #'*id?*
-              lumen.s/str-uuid-gen))
+(s/def ::id? #'*id?*)
+
+(s/def ::id  (s/with-gen
+               ::id?
+               lumen.s/str-uuid-gen))
 
 (s/def ::version int?)
 (s/def ::sort any?)

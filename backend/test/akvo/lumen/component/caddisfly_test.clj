@@ -20,11 +20,11 @@
 
 (deftest component-versions-test
   (testing "prod component version"
-    (is (= (-> (caddisfly :prod) :schema first val keys)
-           '(:name :uuid :sample :device :brand :model :reagents :results :hasImage))))
+    (is (= (-> (caddisfly :prod) :schema first val keys set)
+           #{:name :uuid :sample :device :brand :model :reagents :results :hasImage})))
   (testing "dev component version"
-    (is (= (-> (caddisfly :dev) :schema first val keys)
-           '(:name :uuid :sample :device :brand :model :reagents :results :hasImage)))))
+    (is (= (-> (caddisfly :dev) :schema first val keys set)
+           #{:name :uuid :sample :device :brand :model :reagents :results :hasImage}))))
 
 (defn load-local-file [uri]
   (-> uri io/resource slurp (json/parse-string keyword)))
@@ -49,5 +49,5 @@
       (testing "testing compatibility backwards"
         (let [d3 (c/version-schema-backwards-adapt d1 d2)
               diff2 (data/diff (adapt* d1) (adapt* d3))]
-          (is (= c/v2-count (count (adapt* d3))) )
+          (is (= c/v2-count (count (adapt* d3))))
           (is (nil? (first diff2))))))))
