@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import queryString from 'querystringify';
 
 import ContextMenu from '../common/ContextMenu';
 
@@ -29,9 +28,6 @@ class DatasetControls extends Component {
       isLockedFromTransformations,
     } = this.props;
 
-    const queryParams = queryString.parse(location.search);
-    const showCategoryTransform = queryParams['show-category-transform'];
-
     const deriveColumnSubMenu = [
       {
         label: <FormattedMessage id="derive_column_javascript" />,
@@ -39,12 +35,10 @@ class DatasetControls extends Component {
       },
     ];
 
-    if (showCategoryTransform === '1') {
-      deriveColumnSubMenu.unshift({
-        label: <FormattedMessage id="derive_column_category" />,
-        value: 'deriveColumnCategory',
-      });
-    }
+    deriveColumnSubMenu.unshift({
+      label: <FormattedMessage id="derive_column_category" />,
+      value: 'deriveColumnCategory',
+    });
 
     return (
       <div className="DatasetControls">
