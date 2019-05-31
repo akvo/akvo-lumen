@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Row, Col } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { uniqBy, sortBy } from 'lodash';
+import { itsSet } from 'its-set';
 
 import './DeriveCategoryMappingText.scss';
 import Popover from '../../common/Popover';
@@ -40,10 +41,13 @@ class DeriveCategoryMapping extends Component {
     return sortBy(
       // eslint-disable-next-line no-unused-vars
       unassignedValues.filter(([count, value]) =>
-        (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
+        itsSet(value) && (
+          !search.length ||
+          `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1
+        )
       ).slice(0, SEARCH_RESULTS_LIMIT),
      // eslint-disable-next-line no-unused-vars
-      ([count, value]) => value.toLowerCase()
+      ([count, value]) => `${value}`.toLowerCase()
     );
   }
 
@@ -133,7 +137,7 @@ class DeriveCategoryMapping extends Component {
                 className="DeriveCategoryMappings__search-input"
                 value={search}
                 onChange={(event) => {
-                  this.setState({ search: event.target.value });
+                  this.setState({ search: event.target.value || '' });
                 }}
               />
               <ul className="DeriveCategoryMappings__list">
