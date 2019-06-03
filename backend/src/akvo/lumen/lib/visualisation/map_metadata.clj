@@ -2,6 +2,7 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [clojure.walk :as walk]
+            [akvo.lumen.lib.dataset.utils :as utils]
             [clojure.string :as str]))
 
 (def palette ["#BF2932"
@@ -146,6 +147,20 @@
      :columnTitles column-titles
      :shapeColorMappingTitle shape-color-mapping-title}))
 
+(defn shape-aggregation-metadata-text [tenant-conn table-name layer where-clause]
+  (let [column-titles (get-column-titles tenant-conn "table_name" table-name)
+        column-title-for-name (get-column-title-for-name
+                               (get-column-titles tenant-conn "dataset_id"
+                                                  (:aggregationDataset layer))
+                               (:aggregationColumn layer))
+        shape-color-mapping-title (format "%s (%s)" column-title-for-name
+                                          (:aggregationMethod layer))]
+    {:boundingBox (bounds tenant-conn table-name layer where-clause)
+     :shapeColorMapping (shape-color-mapping layer)
+     :availableColors gradient-palette
+     :columnTitles column-titles
+     :shapeColorMappingTitle shape-color-mapping-title}))
+
 (defn shape-metadata [tenant-conn table-name layer where-clause]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name)]
     {:columnTitles column-titles
@@ -161,20 +176,25 @@
         {:boundingBox [(reverse (first bbox)) (reverse (second bbox))]}
         {}))))
 
-(defn get-metadata [{:keys [aggregationDataset aggregationColumn aggregationGeomColumn layerType]
-                     :as layer}]
+(defn get-metadata [{:keys [aggregationDataset aggregationColumn aggregationGeomColumn layerType aggregationColumn]
+                     :as layer} columns]
   (cond
     (= layerType "raster")
     raster-metadata
 
-    (and aggregationDataset aggregationColumn aggregationGeomColumn)
+    (and aggregationDataset aggregationColumn aggregationGeomColumn
+         (and (= "number" (:type (utils/find-column columns aggregationColumn)))))
     shape-aggregation-metadata
 
+    (and aggregationDataset aggregationColumn aggregationGeomColumn
+         (and (= "text" (:type (utils/find-column columns aggregationColumn)))))
+    shape-aggregation-metadata-text
+    
     (= layerType "geo-shape")
     shape-metadata
 
     :else
     point-metadata))
 
-(defn build [tenant-conn table-name layer where-clause]
-  ((get-metadata layer) tenant-conn table-name layer where-clause))
+(defn build [tenant-conn table-name layer where-clause columns]
+  ((get-metadata layer columns) tenant-conn table-name layer where-clause))

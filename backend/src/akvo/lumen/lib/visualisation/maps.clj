@@ -107,14 +107,15 @@
                {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
                                                            (raster-by-id tenant-conn {:id current-dataset-id})
                                                            (dataset-by-id tenant-conn {:id current-dataset-id}))
-               current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
+               columns (walk/keywordize-keys columns)
+               current-where-clause (filter/sql-str columns (:filters current-layer))]
            (map-metadata/build tenant-conn
                                (or raster_table
                                    table-name
                                    (when (not= current-layer-type "raster")
                                      (throw
                                       (ex-info "no authorised to create a map visualisation with current dataset associated" {:datasetId current-dataset-id}))))
-                               current-layer current-where-clause)))
+                               current-layer current-where-clause columns)))
        layers))
 
 (defn create
