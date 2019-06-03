@@ -58,6 +58,46 @@ export function fetchDataset(id, metaOnly) {
   };
 }
 
+function fetchSortedDatasetRequest(id) {
+  return {
+    type: constants.FETCH_SORTED_DATASET_REQUEST,
+    id,
+  };
+}
+
+function fetchSortedDatasetSuccess(sortedValues) {
+  return {
+    type: constants.FETCH_SORTED_DATASET_SUCCESS,
+    payload: sortedValues,
+  };
+}
+
+function fetchSortedDatasetFailure(error, id) {
+  return {
+    type: constants.FETCH_SORTED_DATASET_FAILURE,
+    id,
+  };
+}
+
+export function fetchSortedDataset(id, columnName) {
+  return (dispatch) => {
+    dispatch(fetchSortedDatasetRequest(id));
+    return api.get(`/api/datasets/${id}/sort/${columnName}`)
+      .then(({ body }) => {
+        dispatch(fetchSortedDatasetSuccess({
+          id,
+          columnName,
+          sortedValues: body,
+        }));
+        return body;
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch dataset.'));
+        dispatch(fetchSortedDatasetFailure(error, id));
+      });
+  };
+}
+
 export function ensureDatasetFullyLoaded(id) {
   return (dispatch, getState) => {
     const { datasets } = getState().library;
@@ -290,8 +330,9 @@ export function deleteDataset(id) {
           dispatch(deleteDatasetSuccess(id));
         }
       })
-      .catch(() => {
-        dispatch(showNotification('error', 'Failed to delete dataset.'));
+      .catch((error) => {
+        dispatch(deleteDatasetFailure(id));
+        dispatch(showNotification('error', error.message || 'Failed to delete dataset.'));
       });
   };
 }
@@ -443,8 +484,8 @@ export function updateDataset(id) {
           dispatch(showNotification('error', `Update failed: ${error}`));
         }
       })
-      .catch(() => {
-        dispatch(showNotification('error', 'Failed to update dataset.'));
+      .catch((error) => {
+        dispatch(showNotification('error', error.message || 'Failed to update dataset.'));
       });
   };
 }
@@ -506,8 +547,8 @@ function pollDatasetTransformationStatus(jobExecutionId, datasetId) {
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
-          dispatch(showNotification('error', 'Failed to transform dataset.'));
-          dispatch(transformationFailure(datasetId, reason));
+          dispatch(showNotification('error', reason));
+          dispatch(transformationFailure(datasetId, 'Failed to transform dataset.'));
         } else if (status === 'OK') {
           dispatch(transformationSuccess(datasetId));
         }
@@ -572,33 +613,6 @@ function txDatasetSuccess(datasetId, jobExecutionId) {
   };
 }
 
-export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
-  return (dispatch) => {
-    dispatch(txDatasetPending(jobExecutionId, name));
-    api
-      .get(`/api/job_executions/transformation/${jobExecutionId}`)
-      .then(({ body: { status, reason, datasetId } }) => {
-        if (status === 'PENDING') {
-          setTimeout(
-            () => dispatch(pollTxImportStatus(jobExecutionId, callback)),
-            constants.POLL_INTERVAL
-          );
-        } else if (status === 'FAILED') {
-          dispatch(showNotification('error', 'Failed to transform dataset.'));
-          dispatch(txDatasetFailure(datasetId, jobExecutionId, reason));
-        } else if (status === 'OK') {
-          dispatch(txDatasetSuccess(datasetId, jobExecutionId));
-          dispatch(fetchDataset(datasetId));
-          callback();
-        }
-      })
-      .catch((error) => {
-        dispatch(showNotification('error', 'Failed to transform dataset.'));
-        dispatch(txDatasetFailure(jobExecutionId, error.message));
-      });
-  };
-}
-
 export function startTx(datasetId) {
   return (dispatch) => {
     dispatch(showNotification('info', 'Applying transformation...'));
@@ -625,11 +639,13 @@ export function undoTx(datasetId) {
   };
 }
 
-export function endTx(datasetId) {
+export function endTx(datasetId, showSuccessNotif = true) {
   return (dispatch) => {
     const AUTO_HIDE = true;
 
-    dispatch(showNotification('success', 'Transformation applied...', AUTO_HIDE));
+    if (showSuccessNotif) {
+      dispatch(showNotification('success', 'Transformation applied...', AUTO_HIDE));
+    }
 
     dispatch({
       type: constants.TRANSFORMATION_END,
@@ -637,5 +653,34 @@ export function endTx(datasetId) {
         datasetId,
       },
     });
+  };
+}
+
+export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
+  return (dispatch) => {
+    dispatch(txDatasetPending(jobExecutionId, name));
+    api
+      .get(`/api/job_executions/transformation/${jobExecutionId}`)
+      .then(({ body: { status, reason, datasetId } }) => {
+        if (status === 'PENDING') {
+          setTimeout(
+            () => dispatch(pollTxImportStatus(jobExecutionId, callback)),
+            constants.POLL_INTERVAL
+          );
+        } else if (status === 'FAILED') {
+          dispatch(showNotification('error', reason));
+          dispatch(txDatasetFailure(datasetId, jobExecutionId, reason));
+          const DONT_SHOW_SUCCESS_NOTIF = false;
+          dispatch(endTx(datasetId, DONT_SHOW_SUCCESS_NOTIF));
+        } else if (status === 'OK') {
+          dispatch(txDatasetSuccess(datasetId, jobExecutionId));
+          dispatch(fetchDataset(datasetId));
+          callback();
+        }
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to transform dataset.'));
+        dispatch(txDatasetFailure(jobExecutionId, error.message));
+      });
   };
 }

@@ -77,12 +77,20 @@
           (rename-keys {:title :name})
           (assoc :rows data :columns columns :status "OK")))))
 
+(defn sort*
+  [tenant-conn id column-name offset]
+  (when-let [dataset (table-name-by-dataset-id tenant-conn {:id id})]
+    (log/debug ::sort* :id id :table-name (:table-name dataset) :column-name column-name :offset offset)
+    (->> {:column-name column-name :table-name (:table-name dataset) :offset (or offset 1000)}
+         (count-vals-by-column-name tenant-conn)
+         (map (juxt :counter :coincidence)))))
+
 (defn delete
   [tenant-conn id]
   (if-let [dataset (dataset-by-id tenant-conn {:id id})]
     (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
-      (lib/conflict {:error (format "This dataset is used in merge tranformations with other datasets: %s"
-                                    (str/join ", " datasets-merged-with))})
+      (lib/conflict {:error (format "Cannot delete dataset. It is used in merge transformations of dataset: %s"
+                                    (str/join ", " (map :title datasets-merged-with)))})
       (let [c (delete-dataset-by-id tenant-conn {:id id})]
         (if (zero? c)
           (do

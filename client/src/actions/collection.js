@@ -1,4 +1,6 @@
 import { createAction } from 'redux-actions';
+import { uniq } from 'lodash';
+
 import { hideModal } from './activeModal';
 import { showNotification } from './notification';
 import * as api from '../utilities/api';
@@ -39,8 +41,7 @@ export function createCollection(title, optionalEntities) {
         const collection = body;
         dispatch(createCollectionSuccess(collection));
         if (optionalEntities) {
-          const collectionWithEntities =
-            Object.assign({}, collection, { entities: optionalEntities });
+          const collectionWithEntities = { ...collection, entities: optionalEntities };
           dispatch(editCollection(collectionWithEntities));
         }
         dispatch(hideModal());
@@ -77,16 +78,9 @@ export function addEntitiesToCollection(entityIds, collectionId) {
     const newEntities = Array.isArray(entityIds) ? entityIds : [entityIds];
     const oldEntities = collection.entities || [];
 
-    const updatedEntityArray = oldEntities.slice(0);
+    const entities = uniq([...newEntities, ...oldEntities]);
 
-    // Add any new entities that are not already in the collection
-    newEntities.forEach((newEntity) => {
-      if (oldEntities.every(oldEntity => oldEntity !== newEntity)) {
-        updatedEntityArray.push(newEntity);
-      }
-    });
-
-    const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
+    const newCollection = { ...collection, entities };
     dispatch(editCollection(newCollection));
 
     // Show a notification because there is no other visual feedback on adding item to collection
@@ -111,7 +105,7 @@ export function addTemporaryEntitiesToCollection(entityIds, collectionId) {
       }
     });
 
-    const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
+    const newCollection = { ...collection, entities: updatedEntityArray };
     dispatch(editCollectionSuccess(newCollection));
   };
 }
@@ -126,10 +120,10 @@ export function removeTemporaryEntitiesFromCollection(entityIds, collectionId) {
 
     if (Array.isArray(entityIds)) {
       entityIds.forEach((entityId) => {
-        delete newCollection[entityId];
+        newCollection.entities = newCollection.entities.filter(id => id !== entityId);
       });
     } else {
-      delete newCollection[entityIds];
+      newCollection.entities = newCollection.entities.filter(id => id !== entityIds);
     }
 
     dispatch(editCollectionSuccess(newCollection));

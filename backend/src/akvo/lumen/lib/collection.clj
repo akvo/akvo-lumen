@@ -10,10 +10,13 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
-(defn all [tenant-conn]
-  (lib/ok (mapv (fn [collection]
-                  (core/update collection :entities #(vec (.getArray %))))
-                (all-collections tenant-conn {}))))
+(defn all
+  ([tenant-conn]
+   (all tenant-conn nil))
+  ([tenant-conn ids]
+   (mapv (fn [collection]
+           (core/update collection :entities #(vec (.getArray %))))
+         (all-collections tenant-conn (if ids {:ids ids} {})))))
 
 (defn fetch [tenant-conn id]
   (if-let [collection (fetch-collection tenant-conn {:id id})]
@@ -48,7 +51,7 @@
 (defn unique-violation? [^SQLException e]
   (= (.getSQLState e) "23505"))
 
-(defn create [tenant-conn {:strs [title entities]}]
+(defn create [tenant-conn {:keys [title entities]}]
   (cond
     (empty? title) (lib/bad-request {:error "Title is missing"})
     (> (count title) 128) (lib/bad-request {:error "Title is too long"
@@ -70,7 +73,7 @@
 (defn update
   "Update a collection. Updates the title and all the entities"
   [tenant-conn id collection]
-  (let [{:strs [entities title]} collection]
+  (let [{:keys [entities title]} collection]
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (when title
         (update-collection-title tx-conn {:id id :title title}))

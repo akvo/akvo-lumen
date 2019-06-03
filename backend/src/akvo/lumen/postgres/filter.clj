@@ -2,7 +2,7 @@
   (:require [akvo.lumen.postgres :as core]
             [clojure.tools.logging :as log]
             [clojure.string :as str])
-  (:import [java.sql.Timestamp]))
+  (:import [java.sql Timestamp]))
 
 (defn invalid-filter [msg map]
   (throw (ex-info (format "Invalid filter: %s" msg) map)))

@@ -1,5 +1,6 @@
 (ns akvo.lumen.migrate
   (:require
+   [akvo.lumen.component.hikaricp :as hikaricp]
    [akvo.lumen.config :as config]
    [akvo.lumen.lib.aes :as aes]
    [clojure.java.io :as io]
@@ -49,14 +50,14 @@
   "Migrate tenant manager and tenants."
   ([config]
    (let [migrations (load-migrations config)
-         tenant-manager-db {:connection-uri (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri])}]
+         tenant-manager-db {:connection-uri (hikaricp/ssl-url (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri]))}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
      (doseq [tenant (all-tenants tenant-manager-db)]
        (try
          (do-migrate (ragtime-jdbc/sql-database
-                          {:connection-uri (aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
-                                                        (:db_uri tenant))})
+                      {:connection-uri (hikaricp/ssl-url (aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
+                                                                      (:db_uri tenant)))})
                         (:tenants migrations))
          (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
 
@@ -87,9 +88,11 @@
         tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
 
-        tenant-manager-db {:connection-uri (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri])}
-        tenant-connection-uri-fn #(aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
-                                       (:db_uri %))]
+        tenant-manager-db {:connection-uri (hikaricp/ssl-url (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri]))}
+        tenant-connection-uri-fn #(hikaricp/ssl-url
+                                   (aes/decrypt
+                                    (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
+                                    (:db_uri %)))]
     (cond
       (= arg :tenant-manager)
       (do-rollback (ragtime-jdbc/sql-database tenant-manager-db)

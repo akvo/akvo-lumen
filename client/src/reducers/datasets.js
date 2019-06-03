@@ -50,6 +50,13 @@ function saveDataset(state, dataset) {
   };
 }
 
+function saveSortedDataset(state, { id, sortedValues }) {
+  return {
+    ...state,
+    [id]: state[id].set('sortedValues', sortedValues),
+  };
+}
+
 function saveDatasets(state, ds) {
   return ds.reduce((result, dataset) => {
     const id = dataset.get('id');
@@ -148,6 +155,8 @@ export default function datasets(state = initialState, action) {
       return importDatasetSuccess(state, action);
     case constants.FETCH_DATASET_SUCCESS:
       return saveDataset(state, action.dataset);
+    case constants.FETCH_SORTED_DATASET_SUCCESS:
+      return saveSortedDataset(state, action.payload);
     case constants.FETCH_DATASETS_SUCCESS:
       return saveDatasets(state, action.datasets);
     case constants.UPDATE_DATASET_META_SUCCESS:

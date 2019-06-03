@@ -11,6 +11,9 @@
       font-family: $bodyFont;
       font-size: 14px;
     }
+    .popover-footer {
+      border-top: 1px solid #dedeea;
+    }
     &.bs-popover-left,
     &.bs-popover-right {
       .arrow {
@@ -30,6 +33,13 @@
       .arrow {
         left: auto;
         right: 0%;
+      }
+    }
+    &.popover-bottom-right {
+      .popover-header {
+        &:before {
+          left: 14px;
+        }
       }
     }
     &.popover-top-right,

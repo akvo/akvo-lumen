@@ -2,20 +2,21 @@
   (:require [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.lib.aggregation.bar :as aggregation.bar]
             [akvo.lumen.lib.aggregation.bubble :as aggregation.bubble]
-            [akvo.lumen.specs.protocols :as protocols.s]
-            [clojure.tools.logging :as log]
             [akvo.lumen.lib.aggregation.line :as aggregation.line]
             [akvo.lumen.lib.aggregation.pie :as aggregation.pie]
             [akvo.lumen.lib.aggregation.pivot :as aggregation.pivot]
             [akvo.lumen.lib.aggregation.scatter :as aggregation.scatter]
+            [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.postgres.filter :as postgres.filter]
-            [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.aggregation :as aggregation.s]
+            [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.db.dataset-version :as db.dsv.s]
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
-            [akvo.lumen.lib.visualisation :as visualisation]
-            [clojure.spec.alpha :as s]))
+            [akvo.lumen.specs.protocols :as protocols.s]
+            [akvo.lumen.specs.visualisation.maps :as visualisation.maps.s]
+            [clojure.spec.alpha :as s]
+            [clojure.tools.logging :as log]))
 
 (s/def ::name string?)
 (s/def ::visualisationType #{"pie" "area" "bar" "line" "polararea" "donut" "pivot table" "scatter" "bubble" "map"})
@@ -27,9 +28,11 @@
 
 (def ^:dynamic *id?*  lumen.s/str-uuid?)
 
-(s/def ::id (s/with-gen
-              #'*id?*
-              lumen.s/str-uuid-gen))
+(s/def ::id? #'*id?*)
+
+(s/def ::id  (s/with-gen
+               ::id?
+               lumen.s/str-uuid-gen))
 
 (s/def ::version int?)
 (s/def ::sort any?)
@@ -102,17 +105,24 @@
 (defmethod vis "bubble"  [_]
   (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
 
-(defmethod vis "map"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+(create-ns  'akvo.lumen.specs.visualisation.map)
+(alias 'map.s 'akvo.lumen.specs.visualisation.map)
 
-(s/fdef visualisation/create
+(s/def ::map.s/baseLayer #{"street" "satellite" "terrain"})
+
+(s/def ::map.s/spec (s/keys :req-un [::version ::map.s/baseLayer ::visualisation.maps.s/layers]))
+
+(defmethod vis "map"  [_]
+  (s/merge ::base-viz (s/keys :req-un [::map.s/spec])) )
+
+#_(s/fdef visualisation/create
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :body ::visualisation
 	 :jwt-claims map?)
   :ret any?)
 
-(s/fdef visualisation/upsert
+#_(s/fdef visualisation/upsert
   :args (s/cat
          :db-conn ::db.s/tenant-connection
 	 :body ::visualisation

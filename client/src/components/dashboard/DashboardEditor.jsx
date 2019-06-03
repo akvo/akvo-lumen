@@ -6,10 +6,15 @@ import { Element, scroller } from 'react-scroll';
 
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
+import { groupIntoPages } from '../../utilities/dashboard';
+import { A4 } from '../../constants/print';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
+
+export const ROW_COUNT = 16;
+const COL_COUNT = 12;
 
 const getArrayFromObject = object => Object.keys(object).map(key => object[key]);
 
@@ -142,6 +147,33 @@ export default class DashboardEditor extends Component {
     }
   }
 
+  getLayout() {
+    const { exporting, preventPageOverlaps } = this.props;
+    const { propLayout } = this.state;
+    return (exporting && preventPageOverlaps) ?
+      groupIntoPages()(propLayout) :
+      propLayout;
+  }
+
+  getRowHeight() {
+    const canvasWidth = this.state.gridWidth;
+    const canvasHeight = (canvasWidth * (A4.height / A4.width)) + 46;
+    const rowHeight = canvasHeight / ROW_COUNT;
+    return rowHeight;
+  }
+
+  focusTextItem(id) {
+    setTimeout(() => {
+      const canvasItem = this.canvasElements[id];
+      if (!canvasItem) return;
+      const el = canvasItem.getElement();
+      if (!el) return;
+      const textarea = el.querySelector('textarea');
+      if (!textarea) return;
+      textarea.focus();
+    }, 1000);
+  }
+
   handleLayoutChange(layout) {
     this.props.onUpdateLayout(layout);
   }
@@ -206,18 +238,6 @@ export default class DashboardEditor extends Component {
     this.props.onUpdateEntities(newEntities);
   }
 
-  focusTextItem(id) {
-    setTimeout(() => {
-      const canvasItem = this.canvasElements[id];
-      if (!canvasItem) return;
-      const el = canvasItem.getElement();
-      if (!el) return;
-      const textarea = el.querySelector('textarea');
-      if (!textarea) return;
-      textarea.focus();
-    }, 1000);
-  }
-
   handleResize() {
     // Offset the padding width (16px on each side)
     const newWidth = this.DashboardEditorCanvasContainer.clientWidth - 32;
@@ -251,7 +271,8 @@ export default class DashboardEditor extends Component {
   render() {
     const { dashboard, datasets, exporting } = this.props;
     const canvasWidth = this.state.gridWidth;
-    const rowHeight = canvasWidth / 12;
+    const rowHeight = this.getRowHeight();
+    const layout = this.getLayout();
 
     return (
       <div
@@ -288,11 +309,11 @@ export default class DashboardEditor extends Component {
           <div className="DashboardEditorCanvas">
             <ReactGridLayout
               className="layout"
-              cols={12}
+              cols={COL_COUNT}
               rowHeight={rowHeight}
               width={canvasWidth}
-              verticalCompact
-              layout={this.state.propLayout}
+              verticalCompact={!exporting}
+              layout={layout}
               onLayoutChange={this.handleLayoutChange}
               isDraggable={!this.state.focusedItem}
               isResizable={!this.state.focusedItem}
@@ -324,6 +345,7 @@ export default class DashboardEditor extends Component {
                     metadata={this.props.metadata}
                     canvasLayout={dashboard.layout}
                     canvasWidth={canvasWidth}
+                    rowHeight={rowHeight}
                     onDeleteClick={this.handleEntityToggle}
                     onSave={this.props.onSave}
                     onEntityUpdate={this.handleEntityUpdate}
@@ -363,4 +385,10 @@ DashboardEditor.propTypes = {
   onUpdateName: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   exporting: PropTypes.bool,
+  preventPageOverlaps: PropTypes.bool,
+};
+
+DashboardEditor.defaultProps = {
+  exporting: false,
+  preventPageOverlaps: false,
 };

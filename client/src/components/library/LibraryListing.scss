@@ -1,6 +1,9 @@
 @import "../../styles/modules/importAll";
 
 .LibraryListing {
+    vertical-align: middle;
+    min-height: 100%;
+
     ul,
     ol {
         list-style: none;
@@ -172,5 +175,26 @@
     }
     .LibraryListingGroup:last-child .LibraryListingItem:last-child {
         margin-bottom: 6rem;
+    }
+
+    .ErrorScreen {
+        flex: 1;
+
+        .ErrorScreen__inner {
+            max-width: 580px;
+        }
+
+        h1 {
+            font-size: 5em;
+            line-height: 1.4em;
+        }
+
+        h2 {
+            font-size: 1.6em;
+        }
+    }
+
+    &.LibraryListing--empty {
+        display: flex;
     }
 }

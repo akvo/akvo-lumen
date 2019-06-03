@@ -1,5 +1,6 @@
 (ns akvo.lumen.test-utils
   (:require [akvo.lumen.auth :as auth]
+            [akvo.lumen.component.hikaricp :as hikaricp]
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
@@ -28,8 +29,10 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
 (defn retry-job-execution [tenant-conn job-execution-id with-job?]
   (dh/with-retry {:retry-if (fn [v e] (not v))
@@ -59,11 +62,12 @@
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
   [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]
   (let [spec {"name" (or dataset-name file)
-              "source" {"path" (when file (.getAbsolutePath (io/file (io/resource file))))
-                        "kind" (or kind "DATA_FILE")
-                        "fileName" (or dataset-name file)
-                        "data" data
-                        "hasColumnHeaders" (boolean has-column-headers?)}}
+              "source" (with-meta
+                         {"path" (when file (.getAbsolutePath (io/file (io/resource file))))
+                          "kind" (or kind "DATA_FILE")
+                          "fileName" (or dataset-name file)
+                          "hasColumnHeaders" (boolean has-column-headers?)}
+                         {:data data})}
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
@@ -184,7 +188,7 @@
 (defn seed
   "At the moment only support seed of tenants table."
   [config]
-  (let [db-uri (-> config :akvo.lumen.component.hikaricp/hikaricp :uri)]
+  (let [db-uri (hikaricp/ssl-url (-> config :akvo.lumen.component.hikaricp/hikaricp :uri))]
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
@@ -198,7 +202,10 @@
   (fn [handler]
     (fn [{tenant :tenant
           :as req}]
-      (handler (assoc req :auth-service
-                      (l.auth/new-auth-service {:auth-datasets (map :id (all-datasets (p/connection tenant-manager tenant)))
-                                                :auth-visualisations (mapv :id (all-visualisations (p/connection tenant-manager tenant)))
-                                                :auth-dashboards (mapv :id (all-dashboards (p/connection tenant-manager tenant)))}))))))
+      (let [tenant-conn (p/connection tenant-manager tenant)]
+        (handler (assoc req :auth-service
+                        (l.auth/new-auth-service {:auth-datasets       (map :id (all-datasets tenant-conn))
+                                                  :auth-visualisations (mapv :id (all-visualisations tenant-conn))
+                                                  :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
+                                                  :auth-collections    (mapv :id (all-collections tenant-conn))
+                                                  :rasters             (mapv :id (all-rasters tenant-conn))})))))))

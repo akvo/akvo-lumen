@@ -156,6 +156,12 @@
                       :transformations []
                       :columns commons/dataset-link-columns}
                      (select-keys meta-dataset [:id :name :status :transformations :columns])))))
+
+          (testing "sort"
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" ) {"offset" 2}))
+                                   body-kw)]
+              (is (= '([2 "B"] [2 "A"]) dataset-sort))))
+
           (is (= title (-> (h (get* (api-url "/library")))
                           body-kw :datasets first :name)))
           (let [bar-vis-name "hello-bar-vis!"]
@@ -258,7 +264,7 @@
           (is (some? (re-find #"path=\"/api/aggregation/:dataset-id/:visualisation-type\",tenant=\"t1\""
                               (:body r))))))
       
-      (testing "/transformations/:id/transform & /transformations/:id/undo"
+      (testing "/transformations/:id/transform/:op1/:op2 & /transformations/:id/undo"
         (let [title "GDP-dataset"
               file-name "GDP.csv"
               dataset-url (post-files h file-name)
@@ -282,7 +288,7 @@
                    (select-keys dataset [:transformations :name :status :id])))
             (is (= 196 (count (:rows dataset))))
             (is (= 10 (count (:columns dataset))))
-            (let [res (h (post* (api-url "/transformations" dataset-id "transform")
+            (let [res (h (post* (api-url "/transformations" dataset-id "transform" "core/trim")
                                 {:args {:columnName "c5"}, :onError "fail", :op "core/trim"}))]
 
               (is (= 200 (:status res)))
@@ -334,4 +340,48 @@
                     res-verify (h (get* url))]
                 (is (= 302 (:status res-verify))))
               (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
-                (is (= 200 (:status (h (del* (api-url "/admin/users" (:id (first (filter #(= email (:email %)) users)))))))))))))))))
+                (is (= 200 (:status (h (del* (api-url "/admin/users" (:id (first (filter #(= email (:email %)) users))))))))))))))
+      (testing "import empty csv dataset"
+        (let [title "dataset-empty"
+              file-name "empty.csv"
+              dataset-url (post-files h file-name)
+              import-id (-> (h (post*  (api-url "/datasets") {:source
+                                                              {:kind "DATA_FILE"
+                                                               :hasColumnHeaders true
+                                                               :guessColumnTypes true
+                                                               :url dataset-url
+                                                               :fileName file-name}
+                                                              :name title}))
+                            body-kw
+                            :importId)
+              _           (is (some? import-id))
+              dataset-id (job-execution-dataset-id h import-id)
+              ]
+          (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
+                            body-kw)]
+            (is (= {:transformations []
+                    :columns [{:key false,
+	                       :type "text",
+	                       :title "one",
+	                       :multipleId nil,
+	                       :hidden false,
+	                       :multipleType nil,
+	                       :columnName "c1",
+	                       :direction nil,
+	                       :sort nil}
+	                      {:key false,
+	                       :type "text",
+	                       :title "two",
+	                       :multipleId nil,
+	                       :hidden false,
+	                       :multipleType nil,
+	                       :columnName "c2",
+	                       :direction nil,
+	                       :sort nil}]
+                    :name title
+                    ;;:author nil,
+                    :rows
+                    []
+                    :status "OK"
+                    :id dataset-id}
+                   (select-keys dataset [:transformations :columns :name :rows :status :id])))))))))

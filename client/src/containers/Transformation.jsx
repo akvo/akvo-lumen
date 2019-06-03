@@ -1,19 +1,23 @@
+// TODO dataset not fetched if navigate straight to page
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
-import { pollTxImportStatus, startTx, endTx } from '../actions/dataset';
+import { pollTxImportStatus, startTx, endTx, fetchDataset, fetchSortedDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
+import DeriveCategoryTransformation from '../components/transformation/DeriveCategoryTransformation';
 import { trackEvent } from '../utilities/analytics';
 import { TRANSFORM_DATASET } from '../constants/analytics';
+import './Transformation.scss';
 
 const transformationComponent = {
   merge: MergeTransformation,
   'reverse-geocode': ReverseGeocodeTransformation,
+  'derive-category': DeriveCategoryTransformation,
 };
 
 class Transformation extends Component {
@@ -39,7 +43,8 @@ class Transformation extends Component {
 
     dispatch(startTx(datasetId));
 
-    api.post(`/api/transformations/${datasetId}/transform`, transformation)
+    // TODO move this into an action instead of here
+    api.post(`/api/transformations/${datasetId}/transform/${transformation.op}`, transformation)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Failed to merge dataset');
@@ -54,6 +59,8 @@ class Transformation extends Component {
       }).catch((err) => {
         this.setState({ transforming: false });
         dispatch(showNotification('error', `Transformation failed: ${err.message}`));
+        const DONT_SHOW_SUCCESS_NOTIF = false;
+        dispatch(endTx(datasetId, DONT_SHOW_SUCCESS_NOTIF));
       });
   }
 
@@ -71,6 +78,15 @@ class Transformation extends Component {
           datasetId={datasetId}
           datasets={datasets}
           onApplyTransformation={transformation => this.handleApplyTransformation(transformation)}
+          onFetchDataset={(id) => {
+            this.props.dispatch(fetchDataset(id));
+          }}
+          onFetchSortedDataset={(id, columnName) => {
+            this.props.dispatch(fetchSortedDataset(id, columnName));
+          }}
+          onAlert={(alert) => {
+            this.props.dispatch(alert);
+          }}
         />
       </div>
     );

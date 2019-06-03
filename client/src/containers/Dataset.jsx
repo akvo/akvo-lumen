@@ -105,7 +105,7 @@ class Dataset extends Component {
     this.setPendingTransformation(now, transformation);
     dispatch(startTx(id));
 
-    return api.post(`/api/transformations/${id}/transform`, transformationJs)
+    return api.post(`/api/transformations/${id}/transform/${transformationJs.op}`, transformationJs)
       .then((response) => {
         if (!response.ok) {
           this.removePending(now);
@@ -119,6 +119,7 @@ class Dataset extends Component {
       .then(() => this.removePending(now))
       .catch((error) => {
         dispatch(showNotification('error', error.message));
+        dispatch(endTx(id));
         throw error;
       });
   }

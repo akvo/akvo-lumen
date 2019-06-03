@@ -12,6 +12,7 @@
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.transformation.derive-category :as derive-category]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.import :as import.s]
@@ -30,13 +31,16 @@
             [clojure.string :as string]
             [clojure.test :refer :all]
             [clojure.tools.logging :as log]
-            [clojure.walk :refer (stringify-keys)]
+            [clojure.walk :refer (stringify-keys keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [akvo.lumen.postgres Geoshape Geopoint]))
 
 (alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
+(alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
 (alias 'import.column.geoshape.s                'akvo.lumen.specs.import.column.geoshape)
 (alias 'import.column.multiple.s                'akvo.lumen.specs.import.column.multiple)
+(alias 'import.column.multiple.caddisfly.s      'akvo.lumen.specs.import.column.multiple.caddisfly)
+(alias 'import.column.multiple.geo-shape-features.s  'akvo.lumen.specs.import.column.multiple.geo-shape-features)
 (alias 'transformation.engine.s                 'akvo.lumen.specs.transformation.engine)
 (alias 'transformation.combine.s                'akvo.lumen.specs.transformation.combine)
 (alias 'transformation.filter-column.s          'akvo.lumen.specs.transformation.filter-column)
@@ -50,6 +54,10 @@
 (alias 'transformation.merge-datasets.source.s  'akvo.lumen.specs.transformation.merge-datasets.source)
 (alias 'transformation.merge-datasets.target.s  'akvo.lumen.specs.transformation.merge-datasets.target)
 (alias 'transformation.merge-datasets.s         'akvo.lumen.specs.transformation.merge-datasets)
+(alias 'transformation.derive-category.derivation.s 'akvo.lumen.specs.transformation.derive-category.derivation)
+(alias 'transformation.derive-category.target.s 'akvo.lumen.specs.transformation.derive-category.target)
+(alias 'transformation.derive-category.source.s 'akvo.lumen.specs.transformation.derive-category.source)
+(alias 'transformation.derive-category.s 'akvo.lumen.specs.transformation.derive-category)
 (alias 'transformation.reverse-geocode.source.s 'akvo.lumen.specs.transformation.reverse-geocode.source)
 (alias 'transformation.reverse-geocode.target.s 'akvo.lumen.specs.transformation.reverse-geocode.target)
 (alias 'transformation.reverse-geocode.s        'akvo.lumen.specs.transformation.reverse-geocode)
@@ -529,39 +537,67 @@
                                               (assoc :extract %3))
                                          columns (range) bols)
         new-columns                (filter :extract columns-payload)
-        data                       (import.s/sample-imported-dataset [[:multiple {::import.values.s/multipleId    #(s/gen #{import.values.s/cad1-id})
-                                                                                  ::import.column.multiple.s/value #(s/gen #{import.values.s/cad1})}]] 2)
+        data                       (-> (import.s/sample-imported-dataset
+                                        [[:multiple {::import.column.multiple.s/header* #(s/gen ::import.column.multiple.caddisfly.s/header*)
+                                                     ::import.column.multiple.s/value   #(s/gen #{import.values.s/cad1})}]
+                                         [:multiple {::import.column.multiple.s/header* #(s/gen ::import.column.multiple.caddisfly.s/header*)
+                                                     ::import.column.multiple.s/value #(s/gen #{import.values.s/cad2})}]] 2)
+                                       (assoc-in [:columns 0 :multipleId] import.values.s/cad1-id)
+                                       (assoc-in [:columns 1 :multipleId] import.values.s/cad2-id))
         dataset-id                 (import-file *tenant-conn* *error-tracker*
                                                 {:dataset-name "multiple caddisfly"
                                                  :kind         "clj"
                                                  :data         data})
-        apply-transformation       (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-        selected-column            (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
-                                                             {::import.values.s/multipleType          "caddisfly"
-                                                              ::import.values.s/multipleId            import.values.s/cad1-id
-                                                              ::db.dataset-version.column.s/columnName "c1"
-                                                              ::import.values.s/id                     :c1
-                                                              ::import.column.s/header                 #(s/gen ::import.column.multiple.s/header)})
-        [tag _ :as res]            (apply-transformation
-                                    {:type :transformation
-                                     :transformation
-                                     (-> (gen-transformation :core/extract-multiple
-                                                             {::db.dataset-version.column.s/columnName "c1"
-                                                              ::transformation.split-column.s/pattern  "-"
-                                                              ::transformation.engine.s/onError        "fail"}
-                                                             :selectedColumn selected-column)
-                                         (update-in ["args" "extractImage"] (constantly false))
-                                         (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
-    (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-      
-      (is (= (apply conj ["c1"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (count new-columns)))))
-             (map #(get % "columnName") columns)))
-      (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d1"])]
-        (is (nil? before))
-        (is (= 1 (get after "caddisfly-test-id")))
-        (is (= (:name (nth new-columns 0)) (get after "title")))
-        (is (= "d1" (get after "columnName")))))))
+        apply-transformation       (partial async-tx-apply {:tenant-conn *tenant-conn* :caddisfly *caddisfly*} dataset-id)]
+    (let [selected-column (merge
+                           (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
+                                                     {::db.dataset-version.column.s/columnName "c1"})
+                           (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
+                                                     {::import.values.s/multipleId import.values.s/cad1-id
+                                                      ::import.values.s/id         "c1"}))
+          [tag _ :as res] (apply-transformation
+                           {:type :transformation
+                            :transformation
+                            (-> (gen-transformation :core/extract-multiple
+                                                    {::db.dataset-version.column.s/columnName "c1"
+                                                     ::transformation.split-column.s/pattern  "-"
+                                                     ::transformation.engine.s/onError        "fail"}
+                                                    :selectedColumn selected-column)
+                                (update-in ["args" "extractImage"] (constantly true))
+                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+        
+        (is (= (apply conj ["c1" "c2"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (inc (count new-columns))))))
+               (map #(get % "columnName") columns)))
+        (is (= ["https://akvoflow-uat1.s3.amazonaws.com/images/b1961e99-bc1c-477c-9309-ae5e8d2374e8.png"
+                "https://akvoflow-uat1.s3.amazonaws.com/images/b1961e99-bc1c-477c-9309-ae5e8d2374e8.png"]
+               (mapv :d1 (get-data *tenant-conn* {:table-name table-name}))))
+        (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "d2"])]
+          (is (nil? before))
+          (is (= 1 (get after "caddisfly-test-id")))
+          (is (= (:name (nth new-columns 0)) (get after "title")))
+          (is (= "d2" (get after "columnName"))))))
+    (let [selected-column
+          (merge
+           (lumen.s/sample-with-gen* ::transformation.split-column.s/selectedColumn
+                                     {::db.dataset-version.column.s/columnName "c2"})
+           (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
+                                     {::import.values.s/multipleId import.values.s/cad2-id
+                                      ::import.values.s/id         "c2"}))
+          [tag _ :as res] (apply-transformation
+                           {:type :transformation
+                            :transformation
+                            (-> (gen-transformation :core/extract-multiple
+                                                    {::db.dataset-version.column.s/columnName "c2"
+                                                     ::transformation.split-column.s/pattern  "-"
+                                                     ::transformation.engine.s/onError        "fail"}
+                                                    :selectedColumn selected-column)
+                                (update-in ["args" "extractImage"] (constantly true))
+                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+        (is (= [nil nil] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
 
 (defn- replace-column
   "utility to have same column in other generated dataset"
@@ -569,6 +605,92 @@
   (-> target-data
       (assoc-in [:columns column-idx]  (nth (:columns origin-data) column-idx))
       (assoc :rows (map #(assoc-in % [column-idx] (nth %2 column-idx)) (:rows target-data) (:rows origin-data)))))
+
+(deftest ^:functional derive-category-number-test
+  (let [column-vals          [1.0 2.0 3.0 4.0]
+        origin-data          (import.s/sample-imported-dataset [[:number {::import.column.number.s/value #(s/gen (set column-vals))}]] 100)
+        dataset-id           (import-file *tenant-conn* *error-tracker*
+                                          {:dataset-name "origin-dataset"
+                                           :kind         "clj"
+                                           :data         origin-data})
+        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+        new-column-name      "Derived column name"
+        uncategorized-value  "Uncategorised value"
+        new-derived-column   {:sort       nil,
+	                      :type       "number",
+	                      :title      new-column-name
+	                      :hidden     false,
+	                      :direction  nil,
+	                      :columnName "d1"}
+        mappings*            [[[">=" 0] ["<=" 1] "one"]
+                              [["=" 2] nil "two"]]
+        tx                   (gen-transformation "core/derive-category"
+                                                 {}
+                                                 [:source :column :columnName] "c1"
+                                                 [:target :column :title] new-column-name
+                                                 [:derivation :mappings] mappings*
+                                                 [:derivation :type] "number"
+                                                 [:derivation :uncategorizedValue] uncategorized-value)
+
+        [tag _ :as res] (apply-transformation {:type           :transformation
+                                               :transformation tx})]
+    (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
+
+    (is (= ::lib/ok tag))
+    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+          data-db                                      (get-data *tenant-conn* {:table-name table-name})]
+      (is (every? #(= (:d1 %) (derive-category/find-number-cat mappings* (:c1 %) uncategorized-value)) data-db))
+      (is (= new-derived-column
+             (keywordize-keys (last columns))))
+      (let [applied-tx (keywordize-keys (last transformations))]
+        (is (= (keywordize-keys tx) (select-keys applied-tx [:op :args])))
+        (is (= {:d1
+	        {:after
+	         new-derived-column,
+	         :before nil}} (:changedColumns applied-tx)))))))
+
+(deftest ^:functional derive-category-text-test
+  (let [column-vals          ["v1" "v2" "v3" "v4"]
+        origin-data          (import.s/sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
+        dataset-id           (import-file *tenant-conn* *error-tracker*
+                                          {:dataset-name "origin-dataset"
+                                           :kind         "clj"
+                                           :data         origin-data})
+        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+        new-column-name      "Derived column name"
+        uncategorized-value  "Uncategorised value"
+        new-derived-column   {:sort       nil,
+	                      :type       "text",
+	                      :title      new-column-name
+	                      :hidden     false,
+	                      :direction  nil,
+	                      :columnName "d1"}
+        mappings*            [[["v2" "v3"] "mapped-1"]
+                              [["v4"] "mapped-2"]]
+        tx                   (gen-transformation "core/derive-category"
+                                                 {}
+                                                 [:source :column :columnName] "c1"
+                                                 [:target :column :title] new-column-name
+                                                 [:derivation :mappings] mappings*
+                                                 [:derivation :type] "text"
+                                                 [:derivation :uncategorizedValue] uncategorized-value)
+
+        [tag _ :as res] (apply-transformation {:type           :transformation
+                                               :transformation tx})]
+    (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
+
+    (is (= ::lib/ok tag))
+    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+          data-db                                      (get-data *tenant-conn* {:table-name table-name})]
+      (is (every? #(= (:d1 %) (derive-category/find-text-cat (derive-category/mappings-dict mappings*) (:c1 %) uncategorized-value)) data-db))
+      (is (= new-derived-column
+             (keywordize-keys (last columns))))
+      (let [applied-tx (keywordize-keys (last transformations))]
+        (is (= (keywordize-keys tx) (select-keys applied-tx [:op :args])))
+        (is (= {:d1
+	        {:after
+	         new-derived-column,
+	         :before nil}} (:changedColumns applied-tx)))))))
 
 (deftest ^:functional merge-datasets-test
   (let [origin-data          (import.s/sample-imported-dataset [:text :date] 2)

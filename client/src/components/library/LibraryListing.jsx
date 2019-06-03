@@ -1,8 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+
 import LibraryListingGroup from './LibraryListingGroup';
 import * as entity from '../../domain/entity';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import ErrorScreen from '../../components/common/ErrorScreen';
 
 require('./LibraryListing.scss');
 
@@ -105,33 +108,45 @@ export default function LibraryListing({
   searchString,
   checkboxEntities,
   onCheckEntity,
-  onEntityAction }) {
+  onEntityAction,
+}) {
+  if (!library.meta.hasFetched) {
+    return (
+      <div className={`LibraryListing ${displayMode}`}>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   const entities = filterEntities(library, filterBy, searchString);
   const listGroups = groupEntities(entities, sortOrder);
   const sortedListGroups = sortGroups(listGroups, sortOrder, isReverseSort);
   const results = sortedListGroups.length > 0;
 
   return (
-    <div className={`LibraryListing ${displayMode}`}>
-      {(!results && !currentCollection && !searchString) &&
-        <span
-          className="noItemsMessage"
+    <div className={`LibraryListing ${displayMode} ${!results ? 'LibraryListing--empty' : ''}`}>
+      {(!results && !currentCollection && !searchString) && (
+        <ErrorScreen
+          code="Welcome"
+          title="Get started by adding datasets, visualisations and dashboards to your library from the top menu."
         />
-      }
-      {(!results && currentCollection && !searchString) &&
-        <span
-          className="noItemsMessage"
-        >
-          <p>There are no items in this collection.</p>
-        </span>
-      }
-      {(!results && searchString) &&
-        <div className="noSearchResults">
-          <h3>No results found</h3>
-          <p>Please update your search and try again.</p>
-        </div>
-      }
-      {results &&
+      )}
+
+      {(!results && currentCollection && !searchString) && (
+        <ErrorScreen
+          code="Empty"
+          title="There are no items in this collection."
+        />
+      )}
+
+      {(!results && searchString) && (
+        <ErrorScreen
+          code="No Results"
+          title="Please update your search and try again."
+        />
+      )}
+
+      {results && (
         <ul>
           {sortedListGroups.map((listGroup, index) =>
             <LibraryListingGroup
@@ -148,7 +163,7 @@ export default function LibraryListing({
             />
           )}
         </ul>
-      }
+      )}
     </div>
   );
 }

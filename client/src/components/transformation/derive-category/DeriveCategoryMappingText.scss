@@ -1,0 +1,180 @@
+@import "../../../styles/modules/importAll";
+
+.DeriveCategoryMapping {
+  position: relative;
+  border-bottom: 1px solid $lightGrey;
+  padding: 0;
+
+  .DeriveCategoryMapping__text {
+    padding: 1rem 0 !important;
+  }
+
+  .DeriveCategoryMapping__input-wrap {
+    padding: 0 !important;
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 7px;
+      border: 1px solid transparent;
+      font-weight: 600;
+
+      &:focus {
+        border-color: $anchorLinkLight;
+      }
+    }
+  }
+
+  .DeriveCategoryMapping__tag {
+    border: 1px solid $midLightGrey;
+    background: white;
+    padding: 0.2rem 0.5rem;
+    position: relative;
+    display: inline-block;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+    @include border-radius(4px);
+
+    &--with-btn {
+      padding-right: 1.5rem;
+    }
+
+    &--active,
+    &:hover {
+      border-color: $anchorLinkLight;
+      color: $anchorLinkLight;
+
+      .DeriveCategoryMapping__tag__btn {
+        color: $anchorLinkLight;
+      }
+    }
+  }
+
+  .DeriveCategoryMapping__tag__btn {
+    position: absolute;
+    right: 0.2rem;
+    top: 0.4rem;
+  }
+
+  .DeriveCategoryMapping__action_btn {
+    visibility: hidden;
+    color: $anchorLinkLight;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    font-style: italic;
+  }
+
+  &:hover {
+    .DeriveCategoryMapping__action_btn {
+      visibility: visible; 
+    }
+    .DeriveCategoryMapping__input-wrap {
+      input {
+        border-color: $lightGrey;
+
+        &:focus {
+          border-color: $anchorLinkLight;
+        }
+      }
+    }
+  }
+
+  .Popover {
+    .popover {
+      border: 1px solid $midLightGrey;
+      background: white;
+      width: 290px;
+
+      .arrow {
+        &:after {
+          border-bottom-color: $midLightGrey;
+        }
+        &:after {
+          border-bottom-color: white;
+        }
+      }
+    }
+
+    .popover-header,
+    .popover-footer,
+    .popover-body {
+      background: none;
+      padding: 1rem;
+    }
+
+    .popover-header {
+      &:before {
+        border-bottom-color: white !important;
+      }
+      a {
+        float: right;
+      }
+    }
+
+    .popover-footer {
+      .Button {
+        float: right;
+      }
+
+      input,
+      label {
+        margin: 12px 5px;
+      }
+    }
+
+    .DeriveCategoryMappings__search-input {
+      margin-top: 6px;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .DeriveCategoryMappings__list {
+      list-style: none;
+      li {
+        padding: 0.75rem 0;
+
+        input {
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+
+  &--lg {
+    a,
+    input {
+      font-size: 1.2em;
+      font-weight: 600;
+    }
+
+    a {
+      margin-left: 40px;
+      color: $midLightGrey;
+      padding: 0px 20px;
+      position: relative;
+      top: 2px;
+
+      &:hover {
+        color: $anchorLinkLight;
+      }
+    }
+    
+    i {
+      margin-right: 10px;
+    }
+  }
+
+  &--invalid {
+    &,
+    &:hover {
+      .DeriveCategoryMapping__input-wrap {
+        input {
+          &,
+          &:focus {
+            border-color: $errorRed;
+          }
+        }
+      }
+    }
+  }
+}

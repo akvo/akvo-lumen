@@ -78,17 +78,16 @@
       (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
 
 (defn dashboard-response-data [tenant-conn id windshaft-url]
-  (let [[tag dashboard] (dashboard/fetch tenant-conn id)]
-    (when (= tag ::lib/ok)
-      (let [deps (->> dashboard
-                      :entities
-                      vals
-                      (filter #(= "visualisation" (get % "type")))
-                      (map #(get % "id"))
-                      (map #(visualisation-response-data tenant-conn % windshaft-url))
-                      (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
-                      (apply merge-with merge))]
-        (assoc deps :dashboards {id dashboard})))))
+  (when-let [dashboard (dashboard/fetch tenant-conn id)]
+    (let [deps (->> dashboard
+                    :entities
+                    vals
+                    (filter #(= "visualisation" (:type %)))
+                    (map :id)
+                    (map #(visualisation-response-data tenant-conn % windshaft-url))
+                    (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
+                    (apply merge-with merge))]
+      (assoc deps :dashboards {id dashboard}))))
 
 (defn response-data [tenant-conn share windshaft-url]
   (if-let [dashboard-id (:dashboard-id share)]

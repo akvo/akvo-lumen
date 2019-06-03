@@ -6,6 +6,7 @@
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs.dashboard :as dashboard.s]
             [clojure.spec.alpha :as s]
+            [clojure.walk :as w]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
@@ -28,8 +29,13 @@
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              auth-service :auth-service
                               body :body}]
-                          (dashboard/create (p/connection tenant-manager tenant) body jwt-claims))}}]
+                          (let [payload (w/keywordize-keys body)
+                                ids (l.auth/ids ::dashboard.s/dashboard-post-payload payload)]
+                            (if (p/allow? auth-service ids)
+                              (dashboard/create (p/connection tenant-manager tenant) payload jwt-claims)
+                              (lib/not-authorized {:ids ids}))))}}]
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
@@ -41,13 +47,20 @@
     ["" {:get {:parameters {:path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               {:keys [id]} :path-params}]
-                          (dashboard/fetch (p/connection tenant-manager tenant) id))}
+                          (if-let [d (dashboard/fetch (p/connection tenant-manager tenant) id)]
+                            (lib/ok d)
+                            (lib/not-found {:error "Not found"})))}
          :put {:parameters {:body map?
                             :path-params {:id string?}}
                :handler (fn [{tenant :tenant
+                              auth-service :auth-service
                               body :body
                               {:keys [id]} :path-params}]
-                          (dashboard/upsert (p/connection tenant-manager tenant) id body))}
+                          (let [payload (w/keywordize-keys body)
+                                ids (l.auth/ids ::dashboard.s/dashboard-payload payload)]
+                            (if (p/allow? auth-service ids)
+                              (dashboard/upsert (p/connection tenant-manager tenant) id payload)
+                              (lib/not-authorized {:ids ids}))))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]

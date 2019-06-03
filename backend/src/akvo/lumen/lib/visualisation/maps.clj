@@ -4,6 +4,7 @@
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [clojure.tools.logging :as log]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -88,6 +89,7 @@
         headers (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
+        _ (log/debug :map-config map-config)
         layer-group-id (-> (client/post url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})
@@ -121,9 +123,12 @@
     (conform-create-args layers)
     (let [metadata-array (metadata-layers tenant-conn layers)
           map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
+          headers* (headers tenant-conn)
+          _ (log/warn :map-config map-config)
+          _ (log/warn :headers headers)
           layer-group-id (-> (client/post (format "%s/layergroup" windshaft-url)
                                           {:body (json/encode map-config)
-                                           :headers (headers tenant-conn)
+                                           :headers headers*
                                            :content-type :json})
                              :body json/decode (get "layergroupid"))]
       (lib/ok {:layerGroupId layer-group-id

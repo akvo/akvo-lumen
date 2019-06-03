@@ -129,6 +129,10 @@ export default class CombineColumns extends Component {
                   value: ',',
                 },
                 {
+                  label: <span><FormattedMessage id="hyphen" /> (-)</span>,
+                  value: '-',
+                },
+                {
                   label: <FormattedMessage id="none" />,
                   value: '',
                 },

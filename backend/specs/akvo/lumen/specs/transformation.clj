@@ -27,12 +27,12 @@
 
 (s/def ::command (s/multi-spec command-spec :type))
 
-(create-ns  'akvo.lumen.specs.transformation.engine)
-(alias 'transformation.engine 'akvo.lumen.specs.transformation.engine)
+(create-ns 'akvo.lumen.specs.transformation.engine)
+(alias 'transformation.engine.s 'akvo.lumen.specs.transformation.engine)
 
-(s/def ::transformation.engine/onError #{"leave-empty" "fail" "delete-row" "default-value"})
+(s/def ::transformation.engine.s/onError #{"leave-empty" "fail" "delete-row" "default-value"})
 
-(s/def ::transformation.engine/op #{"core/change-datatype"
+(s/def ::transformation.engine.s/op #{"core/change-datatype"
 				    "core/combine"
 				    "core/delete-column"
 				    "core/derive"
@@ -40,6 +40,7 @@
 				    "core/filter-column"
 				    "core/generate-geopoints"
 				    "core/merge-datasets"
+                                    "core/derive-category"
 				    "core/remove-sort"
 				    "core/rename-column"
 				    "core/reverse-geocode"
@@ -53,7 +54,7 @@
 
 (defmulti op-spec :op)
 
-(s/def ::transformation.engine/op-spec
+(s/def ::transformation.engine.s/op-spec
   (s/multi-spec op-spec :op))
 
 (create-ns  'akvo.lumen.specs.transformation.delete-column)
@@ -65,8 +66,8 @@
 (defmethod op-spec "core/delete-column"  [_]
   (s/keys
    :req-un [::transformation.delete-column/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.change-datatype)
@@ -85,15 +86,15 @@
 (defmethod op-spec "core/change-datatype"  [_]
   (s/keys
    :req-un [::transformation.change-datatype/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.combine)
 (alias 'transformation.combine 'akvo.lumen.specs.transformation.combine)
 
 (s/def ::transformation.combine/newColumnTitle string?)
 
-(s/def ::transformation.combine/separator string?)
+(s/def ::transformation.combine/separator #{" " "," "" "-"})
 
 (s/def ::transformation.combine/columnNames (s/coll-of ::db.dsv.column.s/columnName :kind vector? :distinct true)) 
 (s/def ::transformation.combine/args
@@ -104,8 +105,8 @@
 (defmethod op-spec "core/combine"  [_]
   (s/keys
    :req-un [::transformation.combine/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.derive)
@@ -125,8 +126,8 @@
 (defmethod op-spec "core/derive"  [_]
   (s/keys
    :req-un [::transformation.derive/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.filter-column)
@@ -145,8 +146,8 @@
 (defmethod op-spec "core/filter-column"  [_]
   (s/keys
    :req-un [::transformation.filter-column/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.generate-geopoints)
@@ -165,8 +166,8 @@
 (defmethod op-spec "core/generate-geopoints"  [_]
   (s/keys
    :req-un [::transformation.generate-geopoints/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.merge-datasets)
 (alias 'transformation.merge-datasets 'akvo.lumen.specs.transformation.merge-datasets)
@@ -176,8 +177,6 @@
 
 (create-ns  'akvo.lumen.specs.transformation.merge-datasets.target)
 (alias 'transformation.merge-datasets.target 'akvo.lumen.specs.transformation.merge-datasets.target)
-
-
 
 (s/def ::transformation.merge-datasets.source/datasetId ::db.dsv.s/dataset-id)
 (s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable columnName?))
@@ -205,8 +204,84 @@
 (defmethod op-spec "core/merge-datasets"  [_]
   (s/keys
    :req-un [::transformation.merge-datasets/args
-            ::transformation.engine/op]))
+            ::transformation.engine.s/op]))
 
+(create-ns  'akvo.lumen.specs.transformation.derive-category)
+(alias 'transformation.derive-category 'akvo.lumen.specs.transformation.derive-category)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.source)
+(alias 'transformation.derive-category.source 'akvo.lumen.specs.transformation.derive-category.source)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.target)
+(alias 'transformation.derive-category.target 'akvo.lumen.specs.transformation.derive-category.target)
+
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.derivation)
+(alias 'transformation.derive-category.derivation 'akvo.lumen.specs.transformation.derive-category.derivation)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.derivation.text)
+(alias 'transformation.derive-category.derivation.text 'akvo.lumen.specs.transformation.derive-category.derivation.text)
+
+(create-ns  'akvo.lumen.specs.transformation.derive-category.derivation.number)
+(alias 'transformation.derive-category.derivation.number 'akvo.lumen.specs.transformation.derive-category.derivation.number)
+
+
+(s/def ::transformation.derive-category.source/columnName ::i.values.s/id)
+(s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName]))
+
+(s/def ::transformation.derive-category/source (s/keys
+                                               :req-un [::transformation.derive-category.source/column]))
+
+(s/def ::transformation.derive-category.target/column (s/keys :req-un [::i.values.s/title]))
+(s/def ::transformation.derive-category/target (s/keys
+                                               :req-un [::transformation.derive-category.target/column]))
+
+(s/def ::transformation.derive-category.derivation.text/mappings (s/coll-of (s/tuple (s/coll-of (s/nilable string?) :kind vector? :min-count 1) string?) :kind vector? :min-count 1))
+
+(s/def ::transformation.derive-category.derivation.number/op #{">" "<" ">=" "<=" "="})
+
+(s/def ::transformation.derive-category.derivation.number/op*
+  (s/tuple ::transformation.derive-category.derivation.number/op
+           number?))
+
+(s/def ::transformation.derive-category.derivation.number/mappings
+  (s/coll-of
+   (s/tuple
+    ::transformation.derive-category.derivation.number/op*
+    (s/nilable ::transformation.derive-category.derivation.number/op*)
+    ::lumen.s/non-empty-string)
+   :kind vector? :min-count 1))
+
+(s/def ::transformation.derive-category.derivation/uncategorizedValue ::lumen.s/non-empty-string)
+
+(s/def ::transformation.derive-category.derivation/type #{"text" "number"})
+
+(defmulti derivation :type)
+
+(defmethod derivation "text" [_]
+  (s/keys :req-un [::transformation.derive-category.derivation.text/mappings
+                   ::transformation.derive-category.derivation/type]))
+
+(defmethod derivation "number" [_]
+  (s/keys :req-un [::transformation.derive-category.derivation.number/mappings
+                   ::transformation.derive-category.derivation/type]))
+
+(defmethod derivation :default [_]
+  (s/keys :req-un [::transformation.derive-category.derivation.text/mappings]))
+
+(s/def ::transformation.derive-category/derivation
+  (s/merge (s/keys :req-un [::transformation.derive-category.derivation/uncategorizedValue])
+           (s/multi-spec derivation :type)))
+
+(s/def ::transformation.derive-category/args
+  (s/keys :req-un [::transformation.derive-category/source
+                   ::transformation.derive-category/target
+                   ::transformation.derive-category/derivation]))
+
+(defmethod op-spec "core/derive-category"  [_]
+  (s/keys
+   :req-un [::transformation.derive-category/args
+            ::transformation.engine.s/op]))
 
 (create-ns 'akvo.lumen.specs.transformation.extract-multiple)
 (alias 'transformation.extract-multiple 'akvo.lumen.specs.transformation.extract-multiple)
@@ -237,8 +312,8 @@
 (defmethod op-spec "core/extract-multiple"  [_]
   (s/keys
    :req-un [::transformation.extract-multiple/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.rename-column)
@@ -254,8 +329,8 @@
 (defmethod op-spec "core/rename-column"  [_]
   (s/keys
    :req-un [::transformation.rename-column/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 
 
@@ -293,7 +368,7 @@
 (defmethod op-spec "core/reverse-geocode"  [_]
   (s/keys
    :req-un [::transformation.reverse-geocode/args
-            ::transformation.engine/op]))
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.sort-column)
 (alias 'transformation.sort-column 'akvo.lumen.specs.transformation.sort-column)
@@ -308,8 +383,8 @@
 (defmethod op-spec "core/sort-column"  [_]
   (s/keys
    :req-un [::transformation.sort-column/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.remove-sort)
 (alias 'transformation.remove-sort 'akvo.lumen.specs.transformation.remove-sort)
@@ -322,8 +397,8 @@
 (defmethod op-spec "core/remove-sort"  [_]
   (s/keys
    :req-un [::transformation.remove-sort/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.split-column)
 (alias 'transformation.split-column 'akvo.lumen.specs.transformation.split-column)
@@ -343,8 +418,8 @@
 (defmethod op-spec "core/split-column"  [_]
   (s/keys
    :req-un [::transformation.split-column/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.trim)
 (alias 'transformation.trim 'akvo.lumen.specs.transformation.trim)
@@ -355,8 +430,8 @@
 (defmethod op-spec "core/trim"  [_]
   (s/keys
    :req-un [::transformation.trim/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.to-lowercase)
 (alias 'transformation.to-lowercase 'akvo.lumen.specs.transformation.to-lowercase)
@@ -367,8 +442,8 @@
 (defmethod op-spec "core/to-lowercase"  [_]
   (s/keys
    :req-un [::transformation.to-lowercase/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.to-uppercase)
 (alias 'transformation.to-uppercase 'akvo.lumen.specs.transformation.to-uppercase)
@@ -379,8 +454,8 @@
 (defmethod op-spec "core/to-uppercase"  [_]
   (s/keys
    :req-un [::transformation.to-uppercase/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.to-titlecase)
 (alias 'transformation.to-titlecase 'akvo.lumen.specs.transformation.to-titlecase)
@@ -391,8 +466,8 @@
 (defmethod op-spec "core/to-titlecase"  [_]
   (s/keys
    :req-un [::transformation.to-titlecase/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.transformation.trim-doublespace)
 (alias 'transformation.trim-doublespace 'akvo.lumen.specs.transformation.trim-doublespace)
@@ -403,8 +478,8 @@
 (defmethod op-spec "core/trim-doublespace"  [_]
   (s/keys
    :req-un [::transformation.trim-doublespace/args
-	    ::transformation.engine/onError
-            ::transformation.engine/op]))
+	    ::transformation.engine.s/onError
+            ::transformation.engine.s/op]))
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
 (alias 'db.dsv.transformation 'akvo.lumen.specs.dataset-version.transformation)
@@ -424,7 +499,9 @@
 
 (s/def ::db.dsv.transformation/changedColumns* (s/keys :req-un [::db.dsv.transformation/changedColumns]))
 
-(s/def ::db.dsv.s/transformation (s/merge ::transformation.engine/op-spec ::db.dsv.transformation/changedColumns*))
+(s/def ::db.dsv.s/transformation (s/merge ::transformation.engine.s/op-spec ::db.dsv.transformation/changedColumns*))
+
+(s/def ::op-spec ::transformation.engine.s/op-spec)
 
 (s/def ::db.dsv.s/transformations (s/coll-of ::db.dsv.s/transformation :kind vector? :distinct true))
 

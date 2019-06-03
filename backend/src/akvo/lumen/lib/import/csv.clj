@@ -38,11 +38,12 @@
 (defn get-column-types
   "Returns a seq of types for each column in the given rows"
   [rows]
-  (for [column-data (apply map vector rows)]
-    (condp every? column-data
-      numeric? "number"
-      wkt-shape? "geoshape"
-      "text")))
+  (when (seq rows)
+    (for [column-data (apply map vector rows)]
+      (condp every? column-data
+        numeric? "number"
+        wkt-shape? "geoshape"
+        "text"))))
 
 (defn get-column-tuples
   "Returns a seq of maps containing column id, titles & types.
@@ -82,9 +83,10 @@
                         (first data)
                         (gen-column-titles column-count))
         rows (if headers? (rest data) data)
-        column-types (if guess-types?
-                       (get-column-types rows)
-                       (repeat column-count "text"))
+        column-types (let [default-value (repeat column-count "text")]
+                       (if guess-types?
+                         (or (get-column-types rows) default-value)
+                         default-value))
         column-spec (get-column-tuples column-titles column-types)]
     (reify
       p/DatasetImporter

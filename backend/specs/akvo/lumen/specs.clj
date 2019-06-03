@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [integrant.core :as ig]
+            [clojure.string :as string]
             [akvo.lumen.util :refer (squuid)]
             [clojure.tools.logging :as log]))
 
@@ -29,7 +30,9 @@
 
 (defn str-uuid? [v]
   (when (some? v)
-    (uuid? (read-string (format "#uuid \"%s\"" v)))))
+    (try
+      (uuid? (read-string (format "#uuid \"%s\"" v)))
+      (catch Throwable t false))))
 
 (s/def ::str-uuid
   (s/with-gen
@@ -59,3 +62,8 @@
   (s/keys :req-un [::conform-specs]))
 
 (s/def ::date-number (s/nilable number?))
+
+(s/def ::non-empty-string
+  (s/with-gen
+    (s/and string? (complement string/blank?))
+    #(gen/not-empty (gen/string-alphanumeric))))

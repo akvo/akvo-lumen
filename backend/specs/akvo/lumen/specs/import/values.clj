@@ -14,15 +14,18 @@
 ;;{:title "Fluoride", :type :multiple, :id :c116809115, :multipleType :caddisfly, :multipleId "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf"}
 (def cad1-id "f0f3c1dd-89af-49f1-83e7-bcc31c3006cf")
 (def cad1
-  "{\"device\":{\"model\":\"ASUS_Z00LD\",\"product\":\"WW_Z00L\",\"manufacturer\":\"asus\",\"os\":\"Android - 6.0.1 (23)\",\"country\":\"US\",\"language\":\"en\"},\"image\":\"b1961e99-bc1c-477c-9309-ae5e8d2374e8.png\",\"user\":{\"backDropDetection\":false,\"language\":\"en\"},\"name\":\"Water - Fluoride\",\"uuid\":\"f0f3c1dd-89af-49f1-83e7-bcc31c3006cf\",\"testDate\":\"2017-02-06 00:50\",\"type\":\"caddisfly\",\"app\":{\"appVersion\":\"Version 1.0.0 Beta 9.0\",\"language\":\"en\"},\"result\":[{\"name\":\"Fluoride\",\"unit\":\"ppm\",\"id\":1,\"value\":\"1.51\"}]}")
+  "{\"device\":{\"model\":\"ASUS_Z10LD\",\"product\":\"WW_Z00L\",\"manufacturer\":\"asus\",\"os\":\"Android - 6.0.1 (23)\",\"country\":\"US\",\"language\":\"en\"},\"image\":\"b1961e99-bc1c-477c-9309-ae5e8d2374e8.png\",\"user\":{\"backDropDetection\":false,\"language\":\"en\"},\"name\":\"Water - Fluoride\",\"uuid\":\"f0f3c1dd-89af-49f1-83e7-bcc31c3006cf\",\"testDate\":\"2017-02-06 00:50\",\"type\":\"caddisfly\",\"app\":{\"appVersion\":\"Version 1.0.0 Beta 9.0\",\"language\":\"en\"},\"result\":[{\"name\":\"Fluoride\",\"unit\":\"ppm\",\"id\":1,\"value\":\"1.51\"}]}")
 
 ;;{:title "Soil - Nitrogen", :type :multiple, :id :c117759118, :multipleType :caddisfly, :multipleId "53a1649a-be67-4a13-8cba-1b7db640037c"}
+(def cad2-id "53a1649a-be67-4a13-8cba-1b7db640037c")
 (def cad2
-  "{\"device\":{\"model\":\"ASUS_Z00LD\",\"product\":\"WW_Z00L\",\"manufacturer\":\"asus\",\"os\":\"Android - 6.0.1 (23)\",\"country\":\"ID\",\"language\":\"in\"},\"image\":\"27a1821b-7bfa-4254-81b2-10a5446fa5f9.png\",\"user\":{\"backDropDetection\":true,\"language\":\"in\"},\"name\":\"Soil - Available Nitrogen\",\"uuid\":\"53a1649a-be67-4a13-8cba-1b7db640037c\",\"testDate\":\"2017-02-14 14:27\",\"type\":\"caddisfly\",\"app\":{\"appVersion\":\"Version 1.0.0 Alpha 8.6 (Build 167)\",\"language\":\"en\"},\"result\":[{\"name\":\"Available Nitrogen\",\"unit\":\"kg/ha\",\"id\":1,\"value\":\"582.4\"},{\"name\":\"Nitrate Nitrogen\",\"unit\":\"ppm\",\"id\":2,\"value\":\"50.0\"},{\"name\":\"Nitrite Nitrogen\",\"unit\":\"ppm\",\"id\":3,\"value\":\"2.0\"}]}")
+  "{\"device\":{\"model\":\"ASUS_Z00LD\",\"product\":\"WW_Z00L\",\"manufacturer\":\"asus\",\"os\":\"Android - 6.0.1 (23)\",\"country\":\"ID\",\"language\":\"in\"},\"image\": null,\"user\":{\"backDropDetection\":true,\"language\":\"in\"},\"name\":\"Soil - Available Nitrogen\",\"uuid\":\"53a1649a-be67-4a13-8cba-1b7db640037c\",\"testDate\":\"2017-02-14 14:27\",\"type\":\"caddisfly\",\"app\":{\"appVersion\":\"Version 1.0.0 Alpha 8.6 (Build 167)\",\"language\":\"en\"},\"result\":[{\"name\":\"Available Nitrogen\",\"unit\":\"kg/ha\",\"id\":1,\"value\":\"582.4\"},{\"name\":\"Nitrate Nitrogen\",\"unit\":\"ppm\",\"id\":2,\"value\":\"50.0\"},{\"name\":\"Nitrite Nitrogen\",\"unit\":\"ppm\",\"id\":3,\"value\":\"2.0\"}]}")
 
 ;; locate uuid and title
 (def cad3
   "{\"device\":{\"model\":\"ASUS_Z00LD\",\"product\":\"WW_Z00L\",\"manufacturer\":\"asus\",\"os\":\"Android - 6.0.1 (23)\",\"country\":\"ID\",\"language\":\"in\"},\"image\":\"6a8aa913-7579-4276-a159-9ac3f2ff5c84.png\",\"user\":{\"backDropDetection\":true,\"language\":\"in\"},\"name\":\"Soil - Available Phosphorous\",\"uuid\":\"7cb666ea-7913-4511-9ae4-18f78e67aa09\",\"testDate\":\"2017-02-14 14:16\",\"type\":\"caddisfly\",\"app\":{\"appVersion\":\"Version 1.0.0 Alpha 8.6 (Build 167)\",\"language\":\"en\"},\"result\":[{\"name\":\"Available Phosphorous\",\"unit\":\"kg/ha\",\"id\":1,\"value\":\"200.9\"}]}")
+
+(def geo-shape-feature1 "{\"pointCount\":\"4\",\"length\":\"238,56\",\"area\":\"2966,31\"}")
 
 
 (s/def ::wkt-string
@@ -46,4 +49,4 @@
                        lumen.s/str-uuid?
                        #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
 
-(s/def ::multipleType #{"caddisfly"})
+(s/def ::multipleType #{"caddisfly" "geo-shape-features" "geo-multi-point-features" "geo-line-string-features"})

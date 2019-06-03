@@ -10,7 +10,7 @@ import SidebarControls from './SidebarControls';
 
 require('codemirror/lib/codemirror.css');
 require('codemirror/mode/javascript/javascript');
-require('./DeriveColumn.scss');
+require('./DeriveColumnJavascript.scss');
 
 
 const typeOptions = [

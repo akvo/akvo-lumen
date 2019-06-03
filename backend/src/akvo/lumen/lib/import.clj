@@ -39,7 +39,7 @@
                                :imported-table-name imported-table-name
                                :version 1
                                :columns (mapv (fn [{:keys [title id type key multipleType multipleId]}]
-                                                {:columnName (name id)
+                                                {:columnName id
                                                  :direction nil
                                                  :hidden false
                                                  :key (boolean key)
@@ -47,7 +47,7 @@
                                                  :multipleType multipleType
                                                  :sort nil
                                                  :title (string/trim title)
-                                                 :type (name type)})
+                                                 :type type})
                                               columns)
                                :transformations []})
     (update-job-execution conn {:id             job-execution-id
@@ -78,17 +78,11 @@
           (p/track error-tracker e)
           (throw e))))))
 
-(defn insert-data-source-db
-  "not all kind of things in data-source could be jsonify properly,
-  extracting here this functionality to be hookable in `dev` and `test`"
-  [tenant-conn data-source-id data-source]
-  (insert-data-source tenant-conn {:id data-source-id
-                                   :spec (json/generate-string data-source)}))
-
 (defn handle [tenant-conn import-config error-tracker claims data-source]
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))]
-    (insert-data-source-db tenant-conn data-source-id data-source)
+    (insert-data-source tenant-conn {:id data-source-id
+                                   :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
     (execute tenant-conn import-config error-tracker job-execution-id data-source-id claims data-source)
