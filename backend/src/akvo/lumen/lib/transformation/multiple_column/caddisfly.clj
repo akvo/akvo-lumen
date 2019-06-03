@@ -72,7 +72,7 @@
                                                             cad-results)
                                                            (reduce #(apply assoc % %2) {}))]
                                       (log/debug :update-vals update-vals)
-                                      (multiple-column/update-row conn table-name (:rnum m) update-vals ""))))
+                                      (multiple-column/update-row conn table-name (:rnum m) update-vals "NULL"))))
                                  doall)]
       (log/debug :db-txs selected-column add-db-columns update-db-columns)
       {:success?      true
