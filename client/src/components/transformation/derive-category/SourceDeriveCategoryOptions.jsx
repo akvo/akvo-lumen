@@ -20,7 +20,7 @@ const SourceDeriveCategoryOptions = ({ dataset, onChange, selected }) => (
             value={selected}
             searchable
             options={
-              dataset.columns.filter(({ type }) => type === 'text')
+              dataset.columns.filter(({ type }) => type === 'text' || type === 'number')
                 .map(({ columnName, title, type }) => ({
                   value: columnName,
                   label: `${title} (${type})`,
