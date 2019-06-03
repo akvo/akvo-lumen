@@ -76,7 +76,7 @@ class DeriveCategoryTransformation extends Component {
 
   handleApplyTransformation() {
     const { onApplyTransformation, intl, onAlert } = this.props;
-    const { transformation, duplicatedCategoryNames } = this.state;
+    const { transformation, duplicatedCategoryNames, columnType } = this.state;
 
     if (duplicatedCategoryNames.length) {
       onAlert(showNotification('error', intl.formatMessage({ id: 'categories_must_be_unique' })));
@@ -89,7 +89,7 @@ class DeriveCategoryTransformation extends Component {
         ...transformation.args,
         derivation: {
           ...transformation.args.derivation,
-          type: 'text',
+          type: columnType,
           mappings: transformation.args.derivation.mappings.map(([sourceValues, target]) =>
             [
               // eslint-disable-next-line no-unused-vars
@@ -101,7 +101,10 @@ class DeriveCategoryTransformation extends Component {
       },
     });
   }
-
+  findColumn(columns, columnName) {
+    return columns
+    .filter(column => column.columnName === columnName)[0];
+  }
   render() {
     const {
       datasetId,
@@ -110,9 +113,13 @@ class DeriveCategoryTransformation extends Component {
       onFetchSortedDataset,
       intl,
     } = this.props;
-    const { transformation, selectingSourceColumn, duplicatedCategoryNames } = this.state;
+    const {
+      transformation,
+      selectingSourceColumn,
+      duplicatedCategoryNames,
+      columnType } = this.state;
     const dataset = datasets[datasetId].toJS();
-
+    console.log(transformation.args.source.column);
     return (
       <div className="DeriveCategoryTransformation">
 
@@ -131,9 +138,11 @@ class DeriveCategoryTransformation extends Component {
               dataset={dataset}
               selected={transformation.args.source.column.columnName}
               onChange={(columnName) => {
+                console.log('selected column', this.findColumn(dataset.columns, columnName));
                 if (columnName !== transformation.args.source.column.columnName) {
                   onFetchSortedDataset(datasetId, columnName);
                   this.setState({
+                    columnType: this.findColumn(dataset.columns, columnName).type,
                     selectingSourceColumn: false,
                     transformation: {
                       ...this.state.transformation,
@@ -162,7 +171,8 @@ class DeriveCategoryTransformation extends Component {
             />
           )}
 
-          {transformation.args.source.column.columnName && !selectingSourceColumn && (
+          {transformation.args.source.column.columnName && !selectingSourceColumn && columnType === 'text'
+          && (
             <DeriveCategoryMappingsText
               mappings={transformation.args.derivation.mappings || []}
               uncategorizedValue={transformation.args.derivation.uncategorizedValue}
@@ -221,6 +231,10 @@ class DeriveCategoryTransformation extends Component {
                 }, this.handleValidate);
               }}
             />
+          )}
+          {transformation.args.source.column.columnName && !selectingSourceColumn && columnType === 'number'
+          && (
+            <div>You selected number type</div>
           )}
 
         </div>
