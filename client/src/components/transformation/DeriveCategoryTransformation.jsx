@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 
 import DeriveCategoryMappingsText from './derive-category/DeriveCategoryMappingsText';
+import DeriveCategoryMappingsNumber from './derive-category/DeriveCategoryMappingsNumber';
 import SourceDeriveCategoryOptions from './derive-category/SourceDeriveCategoryOptions';
 import './DeriveCategoryTransformation.scss';
 import TransformationHeader from './TransformationHeader';
@@ -119,7 +120,6 @@ class DeriveCategoryTransformation extends Component {
       duplicatedCategoryNames,
       columnType } = this.state;
     const dataset = datasets[datasetId].toJS();
-    console.log(transformation.args.source.column);
     return (
       <div className="DeriveCategoryTransformation">
 
@@ -138,11 +138,11 @@ class DeriveCategoryTransformation extends Component {
               dataset={dataset}
               selected={transformation.args.source.column.columnName}
               onChange={(columnName) => {
-                console.log('selected column', this.findColumn(dataset.columns, columnName));
+                const ct = this.findColumn(dataset.columns, columnName).type;
                 if (columnName !== transformation.args.source.column.columnName) {
-                  onFetchSortedDataset(datasetId, columnName);
+                  onFetchSortedDataset(datasetId, columnName, ct);
                   this.setState({
-                    columnType: this.findColumn(dataset.columns, columnName).type,
+                    columnType: ct,
                     selectingSourceColumn: false,
                     transformation: {
                       ...this.state.transformation,
@@ -234,8 +234,65 @@ class DeriveCategoryTransformation extends Component {
           )}
           {transformation.args.source.column.columnName && !selectingSourceColumn && columnType === 'number'
           && (
-            <div>You selected number type</div>
-          )}
+            <DeriveCategoryMappingsNumber
+              mappings={transformation.args.derivation.mappings || []}
+              uncategorizedValue={transformation.args.derivation.uncategorizedValue}
+              sourceColumnIndex={findIndex(
+                dataset.columns,
+                ({ columnName }) => columnName === transformation.args.source.column.columnName
+              )}
+              dataset={dataset}
+              onReselectSourceColumn={() => {
+                this.setState({ selectingSourceColumn: true }, this.handleValidate);
+              }}
+              duplicatedCategoryNames={duplicatedCategoryNames}
+              onChange={(mappings) => {
+                this.setState({
+                  transformation: {
+                    ...this.state.transformation,
+                    args: {
+                      ...this.state.transformation.args,
+                      derivation: {
+                        ...this.state.transformation.args.derivation,
+                        mappings,
+                      },
+                    },
+                  },
+                }, this.handleValidate);
+              }}
+              onChangeTargetColumnName={(title) => {
+                this.setState({
+                  transformation: {
+                    ...this.state.transformation,
+                    args: {
+                      ...this.state.transformation.args,
+                      target: {
+                        ...this.state.transformation.args.target,
+                        column: {
+                          ...this.state.transformation.args.target.column,
+                          title,
+                        },
+                      },
+                    },
+                  },
+                }, this.handleValidate);
+              }}
+              onChangeUncategorizedValue={(uncategorizedValue) => {
+                this.setState({
+                  transformation: {
+                    ...this.state.transformation,
+                    args: {
+                      ...this.state.transformation.args,
+                      derivation: {
+                        ...this.state.transformation.args.derivation,
+                        uncategorizedValue,
+                      },
+                    },
+                  },
+                }, this.handleValidate);
+              }}
+            />
+        )}
 
         </div>
       </div>

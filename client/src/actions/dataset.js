@@ -79,10 +79,29 @@ function fetchSortedDatasetFailure(error, id) {
   };
 }
 
-export function fetchSortedDataset(id, columnName) {
+export function fetchTextSortedDataset(id, columnName) {
   return (dispatch) => {
     dispatch(fetchSortedDatasetRequest(id));
     return api.get(`/api/datasets/${id}/sort/${columnName}/text`)
+      .then(({ body }) => {
+        dispatch(fetchSortedDatasetSuccess({
+          id,
+          columnName,
+          sortedValues: body,
+        }));
+        return body;
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch dataset.'));
+        dispatch(fetchSortedDatasetFailure(error, id));
+      });
+  };
+}
+
+export function fetchNumberSortedDataset(id, columnName) {
+  return (dispatch) => {
+    dispatch(fetchSortedDatasetRequest(id));
+    return api.get(`/api/datasets/${id}/sort/${columnName}/number`)
       .then(({ body }) => {
         dispatch(fetchSortedDatasetSuccess({
           id,
