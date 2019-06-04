@@ -158,9 +158,12 @@
                      (select-keys meta-dataset [:id :name :status :transformations :columns])))))
 
           (testing "sort"
-            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" ) {"offset" 2}))
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"offset" 2}))
                                    body-kw)]
-              (is (= '([2 "B"] [2 "A"]) dataset-sort))))
+              (is (= '([2 "B"] [2 "A"]) dataset-sort)))
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c2" "number")))
+                                   body-kw)]
+              (is (= {:counter 4, :max 72.0, :min 22.0} dataset-sort))))
 
           (is (= title (-> (h (get* (api-url "/library")))
                           body-kw :datasets first :name)))

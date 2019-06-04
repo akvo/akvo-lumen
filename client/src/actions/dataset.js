@@ -82,7 +82,7 @@ function fetchSortedDatasetFailure(error, id) {
 export function fetchSortedDataset(id, columnName) {
   return (dispatch) => {
     dispatch(fetchSortedDatasetRequest(id));
-    return api.get(`/api/datasets/${id}/sort/${columnName}`)
+    return api.get(`/api/datasets/${id}/sort/${columnName}/text`)
       .then(({ body }) => {
         dispatch(fetchSortedDatasetSuccess({
           id,
