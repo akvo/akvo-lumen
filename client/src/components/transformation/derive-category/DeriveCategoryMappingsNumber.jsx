@@ -1,15 +1,13 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
-import { findIndex, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Col, Container, Row } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
-import DeriveCategoryMapping from './DeriveCategoryMappingText';
-import './DeriveCategoryMappingsText.scss';
+import LogicRule from './LogicRule';
+import './DeriveCategoryMappingsNumber.scss';
 import ContextMenu from '../../common/ContextMenu';
 
-const MAPPING_COUNT_LIMIT = 50;
 
 class DeriveCategoryMappings extends Component {
 
@@ -36,26 +34,34 @@ class DeriveCategoryMappings extends Component {
     super(props);
     this.handleTargetCategoryNameUpdate = this.handleTargetCategoryNameUpdate.bind(this);
     this.handleSourceValuesUpdate = this.handleSourceValuesUpdate.bind(this);
+    this.onUpdateOpRule = this.onUpdateOpRule.bind(this);
+    this.onUpdateCategoryRule = this.onUpdateCategoryRule.bind(this);
   }
 
   state = {
     search: '',
     sort: 'numeric',
     showSourceColumnContextMenu: false,
+    rule: {
+      op: null,
+      opValue: null,
+    },
   }
-
   componentDidMount() {
     if (this.derivedColumnTitleInput) {
       this.derivedColumnTitleInput.focus();
     }
   }
 
-  getExistingMappingIndex(value) {
-    const { mappings } = this.props;
-    return findIndex(mappings, ([sourceValues]) =>
-      // eslint-disable-next-line no-unused-vars
-      sourceValues.map(([c, v]) => v).includes(value)
-    );
+  onUpdateOpRule(a, b) {
+    const { rule } = this.state;
+    const { category } = rule;
+    this.setState({ rule: { op: a, opValue: b, category } });
+  }
+  onUpdateCategoryRule(a) {
+    const { rule } = this.state;
+    const { op, opValue } = rule;
+    this.setState({ rule: { category: a, op, opValue } });
   }
 
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
@@ -91,6 +97,7 @@ class DeriveCategoryMappings extends Component {
     onChange(newMappings);
   }
 
+
   render() {
     const {
       dataset,
@@ -104,12 +111,15 @@ class DeriveCategoryMappings extends Component {
       intl,
       duplicatedCategoryNames,
     } = this.props;
-    const { search, sort } = this.state;
-    const { counter, max, min } = dataset.sortedValues;
-    console.log('dataset.sortedValues', counter, max, min);
-    console.log(this.props);
+    const { rule } = this.state;
+    console.log('rule', rule);
 
     if (!dataset.sortedValues) return null;
+
+    const { uniques, max, min } = dataset.sortedValues;
+//    console.log('dataset.sortedValues', all, uniques, max, min);
+//    console.log(this.props);
+
     /*
 
     const unassignedValues = dataset.sortedValues
@@ -134,7 +144,6 @@ class DeriveCategoryMappings extends Component {
     const potentialMappings = mappings.concat(searchedValues.map(value => [[value]]));
     */
     const uncategorizedValueIsInvalid = duplicatedCategoryNames.includes(uncategorizedValue);
-
     return (
       <Container className="DeriveCategoryMappings container">
         <Row className="DeriveCategoryMapping DeriveCategoryMapping--lg">
@@ -180,34 +189,15 @@ class DeriveCategoryMappings extends Component {
           </Col>
         </Row>
 
-        {/* <Row className="DeriveCategoryMapping DeriveCategoryMeta">
+        <Row className="DeriveCategoryMapping DeriveCategoryMeta">
           <Col xs={7} className="DeriveCategoryMapping__text">
             <span>
               <FormattedMessage
                 id="unique_values_count"
-                values={{ count: dataset.sortedValues.length }}
+                values={{ count: uniques }}
               />
+              MIN: { min }. MAX: { max }
             </span>
-            <a
-              className={`fa fa-sort-numeric-desc DeriveCategoryMapping__sort-btn ${sort === 'numeric' ? 'DeriveCategoryMapping__sort-btn--selected' : ''}`}
-              onClick={() => {
-                this.setState({ sort: 'numeric' });
-              }}
-            />
-            <a
-              className={`fa fa-sort-alpha-desc DeriveCategoryMapping__sort-btn ${sort === 'alpha' ? 'DeriveCategoryMapping__sort-btn--selected' : ''}`}
-              onClick={() => {
-                this.setState({ sort: 'alpha' });
-              }}
-            />
-            <input
-              placeholder="Search..."
-              className="DeriveCategoryMappings__search-input"
-              value={search}
-              onChange={(event) => {
-                this.setState({ search: event.target.value });
-              }}
-            />
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__text">
             <FormattedMessage
@@ -215,29 +205,12 @@ class DeriveCategoryMappings extends Component {
               values={{ count: mappings.length + 1 }}
             />
           </Col>
-        </Row> */}
-
-        {/* potentialMappings.map(([sourceValues, targetCategoryName]) => (
-          <DeriveCategoryMapping
-            key={sourceValues[0][1]}
-            unassignedValues={unassignedValues}
-            sourceValues={sourceValues}
-            targetCategoryName={targetCategoryName}
-            onChangeCategoryName={(event) => {
-              this.handleTargetCategoryNameUpdate(sourceValues, event.target.value);
-            }}
-            onSourceValuesUpdate={this.handleSourceValuesUpdate}
-            isGrouping={
-              // eslint-disable-next-line no-unused-vars
-              sourceValues.map(([count, value]) => value).includes(this.state.isGroupingValue)
-            }
-            onToggleGrouping={(isGroupingValue) => {
-              this.setState({ isGroupingValue });
-            }}
-            isInvalid={duplicatedCategoryNames.includes(targetCategoryName)}
-          />
-          )) */}
-
+        </Row>
+        <LogicRule
+          onUpdateOpRule={this.onUpdateOpRule}
+          onUpdateCategoryRule={this.onUpdateCategoryRule}
+          rule={rule}
+        />
         <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="uncategorized_values" />
