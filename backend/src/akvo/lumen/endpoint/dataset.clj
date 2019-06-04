@@ -63,11 +63,11 @@
      ["/sort"
       [["/:column-name/text" {:get {:parameters {:path-params {:id string?
                                                                :column-name string?}
-                                                 :query-params {:offset (s/nilable string?)}}
+                                                 :query-params {:limit (s/nilable string?)}}
                                     :handler (fn [{tenant :tenant
                                                    {:keys [id column-name]} :path-params
                                                    query-params :query-params}]
-                                               (lib/ok (dataset/sort-text (p/connection tenant-manager tenant) id column-name (get query-params "offset"))))}}]]
+                                               (lib/ok (dataset/sort-text (p/connection tenant-manager tenant) id column-name (get query-params "limit"))))}}]]
       [["/:column-name/number" {:get {:parameters {:path-params {:id string?
                                                                  :column-name string?}}
                                       :handler (fn [{tenant :tenant

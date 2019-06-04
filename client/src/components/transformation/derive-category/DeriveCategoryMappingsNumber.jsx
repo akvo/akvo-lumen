@@ -105,8 +105,12 @@ class DeriveCategoryMappings extends Component {
       duplicatedCategoryNames,
     } = this.props;
     const { search, sort } = this.state;
-    /*
+    const { counter, max, min } = dataset.sortedValues;
+    console.log('dataset.sortedValues', counter, max, min);
+    console.log(this.props);
+
     if (!dataset.sortedValues) return null;
+    /*
 
     const unassignedValues = dataset.sortedValues
       // eslint-disable-next-line no-unused-vars
@@ -128,8 +132,9 @@ class DeriveCategoryMappings extends Component {
     searchedValues = searchedValues.slice(0, MAPPING_COUNT_LIMIT);
 
     const potentialMappings = mappings.concat(searchedValues.map(value => [[value]]));
-    const uncategorizedValueIsInvalid = duplicatedCategoryNames.includes(uncategorizedValue);
     */
+    const uncategorizedValueIsInvalid = duplicatedCategoryNames.includes(uncategorizedValue);
+
     return (
       <Container className="DeriveCategoryMappings container">
         <Row className="DeriveCategoryMapping DeriveCategoryMapping--lg">
@@ -233,7 +238,7 @@ class DeriveCategoryMappings extends Component {
           />
           )) */}
 
-        {/* <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
+        <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="uncategorized_values" />
           </Col>
@@ -247,7 +252,7 @@ class DeriveCategoryMappings extends Component {
               title={uncategorizedValueIsInvalid ? intl.formatMessage({ id: 'categories_must_be_unique' }) : undefined}
             />
           </Col>
-        </Row>*/}
+        </Row>
       </Container>
     );
   }
