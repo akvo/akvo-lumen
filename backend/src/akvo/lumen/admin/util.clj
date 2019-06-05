@@ -1,6 +1,7 @@
 (ns akvo.lumen.admin.util
   (:require [akvo.lumen.component.keycloak :as keycloak]
             [clojure.java.jdbc :as jdbc]
+            [akvo.lumen.component.hikaricp :as hikaricp]
             [environ.core :refer [env]]))
 
 (defn exec!
@@ -18,11 +19,12 @@
           database (env :pg-database)
           user (env :pg-user)
           password (env :pg-password)}}]
-   (format "jdbc:postgresql://%s/%s?ssl=true&user=%s%s"
-           host database user
-           (if (or (= host "localhost") (= host "postgres"))
-             ""
-             (format "&password=%s" password)))))
+   (hikaricp/ssl-url
+    (format "jdbc:postgresql://%s/%s?ssl=true&user=%s%s"
+            host database user
+            (if (or (= host "localhost") (= host "postgres"))
+              ""
+              (format "&password=%s" password))))))
 
 (defn create-keycloak []
   (let [url (format "%s/auth" (:kc-url env))
