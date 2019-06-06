@@ -42,13 +42,7 @@ class DeriveCategoryMappings extends Component {
     search: '',
     sort: 'numeric',
     showSourceColumnContextMenu: false,
-    rules: immutable.fromJS([[{
-      op: null,
-      opValue: null,
-    }, {
-      op: null,
-      opValue: null,
-    }]]),
+    rules: immutable.fromJS([this.newRule(), this.newRule(), this.newRule()]),
   }
   componentDidMount() {
     if (this.derivedColumnTitleInput) {
@@ -56,12 +50,23 @@ class DeriveCategoryMappings extends Component {
     }
   }
 
-  onUpdateOpRule(n, a, b) {
-    this.setState({ rules: this.state.rules.updateIn([0, n],
+  onUpdateOpRule(idx, n, a, b) {
+    this.setState({ rules: this.state.rules.updateIn([idx, n],
       o => o.merge({ op: a, opValue: b })) });
   }
-  onUpdateCategoryRule(a) {
-    this.setState({ rules: this.state.rules.setIn([0, 2], a) });
+
+  onUpdateCategoryRule(idx, a) {
+    this.setState({ rules: this.state.rules.setIn([idx, 2], a) });
+  }
+
+  newRule() {
+    return [{
+      op: null,
+      opValue: null,
+    }, {
+      op: null,
+      opValue: null,
+    }];
   }
 
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
@@ -112,41 +117,12 @@ class DeriveCategoryMappings extends Component {
       duplicatedCategoryNames,
     } = this.props;
 
-    const rule = this.state.rules.getIn([0, 0]);
-    console.log('rule', JSON.stringify(rule));
-    const cat = this.state.rules.getIn([0, 2]);
-    console.log('r', JSON.stringify(this.state.rules.get(0)));
-    const rule2 = this.state.rules.getIn([0, 1]);
+    const rules = this.state.rules;
 
     if (!dataset.sortedValues) return null;
 
     const { uniques, max, min } = dataset.sortedValues;
-//    console.log('dataset.sortedValues', all, uniques, max, min);
-//    console.log(this.props);
 
-    /*
-
-    const unassignedValues = dataset.sortedValues
-      // eslint-disable-next-line no-unused-vars
-      .filter(([count, value]) => this.getExistingMappingIndex(value) === -1);
-
-    let searchedValues = sortBy(
-      unassignedValues
-        // eslint-disable-next-line no-unused-vars
-        .filter(([count, value]) =>
-          (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
-        ),
-      ([count, value]) => (sort === 'numeric' ? count : value.toLowerCase())
-    );
-
-    if (sort === 'numeric') {
-      searchedValues = searchedValues.reverse();
-    }
-
-    searchedValues = searchedValues.slice(0, MAPPING_COUNT_LIMIT);
-
-    const potentialMappings = mappings.concat(searchedValues.map(value => [[value]]));
-    */
     const uncategorizedValueIsInvalid = duplicatedCategoryNames.includes(uncategorizedValue);
     return (
       <Container className="DeriveCategoryMappings container">
@@ -210,13 +186,17 @@ class DeriveCategoryMappings extends Component {
             />
           </Col>
         </Row>
-        <LogicRule
-          onUpdateOpRule={this.onUpdateOpRule}
-          onUpdateCategoryRule={this.onUpdateCategoryRule}
-          rule={rule.toObject()}
-          rule2={rule2.toObject()}
-          category={cat}
-        />
+        {[0, 1, 2].map(x => (
+          <LogicRule
+            key={x}
+            path={x}
+            onUpdateOpRule={this.onUpdateOpRule}
+            onUpdateCategoryRule={this.onUpdateCategoryRule}
+            rule={rules.getIn([x, 0]).toObject()}
+            rule2={rules.getIn([x, 1]).toObject()}
+            category={rules.getIn([x, 2])}
+          />
+        ))}
         <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="uncategorized_values" />

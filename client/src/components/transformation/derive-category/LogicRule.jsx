@@ -11,6 +11,7 @@ export default class LogicRule extends Component {
     rule: PropTypes.object,
     rule2: PropTypes.object,
     category: PropTypes.string,
+    path: PropTypes.number,
   }
 
   constructor(props) {
@@ -81,7 +82,7 @@ export default class LogicRule extends Component {
             categoryValue,
             } = this.state;
 
-    const { onUpdateOpRule, onUpdateCategoryRule, rule, rule2, category } = this.props;
+    const { onUpdateOpRule, onUpdateCategoryRule, rule, rule2, category, path } = this.props;
     // eslint-disable-line no-unused-vars
     return (
       <Row className="DeriveCategoryMapping">
@@ -90,12 +91,11 @@ export default class LogicRule extends Component {
             <ContextMenu
               style={{ left: 0 }}
               onOptionSelected={(op) => {
-                console.log(op);
                 if (this.nameInput !== undefined) {
                   this.nameInput.focus();
                 }
                 this.setState({ selected: true, showConditions: false, conditionsValue: op });
-                onUpdateOpRule(0, op, rule.opValue);
+                onUpdateOpRule(path, 0, op, rule.opValue);
               }}
               options={this.selectOptions}
             />
@@ -109,8 +109,7 @@ export default class LogicRule extends Component {
             size="10"
             placeholder="Enter a number"
             onChange={(event) => {
-              onUpdateOpRule(0, rule.op, event.target.value);
-              console.log(event.target.value);
+              onUpdateOpRule(path, 0, rule.op, event.target.value);
             }}
             title=""
           />
@@ -126,15 +125,19 @@ export default class LogicRule extends Component {
             <ContextMenu
               style={{ left: 0 }}
               onOptionSelected={(op) => {
-                console.log(op);
                 if (this.nameInput2 !== undefined) {
                   this.nameInput2.focus();
                 }
                 this.setState({ selected2: true, showConditions2: false, conditionsValue2: op });
-                onUpdateOpRule(1, op, rule2.opValue);
+                onUpdateOpRule(path, 1, op, rule2.opValue);
               }}
               options={this.selectOptions}
-            /> : <div hidden={showConditions2} onClick={this.handleSecondCondition}>{this.dict[conditionsValue2]}</div>}
+            /> : <div
+              hidden={showConditions2}
+              onClick={this.handleSecondCondition}
+            >{this.dict[conditionsValue2]}
+            </div>
+          }
         </Col>
         <Col xs={1} className="DeriveCategoryMapping__text" >
           <input
@@ -144,8 +147,7 @@ export default class LogicRule extends Component {
             size="10"
             placeholder="Enter a number"
             onChange={(event) => {
-              onUpdateOpRule(1, rule2.op, event.target.value);
-              console.log(event.target.value);
+              onUpdateOpRule(path, 1, rule2.op, event.target.value);
             }}
             title=""
           />
@@ -155,8 +157,7 @@ export default class LogicRule extends Component {
             value={category || ''}
             placeholder={categoryValue}
             onChange={(event) => {
-              console.log(event.target.value);
-              onUpdateCategoryRule(event.target.value);
+              onUpdateCategoryRule(path, event.target.value);
             }}
             title=""
           />
