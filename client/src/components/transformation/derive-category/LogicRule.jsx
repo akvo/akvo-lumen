@@ -91,6 +91,8 @@ export default class LogicRule extends Component {
             ref={(input) => { this.nameInput = input; }}
             hidden={!selected}
             value={rule.opValue || ''}
+            placeholder="Enter a number"
+            type="number"
             onChange={(event) => {
               onUpdateOpRule(rule.op, event.target.value);
               console.log(event.target.value);
