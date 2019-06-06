@@ -42,10 +42,13 @@ class DeriveCategoryMappings extends Component {
     search: '',
     sort: 'numeric',
     showSourceColumnContextMenu: false,
-    rules: immutable.fromJS([{
+    rules: immutable.fromJS([[{
       op: null,
       opValue: null,
-    }]),
+    }, {
+      op: null,
+      opValue: null,
+    }]]),
   }
   componentDidMount() {
     if (this.derivedColumnTitleInput) {
@@ -53,11 +56,12 @@ class DeriveCategoryMappings extends Component {
     }
   }
 
-  onUpdateOpRule(a, b) {
-    this.setState({ rules: this.state.rules.updateIn([0], o => o.merge({ op: a, opValue: b })) });
+  onUpdateOpRule(n, a, b) {
+    this.setState({ rules: this.state.rules.updateIn([0, n],
+      o => o.merge({ op: a, opValue: b })) });
   }
   onUpdateCategoryRule(a) {
-    this.setState({ rules: this.state.rules.updateIn([0], o => o.merge({ category: a })) });
+    this.setState({ rules: this.state.rules.setIn([0, 2], a) });
   }
 
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
@@ -108,8 +112,12 @@ class DeriveCategoryMappings extends Component {
       duplicatedCategoryNames,
     } = this.props;
 
-    const rule = this.state.rules.get(0);
+    const rule = this.state.rules.getIn([0, 0]);
     console.log('rule', JSON.stringify(rule));
+    const cat = this.state.rules.getIn([0, 2]);
+    console.log('r', JSON.stringify(this.state.rules.get(0)));
+    const rule2 = this.state.rules.getIn([0, 1]);
+
     if (!dataset.sortedValues) return null;
 
     const { uniques, max, min } = dataset.sortedValues;
@@ -206,6 +214,8 @@ class DeriveCategoryMappings extends Component {
           onUpdateOpRule={this.onUpdateOpRule}
           onUpdateCategoryRule={this.onUpdateCategoryRule}
           rule={rule.toObject()}
+          rule2={rule2.toObject()}
+          category={cat}
         />
         <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">

@@ -9,17 +9,23 @@ export default class LogicRule extends Component {
     onUpdateOpRule: PropTypes.func,
     onUpdateCategoryRule: PropTypes.func,
     rule: PropTypes.object,
+    rule2: PropTypes.object,
+    category: PropTypes.string,
   }
 
   constructor(props) {
     super(props);
     this.handleClicking = this.handleClicking.bind(this);
+    this.handleSecondCondition = this.handleSecondCondition.bind(this);
   }
 
   state = {
     selected: false,
+    selected2: false,
     showConditions: false,
+    showConditions2: false,
     conditionsValue: '',
+    conditionsValue2: '',
     categoryValue: 'Category',
   }
   componentDidMount() {
@@ -47,17 +53,35 @@ export default class LogicRule extends Component {
     '': 'Define category',
   }
 
+  selectOptions = [
+    this.getDict('<'),
+    this.getDict('<='),
+    this.getDict('=='),
+    this.getDict('>='),
+    this.getDict('>'),
+  ]
 
   handleClicking(e) {
     this.setState({ showConditions: true });
     e.preventDefault();
   }
+  handleSecondCondition(e) {
+    this.setState({ showConditions2: true });
+    e.preventDefault();
+  }
 
 
   render() {
-    const { selected, showConditions, conditionsValue, categoryValue } = this.state;
+    const { selected,
+            showConditions,
+            conditionsValue,
+            selected2,
+            showConditions2,
+            conditionsValue2,
+            categoryValue,
+            } = this.state;
 
-    const { onUpdateOpRule, onUpdateCategoryRule, rule } = this.props;
+    const { onUpdateOpRule, onUpdateCategoryRule, rule, rule2, category } = this.props;
     // eslint-disable-line no-unused-vars
     return (
       <Row className="DeriveCategoryMapping">
@@ -67,34 +91,60 @@ export default class LogicRule extends Component {
               style={{ left: 0 }}
               onOptionSelected={(op) => {
                 console.log(op);
-                /*
                 if (this.nameInput !== undefined) {
                   this.nameInput.focus();
                 }
-                */
                 this.setState({ selected: true, showConditions: false, conditionsValue: op });
-                onUpdateOpRule(op, rule.opValue);
+                onUpdateOpRule(0, op, rule.opValue);
               }}
-              options={
-              [
-                this.getDict('<'),
-                this.getDict('<='),
-                this.getDict('=='),
-                this.getDict('>='),
-                this.getDict('>'),
-              ]}
+              options={this.selectOptions}
             />
             : <div onClick={this.handleClicking}>{this.dict[conditionsValue]}</div>}
         </Col>
-        <Col xs={5} className="DeriveCategoryMapping__text" >
+        <Col xs={1} className="DeriveCategoryMapping__text" >
           <input
             ref={(input) => { this.nameInput = input; }}
             hidden={!selected}
             value={rule.opValue || ''}
+            size="10"
             placeholder="Enter a number"
-            type="number"
             onChange={(event) => {
-              onUpdateOpRule(rule.op, event.target.value);
+              onUpdateOpRule(0, rule.op, event.target.value);
+              console.log(event.target.value);
+            }}
+            title=""
+          />
+        </Col>
+        <Col xs={1} className="DeriveCategoryMapping__text" >
+          { selected ? <div
+            onClick={this.handleSecondCondition}
+            style={{ textDecoration: 'underline' }}
+          > AND </div> : ''}
+        </Col>
+        <Col xs={2} className="DeriveCategoryMapping__text" >
+          { showConditions2 ?
+            <ContextMenu
+              style={{ left: 0 }}
+              onOptionSelected={(op) => {
+                console.log(op);
+                if (this.nameInput2 !== undefined) {
+                  this.nameInput2.focus();
+                }
+                this.setState({ selected2: true, showConditions2: false, conditionsValue2: op });
+                onUpdateOpRule(1, op, rule2.opValue);
+              }}
+              options={this.selectOptions}
+            /> : <div hidden={showConditions2} onClick={this.handleSecondCondition}>{this.dict[conditionsValue2]}</div>}
+        </Col>
+        <Col xs={1} className="DeriveCategoryMapping__text" >
+          <input
+            ref={(input) => { this.nameInput2 = input; }}
+            hidden={!selected2}
+            value={rule2.opValue || ''}
+            size="10"
+            placeholder="Enter a number"
+            onChange={(event) => {
+              onUpdateOpRule(1, rule2.op, event.target.value);
               console.log(event.target.value);
             }}
             title=""
@@ -102,7 +152,8 @@ export default class LogicRule extends Component {
         </Col>
         <Col xs={5} className="DeriveCategoryMapping__input-wrap">
           <input
-            value={rule.category || categoryValue}
+            value={category || ''}
+            placeholder={categoryValue}
             onChange={(event) => {
               console.log(event.target.value);
               onUpdateCategoryRule(event.target.value);
