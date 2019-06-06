@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Col, Container, Row } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-
+import immutable from 'immutable';
 import LogicRule from './LogicRule';
 import './DeriveCategoryMappingsNumber.scss';
 import ContextMenu from '../../common/ContextMenu';
@@ -42,10 +42,10 @@ class DeriveCategoryMappings extends Component {
     search: '',
     sort: 'numeric',
     showSourceColumnContextMenu: false,
-    rule: {
+    rules: immutable.fromJS([{
       op: null,
       opValue: null,
-    },
+    }]),
   }
   componentDidMount() {
     if (this.derivedColumnTitleInput) {
@@ -54,14 +54,10 @@ class DeriveCategoryMappings extends Component {
   }
 
   onUpdateOpRule(a, b) {
-    const { rule } = this.state;
-    const { category } = rule;
-    this.setState({ rule: { op: a, opValue: b, category } });
+    this.setState({ rules: this.state.rules.updateIn([0], o => o.merge({ op: a, opValue: b })) });
   }
   onUpdateCategoryRule(a) {
-    const { rule } = this.state;
-    const { op, opValue } = rule;
-    this.setState({ rule: { category: a, op, opValue } });
+    this.setState({ rules: this.state.rules.updateIn([0], o => o.merge({ category: a })) });
   }
 
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
@@ -111,9 +107,9 @@ class DeriveCategoryMappings extends Component {
       intl,
       duplicatedCategoryNames,
     } = this.props;
-    const { rule } = this.state;
-    console.log('rule', rule);
 
+    const rule = this.state.rules.get(0);
+    console.log('rule', JSON.stringify(rule));
     if (!dataset.sortedValues) return null;
 
     const { uniques, max, min } = dataset.sortedValues;
@@ -209,7 +205,7 @@ class DeriveCategoryMappings extends Component {
         <LogicRule
           onUpdateOpRule={this.onUpdateOpRule}
           onUpdateCategoryRule={this.onUpdateCategoryRule}
-          rule={rule}
+          rule={rule.toObject()}
         />
         <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
