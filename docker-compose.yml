@@ -35,7 +35,7 @@ services:
    volumes:
       - pg-data:/pg-certs:ro
  fe-e2e-tests:
-   image: akvo/akvo-lumen-e2e-test:20181024.271ce79
+   image: akvo/akvo-lumen-e2e-test:20190607.073620.6426562
    volumes:
      - ./client/e2e-test:/app/e2e-test
    environment:
