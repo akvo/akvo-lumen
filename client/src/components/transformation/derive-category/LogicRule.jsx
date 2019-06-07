@@ -1,11 +1,14 @@
+/* eslint-disable jsx-a11y/anchor-has-content */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-grid-system';
 import ContextMenu from '../../common/ContextMenu';
+import ClickAway from '../../common/ClickAway';
 
 export default class LogicRule extends Component {
 
   static propTypes = {
+    onRemoveRule: PropTypes.func,
     onUpdateOpRule: PropTypes.func,
     onUpdateCategoryRule: PropTypes.func,
     rule: PropTypes.object,
@@ -82,24 +85,36 @@ export default class LogicRule extends Component {
             categoryValue,
             } = this.state;
 
-    const { onUpdateOpRule, onUpdateCategoryRule, rule, rule2, category, path } = this.props;
+    const { onRemoveRule, onUpdateOpRule, onUpdateCategoryRule,
+      rule, rule2, category, path } = this.props;
     // eslint-disable-line no-unused-vars
     return (
       <Row className="DeriveCategoryMapping">
-        <Col xs={2} className="DeriveCategoryMapping__text" >
-          { showConditions ?
-            <ContextMenu
-              style={{ left: 0 }}
-              onOptionSelected={(op) => {
-                if (this.nameInput !== undefined) {
-                  this.nameInput.focus();
-                }
-                this.setState({ selected: true, showConditions: false, conditionsValue: op });
-                onUpdateOpRule(path, 0, op, rule.opValue);
-              }}
-              options={this.selectOptions}
-            />
-            : <div onClick={this.handleClicking}>{this.dict[conditionsValue]}</div>}
+        <Col xs={2} className="DeriveCategoryMapping__text" style={{ display: '-webkit-inline-box' }} >
+          <a
+            onClick={() => onRemoveRule(path)}
+            className="fa fa-times-circle"
+            style={{ fontSize: '2em', marginRight: '5px' }}
+          />
+          <ClickAway
+            onClickAway={() => {
+              this.setState({ showConditions: false });
+            }}
+          >
+            { showConditions ?
+              <ContextMenu
+                style={{ left: 0 }}
+                onOptionSelected={(op) => {
+                  if (this.nameInput !== undefined) {
+                    this.nameInput.focus();
+                  }
+                  this.setState({ selected: true, showConditions: false, conditionsValue: op });
+                  onUpdateOpRule(path, 0, op, rule.opValue);
+                }}
+                options={this.selectOptions}
+              />
+              : <div onClick={this.handleClicking}>{this.dict[conditionsValue]}</div>}
+          </ClickAway>
         </Col>
         <Col xs={1} className="DeriveCategoryMapping__text" >
           <input
@@ -115,29 +130,45 @@ export default class LogicRule extends Component {
           />
         </Col>
         <Col xs={1} className="DeriveCategoryMapping__text" >
-          { selected ? <div
-            onClick={this.handleSecondCondition}
-            style={{ textDecoration: 'underline' }}
-          > AND </div> : ''}
+          { selected ? <div>
+            <a
+              style={{ textDecoration: 'underline',
+                color: !conditionsValue2 ? '#c3c3c3' : 'black' }}
+              onClick={this.handleSecondCondition}
+            > AND </a>
+            <a
+              onClick={() => {
+                this.setState({ selected2: false, showConditions2: false, conditionsValue2: null });
+              }}
+              className="fa fa-times-circle"
+              style={{ visibility: !conditionsValue2 ? 'hidden' : 'visible' }}
+            /></div>
+            : ''}
         </Col>
         <Col xs={2} className="DeriveCategoryMapping__text" >
-          { showConditions2 ?
-            <ContextMenu
-              style={{ left: 0 }}
-              onOptionSelected={(op) => {
-                if (this.nameInput2 !== undefined) {
-                  this.nameInput2.focus();
-                }
-                this.setState({ selected2: true, showConditions2: false, conditionsValue2: op });
-                onUpdateOpRule(path, 1, op, rule2.opValue);
-              }}
-              options={this.selectOptions}
-            /> : <div
-              hidden={!selected2}
-              onClick={this.handleSecondCondition}
-            >{this.dict[conditionsValue2]}
-            </div>
+          <ClickAway
+            onClickAway={() => {
+              this.setState({ showConditions2: false });
+            }}
+          >
+            { showConditions2 ?
+              <ContextMenu
+                style={{ left: 0 }}
+                onOptionSelected={(op) => {
+                  if (this.nameInput2 !== undefined) {
+                    this.nameInput2.focus();
+                  }
+                  this.setState({ selected2: true, showConditions2: false, conditionsValue2: op });
+                  onUpdateOpRule(path, 1, op, rule2.opValue);
+                }}
+                options={this.selectOptions}
+              /> : <div
+                hidden={!selected2}
+                onClick={this.handleSecondCondition}
+              >{this.dict[conditionsValue2]}
+              </div>
           }
+          </ClickAway>
         </Col>
         <Col xs={1} className="DeriveCategoryMapping__text" >
           <input

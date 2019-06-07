@@ -38,6 +38,7 @@ class DeriveCategoryMappings extends Component {
     this.onUpdateOpRule = this.onUpdateOpRule.bind(this);
     this.onUpdateCategoryRule = this.onUpdateCategoryRule.bind(this);
     this.onAddRule = this.onAddRule.bind(this);
+    this.onRemoveRule = this.onRemoveRule.bind(this);
   }
 
   state = {
@@ -54,6 +55,9 @@ class DeriveCategoryMappings extends Component {
   }
   onAddRule() {
     this.setState({ rules: this.state.rules.push(immutable.fromJS(this.newRule())) });
+  }
+  onRemoveRule(idx) {
+    this.setState({ rules: this.state.rules.delete(idx) });
   }
 
   onUpdateOpRule(idx, n, a, b) {
@@ -128,8 +132,6 @@ class DeriveCategoryMappings extends Component {
     } = this.props;
 
     const rules = this.state.rules;
-    console.log('tules', rules.toObject());
-    this.range(0, rules.size).map(x => console.log('yup', x));
 
     if (!dataset.sortedValues) return null;
 
@@ -203,6 +205,7 @@ class DeriveCategoryMappings extends Component {
             <LogicRule
               key={x}
               path={x}
+              onRemoveRule={this.onRemoveRule}
               onUpdateOpRule={this.onUpdateOpRule}
               onUpdateCategoryRule={this.onUpdateCategoryRule}
               rule={rules.getIn([x, 0]).toObject()}
