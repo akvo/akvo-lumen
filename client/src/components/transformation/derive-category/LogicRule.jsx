@@ -23,7 +23,7 @@ export default class LogicRule extends Component {
   state = {
     selected: false,
     selected2: false,
-    showConditions: false,
+    showConditions: true,
     showConditions2: false,
     conditionsValue: '',
     conditionsValue2: '',
@@ -133,7 +133,7 @@ export default class LogicRule extends Component {
               }}
               options={this.selectOptions}
             /> : <div
-              hidden={showConditions2}
+              hidden={!selected2}
               onClick={this.handleSecondCondition}
             >{this.dict[conditionsValue2]}
             </div>

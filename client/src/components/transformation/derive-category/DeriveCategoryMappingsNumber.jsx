@@ -5,6 +5,7 @@ import { Col, Container, Row } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import immutable from 'immutable';
 import LogicRule from './LogicRule';
+import EmptyLogicRule from './EmptyLogicRule';
 import './DeriveCategoryMappingsNumber.scss';
 import ContextMenu from '../../common/ContextMenu';
 
@@ -36,18 +37,23 @@ class DeriveCategoryMappings extends Component {
     this.handleSourceValuesUpdate = this.handleSourceValuesUpdate.bind(this);
     this.onUpdateOpRule = this.onUpdateOpRule.bind(this);
     this.onUpdateCategoryRule = this.onUpdateCategoryRule.bind(this);
+    this.onAddRule = this.onAddRule.bind(this);
   }
 
   state = {
     search: '',
     sort: 'numeric',
     showSourceColumnContextMenu: false,
-    rules: immutable.fromJS([this.newRule(), this.newRule(), this.newRule()]),
+    rules: immutable.fromJS([]),
   }
+  // this.newRule(), this.newRule(), this.newRule()a
   componentDidMount() {
     if (this.derivedColumnTitleInput) {
       this.derivedColumnTitleInput.focus();
     }
+  }
+  onAddRule() {
+    this.setState({ rules: this.state.rules.push(immutable.fromJS(this.newRule())) });
   }
 
   onUpdateOpRule(idx, n, a, b) {
@@ -102,6 +108,10 @@ class DeriveCategoryMappings extends Component {
     onChange(newMappings);
   }
 
+  range(start, count) {
+    return Array.apply(0, Array(count))
+      .map((element, index) => index + start);
+  }
 
   render() {
     const {
@@ -118,6 +128,8 @@ class DeriveCategoryMappings extends Component {
     } = this.props;
 
     const rules = this.state.rules;
+    console.log('tules', rules.toObject());
+    this.range(0, rules.size).map(x => console.log('yup', x));
 
     if (!dataset.sortedValues) return null;
 
@@ -186,17 +198,19 @@ class DeriveCategoryMappings extends Component {
             />
           </Col>
         </Row>
-        {[0, 1, 2].map(x => (
-          <LogicRule
-            key={x}
-            path={x}
-            onUpdateOpRule={this.onUpdateOpRule}
-            onUpdateCategoryRule={this.onUpdateCategoryRule}
-            rule={rules.getIn([x, 0]).toObject()}
-            rule2={rules.getIn([x, 1]).toObject()}
-            category={rules.getIn([x, 2])}
-          />
-        ))}
+        {rules.size > 0 ? this.range(0, rules.size).map(x =>
+          (
+            <LogicRule
+              key={x}
+              path={x}
+              onUpdateOpRule={this.onUpdateOpRule}
+              onUpdateCategoryRule={this.onUpdateCategoryRule}
+              rule={rules.getIn([x, 0]).toObject()}
+              rule2={rules.getIn([x, 1]).toObject()}
+              category={rules.getIn([x, 2])}
+            />
+          )) : '' }
+        <EmptyLogicRule onAddRule={this.onAddRule} />
         <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="uncategorized_values" />
