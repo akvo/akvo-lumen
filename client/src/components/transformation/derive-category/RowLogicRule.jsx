@@ -2,9 +2,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-grid-system';
+import { intlShape } from 'react-intl';
 import ContextMenu from '../../common/ContextMenu';
 import ClickAway from '../../common/ClickAway';
-import { FormattedMessage, intlShape } from 'react-intl';
 
 export default class RowLogicRule extends Component {
 
@@ -108,7 +108,8 @@ export default class RowLogicRule extends Component {
                 }}
                 options={this.selectOptions}
               />
-              : <div onClick={this.handleClicking}>{this.dict[conditionsValue]}</div>}
+              : <div onClick={this.handleClicking}>{this.dict[conditionsValue]}
+                &nbsp; <a className="fa fa-chevron-down" /></div>}
           </ClickAway>
         </Col>
         <Col xs={1} className="DeriveCategoryMapping__text" >
