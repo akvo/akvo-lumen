@@ -2,20 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-grid-system';
 
-export default class EmptyLogicRule extends Component {
+export default class EmptyRowLogicRule extends Component {
 
   static propTypes = {
     onAddRule: PropTypes.func,
   }
-
-  componentDidMount() {
-//    document.body.addEventListener('click', this.handleClickBody);
-  }
-
-  componentWillUnmount() {
-//    document.body.removeEventListener('click', this.handleClickBody);
-  }
-
 
   render() {
     const { onAddRule } = this.props;

@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import { Col, Container, Row } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import immutable from 'immutable';
-import LogicRule from './LogicRule';
-import EmptyLogicRule from './EmptyLogicRule';
+import RowLogicRule from './RowLogicRule';
+import EmptyRowLogicRule from './EmptyRowLogicRule';
 import './DeriveCategoryMappingsNumber.scss';
 import ContextMenu from '../../common/ContextMenu';
 
@@ -96,22 +96,7 @@ class DeriveCategoryMappings extends Component {
       opValue: null,
     }];
   }
-/*
-  handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
-    const { mappings } = this.props;
-    const existingMappingIndex = this.getExistingMappingIndex(sourceValues[0][1]);
-    const newMappings = [...mappings];
-    if (existingMappingIndex > -1) {
-      newMappings[existingMappingIndex][1] = targetCategoryName;
-    } else {
-      newMappings.push([
-        sourceValues,
-        targetCategoryName,
-      ]);
-    }
-    this.onChange(newMappings);
-  }
-*/
+
   range(start, count) {
     return Array.apply(0, Array(count))
       .map((element, index) => index + start);
@@ -202,7 +187,7 @@ class DeriveCategoryMappings extends Component {
         </Row>
         {rules.size > 0 ? this.range(0, rules.size).map(x =>
           (
-            <LogicRule
+            <RowLogicRule
               key={x}
               path={x}
               onRemoveRule={this.onRemoveRule}
@@ -213,7 +198,7 @@ class DeriveCategoryMappings extends Component {
               category={rules.getIn([x, 2])}
             />
           )) : '' }
-        <EmptyLogicRule onAddRule={this.onAddRule} />
+        <EmptyRowLogicRule onAddRule={this.onAddRule} />
         <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="uncategorized_values" />

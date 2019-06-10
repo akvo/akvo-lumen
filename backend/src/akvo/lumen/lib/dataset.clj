@@ -80,7 +80,6 @@
 (defn sort-text
   [tenant-conn id column-name limit]
   (when-let [dataset (table-name-by-dataset-id tenant-conn {:id id})]
-    (log/debug ::sort* :id id :table-name (:table-name dataset) :column-name column-name :limit limit)
     (->> (merge {:column-name column-name :table-name (:table-name dataset)}
                 (when limit {:limit limit}))
          (count-vals-by-column-name tenant-conn)
@@ -89,7 +88,6 @@
 (defn sort-number
   [tenant-conn id column-name]
   (when-let [dataset (table-name-by-dataset-id tenant-conn {:id id})]
-    (log/debug ::sort* :id id :table-name (:table-name dataset) :column-name column-name)
     (merge (->> {:column-name column-name :table-name (:table-name dataset)}
                 (count-num-vals-by-column-name tenant-conn))
            (->> {:column-name column-name :table-name (:table-name dataset)}

@@ -5,7 +5,7 @@ import { Col, Row } from 'react-grid-system';
 import ContextMenu from '../../common/ContextMenu';
 import ClickAway from '../../common/ClickAway';
 
-export default class LogicRule extends Component {
+export default class RowLogicRule extends Component {
 
   static propTypes = {
     onRemoveRule: PropTypes.func,

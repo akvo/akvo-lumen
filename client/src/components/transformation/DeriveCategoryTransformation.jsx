@@ -36,6 +36,9 @@ class DeriveCategoryTransformation extends Component {
     };
     this.handleValidate = this.handleValidate.bind(this);
     this.handleApplyTransformation = this.handleApplyTransformation.bind(this);
+    this.onChangeMappings = this.onChangeMappings.bind(this);
+    this.onChangeTargetColumnName = this.onChangeTargetColumnName.bind(this);
+    this.onChangeUncategorizedValue = this.onChangeUncategorizedValue.bind(this);
   }
 
   componentDidMount() {
@@ -47,12 +50,52 @@ class DeriveCategoryTransformation extends Component {
     }
   }
 
-  isValidTransformation() {
-    const { source, target, derivation } = this.state.transformation.args;
-    if (source.column.columnName && target.column.title && derivation.mappings.length) {
-      return true;
-    }
-    return false;
+  onChangeMappings(mappings) {
+    this.setState({
+      transformation: {
+        ...this.state.transformation,
+        args: {
+          ...this.state.transformation.args,
+          derivation: {
+            ...this.state.transformation.args.derivation,
+            mappings,
+          },
+        },
+      },
+    }, this.handleValidate);
+  }
+
+  onChangeUncategorizedValue(uncategorizedValue) {
+    this.setState({
+      transformation: {
+        ...this.state.transformation,
+        args: {
+          ...this.state.transformation.args,
+          derivation: {
+            ...this.state.transformation.args.derivation,
+            uncategorizedValue,
+          },
+        },
+      },
+    }, this.handleValidate);
+  }
+
+  onChangeTargetColumnName(title) {
+    this.setState({
+      transformation: {
+        ...this.state.transformation,
+        args: {
+          ...this.state.transformation.args,
+          target: {
+            ...this.state.transformation.args.target,
+            column: {
+              ...this.state.transformation.args.target.column,
+              title,
+            },
+          },
+        },
+      },
+    }, this.handleValidate);
   }
 
   handleArgsChange(changedArgs) {
@@ -94,6 +137,15 @@ class DeriveCategoryTransformation extends Component {
         },
       },
     });
+  }
+
+
+  isValidTransformation() {
+    const { source, target, derivation } = this.state.transformation.args;
+    if (source.column.columnName && target.column.title && derivation.mappings.length) {
+      return true;
+    }
+    return false;
   }
 
   findColumn(columns, columnName) {
@@ -180,51 +232,9 @@ class DeriveCategoryTransformation extends Component {
                 this.setState({ selectingSourceColumn: true }, this.handleValidate);
               }}
               duplicatedCategoryNames={duplicatedCategoryNames}
-              onChange={(mappings) => {
-                this.setState({
-                  transformation: {
-                    ...this.state.transformation,
-                    args: {
-                      ...this.state.transformation.args,
-                      derivation: {
-                        ...this.state.transformation.args.derivation,
-                        mappings,
-                      },
-                    },
-                  },
-                }, this.handleValidate);
-              }}
-              onChangeTargetColumnName={(title) => {
-                this.setState({
-                  transformation: {
-                    ...this.state.transformation,
-                    args: {
-                      ...this.state.transformation.args,
-                      target: {
-                        ...this.state.transformation.args.target,
-                        column: {
-                          ...this.state.transformation.args.target.column,
-                          title,
-                        },
-                      },
-                    },
-                  },
-                }, this.handleValidate);
-              }}
-              onChangeUncategorizedValue={(uncategorizedValue) => {
-                this.setState({
-                  transformation: {
-                    ...this.state.transformation,
-                    args: {
-                      ...this.state.transformation.args,
-                      derivation: {
-                        ...this.state.transformation.args.derivation,
-                        uncategorizedValue,
-                      },
-                    },
-                  },
-                }, this.handleValidate);
-              }}
+              onChange={this.onChangeMappings}
+              onChangeTargetColumnName={this.onChangeTargetColumnName}
+              onChangeUncategorizedValue={this.onChangeUncategorizedValue}
             />
           )}
           {transformation.args.source.column.columnName && !selectingSourceColumn && columnType === 'number'
@@ -241,51 +251,9 @@ class DeriveCategoryTransformation extends Component {
                 this.setState({ selectingSourceColumn: true }, this.handleValidate);
               }}
               duplicatedCategoryNames={duplicatedCategoryNames}
-              onChange={(mappings) => {
-                this.setState({
-                  transformation: {
-                    ...this.state.transformation,
-                    args: {
-                      ...this.state.transformation.args,
-                      derivation: {
-                        ...this.state.transformation.args.derivation,
-                        mappings,
-                      },
-                    },
-                  },
-                }, this.handleValidate);
-              }}
-              onChangeTargetColumnName={(title) => {
-                this.setState({
-                  transformation: {
-                    ...this.state.transformation,
-                    args: {
-                      ...this.state.transformation.args,
-                      target: {
-                        ...this.state.transformation.args.target,
-                        column: {
-                          ...this.state.transformation.args.target.column,
-                          title,
-                        },
-                      },
-                    },
-                  },
-                }, this.handleValidate);
-              }}
-              onChangeUncategorizedValue={(uncategorizedValue) => {
-                this.setState({
-                  transformation: {
-                    ...this.state.transformation,
-                    args: {
-                      ...this.state.transformation.args,
-                      derivation: {
-                        ...this.state.transformation.args.derivation,
-                        uncategorizedValue,
-                      },
-                    },
-                  },
-                }, this.handleValidate);
-              }}
+              onChange={this.onChangeMappings}
+              onChangeTargetColumnName={this.onChangeTargetColumnName}
+              onChangeUncategorizedValue={this.onChangeUncategorizedValue}
             />
         )}
 
