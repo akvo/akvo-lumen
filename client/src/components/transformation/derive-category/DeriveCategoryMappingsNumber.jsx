@@ -33,12 +33,12 @@ class DeriveCategoryMappings extends Component {
 
   constructor(props) {
     super(props);
-    this.handleTargetCategoryNameUpdate = this.handleTargetCategoryNameUpdate.bind(this);
-    this.handleSourceValuesUpdate = this.handleSourceValuesUpdate.bind(this);
+//    this.handleTargetCategoryNameUpdate = this.handleTargetCategoryNameUpdate.bind(this);
     this.onUpdateOpRule = this.onUpdateOpRule.bind(this);
     this.onUpdateCategoryRule = this.onUpdateCategoryRule.bind(this);
     this.onAddRule = this.onAddRule.bind(this);
     this.onRemoveRule = this.onRemoveRule.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
   state = {
@@ -54,19 +54,37 @@ class DeriveCategoryMappings extends Component {
     }
   }
   onAddRule() {
-    this.setState({ rules: this.state.rules.push(immutable.fromJS(this.newRule())) });
+    const rules = this.state.rules.push(immutable.fromJS(this.newRule()));
+    this.setState({ rules });
+    this.onChange(rules);
   }
   onRemoveRule(idx) {
-    this.setState({ rules: this.state.rules.delete(idx) });
+    const rules = this.state.rules.delete(idx);
+    this.setState({ rules });
+    this.onChange(rules);
   }
 
   onUpdateOpRule(idx, n, a, b) {
-    this.setState({ rules: this.state.rules.updateIn([idx, n],
-      o => o.merge({ op: a, opValue: b })) });
+    const rules = this.state.rules.updateIn([idx, n],
+      o => o.merge({ op: a, opValue: b }));
+    this.setState({ rules });
+    this.onChange(rules);
   }
 
   onUpdateCategoryRule(idx, a) {
-    this.setState({ rules: this.state.rules.setIn([idx, 2], a) });
+    const rules = this.state.rules.setIn([idx, 2], a);
+    this.setState({ rules });
+    this.onChange(rules);
+  }
+
+  onChange(rules) {
+    const mappings = rules.map((a) => {
+      const r1 = a.get(0);
+      const r2 = a.get(1);
+      const a2 = r2.get('op') && r2.get('opValue') ? [r2.get('op'), Number(r2.get('opValue'))] : null;
+      return [[r1.get('op'), Number(r1.get('opValue'))], a2, a.get(2)];
+    });
+    this.props.onChange(mappings.toJS());
   }
 
   newRule() {
@@ -78,9 +96,9 @@ class DeriveCategoryMappings extends Component {
       opValue: null,
     }];
   }
-
+/*
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
-    const { onChange, mappings } = this.props;
+    const { mappings } = this.props;
     const existingMappingIndex = this.getExistingMappingIndex(sourceValues[0][1]);
     const newMappings = [...mappings];
     if (existingMappingIndex > -1) {
@@ -91,27 +109,9 @@ class DeriveCategoryMappings extends Component {
         targetCategoryName,
       ]);
     }
-    onChange(newMappings);
+    this.onChange(newMappings);
   }
-
-  handleSourceValuesUpdate(currentSourceValues, nextSourceValues) {
-    const { onChange, mappings } = this.props;
-    const existingMappingIndex = this.getExistingMappingIndex(currentSourceValues[0][1]);
-    const newMappings = [...mappings];
-    if (existingMappingIndex > -1) {
-      if (nextSourceValues.length === 1 && !newMappings[existingMappingIndex][1]) {
-        newMappings.splice(existingMappingIndex, 1);
-      } else {
-        newMappings[existingMappingIndex][0] = nextSourceValues;
-      }
-    } else {
-      newMappings.push([
-        nextSourceValues,
-      ]);
-    }
-    onChange(newMappings);
-  }
-
+*/
   range(start, count) {
     return Array.apply(0, Array(count))
       .map((element, index) => index + start);

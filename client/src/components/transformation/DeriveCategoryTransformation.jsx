@@ -91,21 +91,16 @@ class DeriveCategoryTransformation extends Component {
         derivation: {
           ...transformation.args.derivation,
           type: columnType,
-          mappings: transformation.args.derivation.mappings.map(([sourceValues, target]) =>
-            [
-              // eslint-disable-next-line no-unused-vars
-              sourceValues.map(([count, value]) => value),
-              target,
-            ]
-          ),
         },
       },
     });
   }
+
   findColumn(columns, columnName) {
     return columns
     .filter(column => column.columnName === columnName)[0];
   }
+
   render() {
     const {
       datasetId,

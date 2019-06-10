@@ -36,6 +36,7 @@ class DeriveCategoryMappings extends Component {
     super(props);
     this.handleTargetCategoryNameUpdate = this.handleTargetCategoryNameUpdate.bind(this);
     this.handleSourceValuesUpdate = this.handleSourceValuesUpdate.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
   state = {
@@ -50,6 +51,16 @@ class DeriveCategoryMappings extends Component {
     }
   }
 
+  onChange(mappings) {
+    this.props.onChange(mappings.map(([sourceValues, target]) =>
+      [
+        // eslint-disable-next-line no-unused-vars
+        sourceValues.map(([count, value]) => value),
+        target,
+      ]
+    ));
+  }
+
   getExistingMappingIndex(value) {
     const { mappings } = this.props;
     return findIndex(mappings, ([sourceValues]) =>
@@ -59,7 +70,7 @@ class DeriveCategoryMappings extends Component {
   }
 
   handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
-    const { onChange, mappings } = this.props;
+    const { mappings } = this.props;
     const existingMappingIndex = this.getExistingMappingIndex(sourceValues[0][1]);
     const newMappings = [...mappings];
     if (existingMappingIndex > -1) {
@@ -70,11 +81,11 @@ class DeriveCategoryMappings extends Component {
         targetCategoryName,
       ]);
     }
-    onChange(newMappings);
+    this.onChange(newMappings);
   }
 
   handleSourceValuesUpdate(currentSourceValues, nextSourceValues) {
-    const { onChange, mappings } = this.props;
+    const { mappings } = this.props;
     const existingMappingIndex = this.getExistingMappingIndex(currentSourceValues[0][1]);
     const newMappings = [...mappings];
     if (existingMappingIndex > -1) {
@@ -88,7 +99,7 @@ class DeriveCategoryMappings extends Component {
         nextSourceValues,
       ]);
     }
-    onChange(newMappings);
+    this.onChange(newMappings);
   }
 
   render() {
