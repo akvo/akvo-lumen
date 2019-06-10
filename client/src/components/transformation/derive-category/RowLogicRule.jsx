@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Col, Row } from 'react-grid-system';
 import ContextMenu from '../../common/ContextMenu';
 import ClickAway from '../../common/ClickAway';
+import { FormattedMessage, intlShape } from 'react-intl';
 
 export default class RowLogicRule extends Component {
 
@@ -15,6 +16,7 @@ export default class RowLogicRule extends Component {
     rule2: PropTypes.object,
     category: PropTypes.string,
     path: PropTypes.number,
+    intl: intlShape.isRequired,
   }
 
   constructor(props) {
@@ -30,7 +32,7 @@ export default class RowLogicRule extends Component {
     showConditions2: false,
     conditionsValue: '',
     conditionsValue2: '',
-    categoryValue: 'Category',
+    categoryValue: this.props.intl.formatMessage({ id: 'category' }),
   }
 
   getDict(k) {
@@ -42,12 +44,12 @@ export default class RowLogicRule extends Component {
   }
 
   dict = {
-    '<': 'is less than',
-    '<=': 'is less or equal to',
-    '==': 'is equal to',
-    '>=': 'is greater or equal to',
-    '>': 'is greater than',
-    '': 'Define category',
+    '<': this.props.intl.formatMessage({ id: 'is_less_than' }),
+    '<=': this.props.intl.formatMessage({ id: 'is_less_or_equal_to' }),
+    '==': this.props.intl.formatMessage({ id: 'is_equal_to' }),
+    '>=': this.props.intl.formatMessage({ id: 'is_greater_or_equal_to' }),
+    '>': this.props.intl.formatMessage({ id: 'is_greater_than' }),
+    '': this.props.intl.formatMessage({ id: 'define_category' }),
   }
 
   selectOptions = [
@@ -115,7 +117,7 @@ export default class RowLogicRule extends Component {
             hidden={!selected}
             value={rule.opValue || ''}
             size="10"
-            placeholder="Enter a number"
+            placeholder={this.props.intl.formatMessage({ id: 'enter_a_number' })}
             onChange={(event) => {
               onUpdateOpRule(path, 0, rule.op, Number(event.target.value) || 0);
             }}
@@ -169,7 +171,7 @@ export default class RowLogicRule extends Component {
             hidden={!selected2}
             value={rule2.opValue || ''}
             size="10"
-            placeholder="Enter a number"
+            placeholder={this.props.intl.formatMessage({ id: 'enter_a_number' })}
             onChange={(event) => {
               onUpdateOpRule(path, 1, rule2.op, Number(event.target.value) || 0);
             }}

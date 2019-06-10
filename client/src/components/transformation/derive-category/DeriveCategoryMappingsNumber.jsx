@@ -174,13 +174,20 @@ class DeriveCategoryMappings extends Component {
                 id="unique_values_count"
                 values={{ count: uniques }}
               />
-              MIN: { min }. MAX: { max }
+              <FormattedMessage
+                id="min_value"
+                values={{ val: min }}
+              />
+              <FormattedMessage
+                id="max_value"
+                values={{ val: max }}
+              />
             </span>
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__text">
             <FormattedMessage
               id="categories_count"
-              values={{ count: mappings.length + 1 }}
+              values={{ count: mappings.length }}
             />
           </Col>
         </Row>
@@ -189,6 +196,7 @@ class DeriveCategoryMappings extends Component {
             <RowLogicRule
               key={x}
               path={x}
+              intl={intl}
               onRemoveRule={this.onRemoveRule}
               onUpdateOpRule={this.onUpdateOpRule}
               onUpdateCategoryRule={this.onUpdateCategoryRule}
