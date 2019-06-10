@@ -6,7 +6,7 @@ import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import immutable from 'immutable';
 import RowLogicRule from './RowLogicRule';
 import EmptyRowLogicRule from './EmptyRowLogicRule';
-import './DeriveCategoryMappingsNumber.scss';
+import './DeriveCategoryMappingsText.scss';
 import ContextMenu from '../../common/ContextMenu';
 
 
@@ -33,7 +33,6 @@ class DeriveCategoryMappings extends Component {
 
   constructor(props) {
     super(props);
-//    this.handleTargetCategoryNameUpdate = this.handleTargetCategoryNameUpdate.bind(this);
     this.onUpdateOpRule = this.onUpdateOpRule.bind(this);
     this.onUpdateCategoryRule = this.onUpdateCategoryRule.bind(this);
     this.onAddRule = this.onAddRule.bind(this);
@@ -47,7 +46,7 @@ class DeriveCategoryMappings extends Component {
     showSourceColumnContextMenu: false,
     rules: immutable.fromJS([]),
   }
-  // this.newRule(), this.newRule(), this.newRule()a
+
   componentDidMount() {
     if (this.derivedColumnTitleInput) {
       this.derivedColumnTitleInput.focus();

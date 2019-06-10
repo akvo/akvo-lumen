@@ -32,13 +32,6 @@ export default class RowLogicRule extends Component {
     conditionsValue2: '',
     categoryValue: 'Category',
   }
-  componentDidMount() {
-//    document.body.addEventListener('click', this.handleClickBody);
-  }
-
-  componentWillUnmount() {
-//    document.body.removeEventListener('click', this.handleClickBody);
-  }
 
   getDict(k) {
     return {
@@ -124,7 +117,7 @@ export default class RowLogicRule extends Component {
             size="10"
             placeholder="Enter a number"
             onChange={(event) => {
-              onUpdateOpRule(path, 0, rule.op, event.target.value);
+              onUpdateOpRule(path, 0, rule.op, Number(event.target.value) || 0);
             }}
             title=""
           />
@@ -178,7 +171,7 @@ export default class RowLogicRule extends Component {
             size="10"
             placeholder="Enter a number"
             onChange={(event) => {
-              onUpdateOpRule(path, 1, rule2.op, event.target.value);
+              onUpdateOpRule(path, 1, rule2.op, Number(event.target.value) || 0);
             }}
             title=""
           />
