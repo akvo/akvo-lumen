@@ -52,13 +52,7 @@ class DeriveCategoryMappings extends Component {
   }
 
   onChange(mappings) {
-    this.props.onChange(mappings.map(([sourceValues, target]) =>
-      [
-        // eslint-disable-next-line no-unused-vars
-        sourceValues.map(([count, value]) => value),
-        target,
-      ]
-    ));
+    this.props.onChange(mappings);
   }
 
   getExistingMappingIndex(value) {

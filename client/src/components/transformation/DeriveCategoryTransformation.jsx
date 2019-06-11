@@ -126,17 +126,35 @@ class DeriveCategoryTransformation extends Component {
       onAlert(showNotification('error', intl.formatMessage({ id: 'categories_must_be_unique' })));
       return;
     }
-
-    onApplyTransformation({
-      ...transformation,
-      args: {
-        ...transformation.args,
-        derivation: {
-          ...transformation.args.derivation,
-          type: columnType,
+    if (columnType === 'text') {
+      onApplyTransformation({
+        ...transformation,
+        args: {
+          ...transformation.args,
+          derivation: {
+            ...transformation.args.derivation,
+            type: columnType,
+            mappings: transformation.args.derivation.mappings.map(([sourceValues, target]) =>
+              [
+              // eslint-disable-next-line no-unused-vars
+                sourceValues.map(([count, value]) => value),
+                target,
+              ]),
+          },
         },
-      },
-    });
+      });
+    } else {
+      onApplyTransformation({
+        ...transformation,
+        args: {
+          ...transformation.args,
+          derivation: {
+            ...transformation.args.derivation,
+            type: columnType,
+          },
+        },
+      });
+    }
   }
 
 
