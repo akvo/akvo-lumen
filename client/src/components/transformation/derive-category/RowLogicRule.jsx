@@ -117,12 +117,13 @@ export default class RowLogicRule extends Component {
             ref={(input) => { this.nameInput = input; }}
             hidden={!selected}
             value={rule.opValue || ''}
-            size="10"
+            style={{ width: '4em' }}
             placeholder={this.props.intl.formatMessage({ id: 'enter_a_number' })}
             onChange={(event) => {
-              onUpdateOpRule(path, 0, rule.op, Number(event.target.value) || 0);
+              onUpdateOpRule(path, 0, rule.op, event.target.value);
             }}
             title=""
+            type="number"
           />
         </Col>
         <Col xs={1} className="DeriveCategoryMapping__text" >
@@ -171,12 +172,13 @@ export default class RowLogicRule extends Component {
             ref={(input) => { this.nameInput2 = input; }}
             hidden={!selected2}
             value={rule2.opValue || ''}
-            size="10"
+            style={{ width: '4em' }}
             placeholder={this.props.intl.formatMessage({ id: 'enter_a_number' })}
             onChange={(event) => {
-              onUpdateOpRule(path, 1, rule2.op, Number(event.target.value) || 0);
+              onUpdateOpRule(path, 1, rule2.op, event.target.value);
             }}
             title=""
+            type="number"
           />
         </Col>
         <Col xs={5} className="DeriveCategoryMapping__input-wrap">
