@@ -266,7 +266,7 @@ class SourceMergeOptions extends Component {
       aggregationColumn,
       aggregationDirection,
     } = this.state;
-    const columns = dataset && dataset.get('columns') ? dataset.get('columns').filter(col => col !== mergeColumn) : Immutable.fromJS([]);
+    const columns = dataset ? dataset.get('columns').filter(col => col !== mergeColumn) : Immutable.fromJS([]);
     return (
       <div className="SourceMergeOptions">
         <h1>Dataset 2</h1>
