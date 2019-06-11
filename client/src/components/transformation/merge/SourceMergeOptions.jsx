@@ -132,7 +132,7 @@ class SourceMergeOptions extends Component {
       mergeColumn: null,
       aggregationColumn: null,
       aggregationDirection: 'DESC',
-      mergeColumns: Immutable.fromJS([]),
+      mergeColumns: Immutable.List(),
     };
   }
 
@@ -155,7 +155,7 @@ class SourceMergeOptions extends Component {
           mergeColumn: guessedMergeColumn,
           aggregationColumn: guessedAggregationColumn,
           direction: 'DESC',
-          mergeColumns: Immutable.fromJS([]),
+          mergeColumns: Immutable.List(),
         });
 
         onChange({
@@ -163,7 +163,7 @@ class SourceMergeOptions extends Component {
           mergeColumn: getColumnName(guessedMergeColumn),
           aggregationColumn: getColumnName(guessedAggregationColumn),
           aggregationDirection,
-          mergeColumns: Immutable.fromJS([]),
+          mergeColumns: Immutable.List(),
         });
       });
   }
@@ -266,7 +266,7 @@ class SourceMergeOptions extends Component {
       aggregationColumn,
       aggregationDirection,
     } = this.state;
-    const columns = dataset ? dataset.get('columns').filter(col => col !== mergeColumn) : Immutable.fromJS([]);
+    const columns = dataset ? dataset.get('columns').filter(col => col !== mergeColumn) : Immutable.List();
     return (
       <div className="SourceMergeOptions">
         <h1>Dataset 2</h1>
