@@ -41,7 +41,7 @@
                 :form-params body
                 :content-type :json})
               (catch Exception e (log/error :fail :body body :response (ex-data e))))]
-    (log/info ::check-permissions :body body :res res :elapsed-time (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start)) 1000000.0) " msecs"))
+    (log/debug ::check-permissions :body body :res res :elapsed-time (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start)) 1000000.0) " msecs"))
     res))
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]
