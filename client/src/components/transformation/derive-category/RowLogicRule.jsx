@@ -46,7 +46,7 @@ export default class RowLogicRule extends Component {
   dict = {
     '<': this.props.intl.formatMessage({ id: 'is_less_than' }),
     '<=': this.props.intl.formatMessage({ id: 'is_less_or_equal_to' }),
-    '==': this.props.intl.formatMessage({ id: 'is_equal_to' }),
+    '=': this.props.intl.formatMessage({ id: 'is_equal_to' }),
     '>=': this.props.intl.formatMessage({ id: 'is_greater_or_equal_to' }),
     '>': this.props.intl.formatMessage({ id: 'is_greater_than' }),
     '': this.props.intl.formatMessage({ id: 'define_category' }),
@@ -55,7 +55,7 @@ export default class RowLogicRule extends Component {
   selectOptions = [
     this.getDict('<'),
     this.getDict('<='),
-    this.getDict('=='),
+    this.getDict('='),
     this.getDict('>='),
     this.getDict('>'),
   ]
