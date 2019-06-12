@@ -77,7 +77,7 @@
       {:success?      true
        :execution-log [execution-log-message]
        :columns       (conj columns {"title"      column-title
-                                     "type"       derivation-type
+                                     "type"       "text"
                                      "sort"       nil
                                      "hidden"     false
                                      "direction"  nil
