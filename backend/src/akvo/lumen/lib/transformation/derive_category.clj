@@ -56,10 +56,10 @@
         all-data              (all-data tenant-conn {:table-name table-name})
         mappings              (get-in op-spec [:args :derivation :mappings])
         derivation-type       (get-in op-spec [:args :derivation :type] "text")
-        execution-log-message (format "Derived %s category '%s' using column: '%s' and mappings: '%s'"
-                                      derivation-type
+        execution-log-message (format "Derived category '%s' using column: '%s'(%s) and mappings: '%s'"
                                       column-title
                                       (:title (dataset.utils/find-column (walk/keywordize-keys columns) source-column-name))
+                                      derivation-type
                                       mappings)]
     (jdbc/with-db-transaction [tenant-conn tenant-conn]
       (add-column tenant-conn {:table-name      table-name
