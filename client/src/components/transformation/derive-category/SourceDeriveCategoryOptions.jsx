@@ -2,10 +2,22 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'react-grid-system';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import queryString from 'querystringify';
 
 import SelectMenu from '../../common/SelectMenu';
 
 import './SourceDeriveCategoryOptions.scss';
+
+function conditionColumn({ type }) {
+  const showCategoryTransform = queryString.parse(location.search)['show-category-number-transform'] === '1';
+  let res;
+  if (showCategoryTransform) {
+    res = type === 'text' || type === 'number';
+  } else {
+    res = type === 'text';
+  }
+  return res;
+}
 
 const SourceDeriveCategoryOptions = ({ dataset, onChange, selected }) => (
   <Container className="SourceDeriveCategoryOptions">
@@ -20,7 +32,7 @@ const SourceDeriveCategoryOptions = ({ dataset, onChange, selected }) => (
             value={selected}
             searchable
             options={
-              dataset.columns.filter(({ type }) => type === 'text')
+              dataset.columns.filter(conditionColumn)
                 .map(({ columnName, title, type }) => ({
                   value: columnName,
                   label: `${title} (${type})`,

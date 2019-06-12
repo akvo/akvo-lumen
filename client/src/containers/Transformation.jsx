@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
-import { pollTxImportStatus, startTx, endTx, fetchDataset, fetchSortedDataset } from '../actions/dataset';
+import { pollTxImportStatus, startTx, endTx, fetchDataset, fetchTextSortedDataset, fetchNumberSortedDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
@@ -81,8 +81,12 @@ class Transformation extends Component {
           onFetchDataset={(id) => {
             this.props.dispatch(fetchDataset(id));
           }}
-          onFetchSortedDataset={(id, columnName) => {
-            this.props.dispatch(fetchSortedDataset(id, columnName));
+          onFetchSortedDataset={(id, columnName, columnType) => {
+            if (columnType === 'text') {
+              this.props.dispatch(fetchTextSortedDataset(id, columnName));
+            } else {
+              this.props.dispatch(fetchNumberSortedDataset(id, columnName));
+            }
           }}
           onAlert={(alert) => {
             this.props.dispatch(alert);

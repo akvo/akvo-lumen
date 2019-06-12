@@ -1,15 +1,14 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
-import { findIndex, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Col, Container, Row } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-
-import DeriveCategoryMapping from './DeriveCategoryMappingText';
+import immutable from 'immutable';
+import RowLogicRule from './RowLogicRule';
+import EmptyRowLogicRule from './EmptyRowLogicRule';
 import './DeriveCategoryMappingsText.scss';
 import ContextMenu from '../../common/ContextMenu';
 
-const MAPPING_COUNT_LIMIT = 50;
 
 class DeriveCategoryMappings extends Component {
 
@@ -34,8 +33,10 @@ class DeriveCategoryMappings extends Component {
 
   constructor(props) {
     super(props);
-    this.handleTargetCategoryNameUpdate = this.handleTargetCategoryNameUpdate.bind(this);
-    this.handleSourceValuesUpdate = this.handleSourceValuesUpdate.bind(this);
+    this.onUpdateOpRule = this.onUpdateOpRule.bind(this);
+    this.onUpdateCategoryRule = this.onUpdateCategoryRule.bind(this);
+    this.onAddRule = this.onAddRule.bind(this);
+    this.onRemoveRule = this.onRemoveRule.bind(this);
     this.onChange = this.onChange.bind(this);
   }
 
@@ -43,6 +44,7 @@ class DeriveCategoryMappings extends Component {
     search: '',
     sort: 'numeric',
     showSourceColumnContextMenu: false,
+    rules: immutable.fromJS([]),
   }
 
   componentDidMount() {
@@ -50,50 +52,53 @@ class DeriveCategoryMappings extends Component {
       this.derivedColumnTitleInput.focus();
     }
   }
-
-  onChange(mappings) {
-    this.props.onChange(mappings);
+  onAddRule() {
+    const rules = this.state.rules.push(immutable.fromJS(this.newRule()));
+    this.setState({ rules });
+    this.onChange(rules);
+  }
+  onRemoveRule(idx) {
+    const rules = this.state.rules.delete(idx);
+    this.setState({ rules });
+    this.onChange(rules);
   }
 
-  getExistingMappingIndex(value) {
-    const { mappings } = this.props;
-    return findIndex(mappings, ([sourceValues]) =>
-      // eslint-disable-next-line no-unused-vars
-      sourceValues.map(([c, v]) => v).includes(value)
-    );
+  onUpdateOpRule(idx, n, a, b) {
+    const rules = this.state.rules.updateIn([idx, n],
+      o => o.merge({ op: a, opValue: b }));
+    this.setState({ rules });
+    this.onChange(rules);
   }
 
-  handleTargetCategoryNameUpdate(sourceValues, targetCategoryName) {
-    const { mappings } = this.props;
-    const existingMappingIndex = this.getExistingMappingIndex(sourceValues[0][1]);
-    const newMappings = [...mappings];
-    if (existingMappingIndex > -1) {
-      newMappings[existingMappingIndex][1] = targetCategoryName;
-    } else {
-      newMappings.push([
-        sourceValues,
-        targetCategoryName,
-      ]);
-    }
-    this.onChange(newMappings);
+  onUpdateCategoryRule(idx, a) {
+    const rules = this.state.rules.setIn([idx, 2], a);
+    this.setState({ rules });
+    this.onChange(rules);
   }
 
-  handleSourceValuesUpdate(currentSourceValues, nextSourceValues) {
-    const { mappings } = this.props;
-    const existingMappingIndex = this.getExistingMappingIndex(currentSourceValues[0][1]);
-    const newMappings = [...mappings];
-    if (existingMappingIndex > -1) {
-      if (nextSourceValues.length === 1 && !newMappings[existingMappingIndex][1]) {
-        newMappings.splice(existingMappingIndex, 1);
-      } else {
-        newMappings[existingMappingIndex][0] = nextSourceValues;
-      }
-    } else {
-      newMappings.push([
-        nextSourceValues,
-      ]);
-    }
-    this.onChange(newMappings);
+  onChange(rules) {
+    const mappings = rules.map((a) => {
+      const r1 = a.get(0);
+      const r2 = a.get(1);
+      const a2 = r2.get('op') && r2.get('opValue') ? [r2.get('op'), Number(r2.get('opValue'))] : null;
+      return [[r1.get('op'), Number(r1.get('opValue'))], a2, a.get(2)];
+    });
+    this.props.onChange(mappings.toJS());
+  }
+
+  newRule() {
+    return [{
+      op: null,
+      opValue: null,
+    }, {
+      op: null,
+      opValue: null,
+    }];
+  }
+
+  range(start, count) {
+    return Array.apply(0, Array(count))
+      .map((element, index) => index + start);
   }
 
   render() {
@@ -109,35 +114,16 @@ class DeriveCategoryMappings extends Component {
       intl,
       duplicatedCategoryNames,
     } = this.props;
-    const { search, sort } = this.state;
+
+    const rules = this.state.rules;
 
     if (!dataset.sortedValues) return null;
 
-    const unassignedValues = dataset.sortedValues
-      // eslint-disable-next-line no-unused-vars
-      .filter(([count, value]) => this.getExistingMappingIndex(value) === -1);
+    const { uniques, max, min } = dataset.sortedValues;
 
-    let searchedValues = sortBy(
-      unassignedValues
-        // eslint-disable-next-line no-unused-vars
-        .filter(([count, value]) =>
-          (!search.length || `${value}`.toLowerCase().indexOf(search.toLowerCase()) > -1)
-        ),
-      ([count, value]) => (sort === 'numeric' ? count : value.toLowerCase())
-    );
-
-    if (sort === 'numeric') {
-      searchedValues = searchedValues.reverse();
-    }
-
-    searchedValues = searchedValues.slice(0, MAPPING_COUNT_LIMIT);
-
-    const potentialMappings = mappings.concat(searchedValues.map(value => [[value]]));
     const uncategorizedValueIsInvalid = duplicatedCategoryNames.includes(uncategorizedValue);
-
     return (
       <Container className="DeriveCategoryMappings container">
-
         <Row className="DeriveCategoryMapping DeriveCategoryMapping--lg">
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="source_column" />: {dataset.columns[sourceColumnIndex].title}
@@ -186,59 +172,40 @@ class DeriveCategoryMappings extends Component {
             <span>
               <FormattedMessage
                 id="unique_values_count"
-                values={{ count: dataset.sortedValues.length }}
+                values={{ count: uniques }}
+              />
+              <FormattedMessage
+                id="min_value"
+                values={{ val: min }}
+              />
+              <FormattedMessage
+                id="max_value"
+                values={{ val: max }}
               />
             </span>
-            <a
-              className={`fa fa-sort-numeric-desc DeriveCategoryMapping__sort-btn ${sort === 'numeric' ? 'DeriveCategoryMapping__sort-btn--selected' : ''}`}
-              onClick={() => {
-                this.setState({ sort: 'numeric' });
-              }}
-            />
-            <a
-              className={`fa fa-sort-alpha-desc DeriveCategoryMapping__sort-btn ${sort === 'alpha' ? 'DeriveCategoryMapping__sort-btn--selected' : ''}`}
-              onClick={() => {
-                this.setState({ sort: 'alpha' });
-              }}
-            />
-            <input
-              placeholder="Search..."
-              className="DeriveCategoryMappings__search-input"
-              value={search}
-              onChange={(event) => {
-                this.setState({ search: event.target.value });
-              }}
-            />
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__text">
             <FormattedMessage
               id="categories_count"
-              values={{ count: mappings.length + 1 }}
+              values={{ count: mappings.length }}
             />
           </Col>
         </Row>
-
-        {potentialMappings.map(([sourceValues, targetCategoryName]) => (
-          <DeriveCategoryMapping
-            key={sourceValues[0][1]}
-            unassignedValues={unassignedValues}
-            sourceValues={sourceValues}
-            targetCategoryName={targetCategoryName}
-            onChangeCategoryName={(event) => {
-              this.handleTargetCategoryNameUpdate(sourceValues, event.target.value);
-            }}
-            onSourceValuesUpdate={this.handleSourceValuesUpdate}
-            isGrouping={
-              // eslint-disable-next-line no-unused-vars
-              sourceValues.map(([count, value]) => value).includes(this.state.isGroupingValue)
-            }
-            onToggleGrouping={(isGroupingValue) => {
-              this.setState({ isGroupingValue });
-            }}
-            isInvalid={duplicatedCategoryNames.includes(targetCategoryName)}
-          />
-        ))}
-
+        {rules.size > 0 ? this.range(0, rules.size).map(x =>
+          (
+            <RowLogicRule
+              key={x}
+              path={x}
+              intl={intl}
+              onRemoveRule={this.onRemoveRule}
+              onUpdateOpRule={this.onUpdateOpRule}
+              onUpdateCategoryRule={this.onUpdateCategoryRule}
+              rule={rules.getIn([x, 0]).toObject()}
+              rule2={rules.getIn([x, 1]).toObject()}
+              category={rules.getIn([x, 2])}
+            />
+          )) : '' }
+        <EmptyRowLogicRule onAddRule={this.onAddRule} />
         <Row className={`DeriveCategoryMapping ${uncategorizedValueIsInvalid ? 'DeriveCategoryMapping--invalid' : ''}`}>
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="uncategorized_values" />

@@ -31,17 +31,19 @@
   (get mappings v uncategorized-value))
 
 (defn find-number-cat [mappings v uncategorized-value]
-  (or
-   (some (fn [[[a b :as x] [c d :as y] cat]]
-           (let [exp (read-string (format "(%s %s %s)" a v b))
-                 eval1 (eval exp)]
-             (if y
-               (let [exp2 (read-string (format "(%s %s %s)" c v d))
-                     eval1&2 (and eval1 (eval exp2))]
-                 (when eval1&2 cat))
-               (when eval1 cat))))
-         mappings)
-   uncategorized-value))
+  (if-not v
+    uncategorized-value
+    (or
+     (some (fn [[[a b :as x] [c d :as y] cat]]
+             (let [exp (read-string (format "(%s %s %s)" a v b))
+                   eval1 (eval exp)]
+               (if y
+                 (let [exp2 (read-string (format "(%s %s %s)" c v d))
+                       eval1&2 (and eval1 (eval exp2))]
+                   (when eval1&2 cat))
+                 (when eval1 cat))))
+           mappings)
+     uncategorized-value)))
 
 
 (defmethod engine/apply-operation "core/derive-category"
