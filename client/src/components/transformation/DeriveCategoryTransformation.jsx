@@ -108,8 +108,11 @@ class DeriveCategoryTransformation extends Component {
 
   handleValidate() {
     const { mappings, uncategorizedValue } = this.state.transformation.args.derivation;
+    const textColumn = this.state.columnType === 'text';
     // eslint-disable-next-line no-unused-vars
-    const categoryCounts = countBy(mappings, ([sv, categoryName]) => categoryName);
+    const categoryCounts = textColumn ? countBy(mappings, ([sv, categoryName]) => categoryName) :
+    // eslint-disable-next-line no-unused-vars
+    countBy(mappings, ([r1, r2, categoryName]) => categoryName);
     categoryCounts[uncategorizedValue] = categoryCounts[uncategorizedValue] || 0;
     categoryCounts[uncategorizedValue] += 1;
     const duplicatedCategoryNames = Object.keys(categoryCounts).reduce((acc, categoryName) =>
