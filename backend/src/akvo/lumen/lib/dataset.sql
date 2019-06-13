@@ -121,4 +121,14 @@ SELECT COUNT(*) as counter, :i:column-name as coincidence
   FROM :i:table-name
   GROUP BY coincidence
   ORDER BY counter DESC
-  LIMIT :offset
+  --~ (when (:limit params) "LIMIT :i:limit")
+
+
+
+-- :name count-num-vals-by-column-name :? :1
+SELECT COUNT(*) as "all", max(:i:column-name) as "max", min(:i:column-name) as "min"
+  FROM :i:table-name
+
+
+-- :name count-unique-vals-by-colum-name :? :1
+select COUNT(DISTINCT :i:column-name) as "uniques" from :i:table-name

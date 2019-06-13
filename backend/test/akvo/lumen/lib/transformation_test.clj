@@ -617,7 +617,7 @@
         new-column-name      "Derived column name"
         uncategorized-value  "Uncategorised value"
         new-derived-column   {:sort       nil,
-	                      :type       "number",
+	                      :type       "text",
 	                      :title      new-column-name
 	                      :hidden     false,
 	                      :direction  nil,

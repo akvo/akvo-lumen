@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SelectDataset from './SelectDataset';
@@ -74,12 +75,26 @@ SelectAggregation.propTypes = {
   onChangeDirection: PropTypes.func.isRequired,
 };
 
-function SelectMergeColumns({ onChange, columns, selected }) {
+function SelectMergeColumns({ onChange, onChangeAll, columns, selected }) {
+  const selectedNames = selected.map(o => o.get('columnName'));
+  const allSelected = selected.size === columns.size;
   return (
     <fieldset>
-      <legend><h1>Choose which columns to merge ({selected.length} / {columns.size})</h1></legend>
+      <legend><h1>Choose which columns to merge ({selected.size} / {columns.size})</h1>
+        <fieldset style={{ boderColor: '#EEEEEE', backgroundColor: allSelected ? '#EEEEEE' : '#FFFFFF' }}>
+          <input
+            type="checkbox"
+            name="all_checks"
+            value="yupie"
+            checked={allSelected}
+            onChange={onChangeAll}
+          />
+          {selected.size === columns.size ? 'All columns selected' : 'Select all Columns'}
+        </fieldset>
+      </legend>
       {columns.map((column) => {
         const columnName = column.get('columnName');
+
         const id = `merge_column_${columnName}`;
         return (
           <div key={columnName}>
@@ -88,7 +103,8 @@ function SelectMergeColumns({ onChange, columns, selected }) {
               id={id}
               name="merge_column"
               value={columnName}
-              selected={selected.includes(column)}
+              selected={selectedNames.includes(columnName)}
+              checked={selectedNames.includes(columnName)}
               onChange={() => onChange(column)}
             />
             <label htmlFor={id}>{column.get('title')}</label>
@@ -101,8 +117,9 @@ function SelectMergeColumns({ onChange, columns, selected }) {
 
 SelectMergeColumns.propTypes = {
   onChange: PropTypes.func.isRequired,
+  onChangeAll: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
-  selected: PropTypes.array,
+  selected: PropTypes.object.isRequired,
 };
 
 class SourceMergeOptions extends Component {
@@ -115,7 +132,7 @@ class SourceMergeOptions extends Component {
       mergeColumn: null,
       aggregationColumn: null,
       aggregationDirection: 'DESC',
-      mergeColumns: [],
+      mergeColumns: Immutable.List(),
     };
   }
 
@@ -138,7 +155,7 @@ class SourceMergeOptions extends Component {
           mergeColumn: guessedMergeColumn,
           aggregationColumn: guessedAggregationColumn,
           direction: 'DESC',
-          mergeColumns: [],
+          mergeColumns: Immutable.List(),
         });
 
         onChange({
@@ -146,7 +163,7 @@ class SourceMergeOptions extends Component {
           mergeColumn: getColumnName(guessedMergeColumn),
           aggregationColumn: getColumnName(guessedAggregationColumn),
           aggregationDirection,
-          mergeColumns: [],
+          mergeColumns: Immutable.List(),
         });
       });
   }
@@ -201,13 +218,33 @@ class SourceMergeOptions extends Component {
       aggregationColumn,
       aggregationDirection,
       dataset } = this.state;
-
     const newMergeColumns = mergeColumns.includes(column) ?
       mergeColumns.filter(col => col !== column) :
-      [column, ...mergeColumns];
+      mergeColumns.push(column);
 
     this.setState({
       mergeColumns: newMergeColumns,
+    });
+
+    onChange({
+      datasetId: dataset.get('id'),
+      mergeColumn: mergeColumn.get('columnName'),
+      aggregationColumn: getColumnName(aggregationColumn),
+      aggregationDirection,
+      mergeColumns: newMergeColumns.map(col => col.get('columnName')),
+    });
+  }
+
+  handleToggleAllColumns(columns) {
+    const { onChange } = this.props;
+    const {
+      mergeColumn,
+      aggregationColumn,
+      aggregationDirection,
+      dataset } = this.state;
+    const newMergeColumns = columns;
+    this.setState({
+      mergeColumns: columns,
     });
 
     onChange({
@@ -229,7 +266,7 @@ class SourceMergeOptions extends Component {
       aggregationColumn,
       aggregationDirection,
     } = this.state;
-
+    const columns = dataset ? dataset.get('columns').filter(col => col !== mergeColumn) : Immutable.List();
     return (
       <div className="SourceMergeOptions">
         <h1>Dataset 2</h1>
@@ -257,9 +294,10 @@ class SourceMergeOptions extends Component {
         }
         {mergeColumn != null &&
           <SelectMergeColumns
-            columns={dataset.get('columns')}
+            columns={columns}
             selected={mergeColumns}
             onChange={column => this.handleToggleMergeColumn(column)}
+            onChangeAll={() => this.handleToggleAllColumns(columns)}
           />
         }
       </div>

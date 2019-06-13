@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Immutable from 'immutable';
 import TransformationHeader from './TransformationHeader';
 import TargetMergeOptions from './merge/TargetMergeOptions';
 import SourceMergeOptions from './merge/SourceMergeOptions';
@@ -19,7 +20,7 @@ export default class MergeTransformation extends Component {
             mergeColumn: null,
             aggregationColumn: null,
             aggregationDirection: 'DESC',
-            mergeColumns: [], // Array of column names.
+            mergeColumns: Immutable.fromJS([]), // Array of column names.
           },
           target: {
             mergeColumn: null,
@@ -34,7 +35,7 @@ export default class MergeTransformation extends Component {
     return (
       source.datasetId != null &&
       source.mergeColumn != null &&
-      source.mergeColumns.length > 0 &&
+      source.mergeColumns.size > 0 &&
       target.mergeColumn != null
     );
   }

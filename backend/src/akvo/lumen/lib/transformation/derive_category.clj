@@ -31,17 +31,19 @@
   (get mappings v uncategorized-value))
 
 (defn find-number-cat [mappings v uncategorized-value]
-  (or
-   (some (fn [[[a b :as x] [c d :as y] cat]]
-           (let [exp (read-string (format "(%s %s %s)" a v b))
-                 eval1 (eval exp)]
-             (if y
-               (let [exp2 (read-string (format "(%s %s %s)" c v d))
-                     eval1&2 (and eval1 (eval exp2))]
-                 (when eval1&2 cat))
-               (when eval1 cat))))
-         mappings)
-   uncategorized-value))
+  (if-not v
+    uncategorized-value
+    (or
+     (some (fn [[[a b :as x] [c d :as y] cat]]
+             (let [exp (read-string (format "(%s %s %s)" a v b))
+                   eval1 (eval exp)]
+               (if y
+                 (let [exp2 (read-string (format "(%s %s %s)" c v d))
+                       eval1&2 (and eval1 (eval exp2))]
+                   (when eval1&2 cat))
+                 (when eval1 cat))))
+           mappings)
+     uncategorized-value)))
 
 
 (defmethod engine/apply-operation "core/derive-category"
@@ -54,10 +56,10 @@
         all-data              (all-data tenant-conn {:table-name table-name})
         mappings              (get-in op-spec [:args :derivation :mappings])
         derivation-type       (get-in op-spec [:args :derivation :type] "text")
-        execution-log-message (format "Derived %s category '%s' using column: '%s' and mappings: '%s'"
-                                      derivation-type
+        execution-log-message (format "Derived category '%s' using column: '%s'(%s) and mappings: '%s'"
                                       column-title
                                       (:title (dataset.utils/find-column (walk/keywordize-keys columns) source-column-name))
+                                      derivation-type
                                       mappings)]
     (jdbc/with-db-transaction [tenant-conn tenant-conn]
       (add-column tenant-conn {:table-name      table-name
@@ -75,7 +77,7 @@
       {:success?      true
        :execution-log [execution-log-message]
        :columns       (conj columns {"title"      column-title
-                                     "type"       derivation-type
+                                     "type"       "text"
                                      "sort"       nil
                                      "hidden"     false
                                      "direction"  nil
