@@ -89,7 +89,7 @@ export default class RowLogicRule extends Component {
           <a
             onClick={() => onRemoveRule(path)}
             className="fa fa-times-circle"
-            style={{ fontSize: '2em', marginRight: '5px' }}
+            style={{ marginRight: '5px' }}
           />
           <ClickAway
             onClickAway={() => {
