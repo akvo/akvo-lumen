@@ -89,10 +89,10 @@ class DeriveCategoryMappings extends Component {
   newRule() {
     return [{
       op: null,
-      opValue: null,
+      opValue: 0,
     }, {
       op: null,
-      opValue: null,
+      opValue: 0,
     }];
   }
 
