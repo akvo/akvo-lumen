@@ -116,7 +116,7 @@ export default class RowLogicRule extends Component {
           <input
             ref={(input) => { this.nameInput = input; }}
             hidden={!selected}
-            value={rule.opValue || ''}
+            value={rule.opValue}
             style={{ width: '4em' }}
             placeholder={this.props.intl.formatMessage({ id: 'enter_a_number' })}
             onChange={(event) => {
@@ -171,7 +171,7 @@ export default class RowLogicRule extends Component {
           <input
             ref={(input) => { this.nameInput2 = input; }}
             hidden={!selected2}
-            value={rule2.opValue || ''}
+            value={rule2.opValue}
             style={{ width: '4em' }}
             placeholder={this.props.intl.formatMessage({ id: 'enter_a_number' })}
             onChange={(event) => {
