@@ -17,6 +17,7 @@ class DeriveCategoryTransformation extends Component {
     super(props);
     this.state = {
       duplicatedCategoryNames: [],
+      emptyCategories: false,
       selectingSourceColumn: false,
       transformation: {
         op: 'core/derive-category',
@@ -115,20 +116,27 @@ class DeriveCategoryTransformation extends Component {
     countBy(mappings, ([r1, r2, categoryName]) => categoryName);
     categoryCounts[uncategorizedValue] = categoryCounts[uncategorizedValue] || 0;
     categoryCounts[uncategorizedValue] += 1;
+    const emptyCategories = Object.keys(categoryCounts).includes('') || Object.keys(categoryCounts).includes('undefined');
     const duplicatedCategoryNames = Object.keys(categoryCounts).reduce((acc, categoryName) =>
       (categoryCounts[categoryName] > 1 ? acc.concat(categoryName) : acc)
     , []);
-    this.setState({ duplicatedCategoryNames });
+    this.setState({ duplicatedCategoryNames, emptyCategories });
   }
 
   handleApplyTransformation() {
     const { onApplyTransformation, intl, onAlert } = this.props;
-    const { transformation, duplicatedCategoryNames, columnType } = this.state;
+    const { transformation, duplicatedCategoryNames, emptyCategories, columnType } = this.state;
 
     if (duplicatedCategoryNames.length) {
       onAlert(showNotification('error', intl.formatMessage({ id: 'categories_must_be_unique' })));
       return;
     }
+
+    if (emptyCategories) {
+      onAlert(showNotification('error', intl.formatMessage({ id: 'categories_cant_be_empty' })));
+      return;
+    }
+
     if (columnType === 'text') {
       onApplyTransformation({
         ...transformation,

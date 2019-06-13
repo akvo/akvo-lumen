@@ -30,6 +30,7 @@
   "bulk_column_editor": "Bulk column editor",
   "bulk_row_editor": "Bulk row editor",
   "cancel": "Cancel",
+  "categories_cant_be_empty": "Categories can't be empty",
   "categories_count": "{count} {count, plural, one {category} other {categories}}",
   "categories_must_be_unique": "Categories must be unique",
   "category": "Category",
