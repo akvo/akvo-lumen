@@ -8,6 +8,7 @@ import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import DeriveCategoryMapping from './DeriveCategoryMappingText';
 import './DeriveCategoryMappingsText.scss';
 import ContextMenu from '../../common/ContextMenu';
+import ClickAway from '../../common/ClickAway';
 
 const MAPPING_COUNT_LIMIT = 50;
 
@@ -111,7 +112,7 @@ class DeriveCategoryMappings extends Component {
     } = this.props;
     const { search, sort } = this.state;
 
-    if (!dataset.sortedValues) return null;
+    if (!dataset.sortedValues || !Array.isArray(dataset.sortedValues)) return null;
 
     const unassignedValues = dataset.sortedValues
       // eslint-disable-next-line no-unused-vars
@@ -142,15 +143,22 @@ class DeriveCategoryMappings extends Component {
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="source_column" />: {dataset.columns[sourceColumnIndex].title}
             <div style={{ position: 'relative', display: 'inline-block' }}>
-              <a
-                className="fa fa-ellipsis-v"
-                onClick={() => {
+              <ClickAway
+                onClickAway={() => {
                   this.setState({
-                    showSourceColumnContextMenu: !this.state.showSourceColumnContextMenu,
+                    showSourceColumnContextMenu: false,
                   });
                 }}
-              />
-              {this.state.showSourceColumnContextMenu && (
+              >
+                <a
+                  className="fa fa-ellipsis-v"
+                  onClick={() => {
+                    this.setState({
+                      showSourceColumnContextMenu: !this.state.showSourceColumnContextMenu,
+                    });
+                  }}
+                />
+                {this.state.showSourceColumnContextMenu && (
                 <ContextMenu
                   onOptionSelected={(optionValue) => {
                     if (optionValue === 'reselect_source_column') {
@@ -165,6 +173,7 @@ class DeriveCategoryMappings extends Component {
                   ]}
                 />
               )}
+              </ClickAway>
             </div>
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__input-wrap">

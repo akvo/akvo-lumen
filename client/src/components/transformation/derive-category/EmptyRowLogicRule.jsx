@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-grid-system';
 import { FormattedMessage } from 'react-intl';
+import './DeriveCategoryMappingText.scss';
+import './DeriveCategoryMappingNumber.scss';
 
 
 function EmptyRowLogicRule({ onAddRule }) {
@@ -9,7 +11,7 @@ function EmptyRowLogicRule({ onAddRule }) {
   return (
     <Row className="DeriveCategoryMapping">
       <Col xs={12} className="DeriveCategoryMapping__text" >
-        <div onClick={onAddRule}><FormattedMessage id="define_new_category" /></div>
+        <a onClick={onAddRule} className="DeriveCategoryMapping__action_btn"><FormattedMessage id="define_new_category" /></a>
       </Col>
     </Row>
   );
