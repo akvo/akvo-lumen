@@ -8,6 +8,7 @@ import RowLogicRule from './RowLogicRule';
 import EmptyRowLogicRule from './EmptyRowLogicRule';
 import './DeriveCategoryMappingsText.scss';
 import ContextMenu from '../../common/ContextMenu';
+import ClickAway from '../../common/ClickAway';
 
 
 class DeriveCategoryMappings extends Component {
@@ -128,29 +129,38 @@ class DeriveCategoryMappings extends Component {
           <Col xs={7} className="DeriveCategoryMapping__text">
             <FormattedMessage id="source_column" />: {dataset.columns[sourceColumnIndex].title}
             <div style={{ position: 'relative', display: 'inline-block' }}>
-              <a
-                className="fa fa-ellipsis-v"
-                onClick={() => {
+              <ClickAway
+                onClickAway={() => {
                   this.setState({
-                    showSourceColumnContextMenu: !this.state.showSourceColumnContextMenu,
+                    showSourceColumnContextMenu: false,
                   });
                 }}
-              />
-              {this.state.showSourceColumnContextMenu && (
-                <ContextMenu
-                  onOptionSelected={(optionValue) => {
-                    if (optionValue === 'reselect_source_column') {
-                      onReselectSourceColumn();
-                    }
+              >
+                <a
+                  className="fa fa-ellipsis-v"
+                  onClick={() => {
+                    this.setState({
+                      showSourceColumnContextMenu: !this.state.showSourceColumnContextMenu,
+                    });
                   }}
-                  options={[
-                    {
-                      label: <FormattedMessage id="reselect_source_column" />,
-                      value: 'reselect_source_column',
-                    },
-                  ]}
                 />
-              )}
+                {this.state.showSourceColumnContextMenu && (
+                  <ContextMenu
+                    onOptionSelected={(optionValue) => {
+                      if (optionValue === 'reselect_source_column') {
+                        onReselectSourceColumn();
+                      }
+                    }}
+                    options={[
+                      {
+                        label: <FormattedMessage id="reselect_source_column" />,
+                        value: 'reselect_source_column',
+                      },
+                    ]}
+                  />
+                )}
+              </ClickAway>
+
             </div>
           </Col>
           <Col xs={5} className="DeriveCategoryMapping__input-wrap">
