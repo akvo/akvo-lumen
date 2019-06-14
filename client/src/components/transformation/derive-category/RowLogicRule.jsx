@@ -5,6 +5,9 @@ import { Col, Row } from 'react-grid-system';
 import { intlShape } from 'react-intl';
 import ContextMenu from '../../common/ContextMenu';
 import ClickAway from '../../common/ClickAway';
+import './DeriveCategoryMappingText.scss';
+import './DeriveCategoryMappingNumber.scss';
+
 
 export default class RowLogicRule extends Component {
 
@@ -129,8 +132,9 @@ export default class RowLogicRule extends Component {
         <Col xs={1} className="DeriveCategoryMapping__text" >
           { selected ? <div>
             <a
+              className="DeriveCategoryMapping__action_btn"
               style={{ textDecoration: 'underline',
-                color: !conditionsValue2 ? '#c3c3c3' : 'black' }}
+                color: !conditionsValue2 ? '' : 'black' }}
               onClick={this.handleSecondCondition}
             > AND </a>
             <a
