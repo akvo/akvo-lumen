@@ -112,7 +112,7 @@ class DeriveCategoryMappings extends Component {
     } = this.props;
     const { search, sort } = this.state;
 
-    if (!dataset.sortedValues) return null;
+    if (!dataset.sortedValues || !Array.isArray(dataset.sortedValues)) return null;
 
     const unassignedValues = dataset.sortedValues
       // eslint-disable-next-line no-unused-vars
