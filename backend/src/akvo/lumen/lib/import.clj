@@ -62,11 +62,11 @@
 (defn- execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
-  [conn import-config error-tracker job-execution-id data-source-id claims spec]
+  [conn import-config error-tracker job-execution-id data-source-id claims spec tenant]
   (future
     (let [table-name (util/gen-table-name "ds")]
       (try
-        (with-open [importer (common/dataset-importer (get spec "source") import-config)]
+        (with-open [importer (common/dataset-importer (get spec "source") (assoc import-config :tenant tenant))]
           (let [columns (p/columns importer)]
             (postgres/create-dataset-table conn table-name columns)
             (doseq [record (map postgres/coerce-to-sql (p/records importer))]
@@ -78,13 +78,13 @@
           (p/track error-tracker e)
           (throw e))))))
 
-(defn handle [tenant-conn import-config error-tracker claims data-source]
+(defn handle [tenant-conn import-config error-tracker claims data-source tenant]
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))]
     (insert-data-source tenant-conn {:id data-source-id
                                    :spec (json/generate-string data-source)})
     (insert-job-execution tenant-conn {:id job-execution-id
                                        :data-source-id data-source-id})
-    (execute tenant-conn import-config error-tracker job-execution-id data-source-id claims data-source)
+    (execute tenant-conn import-config error-tracker job-execution-id data-source-id claims data-source tenant)
     (lib/ok {"importId" job-execution-id
              "kind" (get-in data-source ["source" "kind"])})))
