@@ -59,7 +59,7 @@
  :akvo.lumen.endpoint.env/env {:routes-opts
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
                                :keycloak #ig/ref :akvo.lumen.component.keycloak/data
-                               :keycloak-public-client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]
+                               :keycloak-public-client-id "akvo-lumen"
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"}
@@ -172,7 +172,7 @@
                                       :realm "akvo"}
 
  :akvo.lumen.component.keycloak/keycloak {:data #ig/ref :akvo.lumen.component.keycloak/data
-                                          :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
+                                          :credentials {:client_id "akvo-lumen-confidential"
                                                         :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
 
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
