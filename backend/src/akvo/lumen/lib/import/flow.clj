@@ -38,7 +38,7 @@
         (try
           (cond
             (<= version 2) (v2/form-data headers-fn @survey formId)
-            (<= version 3) (v3/form-data headers-fn @survey formId))
+            (<= version 3) (v3/form-data headers-fn instance @survey formId))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
