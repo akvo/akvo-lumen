@@ -8,7 +8,6 @@ import { itsSet } from 'its-set';
 
 import './DeriveCategoryMappingText.scss';
 import Popover from '../../common/Popover';
-import Button from '../../common/Button';
 import ClickAway from '../../common/ClickAway';
 
 const SEARCH_RESULTS_LIMIT = 10;
@@ -111,7 +110,7 @@ class DeriveCategoryMapping extends Component {
               )}
               footer={(
                 <Row>
-                  <Col xs={6}>
+                  <Col xs={12}>
                     <input
                       type="checkbox"
                       id="select-all-checkbox"
@@ -120,11 +119,6 @@ class DeriveCategoryMapping extends Component {
                     <label htmlFor="select-all-checkbox">
                       <FormattedMessage id="select_all" />
                     </label>
-                  </Col>
-                  <Col xs={6} className="text-right">
-                    <Button>
-                      <FormattedMessage id="close" />
-                    </Button>
                   </Col>
                 </Row>
               )}

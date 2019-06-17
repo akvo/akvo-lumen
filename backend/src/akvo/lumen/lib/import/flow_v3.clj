@@ -91,7 +91,7 @@
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
   instances and pulls additional data-point data using the forms data-point-id."
-  [headers-fn survey form-id]
+  [headers-fn instance survey form-id]
   (let [form (flow-common/form survey form-id)
         data-points (util/index-by
                      "id" (flow-common/data-points headers-fn survey))]
@@ -104,5 +104,6 @@
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
                                {:form-instance-id (get form-instance "id")
                                 :data-point-id data-point-id
+                                :instance instance
                                 :survey-id (:id survey)})))))
          (flow-common/form-instances headers-fn form))))
