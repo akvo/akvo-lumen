@@ -31,7 +31,7 @@
                               jwt-claims :jwt-claims
                               body :body}]
                           (dataset/create (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                          error-tracker jwt-claims (w/stringify-keys body)))}}]
+                                          error-tracker jwt-claims (w/stringify-keys body) tenant))}}]
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
@@ -83,7 +83,7 @@
                                        body :body
                                        {:keys [id]} :path-params}]
                                    (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                                   error-tracker id (w/stringify-keys body)))}}]]]])
+                                                   error-tracker id (w/stringify-keys body) tenant))}}]]]])
 
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
