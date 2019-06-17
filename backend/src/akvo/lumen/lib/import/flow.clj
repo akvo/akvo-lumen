@@ -11,7 +11,7 @@
 
 (defmethod import/dataset-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId refreshToken version] :as spec}
-   {:keys [flow-api tenant] :as config}]
+   {:keys [flow-api] :as config}]
   (let [version (if version version 1)
         headers-fn #(c.flow/api-headers (c.flow/access-token flow-api refreshToken))
         survey (delay (flow-common/survey-definition (:url flow-api)
@@ -32,7 +32,7 @@
               (do
                 (log/error e)
                 (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
-                                (assoc ex-d :instance instance :tenant tenant))))
+                                (assoc ex-d :instance instance))))
               (throw e)))))
       (records [this]
         (try
@@ -42,6 +42,5 @@
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
-                              (assoc ex-d :instance instance
-                                     :tenant tenant)))
+                              (assoc ex-d :instance instance)))
               (throw e))))))))

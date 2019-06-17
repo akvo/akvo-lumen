@@ -85,9 +85,9 @@
                                    columns))
       nil)))
 
-(defn- do-update [tenant-conn import-config dataset-id data-source-id job-execution-id data-source-spec tenant]
+(defn- do-update [tenant-conn import-config dataset-id data-source-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
-    (with-open [importer (import/dataset-importer (get data-source-spec "source") (assoc import-config :tenant tenant))]
+    (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
       (let [initial-dataset-version  (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)]
@@ -134,7 +134,7 @@
                                  imported-table-name
                                  dataset-version))))))))
 
-(defn update-dataset [tenant-conn import-config error-tracker dataset-id data-source-id data-source-spec tenant]
+(defn update-dataset [tenant-conn import-config error-tracker dataset-id data-source-id data-source-spec]
   (if-let [current-tx-job (pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
     (lib/bad-request {:message "A running transformation still exists, please wait to update this dataset ..."})
     (let [job-execution-id (str (util/squuid))]
@@ -147,8 +147,7 @@
                     dataset-id
                     data-source-id
                     job-execution-id
-                    data-source-spec
-                    tenant)
+                    data-source-spec)
          (catch Exception e
            (failed-update tenant-conn job-execution-id (.getMessage e))
            (p/track error-tracker e)

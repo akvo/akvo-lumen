@@ -68,7 +68,7 @@
                           "fileName" (or dataset-name file)
                           "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
-        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec "test")]
+        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
 
@@ -78,7 +78,7 @@
   (let [spec {"source" {"kind" kind
                         "hasColumnHeaders" (boolean has-column-headers?)
                         "data" data}}
-        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn {} error-tracker dataset-id data-source-id spec "test")]
+        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn {} error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (dh/with-retry {:retry-if (fn [v e] (not v))
                     :max-retries 20
