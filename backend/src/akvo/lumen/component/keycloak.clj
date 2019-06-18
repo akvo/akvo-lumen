@@ -222,6 +222,36 @@
           (lib/internal-server-error))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; WIP
+;;;
+
+(defn- api-get
+  [headers url]
+  (-> url
+      (client/get {:headers headers})
+      :body
+      json/decode))
+
+(defn allowed-paths
+  "From email get Keycloak user and returns the set of allowed paths for email"
+  [{:keys [api-root] :as keycloak} email]
+  (let [request-headers (request-headers keycloak)
+        users (api-get request-headers
+                       (format "%s/users/?email=%s" api-root email))
+        validated-user-id (-> (filter #(and (= (get % "email") email)
+                                            (get % "emailVerified"))
+                                      users)
+                              first
+                              (get "id"))
+        user-groups (api-get request-headers
+                             (format "%s/users/%s/groups" api-root
+                                     validated-user-id))]
+    (reduce (fn [paths {:strs [path]}]
+              (conj paths (subs path 12))) ;; remove leading /akvo/lumen/
+            #{} user-groups)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; KeycloakAgent Component
 ;;;
 
@@ -271,12 +301,20 @@
                                       email)))))
 
   (users [this tenant-label]
-    (tenant-members this tenant-label)))
+    (tenant-members this tenant-label))
+
+
+  p/KeycloakAuthorization
+  (tenant-member? [keycloak tenant-label email]
+    (tenant-member? keycloak tenant-label email))
+
+  (allowed-paths [keycloak email]
+    (allowed-paths keycloak email)))
 
 (defn- keycloak [{:keys [credentials url realm]}]
-  (map->KeycloakAgent {:issuer (format "%s/realms/%s" url realm)
-                       :api-root (format "%s/admin/realms/%s" url realm)
-                       :credentials credentials}))
+  (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
+                       :credentials credentials
+                       :issuer (format "%s/realms/%s" url realm)}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   (try

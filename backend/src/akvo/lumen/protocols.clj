@@ -46,6 +46,15 @@
     [this tenant-label]
     "List tenants users"))
 
+(defprotocol KeycloakAuthorization
+  (tenant-member?
+    [this tenant-label email]
+    "Predicate for checking tenant membership based on API")
+
+  (allowed-paths
+    [this email]
+    "Allowed paths by email"))
+
 (defprotocol DatasetImporter
   "
   A protocol for importing datasets into Lumen. A typical implementation
@@ -109,4 +118,3 @@
     "Provisional workaround for
      https://github.com/akvo/akvo-lumen/issues/2080
     'Refactor api/collections payload'"))
-

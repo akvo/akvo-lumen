@@ -35,4 +35,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.library/library  [_ opts]
   (routes opts))
-

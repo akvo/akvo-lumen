@@ -98,3 +98,17 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
   (s/keys :req-un [::keycloak ::auth0]))
+
+(defmethod ig/init-key  :akvo.lumen.auth/wrap-authorization
+  [_ {:keys [keycloak]}]
+  (fn [handler]
+    (fn [{:keys [jwt-claims tenant] :as request}]
+      (let [email (get jwt-claims "email")
+            ;; member? (keycloak/tenant-member? keycloak tenant email)
+            ;; user (keycloak/user keycloak email)
+            allowed-paths (keycloak/allowed-paths keycloak email)]
+        (prn allowed-paths)
+        (handler request)))))
+
+#_(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
+    (s/keys :req-un [::keycloak]))

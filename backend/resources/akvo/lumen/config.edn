@@ -30,6 +30,8 @@
  :akvo.lumen.auth/wrap-auth {:keycloak #ig/ref :akvo.lumen.component.keycloak/data
                              :auth0 #ig/ref :akvo.lumen.component.auth0/data}
 
+ :akvo.lumen.auth/wrap-authorization {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
+
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
                                           :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
@@ -43,14 +45,14 @@
                                                   :opts {:namespaces ["org.akvo" "akvo"]}}
 
  :akvo.lumen.endpoint.aggregation/aggregation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
- 
+
  :akvo.lumen.endpoint.collection/collection {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
- 
+
  :akvo.lumen.endpoint.dashboard/dashboard {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
                                  :keycloak #ig/ref :akvo.lumen.component.keycloak/data}
- 
+
  :akvo.lumen.endpoint.dataset/dataset {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                        :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
                                        :upload-config #ig/ref :akvo.lumen.upload/data
@@ -70,7 +72,7 @@
 
  :akvo.lumen.upload/data {:file-upload-path #duct/env [ "LUMEN_FILE_UPLOAD_PATH" :or "/tmp/akvo/lumen" ]
                           :max-upload-size 100}
- 
+
  :akvo.lumen.endpoint.files/files {:upload-config #ig/ref :akvo.lumen.upload/data}
  :akvo.lumen.endpoint.healthz/healthz {}
 
@@ -83,7 +85,8 @@
 
  :akvo.lumen.endpoint.job-execution/job-execution {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
- :akvo.lumen.endpoint.library/library {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
+ :akvo.lumen.endpoint.library/library {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak
+                                       :tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.endpoint.multiple-column/multiple-column {:caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
@@ -115,6 +118,7 @@
                                             :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                                                          #ig/ref :akvo.lumen.auth/wrap-jwt
                                                          #ig/ref :akvo.lumen.auth/wrap-auth
+                                                         #ig/ref :akvo.lumen.auth/wrap-authorization
                                                          #ig/ref :akvo.lumen.lib.auth/wrap-auth-datasets
                                                          #ig/ref :akvo.lumen.component.handler/common-middleware
                                                          #ig/ref :akvo.lumen.monitoring/middleware]
@@ -148,7 +152,6 @@
                                                            #ig/ref :akvo.lumen.component.handler/common-middleware]
                                               :routes [#ig/ref :akvo.lumen.endpoint.public/public]}
 
- 
  :akvo.lumen.component.handler/common-middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
                                                   #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
                                                   #ig/ref :akvo.lumen.component.handler/wrap-defaults
@@ -156,7 +159,7 @@
                                                   #ig/ref :akvo.lumen.component.handler/wrap-json-response
                                                   #ig/ref :akvo.lumen.component.handler/variant
                                                   #ig/ref :akvo.lumen.component.handler/wrap-not-found]
- 
+
  :akvo.lumen.component.handler/handler {:endpoints [["" {:middleware  #ig/ref :akvo.lumen.component.handler/common-middleware}
                                                      [#ig/ref :akvo.lumen.endpoint.env/env
                                                       #ig/ref :akvo.lumen.endpoint.healthz/healthz
