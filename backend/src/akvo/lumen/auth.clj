@@ -99,16 +99,87 @@
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
   (s/keys :req-un [::keycloak ::auth0]))
 
-(defmethod ig/init-key  :akvo.lumen.auth/wrap-authorization
+(defn api-tenant-admin?
+  [tenant allowed-paths]
+  (contains? allowed-paths (str tenant "/admin")))
+
+(comment
+
+  (and
+   ;; As admin on tenant
+   (let [allowed-paths #{"demo/admin" "t1"}
+         tenant "demo"]
+     (= true
+        (api-tenant-admin? tenant allowed-paths)))
+
+   ;; As user on tenant
+   (let [allowed-paths #{"demo" "t1"}
+         tenant "demo"]
+     (= false
+        (api-tenant-admin? tenant allowed-paths)))
+
+   ;; As Admin on another tenant
+   (let [allowed-paths #{"t1/admin"}
+         tenant "demo"]
+     (= false
+        (api-tenant-admin? tenant allowed-paths)))
+
+   ;; As user on another tenant
+   (let [allowed-paths #{"t1" }
+         tenant "demo"]
+     (= false
+        (api-tenant-admin? tenant allowed-paths))))
+  )
+
+(defn api-tenant-user?
+  [tenant allowed-paths]
+  (or
+   (contains? allowed-paths (str tenant "/admin"))
+   (contains? allowed-paths tenant)))
+
+(comment
+
+  (and
+   ;; As admin on tenant
+   (let [allowed-paths #{"demo/admin" "t1"}
+         tenant "demo"]
+     (= true
+        (api-tenant-user? tenant allowed-paths)))
+
+   ;; As user on tenant
+   (let [allowed-paths #{"demo" "t1"}
+         tenant "demo"]
+     (= true
+        (api-tenant-user? tenant allowed-paths)))
+
+   ;; As Admin on another tenant
+   (let [allowed-paths #{"t1/admin"}
+         tenant "demo"]
+     (= false
+        (api-tenant-user? tenant allowed-paths)))
+
+   ;; As user on another tenant
+   (let [allowed-paths #{"t1" }
+         tenant "demo"]
+     (= false
+        (api-tenant-user? tenant allowed-paths))))
+  )
+
+(defmethod ig/init-key :akvo.lumen.auth/wrap-authorization
   [_ {:keys [keycloak]}]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
       (let [email (get jwt-claims "email")
-            ;; member? (keycloak/tenant-member? keycloak tenant email)
-            ;; user (keycloak/user keycloak email)
             allowed-paths (keycloak/allowed-paths keycloak email)]
-        (prn allowed-paths)
-        (handler request)))))
+        (cond
+          (nil? jwt-claims) not-authenticated
+          (admin-path? request) (if (api-tenant-admin? tenant allowed-paths)
+                                  (handler request)
+                                  not-authorized)
+          (api-path? request) (if (api-tenant-user? tenant allowed-paths)
+                                (handler request)
+                                not-authorized)
+          :else not-authorized)))))
 
 #_(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
     (s/keys :req-un [::keycloak]))
