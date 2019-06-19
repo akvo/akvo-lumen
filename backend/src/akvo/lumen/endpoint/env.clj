@@ -1,22 +1,33 @@
 (ns akvo.lumen.endpoint.env
   (:require [integrant.core :as ig]
             [clojure.spec.alpha :as s]
-            [ring.util.response :refer [response]]))
+            [clojure.tools.logging :as log]
+            [ring.util.response :as response]))
+
+(s/def ::auth-type #{"keycloak" "auth0"})
 
 (defn handler [{:keys [keycloak-public-client-id keycloak flow-api
                         piwik-site-id sentry-client-dsn] :as opts}]
-  (fn [{tenant :tenant :as request}]
-    (response
-        (cond-> {"keycloakClient" keycloak-public-client-id
-                 "keycloakURL" (:url keycloak)
-                 "flowApiUrl" (:url flow-api)
-                 "piwikSiteId" piwik-site-id
-                 "tenant" (:tenant request)}
-          (string? sentry-client-dsn)
-          (assoc "sentryDSN" sentry-client-dsn)))))
+  (fn [{tenant :tenant
+        query-params :query-params
+        :as request}]
+    (let [auth-type (get query-params "auth")]
+      (if (s/valid? ::auth-type auth-type)
+        (response
+         (cond-> {"keycloakClient" keycloak-public-client-id
+                  "keycloakURL" (:url keycloak)
+                  "flowApiUrl" (:url flow-api)
+                  "piwikSiteId" piwik-site-id
+                  "tenant" (:tenant request)}
+           (string? sentry-client-dsn)
+           (assoc "sentryDSN" sentry-client-dsn)))
+        (-> (response/response (str "Auth-provided not implemented: " auth-type))
+            (response/status 400))))))
+
 
 (defn routes [{:keys [routes-opts] :as opts}]
-  ["/env" (merge {:get {:handler (handler opts)}}
+  ["/env" (merge {:get {:parameters {:query-params {:auth ::auth-type}}
+                        :handler (handler opts)}}
                  (when routes-opts routes-opts))])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]

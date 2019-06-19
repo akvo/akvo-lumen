@@ -35,7 +35,8 @@ export function init() {
   if (keycloak != null) {
     throw new Error('Keycloak already initialized');
   }
-  return get('/env')
+  const auth = queryString.parse(location.search).auth || 'keycloak';
+  return get('/env', { auth })
     .then(
       ({
         body: {
