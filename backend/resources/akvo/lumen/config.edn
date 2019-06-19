@@ -27,7 +27,8 @@
                                                           :content-types true
                                                           :default-charset "utf-8"}}
 
- :akvo.lumen.auth/wrap-auth {}
+ :akvo.lumen.auth/wrap-auth {:keycloak #ig/ref :akvo.lumen.component.keycloak/data
+                             :auth0 #ig/ref :akvo.lumen.component.auth0/data}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
@@ -172,7 +173,7 @@
  :akvo.lumen.component.keycloak/data {:url #duct/env "LUMEN_KEYCLOAK_URL"
                                       :realm "akvo"}
 
- :akvo.lumen.component.auth0/data {:url #duct/env "LUMEN_AUTH0_URL"}
+ :akvo.lumen.component.auth0/data {:url #duct/env ["LUMEN_AUTH0_URL" :or "https://tangrammer.eu.auth0.com"]}
 
  :akvo.lumen.component.keycloak/keycloak {:data #ig/ref :akvo.lumen.component.keycloak/data
                                           :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]

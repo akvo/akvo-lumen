@@ -23,7 +23,7 @@
                  (body-kw r)))))
 
       (testing "/env"
-        (let [r (h (get*  "/env"))]
+        (let [r (h (get*  "/env" {"auth" "keycloak"}))]
           (is (= 200 (:status r)))
           (is (= {:keycloakClient "akvo-lumen",
                   :keycloakURL "http://auth.lumen.local:8080/auth",
