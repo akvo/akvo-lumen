@@ -229,11 +229,14 @@
 
 (defn- api-get
   [headers url]
-  (-> url (client/get {:headers headers}) :body json/decode))
+  (time
+   (-> url
+       (client/get {:headers headers})
+       :body
+       json/decode)))
 
 (defn- active-user [users email]
   (-> (filter #(and (= (get % "email") email)
-                    (get % "emailVerified")
                     (get % "enabled"))
               users)
       first
@@ -326,10 +329,12 @@
     (allowed-paths keycloak email)))
 
 (defn- keycloak [{:keys [credentials url realm]}]
-  (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
-                       :credentials credentials
-                       :issuer (format "%s/realms/%s" url realm)
-                       :user-id-cache (atom {})}))
+  (client/with-connection-pool
+    {:timeout 5 :threads 4 :insecure? false :default-per-route 10}
+    (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
+                         :credentials credentials
+                         :issuer (format "%s/realms/%s" url realm)
+                         :user-id-cache (atom {})})))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   (try
