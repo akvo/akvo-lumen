@@ -1,7 +1,8 @@
 (ns akvo.lumen.component.keycloak
   "We leverage Keycloak groups for tenant partition and admin roles.
    More info can be found in the Keycloak integration doc spec."
-  (:require [akvo.lumen.lib :as lib]
+  (:require [akvo.commons.jwt :as jwt]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -278,7 +279,18 @@
                        :credentials credentials}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
-  opts)
+  (try
+    (let [issuer (str url "/realms/" realm)
+         rsa-key  (-> (str issuer "/protocol/openid-connect/certs")
+                      client/get
+                      :body
+                      (jwt/rsa-key 0))]
+     (assoc opts
+            :issuer issuer
+            :rsa-key rsa-key))
+    (catch Exception e
+      (log/error e "Could not get cert from Keycloak")
+      (throw e))))
 
 (s/def ::url string?)
 (s/def ::realm string?)

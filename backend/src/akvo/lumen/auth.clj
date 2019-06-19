@@ -59,14 +59,14 @@
 
 (defn provisional-wrap-jwt-claims
   "extended functionality from 'jwt/wrap-jwt-claims' to support 2 auth providers"
-  [handler keycloak-rsa-key keycloak-issuer auth0-rsa-key auth0-issuer]
-  (let [keycloak-verifier (RSASSAVerifier. keycloak-rsa-key)
-        auth0-verifier (RSASSAVerifier. auth0-rsa-key)]
+  [handler keycloak auth0]
+  (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak))
+        auth0-verifier (RSASSAVerifier.  (:rsa-key auth0))]
     (fn [req]
       (if-let [token (jwt/jwt-token req)]
         (try
-          (if-let [claims (or (jwt/verified-claims token keycloak-verifier keycloak-issuer {})
-                              (jwt/verified-claims token auth0-verifier auth0-issuer {}))]
+          (if-let [claims (or (jwt/verified-claims token keycloak-verifier (:issuer keycloak) {})
+                              (jwt/verified-claims token auth0-verifier (:issuer auth0) {}))]
             (handler (assoc req :jwt-claims claims))
             (handler req))
           (catch ParseException e
@@ -79,17 +79,7 @@
   [keycloak auth0]
   (fn [handler]
    (try
-     (let [keycloak-issuer (str (:url keycloak) "/realms/" (:realm keycloak))
-           keycloak-rsa-key  (-> (str keycloak-issuer "/protocol/openid-connect/certs")
-                                 client/get
-                                 :body
-                                 (jwt/rsa-key 0))
-           auth0-issuer (format "%s/" (:url auth0))
-           auth0-rsa-key (-> (format  "%s.well-known/jwks.json" auth0-issuer)
-                             client/get
-                             :body
-                             (jwt/rsa-key 0))]
-       (provisional-wrap-jwt-claims handler keycloak-rsa-key keycloak-issuer auth0-rsa-key auth0-issuer))
+     (provisional-wrap-jwt-claims handler keycloak auth0)
      (catch Exception e
        (println "Could not get cert from Keycloak :: auth")
        (throw e)))))
