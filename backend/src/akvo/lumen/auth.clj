@@ -187,5 +187,5 @@
                                 not-authorized)
           :else not-authorized)))))
 
-(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
-  (s/keys :req-un [::keycloak]))
+#_(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
+    (s/keys :req-un [::keycloak]))

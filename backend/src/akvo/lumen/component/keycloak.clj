@@ -370,7 +370,8 @@
 
 (s/def ::config (s/keys :req-un [::data ::credentials]))
 
-(s/def ::keycloak (partial satisfies? p/KeycloakUserManagement))
+(s/def ::keycloak (s/and (partial satisfies? p/KeycloakUserManagement)
+                         (partial satisfies? p/KeycloakAuthorization)))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/keycloak [_]
   ::config)
