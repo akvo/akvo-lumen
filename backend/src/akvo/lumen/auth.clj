@@ -7,8 +7,11 @@
             [clojure.string :as string]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.component.auth0 :as auth0]
             [integrant.core :as ig]
-            [ring.util.response :as response]))
+            [ring.util.response :as response])
+  (:import java.text.ParseException
+           com.nimbusds.jose.crypto.RSASSAVerifier))
 
 (defn claimed-roles [jwt-claims]
   (set (get-in jwt-claims ["realm_access" "roles"])))
@@ -54,19 +57,41 @@
                             not-authorized)
       :else not-authorized)))
 
+(defn provisional-wrap-jwt-claims
+  "extended functionality from 'jwt/wrap-jwt-claims' to support 2 auth providers"
+  [handler keycloak-rsa-key keycloak-issuer auth0-rsa-key auth0-issuer]
+  (let [keycloak-verifier (RSASSAVerifier. keycloak-rsa-key)
+        auth0-verifier (RSASSAVerifier. auth0-rsa-key)]
+    (fn [req]
+      (if-let [token (jwt/jwt-token req)]
+        (try
+          (if-let [claims (or (jwt/verified-claims token keycloak-verifier keycloak-issuer {})
+                              (jwt/verified-claims token auth0-verifier auth0-issuer {}))]
+            (handler (assoc req :jwt-claims claims))
+            (handler req))
+          (catch ParseException e
+            (handler req)))
+        (handler req)))))
+
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
-  [{:keys [url realm]}]
+  [keycloak auth0]
   (fn [handler]
    (try
-     (let [issuer (str url "/realms/" realm)
-           certs  (-> (str issuer "/protocol/openid-connect/certs")
-                      client/get
-                      :body)]
-       (jwt/wrap-jwt-claims handler (jwt/rsa-key certs 0) issuer))
+     (let [keycloak-issuer (str (:url keycloak) "/realms/" (:realm keycloak))
+           keycloak-rsa-key  (-> (str keycloak-issuer "/protocol/openid-connect/certs")
+                                 client/get
+                                 :body
+                                 (jwt/rsa-key 0))
+           auth0-issuer (format "%s/" (:url auth0))
+           auth0-rsa-key (-> (format  "%s.well-known/jwks.json" auth0-issuer)
+                             client/get
+                             :body
+                             (jwt/rsa-key 0))]
+       (provisional-wrap-jwt-claims handler keycloak-rsa-key keycloak-issuer auth0-rsa-key auth0-issuer))
      (catch Exception e
-       (println "Could not get cert from Keycloak")
+       (println "Could not get cert from Keycloak :: auth")
        (throw e)))))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
@@ -75,9 +100,10 @@
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
   empty?)
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]
-  (wrap-jwt keycloak))
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak auth0]}]
+  (wrap-jwt keycloak auth0))
 
 (s/def ::keycloak ::keycloak/data)
+(s/def ::auht0 ::auth0/data)
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
-  (s/keys :req-un [::keycloak]))
+  (s/keys :req-un [::keycloak ::auth0]))
