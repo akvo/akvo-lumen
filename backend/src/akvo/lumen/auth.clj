@@ -106,6 +106,12 @@
 (comment
 
   (and
+   ;; Email without active user
+   (let [allowed-paths nil
+         tenant "demo"]
+     (= false
+        (api-tenant-admin? tenant allowed-paths)))
+
    ;; As admin on tenant
    (let [allowed-paths #{"demo/admin" "t1"}
          tenant "demo"]
@@ -181,5 +187,5 @@
                                 not-authorized)
           :else not-authorized)))))
 
-#_(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
-    (s/keys :req-un [::keycloak]))
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
+  (s/keys :req-un [::keycloak]))

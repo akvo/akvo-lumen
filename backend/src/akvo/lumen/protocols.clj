@@ -47,10 +47,6 @@
     "List tenants users"))
 
 (defprotocol KeycloakAuthorization
-  (tenant-member?
-    [this tenant-label email]
-    "Predicate for checking tenant membership based on API")
-
   (allowed-paths
     [this email]
     "Allowed paths by email"))

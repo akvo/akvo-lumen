@@ -231,21 +231,25 @@
   [headers url]
   (-> url (client/get {:headers headers}) :body json/decode))
 
+(defn- active-user [users email]
+  (-> (filter #(and (= (get % "email") email)
+                    (get % "emailVerified")
+                    (get % "enabled"))
+              users)
+      first
+      (get "id")))
+
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
   [request-headers api-root user-id-cache email]
   (if-let [user-id (get @user-id-cache email)]
     user-id
-    (let [users (api-get request-headers
-                         (format "%s/users/?email=%s" api-root email))
-          verified-user-id (-> (filter #(and (= (get % "email") email)
-                                             (get % "emailVerified"))
-                                       users)
-                               first
-                               (get "id"))]
-      (-> user-id-cache
-          (swap! assoc email verified-user-id)
-          (get email)))))
+    (let [url (format "%s/users/?email=%s" api-root email)
+          users (api-get request-headers url)]
+      (if-let [user-id (active-user users email)]
+        (-> user-id-cache
+            (swap! assoc email user-id)
+            (get email))))))
 
 (defn allowed-paths
   "Provided an email address from the authentication process dig out the
@@ -254,13 +258,14 @@
   The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
   remove the leading /akvo/lumen and return paths as demo/admin."
   [{:keys [api-root user-id-cache] :as keycloak} email]
-  (let [request-headers (request-headers keycloak)
-        user-id (lookup-user-id request-headers api-root user-id-cache email)
-        user-groups (api-get request-headers
-                             (format "%s/users/%s/groups" api-root user-id))]
-    (reduce (fn [paths {:strs [path]}]
-              (conj paths (subs path 12)))
-            #{} user-groups)))
+  (let [request-headers (request-headers keycloak)]
+    (if-let [user-id (lookup-user-id request-headers api-root user-id-cache email)]
+      (reduce (fn [paths {:strs [path]}]
+                (conj paths (subs path 12)))
+              #{}
+              (api-get request-headers
+                       (format "%s/users/%s/groups" api-root user-id)))
+      #{})))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -317,9 +322,6 @@
 
 
   p/KeycloakAuthorization
-  (tenant-member? [keycloak tenant-label email]
-    (tenant-member? keycloak tenant-label email))
-
   (allowed-paths [keycloak email]
     (allowed-paths keycloak email)))
 
