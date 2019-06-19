@@ -229,11 +229,10 @@
 
 (defn- api-get
   [headers url]
-  (time
-   (-> url
-       (client/get {:headers headers})
-       :body
-       json/decode)))
+  (-> url
+      (client/get {:headers headers})
+      :body
+      json/decode))
 
 (defn- active-user [users email]
   (-> (filter #(and (= (get % "email") email)
@@ -329,7 +328,7 @@
     (allowed-paths keycloak email)))
 
 (defn- keycloak [{:keys [credentials url realm]}]
-  (client/with-connection-pool
+  (client/with-async-connection-pool
     {:timeout 5 :threads 4 :insecure? false :default-per-route 10}
     (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
                          :credentials credentials
