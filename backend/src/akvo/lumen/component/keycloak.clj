@@ -12,6 +12,7 @@
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
 ;;;
@@ -221,33 +222,44 @@
           (println (format "Tried to remove user: %s" user-id))
           (lib/internal-server-error))))))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; WIP
+;;; API Authorization
 ;;;
 
 (defn- api-get
   [headers url]
-  (-> url
-      (client/get {:headers headers})
-      :body
-      json/decode))
+  (-> url (client/get {:headers headers}) :body json/decode))
+
+(defn- lookup-user-id
+  "Lookup email -> Keycloak user-id, via cached Keycloak API."
+  [request-headers api-root user-id-cache email]
+  (if-let [user-id (get @user-id-cache email)]
+    user-id
+    (let [users (api-get request-headers
+                         (format "%s/users/?email=%s" api-root email))
+          verified-user-id (-> (filter #(and (= (get % "email") email)
+                                             (get % "emailVerified"))
+                                       users)
+                               first
+                               (get "id"))]
+      (-> user-id-cache
+          (swap! assoc email verified-user-id)
+          (get email)))))
 
 (defn allowed-paths
-  "From email get Keycloak user and returns the set of allowed paths for email"
-  [{:keys [api-root] :as keycloak} email]
+  "Provided an email address from the authentication process dig out the
+  Keycloak user and get allowed set of paths, as in #{\"demo/admin\" \"t1\"}
+
+  The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
+  remove the leading /akvo/lumen and return paths as demo/admin."
+  [{:keys [api-root user-id-cache] :as keycloak} email]
   (let [request-headers (request-headers keycloak)
-        users (api-get request-headers
-                       (format "%s/users/?email=%s" api-root email))
-        validated-user-id (-> (filter #(and (= (get % "email") email)
-                                            (get % "emailVerified"))
-                                      users)
-                              first
-                              (get "id"))
+        user-id (lookup-user-id request-headers api-root user-id-cache email)
         user-groups (api-get request-headers
-                             (format "%s/users/%s/groups" api-root
-                                     validated-user-id))]
+                             (format "%s/users/%s/groups" api-root user-id))]
     (reduce (fn [paths {:strs [path]}]
-              (conj paths (subs path 12))) ;; remove leading /akvo/lumen/
+              (conj paths (subs path 12)))
             #{} user-groups)))
 
 
@@ -255,7 +267,7 @@
 ;;; KeycloakAgent Component
 ;;;
 
-(defrecord KeycloakAgent [issuer openid-config api-root]
+(defrecord KeycloakAgent [issuer openid-config api-root user-id-cache]
   p/KeycloakUserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [request-headers (request-headers keycloak)
@@ -314,7 +326,8 @@
 (defn- keycloak [{:keys [credentials url realm]}]
   (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials
-                       :issuer (format "%s/realms/%s" url realm)}))
+                       :issuer (format "%s/realms/%s" url realm)
+                       :user-id-cache (atom {})}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   (try
