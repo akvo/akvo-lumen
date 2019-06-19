@@ -13,7 +13,7 @@
         :as request}]
     (let [auth-type (get query-params "auth")]
       (if (s/valid? ::auth-type auth-type)
-        (response
+        (response/response
          (cond-> {"keycloakClient" keycloak-public-client-id
                   "keycloakURL" (:url keycloak)
                   "flowApiUrl" (:url flow-api)

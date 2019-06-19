@@ -171,6 +171,8 @@
  :akvo.lumen.component.keycloak/data {:url #duct/env "LUMEN_KEYCLOAK_URL"
                                       :realm "akvo"}
 
+ :akvo.lumen.component.auth0/data {:url #duct/env "LUMEN_AUTH0_URL"}
+
  :akvo.lumen.component.keycloak/keycloak {:data #ig/ref :akvo.lumen.component.keycloak/data
                                           :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
                                                         :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
