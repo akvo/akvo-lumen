@@ -233,19 +233,19 @@
 ;;; API Authorization
 ;;;
 
-(defn- api-get-async
-  [http-pool headers url]
-  @(d/chain
-    (d/timeout!
+(defn- api-get-async [http-pool headers url]
+  @(d/timeout!
+    (d/chain
      (http/get url {:headers headers
                     :pool http-pool})
-     10000
-     :timeout)
-    :body
-    #(stream/map bs/to-byte-array %)
-    #(stream/reduce conj [] %)
-    bs/to-string
-    json/decode))
+     :body
+     #(stream/map bs/to-byte-array %)
+     #(stream/reduce conj [] %)
+     bs/to-string
+     json/decode)
+    10000
+    nil))
+
 
 (defn- active-user [users email]
   (-> (filter #(and (= (get % "email") email)
@@ -259,12 +259,14 @@
   [http-pool request-headers api-root user-id-cache email]
   (if-let [user-id (get @user-id-cache email)]
     user-id
-    (let [url (format "%s/users/?email=%s" api-root email)
-          users (api-get-async http-pool request-headers url)]
-      (if-let [user-id (active-user users email)]
-        (-> user-id-cache
-            (swap! assoc email user-id)
-            (get email))))))
+    (let [url (format "%s/users/?email=%s" api-root email)]
+      (if-let [users (api-get-async http-pool request-headers url)]
+        (if-let [user-id (active-user users email)]
+          (-> user-id-cache
+              (swap! assoc email user-id)
+              (get email))
+          (throw (Exception. "Could not match email address to active Keycloak user")))
+        (throw (Exception. "Keycloak users timed out"))))))
 
 (defn allowed-paths
   "Provided an email address from the authentication process dig out the
@@ -275,13 +277,14 @@
   [{:keys [api-root http-pool user-id-cache] :as keycloak} email]
   (let [request-headers (request-headers keycloak)]
     (if-let [user-id (lookup-user-id http-pool request-headers api-root user-id-cache email)]
-      (reduce (fn [paths {:strs [path]}]
-                (conj paths (subs path 12)))
-              #{}
-              (api-get-async http-pool
-                             request-headers
-                             (format "%s/users/%s/groups" api-root user-id)))
-      #{})))
+      (if-let [allowed-paths (api-get-async http-pool
+                                            request-headers
+                                            (format "%s/users/%s/groups" api-root user-id))]
+        (reduce (fn [paths {:strs [path]}]
+                  (conj paths (subs path 12)))
+                #{}
+                allowed-paths)
+        (throw (Exception. "Keycloak paths call timed out"))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
