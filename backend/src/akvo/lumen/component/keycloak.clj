@@ -233,19 +233,17 @@
 ;;; API Authorization
 ;;;
 
-(defn- api-get-async [http-pool headers url]
+(defn- api-get-async [{:keys [timeout] :as req-opts} url]
   @(d/timeout!
     (d/chain
-     (http/get url {:headers headers
-                    :pool http-pool})
+     (http/get url (select-keys req-opts [:headers :pool]))
      :body
      #(stream/map bs/to-byte-array %)
      #(stream/reduce conj [] %)
      bs/to-string
      json/decode)
-    10000
+    timeout
     nil))
-
 
 (defn- active-user [users email]
   (-> (filter #(and (= (get % "email") email)
@@ -256,17 +254,20 @@
 
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
-  [http-pool request-headers api-root user-id-cache email]
-  (if-let [user-id (get @user-id-cache email)]
+  [req-opts api-root user-id-cache email]
+  (if-some [user-id (get @user-id-cache email)]
     user-id
     (let [url (format "%s/users/?email=%s" api-root email)]
-      (if-let [users (api-get-async http-pool request-headers url)]
-        (if-let [user-id (active-user users email)]
+      (if-some [users (api-get-async req-opts url)]
+        (if-some [user-id (active-user users email)]
           (-> user-id-cache
               (swap! assoc email user-id)
               (get email))
-          (throw (Exception. "Could not match email address to active Keycloak user")))
-        (throw (Exception. "Keycloak users timed out"))))))
+          (throw
+           (ex-info "No active user with email provided" {:response-code 401})))
+        (throw
+         (ex-info "Down stream auth server timed out (Keycloak)"
+                  {:response-code 503}))))))
 
 (defn allowed-paths
   "Provided an email address from the authentication process dig out the
@@ -274,17 +275,21 @@
 
   The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
   remove the leading /akvo/lumen and return paths as demo/admin."
-  [{:keys [api-root http-pool user-id-cache] :as keycloak} email]
-  (let [request-headers (request-headers keycloak)]
-    (if-let [user-id (lookup-user-id http-pool request-headers api-root user-id-cache email)]
-      (if-let [allowed-paths (api-get-async http-pool
-                                            request-headers
-                                            (format "%s/users/%s/groups" api-root user-id))]
-        (reduce (fn [paths {:strs [path]}]
-                  (conj paths (subs path 12)))
-                #{}
-                allowed-paths)
-        (throw (Exception. "Keycloak paths call timed out"))))))
+  ([keycloak email]
+   (allowed-paths keycloak email 10000))
+  ([{:keys [api-root http-pool user-id-cache] :as keycloak} email timeout]
+   (let [req-opts {:headers (request-headers keycloak)
+                   :pool http-pool
+                   :timeout timeout}]
+     (if-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
+       (if-let [allowed-paths (api-get-async req-opts
+                                             (format "%s/users/%s/groups" api-root user-id))]
+         (reduce (fn [paths {:strs [path]}]
+                   (conj paths (subs path 12)))
+                 #{}
+                 allowed-paths)
+         (throw (ex-info "Down stream auth server timed out"
+                         {:response-code 503})))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -29,4 +29,13 @@
            (keycloak/allowed-paths *keycloak* "salim@t1.lumen.localhost"))))
 
   (testing "Non existing user"
-    (is (thrown? Exception (keycloak/allowed-paths *keycloak* "nobody@t1.lumen.localhost")))))
+    (is (thrown? Exception (keycloak/allowed-paths *keycloak* "nobody@t1.lumen.localhost"))))
+
+  (testing "Timeout Keycloak"
+    (try
+      (keycloak/allowed-paths *keycloak* "jerome@t1.lumen.localhost" 0)
+      (catch Exception e
+        (is (= clojure.lang.ExceptionInfo
+               (class e)))
+        (is (= 503
+               (-> e ex-data :response-code)))))))

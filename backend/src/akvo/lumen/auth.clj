@@ -120,7 +120,6 @@
       (try
         (let [email (get jwt-claims "email")
               allowed-paths (keycloak/allowed-paths keycloak email)]
-
           (cond
             (nil? jwt-claims) not-authenticated
             (admin-path? request) (if (api-tenant-admin? tenant allowed-paths)
@@ -132,7 +131,9 @@
             :else not-authorized))
         (catch Exception e
           (log/info (.getMessage e))
-          service-unavailable)))))
+          (case (-> e ex-data :response-code)
+            503 service-unavailable
+            401 not-authorized))))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
   (s/keys :req-un [::keycloak/keycloak]))
