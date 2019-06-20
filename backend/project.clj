@@ -4,7 +4,8 @@
   :license {:name "GNU Affero General Public License 3.0"
             :url "https://www.gnu.org/licenses/agpl-3.0.html"}
   :min-lein-version "2.0.0"
-  :dependencies [[clojurewerkz/scrypt "1.2.0"]
+  :dependencies [[aleph "0.4.7-alpha5"]
+                 [clojurewerkz/scrypt "1.2.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]
                  [org.clojure/tools.logging "0.4.1"]
                  [org.slf4j/log4j-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]

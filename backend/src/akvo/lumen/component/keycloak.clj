@@ -1,16 +1,22 @@
 (ns akvo.lumen.component.keycloak
   "We leverage Keycloak groups for tenant partition and admin roles.
    More info can be found in the Keycloak integration doc spec."
-  (:require [akvo.commons.jwt :as jwt]
-            [akvo.lumen.lib :as lib]
-            [akvo.lumen.protocols :as p]
-            [cheshire.core :as json]
-            [clj-http.client :as client]
-            [integrant.core :as ig]
-            [clojure.spec.alpha :as s]
-            [clojure.set :as set]
-            [clojure.tools.logging :as log]
-            [ring.util.response :refer [response]]))
+  (:require
+   [akvo.lumen.lib :as lib]
+   [akvo.lumen.protocols :as p]
+   [aleph.http :as http]
+   [byte-streams :as bs]
+   [cheshire.core :as json]
+   [clj-http.client :as client]
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [clojure.tools.logging :as log]
+   [integrant.core :as ig]
+   [manifold.deferred :as d]
+   [manifold.stream :as stream]
+   [ring.util.response :refer [response]])
+  (:import (io.aleph.dirigiste IPool)))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -227,12 +233,19 @@
 ;;; API Authorization
 ;;;
 
-(defn- api-get
-  [headers url]
-  (-> url
-      (client/get {:headers headers})
-      :body
-      json/decode))
+(defn- api-get-async
+  [http-pool headers url]
+  @(d/chain
+    (d/timeout!
+     (http/get url {:headers headers
+                    :pool http-pool})
+     10000
+     :timeout)
+    :body
+    #(stream/map bs/to-byte-array %)
+    #(stream/reduce conj [] %)
+    bs/to-string
+    json/decode))
 
 (defn- active-user [users email]
   (-> (filter #(and (= (get % "email") email)
@@ -243,11 +256,11 @@
 
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
-  [request-headers api-root user-id-cache email]
+  [http-pool request-headers api-root user-id-cache email]
   (if-let [user-id (get @user-id-cache email)]
     user-id
     (let [url (format "%s/users/?email=%s" api-root email)
-          users (api-get request-headers url)]
+          users (api-get-async http-pool request-headers url)]
       (if-let [user-id (active-user users email)]
         (-> user-id-cache
             (swap! assoc email user-id)
@@ -259,14 +272,15 @@
 
   The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
   remove the leading /akvo/lumen and return paths as demo/admin."
-  [{:keys [api-root user-id-cache] :as keycloak} email]
+  [{:keys [api-root http-pool user-id-cache] :as keycloak} email]
   (let [request-headers (request-headers keycloak)]
-    (if-let [user-id (lookup-user-id request-headers api-root user-id-cache email)]
+    (if-let [user-id (lookup-user-id http-pool request-headers api-root user-id-cache email)]
       (reduce (fn [paths {:strs [path]}]
                 (conj paths (subs path 12)))
               #{}
-              (api-get request-headers
-                       (format "%s/users/%s/groups" api-root user-id)))
+              (api-get-async http-pool
+                             request-headers
+                             (format "%s/users/%s/groups" api-root user-id)))
       #{})))
 
 
@@ -327,13 +341,12 @@
   (allowed-paths [keycloak email]
     (allowed-paths keycloak email)))
 
-(defn- keycloak [{:keys [credentials url realm]}]
-  (client/with-async-connection-pool
-    {:timeout 5 :threads 4 :insecure? false :default-per-route 10}
-    (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
-                         :credentials credentials
-                         :issuer (format "%s/realms/%s" url realm)
-                         :user-id-cache (atom {})})))
+(defn- keycloak [{:keys [credentials http-pool url realm]}]
+  (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
+                       :credentials credentials
+                       :issuer (format "%s/realms/%s" url realm)
+                       :user-id-cache (atom {})
+                       :http-pool http-pool}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   (try
@@ -362,9 +375,16 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data] :as opts}]
   (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
-        openid-config (fetch-openid-configuration issuer)]
-      (log/info "Successfully got openid-config from provider.")
-      (assoc this :openid-config openid-config)))
+        openid-config (fetch-openid-configuration issuer)
+        http-pool (http/connection-pool {:connection-options {:raw-stream? true}})]
+    (log/info "Successfully got openid-config from provider.")
+    (assoc this
+           :openid-config openid-config
+           :http-pool http-pool)))
+
+(defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak
+  [_ {:keys [http-pool] :as this}]
+  (.shutdown ^IPool http-pool))
 
 (s/def ::client_id string?)
 (s/def ::client_secret string?)

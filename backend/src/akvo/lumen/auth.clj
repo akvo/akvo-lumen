@@ -44,6 +44,10 @@
   (-> (response/response "Not authorized")
       (response/status 403)))
 
+(def service-unavailable
+  (-> (response/response "Service Unavailable")
+      (response/status 503)))
+
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
   If request don't contain claims return 401. If current dns label (tenant) is
@@ -175,17 +179,22 @@
   [_ {:keys [keycloak]}]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
-      (let [email (get jwt-claims "email")
-            allowed-paths (keycloak/allowed-paths keycloak email)]
-        (cond
-          (nil? jwt-claims) not-authenticated
-          (admin-path? request) (if (api-tenant-admin? tenant allowed-paths)
+      (try
+        (let [email (get jwt-claims "email")
+              allowed-paths (keycloak/allowed-paths keycloak email)]
+
+          (cond
+            (nil? jwt-claims) not-authenticated
+            (admin-path? request) (if (api-tenant-admin? tenant allowed-paths)
+                                    (handler request)
+                                    not-authorized)
+            (api-path? request) (if (api-tenant-user? tenant allowed-paths)
                                   (handler request)
                                   not-authorized)
-          (api-path? request) (if (api-tenant-user? tenant allowed-paths)
-                                (handler request)
-                                not-authorized)
-          :else not-authorized)))))
+            :else not-authorized))
+        (catch Exception e
+          (log/info (.getMessage e))
+          service-unavailable)))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
   (s/keys :req-un [::keycloak/keycloak]))
