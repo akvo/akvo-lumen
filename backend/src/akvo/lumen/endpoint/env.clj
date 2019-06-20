@@ -15,7 +15,7 @@
       (if (s/valid? ::auth-type auth-type)
         (response/response
          (cond-> {"keycloakClient" keycloak-public-client-id
-                  "keycloakURL" (:url keycloak)
+                  "authURL" (:url keycloak)
                   "flowApiUrl" (:url flow-api)
                   "piwikSiteId" piwik-site-id
                   "tenant" (:tenant request)}
