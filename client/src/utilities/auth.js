@@ -42,6 +42,7 @@ export function init() {
         body: {
           keycloakClient,
           authURL,
+          authProvider,
           tenant,
           sentryDSN,
           flowApiUrl,
@@ -54,15 +55,17 @@ export function init() {
             Raven.config(sentryDSN).install();
             Raven.setExtraContext({ tenant });
           }
-          keycloak = new Keycloak({
-            url: authURL,
-            realm: 'akvo',
-            clientId: keycloakClient,
-          });
 
           const queryParams = queryString.parse(location.search);
 
-          keycloak
+          if (authProvider === 'keycloak') {
+            keycloak = new Keycloak({
+              url: authURL,
+              realm: 'akvo',
+              clientId: keycloakClient,
+            });
+
+            keycloak
             .init({
               onLoad: 'login-required',
               checkLoginIframe: false,
@@ -94,6 +97,9 @@ export function init() {
             .error(() => {
               reject(new Error('Login attempt failed'));
             });
+          } else if (authProvider === 'auth0') {
+            alert('auth0 selected');
+          }
         })
     );
 }
