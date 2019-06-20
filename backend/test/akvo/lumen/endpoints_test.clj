@@ -27,6 +27,7 @@
           (is (= 200 (:status r)))
           (is (= {:keycloakClient "akvo-lumen",
                   :authURL "http://auth.lumen.local:8080/auth",
+                  :authProvider "keycloak",
                   :flowApiUrl "https://api.akvotest.org/flow",
                   :piwikSiteId "165",
                   :tenant "t1",

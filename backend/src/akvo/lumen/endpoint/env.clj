@@ -22,6 +22,7 @@
         (response/response
          (cond-> {"keycloakClient" keycloak-public-client-id
                   "authURL" auth-url
+                  "authProvider" auth-type
                   "flowApiUrl" (:url flow-api)
                   "piwikSiteId" piwik-site-id
                   "tenant" (:tenant request)}
