@@ -25,21 +25,48 @@
 
 (defn fetch-openid-configuration
   "Get the openid configuration"
-  [issuer]
-  (-> (client/get (format "%s/.well-known/openid-configuration" issuer))
-      :body json/decode))
+  [issuer pool]
+  (-> @(http/get (format "%s/.well-known/openid-configuration" issuer)
+                 {:pool pool})
+      :body
+      bs/to-string
+      json/decode))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
-  [{:keys [openid-config credentials]}]
-  (let [params (merge {:grant_type "client_credentials"}
-                      credentials)
-        resp (client/post (get openid-config "token_endpoint")
-                          {:form-params params})
-        access-token (-> resp :body json/decode (get "access_token"))]
-    {"Authorization" (str "bearer " access-token)
-     "Content-Type" "application/json"}))
+  ([{:keys [openid-config credentials]}]
+   (let [params (merge {:grant_type "client_credentials"}
+                       credentials)
+         resp (client/post (get openid-config "token_endpoint")
+                           {:form-params params})
+         access-token (-> resp :body json/decode (get "access_token"))]
+     {"Authorization" (str "bearer " access-token)
+      "Content-Type" "application/json"}))
+  ([{:keys [openid-config credentials]}
+    {:keys [timeout] :as req-opts}]
+   (let [params (merge {:grant_type "client_credentials"}
+                       credentials)]
+     (if-some [access-token @(d/timeout!
+                              (d/chain
+                               (http/post (get openid-config "token_endpoint")
+                                          (-> req-opts
+                                              (select-keys [:pool])
+                                              (assoc :form-params params)))
+                               :body
+                               #(stream/map bs/to-byte-array %)
+                               #(stream/reduce conj [] %)
+                               bs/to-string
+                               json/decode
+                               #(get % "access_token"))
+                              timeout
+                              nil)]
+       {"Authorization" (str "bearer " access-token)
+        "Conternt-Type" "application/json"}
+       (throw
+        (ex-info "Down stream auth server timed out (Keycloak)"
+                 {:response-code 503}))))))
+
 
 (defn group-by-path
   "Get the group id (uuid) by using group path.
@@ -276,20 +303,24 @@
   The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
   remove the leading /akvo/lumen and return paths as demo/admin."
   ([keycloak email]
-   (allowed-paths keycloak email 10000))
-  ([{:keys [api-root http-pool user-id-cache] :as keycloak} email timeout]
-   (let [req-opts {:headers (request-headers keycloak)
-                   :pool http-pool
-                   :timeout timeout}]
-     (if-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-       (if-let [allowed-paths (api-get-async req-opts
-                                             (format "%s/users/%s/groups" api-root user-id))]
-         (reduce (fn [paths {:strs [path]}]
-                   (conj paths (subs path 12)))
-                 #{}
-                 allowed-paths)
-         (throw (ex-info "Down stream auth server timed out"
-                         {:response-code 503})))))))
+   (allowed-paths keycloak email {}))
+  ([{:keys [api-root http-pool user-id-cache] :as keycloak} email
+    {:keys [timeout] :or {timeout 10000}}]
+   (let [bare-req-opts {:pool http-pool
+                        :timeout timeout}]
+     (if-some [headers (request-headers keycloak bare-req-opts)]
+       (let [req-opts (assoc bare-req-opts :headers headers)]
+         (if-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
+           (if-let [allowed-paths (api-get-async req-opts
+                                                 (format "%s/users/%s/groups" api-root user-id))]
+             (reduce (fn [paths {:strs [path]}]
+                       (conj paths (subs path 12)))
+                     #{}
+                     allowed-paths)
+             (throw (ex-info "Down stream auth server timed out"
+                             {:response-code 503})))))
+       (throw (ex-info "Down stream auth server timed out"
+                       {:response-code 503}))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -383,12 +414,12 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data] :as opts}]
   (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
-        openid-config (fetch-openid-configuration issuer)
-        http-pool (http/connection-pool {:connection-options {:raw-stream? true}})]
+        http-pool (http/connection-pool {:connection-options {:raw-stream? true}})
+        openid-config (fetch-openid-configuration issuer http-pool)]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
-           :openid-config openid-config
-           :http-pool http-pool)))
+           :http-pool http-pool
+           :openid-config openid-config)))
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak
   [_ {:keys [http-pool] :as this}]

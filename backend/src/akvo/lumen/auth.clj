@@ -48,6 +48,10 @@
   (-> (response/response "Service Unavailable")
       (response/status 503)))
 
+(def internal-server-error
+  (-> (response/response "Internal server errror")
+      (response/status 500)))
+
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
   If request don't contain claims return 401. If current dns label (tenant) is
@@ -133,7 +137,8 @@
           (log/info (.getMessage e))
           (case (-> e ex-data :response-code)
             503 service-unavailable
-            401 not-authorized))))))
+            401 not-authorized
+            internal-server-error))))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-authorization [_]
   (s/keys :req-un [::keycloak/keycloak]))

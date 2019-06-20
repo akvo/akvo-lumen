@@ -33,7 +33,7 @@
 
   (testing "Timeout Keycloak"
     (try
-      (keycloak/allowed-paths *keycloak* "jerome@t1.lumen.localhost" 0)
+      (keycloak/allowed-paths *keycloak* "jerome@t1.lumen.localhost" {:timeout 0})
       (catch Exception e
         (is (= clojure.lang.ExceptionInfo
                (class e)))
