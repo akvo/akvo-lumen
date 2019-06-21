@@ -25,12 +25,15 @@
 
 (defn fetch-openid-configuration
   "Get the openid configuration"
-  [issuer pool]
-  (-> @(http/get (format "%s/.well-known/openid-configuration" issuer)
-                 {:pool pool})
-      :body
-      bs/to-string
-      json/decode))
+  ([issuer]
+   (let [pool (http/connection-pool {:connection-options {:raw-stream? true}})]
+     (fetch-openid-configuration issuer pool)))
+  ([issuer pool]
+   (-> @(http/get (format "%s/.well-known/openid-configuration" issuer)
+                  {:pool pool})
+       :body
+       bs/to-string
+       json/decode)))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
@@ -419,11 +422,15 @@
     (log/info "Successfully got openid-config from provider.")
     (assoc this
            :http-pool http-pool
+           :active-pool? (atom true)
            :openid-config openid-config)))
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak
-  [_ {:keys [http-pool] :as this}]
-  (.shutdown ^IPool http-pool))
+  [_ {:keys [active-pool? http-pool] :as this}]
+  (when @active-pool?
+    (locking active-pool?
+      (.shutdown ^IPool http-pool)
+      (reset! active-pool? false))))
 
 (s/def ::client_id string?)
 (s/def ::client_secret string?)
