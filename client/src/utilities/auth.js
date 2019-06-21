@@ -104,11 +104,10 @@ export function init() {
             auth0 = new Auth0.WebAuth({
               domain: url.parse(authURL).host,
               clientID: 'kU4u9d2IJIMXnTGUe7WZ7ITi9c7VN0An',
-              redirectUri: 'http://t1.lumen.local:3030/',
+              redirectUri: 'http://t1.lumen.local:3030/auth0/callback',
               responseType: 'token id_token',
               scope: 'openid email',
             });
-            alert('auth0 selected');
             auth0.authorize();
           }
         })

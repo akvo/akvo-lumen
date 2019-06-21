@@ -21,6 +21,7 @@ export default function App({ history, location }) {
       <Router history={history}>
         <Route path="/" component={Main}>
           <IndexRedirect from="" to="library" />
+          <Redirect from="auth0/callback" to="/" />
           <Route
             path="library"
             components={{ sidebar: WorkspaceNav, content: Library }}

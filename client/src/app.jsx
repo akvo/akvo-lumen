@@ -9,6 +9,7 @@ import configureStore from './store/configureStore';
 import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
 import queryString from 'querystringify';
+import url from 'url';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };
@@ -45,6 +46,7 @@ function initAuthenticated(profile, env) {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function initWithAuthToken(locale) {
   const initialState = { profile: { attributes: { locale: [locale] } } };
   const rootElement = document.querySelector('#root');
@@ -65,15 +67,30 @@ function initNotAuthenticated(msg) {
 
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
-  const accessToken = queryParams.access_token;
-  if (accessToken == null) {
-    auth
-      .init()
-      .then(({ profile, env }) => initAuthenticated(profile, env))
-      .catch(err => initNotAuthenticated(err.message));
+  console.log(queryParams, url.parse(location.href).pathname);
+  if (url.parse(location.href).pathname !== '/auth0/callback') {
+    const accessToken = queryParams.access_token;
+    if (accessToken == null) {
+      auth
+        .init()
+        .then(({ profile, env }) => initAuthenticated(profile, env))
+        .catch(err => initNotAuthenticated(err.message));
+    } else {
+      auth.initExport(accessToken).then(initAuthenticated(queryParams.locale));
+    }
   } else {
-    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
+    const idToken = queryString.parse(location.hash).id_token;
+    console.log(queryString.parse(location.hash));
+    auth.initExport(idToken).then(initAuthenticated({ admin: false }, {
+      keycloakClient: 'akvo-lumen',
+      authURL: 'http://auth.lumen.local:8080/auth',
+      flowApiUrl: 'https://api.akvotest.org/flow',
+      piwikSiteId: '165',
+      tenant: 't1',
+      sentryDSN: 'dev-sentry-client-dsn',
+    }));
   }
 }
 
 dispatchOnMode();
+
