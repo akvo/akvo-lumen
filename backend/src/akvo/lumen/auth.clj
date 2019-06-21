@@ -17,14 +17,18 @@
   (set (get-in jwt-claims ["realm_access" "roles"])))
 
 (defn tenant-user?
-  [{:keys [tenant jwt-claims]}]
-  (contains? (claimed-roles jwt-claims)
-             (format "akvo:lumen:%s" tenant)))
+  [{:keys [tenant jwt-claims]} issuer]
+  (or (contains? (claimed-roles jwt-claims)
+                 (format "akvo:lumen:%s" tenant))
+      (and (= issuer :auth0)
+           (string/includes? (get jwt-claims "email") "@akvo.org"))))
 
 (defn tenant-admin?
-  [{:keys [tenant jwt-claims]}]
-  (contains? (claimed-roles jwt-claims)
-             (format "akvo:lumen:%s:admin" tenant)))
+  [{:keys [tenant jwt-claims]} issuer]
+  (or (contains? (claimed-roles jwt-claims)
+                 (format "akvo:lumen:%s:admin" tenant))
+      (and (= issuer :auth0)
+           (string/includes? (get jwt-claims "email") "@akvo.org"))))
 
 (defn admin-path? [{:keys [path-info]}]
   (string/starts-with? path-info "/api/admin/"))
@@ -48,19 +52,19 @@
   [keycloak auth0]
   (fn [handler]
     (fn [{:keys [jwt-claims] :as request}]
-      (log/error :current-issuer (condp = (get jwt-claims "iss")
+      (let [issuer (condp = (get jwt-claims "iss")
                                    (:issuer keycloak) :keycloak
                                    (:issuer auth0) :auth0
-                                   :other))
-      (cond
-        (nil? jwt-claims) not-authenticated
-        (admin-path? request) (if (tenant-admin? request)
+                                   :other)]
+        (cond
+          (nil? jwt-claims) not-authenticated
+          (admin-path? request) (if (tenant-admin? request issuer)
+                                  (handler request)
+                                  not-authorized)
+          (api-path? request) (if (tenant-user? request issuer)
                                 (handler request)
                                 not-authorized)
-        (api-path? request) (if (tenant-user? request)
-                              (handler request)
-                              not-authorized)
-        :else not-authorized))))
+          :else not-authorized)))))
 
 (defn provisional-wrap-jwt-claims
   "extended functionality from 'jwt/wrap-jwt-claims' to support 2 auth providers"

@@ -1,11 +1,14 @@
 /* eslint-disable no-underscore-dangle */
 import Keycloak from 'keycloak-js';
+import Auth0 from 'auth0-js';
 import Raven from 'raven-js';
 import queryString from 'querystringify';
+import url from 'url';
 
 import { get } from './api';
 
 let keycloak = null;
+let auth0 = null;
 let accessToken = null;
 
 export function token() {
@@ -98,7 +101,15 @@ export function init() {
               reject(new Error('Login attempt failed'));
             });
           } else if (authProvider === 'auth0') {
+            auth0 = new Auth0.WebAuth({
+              domain: url.parse(authURL).host,
+              clientID: 'kU4u9d2IJIMXnTGUe7WZ7ITi9c7VN0An',
+              redirectUri: 'http://t1.lumen.local:3030/',
+              responseType: 'token id_token',
+              scope: 'openid email',
+            });
             alert('auth0 selected');
+            auth0.authorize();
           }
         })
     );
