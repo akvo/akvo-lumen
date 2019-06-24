@@ -55,10 +55,10 @@
 (defn api-authz?
   "Feature flag predicate function. Add trailing $auth to given_name to enable
   API authz"
-  [{:strs [given_name]}]
-  (if (nil? given_name)
+  [{:strs [family_name] :as jwt-claims}]
+  (if (nil? family_name)
     false
-    (string/ends-with? given_name "$auth")))
+    (string/ends-with? family_name "$auth")))
 
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
