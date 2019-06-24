@@ -117,7 +117,7 @@
  :akvo.lumen.component.handler/handler-api {:path "/api"
                                             :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                                                          #ig/ref :akvo.lumen.auth/wrap-jwt
-                                                         ;; #ig/ref :akvo.lumen.auth/wrap-auth
+                                                         #ig/ref :akvo.lumen.auth/wrap-auth
                                                          #ig/ref :akvo.lumen.auth/wrap-authorization
                                                          #ig/ref :akvo.lumen.lib.auth/wrap-auth-datasets
                                                          #ig/ref :akvo.lumen.component.handler/common-middleware
