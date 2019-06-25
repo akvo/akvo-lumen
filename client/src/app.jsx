@@ -10,6 +10,7 @@ import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
 import queryString from 'querystringify';
 import url from 'url';
+import { get } from './utilities/api';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };
@@ -67,28 +68,48 @@ function initNotAuthenticated(msg) {
 
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
+  const accessToken = queryParams.access_token;
   console.log(queryParams, url.parse(location.href).pathname);
-  if (url.parse(location.href).pathname !== '/auth0/callback') {
-    const accessToken = queryParams.access_token;
-    if (accessToken == null) {
-      auth
-        .init()
+
+  if (url.parse(location.href).pathname !== '/auth0_callback' && accessToken == null) {
+    const authz = queryString.parse(location.search).auth || 'keycloak';
+    get('/env', { auth: authz })
+    .then(
+      ({
+        body,
+      // eslint-disable-next-line consistent-return
+      }) => {
+        auth.init(body, auth.initService(body))
         .then(({ profile, env }) => initAuthenticated(profile, env))
         .catch(err => initNotAuthenticated(err.message));
-    } else {
-      auth.initExport(accessToken).then(initAuthenticated(queryParams.locale));
-    }
+      });
+  } else if (accessToken != null) {
+    auth.initExport(accessToken).then(initAuthenticated(queryParams.locale));
   } else {
     const idToken = queryString.parse(location.hash).id_token;
     console.log(queryString.parse(location.hash));
-    auth.initExport(idToken).then(initAuthenticated({ admin: false }, {
-      keycloakClient: 'akvo-lumen',
-      authURL: 'http://auth.lumen.local:8080/auth',
-      flowApiUrl: 'https://api.akvotest.org/flow',
-      piwikSiteId: '165',
-      tenant: 't1',
-      sentryDSN: 'dev-sentry-client-dsn',
-    }));
+    get('/env', { auth: 'auth0' })
+    .then(
+      ({
+        body,
+      // eslint-disable-next-line consistent-return
+      }) => {
+        console.log('env auth0', body);
+        auth.initService(body).parseHash({ hash: window.location.hash }, (err, authResult) => {
+          if (err) {
+            return console.log(err);
+          }
+
+          auth.initService(body).client.userInfo(authResult.accessToken, (err2, user) => {
+            // Now you have the user's information
+            user.admin = false;
+            if (err2) {
+              return console.log(err2);
+            }
+            auth.initExport(idToken).then(initAuthenticated(user, body));
+          });
+        });
+      });
   }
 }
 
