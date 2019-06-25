@@ -14,31 +14,29 @@
    [integrant.core :as ig]
    [manifold.deferred :as d]
    [manifold.stream :as stream]
-   [ring.util.response :refer [response]])
-  (:import (io.aleph.dirigiste IPool)))
-
+   [ring.util.response :refer [response]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; HTTP client
+;;; Async HTTP client helpers
 ;;;
 
 (defn deferred-GET
-  [url req-opts]
-  (d/chain (http/get url (select-keys req-opts [:headers :pool]))
-           :body
-           #(stream/map bs/to-byte-array %)
-           #(stream/reduce conj [] %)
-           bs/to-string
-           json/decode))
+  [url {:keys [timeout] :as req-opts}]
+  (d/chain
+   (d/timeout! (http/get url (select-keys req-opts [:headers]))
+               timeout)
+   :body
+   bs/to-string
+   json/decode))
 
 (defn deferred-POST
-  [url req-opts]
-  (d/chain (http/post url (select-keys req-opts [:form-params :headers :pool]))
-           :body
-           #(stream/map bs/to-byte-array %)
-           #(stream/reduce conj [] %)
-           bs/to-string
-           json/decode))
+  [url {:keys [timeout] :as req-opts}]
+  (d/chain
+   (d/timeout! (http/post url (select-keys req-opts [:form-params :headers]))
+               timeout)
+   :body
+   bs/to-string
+   json/decode))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -48,30 +46,10 @@
 (defn fetch-openid-configuration
   "Get the openid configuration"
   ([issuer]
-   (let [pool (http/connection-pool {:connection-options {:raw-stream? true}})]
-     (fetch-openid-configuration issuer {:pool pool})
-     (.shutdown ^IPool pool)))
-  ([issuer pool]
+   (fetch-openid-configuration issuer {}))
+  ([issuer req-opts]
    (let [url (format "%s/.well-known/openid-configuration" issuer)]
-     @(deferred-GET url {:pool pool}))
-
-   ;; @(d/timeout!
-   ;;   (-> (http/get (format "%s/.well-known/openid-configuration" issuer)
-   ;;                 {:pool pool})
-   ;;       (d/chain
-   ;;        :body
-   ;;        #(stream/map bs/to-byte-array %)
-   ;;        #(stream/reduce conj [] %)
-   ;;        bs/to-string
-   ;;        json/decode)
-   ;;       (d/catch (fn [_] (prn "neej"
-   ;;                             nil))))
-   ;;   10000
-   ;;   nil)
-   ))
-
-
-
+     @(deferred-GET url req-opts))))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
@@ -90,7 +68,7 @@
                        credentials)
          url (get openid-config "token_endpoint")
          req-opts (-> req-opts
-                      (select-keys [:pool])
+                      (select-keys [:timeout])
                       (assoc :form-params params))]
      (if-some [access-token (-> @(deferred-POST url req-opts)
                                 (get "access_token"))]
@@ -293,51 +271,6 @@
 ;;; API Authorization
 ;;;
 
-#_(defn- api-get-async [{:keys [timeout] :as req-opts} url]
-    @(d/timeout!
-      (->
-       (d/chain
-        (http/get url (select-keys req-opts [:headers :pool]))
-        :body
-        #(stream/map bs/to-byte-array %)
-        #(stream/reduce conj [] %)
-        bs/to-string
-        json/decode)
-       (d/catch
-           (fn [_]
-             (prn "yikes")
-             nil)))
-      timeout
-      nil))
-
-
-#_(defn- api-get-async [{:keys [timeout] :as req-opts} url]
-    @(d/timeout!
-      (->
-       (d/chain
-        (http/get url (select-keys req-opts [:headers :pool]))
-        :body
-        #(stream/map bs/to-byte-array %)
-        #(stream/reduce conj [] %)
-        bs/to-string
-        json/decode)
-       (d/catch
-           (fn [_]
-             (prn "yikes")
-             nil)))
-      timeout
-      nil))
-
-#_(defn- api-get-async [{:keys [timeout] :as req-opts} url]
-    @(-> (http/get url (select-keys req-opts [:headers :pool]))
-         (d/chain
-          :body
-          #(stream/map bs/to-byte-array %)
-          #(stream/reduce conj [] %)
-          bs/to-string
-          json/decode)))
-
-
 (defn- active-user [users email]
   (-> (filter #(and (= (get % "email") email)
                     (get % "enabled"))
@@ -370,11 +303,10 @@
   remove the leading /akvo/lumen and return paths as demo/admin."
   ([keycloak email]
    (allowed-paths keycloak email {}))
-  ([{:keys [api-root http-pool user-id-cache] :as keycloak} email
-    {:keys [timeout] :or {timeout 10000}}]
-   (let [bare-req-opts {:pool http-pool
-                        :timeout timeout}]
-     (if-some [headers (request-headers keycloak bare-req-opts)]
+  ([{:keys [api-root http-timeout user-id-cache] :as keycloak} email
+    {:keys [timeout] :or {timeout http-timeout}}]
+   (let [bare-req-opts {:timeout timeout}]
+     (if-some [headers (request-headers keycloak (assoc bare-req-opts :timeout timeout))]
        (let [req-opts (assoc bare-req-opts :headers headers)]
          (if-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
            (if-let [allowed-paths @(deferred-GET (format "%s/users/%s/groups" api-root user-id) req-opts)]
@@ -445,12 +377,12 @@
   (allowed-paths [keycloak email]
     (allowed-paths keycloak email)))
 
-(defn- keycloak [{:keys [credentials http-pool url realm]}]
+(defn- keycloak [{:keys [credentials http-timeout url realm]}]
   (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials
                        :issuer (format "%s/realms/%s" url realm)
                        :user-id-cache (atom {})
-                       :http-pool http-pool}))
+                       :http-timeout http-timeout}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   (try
@@ -479,27 +411,12 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data] :as opts}]
   (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
-        http-pool (http/connection-pool {:connection-options {:raw-stream? true}})
-        openid-config (fetch-openid-configuration issuer http-pool)]
+        http-timeout 10000
+        openid-config (fetch-openid-configuration issuer {:timeout http-timeout})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
-           :http-pool http-pool
-           :active-pool? (atom true)
+           :http-timeout http-timeout
            :openid-config openid-config)))
-
-#_(defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak
-    [_ {:keys [active-pool? http-pool] :as this}]
-    (when @active-pool?
-      (locking active-pool?
-        (.shutdown ^IPool http-pool)
-        (reset! active-pool? false))))
-
-(defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak
-  [_ {:keys [active-pool? http-pool] :as this}]
-  (locking active-pool?
-    (when @active-pool?
-      (.shutdown ^IPool http-pool)
-      (reset! active-pool? false))))
 
 (s/def ::client_id string?)
 (s/def ::client_secret string?)
