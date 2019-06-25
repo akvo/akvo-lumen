@@ -25,7 +25,7 @@ function initAuthenticated(profile, env) {
 
   // Refreshing the token on a fixed schedule (every 10 minutes)
   // will disable SSO Idle Timeout
-  setInterval(auth.token, 1000 * 60 * 10);
+  setInterval(auth.token, 1000 * 60 * 1);
 
   render(
     <AppContainer>
@@ -95,18 +95,23 @@ function dispatchOnMode() {
       // eslint-disable-next-line consistent-return
       }) => {
         console.log('env auth0', body);
-        auth.initService(body).parseHash({ hash: window.location.hash }, (err, authResult) => {
+        const auth0 = auth.initService(body);
+        auth.setAuth0(auth0);
+        // eslint-disable-next-line consistent-return
+        auth0.parseHash({ hash: window.location.hash }, (err, authResult) => {
           if (err) {
             return console.log(err);
           }
 
-          auth.initService(body).client.userInfo(authResult.accessToken, (err2, user) => {
+          // eslint-disable-next-line consistent-return
+          auth0.client.userInfo(authResult.accessToken, (err2, user) => {
             // Now you have the user's information
-            user.admin = false;
+            const userr = user;
+            userr.admin = false;
             if (err2) {
               return console.log(err2);
             }
-            auth.initExport(idToken).then(initAuthenticated(user, body));
+            auth.initExport(idToken).then(initAuthenticated(userr, body));
           });
         });
       });

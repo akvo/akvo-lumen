@@ -3,6 +3,7 @@ import Keycloak from 'keycloak-js';
 import Auth0 from 'auth0-js';
 import url from 'url';
 import * as k from './keycloak';
+import * as a0 from './auth0';
 import { get } from './api';
 
 let keycloak = null;
@@ -15,11 +16,20 @@ function service() {
   }
   return auth0;
 }
+
+export function setKeycloak(K) {
+  keycloak = K;
+}
+export function setAuth0(A) {
+  auth0 = A;
+}
+
+
 function lib() {
   if (keycloak) {
     return k;
   }
-  return null;
+  return a0;
 }
 
 export function token() {
@@ -54,10 +64,15 @@ export function initService(env) {
       clientID: 'kU4u9d2IJIMXnTGUe7WZ7ITi9c7VN0An',
       redirectUri: 'http://t1.lumen.local:3030/auth0_callback',
       responseType: 'token id_token',
-      audience: 't1.lumen.local:3030',
       scope: 'openid email profile',
+      audience: 'https://tangrammer.eu.auth0.com/userinfo',
+      connection: 'google-oauth2',
+//      once: '1',
+//      state: '1',
+
     });
   }
+
   return s;
 }
 export function init(env, s) {
