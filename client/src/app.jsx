@@ -108,10 +108,13 @@ function dispatchOnMode() {
             // Now you have the user's information
             const userr = user;
             userr.admin = false;
+            userr.firstName = user.firstName || user.given_name;
+            userr.lastName = user.lastName || user.family_name;
+            userr.username = user.username || user.nickname;
             if (err2) {
               return console.log(err2);
             }
-            auth.initExport(idToken).then(initAuthenticated(userr, body));
+            initAuthenticated(userr, body);
           });
         });
       });
