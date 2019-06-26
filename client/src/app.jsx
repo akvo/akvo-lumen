@@ -65,6 +65,16 @@ function initWithAuthToken(locale) {
 function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = msg;
 }
+const locales = new Set([1, 2, 3, 4, 5]);
+function userLocale(lo) {
+  if (lo) {
+    const l = lo.toLowerCase().substring(0, 2);
+    if (locales.has(l)) {
+      return l;
+    }
+  }
+  return 'en';
+}
 
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
@@ -110,6 +120,7 @@ function dispatchOnMode() {
             userr.admin = false;
             userr.firstName = user.firstName || user.given_name;
             userr.lastName = user.lastName || user.family_name;
+            userr.attributes = user.attributes || { locale: [userLocale(user.locale)] };
             userr.username = user.username || user.nickname;
             if (err2) {
               return console.log(err2);
