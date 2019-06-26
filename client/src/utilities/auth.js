@@ -17,6 +17,7 @@ function service() {
   return auth0;
 }
 
+
 export function setKeycloak(K) {
   keycloak = K;
 }
@@ -30,6 +31,10 @@ function lib() {
     return k;
   }
   return a0;
+}
+
+export function logout() {
+  lib().logout(service());
 }
 
 export function token() {
@@ -72,7 +77,6 @@ export function initService(env) {
 
     });
   }
-
   return s;
 }
 export function init(env, s) {

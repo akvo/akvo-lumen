@@ -26,6 +26,10 @@ export function login(keycloak) {
   }
   return keycloak.login();
 }
+// eslint-disable-next-line no-unused-vars
+export function logout(keycloak) {
+  throw new Error('Keycloak dont have this logout functionality');
+}
 
 export function init(env, keycloak) {
   const { tenant, sentryDSN } = env;

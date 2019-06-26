@@ -16,6 +16,10 @@ export function token(auth0) {
   });
 }
 
+export function logout(auth0) {
+  auth0.logout({ returnTo: 'http://t1.lumen.local:3030' });
+}
+
 
 // eslint-disable-next-line no-unused-vars
 export function refreshToken(auht0) {
