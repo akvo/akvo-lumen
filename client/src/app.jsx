@@ -86,7 +86,7 @@ function dispatchOnMode() {
   } else if (accessToken != null) {
     auth.initExport(accessToken).then(initAuthenticated(queryParams.locale));
   } else {
-    const idToken = queryString.parse(location.hash).id_token;
+//    const idToken = queryString.parse(location.hash).id_token;
     console.log(queryString.parse(location.hash));
     get('/env', { auth: 'auth0' })
     .then(

@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 function OrganizationMenu({ profile, authURL }) {
+  const url = authURL.includes('auth0') ? 'https://manage.auth0.com' : `${authURL}/realms/akvo/account`;
   return (
     <div className="OrganizationMenu">
       <div className="name">
-        <a href={`${authURL}/realms/akvo/account`}>
+        <a href={url}>
           <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
         </a>
       </div>
