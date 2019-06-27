@@ -26,8 +26,9 @@
       (throw e))))
 
 (s/def ::url string?)
+(s/def ::client-id string?)
 
-(s/def ::data (s/keys :req-un [::url]))
+(s/def ::data (s/keys :req-un [::url ::client-id]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.auth0/data [_]
   ::data)

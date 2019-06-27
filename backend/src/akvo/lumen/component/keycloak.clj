@@ -293,10 +293,12 @@
       (throw e))))
 
 (s/def ::url string?)
+(s/def ::client-id string?)
 (s/def ::realm string?)
 
 (s/def ::data (s/keys :req-un [::url
-                               ::realm]))
+                               ::realm
+                               ::client-id]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
   ::data)

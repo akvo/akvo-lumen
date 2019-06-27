@@ -52,7 +52,7 @@ export function refreshToken() {
 }
 export function initService(env) {
   const {
-    keycloakClient,
+    authClientId,
     authProvider,
     authURL,
   } = env;
@@ -61,16 +61,16 @@ export function initService(env) {
     s = new Keycloak({
       url: authURL,
       realm: 'akvo',
-      clientId: keycloakClient,
+      clientId: authClientId,
     });
   } else {
     s = new Auth0.WebAuth({
       domain: url.parse(authURL).host,
-      clientID: 'D5LayiXP1pzq-6g2B_QVvzCw_eycZxQK',
+      clientID: authClientId,
       redirectUri: `${location.protocol}//${location.host}/auth0_callback`,
       responseType: 'token id_token',
       scope: 'openid email profile',
-      audience: 'https://akvotest.eu.auth0.com/userinfo',
+      audience: `${authURL}/userinfo`,
       connection: 'google-oauth2',
 //      once: '1',
 //      state: '1',
