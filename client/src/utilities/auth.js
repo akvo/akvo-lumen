@@ -67,7 +67,7 @@ export function initService(env) {
     s = new Auth0.WebAuth({
       domain: url.parse(authURL).host,
       clientID: 'D5LayiXP1pzq-6g2B_QVvzCw_eycZxQK',
-      redirectUri: 'http://t1.lumen.local:3030/auth0_callback',
+      redirectUri: `${location.protocol}//${location.host}/auth0_callback`,
       responseType: 'token id_token',
       scope: 'openid email profile',
       audience: 'https://akvotest.eu.auth0.com/userinfo',
