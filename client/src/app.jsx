@@ -65,7 +65,7 @@ function initWithAuthToken(locale) {
 function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = msg;
 }
-const locales = new Set([1, 2, 3, 4, 5]);
+const locales = new Set(['en', 'es', 'fr']);
 function userLocale(lo) {
   if (lo) {
     const l = lo.toLowerCase().substring(0, 2);
