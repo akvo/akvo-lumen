@@ -17,7 +17,7 @@ export function token(auth0) {
 }
 
 export function logout(auth0) {
-  auth0.logout({ returnTo: 'http://t1.lumen.local:3030' });
+  auth0.logout({ returnTo: `${location.protocol}//${location.host}` });
 }
 
 
