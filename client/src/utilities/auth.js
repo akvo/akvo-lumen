@@ -66,11 +66,11 @@ export function initService(env) {
   } else {
     s = new Auth0.WebAuth({
       domain: url.parse(authURL).host,
-      clientID: 'kU4u9d2IJIMXnTGUe7WZ7ITi9c7VN0An',
+      clientID: 'D5LayiXP1pzq-6g2B_QVvzCw_eycZxQK',
       redirectUri: 'http://t1.lumen.local:3030/auth0_callback',
       responseType: 'token id_token',
       scope: 'openid email profile',
-      audience: 'https://tangrammer.eu.auth0.com/userinfo',
+      audience: 'https://akvotest.eu.auth0.com/userinfo',
       connection: 'google-oauth2',
 //      once: '1',
 //      state: '1',

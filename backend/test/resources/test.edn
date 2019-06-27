@@ -18,7 +18,7 @@
  :akvo.lumen.component.keycloak/data {:url "http://auth.lumen.local:8080/auth"
                                       :realm "akvo"}
 
- :akvo.lumen.component.auth0/data {:url "https://tangrammer.eu.auth0.com"}
+ :akvo.lumen.component.auth0/data {:url "https://akvotest.eu.auth0.com"}
 
  :akvo.lumen.component.keycloak/keycloak {:credentials
                                           {:client_id "akvo-lumen-confidential"
