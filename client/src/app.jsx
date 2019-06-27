@@ -11,6 +11,7 @@ import { init as initAnalytics } from './utilities/analytics';
 import queryString from 'querystringify';
 import url from 'url';
 import { get } from './utilities/api';
+import Raven from 'raven-js';
 
 function initAuthenticated(profile, env) {
   const initialState = { profile, env };
@@ -115,6 +116,9 @@ function dispatchOnMode() {
 
           // eslint-disable-next-line consistent-return
           auth0.client.userInfo(authResult.accessToken, (err2, user) => {
+            if (err2) {
+              return console.log(err2);
+            }
             // Now you have the user's information
             const userr = user;
             userr.admin = false;
@@ -122,9 +126,10 @@ function dispatchOnMode() {
             userr.lastName = user.lastName || user.family_name;
             userr.attributes = user.attributes || { locale: [userLocale(user.locale)] };
             userr.username = user.username || user.nickname;
-            if (err2) {
-              return console.log(err2);
+            if (process.env.NODE_ENV === 'production') {
+              Raven.setUserContext(userr);
             }
+
             initAuthenticated(userr, body);
           });
         });
