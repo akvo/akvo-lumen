@@ -1,4 +1,4 @@
-(defproject org.akvo/lumen "0.25.0-SNAPSHOT"
+(defproject org.akvo/lumen "0.26.0-SNAPSHOT"
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
@@ -11,7 +11,7 @@
                  [org.slf4j/jcl-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [org.slf4j/jul-to-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [cheshire "5.8.1" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [clj-http "3.10.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
+                 [clj-http "3.10.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime commons-io/commons-io]]
                  [clj-time "0.15.1"]
                  [com.layerware/hugsql "0.4.9"]
                  [commons-io/commons-io "2.6"]
@@ -27,7 +27,7 @@
                  [org.akvo/commons "0.4.6" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "1.46.266acfa5bb52c9b484af19f0bcfbfacb60b97319"]
                  [org.apache.tika/tika-core "1.21"]
-                 [org.apache.tika/tika-parsers "1.21" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
+                 [org.apache.tika/tika-parsers "1.21" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime commons-io/commons-io]]
                  ;; explicit versions of commons deps used by tika-parsers and clj-http
                  [com.fasterxml.jackson.core/jackson-core "2.9.9"]
                  [org.apache.httpcomponents/httpcore "4.4.11"]
