@@ -23,19 +23,23 @@ echo "Keycloak is ready!"
 
 echo "Waiting for PostgreSQL ..."
 
+echo "@JAVA HOME"
 echo $JAVA_HOME
 # In JRE container JAVA_HOME points to /jre
 # In JDK container JAVA_HOME points to the parent of */jre
 cacerts_file=""
 # JDK-8189131 : Open-source the Oracle JDK Root Certificates
 # https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8189131
-if [ "${JAVA_HOME}" == "/docker-java-home" ]
+if [ "${JAVA_HOME}" == "/docker-java-home" ];
 then
     cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
+elif [ "${JAVA_HOME}" == "/usr/local/openjdk-8" ]; then
+    cacerts_file="${JAVA_HOME}/jre/lib/security/cacerts"
 else
-    cacerts_file="${JAVA_HOME%jre}/lib/security/cacerts"
+    cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
 fi
 
+echo $cacerts_file
 
 ATTEMPTS=0
 CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${cacerts_file}" -storepass changeit | grep postgrescert) || echo "not found")
