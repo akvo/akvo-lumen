@@ -23,8 +23,7 @@ echo "Keycloak is ready!"
 
 echo "Waiting for PostgreSQL ..."
 
-echo "@JAVA HOME"
-echo $JAVA_HOME
+
 # In JRE container JAVA_HOME points to /jre
 # In JDK container JAVA_HOME points to the parent of */jre
 cacerts_file=""
@@ -41,9 +40,12 @@ else
 fi
 
 echo "---->"
+whoami
+echo "@JAVA HOME"
+echo $JAVA_HOME
 echo $cacerts_file
 find $JAVA_HOME -name "cacerts"
-ls -la "${cacerts_file%cacerts=}"
+ls -la "${cacerts_file%cacerts}"
 echo "<----"
 
 ATTEMPTS=0
