@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-sudo dpkg --purge --force-depends ca-certificates-java
-sudo apt-get install ca-certificates-java
-
 set -eu
 
 MAX_ATTEMPTS=120
@@ -38,13 +35,13 @@ then
     cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
 elif [ "${JAVA_HOME}" == "/usr/local/openjdk-8" ]; then
     echo "@/usr/local/openjdk-8"
-    ls -la /usr/local/openjdk-8
     cacerts_file="${JAVA_HOME}/jre/lib/security/cacerts"
 else
-    cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
+    cacerts_file="${JAVA_HOME%jre}/lib/security/cacerts"
 fi
 
 echo $cacerts_file
+echo ls -la "${cacerts_file%cacerts=}"
 
 ATTEMPTS=0
 CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${cacerts_file}" -storepass changeit | grep postgrescert) || echo "not found")
