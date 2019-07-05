@@ -32,7 +32,7 @@ if [ "${JAVA_HOME}" == "/docker-java-home" ]
 then
     cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
 else
-    cacerts_file="${JAVA_HOME%jre}/lib/security/cacerts"
+    cacerts_file="${JAVA_HOME}/jre/lib/security/cacerts"
 fi
 
 ATTEMPTS=0
