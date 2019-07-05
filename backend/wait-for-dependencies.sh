@@ -41,12 +41,14 @@ else
     cacerts_file="${JAVA_HOME%jre}/lib/security/cacerts"
 fi
 
-echo "---->"
+echo "!---->"
 echo $JAVA_HOME
 echo $cacerts_file
+echo "find:"
 find $JAVA_HOME -name "cacerts"
+echo ":find"
 ls -la "${cacerts_file%cacerts}"
-echo "<----"
+echo "<----!"
 
 ATTEMPTS=0
 CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${cacerts_file}" -storepass changeit | grep postgrescert) || echo "not found")
