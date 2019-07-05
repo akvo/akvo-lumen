@@ -33,15 +33,15 @@ if [ "${JAVA_HOME}" == "/docker-java-home" ];
 then
     cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
 elif [ "${JAVA_HOME}" == "/usr/local/openjdk-8" ]; then
-    echo "@/usr/local/openjdk-8"
     cacerts_file="${JAVA_HOME}/jre/lib/security/cacerts"
+    if ! [ -f "$cacerts_file" ]; then
+        cacerts_file="${JAVA_HOME}/lib/security/cacerts"
+    fi
 else
     cacerts_file="${JAVA_HOME%jre}/lib/security/cacerts"
 fi
 
 echo "---->"
-whoami
-echo "@JAVA HOME"
 echo $JAVA_HOME
 echo $cacerts_file
 find $JAVA_HOME -name "cacerts"
