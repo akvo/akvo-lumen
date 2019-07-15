@@ -17,7 +17,7 @@
     "express": "^4.16.3",
     "express-validation": "^1.0.2",
     "joi": "^13.4.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
