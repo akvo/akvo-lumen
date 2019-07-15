@@ -7,13 +7,14 @@
                         piwik-site-id sentry-client-dsn] :as opts}]
   (fn [{tenant :tenant :as request}]
     (response
-        (cond-> {"keycloakClient" keycloak-public-client-id
-                 "keycloakURL" (:url keycloak)
-                 "flowApiUrl" (:url flow-api)
-                 "piwikSiteId" piwik-site-id
-                 "tenant" (:tenant request)}
-          (string? sentry-client-dsn)
-          (assoc "sentryDSN" sentry-client-dsn)))))
+     (cond-> {"authClientId" keycloak-public-client-id
+              "authURL" (:url keycloak)
+              "authProvider" "keycloak"
+              "flowApiUrl" (:url flow-api)
+              "piwikSiteId" piwik-site-id
+              "tenant" (:tenant request)}
+       (string? sentry-client-dsn)
+       (assoc "sentryDSN" sentry-client-dsn)))))
 
 (defn routes [{:keys [routes-opts] :as opts}]
   ["/env" (merge {:get {:handler (handler opts)}}
