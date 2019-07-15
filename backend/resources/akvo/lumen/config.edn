@@ -59,7 +59,6 @@
  :akvo.lumen.endpoint.env/env {:routes-opts
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
                                :keycloak #ig/ref :akvo.lumen.component.keycloak/data
-                               :keycloak-public-client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"}
@@ -169,7 +168,8 @@
  :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://s3-eu-west-1.amazonaws.com/akvoflow-public/caddisfly-tests-v2.json"]}
 
  :akvo.lumen.component.keycloak/data {:url #duct/env "LUMEN_KEYCLOAK_URL"
-                                      :realm "akvo"}
+                                      :realm "akvo"
+                                      :client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]}
 
  :akvo.lumen.component.keycloak/keycloak {:data #ig/ref :akvo.lumen.component.keycloak/data
                                           :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
