@@ -1,16 +1,17 @@
 (ns akvo.lumen.auth
   (:require [akvo.commons.jwt :as jwt]
+            [akvo.lumen.component.auth0 :as auth0]
+            [akvo.lumen.component.keycloak :as keycloak]
             [cheshire.core :as json]
-            [clojure.tools.logging :as log]
             [clj-http.client :as client]
             [clojure.set :as set]
-            [clojure.string :as string]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.component.keycloak :as keycloak]
+            [clojure.string :as string]
+            [clojure.tools.logging :as log]
             [integrant.core :as ig]
             [ring.util.response :as response])
-  (:import java.text.ParseException
-           com.nimbusds.jose.crypto.RSASSAVerifier))
+  (:import com.nimbusds.jose.crypto.RSASSAVerifier
+           java.text.ParseException))
 
 (defn claimed-roles [jwt-claims]
   (set (get-in jwt-claims ["realm_access" "roles"])))
@@ -59,18 +60,20 @@
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
-  [keycloak]
-  (fn [handler]
-    (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak))]
-    (fn [req]
-      (if-let [token (jwt/jwt-token req)]
-        (try
-          (if-let [claims (jwt/verified-claims token keycloak-verifier (:issuer keycloak) {})]
-            (handler (assoc req :jwt-claims claims))
-            (handler req))
-          (catch ParseException e
-            (handler req)))
-        (handler req))))))
+  [keycloak auth0]
+  (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak))
+        auth0-verifier (RSASSAVerifier.  (:rsa-key auth0))]
+    (fn [handler]
+      (fn [req]
+        (if-let [token (jwt/jwt-token req)]
+          (try
+            (if-let [claims (or (jwt/verified-claims token keycloak-verifier (:issuer keycloak) {})
+                                (jwt/verified-claims token auth0-verifier (:issuer auth0) {}))]
+              (handler (assoc req :jwt-claims claims))
+              (handler req))
+            (catch ParseException e
+              (handler req)))
+          (handler req))))))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
   wrap-auth)
@@ -78,9 +81,11 @@
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
   empty?)
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak]}]
-  (wrap-jwt keycloak))
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak auth0]}]
+  (wrap-jwt keycloak auth0))
 
 (s/def ::keycloak ::keycloak/data)
+(s/def ::auht0 ::auth0/data)
+
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
-  (s/keys :req-un [::keycloak]))
+  (s/keys :req-un [::keycloak ::auth0]))
