@@ -27,7 +27,8 @@
                                                           :content-types true
                                                           :default-charset "utf-8"}}
 
- :akvo.lumen.auth/wrap-auth {}
+ :akvo.lumen.auth/wrap-auth {:keycloak #ig/ref :akvo.lumen.component.keycloak/data
+                             :auth0 #ig/ref :akvo.lumen.component.auth0/data}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
