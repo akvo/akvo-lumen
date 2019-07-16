@@ -80,7 +80,6 @@ function userLocale(lo) {
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
-  console.log(queryParams, url.parse(location.href).pathname);
 
   if (url.parse(location.href).pathname !== '/auth0_callback' && accessToken == null) {
     const authz = queryString.parse(location.search).auth || 'keycloak';
@@ -97,27 +96,24 @@ function dispatchOnMode() {
   } else if (accessToken != null) {
     auth.initExport(accessToken).then(initAuthenticated(queryParams.locale));
   } else {
-//    const idToken = queryString.parse(location.hash).id_token;
-    console.log(queryString.parse(location.hash));
     get('/env', { auth: 'auth0' })
     .then(
       ({
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        console.log('env auth0', body);
         const auth0 = auth.initService(body);
         auth.setAuth0(auth0);
         // eslint-disable-next-line consistent-return
         auth0.parseHash({ hash: window.location.hash }, (err, authResult) => {
           if (err) {
-            return console.log(err);
+            throw err;
           }
 
           // eslint-disable-next-line consistent-return
           auth0.client.userInfo(authResult.accessToken, (err2, user) => {
             if (err2) {
-              return console.log(err2);
+              throw err2;
             }
             // Now you have the user's information
             const userr = user;
@@ -129,7 +125,6 @@ function dispatchOnMode() {
             if (process.env.NODE_ENV === 'production') {
               Raven.setUserContext(userr);
             }
-
             initAuthenticated(userr, body);
           });
         });

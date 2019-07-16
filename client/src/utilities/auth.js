@@ -17,14 +17,13 @@ function service() {
   return auth0;
 }
 
-
 export function setKeycloak(K) {
   keycloak = K;
 }
+
 export function setAuth0(A) {
   auth0 = A;
 }
-
 
 function lib() {
   if (keycloak) {
@@ -50,6 +49,7 @@ export function refreshToken() {
   }
   return lib().refreshToken(service());
 }
+
 export function initService(env) {
   const {
     authClientId,
@@ -72,9 +72,6 @@ export function initService(env) {
       scope: 'openid email profile',
       audience: `${authURL}/userinfo`,
       connection: 'google-oauth2',
-//      once: '1',
-//      state: '1',
-
     });
   }
   return s;
