@@ -1,100 +1,100 @@
 /* eslint-disable no-underscore-dangle */
 import Keycloak from 'keycloak-js';
-import Raven from 'raven-js';
-import queryString from 'querystringify';
-
+import Auth0 from 'auth0-js';
+import url from 'url';
+import * as k from './keycloak';
+import * as a0 from './auth0';
 import { get } from './api';
 
 let keycloak = null;
+let auth0 = null;
 let accessToken = null;
 
+function service() {
+  if (keycloak) {
+    return keycloak;
+  }
+  return auth0;
+}
+
+
+export function setKeycloak(K) {
+  keycloak = K;
+}
+export function setAuth0(A) {
+  auth0 = A;
+}
+
+
+function lib() {
+  if (keycloak) {
+    return k;
+  }
+  return a0;
+}
+
+export function logout() {
+  lib().logout(service());
+}
+
 export function token() {
-  if (!keycloak) {
+  if (!service()) {
     return Promise.resolve(accessToken);
   }
-
-  return new Promise(resolve =>
-    keycloak
-      .updateToken()
-      .success(() => resolve(keycloak.token))
-      .error(() => {
-        // Redirect to login page
-        keycloak.login();
-      })
-  );
+  return lib().token(service());
 }
 
 export function refreshToken() {
-  if (keycloak == null) {
-    throw new Error('Keycloak not initialized');
+  if (service() == null) {
+    throw new Error('Auth not initialized');
   }
-  return keycloak.refreshToken;
+  return lib().refreshToken(service());
 }
+export function initService(env) {
+  const {
+    authClientId,
+    authProvider,
+    authURL,
+  } = env;
+  let s = null;
+  if (authProvider === 'keycloak') {
+    s = new Keycloak({
+      url: authURL,
+      realm: 'akvo',
+      clientId: authClientId,
+    });
+  } else {
+    s = new Auth0.WebAuth({
+      domain: url.parse(authURL).host,
+      clientID: authClientId,
+      redirectUri: `${location.protocol}//${location.host}/auth0_callback`,
+      responseType: 'token id_token',
+      scope: 'openid email profile',
+      audience: `${authURL}/userinfo`,
+      connection: 'google-oauth2',
+//      once: '1',
+//      state: '1',
 
-export function init() {
+    });
+  }
+  return s;
+}
+export function init(env, s) {
   if (keycloak != null) {
     throw new Error('Keycloak already initialized');
   }
-  return get('/env')
-    .then(
-      ({
-        body: {
-          authClientId,
-          authURL,
-          tenant,
-          sentryDSN,
-          flowApiUrl,
-          piwikSiteId,
-          exporterUrl,
-        },
-      }) =>
-        new Promise((resolve, reject) => {
-          if (process.env.NODE_ENV === 'production') {
-            Raven.config(sentryDSN).install();
-            Raven.setExtraContext({ tenant });
-          }
-          keycloak = new Keycloak({
-            url: authURL,
-            realm: 'akvo',
-            clientId: authClientId,
-          });
-
-          const queryParams = queryString.parse(location.search);
-
-          keycloak
-            .init({
-              onLoad: 'login-required',
-              checkLoginIframe: false,
-              token: queryParams.token,
-              refreshToken: queryParams.refresh_token,
-            })
-            .success((authenticated) => {
-              if (authenticated) {
-                keycloak
-                  .loadUserProfile()
-                  .success((profile) => {
-                    if (process.env.NODE_ENV === 'production') {
-                      Raven.setUserContext(profile);
-                    }
-                    resolve({
-                      profile: Object.assign({}, profile, {
-                        admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`),
-                      }),
-                      env: { flowApiUrl, authURL, piwikSiteId, exporterUrl },
-                    });
-                  })
-                  .error(() => {
-                    reject(new Error('Could not load user profile'));
-                  });
-              } else {
-                reject(new Error('Could not authenticate'));
-              }
-            })
-            .error(() => {
-              reject(new Error('Login attempt failed'));
-            });
-        })
-    );
+  if (env.authProvider === 'keycloak') {
+    if (keycloak != null) {
+      throw new Error('Keycloak already initialized');
+    }
+    keycloak = s;
+    return lib().init(env, service());
+  } else if (env.authProvider === 'auth0') {
+    auth0 = s;
+    auth0.authorize();
+    return new Promise(() => null);
+  }
+  return null;
 }
 
 export function initPublic() {

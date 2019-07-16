@@ -20,6 +20,7 @@ export default function App({ history, location }) {
     <IntlWrapper>
       <Router history={history}>
         <Route path="/" component={Main}>
+          <Redirect from="auth0_callback" to="/" />
           <IndexRedirect from="" to="library" />
           <Route
             path="library"

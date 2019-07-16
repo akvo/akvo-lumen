@@ -1,14 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import * as auth from './../../utilities/auth';
 
 function OrganizationMenu({ profile, authURL }) {
+  const url = authURL.includes('auth0') ? 'https://manage.auth0.com' : `${authURL}/realms/akvo/account`;
+  const logout = authURL.includes('auth0') ? <a onClick={() => auth.logout()}>&nbsp; <i className="fa fa-power-off" aria-hidden="true" /> LOGOUT</a> : '';
   return (
     <div className="OrganizationMenu">
       <div className="name">
-        <a href={`${authURL}/realms/akvo/account`}>
+        <a href={url}>
           <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
         </a>
+        {logout}
       </div>
       <div className="organization">Akvo Lumen</div>
     </div>
