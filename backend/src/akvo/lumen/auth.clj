@@ -8,7 +8,9 @@
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.keycloak :as keycloak]
             [integrant.core :as ig]
-            [ring.util.response :as response]))
+            [ring.util.response :as response])
+  (:import java.text.ParseException
+           com.nimbusds.jose.crypto.RSASSAVerifier))
 
 (defn claimed-roles [jwt-claims]
   (set (get-in jwt-claims ["realm_access" "roles"])))
@@ -57,17 +59,18 @@
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
-  [{:keys [url realm]}]
+  [keycloak]
   (fn [handler]
-   (try
-     (let [issuer (str url "/realms/" realm)
-           certs  (-> (str issuer "/protocol/openid-connect/certs")
-                      client/get
-                      :body)]
-       (jwt/wrap-jwt-claims handler (jwt/rsa-key certs 0) issuer))
-     (catch Exception e
-       (println "Could not get cert from Keycloak")
-       (throw e)))))
+    (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak))]
+    (fn [req]
+      (if-let [token (jwt/jwt-token req)]
+        (try
+          (if-let [claims (jwt/verified-claims token keycloak-verifier (:issuer keycloak) {})]
+            (handler (assoc req :jwt-claims claims))
+            (handler req))
+          (catch ParseException e
+            (handler req)))
+        (handler req))))))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
   wrap-auth)
