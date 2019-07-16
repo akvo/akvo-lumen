@@ -33,7 +33,8 @@
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
                                           :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
 
- :akvo.lumen.auth/wrap-jwt {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
+ :akvo.lumen.auth/wrap-jwt {:keycloak #ig/ref :akvo.lumen.component.keycloak/data
+                            :auth0 #ig/ref :akvo.lumen.component.auth0/data}
 
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
 
