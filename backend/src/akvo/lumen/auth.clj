@@ -17,14 +17,18 @@
   (set (get-in jwt-claims ["realm_access" "roles"])))
 
 (defn tenant-user?
-  [{:keys [tenant jwt-claims]}]
-  (contains? (claimed-roles jwt-claims)
-             (format "akvo:lumen:%s" tenant)))
+  [{:keys [tenant jwt-claims]} issuer]
+  (or (contains? (claimed-roles jwt-claims)
+                 (format "akvo:lumen:%s" tenant))
+      (and (= issuer :auth0)
+           (string/includes? (get jwt-claims "email") "@akvo.org"))))
 
 (defn tenant-admin?
-  [{:keys [tenant jwt-claims]}]
-  (contains? (claimed-roles jwt-claims)
-             (format "akvo:lumen:%s:admin" tenant)))
+  [{:keys [tenant jwt-claims]} issuer]
+  (or (contains? (claimed-roles jwt-claims)
+                 (format "akvo:lumen:%s:admin" tenant))
+      (and (= issuer :auth0)
+           (string/includes? (get jwt-claims "email") "@akvo.org"))))
 
 (defn admin-path? [{:keys [path-info]}]
   (string/starts-with? path-info "/api/admin/"))
@@ -45,17 +49,22 @@
   If request don't contain claims return 401. If current dns label (tenant) is
   not in claimed roles return 403.
   Otherwiese grant access. This implies that access is on tenant level."
-  [handler]
-  (fn [{:keys [jwt-claims] :as request}]
-    (cond
-      (nil? jwt-claims) not-authenticated
-      (admin-path? request) (if (tenant-admin? request)
-                              (handler request)
-                              not-authorized)
-      (api-path? request) (if (tenant-user? request)
-                            (handler request)
-                            not-authorized)
-      :else not-authorized)))
+  [keycloak auth0]
+  (fn [handler]
+    (fn [{:keys [jwt-claims] :as request}]
+      (let [issuer (condp = (get jwt-claims "iss")
+                                   (:issuer keycloak) :keycloak
+                                   (:issuer auth0) :auth0
+                                   :other)]
+        (cond
+          (nil? jwt-claims) not-authenticated
+          (admin-path? request) (if (tenant-admin? request issuer)
+                                  (handler request)
+                                  not-authorized)
+          (api-path? request) (if (tenant-user? request issuer)
+                                (handler request)
+                                not-authorized)
+          :else not-authorized)))))
 
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
@@ -75,11 +84,11 @@
               (handler req)))
           (handler req))))))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ opts]
-  wrap-auth)
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ {:keys [keycloak auth0]}]
+  (wrap-auth keycloak auth0))
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
-  empty?)
+  (s/keys :req-un [::keycloak ::auth0]))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak auth0]}]
   (wrap-jwt keycloak auth0))
