@@ -6,7 +6,7 @@
 (defn handler [{:keys [keycloak flow-api piwik-site-id sentry-client-dsn] :as opts}]
   (fn [{tenant :tenant :as request}]
     (response
-     (cond-> {"authClientId" keycloak-public-client-id
+     (cond-> {"authClientId" (:client-id keycloak)
               "authURL" (:url keycloak)
               "authProvider" "keycloak"
               "flowApiUrl" (:url flow-api)
