@@ -39,8 +39,8 @@ export function init() {
     .then(
       ({
         body: {
-          keycloakClient,
-          keycloakURL,
+          authClientId,
+          authURL,
           tenant,
           sentryDSN,
           flowApiUrl,
@@ -54,9 +54,9 @@ export function init() {
             Raven.setExtraContext({ tenant });
           }
           keycloak = new Keycloak({
-            url: keycloakURL,
+            url: authURL,
             realm: 'akvo',
-            clientId: keycloakClient,
+            clientId: authClientId,
           });
 
           const queryParams = queryString.parse(location.search);
@@ -80,7 +80,7 @@ export function init() {
                       profile: Object.assign({}, profile, {
                         admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`),
                       }),
-                      env: { flowApiUrl, keycloakURL, piwikSiteId, exporterUrl },
+                      env: { flowApiUrl, authURL, piwikSiteId, exporterUrl },
                     });
                   })
                   .error(() => {

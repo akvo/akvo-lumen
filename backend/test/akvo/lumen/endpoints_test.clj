@@ -25,8 +25,9 @@
       (testing "/env"
         (let [r (h (get*  "/env"))]
           (is (= 200 (:status r)))
-          (is (= {:keycloakClient "akvo-lumen",
-                  :keycloakURL "http://auth.lumen.local:8080/auth",
+          (is (= {:authClientId "akvo-lumen",
+                  :authURL "http://auth.lumen.local:8080/auth",
+                  :authProvider "keycloak",
                   :flowApiUrl "https://api.akvotest.org/flow",
                   :piwikSiteId "165",
                   :tenant "t1",
