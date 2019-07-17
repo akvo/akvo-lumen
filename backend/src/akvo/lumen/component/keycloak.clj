@@ -384,7 +384,7 @@
   (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
         http-timeout 10000
-        connection-manager (http.conn-mgr/make-reusable-conn-manager {:timeout 2 :threads 3 :insecure? false :default-per-route 10})
+        connection-manager (http.conn-mgr/make-reusable-conn-manager {:timeout 30 :threads 10 :insecure? false :default-per-route 10})
         openid-config (fetch-openid-configuration issuer {:timeout http-timeout :connection-manager connection-manager})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
