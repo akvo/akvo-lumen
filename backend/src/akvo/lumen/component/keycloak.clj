@@ -46,7 +46,7 @@
          req-opts (-> req-opts
                       (select-keys [:timeout])
                       (assoc :form-params params))]
-     (if-some [access-token (-> (client/post url (assoc req-opts :connection-manager connection-manager))
+     (when-some [access-token (-> (client/post url (assoc req-opts :connection-manager connection-manager))
                                 :body
                                 json/decode
                                 (get "access_token"))]
@@ -279,7 +279,7 @@
   ([{:keys [api-root http-timeout user-id-cache connection-manager] :as keycloak} email
     {:keys [timeout] :or {timeout http-timeout}}]
    (let [bare-req-opts {:timeout timeout}]
-     (if-some [headers (request-headers keycloak bare-req-opts)]
+     (when-some [headers (request-headers keycloak bare-req-opts)]
        (let [req-opts (assoc bare-req-opts :headers headers)]
          (when-let [user-id (lookup-user-id connection-manager req-opts api-root user-id-cache email)]
            (when-let [allowed-paths
