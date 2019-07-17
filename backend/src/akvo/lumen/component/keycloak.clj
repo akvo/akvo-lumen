@@ -2,6 +2,7 @@
   "We leverage Keycloak groups for tenant partition and admin roles.
    More info can be found in the Keycloak integration doc spec."
   (:require
+   [akvo.commons.jwt :as jwt]
    [akvo.lumen.lib :as lib]
    [akvo.lumen.protocols :as p]
    [cheshire.core :as json]
