@@ -18,7 +18,7 @@
 
 
 (def keycloak-config (let [c (tu/start-config)]
-                       (merge (select-keys (:akvo.lumen.component.keycloak/keycloak c) [:credentials])
+                       (merge (select-keys (:akvo.lumen.component.keycloak/keycloak c) [:credentials :max-user-ids-cache])
                               {:data (:akvo.lumen.component.keycloak/data c)}
                               )))
 
