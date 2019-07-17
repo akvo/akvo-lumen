@@ -259,14 +259,15 @@
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
   [req-opts api-root user-id-cache email]
-  (if-some [user-id (get-user-id user-id-cache email)]
+  (if-let [user-id (get-user-id user-id-cache email)]
     user-id
-    (let [url (format "%s/users/?email=%s" api-root email)]
-      (let [users (-> (client/get url req-opts) :body json/decode)]
-        (when-some [user-id (active-user users email)]
-          (-> user-id-cache
-              (swap! assoc email user-id)
-              (get email)))))))
+    (when-let [user-id (-> (client/get (format "%s/users/?email=%s" api-root email) req-opts)
+                           :body
+                           json/decode
+                           (active-user email))]
+      (-> user-id-cache
+          (swap! assoc email user-id)
+          (get email)))))
 
 (defn- allowed-paths
   "Provided an email address from the authentication process dig out the
@@ -282,7 +283,7 @@
      (when-let [headers (request-headers keycloak bare-req-opts)]
        (let [req-opts (assoc bare-req-opts :headers headers :connection-manager connection-manager)]
          (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-           (->> (client/get (format "%s/users/%s/groups" api-root user-id) req-opts )
+           (->> (client/get (format "%s/users/%s/groups" api-root user-id) req-opts)
                 :body
                 json/decode
                 (reduce (fn [paths {:strs [path]}]
