@@ -4,40 +4,14 @@
   (:require
    [akvo.lumen.lib :as lib]
    [akvo.lumen.protocols :as p]
-   [aleph.http :as http]
-   [byte-streams :as bs]
    [cheshire.core :as json]
    [clj-http.client :as client]
+   [clj-http.conn-mgr :as http.conn-mgr]
    [clojure.set :as set]
    [clojure.spec.alpha :as s]
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
-   [manifold.deferred :as d]
-   [manifold.stream :as stream]
    [ring.util.response :refer [response]]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Async HTTP client helpers
-;;;
-
-(defn deferred-GET
-  [url {:keys [timeout] :as req-opts}]
-  (d/chain
-   (d/timeout! (http/get url (select-keys req-opts [:headers]))
-               timeout)
-   :body
-   bs/to-string
-   json/decode))
-
-(defn deferred-POST
-  [url {:keys [timeout] :as req-opts}]
-  (d/chain
-   (d/timeout! (http/post url (select-keys req-opts [:form-params :headers]))
-               timeout)
-   :body
-   bs/to-string
-   json/decode))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
@@ -49,20 +23,22 @@
    (fetch-openid-configuration issuer {}))
   ([issuer req-opts]
    (let [url (format "%s/.well-known/openid-configuration" issuer)]
-     @(deferred-GET url req-opts))))
+     (-> (client/get url req-opts) :body json/decode))))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
-  ([{:keys [openid-config credentials]}]
+  ([{:keys [openid-config credentials cm]}]
    (let [params (merge {:grant_type "client_credentials"}
                        credentials)
+         _ (log/info :url (get openid-config "token_endpoint"))
          resp (client/post (get openid-config "token_endpoint")
                            {:form-params params})
+         _ (log/info :res resp)
          access-token (-> resp :body json/decode (get "access_token"))]
      {"Authorization" (str "bearer " access-token)
       "Content-Type" "application/json"}))
-  ([{:keys [openid-config credentials]}
+  ([{:keys [openid-config credentials cm]}
     {:keys [timeout] :as req-opts}]
    (let [params (merge {:grant_type "client_credentials"}
                        credentials)
@@ -70,10 +46,14 @@
          req-opts (-> req-opts
                       (select-keys [:timeout])
                       (assoc :form-params params))]
-     (if-some [access-token (-> @(deferred-POST url req-opts)
+     (if-some [access-token (-> (client/post url (assoc req-opts :connection-manager cm))
+                                :body
+                                json/decode
                                 (get "access_token"))]
-       {"Authorization" (str "bearer " access-token)
-        "Conternt-Type" "application/json"}
+       (do
+         (log/info :access-token access-token)
+        {"Authorization" (str "bearer " access-token)
+         "Conternt-Type" "application/json"})
        (throw
         (ex-info "Down stream auth server timed out (Keycloak)"
                  {:response-code 503}))))))
@@ -280,11 +260,11 @@
 
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
-  [req-opts api-root user-id-cache email]
+  [cm req-opts api-root user-id-cache email]
   (if-some [user-id (get @user-id-cache email)]
     user-id
     (let [url (format "%s/users/?email=%s" api-root email)]
-      (if-some [users @(deferred-GET url req-opts)]
+      (if-some [users (-> (client/get url (assoc req-opts :connection-manager cm)) :body json/decode)]
         (if-some [user-id (active-user users email)]
           (-> user-id-cache
               (swap! assoc email user-id)
@@ -303,13 +283,16 @@
   remove the leading /akvo/lumen and return paths as demo/admin."
   ([keycloak email]
    (allowed-paths keycloak email {}))
-  ([{:keys [api-root http-timeout user-id-cache] :as keycloak} email
+  ([{:keys [api-root http-timeout user-id-cache cm] :as keycloak} email
     {:keys [timeout] :or {timeout http-timeout}}]
+   (log/info :allowed-paths-call)
    (let [bare-req-opts {:timeout timeout}]
      (if-some [headers (request-headers keycloak (assoc bare-req-opts :timeout timeout))]
        (let [req-opts (assoc bare-req-opts :headers headers)]
-         (if-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-           (if-let [allowed-paths @(deferred-GET (format "%s/users/%s/groups" api-root user-id) req-opts)]
+         (if-let [user-id (lookup-user-id cm req-opts api-root user-id-cache email)]
+           (if-let [allowed-paths
+                    (-> (client/get (format "%s/users/%s/groups" api-root user-id)
+                                    (assoc req-opts :connection-manager cm)) :body json/decode)]
              (reduce (fn [paths {:strs [path]}]
                        (conj paths (subs path 12)))
                      #{}
@@ -410,13 +393,21 @@
   ::data)
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data] :as opts}]
+  (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
         http-timeout 10000
-        openid-config (fetch-openid-configuration issuer {:timeout http-timeout})]
+        cm (http.conn-mgr/make-reusable-conn-manager {:timeout 2 :threads 3 :insecure? false :default-per-route 10})
+        openid-config (fetch-openid-configuration issuer {:timeout http-timeout :connection-manager cm})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
+           :cm cm
            :http-timeout http-timeout
            :openid-config openid-config)))
+
+(defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak  [_ opts]
+  (log/info :keycloak "closing connection manager" (:cm opts))
+  (http.conn-mgr/shutdown-manager (:cm opts)))
+
 
 (s/def ::client_id string?)
 (s/def ::client_secret string?)

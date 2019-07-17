@@ -129,13 +129,13 @@
       (if (api-authz? jwt-claims)
         (try
           (let [email (get jwt-claims "email")
-                allowed-paths (delay (keycloak/allowed-paths keycloak email))]
+                allowed-paths (keycloak/allowed-paths keycloak email)]
             (cond
               (nil? jwt-claims) not-authenticated
-              (admin-path? request) (if (api-tenant-admin? tenant @allowed-paths)
+              (admin-path? request) (if (api-tenant-admin? tenant allowed-paths)
                                       (handler request)
                                       not-authorized)
-              (api-path? request) (if (api-tenant-member? tenant @allowed-paths)
+              (api-path? request) (if (api-tenant-member? tenant allowed-paths)
                                     (handler request)
                                     not-authorized)
               :else not-authorized))
