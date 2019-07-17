@@ -30,7 +30,7 @@
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
-  ([{:keys [openid-config credentials cm]}]
+  ([{:keys [openid-config credentials connection-manager]}]
    (let [params (merge {:grant_type "client_credentials"}
                        credentials)
          resp (client/post (get openid-config "token_endpoint")
@@ -38,7 +38,7 @@
          access-token (-> resp :body json/decode (get "access_token"))]
      {"Authorization" (str "bearer " access-token)
       "Content-Type" "application/json"}))
-  ([{:keys [openid-config credentials cm]}
+  ([{:keys [openid-config credentials connection-manager]}
     {:keys [timeout] :as req-opts}]
    (let [params (merge {:grant_type "client_credentials"}
                        credentials)
@@ -46,7 +46,7 @@
          req-opts (-> req-opts
                       (select-keys [:timeout])
                       (assoc :form-params params))]
-     (if-some [access-token (-> (client/post url (assoc req-opts :connection-manager cm))
+     (if-some [access-token (-> (client/post url (assoc req-opts :connection-manager connection-manager))
                                 :body
                                 json/decode
                                 (get "access_token"))]
@@ -258,11 +258,11 @@
 
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
-  [cm req-opts api-root user-id-cache email]
+  [connection-manager req-opts api-root user-id-cache email]
   (if-some [user-id (get-user-id user-id-cache email)]
     user-id
     (let [url (format "%s/users/?email=%s" api-root email)]
-      (let [users (-> (client/get url (assoc req-opts :connection-manager cm)) :body json/decode)]
+      (let [users (-> (client/get url (assoc req-opts :connection-manager connection-manager)) :body json/decode)]
         (when-some [user-id (active-user users email)]
           (-> user-id-cache
               (swap! assoc email user-id)
@@ -276,15 +276,15 @@
   remove the leading /akvo/lumen and return paths as demo/admin."
   ([keycloak email]
    (allowed-paths keycloak email {}))
-  ([{:keys [api-root http-timeout user-id-cache cm] :as keycloak} email
+  ([{:keys [api-root http-timeout user-id-cache connection-manager] :as keycloak} email
     {:keys [timeout] :or {timeout http-timeout}}]
    (let [bare-req-opts {:timeout timeout}]
      (if-some [headers (request-headers keycloak (assoc bare-req-opts :timeout timeout))]
        (let [req-opts (assoc bare-req-opts :headers headers)]
-         (when-let [user-id (lookup-user-id cm req-opts api-root user-id-cache email)]
+         (when-let [user-id (lookup-user-id connection-manager req-opts api-root user-id-cache email)]
            (when-let [allowed-paths
                     (-> (client/get (format "%s/users/%s/groups" api-root user-id)
-                                    (assoc req-opts :connection-manager cm)) :body json/decode)]
+                                    (assoc req-opts :connection-manager connection-manager)) :body json/decode)]
              (reduce (fn [paths {:strs [path]}]
                        (conj paths (subs path 12)))
                      #{}
@@ -384,17 +384,17 @@
   (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
         http-timeout 10000
-        cm (http.conn-mgr/make-reusable-conn-manager {:timeout 2 :threads 3 :insecure? false :default-per-route 10})
-        openid-config (fetch-openid-configuration issuer {:timeout http-timeout :connection-manager cm})]
+        connection-manager (http.conn-mgr/make-reusable-conn-manager {:timeout 2 :threads 3 :insecure? false :default-per-route 10})
+        openid-config (fetch-openid-configuration issuer {:timeout http-timeout :connection-manager connection-manager})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
-           :cm cm
+           :connection-manager connection-manager
            :http-timeout http-timeout
            :openid-config openid-config)))
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak  [_ opts]
-  (log/info :keycloak "closing connection manager" (:cm opts))
-  (http.conn-mgr/shutdown-manager (:cm opts)))
+  (log/info :keycloak "closing connection manager" (:connection-manager opts))
+  (http.conn-mgr/shutdown-manager (:connection-manager opts)))
 
 
 (s/def ::client_id string?)
