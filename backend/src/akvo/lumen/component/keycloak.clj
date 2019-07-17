@@ -51,11 +51,7 @@
                                 json/decode
                                 (get "access_token"))]
        {"Authorization" (str "bearer " access-token)
-        "Conternt-Type" "application/json"}
-       (throw
-        (ex-info "Down stream auth server timed out (Keycloak)"
-                 {:response-code 503}))))))
-
+        "Conternt-Type" "application/json"}))))
 
 (defn group-by-path
   "Get the group id (uuid) by using group path.
@@ -164,7 +160,6 @@
         (not (empty? (set/intersection possible-group-paths user-group-paths))))
       false)))
 
-
 (defn add-user-to-group
   "Returns status code from Keycloak response."
   [request-headers api-root user-id group-id]
@@ -267,16 +262,11 @@
   (if-some [user-id (get-user-id user-id-cache email)]
     user-id
     (let [url (format "%s/users/?email=%s" api-root email)]
-      (if-some [users (-> (client/get url (assoc req-opts :connection-manager cm)) :body json/decode)]
-        (if-some [user-id (active-user users email)]
+      (let [users (-> (client/get url (assoc req-opts :connection-manager cm)) :body json/decode)]
+        (when-some [user-id (active-user users email)]
           (-> user-id-cache
               (swap! assoc email user-id)
-              (get email))
-          (throw
-           (ex-info "No active user with email provided" {:response-code 401})))
-        (throw
-         (ex-info "Down stream auth server timed out (Keycloak)"
-                  {:response-code 503}))))))
+              (get email)))))))
 
 (defn allowed-paths
   "Provided an email address from the authentication process dig out the
@@ -291,18 +281,14 @@
    (let [bare-req-opts {:timeout timeout}]
      (if-some [headers (request-headers keycloak (assoc bare-req-opts :timeout timeout))]
        (let [req-opts (assoc bare-req-opts :headers headers)]
-         (if-let [user-id (lookup-user-id cm req-opts api-root user-id-cache email)]
-           (if-let [allowed-paths
+         (when-let [user-id (lookup-user-id cm req-opts api-root user-id-cache email)]
+           (when-let [allowed-paths
                     (-> (client/get (format "%s/users/%s/groups" api-root user-id)
                                     (assoc req-opts :connection-manager cm)) :body json/decode)]
              (reduce (fn [paths {:strs [path]}]
                        (conj paths (subs path 12)))
                      #{}
-                     allowed-paths)
-             (throw (ex-info "Down stream auth server timed out"
-                             {:response-code 503})))))
-       (throw (ex-info "Down stream auth server timed out"
-                       {:response-code 503}))))))
+                     allowed-paths))))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
