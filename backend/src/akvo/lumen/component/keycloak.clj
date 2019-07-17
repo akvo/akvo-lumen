@@ -32,10 +32,8 @@
   ([{:keys [openid-config credentials cm]}]
    (let [params (merge {:grant_type "client_credentials"}
                        credentials)
-         _ (log/info :url (get openid-config "token_endpoint"))
          resp (client/post (get openid-config "token_endpoint")
                            {:form-params params})
-         _ (log/info :res resp)
          access-token (-> resp :body json/decode (get "access_token"))]
      {"Authorization" (str "bearer " access-token)
       "Content-Type" "application/json"}))
@@ -51,10 +49,8 @@
                                 :body
                                 json/decode
                                 (get "access_token"))]
-       (do
-         (log/info :access-token access-token)
-        {"Authorization" (str "bearer " access-token)
-         "Conternt-Type" "application/json"})
+       {"Authorization" (str "bearer " access-token)
+        "Conternt-Type" "application/json"}
        (throw
         (ex-info "Down stream auth server timed out (Keycloak)"
                  {:response-code 503}))))))
@@ -286,7 +282,6 @@
    (allowed-paths keycloak email {}))
   ([{:keys [api-root http-timeout user-id-cache cm] :as keycloak} email
     {:keys [timeout] :or {timeout http-timeout}}]
-   (log/info :allowed-paths-call)
    (let [bare-req-opts {:timeout timeout}]
      (if-some [headers (request-headers keycloak (assoc bare-req-opts :timeout timeout))]
        (let [req-opts (assoc bare-req-opts :headers headers)]

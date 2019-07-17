@@ -30,6 +30,6 @@
   (testing "Non existing user"
     (is (thrown? Exception (keycloak/allowed-paths *keycloak* "nobody@t1.lumen.localhost"))))
 
-  (testing "Timeout Keycloak"
+  #_(testing "Timeout Keycloak"
     (is (thrown? java.util.concurrent.TimeoutException
                  (keycloak/allowed-paths *keycloak* "jerome@t1.lumen.localhost" {:timeout 0})))))
