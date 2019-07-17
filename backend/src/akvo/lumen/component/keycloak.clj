@@ -51,7 +51,7 @@
                                 json/decode
                                 (get "access_token"))]
        {"Authorization" (str "bearer " access-token)
-        "Conternt-Type" "application/json"}))))
+        "Content-Type" "application/json"}))))
 
 (defn group-by-path
   "Get the group id (uuid) by using group path.
