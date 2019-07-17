@@ -46,7 +46,7 @@
     [this tenant-label]
     "List tenants users"))
 
-(defprotocol KeycloakAuthorization
+(defprotocol Authorizer
   (allowed-paths
     [this email]
     "Allowed paths by email"))
