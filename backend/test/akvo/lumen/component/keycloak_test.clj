@@ -3,6 +3,7 @@
   (:require
    [akvo.lumen.component.keycloak :as keycloak]
    [akvo.lumen.test-utils :as tu]
+   [akvo.lumen.protocols :as p]
    [clojure.test :refer :all]
    [integrant.core :as ig]))
 
@@ -21,15 +22,11 @@
 (deftest keycloak-test
   (testing "Jerome (admin) permissions to t1"
     (is (= #{"t1/admin"}
-           (keycloak/allowed-paths *keycloak* "jerome@t1.lumen.localhost"))))
+           (p/allowed-paths *keycloak* "jerome@t1.lumen.localhost"))))
 
   (testing "Salim (member) permissions to t1"
     (is (= #{"t1"}
-           (keycloak/allowed-paths *keycloak* "salim@t1.lumen.localhost"))))
+           (p/allowed-paths *keycloak* "salim@t1.lumen.localhost"))))
 
   (testing "Non existing user"
-    (is (thrown? Exception (keycloak/allowed-paths *keycloak* "nobody@t1.lumen.localhost"))))
-
-  #_(testing "Timeout Keycloak"
-    (is (thrown? java.util.concurrent.TimeoutException
-                 (keycloak/allowed-paths *keycloak* "jerome@t1.lumen.localhost" {:timeout 0})))))
+    (is (= nil (p/allowed-paths *keycloak* "nobody@t1.lumen.localhost")))))

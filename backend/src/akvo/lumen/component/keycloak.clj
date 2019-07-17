@@ -268,7 +268,7 @@
               (swap! assoc email user-id)
               (get email)))))))
 
-(defn allowed-paths
+(defn- allowed-paths
   "Provided an email address from the authentication process dig out the
   Keycloak user and get allowed set of paths, as in #{\"demo/admin\" \"t1\"}
 
@@ -279,7 +279,7 @@
   ([{:keys [api-root http-timeout user-id-cache connection-manager] :as keycloak} email
     {:keys [timeout] :or {timeout http-timeout}}]
    (let [bare-req-opts {:timeout timeout}]
-     (if-some [headers (request-headers keycloak (assoc bare-req-opts :timeout timeout))]
+     (if-some [headers (request-headers keycloak bare-req-opts)]
        (let [req-opts (assoc bare-req-opts :headers headers)]
          (when-let [user-id (lookup-user-id connection-manager req-opts api-root user-id-cache email)]
            (when-let [allowed-paths
