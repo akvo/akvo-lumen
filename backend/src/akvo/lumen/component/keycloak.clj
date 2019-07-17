@@ -8,6 +8,7 @@
    [cheshire.core :as json]
    [clj-http.client :as client]
    [clj-http.conn-mgr :as http.conn-mgr]
+   [clojure.core.cache :as cache]
    [clojure.set :as set]
    [clojure.spec.alpha :as s]
    [clojure.tools.logging :as log]
@@ -255,10 +256,15 @@
       first
       (get "id")))
 
+(defn- get-user-id [user-id-cache email]
+  (when-let [user-id (get @user-id-cache email)]
+    (swap! user-id-cache cache/hit email)
+    user-id))
+
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
   [cm req-opts api-root user-id-cache email]
-  (if-some [user-id (get @user-id-cache email)]
+  (if-some [user-id (get-user-id user-id-cache email)]
     user-id
     (let [url (format "%s/users/?email=%s" api-root email)]
       (if-some [users (-> (client/get url (assoc req-opts :connection-manager cm)) :body json/decode)]
@@ -356,11 +362,11 @@
   (allowed-paths [this email]
     (allowed-paths this email)))
 
-(defn- keycloak [{:keys [credentials http-timeout url realm]}]
+(defn- init-keycloak [{:keys [credentials http-timeout url realm max-user-ids-cache]}]
   (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials
                        :issuer (format "%s/realms/%s" url realm)
-                       :user-id-cache (atom {})
+                       :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))
                        :http-timeout http-timeout}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
@@ -388,9 +394,9 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
   ::data)
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache] :as opts}]
   (log/info "Starting keycloak")
-  (let [{:keys [issuer openid-config api-root] :as this} (keycloak (assoc data :credentials credentials))
+  (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
         http-timeout 10000
         cm (http.conn-mgr/make-reusable-conn-manager {:timeout 2 :threads 3 :insecure? false :default-per-route 10})
         openid-config (fetch-openid-configuration issuer {:timeout http-timeout :connection-manager cm})]
@@ -411,7 +417,8 @@
 (s/def ::credentials (s/keys :req-un [::client_id
                                       ::client_secret]))
 
-(s/def ::config (s/keys :req-un [::data ::credentials]))
+(s/def ::max-user-ids-cache pos-int?)
+(s/def ::config (s/keys :req-un [::data ::credentials ::max-user-ids-cache]))
 
 (s/def ::keycloak (s/and (partial satisfies? p/KeycloakUserManagement)
                          (partial satisfies? p/Authorizer)))
