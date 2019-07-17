@@ -34,10 +34,10 @@
    (let [params (merge {:grant_type "client_credentials"}
                        credentials)
          resp (client/post (get openid-config "token_endpoint")
-                           {:form-params params})
-         access-token (-> resp :body json/decode (get "access_token"))]
-     {"Authorization" (str "bearer " access-token)
-      "Content-Type" "application/json"}))
+                           {:form-params params})]
+     (when-let [access-token (-> resp :body json/decode (get "access_token"))]
+       {"Authorization" (str "bearer " access-token)
+        "Content-Type" "application/json"})))
   ([{:keys [openid-config credentials connection-manager]}
     {:keys [timeout] :as req-opts}]
    (let [params (merge {:grant_type "client_credentials"}
@@ -46,10 +46,10 @@
          req-opts (-> req-opts
                       (select-keys [:timeout])
                       (assoc :form-params params))]
-     (when-some [access-token (-> (client/post url (assoc req-opts :connection-manager connection-manager))
-                                :body
-                                json/decode
-                                (get "access_token"))]
+     (when-let [access-token (-> (client/post url (assoc req-opts :connection-manager connection-manager))
+                                 :body
+                                 json/decode
+                                 (get "access_token"))]
        {"Authorization" (str "bearer " access-token)
         "Content-Type" "application/json"}))))
 
@@ -258,11 +258,11 @@
 
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
-  [connection-manager req-opts api-root user-id-cache email]
+  [req-opts api-root user-id-cache email]
   (if-some [user-id (get-user-id user-id-cache email)]
     user-id
     (let [url (format "%s/users/?email=%s" api-root email)]
-      (let [users (-> (client/get url (assoc req-opts :connection-manager connection-manager)) :body json/decode)]
+      (let [users (-> (client/get url req-opts) :body json/decode)]
         (when-some [user-id (active-user users email)]
           (-> user-id-cache
               (swap! assoc email user-id)
@@ -279,16 +279,15 @@
   ([{:keys [api-root http-timeout user-id-cache connection-manager] :as keycloak} email
     {:keys [timeout] :or {timeout http-timeout}}]
    (let [bare-req-opts {:timeout timeout}]
-     (when-some [headers (request-headers keycloak bare-req-opts)]
-       (let [req-opts (assoc bare-req-opts :headers headers)]
-         (when-let [user-id (lookup-user-id connection-manager req-opts api-root user-id-cache email)]
-           (when-let [allowed-paths
-                    (-> (client/get (format "%s/users/%s/groups" api-root user-id)
-                                    (assoc req-opts :connection-manager connection-manager)) :body json/decode)]
-             (reduce (fn [paths {:strs [path]}]
-                       (conj paths (subs path 12)))
-                     #{}
-                     allowed-paths))))))))
+     (when-let [headers (request-headers keycloak bare-req-opts)]
+       (let [req-opts (assoc bare-req-opts :headers headers :connection-manager connection-manager)]
+         (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
+           (->> (client/get (format "%s/users/%s/groups" api-root user-id) req-opts )
+                :body
+                json/decode
+                (reduce (fn [paths {:strs [path]}]
+                          (conj paths (subs path 12)))
+                        #{}))))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
