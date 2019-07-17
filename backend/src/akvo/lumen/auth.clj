@@ -2,6 +2,7 @@
   (:require [akvo.commons.jwt :as jwt]
             [akvo.lumen.component.auth0 :as auth0]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [clojure.set :as set]
@@ -130,7 +131,7 @@
       (if (api-authz? jwt-claims)
         (try
           (let [email (get jwt-claims "email")
-                allowed-paths (delay (keycloak/allowed-paths keycloak email))]
+                allowed-paths (delay (p/allowed-paths keycloak email))]
             (cond
               (nil? jwt-claims) not-authenticated
               (admin-path? request) (if (api-tenant-admin? tenant @allowed-paths)
