@@ -1,7 +1,7 @@
 (ns akvo.lumen.component.auth0
   "moving to auth0"
   (:require [akvo.commons.jwt :as jwt]
-            [akvo.lumen.http :as http]
+            [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
@@ -15,7 +15,7 @@
   (try
     (let [issuer (format "%s/" url)
           rsa-key  (-> (format  "%s.well-known/jwks.json" issuer)
-                             http/get*
+                             http.client/get*
                              :body
                              (jwt/rsa-key 0))]
       (assoc opts

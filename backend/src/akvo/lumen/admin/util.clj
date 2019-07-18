@@ -1,5 +1,5 @@
 (ns akvo.lumen.admin.util
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.http.client :as http.client]
             [akvo.lumen.component.keycloak :as keycloak]
             [clojure.java.jdbc :as jdbc]
             [akvo.lumen.component.hikaricp :as hikaricp]
@@ -33,6 +33,6 @@
     {:api-root (format "%s/admin/realms/akvo" url)
      :issuer issuer
      :openid-config (keycloak/fetch-openid-configuration issuer {})
-     :connection-manager (http/new-connection-manager)
+     :connection-manager (http.client/new-connection-manager)
      :credentials {"client_id" (:kc-id env "akvo-lumen-confidential")
                    "client_secret" (:kc-secret env)}}))

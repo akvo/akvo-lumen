@@ -1,6 +1,6 @@
 (ns akvo.lumen.component.flow
   "wrap flow and flow api logic and data related"
-  (:require [akvo.lumen.http :as http]
+  (:require [akvo.lumen.http.client :as http.client]
             [integrant.core :as ig]
             [akvo.lumen.component.keycloak :as c.keycloak]            
             [clojure.tools.logging :as log]
@@ -12,7 +12,7 @@
   (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
                                (-> this :keycloak :url)
                                (-> this :keycloak :realm))]
-    (-> (http/post* token-endpoint
+    (-> (http.client/post* token-endpoint
                    {:form-params {"client_id" "akvo-lumen"
                                   "refresh_token" refresh-token
                                   "grant_type" "refresh_token"}
@@ -32,7 +32,7 @@
   [flow-api token body]
   (let [start (. System (nanoTime))
         res (try
-              (http/post*
+              (http.client/post*
                (str (:url flow-api) "/check_permissions")
                {:as :json
                 :headers (api-headers token)

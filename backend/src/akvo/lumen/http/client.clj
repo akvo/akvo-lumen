@@ -1,4 +1,4 @@
-(ns akvo.lumen.http
+(ns akvo.lumen.http.client
   "wrapping http client calls so we have robust settings values"
   (:require
    [clj-http.client :as client]
