@@ -21,8 +21,6 @@
 
 (defn fetch-openid-configuration
   "Get the openid configuration"
-  ([issuer]
-   (fetch-openid-configuration issuer {}))
   ([issuer req-opts]
    (let [url (format "%s/.well-known/openid-configuration" issuer)]
      (-> (client/get url req-opts) :body json/decode))))
@@ -377,12 +375,16 @@
    (let [default-values {:timeout 1000 :threads 2 :insecure? false :default-per-route 2}]
      (http.conn-mgr/make-reusable-conn-manager (merge default-values (select-keys opts [:timeout :threads :insecure? :default-per-route]))))))
 
+
+;;   all timeouts are in milliseconds!!
+;;  :timeout - Time that connections are left open before automatically closing
+;;  :connection-timeout - int the default connect timeout value for connection
+
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache] :as opts}]
   (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
-        http-timeout 10000
         connection-manager (new-connection-manager {:timeout (* 30 1000) :threads 10 :default-per-route 10})
-        openid-config (fetch-openid-configuration issuer {:timeout http-timeout :connection-manager connection-manager})]
+        openid-config (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
            :connection-manager connection-manager

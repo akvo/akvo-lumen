@@ -31,7 +31,7 @@
         issuer (format "%s/realms/akvo" url)]
     {:api-root (format "%s/admin/realms/akvo" url)
      :issuer issuer
-     :openid-config (keycloak/fetch-openid-configuration issuer)
+     :openid-config (keycloak/fetch-openid-configuration issuer {})
      :connection-manager (keycloak/new-connection-manager)
      :credentials {"client_id" (:kc-id env "akvo-lumen-confidential")
                    "client_secret" (:kc-secret env)}}))
