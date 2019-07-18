@@ -30,23 +30,14 @@
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
-  ([{:keys [openid-config credentials connection-manager]}]
-   (let [params (merge {:grant_type "client_credentials"}
-                       credentials)
-         resp (client/post (get openid-config "token_endpoint")
-                           {:form-params params})]
-     (when-let [access-token (-> resp :body json/decode (get "access_token"))]
-       {"Authorization" (str "bearer " access-token)
-        "Content-Type" "application/json"})))
+  ([{:keys [openid-config credentials connection-manager] :as k}]
+   (request-headers k {}))
   ([{:keys [openid-config credentials connection-manager]}
     {:keys [timeout] :as req-opts}]
-   (let [params (merge {:grant_type "client_credentials"}
-                       credentials)
-         url (get openid-config "token_endpoint")
-         req-opts (-> req-opts
-                      (select-keys [:timeout])
-                      (assoc :form-params params))]
-     (when-let [access-token (-> (client/post url (assoc req-opts :connection-manager connection-manager))
+   (let [params (merge {:grant_type "client_credentials"} credentials)
+         req-opts (-> (select-keys req-opts [:timeout])
+                      (assoc :form-params params :connection-manager connection-manager))]
+     (when-let [access-token (-> (client/post (get openid-config "token_endpoint") req-opts)
                                  :body
                                  json/decode
                                  (get "access_token"))]
