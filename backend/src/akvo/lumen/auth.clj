@@ -141,9 +141,6 @@
                                     (handler request)
                                     not-authorized)
               :else not-authorized))
-          (catch java.util.concurrent.TimeoutException e
-            (log/info (.getMesage e))
-            service-unavailable)
           (catch Exception e
             (let [wrap-info (fn [e v] (log/info (.getMessage e)) v)]
               (case (-> e ex-data :response-code)
