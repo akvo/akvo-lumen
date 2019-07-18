@@ -26,7 +26,7 @@ function initAuthenticated(profile, env) {
 
   // Refreshing the token on a fixed schedule (every 10 minutes)
   // will disable SSO Idle Timeout
-  setInterval(auth.token, 1000 * 60 * 1);
+  setInterval(auth.token, 1000 * 60 * 10);
 
   render(
     <AppContainer>
@@ -82,8 +82,9 @@ function dispatchOnMode() {
   const accessToken = queryParams.access_token;
 
   if (url.parse(location.href).pathname !== '/auth0_callback' && accessToken == null) {
-    const authz = queryString.parse(location.search).auth || 'keycloak';
-    get('/env', { auth: authz })
+    let authz = queryString.parse(location.search).auth;
+    authz = authz ? { auth: authz } : null;
+    get('/env', authz)
     .then(
       ({
         body,
