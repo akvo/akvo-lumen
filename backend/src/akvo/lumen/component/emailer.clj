@@ -1,6 +1,6 @@
 (ns akvo.lumen.component.emailer
-  (:require [cheshire.core :as json]
-            [clj-http.client :as client]
+  (:require [akvo.lumen.http :as http]
+            [cheshire.core :as json]
             [akvo.lumen.protocols :as p]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
@@ -27,7 +27,7 @@
                        "Recipients" (into []
                                           (map (fn [email] {"Email" email})
                                                recipients))})]
-      (client/post "https://api.mailjet.com/v3/send"
+      (http/post* "https://api.mailjet.com/v3/send"
                    {:basic-auth credentials
                     :headers    {"Content-Type" "application/json"}
                     :body       (json/encode body)}))))

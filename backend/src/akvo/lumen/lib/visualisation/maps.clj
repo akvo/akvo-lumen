@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.visualisation.maps
-  (:require [akvo.lumen.lib :as lib]
+  (:require [akvo.lumen.http :as http]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.postgres.filter :as filter]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
@@ -7,7 +8,6 @@
             [clojure.tools.logging :as log]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [clojure.core.match :refer [match]]
             [clojure.walk :as walk]
             [hugsql.core :as hugsql])
@@ -90,7 +90,7 @@
         url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
         _ (log/debug :map-config map-config)
-        layer-group-id (-> (client/post url {:body (json/encode map-config)
+        layer-group-id (-> (http/post* url {:body (json/encode map-config)
                                              :headers headers
                                              :content-type :json})
                            :body json/decode (get "layergroupid"))
@@ -126,7 +126,7 @@
           headers* (headers tenant-conn)
           _ (log/warn :map-config map-config)
           _ (log/warn :headers headers)
-          layer-group-id (-> (client/post (format "%s/layergroup" windshaft-url)
+          layer-group-id (-> (http/post* (format "%s/layergroup" windshaft-url)
                                           {:body (json/encode map-config)
                                            :headers headers*
                                            :content-type :json})

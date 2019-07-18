@@ -26,11 +26,11 @@
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.config :refer [error-msg]]
+            [akvo.lumen.http :as http]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [clojure.java.browse :as browse]
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
@@ -158,22 +158,22 @@
 (defn root-group-id
   "Returns the id of group on path akvo/lumen"
   [headers api-root]
-  (-> (client/get (format "%s/group-by-path/%s" api-root "akvo/lumen")
-                  {:headers headers})
+  (-> (http/get* (format "%s/group-by-path/%s" api-root "akvo/lumen")
+                 {:headers headers})
       :body json/decode (get "id")))
 
 (defn create-group
   [headers api-root root-group-id role group-name]
-  (client/post (format "%s/roles" api-root)
-               {:body (json/encode {"name" role})
-                :headers headers})
-  (let [new-group-id (-> (client/post
+  (http/post* (format "%s/roles" api-root)
+              {:body (json/encode {"name" role})
+               :headers headers})
+  (let [new-group-id (-> (http/post*
                           (format "%s/groups/%s/children"
                                   api-root root-group-id)
                           {:body (json/encode {"name" group-name})
                            :headers headers})
                          :body json/decode (get "id"))
-        available-roles (-> (client/get
+        available-roles (-> (http/get*
                              (format "%s/groups/%s/role-mappings/realm/available"
                                      api-root root-group-id)
                              {:headers headers})
@@ -182,7 +182,7 @@
                             available-roles)
                     first
                     (get "id"))
-        pair-resp (client/post
+        pair-resp (http/post*
                    (format "%s/groups/%s/role-mappings/realm" api-root new-group-id)
                    {:body (json/encode [{"id" role-id
                                          "name" role
@@ -198,7 +198,7 @@
    new user-id and temporary password."
   [headers api-root email]
   (let [tmp-password (random-url-safe-string 6)
-        user-id (-> (client/post (format "%s/users" api-root)
+        user-id (-> (http/post* (format "%s/users" api-root)
                                  {:body (json/encode
                                          {"username" email
                                           "email" email
@@ -208,7 +208,7 @@
                     (get-in [:headers "Location"])
                     (s/split #"/")
                     last)]
-    (client/put (format "%s/users/%s/reset-password" api-root user-id)
+    (http/put* (format "%s/users/%s/reset-password" api-root user-id)
                 {:body (json/encode {"temporary" true
                                      "type" "password"
                                      "value" tmp-password})
@@ -227,14 +227,14 @@
 
 (defn fetch-client
   [headers api-root client-id]
-  (-> (client/get (format "%s/clients" api-root)
+  (-> (http/get* (format "%s/clients" api-root)
                   {:query-params {"clientId" client-id}
                    :headers headers})
       :body json/decode first))
 
 (defn update-client
   [headers api-root {:strs [id] :as client}]
-  (client/put (format "%s/clients/%s" api-root id)
+  (http/put* (format "%s/clients/%s" api-root id)
                 {:body (json/encode client)
                  :headers headers}))
 

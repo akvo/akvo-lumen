@@ -3,11 +3,10 @@
    More info can be found in the Keycloak integration doc spec."
   (:require
    [akvo.commons.jwt :as jwt]
+   [akvo.lumen.http :as http]
    [akvo.lumen.lib :as lib]
    [akvo.lumen.protocols :as p]
    [cheshire.core :as json]
-   [clj-http.client :as client]
-   [clj-http.conn-mgr :as http.conn-mgr]
    [clojure.core.cache :as cache]
    [clojure.set :as set]
    [clojure.spec.alpha :as s]
@@ -23,7 +22,7 @@
   "Get the openid configuration"
   ([issuer req-opts]
    (let [url (format "%s/.well-known/openid-configuration" issuer)]
-     (-> (client/get url req-opts) :body json/decode))))
+     (-> (http/get* url req-opts) :body json/decode))))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
@@ -33,7 +32,7 @@
   ([{:keys [openid-config credentials connection-manager]} req-opts]
    (let [params (merge {:grant_type "client_credentials"} credentials)
          req-opts (merge {:form-params params :connection-manager connection-manager} req-opts)]
-     (when-let [access-token (-> (client/post (get openid-config "token_endpoint") req-opts)
+     (when-let [access-token (-> (http/post* (get openid-config "token_endpoint") req-opts)
                                  :body
                                  json/decode
                                  (get "access_token"))]
@@ -46,7 +45,7 @@
   For example:
     (group-by-path keycloak headers \"/akvo/lumen/t1/admin\") -> uuid"
   [{:keys [api-root credentials openid-config]} headers path]
-  (-> (client/get (format "%s/group-by-path/%s"
+  (-> (http/get* (format "%s/group-by-path/%s"
                           api-root (format "akvo/lumen/%s" path))
                   {:headers headers})
       :body json/decode))
@@ -54,7 +53,7 @@
 (defn group-members
   "Return groups memebers using a group id"
   [{:keys [api-root credentials openid-config]} headers group-id]
-  (-> (client/get (format "%s/groups/%s/members"
+  (-> (http/get* (format "%s/groups/%s/members"
                           api-root group-id)
                   {:headers headers})
       :body json/decode))
@@ -87,11 +86,11 @@
 
 (defn tenant-admin?
   [headers api-root tenant user-id]
-  (let [admin-group-id (-> (client/get (format "%s/group-by-path/akvo/lumen/%s/admin"
+  (let [admin-group-id (-> (http/get* (format "%s/group-by-path/akvo/lumen/%s/admin"
                                                api-root tenant)
                                        {:headers headers})
                            :body json/decode (get "id"))
-        admins (-> (client/get (format "%s/groups/%s/members" api-root admin-group-id)
+        admins (-> (http/get* (format "%s/groups/%s/members" api-root admin-group-id)
                                {:headers headers})
                    :body json/decode)
         admin-ids (into #{}
@@ -104,7 +103,7 @@
 (defn fetch-user-by-id
   "Get user by email. Returns nil if not found."
   [headers api-root tenant user-id]
-  (let [resp (-> (client/get (format "%s/users/%s" api-root user-id)
+  (let [resp (-> (http/get* (format "%s/users/%s" api-root user-id)
                              {:headers headers})
                  :body json/decode)]
     (assoc resp
@@ -114,7 +113,7 @@
 (defn fetch-user-by-email
   "Get user by email. Returns nil if none found."
   [headers api-root email]
-  (let [candidates (-> (client/get (format "%s/users?email=%s"
+  (let [candidates (-> (http/get* (format "%s/users?email=%s"
                                            api-root email)
                                    {:headers headers})
                        :body json/decode)]
@@ -127,7 +126,7 @@
 (defn fetch-user-groups
   "Get the groups of the user"
   [headers api-root user-id]
-  (-> (client/get (format "%s/users/%s/groups" api-root user-id)
+  (-> (http/get* (format "%s/users/%s/groups" api-root user-id)
                   {:headers headers})
       :body json/decode))
 
@@ -150,21 +149,21 @@
 (defn add-user-to-group
   "Returns status code from Keycloak response."
   [headers api-root user-id group-id]
-  (:status (client/put (format "%s/users/%s/groups/%s"
+  (:status (http/put* (format "%s/users/%s/groups/%s"
                                api-root user-id group-id)
-                       {:headers headers})))
+                      {:headers headers})))
 
 (defn remove-user-from-group
   "Returns status code from Keycloak response."
   [headers api-root user-id group-id]
-  (:status (client/delete (format "%s/users/%s/groups/%s"
+  (:status (http/delete* (format "%s/users/%s/groups/%s"
                                   api-root user-id group-id)
                           {:headers headers})))
 
 (defn set-user-have-verified-email
   "Returns status code from Keycloak response."
   [headers api-root user-id]
-  (:status (client/put (format "%s/users/%s" api-root user-id)
+  (:status (http/put* (format "%s/users/%s" api-root user-id)
                        {:body (json/encode {"emailVerified" true})
                         :headers headers})))
 
@@ -246,7 +245,7 @@
   [req-opts api-root user-id-cache email]
   (if-let [user-id (get-user-id user-id-cache email)]
     user-id
-    (when-let [user-id (-> (client/get (format "%s/users/?email=%s" api-root email) req-opts)
+    (when-let [user-id (-> (http/get* (format "%s/users/?email=%s" api-root email) req-opts)
                            :body
                            json/decode
                            (active-user email))]
@@ -264,7 +263,7 @@
   (when-let [headers (request-headers keycloak)]
     (let [req-opts {:headers headers :connection-manager connection-manager}]
       (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-        (->> (client/get (format "%s/users/%s/groups" api-root user-id) req-opts)
+        (->> (http/get* (format "%s/users/%s/groups" api-root user-id) req-opts)
              :body
              json/decode
              (reduce (fn [paths {:strs [path]}]
@@ -290,7 +289,7 @@
                    headers api-root user-id)))))
 
   (create-user [{:keys [api-root]} headers email]
-    (client/post (format "%s/users" api-root)
+    (http/post* (format "%s/users" api-root)
                  {:body (json/encode
                          {"username" email
                           "email" email
@@ -306,7 +305,7 @@
     (do-promote-user-to-admin this tenant author-claims user-id))
 
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
-    (client/put (format "%s/users/%s/reset-password" api-root user-id)
+    (http/put* (format "%s/users/%s/reset-password" api-root user-id)
                 {:body (json/encode {"temporary" true
                                      "type" "password"
                                      "value" tmp-password})
@@ -339,7 +338,7 @@
   (try
     (let [issuer (str url "/realms/" realm)
          rsa-key  (-> (str issuer "/protocol/openid-connect/certs")
-                      client/get
+                      http/get*
                       :body
                       (jwt/rsa-key 0))]
      (assoc opts
@@ -360,27 +359,10 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
   ::data)
 
-(defn default-req-opts
-  "all timeouts are in milliseconds!!
-  :timeout - Time that connections are left open before automatically closing
-  :connection-timeout - the default connect timeout value for connection
-
-  https://github.com/dakrone/clj-http/issues/477
-  " 
-  [opts]
-  (merge {:timeout 5 :threads 2 :insecure? false :default-per-route 2}
-         (select-keys opts [:timeout :threads :insecure? :default-per-route])))
-
-(defn new-connection-manager
-  ([] (new-connection-manager {}))
-  ([opts]
-   (http.conn-mgr/make-reusable-conn-manager (default-req-opts opts))))
-
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache] :as opts}]
   (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
-        connection-manager (new-connection-manager {:timeout (* 10 1000) :threads 10 :default-per-route 10
-                                                    :connection-timeout (* 30 1000)})
+        connection-manager (http/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
         openid-config (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
@@ -389,7 +371,7 @@
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))
-  (http.conn-mgr/shutdown-manager (:connection-manager opts)))
+  (http/shutdown-manager (:connection-manager opts)))
 
 
 (s/def ::client_id string?)

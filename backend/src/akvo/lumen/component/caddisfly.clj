@@ -1,7 +1,7 @@
 (ns akvo.lumen.component.caddisfly
   "akvo-caddisfly component support"
-  (:require [cheshire.core :as json]
-            [clj-http.client :as client]
+  (:require [akvo.lumen.http :as http]
+            [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [integrant.core :as ig]
@@ -49,10 +49,10 @@
 (defmethod ig/init-key :akvo.lumen.component.caddisfly/prod  [_ {:keys [schema-uri] :as opts}]
   {:pre [schema-uri]}
   
-  (let [v0-tests (-> "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json" client/get :body (json/decode keyword) extract-tests)
+  (let [v0-tests (-> "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json" http/get* :body (json/decode keyword) extract-tests)
         tests (version-schema-backwards-adapt
                v0-tests
-               (-> schema-uri client/get :body (json/decode keyword) extract-tests-v2))]
+               (-> schema-uri http/get* :body (json/decode keyword) extract-tests-v2))]
     (when-not (= v2-count (count tests))(log/error :failed-caddisfly-expectations :v2-count v2-count :tests-count (count tests)))
     (log/info ::start "Using caddisfly ONLINE schema-uri" schema-uri)
     (map->Caddisfly (assoc opts :schema tests))))

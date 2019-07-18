@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.import.flow-common
   (:require [akvo.commons.psql-util :as pg]
             [cheshire.core :as json]
-            [clj-http.client :as http]
+            [akvo.lumen.http :as http]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str])
   (:import [java.time Instant]))
@@ -10,13 +10,13 @@
   [api-root headers-fn instance survey-id]
   (-> (format "%s/orgs/%s/surveys/%s"
               api-root instance survey-id)
-      (http/get {:headers (headers-fn)
+      (http/get* {:headers (headers-fn)
                  :as :json})
       :body))
 
 (defn form-instances* [headers-fn url]
   (let [response (-> url
-                     (http/get {:headers (headers-fn)
+                     (http/get* {:headers (headers-fn)
                                 :as :json-string-keys})
                      :body)]
     (lazy-cat (get response "formInstances")
@@ -32,7 +32,7 @@
 (defn data-points*
   [headers-fn url]
   (-> url
-      (http/get {:headers (headers-fn)
+      (http/get* {:headers (headers-fn)
                  :as :json-string-keys})
       :body))
 

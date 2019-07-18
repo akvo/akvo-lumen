@@ -4,7 +4,6 @@
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.string :as string]
