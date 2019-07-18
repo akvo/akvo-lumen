@@ -22,7 +22,8 @@
   (-> (prometheus/collector-registry)
       (jvm/initialize)
       (prometheus/register (DropwizardExports. dropwizard-registry)
-                           (prometheus/histogram :app/flow-check-permissions {:labels [:tenant]}))
+                           (prometheus/histogram :app/flow-check-permissions {:labels [:tenant]})
+                           (prometheus/histogram :app/auth-allowed-paths))
       (ring/initialize {:labels [:tenant]})))
 
 (s/def ::dropwizard-registry ::metric-registry)

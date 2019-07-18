@@ -2,8 +2,8 @@
   (:require [akvo.commons.jwt :as jwt]
             [akvo.lumen.component.auth0 :as auth0]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.string :as string]
@@ -44,6 +44,20 @@
   (-> (response/response "Not authorized")
       (response/status 403)))
 
+(def service-unavailable
+  (-> (response/response "Service Unavailable")
+      (response/status 503)))
+
+(def internal-server-error
+  (-> (response/response "Internal server errror")
+      (response/status 500)))
+
+(defn api-authz?
+  "Feature flag predicate function. Add trailing $auth to given_name to enable
+  API authz"
+  [{:strs [family_name] :as jwt-claims}]
+  (and (nil? family_name) (string/ends-with? family_name "$auth")))
+
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
   If request don't contain claims return 401. If current dns label (tenant) is
@@ -53,9 +67,9 @@
   (fn [handler]
     (fn [{:keys [jwt-claims] :as request}]
       (let [issuer (condp = (get jwt-claims "iss")
-                                   (:issuer keycloak) :keycloak
-                                   (:issuer auth0) :auth0
-                                   :other)]
+                     (:issuer keycloak) :keycloak
+                     (:issuer auth0) :auth0
+                     :other)]
         (cond
           (nil? jwt-claims) not-authenticated
           (admin-path? request) (if (tenant-admin? request issuer)
@@ -87,14 +101,52 @@
 (defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ {:keys [keycloak auth0]}]
   (wrap-auth keycloak auth0))
 
+(s/def ::keycloak ::keycloak/data)
+(s/def ::auht0 ::auth0/data)
+
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
   (s/keys :req-un [::keycloak ::auth0]))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak auth0]}]
   (wrap-jwt keycloak auth0))
 
-(s/def ::keycloak ::keycloak/data)
-(s/def ::auht0 ::auth0/data)
-
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
   (s/keys :req-un [::keycloak ::auth0]))
+
+(defn api-tenant-admin?
+  [tenant allowed-paths]
+  (contains? allowed-paths (str tenant "/admin")))
+
+(defn api-tenant-member?
+  [tenant allowed-paths]
+  (or
+   (api-tenant-admin? tenant allowed-paths)
+   (contains? allowed-paths tenant)))
+
+(defmethod ig/init-key :akvo.lumen.auth/wrap-api-authorization
+  [_ {:keys [keycloak]}]
+  (fn [handler]
+    (fn [{:keys [jwt-claims tenant] :as request}]
+      (if (api-authz? jwt-claims)
+        (try
+          (let [email (get jwt-claims "email")
+                allowed-paths (delay (p/allowed-paths keycloak email))]
+            (cond
+              (nil? jwt-claims) not-authenticated
+              (admin-path? request) (if (api-tenant-admin? tenant @allowed-paths)
+                                      (handler request)
+                                      not-authorized)
+              (api-path? request) (if (api-tenant-member? tenant @allowed-paths)
+                                    (handler request)
+                                    not-authorized)
+              :else not-authorized))
+          (catch Exception e
+            (let [wrap-info (fn [e v] (log/info (.getMessage e)) v)]
+              (case (-> e ex-data :response-code)
+                503 (wrap-info e service-unavailable)
+                401 not-authorized
+                (wrap-info e internal-server-error)))))
+        (handler request)))))
+
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-api-authorization [_]
+  (s/keys :req-un [::keycloak/keycloak]))

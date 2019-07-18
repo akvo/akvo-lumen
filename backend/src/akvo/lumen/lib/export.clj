@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.export
   (:require [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [clj-http.client :as client]))
+            [akvo.lumen.http.client :as http.client]))
 
 (defmacro time*
   "Evaluates expr and prints the time it took.  Returns the value of
@@ -17,7 +17,7 @@
   "Proxy fn, exporter-url token exporter spec -> ring response map"
   [exporter-url access-token locale spec]
   (let [{:keys [body headers status] :as response}
-        (time* (client/post exporter-url
+        (time* (http.client/post* exporter-url
                             {:headers {"access_token" (str/replace-first access-token
                                                                          #"Bearer "
                                                                          "")

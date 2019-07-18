@@ -4,7 +4,6 @@
             [akvo.lumen.util :as util]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [cheshire.core :as json]
-            [clj-http.client :as http]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str])
   (:import [java.time Instant]))

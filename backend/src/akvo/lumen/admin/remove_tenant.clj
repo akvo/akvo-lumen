@@ -21,35 +21,35 @@
   It's not possible to delete a database if open connections exist, workaround:
   https://dba.stackexchange.com/questions/11893/force-drop-db-while-others-may-be-connected"
   (:require [akvo.lumen.admin.util :as util]
+            [akvo.lumen.http.client :as http.client]
             [akvo.lumen.component.keycloak :as keycloak]
-            [cheshire.core :as json]
-            [clj-http.client :as client]))
+            [cheshire.core :as json]))
 
 (defn remove-group
   "Remove keycloak group by id"
   [kc id]
-  (client/delete (format "%s/groups/%s" (:api-root kc) id)
+  (http.client/delete* (format "%s/groups/%s" (:api-root kc) id)
                  {:headers (keycloak/request-headers kc)
                   :as :json}))
 
 (defn get-groups
   "List all keycloak groups and sub groups"
   [kc]
-  (:body (client/get (format "%s/groups" (:api-root kc))
+  (:body (http.client/get* (format "%s/groups" (:api-root kc))
                      {:headers (keycloak/request-headers kc)
                       :as :json})))
 
 (defn get-clients
   "List all keycloak clients"
   [kc]
-  (:body (client/get (format "%s/clients" (:api-root kc))
+  (:body (http.client/get* (format "%s/clients" (:api-root kc))
                      {:headers (keycloak/request-headers kc)
                       :as :json})))
 
 (defn update-client
   "Update keycloak client"
   [kc client]
-  (client/put (format "%s/clients/%s" (:api-root kc) (:id client))
+  (http.client/put* (format "%s/clients/%s" (:api-root kc) (:id client))
               {:headers (keycloak/request-headers kc)
                :body (json/generate-string client)
                :content-type :json}))

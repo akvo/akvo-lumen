@@ -19,7 +19,7 @@
     "Add user to tenant")
 
   (create-user
-    [this request-headers email]
+    [this headers email]
     "Create user")
 
   (demote-user-from-admin
@@ -31,7 +31,7 @@
     "Promote existing tenant member to admin")
 
   (reset-password
-    [this request-headers user-id tmp-password]
+    [this headers user-id tmp-password]
     "Set temporary user password")
 
   (remove-user
@@ -45,6 +45,11 @@
   (users
     [this tenant-label]
     "List tenants users"))
+
+(defprotocol Authorizer
+  (allowed-paths
+    [this email]
+    "Allowed paths by email"))
 
 (defprotocol DatasetImporter
   "
@@ -109,4 +114,3 @@
     "Provisional workaround for
      https://github.com/akvo/akvo-lumen/issues/2080
     'Refactor api/collections payload'"))
-
