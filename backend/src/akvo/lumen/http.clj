@@ -17,7 +17,7 @@
 
 
 (defn shutdown-manager [connection-manager]
-    (http.conn-mgr/shutdown-manager connection-manager))
+  (http.conn-mgr/shutdown-manager connection-manager))
 
 (def default-req-opts
   "

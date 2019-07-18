@@ -31,14 +31,14 @@
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
   ([{:keys [openid-config credentials connection-manager]}]
-   (let [req-opts {:form-params (merge {:grant_type "client_credentials"} credentials)
+   (let [req-opts {:form-params        (merge {:grant_type "client_credentials"} credentials)
                    :connection-manager connection-manager}]
      (when-let [access-token (-> (http/post* (get openid-config "token_endpoint") req-opts)
                                  :body
                                  json/decode
                                  (get "access_token"))]
        {"Authorization" (str "bearer " access-token)
-        "Content-Type" "application/json"}))))
+        "Content-Type"  "application/json"}))))
 
 (defn group-by-path
   "Get the group id (uuid) by using group path.
@@ -47,35 +47,35 @@
     (group-by-path keycloak headers \"/akvo/lumen/t1/admin\") -> uuid"
   [{:keys [api-root credentials openid-config]} headers path]
   (-> (http/get* (format "%s/group-by-path/%s"
-                          api-root (format "akvo/lumen/%s" path))
-                  {:headers headers})
+                         api-root (format "akvo/lumen/%s" path))
+                 {:headers headers})
       :body json/decode))
 
 (defn group-members
   "Return groups memebers using a group id"
   [{:keys [api-root credentials openid-config]} headers group-id]
   (-> (http/get* (format "%s/groups/%s/members"
-                          api-root group-id)
-                  {:headers headers})
+                         api-root group-id)
+                 {:headers headers})
       :body json/decode))
 
 (defn tenant-members
   "Return the users for a tenant. The tenant label here becomes the group-name"
   [keycloak tenant-label]
   (try
-    (let [headers (request-headers keycloak)
-          tenant-group (group-by-path keycloak headers tenant-label)
-          group-id (get tenant-group "id")
-          users  (map #(assoc % "admin" false)
-                      (group-members keycloak headers group-id))
-          admin-group-id (get (first (filter #(= "admin"
-                                                 (get % "name"))
-                                             (get-in tenant-group ["subGroups"])))
-                              "id")
-          admins (map #(assoc % "admin" true)
-                      (group-members keycloak headers admin-group-id))
-          members (filter #(and (get % "emailVerified") (get % "enabled"))
-                          (concat admins users))
+    (let [headers         (request-headers keycloak)
+          tenant-group    (group-by-path keycloak headers tenant-label)
+          group-id        (get tenant-group "id")
+          users           (map #(assoc % "admin" false)
+                               (group-members keycloak headers group-id))
+          admin-group-id  (get (first (filter #(= "admin"
+                                                  (get % "name"))
+                                              (get-in tenant-group ["subGroups"])))
+                               "id")
+          admins          (map #(assoc % "admin" true)
+                               (group-members keycloak headers admin-group-id))
+          members         (filter #(and (get % "emailVerified") (get % "enabled"))
+                                  (concat admins users))
           response-filter ["admin" "email" "firstName" "id" "lastName"
                            "username"]]
       (lib/ok {:users (map #(select-keys % response-filter) members)}))
@@ -83,29 +83,29 @@
       (let [ed (ex-data e)]
         ;; TODO??
         (response {:status (:status ed)
-                   :body (:reasonPhrase ed)})))))
+                   :body   (:reasonPhrase ed)})))))
 
 (defn tenant-admin?
   [headers api-root tenant user-id]
   (let [admin-group-id (-> (http/get* (format "%s/group-by-path/akvo/lumen/%s/admin"
-                                               api-root tenant)
-                                       {:headers headers})
+                                              api-root tenant)
+                                      {:headers headers})
                            :body json/decode (get "id"))
-        admins (-> (http/get* (format "%s/groups/%s/members" api-root admin-group-id)
-                               {:headers headers})
-                   :body json/decode)
-        admin-ids (into #{}
-                        (map #(get % "id"))
-                        (filter #(and (get % "emailVerified")
-                                      (get % "enabled"))
-                                admins))]
+        admins         (-> (http/get* (format "%s/groups/%s/members" api-root admin-group-id)
+                                      {:headers headers})
+                           :body json/decode)
+        admin-ids      (into #{}
+                             (map #(get % "id"))
+                             (filter #(and (get % "emailVerified")
+                                           (get % "enabled"))
+                                     admins))]
     (contains? (set admin-ids) user-id)))
 
 (defn fetch-user-by-id
   "Get user by email. Returns nil if not found."
   [headers api-root tenant user-id]
   (let [resp (-> (http/get* (format "%s/users/%s" api-root user-id)
-                             {:headers headers})
+                            {:headers headers})
                  :body json/decode)]
     (assoc resp
            "admin"
@@ -115,8 +115,8 @@
   "Get user by email. Returns nil if none found."
   [headers api-root email]
   (let [candidates (-> (http/get* (format "%s/users?email=%s"
-                                           api-root email)
-                                   {:headers headers})
+                                          api-root email)
+                                  {:headers headers})
                        :body json/decode)]
     ;; Since the keycloak api does a search and not a key lookup on the email
     ;; we need make sure that we have an exact match
@@ -128,7 +128,7 @@
   "Get the groups of the user"
   [headers api-root user-id]
   (-> (http/get* (format "%s/users/%s/groups" api-root user-id)
-                  {:headers headers})
+                 {:headers headers})
       :body json/decode))
 
 (defn tenant-member?
@@ -139,11 +139,11 @@
              (get (fetch-user-by-email headers api-root email) "id")]
       (let [possible-group-paths (set (map #(format % tenant)
                                            ["/akvo/lumen/%s" "/akvo/lumen/%s/admin"]))
-            user-groups (fetch-user-groups headers api-root user-id)
-            user-group-paths (reduce (fn [path-set group]
-                                       (conj path-set (get group "path")))
-                                     #{}
-                                     user-groups)]
+            user-groups          (fetch-user-groups headers api-root user-id)
+            user-group-paths     (reduce (fn [path-set group]
+                                           (conj path-set (get group "path")))
+                                         #{}
+                                         user-groups)]
         (not (empty? (set/intersection possible-group-paths user-group-paths))))
       false)))
 
@@ -151,33 +151,33 @@
   "Returns status code from Keycloak response."
   [headers api-root user-id group-id]
   (:status (http/put* (format "%s/users/%s/groups/%s"
-                               api-root user-id group-id)
+                              api-root user-id group-id)
                       {:headers headers})))
 
 (defn remove-user-from-group
   "Returns status code from Keycloak response."
   [headers api-root user-id group-id]
   (:status (http/delete* (format "%s/users/%s/groups/%s"
-                                  api-root user-id group-id)
-                          {:headers headers})))
+                                 api-root user-id group-id)
+                         {:headers headers})))
 
 (defn set-user-have-verified-email
   "Returns status code from Keycloak response."
   [headers api-root user-id]
   (:status (http/put* (format "%s/users/%s" api-root user-id)
-                       {:body (json/encode {"emailVerified" true})
-                        :headers headers})))
+                      {:body    (json/encode {"emailVerified" true})
+                       :headers headers})))
 
 (defn do-promote-user-to-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
   (if (= (get author-claims "sub") user-id)
     (lib/bad-request {"reason" "Tried to alter own tenant role"})
-    (let [headers (request-headers keycloak)
+    (let [headers         (request-headers keycloak)
           tenant-group-id (get (group-by-path
                                 keycloak headers tenant) "id")
-          admin-group-id (get (group-by-path
-                               keycloak headers
-                               (format "%s/admin" tenant)) "id")]
+          admin-group-id  (get (group-by-path
+                                keycloak headers
+                                (format "%s/admin" tenant)) "id")]
       (if (and (= 204 (add-user-to-group headers api-root user-id
                                          admin-group-id))
                (= 204 (remove-user-from-group headers api-root user-id
@@ -191,12 +191,12 @@
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
   (if (= (get author-claims "sub") user-id)
     (lib/bad-request {"reason" "Tried to alter own tenant role"})
-    (let [headers (request-headers keycloak)
+    (let [headers         (request-headers keycloak)
           tenant-group-id (get (group-by-path keycloak headers tenant)
                                "id")
-          admin-group-id (get (group-by-path keycloak headers
-                                             (format "%s/admin" tenant))
-                              "id")]
+          admin-group-id  (get (group-by-path keycloak headers
+                                              (format "%s/admin" tenant))
+                               "id")]
       (if (and (= 204 (remove-user-from-group headers api-root user-id
                                               admin-group-id))
                (= 204 (add-user-to-group headers api-root user-id
@@ -210,12 +210,12 @@
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
   (if (= (get author-claims "sub") user-id)
     (lib/bad-request {"reason" "Tried to alter own tenant role"})
-    (let [headers (request-headers keycloak)
+    (let [headers         (request-headers keycloak)
           tenant-group-id (get (group-by-path keycloak headers tenant)
                                "id")
-          admin-group-id (get (group-by-path keycloak headers
-                                             (format "%s/admin" tenant))
-                              "id")]
+          admin-group-id  (get (group-by-path keycloak headers
+                                              (format "%s/admin" tenant))
+                               "id")]
       (if (and (= 204 (remove-user-from-group headers api-root user-id
                                               admin-group-id))
                (= 204 (remove-user-from-group headers api-root user-id
@@ -280,9 +280,9 @@
 (defrecord KeycloakAgent [issuer openid-config api-root user-id-cache]
   p/KeycloakUserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
-    (let [headers (request-headers keycloak)
-          user-id (get (fetch-user-by-email headers api-root email)
-                       "id")
+    (let [headers  (request-headers keycloak)
+          user-id  (get (fetch-user-by-email headers api-root email)
+                        "id")
           group-id (get (group-by-path keycloak headers tenant-label)
                         "id")]
       (and (= 204 (add-user-to-group
@@ -292,12 +292,12 @@
 
   (create-user [{:keys [api-root]} headers email]
     (http/post* (format "%s/users" api-root)
-                 {:body (json/encode
-                         {"username" email
-                          "email" email
-                          "emailVerified" false
-                          "enabled" true})
-                  :headers headers}))
+                {:body    (json/encode
+                           {"username"      email
+                            "email"         email
+                            "emailVerified" false
+                            "enabled"       true})
+                 :headers headers}))
   (demote-user-from-admin
     [this tenant author-claims user-id]
     (do-demote-user-from-admin this tenant author-claims user-id))
@@ -308,10 +308,10 @@
 
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
     (http/put* (format "%s/users/%s/reset-password" api-root user-id)
-                {:body (json/encode {"temporary" true
-                                     "type" "password"
-                                     "value" tmp-password})
-                 :headers headers}))
+               {:body    (json/encode {"temporary" true
+                                       "type"      "password"
+                                       "value"     tmp-password})
+                :headers headers}))
   (remove-user
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
@@ -331,21 +331,21 @@
     (allowed-paths this email)))
 
 (defn- init-keycloak [{:keys [credentials url realm max-user-ids-cache]}]
-  (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
-                       :credentials credentials
-                       :issuer (format "%s/realms/%s" url realm)
+  (map->KeycloakAgent {:api-root      (format "%s/admin/realms/%s" url realm)
+                       :credentials   credentials
+                       :issuer        (format "%s/realms/%s" url realm)
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   (try
     (let [issuer (str url "/realms/" realm)
-         rsa-key  (-> (str issuer "/protocol/openid-connect/certs")
+          rsa-key (-> (str issuer "/protocol/openid-connect/certs")
                       http/get*
                       :body
                       (jwt/rsa-key 0))]
-     (assoc opts
-            :issuer issuer
-            :rsa-key rsa-key))
+      (assoc opts
+             :issuer issuer
+             :rsa-key rsa-key))
     (catch Exception e
       (log/error e "Could not get cert from Keycloak")
       (throw e))))
@@ -364,8 +364,8 @@
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
-        connection-manager (http/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
-        openid-config (fetch-openid-configuration issuer {})]
+        connection-manager                               (http/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
+        openid-config                                    (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
            :connection-manager connection-manager
