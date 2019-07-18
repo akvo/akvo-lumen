@@ -19,7 +19,7 @@
     "Add user to tenant")
 
   (create-user
-    [this request-headers email]
+    [this headers email]
     "Create user")
 
   (demote-user-from-admin
@@ -31,7 +31,7 @@
     "Promote existing tenant member to admin")
 
   (reset-password
-    [this request-headers user-id tmp-password]
+    [this headers user-id tmp-password]
     "Set temporary user password")
 
   (remove-user

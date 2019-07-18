@@ -31,8 +31,8 @@
   ""
   [emailer keycloak tenant-conn location email
    {:strs [name] :as author-claims}]
-  (let [request-headers (keycloak/request-headers keycloak)
-        user-id (as-> (p/create-user keycloak request-headers email) x
+  (let [headers (keycloak/request-headers keycloak)
+        user-id (as-> (p/create-user keycloak headers email) x
                   (:headers x)
                   (get x "Location")
                   (str/split x #"/")
@@ -52,7 +52,7 @@
                      :invite-id invite-id
                      :location location
                      :tmp-password tmp-password})]
-    (p/reset-password keycloak request-headers user-id tmp-password)
+    (p/reset-password keycloak headers user-id tmp-password)
     (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
 

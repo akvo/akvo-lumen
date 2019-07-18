@@ -157,26 +157,26 @@
 
 (defn root-group-id
   "Returns the id of group on path akvo/lumen"
-  [request-headers api-root]
+  [headers api-root]
   (-> (client/get (format "%s/group-by-path/%s" api-root "akvo/lumen")
-                  {:headers request-headers})
+                  {:headers headers})
       :body json/decode (get "id")))
 
 (defn create-group
-  [request-headers api-root root-group-id role group-name]
+  [headers api-root root-group-id role group-name]
   (client/post (format "%s/roles" api-root)
                {:body (json/encode {"name" role})
-                :headers request-headers})
+                :headers headers})
   (let [new-group-id (-> (client/post
                           (format "%s/groups/%s/children"
                                   api-root root-group-id)
                           {:body (json/encode {"name" group-name})
-                           :headers request-headers})
+                           :headers headers})
                          :body json/decode (get "id"))
         available-roles (-> (client/get
                              (format "%s/groups/%s/role-mappings/realm/available"
                                      api-root root-group-id)
-                             {:headers request-headers})
+                             {:headers headers})
                             :body json/decode)
         role-id (-> (filter #(= role (get % "name"))
                             available-roles)
@@ -190,13 +190,13 @@
                                          "composite" false
                                          "clientRole" false
                                          "containerId" "Akvo"}])
-                    :headers request-headers})]
+                    :headers headers})]
     new-group-id))
 
 (defn create-new-user
   "Creates a new user and return a map containing email, and
    new user-id and temporary password."
-  [request-headers api-root email]
+  [headers api-root email]
   (let [tmp-password (random-url-safe-string 6)
         user-id (-> (client/post (format "%s/users" api-root)
                                  {:body (json/encode
@@ -204,7 +204,7 @@
                                           "email" email
                                           "emailVerified" false
                                           "enabled" true})
-                                  :headers request-headers})
+                                  :headers headers})
                     (get-in [:headers "Location"])
                     (s/split #"/")
                     last)]
@@ -212,31 +212,31 @@
                 {:body (json/encode {"temporary" true
                                      "type" "password"
                                      "value" tmp-password})
-                 :headers request-headers})
+                 :headers headers})
     {:email email
      :user-id user-id
      :tmp-password tmp-password}))
 
 (defn user-representation
-  [request-headers api-root email]
-  (if-let [user (keycloak/fetch-user-by-email request-headers api-root email)]
+  [headers api-root email]
+  (if-let [user (keycloak/fetch-user-by-email headers api-root email)]
     {:email email
      :user-id (get user "id")}
-    (create-new-user request-headers api-root email)))
+    (create-new-user headers api-root email)))
 
 
 (defn fetch-client
-  [request-headers api-root client-id]
+  [headers api-root client-id]
   (-> (client/get (format "%s/clients" api-root)
                   {:query-params {"clientId" client-id}
-                   :headers request-headers})
+                   :headers headers})
       :body json/decode first))
 
 (defn update-client
-  [request-headers api-root {:strs [id] :as client}]
+  [headers api-root {:strs [id] :as client}]
   (client/put (format "%s/clients/%s" api-root id)
                 {:body (json/encode client)
-                 :headers request-headers}))
+                 :headers headers}))
 
 (defn add-tenant-urls-to-client
   [client url]
@@ -245,29 +245,29 @@
       (update "redirectUris" conj (format "%s/*" url))))
 
 (defn add-tenant-urls-to-clients
-  [{:keys [api-root]} request-headers url]
-  (let [confidential-client (fetch-client request-headers api-root "akvo-lumen-confidential")
-        public-client (fetch-client request-headers api-root "akvo-lumen")]
-    (update-client request-headers api-root
+  [{:keys [api-root]} headers url]
+  (let [confidential-client (fetch-client headers api-root "akvo-lumen-confidential")
+        public-client (fetch-client headers api-root "akvo-lumen")]
+    (update-client headers api-root
                    (add-tenant-urls-to-client confidential-client url))
-    (update-client request-headers api-root
+    (update-client headers api-root
                    (add-tenant-urls-to-client public-client url))))
 
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
   [label email url]
   (let [{:keys [api-root] :as kc} (util/create-keycloak)
-        request-headers (keycloak/request-headers kc)
-        lumen-group-id (root-group-id request-headers api-root)
-        tenant-id (create-group request-headers api-root lumen-group-id
+        headers (keycloak/request-headers kc)
+        lumen-group-id (root-group-id headers api-root)
+        tenant-id (create-group headers api-root lumen-group-id
                                 (format "akvo:lumen:%s" label) label)
-        tenant-admin-id (create-group request-headers api-root tenant-id
+        tenant-admin-id (create-group headers api-root tenant-id
                                       (format "akvo:lumen:%s:admin" label)
                                       "admin")
         {:keys [user-id email tmp-password] :as user-rep}
-        (user-representation request-headers api-root email)]
-    (add-tenant-urls-to-clients kc request-headers url)
-    (keycloak/add-user-to-group request-headers api-root user-id tenant-admin-id)
+        (user-representation headers api-root email)]
+    (add-tenant-urls-to-clients kc headers url)
+    (keycloak/add-user-to-group headers api-root user-id tenant-admin-id)
     (assoc user-rep :url url)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
