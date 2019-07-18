@@ -20,9 +20,11 @@
     (http.conn-mgr/shutdown-manager connection-manager))
 
 (def default-req-opts
-  ":connection-timeout - time to establish the socket
-   :connection-request-timeout - time to have a free socket
-   :socket-timeout - time to get the response" 
+  "
+  All these timeouts are in milliseconds
+  :connection-timeout - time to establish the socket
+  :connection-request-timeout - time to have a free socket
+  :socket-timeout - time to get the response" 
   {:connection-timeout 2000 :connection-request-timeout 50 :socket-timeout 5000})
 
 (defn get* [url & [opts]]
