@@ -5,12 +5,15 @@
    [akvo.commons.jwt :as jwt]
    [akvo.lumen.http :as http]
    [akvo.lumen.lib :as lib]
+   [akvo.lumen.monitoring :as monitoring]
    [akvo.lumen.protocols :as p]
    [cheshire.core :as json]
    [clojure.core.cache :as cache]
    [clojure.set :as set]
    [clojure.spec.alpha :as s]
    [clojure.tools.logging :as log]
+   [iapetos.core :as prometheus]
+   [iapetos.registry :as registry]
    [integrant.core :as ig]
    [ring.util.response :refer [response]]))
 
@@ -259,16 +262,17 @@
 
   The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
   remove the leading /akvo/lumen and return paths as demo/admin."
-  [{:keys [api-root user-id-cache connection-manager] :as keycloak} email]
-  (when-let [headers (request-headers keycloak)]
-    (let [req-opts {:headers headers :connection-manager connection-manager}]
-      (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-        (->> (http/get* (format "%s/users/%s/groups" api-root user-id) req-opts)
-             :body
-             json/decode
-             (reduce (fn [paths {:strs [path]}]
-                       (conj paths (subs path 12)))
-                     #{}))))))
+  [{:keys [api-root user-id-cache connection-manager monitoring] :as keycloak} email]
+  (prometheus/with-duration (registry/get (:collector monitoring) :app/auth-allowed-paths {})
+    (when-let [headers (request-headers keycloak)]
+      (let [req-opts {:headers headers :connection-manager connection-manager}]
+        (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
+          (->> (http/get* (format "%s/users/%s/groups" api-root user-id) req-opts)
+               :body
+               json/decode
+               (reduce (fn [paths {:strs [path]}]
+                         (conj paths (subs path 12)))
+                       #{})))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -359,7 +363,7 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
   ::data)
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
         connection-manager (http/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
@@ -367,7 +371,8 @@
     (log/info "Successfully got openid-config from provider.")
     (assoc this
            :connection-manager connection-manager
-           :openid-config openid-config)))
+           :openid-config openid-config
+           :monitoring monitoring)))
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))
@@ -381,7 +386,8 @@
                                       ::client_secret]))
 
 (s/def ::max-user-ids-cache pos-int?)
-(s/def ::config (s/keys :req-un [::data ::credentials ::max-user-ids-cache]))
+(s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
+(s/def ::config (s/keys :req-un [::data ::credentials ::max-user-ids-cache ::monitoring]))
 
 (s/def ::keycloak (s/and (partial satisfies? p/KeycloakUserManagement)
                          (partial satisfies? p/Authorizer)))
