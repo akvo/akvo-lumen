@@ -28,13 +28,11 @@
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
    REST API. This allows us to reuse the same token for multiple requests."
-  ([{:keys [openid-config credentials connection-manager] :as k}]
-   (request-headers k {}))
-  ([{:keys [openid-config credentials connection-manager]}
-    {:keys [timeout] :as req-opts}]
+  ([{:keys [openid-config credentials connection-manager] :as keycloak}]
+   (request-headers keycloak {}))
+  ([{:keys [openid-config credentials connection-manager]} req-opts]
    (let [params (merge {:grant_type "client_credentials"} credentials)
-         req-opts (-> (select-keys req-opts [:timeout])
-                      (assoc :form-params params :connection-manager connection-manager))]
+         req-opts (merge {:form-params params :connection-manager connection-manager} req-opts)]
      (when-let [access-token (-> (client/post (get openid-config "token_endpoint") req-opts)
                                  :body
                                  json/decode
@@ -189,7 +187,6 @@
           (println (format "Tried to promote user: %s" user-id))
           (lib/internal-server-error))))))
 
-
 (defn do-demote-user-from-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
   (if (= (get author-claims "sub") user-id)
@@ -228,7 +225,6 @@
           (println (format "Tried to remove user: %s" user-id))
           (lib/internal-server-error))))))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; API Authorization
 ;;;
@@ -264,20 +260,16 @@
 
   The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
   remove the leading /akvo/lumen and return paths as demo/admin."
-  ([keycloak email]
-   (allowed-paths keycloak email {}))
-  ([{:keys [api-root http-timeout user-id-cache connection-manager] :as keycloak} email
-    {:keys [timeout] :or {timeout http-timeout}}]
-   (let [bare-req-opts {:timeout timeout}]
-     (when-let [headers (request-headers keycloak bare-req-opts)]
-       (let [req-opts (assoc bare-req-opts :headers headers :connection-manager connection-manager)]
-         (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-           (->> (client/get (format "%s/users/%s/groups" api-root user-id) req-opts)
-                :body
-                json/decode
-                (reduce (fn [paths {:strs [path]}]
-                          (conj paths (subs path 12)))
-                        #{}))))))))
+  [{:keys [api-root user-id-cache connection-manager] :as keycloak} email]
+  (when-let [headers (request-headers keycloak)]
+    (let [req-opts {:headers headers :connection-manager connection-manager}]
+      (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
+        (->> (client/get (format "%s/users/%s/groups" api-root user-id) req-opts)
+             :body
+             json/decode
+             (reduce (fn [paths {:strs [path]}]
+                       (conj paths (subs path 12)))
+                     #{}))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -337,12 +329,11 @@
   (allowed-paths [this email]
     (allowed-paths this email)))
 
-(defn- init-keycloak [{:keys [credentials http-timeout url realm max-user-ids-cache]}]
+(defn- init-keycloak [{:keys [credentials url realm max-user-ids-cache]}]
   (map->KeycloakAgent {:api-root (format "%s/admin/realms/%s" url realm)
                        :credentials credentials
                        :issuer (format "%s/realms/%s" url realm)
-                       :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))
-                       :http-timeout http-timeout}))
+                       :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
   (try
@@ -369,26 +360,31 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
   ::data)
 
+(defn default-req-opts
+  "all timeouts are in milliseconds!!
+  :timeout - Time that connections are left open before automatically closing
+  :connection-timeout - the default connect timeout value for connection
+
+  https://github.com/dakrone/clj-http/issues/477
+  " 
+  [opts]
+  (merge {:timeout 5 :threads 2 :insecure? false :default-per-route 2}
+         (select-keys opts [:timeout :threads :insecure? :default-per-route])))
+
 (defn new-connection-manager
   ([] (new-connection-manager {}))
   ([opts]
-   (let [default-values {:timeout 1000 :threads 2 :insecure? false :default-per-route 2}]
-     (http.conn-mgr/make-reusable-conn-manager (merge default-values (select-keys opts [:timeout :threads :insecure? :default-per-route]))))))
-
-
-;;   all timeouts are in milliseconds!!
-;;  :timeout - Time that connections are left open before automatically closing
-;;  :connection-timeout - int the default connect timeout value for connection
+   (http.conn-mgr/make-reusable-conn-manager (default-req-opts opts))))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache] :as opts}]
   (log/info "Starting keycloak")
   (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
-        connection-manager (new-connection-manager {:timeout (* 30 1000) :threads 10 :default-per-route 10})
+        connection-manager (new-connection-manager {:timeout (* 10 1000) :threads 10 :default-per-route 10
+                                                    :connection-timeout (* 30 1000)})
         openid-config (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
     (assoc this
            :connection-manager connection-manager
-           :http-timeout http-timeout
            :openid-config openid-config)))
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak  [_ opts]
