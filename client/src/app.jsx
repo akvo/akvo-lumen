@@ -48,9 +48,19 @@ function initAuthenticated(profile, env) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
+const locales = new Set(['en', 'es', 'fr']);
+function userLocale(lo) {
+  if (lo) {
+    const l = lo.toLowerCase().substring(0, 2);
+    if (locales.has(l)) {
+      return l;
+    }
+  }
+  return 'en';
+}
+
 function initWithAuthToken(locale) {
-  const initialState = { profile: { attributes: { locale: [locale] } } };
+  const initialState = { profile: { admin: false, attributes: { locale: [userLocale(locale)] } } };
   const rootElement = document.querySelector('#root');
   const store = configureStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
@@ -66,21 +76,10 @@ function initWithAuthToken(locale) {
 function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = msg;
 }
-const locales = new Set(['en', 'es', 'fr']);
-function userLocale(lo) {
-  if (lo) {
-    const l = lo.toLowerCase().substring(0, 2);
-    if (locales.has(l)) {
-      return l;
-    }
-  }
-  return 'en';
-}
 
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
-
   if (url.parse(location.href).pathname !== '/auth0_callback' && accessToken == null) {
     let authz = queryString.parse(location.search).auth;
     authz = authz ? { auth: authz } : null;
@@ -95,7 +94,7 @@ function dispatchOnMode() {
         .catch(err => initNotAuthenticated(err.message));
       });
   } else if (accessToken != null) {
-    auth.initExport(accessToken).then(initAuthenticated(queryParams.locale));
+    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
   } else {
     get('/env', { auth: 'auth0' })
     .then(
