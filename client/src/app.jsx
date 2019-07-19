@@ -116,16 +116,16 @@ function dispatchOnMode() {
               throw err2;
             }
             // Now you have the user's information
-            const userr = user;
-            userr.admin = false;
-            userr.firstName = user.firstName || user.given_name;
-            userr.lastName = user.lastName || user.family_name;
-            userr.attributes = user.attributes || { locale: [userLocale(user.locale)] };
-            userr.username = user.username || user.nickname;
+            const userProfile = user;
+            userProfile.admin = false;
+            userProfile.firstName = user.firstName || user.given_name;
+            userProfile.lastName = user.lastName || user.family_name;
+            userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+            userProfile.username = user.username || user.nickname;
             if (process.env.NODE_ENV === 'production') {
-              Raven.setUserContext(userr);
+              Raven.setUserContext(userProfile);
             }
-            initAuthenticated(userr, body);
+            initAuthenticated(userProfile, body);
           });
         });
       });
