@@ -84,7 +84,7 @@ export function init(env, s) {
     if (keycloak != null) {
       throw new Error('Keycloak already initialized');
     }
-    keycloak = s;
+    setKeycloak(s);
     return lib().init(env, service());
   } else if (env.authProvider === 'auth0') {
     auth0 = s;
