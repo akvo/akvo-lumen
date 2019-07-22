@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { injectIntl, intlShape } from 'react-intl';
 
 import * as api from '../../../utilities/api';
-import * as keycloak from '../../../utilities/auth';
+import * as auth from '../../../utilities/auth';
 import { showNotification } from '../../../actions/notification';
 
 require('../../../../node_modules/react-select/dist/react-select.css');
@@ -186,7 +186,7 @@ class AkvoFlowDataSourceSettings extends Component {
       instance,
       surveyId: selectedSurveyId,
       formId: selectedFormId,
-      refreshToken: keycloak.refreshToken(),
+      refreshToken: auth.refreshToken(),
       version: 3,
     });
     this.props.onChangeSettings({ name: form.name });
