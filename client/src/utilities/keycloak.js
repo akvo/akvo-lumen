@@ -1,5 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-import Raven from 'raven-js';
 import queryString from 'querystringify';
 
 export function token(keycloak) {
@@ -32,13 +31,7 @@ export function logout(keycloak) {
 }
 
 export function init(env, keycloak) {
-  const { tenant, sentryDSN } = env;
   return new Promise((resolve, reject) => {
-    if (process.env.NODE_ENV === 'production') {
-      Raven.config(sentryDSN).install();
-      Raven.setExtraContext({ tenant });
-    }
-
     const queryParams = queryString.parse(location.search);
     keycloak
     .init({
@@ -52,13 +45,9 @@ export function init(env, keycloak) {
         keycloak
           .loadUserProfile()
           .success((profile) => {
-            if (process.env.NODE_ENV === 'production') {
-              Raven.setUserContext(profile);
-            }
-            console.log('profile', profile);
             resolve({
               profile: Object.assign({}, profile, {
-                admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`),
+                admin: keycloak.hasRealmRole(`akvo:lumen:${env.tenant}:admin`),
               }),
               env,
             });

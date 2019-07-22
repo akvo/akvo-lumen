@@ -14,6 +14,10 @@ import { get } from './utilities/api';
 import Raven from 'raven-js';
 
 function initAuthenticated(profile, env) {
+  if (process.env.NODE_ENV === 'production') {
+    Raven.setUserContext(profile);
+  }
+
   const initialState = { profile, env };
 
   const store = configureStore(initialState);
@@ -122,9 +126,6 @@ function dispatchOnMode() {
             userProfile.lastName = user.lastName || user.family_name;
             userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
             userProfile.username = user.username || user.nickname;
-            if (process.env.NODE_ENV === 'production') {
-              Raven.setUserContext(userProfile);
-            }
             initAuthenticated(userProfile, body);
           });
         });

@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import Keycloak from 'keycloak-js';
+import Raven from 'raven-js';
 import Auth0 from 'auth0-js';
 import url from 'url';
 import * as k from './keycloak';
@@ -76,15 +77,23 @@ export function initService(env) {
   }
   return s;
 }
+
 export function init(env, s) {
   if (keycloak != null) {
     throw new Error('Keycloak already initialized');
   }
+  const { tenant, sentryDSN } = env;
+  if (process.env.NODE_ENV === 'production') {
+    Raven.config(sentryDSN).install();
+    Raven.setExtraContext({ tenant });
+  }
+
   if (env.authProvider === 'keycloak') {
     if (keycloak != null) {
       throw new Error('Keycloak already initialized');
     }
     setKeycloak(s);
+
     return lib().init(env, service());
   } else if (env.authProvider === 'auth0') {
     auth0 = s;
