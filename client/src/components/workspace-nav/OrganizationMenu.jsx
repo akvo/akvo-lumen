@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import * as auth from './../../utilities/auth';
 
 function OrganizationMenu({ profile, authURL }) {
-  const url = (authURL && authURL.includes('auth0')) ? 'https://manage.auth0.com' : `${authURL}/realms/akvo/account`;
+  const url = (authURL && authURL.includes('auth0')) ? '#' : `${authURL}/realms/akvo/account`;
   const logout = (authURL && authURL.includes('auth0')) ? <a onClick={() => auth.logout()}>&nbsp; <i className="fa fa-power-off" aria-hidden="true" /> LOGOUT</a> : '';
   return (
     <div className="OrganizationMenu">
