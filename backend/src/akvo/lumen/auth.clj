@@ -56,7 +56,7 @@
   "Feature flag predicate function. Add trailing $auth to given_name to enable
   API authz"
   [{:strs [family_name] :as jwt-claims}]
-  (and (nil? family_name) (string/ends-with? family_name "$auth")))
+  (and (some? family_name) (string/ends-with? family_name "$auth")))
 
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.
