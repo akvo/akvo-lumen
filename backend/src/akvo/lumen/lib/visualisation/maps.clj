@@ -17,6 +17,8 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
+(def http-client-req-defaults (http.client/req-opts 5000))
+
 (defn- headers [tenant-conn]
   (let [db-uri (-> ^HikariDataSource (:datasource tenant-conn)
                    .getJdbcUrl
@@ -90,9 +92,10 @@
         url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
         _ (log/debug :map-config map-config)
-        layer-group-id (-> (http.client/post* url {:body (json/encode map-config)
-                                             :headers headers
-                                             :content-type :json})
+        layer-group-id (-> (http.client/post* url (merge http-client-req-defaults
+                                                         {:body (json/encode map-config)
+                                                          :headers headers
+                                                          :content-type :json}))
                            :body json/decode (get "layergroupid"))
         layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil)]
     (lib/ok {:layerGroupId layer-group-id
@@ -127,9 +130,10 @@
           _ (log/warn :map-config map-config)
           _ (log/warn :headers headers)
           layer-group-id (-> (http.client/post* (format "%s/layergroup" windshaft-url)
-                                          {:body (json/encode map-config)
-                                           :headers headers*
-                                           :content-type :json})
+                                                (merge http-client-req-defaults
+                                                       {:body (json/encode map-config)
+                                                        :headers headers*
+                                                        :content-type :json}))
                              :body json/decode (get "layergroupid"))]
       (lib/ok {:layerGroupId layer-group-id
                :layerMetadata metadata-array}))

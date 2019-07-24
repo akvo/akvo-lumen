@@ -6,18 +6,21 @@
             [clojure.string :as str])
   (:import [java.time Instant]))
 
+(def http-client-req-defaults (http.client/req-opts 5000))
+
 (defn survey-definition
   [api-root headers-fn instance survey-id]
   (-> (format "%s/orgs/%s/surveys/%s"
               api-root instance survey-id)
-      (http.client/get* {:headers (headers-fn)
-                 :as :json})
+      (http.client/get* (merge http-client-req-defaults {:headers (headers-fn)
+                                                         :as :json}))
       :body))
 
 (defn form-instances* [headers-fn url]
   (let [response (-> url
-                     (http.client/get* {:headers (headers-fn)
-                                :as :json-string-keys})
+                     (http.client/get* (merge http-client-req-defaults
+                                              {:headers (headers-fn)
+                                               :as :json-string-keys}))
                      :body)]
     (lazy-cat (get response "formInstances")
               (when-let [url (get response "nextPageUrl")]
@@ -32,8 +35,9 @@
 (defn data-points*
   [headers-fn url]
   (-> url
-      (http.client/get* {:headers (headers-fn)
-                 :as :json-string-keys})
+      (http.client/get* (merge http-client-req-defaults
+                               {:headers (headers-fn)
+                                :as :json-string-keys}))
       :body))
 
 (defn data-points

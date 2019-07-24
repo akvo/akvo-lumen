@@ -159,24 +159,27 @@
   "Returns the id of group on path akvo/lumen"
   [headers api-root]
   (-> (http.client/get* (format "%s/group-by-path/%s" api-root "akvo/lumen")
-                 {:headers headers})
+                        (merge util/http-client-req-defaults {:headers headers}))
       :body json/decode (get "id")))
 
 (defn create-group
   [headers api-root root-group-id role group-name]
   (http.client/post* (format "%s/roles" api-root)
-              {:body (json/encode {"name" role})
-               :headers headers})
+                     (merge
+                      util/http-client-req-defaults 
+                      {:body (json/encode {"name" role})
+                       :headers headers}))
   (let [new-group-id (-> (http.client/post*
                           (format "%s/groups/%s/children"
                                   api-root root-group-id)
-                          {:body (json/encode {"name" group-name})
-                           :headers headers})
+                          (merge util/http-client-req-defaults
+                                 {:body (json/encode {"name" group-name})
+                                  :headers headers}))
                          :body json/decode (get "id"))
         available-roles (-> (http.client/get*
                              (format "%s/groups/%s/role-mappings/realm/available"
                                      api-root root-group-id)
-                             {:headers headers})
+                             (merge util/http-client-req-defaults {:headers headers}))
                             :body json/decode)
         role-id (-> (filter #(= role (get % "name"))
                             available-roles)
@@ -184,13 +187,14 @@
                     (get "id"))
         pair-resp (http.client/post*
                    (format "%s/groups/%s/role-mappings/realm" api-root new-group-id)
-                   {:body (json/encode [{"id" role-id
-                                         "name" role
-                                         "scopeParamRequired" false
-                                         "composite" false
-                                         "clientRole" false
-                                         "containerId" "Akvo"}])
-                    :headers headers})]
+                   (merge util/http-client-req-defaults
+                          {:body (json/encode [{"id" role-id
+                                                "name" role
+                                                "scopeParamRequired" false
+                                                "composite" false
+                                                "clientRole" false
+                                                "containerId" "Akvo"}])
+                           :headers headers}))]
     new-group-id))
 
 (defn create-new-user
@@ -199,20 +203,22 @@
   [headers api-root email]
   (let [tmp-password (random-url-safe-string 6)
         user-id (-> (http.client/post* (format "%s/users" api-root)
-                                 {:body (json/encode
-                                         {"username" email
-                                          "email" email
-                                          "emailVerified" false
-                                          "enabled" true})
-                                  :headers headers})
+                                       (merge util/http-client-req-defaults
+                                              {:body (json/encode
+                                                      {"username" email
+                                                       "email" email
+                                                       "emailVerified" false
+                                                       "enabled" true})
+                                               :headers headers}))
                     (get-in [:headers "Location"])
                     (s/split #"/")
                     last)]
     (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)
-                {:body (json/encode {"temporary" true
-                                     "type" "password"
-                                     "value" tmp-password})
-                 :headers headers})
+                      (merge util/http-client-req-defaults
+                             {:body (json/encode {"temporary" true
+                                                  "type" "password"
+                                                  "value" tmp-password})
+                              :headers headers}))
     {:email email
      :user-id user-id
      :tmp-password tmp-password}))
@@ -228,15 +234,17 @@
 (defn fetch-client
   [headers api-root client-id]
   (-> (http.client/get* (format "%s/clients" api-root)
-                  {:query-params {"clientId" client-id}
-                   :headers headers})
+                        (merge util/http-client-req-defaults
+                               {:query-params {"clientId" client-id}
+                                :headers headers}))
       :body json/decode first))
 
 (defn update-client
   [headers api-root {:strs [id] :as client}]
   (http.client/put* (format "%s/clients/%s" api-root id)
-                {:body (json/encode client)
-                 :headers headers}))
+                    (merge util/http-client-req-defaults
+                           {:body (json/encode client)
+                            :headers headers})))
 
 (defn add-tenant-urls-to-client
   [client url]
