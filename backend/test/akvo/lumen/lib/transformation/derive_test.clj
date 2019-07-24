@@ -28,7 +28,6 @@
                   (when-not res (log/error v expression res))
                   res)))
 
-
 (deftest parse-row-object-references
   (is (= '(["row.a" "a"])
          (derive/parse-row-object-references "row.a")))
@@ -140,7 +139,14 @@
         computed (derive/compute-transformation-code (get-in t1 ["args" "code"]) older-columns)]
     (is (= code_v2 (derive/columnName>columnTitle computed new-columns)))
     (is (= (update-in t1 ["args" "code"] (constantly code_v2))
-           (engine/adapt-transformation t1 older-columns new-columns)))
-    ))
+           (engine/adapt-transformation t1 older-columns new-columns)))))
+
+(deftest row-template-format-test
+  (is (= "row['%s']"
+         (derive/row-template-format "row.hi")))
+  (is (= "row[\"%s\"]"
+         (derive/row-template-format "row[\"hi\"]")))
+  (is (= "row['%s']"
+       (derive/row-template-format "row['hi']"))))
 
 
