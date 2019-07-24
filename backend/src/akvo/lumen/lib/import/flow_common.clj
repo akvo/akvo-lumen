@@ -18,7 +18,7 @@
 
 (defn form-instances* [headers-fn url]
   (let [response (-> url
-                     (http.client/get* (merge http-client-req-defaults
+                     (http.client/get* (merge (http.client/req-opts 20000)
                                               {:headers (headers-fn)
                                                :as :json-string-keys}))
                      :body)]
