@@ -13,6 +13,17 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/derive.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
+(defn row-template-format [s]
+  (let [double-quote-template "row[\"%s\"]"
+        single-quote-template "row['%s']"]
+    (if (re-find #"row\[" s)
+      (if (re-find #"row\[\'" s)
+        single-quote-template
+        (if (re-find #"row\[\"" s)
+          double-quote-template
+          (throw (ex-info (str "Problem with js row template with code: " s) {:s s}))))
+      single-quote-template)))
+
 (defn columnName>columnTitle
   "Replace code column references and fall back to use code pattern if there is no
   references."
@@ -20,7 +31,7 @@
   (let [columns (walk/keywordize-keys columns)]
     (reduce (fn [code {:strs [column-name id pattern]}]
               (if column-name
-                (str/replace code id (format "row['%s']"
+                (str/replace code id (format (row-template-format pattern)
                                              (-> (try (dataset.utils/find-column columns column-name)
                                                       (catch Exception e nil))
                                                  :title)))
