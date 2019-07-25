@@ -18,6 +18,9 @@
    [integrant.core :as ig]
    [ring.util.response :refer [response]]))
 
+
+(def http-client-req-defaults (http.client/req-opts 5000))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
 ;;;
@@ -26,7 +29,7 @@
   "Get the openid configuration"
   ([issuer req-opts]
    (let [url (format "%s/.well-known/openid-configuration" issuer)]
-     (-> (http.client/get* url req-opts) :body json/decode))))
+     (-> (http.client/get* url (merge http-client-req-defaults req-opts)) :body json/decode))))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
@@ -34,7 +37,8 @@
   ([{:keys [openid-config credentials connection-manager]}]
    (let [req-opts {:form-params        (merge {:grant_type "client_credentials"} credentials)
                    :connection-manager connection-manager}]
-     (when-let [access-token (-> (http.client/post* (get openid-config "token_endpoint") req-opts)
+     (when-let [access-token (-> (http.client/post* (get openid-config "token_endpoint") (merge http-client-req-defaults
+                                                                                                req-opts))
                                  :body
                                  json/decode
                                  (get "access_token"))]
@@ -49,7 +53,8 @@
   [{:keys [api-root credentials openid-config]} headers path]
   (-> (http.client/get* (format "%s/group-by-path/%s"
                          api-root (format "akvo/lumen/%s" path))
-                 {:headers headers})
+                        (merge http-client-req-defaults
+                               {:headers headers}))
       :body json/decode))
 
 (defn group-members
@@ -57,7 +62,8 @@
   [{:keys [api-root credentials openid-config]} headers group-id]
   (-> (http.client/get* (format "%s/groups/%s/members"
                          api-root group-id)
-                 {:headers headers})
+                        (merge http-client-req-defaults
+                               {:headers headers}))
       :body json/decode))
 
 (defn tenant-members
@@ -90,10 +96,12 @@
   [headers api-root tenant user-id]
   (let [admin-group-id (-> (http.client/get* (format "%s/group-by-path/akvo/lumen/%s/admin"
                                               api-root tenant)
-                                      {:headers headers})
+                                             (merge http-client-req-defaults
+                                                    {:headers headers}))
                            :body json/decode (get "id"))
         admins         (-> (http.client/get* (format "%s/groups/%s/members" api-root admin-group-id)
-                                      {:headers headers})
+                                             (merge http-client-req-defaults
+                                                    {:headers headers}))
                            :body json/decode)
         admin-ids      (into #{}
                              (map #(get % "id"))
@@ -106,7 +114,8 @@
   "Get user by email. Returns nil if not found."
   [headers api-root tenant user-id]
   (let [resp (-> (http.client/get* (format "%s/users/%s" api-root user-id)
-                            {:headers headers})
+                                   (merge http-client-req-defaults
+                                          {:headers headers}))
                  :body json/decode)]
     (assoc resp
            "admin"
@@ -117,7 +126,8 @@
   [headers api-root email]
   (let [candidates (-> (http.client/get* (format "%s/users?email=%s"
                                           api-root email)
-                                  {:headers headers})
+                                         (merge http-client-req-defaults
+                                                {:headers headers}))
                        :body json/decode)]
     ;; Since the keycloak api does a search and not a key lookup on the email
     ;; we need make sure that we have an exact match
@@ -129,7 +139,8 @@
   "Get the groups of the user"
   [headers api-root user-id]
   (-> (http.client/get* (format "%s/users/%s/groups" api-root user-id)
-                 {:headers headers})
+                        (merge http-client-req-defaults
+                               {:headers headers}))
       :body json/decode))
 
 (defn tenant-member?
@@ -153,21 +164,24 @@
   [headers api-root user-id group-id]
   (:status (http.client/put* (format "%s/users/%s/groups/%s"
                               api-root user-id group-id)
-                      {:headers headers})))
+                             (merge http-client-req-defaults
+                                    {:headers headers}))))
 
 (defn remove-user-from-group
   "Returns status code from Keycloak response."
   [headers api-root user-id group-id]
   (:status (http.client/delete* (format "%s/users/%s/groups/%s"
                                  api-root user-id group-id)
-                         {:headers headers})))
+                                (merge http-client-req-defaults
+                                       {:headers headers}))))
 
 (defn set-user-have-verified-email
   "Returns status code from Keycloak response."
   [headers api-root user-id]
   (:status (http.client/put* (format "%s/users/%s" api-root user-id)
-                      {:body    (json/encode {"emailVerified" true})
-                       :headers headers})))
+                             (merge http-client-req-defaults
+                                    {:body    (json/encode {"emailVerified" true})
+                                     :headers headers}))))
 
 (defn do-promote-user-to-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
@@ -247,7 +261,8 @@
   [req-opts api-root user-id-cache email]
   (if-let [user-id (get-user-id user-id-cache email)]
     user-id
-    (when-let [user-id (-> (http.client/get* (format "%s/users/?email=%s" api-root email) req-opts)
+    (when-let [user-id (-> (http.client/get* (format "%s/users/?email=%s" api-root email) (merge http-client-req-defaults
+                                                                                                 req-opts))
                            :body
                            json/decode
                            (active-user email))]
@@ -266,7 +281,8 @@
     (when-let [headers (request-headers keycloak)]
       (let [req-opts {:headers headers :connection-manager connection-manager}]
         (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-          (->> (http.client/get* (format "%s/users/%s/groups" api-root user-id) req-opts)
+          (->> (http.client/get* (format "%s/users/%s/groups" api-root user-id) (merge http-client-req-defaults
+                                                                                       req-opts))
                :body
                json/decode
                (reduce (fn [paths {:strs [path]}]
@@ -293,12 +309,13 @@
 
   (create-user [{:keys [api-root]} headers email]
     (http.client/post* (format "%s/users" api-root)
-                {:body    (json/encode
-                           {"username"      email
-                            "email"         email
-                            "emailVerified" false
-                            "enabled"       true})
-                 :headers headers}))
+                       (merge http-client-req-defaults
+                              {:body    (json/encode
+                                         {"username"      email
+                                          "email"         email
+                                          "emailVerified" false
+                                          "enabled"       true})
+                               :headers headers})))
   (demote-user-from-admin
     [this tenant author-claims user-id]
     (do-demote-user-from-admin this tenant author-claims user-id))
@@ -309,10 +326,11 @@
 
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
     (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)
-               {:body    (json/encode {"temporary" true
-                                       "type"      "password"
-                                       "value"     tmp-password})
-                :headers headers}))
+                      (merge http-client-req-defaults
+                             {:body    (json/encode {"temporary" true
+                                                     "type"      "password"
+                                                     "value"     tmp-password})
+                              :headers headers})))
   (remove-user
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
@@ -345,7 +363,7 @@
   (try
     (let [issuer (str url "/realms/" realm)
           rsa-key (-> (str issuer "/protocol/openid-connect/certs")
-                      http.client/get*
+                      (http.client/get* http-client-req-defaults)
                       :body
                       (jwt/rsa-key 0))]
       (assoc opts

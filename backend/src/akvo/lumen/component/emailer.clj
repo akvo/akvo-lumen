@@ -6,6 +6,8 @@
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
+(def http-client-req-defaults (http.client/req-opts 5000))
+
 (defrecord DevEmailer [store]
   p/SendEmail
   (send-email [this recipients email]
@@ -28,9 +30,10 @@
                                           (map (fn [email] {"Email" email})
                                                recipients))})]
       (http.client/post* "https://api.mailjet.com/v3/send"
-                   {:basic-auth credentials
-                    :headers    {"Content-Type" "application/json"}
-                    :body       (json/encode body)}))))
+                         (merge http-client-req-defaults
+                                {:basic-auth credentials
+                                 :headers    {"Content-Type" "application/json"}
+                                 :body       (json/encode body)})))))
 
 (defmethod ig/init-key :akvo.lumen.component.emailer/dev-emailer  [_ {:keys [from-email from-name] :as opts} ]
   (log/info  "Using std out emailer" opts)

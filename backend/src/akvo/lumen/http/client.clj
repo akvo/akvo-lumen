@@ -19,22 +19,29 @@
 (defn shutdown-manager [connection-manager]
   (http.conn-mgr/shutdown-manager connection-manager))
 
-(def default-req-opts
-  "
-  All these timeouts are in milliseconds
+(defn req-opts
+  "All these timeouts are in milliseconds
   :connection-timeout - time to establish the socket
   :connection-request-timeout - time to have a free socket
-  :socket-timeout - time to get the response" 
-  {:connection-timeout 2000 :connection-request-timeout 50 :socket-timeout 5000})
+  :socket-timeout - time to get the response"
+  [socket-timeout]
+  {:connection-timeout 2000 :connection-request-timeout 50 :socket-timeout socket-timeout})
 
-(defn get* [url & [opts]]
-  (client/get url (merge default-req-opts opts)))
+(def req-pre-condition #(and (some? (:connection-timeout %))
+                             (some? (:connection-request-timeout %))
+                             (some? (:socket-timeout %))))
+(defn get* [url opts]
+  {:pre [(req-pre-condition opts)]}
+  (client/get url opts))
 
-(defn post* [url & [opts]]
-  (client/post url (merge default-req-opts opts)))
+(defn post* [url opts]
+  {:pre [(req-pre-condition opts)]}
+  (client/post url opts))
 
-(defn put* [url & [opts]]
-  (client/put url (merge default-req-opts opts)))
+(defn put* [url opts]
+  {:pre [(req-pre-condition opts)]}
+  (client/put url opts))
 
-(defn delete* [url & [opts]]
-  (client/delete url (merge default-req-opts opts)))
+(defn delete* [url opts]
+  {:pre [(req-pre-condition opts)]}
+  (client/delete url opts))

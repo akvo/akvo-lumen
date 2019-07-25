@@ -29,30 +29,34 @@
   "Remove keycloak group by id"
   [kc id]
   (http.client/delete* (format "%s/groups/%s" (:api-root kc) id)
-                 {:headers (keycloak/request-headers kc)
-                  :as :json}))
+                       (merge util/http-client-req-defaults
+                              {:headers (keycloak/request-headers kc)
+                               :as :json})))
 
 (defn get-groups
   "List all keycloak groups and sub groups"
   [kc]
   (:body (http.client/get* (format "%s/groups" (:api-root kc))
-                     {:headers (keycloak/request-headers kc)
-                      :as :json})))
+                           (merge util/http-client-req-defaults
+                                  {:headers (keycloak/request-headers kc)
+                                   :as :json}))))
 
 (defn get-clients
   "List all keycloak clients"
   [kc]
   (:body (http.client/get* (format "%s/clients" (:api-root kc))
-                     {:headers (keycloak/request-headers kc)
-                      :as :json})))
+                           (merge util/http-client-req-defaults
+                                  {:headers (keycloak/request-headers kc)
+                                   :as :json}))))
 
 (defn update-client
   "Update keycloak client"
   [kc client]
   (http.client/put* (format "%s/clients/%s" (:api-root kc) (:id client))
-              {:headers (keycloak/request-headers kc)
-               :body (json/generate-string client)
-               :content-type :json}))
+                    (merge util/http-client-req-defaults
+                           {:headers (keycloak/request-headers kc)
+                            :body (json/generate-string client)
+                            :content-type :json})))
 
 (defn search
   "Performs a linear search for an item in a collection for which (pred item) is truthy.

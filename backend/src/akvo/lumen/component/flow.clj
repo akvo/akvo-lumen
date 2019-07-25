@@ -6,6 +6,8 @@
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]))
 
+(def http-client-req-defaults (http.client/req-opts 5000))
+
 (defn access-token
   "Fetch a new access token using a refresh token"
   [this refresh-token]
@@ -13,10 +15,11 @@
                                (-> this :keycloak :url)
                                (-> this :keycloak :realm))]
     (-> (http.client/post* token-endpoint
-                   {:form-params {"client_id" "akvo-lumen"
-                                  "refresh_token" refresh-token
-                                  "grant_type" "refresh_token"}
-                    :as :json})
+                           (merge http-client-req-defaults
+                                 {:form-params {"client_id" "akvo-lumen"
+                                                "refresh_token" refresh-token
+                                                "grant_type" "refresh_token"}
+                                  :as :json}))
         :body
         :access_token)))
 
@@ -34,12 +37,13 @@
         res (try
               (http.client/post*
                (str (:url flow-api) "/check_permissions")
-               {:as :json
-                :headers (api-headers token)
-                :throw-entire-message? true
-                :unexceptional-status #(<= 200 % 299) 
-                :form-params body
-                :content-type :json})
+               (merge http-client-req-defaults
+                      {:as :json
+                       :headers (api-headers token)
+                       :throw-entire-message? true
+                       :unexceptional-status #(<= 200 % 299) 
+                       :form-params body
+                       :content-type :json}))
               (catch Exception e (log/error :fail :body body :response (ex-data e))))]
     (log/debug ::check-permissions :body body :res res :elapsed-time (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start)) 1000000.0) " msecs"))
     res))

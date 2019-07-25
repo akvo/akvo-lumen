@@ -7,6 +7,8 @@
             [integrant.core :as ig]
             [clojure.tools.logging :as log]))
 
+(def http-client-req-defaults (http.client/req-opts 5000))
+
 (def v2-count 110)
 
 (def missed-v1-uuids-in-v2
@@ -49,10 +51,10 @@
 (defmethod ig/init-key :akvo.lumen.component.caddisfly/prod  [_ {:keys [schema-uri] :as opts}]
   {:pre [schema-uri]}
   
-  (let [v0-tests (-> "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json" http.client/get* :body (json/decode keyword) extract-tests)
+  (let [v0-tests (-> "https://akvoflow-public.s3.amazonaws.com/caddisfly-tests.json" (http.client/get* http-client-req-defaults) :body (json/decode keyword) extract-tests)
         tests (version-schema-backwards-adapt
                v0-tests
-               (-> schema-uri http.client/get* :body (json/decode keyword) extract-tests-v2))]
+               (-> schema-uri (http.client/get* http-client-req-defaults) :body (json/decode keyword) extract-tests-v2))]
     (when-not (= v2-count (count tests))(log/error :failed-caddisfly-expectations :v2-count v2-count :tests-count (count tests)))
     (log/info ::start "Using caddisfly ONLINE schema-uri" schema-uri)
     (map->Caddisfly (assoc opts :schema tests))))

@@ -11,11 +11,13 @@
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
 
+(def http-client-req-defaults (http.client/req-opts 5000))
+
 (defmethod ig/init-key :akvo.lumen.component.auth0/data  [_ {:keys [url] :as opts}]
   (try
     (let [issuer (format "%s/" url)
           rsa-key  (-> (format  "%s.well-known/jwks.json" issuer)
-                             http.client/get*
+                             (http.client/get* http-client-req-defaults)
                              :body
                              (jwt/rsa-key 0))]
       (assoc opts
