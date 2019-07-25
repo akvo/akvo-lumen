@@ -344,7 +344,9 @@
               (is (= email (-> invitation :recipients first)))
               (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))             
               (let [url (str/replace (re-find #"https.*+" (-> invitation :email (get "Text-part"))) "https://t1.lumen.local" "")
-                    res-verify (h (get* url))]
+                    [url auth-flag] (str/split url #"\?")
+                    auth (last (str/split auth-flag #"&"))
+                    res-verify (h (get* url {"auth" auth}))]
                 (is (= 302 (:status res-verify))))
               (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
                 (is (= 200 (:status (h (del* (api-url "/admin/users" (:id (first (filter #(= email (:email %)) users))))))))))))))
