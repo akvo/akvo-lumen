@@ -102,7 +102,7 @@
   (wrap-auth keycloak auth0))
 
 (s/def ::keycloak ::keycloak/data)
-(s/def ::auht0 ::auth0/data)
+(s/def ::auth0 ::auth0/data)
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
   (s/keys :req-un [::keycloak ::auth0]))

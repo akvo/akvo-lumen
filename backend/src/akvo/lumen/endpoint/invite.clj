@@ -51,12 +51,12 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
   (verify-routes opts))
 
-(s/def ::auht0 ::auth0/data)
+(s/def ::auth0 ::auth0/data)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/invite [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
                    ::keycloak/keycloak
-                   ::auht0
+                   ::auth0
                    ::emailer/emailer]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/verify [_]

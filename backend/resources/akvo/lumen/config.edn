@@ -78,7 +78,7 @@
 
  :akvo.lumen.endpoint.invite/invite {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                      :keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak
-                                     :auht0 #ig/ref :akvo.lumen.component.auth0/data
+                                     :auth0 #ig/ref :akvo.lumen.component.auth0/data
                                      :emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.endpoint.invite/verify {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
