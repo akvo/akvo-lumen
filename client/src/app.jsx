@@ -121,12 +121,23 @@ function dispatchOnMode() {
             }
             // Now you have the user's information
             const userProfile = user;
-            userProfile.admin = false;
-            userProfile.firstName = user.firstName || user.given_name;
-            userProfile.lastName = user.lastName || user.family_name;
-            userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
-            userProfile.username = user.username || user.nickname;
-            initAuthenticated(userProfile, body);
+            get('/api/user/admin', { email: user.email }).then((response) => {
+              try {
+                userProfile.admin = response.body.admin;
+              } catch (e) {
+                userProfile.admin = false;
+                Raven.captureException(e, {
+                  extra: {
+                    user,
+                  },
+                });
+              }
+              userProfile.firstName = user.firstName || user.given_name;
+              userProfile.lastName = user.lastName || user.family_name;
+              userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+              userProfile.username = user.username || user.nickname;
+              initAuthenticated(userProfile, body);
+            });
           });
         });
       });
