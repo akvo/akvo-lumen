@@ -12,6 +12,7 @@
    [clojure.set :as set]
    [clojure.spec.alpha :as s]
    [clojure.tools.logging :as log]
+   [clojure.walk :as w]
    [iapetos.core :as prometheus]
    [iapetos.registry :as registry]
    [integrant.core :as ig]
@@ -316,15 +317,19 @@
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
 
+  (user [keycloak tenant email]
+    (let [headers (request-headers keycloak)
+          user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")]
+      (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
+  
   (user? [keycloak email]
     (let [headers (request-headers keycloak)]
       (not (nil? (fetch-user-by-email headers
                                       (:api-root keycloak)
                                       email)))))
-
+  
   (users [this tenant-label]
     (tenant-members this tenant-label))
-
 
   p/Authorizer
   (allowed-paths [this email]

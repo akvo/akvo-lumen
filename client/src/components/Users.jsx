@@ -78,7 +78,6 @@ User.propTypes = {
     active: PropTypes.bool.isRequired,
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
     username: PropTypes.string,
   }).isRequired,
 };
@@ -90,7 +89,7 @@ User.defaultProps = {
   },
 };
 
-function UserList({ activeUserId, getUserActions, invitationMode, onChange, users }) {
+function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, users }) {
   return (
     <table>
       <tbody>
@@ -117,7 +116,7 @@ function UserList({ activeUserId, getUserActions, invitationMode, onChange, user
             onChange={onChange}
             invitationMode={invitationMode}
             user={{
-              active: id === activeUserId,
+              active: email === activeUserEmail,
               admin,
               email,
               id,
@@ -130,7 +129,7 @@ function UserList({ activeUserId, getUserActions, invitationMode, onChange, user
 }
 
 UserList.propTypes = {
-  activeUserId: PropTypes.string.isRequired,
+  activeUserEmail: PropTypes.string.isRequired,
   getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
@@ -268,7 +267,7 @@ class Users extends Component {
 
   render() {
     const actionButtons = this.getUserActionButtons();
-    const { admin, id } = this.props.profile;
+    const { admin, email } = this.props.profile;
     const saveStatus = '';
     const invitationMode = this.state.invitationMode;
     const title = invitationMode ? 'Invitations' : 'Members';
@@ -290,7 +289,7 @@ class Users extends Component {
         />
         <div className="UserList">
           <UserList
-            activeUserId={id}
+            activeUserEmail={email}
             getUserActions={this.getUserActions}
             onChange={this.handleUserActionSelect}
             invitationMode={invitationMode}
