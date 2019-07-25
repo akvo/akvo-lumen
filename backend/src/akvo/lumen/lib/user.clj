@@ -13,7 +13,7 @@
 
 (defn invite-to-tenant
   "Create an invite and use provider emailer to send an invitation email."
-  [emailer tenant-conn location email author-claims]
+  [emailer tenant-conn location email author-claims client-feature-flags]
   (let [invite-id (-> (insert-invite tenant-conn
                         {:author author-claims
                          :email email
@@ -23,6 +23,7 @@
         text-part (selmer/render-file "akvo/lumen/email/invite_to_tenant.txt"
                     {:author-email (get author-claims "email")
                      :invite-id invite-id
+                     :feature-flags (str/join "&" client-feature-flags)
                      :location location})]
     (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                          "Text-part" text-part})))
@@ -30,7 +31,7 @@
 (defn create-new-account-and-invite-to-tenant
   ""
   [emailer keycloak tenant-conn location email
-   {:strs [name] :as author-claims}]
+   {:strs [name] :as author-claims} client-feature-flags]
   (let [headers (keycloak/request-headers keycloak)
         user-id (as-> (p/create-user keycloak headers email) x
                   (:headers x)
@@ -49,6 +50,7 @@
                     "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt"
                     {:author-email (get author-claims "email")
                      :email email
+                     :feature-flags (str/join "&" client-feature-flags)
                      :invite-id invite-id
                      :location location
                      :tmp-password tmp-password})]
@@ -61,16 +63,16 @@
   Then check if user has an account, if so invite to tenant. As a last resort
   setup an invitation to the provided email address for both an account and to
   the tenant."
-  [emailer keycloak tenant-conn tenant location email author-claims]
+  [emailer keycloak tenant-conn tenant location email author-claims client-feature-flags]
   (cond
     (keycloak/tenant-member?
      keycloak tenant email) (lib/bad-request
                              {"reason" "Already tenant member"})
     (p/user? keycloak email) (invite-to-tenant emailer tenant-conn location email
-                                       author-claims)
+                                       author-claims client-feature-flags)
     :else
     (create-new-account-and-invite-to-tenant
-     emailer keycloak tenant-conn location email author-claims))
+     emailer keycloak tenant-conn location email author-claims client-feature-flags))
   (lib/ok {}))
 
 (defn active-invites [tenant-conn]
