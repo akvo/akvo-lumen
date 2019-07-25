@@ -323,9 +323,10 @@
       (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
   
   (user? [keycloak email]
-    (-> (request-headers keycloak)
-        (fetch-user-by-email (:api-root keycloak) email)
-        some?))
+    (let [headers (request-headers keycloak)]
+      (not (nil? (fetch-user-by-email headers
+                                      (:api-root keycloak)
+                                      email)))))
   
   (users [this tenant-label]
     (tenant-members this tenant-label))
