@@ -101,6 +101,10 @@
   [keycloak tenant]
   (p/users keycloak tenant))
 
+(defn user
+  [keycloak tenant email]
+  (p/user keycloak tenant email))
+
 (defn remove-user
   [keycloak tenant author-claims user-id]
   (p/remove-user keycloak tenant author-claims user-id))

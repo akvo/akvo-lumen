@@ -316,15 +316,18 @@
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
 
+  (user [keycloak tenant email]
+    (let [headers (request-headers keycloak)
+          user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")]
+      (clojure.walk/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
+  
   (user? [keycloak email]
-    (let [headers (request-headers keycloak)]
-      (not (nil? (fetch-user-by-email headers
-                                      (:api-root keycloak)
-                                      email)))))
-
+    (-> (request-headers keycloak)
+        (fetch-user-by-email (:api-root keycloak) email)
+        some?))
+  
   (users [this tenant-label]
     (tenant-members this tenant-label))
-
 
   p/Authorizer
   (allowed-paths [this email]
