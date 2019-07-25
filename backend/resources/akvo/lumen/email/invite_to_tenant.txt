@@ -2,7 +2,7 @@ Hi!
 
 You have been invited to join Akvo Lumen by {{author-email}}.
 To complete the invitation process please visit:
-{{location}}/verify/{{invite-id}}
+{{location}}/verify/{{invite-id}}?{{feature-flags}}
 
 Thank you
 
