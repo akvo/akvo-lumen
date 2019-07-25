@@ -12,6 +12,7 @@
    [clojure.set :as set]
    [clojure.spec.alpha :as s]
    [clojure.tools.logging :as log]
+   [clojure.walk :as w]
    [iapetos.core :as prometheus]
    [iapetos.registry :as registry]
    [integrant.core :as ig]
@@ -319,7 +320,7 @@
   (user [keycloak tenant email]
     (let [headers (request-headers keycloak)
           user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")]
-      (clojure.walk/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
+      (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
   
   (user? [keycloak email]
     (-> (request-headers keycloak)
