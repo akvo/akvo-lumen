@@ -16,30 +16,29 @@
 
 (defn routes [{:keys [keycloak] :as opts}]
   [["/user/admin" {:get {:handler (fn [{tenant :tenant
-                                               query-params :query-params}]
-                                           (lib/ok (select-keys (user/user keycloak tenant (get query-params "email"))
-                                                                [:email :admin])))}}]
-   ["/admin"
-     ["/users"
-      ["" {:get {:handler (fn [{tenant :tenant}]
-                            (user/users keycloak tenant))}}]
-      ["/:id" ["" {:patch {:parameters {:body map?
-                                        :path-params {:id string?}}
-                           :handler (fn [{tenant :tenant
-                                          jwt-claims :jwt-claims
-                                          {:keys [id]} :path-params
-                                          body :body}]
-                                      (cond
-                                        (demote-user? body)
-                                        (user/demote-user-from-admin keycloak tenant jwt-claims id)
-                                        (promote-user? body)
-                                        (user/promote-user-to-admin keycloak tenant jwt-claims id)
-                                        :else (http/not-implemented)))}
-                   :delete {:parameters {:path-params {:id string?}}
-                            :handler (fn [{tenant :tenant
-                                           jwt-claims :jwt-claims
-                                           {:keys [id]} :path-params}]
-                                       (user/remove-user keycloak tenant jwt-claims id))}}]]]]])
+                                        query-params :query-params}]
+                                    (lib/ok (select-keys (user/user keycloak tenant (get query-params "email"))
+                                                         [:email :admin])))}}]
+   ["/admin/users"
+    ["" {:get {:handler (fn [{tenant :tenant}]
+                          (user/users keycloak tenant))}}]
+    ["/:id" ["" {:patch {:parameters {:body map?
+                                      :path-params {:id string?}}
+                         :handler (fn [{tenant :tenant
+                                        jwt-claims :jwt-claims
+                                        {:keys [id]} :path-params
+                                        body :body}]
+                                    (cond
+                                      (demote-user? body)
+                                      (user/demote-user-from-admin keycloak tenant jwt-claims id)
+                                      (promote-user? body)
+                                      (user/promote-user-to-admin keycloak tenant jwt-claims id)
+                                      :else (http/not-implemented)))}
+                 :delete {:parameters {:path-params {:id string?}}
+                          :handler (fn [{tenant :tenant
+                                         jwt-claims :jwt-claims
+                                         {:keys [id]} :path-params}]
+                                     (user/remove-user keycloak tenant jwt-claims id))}}]]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.user/user  [_ opts]
   (routes opts))
