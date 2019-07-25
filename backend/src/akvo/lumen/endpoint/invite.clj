@@ -24,8 +24,8 @@
                               jwt-claims :jwt-claims
                               body :body :as request}]
                           (let [client-feature-flags  [(if (= (get jwt-claims "iss") (:issuer auth0))
-                                                         "auth=keycloak"
-                                                         "auth=auth0")]]
+                                                         "auth=auth0"
+                                                         "auth=keycloak")]]
                             (user/create-invite emailer keycloak (p/connection tenant-manager tenant)
                                                 tenant (location (:invite-redirect config) request)
                                                 (get body "email") jwt-claims client-feature-flags)))}}]
