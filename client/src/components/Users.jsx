@@ -320,7 +320,6 @@ Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
