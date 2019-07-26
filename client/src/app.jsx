@@ -78,7 +78,8 @@ function initWithAuthToken(locale) {
 }
 
 function initNotAuthenticated(msg) {
-  document.querySelector('#root').innerHTML = msg;
+  const loc = url.parse(location.href);
+  document.querySelector('#root').innerHTML = `${msg} <a href='${loc.protocol}//${loc.host}'>${loc.protocol}//${loc.host}</a>`;
 }
 
 function dispatchOnMode() {
@@ -111,34 +112,38 @@ function dispatchOnMode() {
         // eslint-disable-next-line consistent-return
         auth0.parseHash({ hash: window.location.hash }, (err, authResult) => {
           if (err) {
-            throw err;
-          }
-
-          // eslint-disable-next-line consistent-return
-          auth0.client.userInfo(authResult.accessToken, (err2, user) => {
-            if (err2) {
-              throw err2;
+            if (err.errorDescription === 'Please verify your email before logging in.') {
+              initNotAuthenticated(err.errorDescription);
+            } else {
+              throw err;
             }
-            // Now you have the user's information
-            const userProfile = user;
-            get('/api/user/admin', { email: user.email }).then((response) => {
-              try {
-                userProfile.admin = response.body.admin;
-              } catch (e) {
-                userProfile.admin = false;
-                Raven.captureException(e, {
-                  extra: {
-                    user,
-                  },
-                });
+          } else {
+            auth0.client.userInfo(authResult.accessToken, (err2, user) => {
+              if (err2) {
+                throw err2;
               }
-              userProfile.firstName = user.firstName || user.given_name;
-              userProfile.lastName = user.lastName || user.family_name;
-              userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
-              userProfile.username = user.username || user.nickname;
-              initAuthenticated(userProfile, body);
+              // Now you have the user's information
+              const userProfile = user;
+              get('/api/user/admin', { email: user.email }).then((response) => {
+                try {
+                  userProfile.admin = response.body.admin;
+                } catch (e) {
+                  userProfile.admin = false;
+                  Raven.captureException(e, {
+                    extra: {
+                      user,
+                    },
+                  });
+                }
+                userProfile.firstName = user.firstName || user.given_name;
+                userProfile.lastName = user.lastName || user.family_name;
+                userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+                userProfile.username = user.username || user.nickname;
+                initAuthenticated(userProfile, body);
+              });
             });
-          });
+          }
+          // eslint-disable-next-line consistent-return
         });
       });
   }
