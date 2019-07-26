@@ -68,8 +68,8 @@
   (testing "Create invite"
     (let [number-of-initial-invites (-> (user/active-invites  *tenant-conn*)
                                         variant/value :invites count)
-          resp (user/create-invite *emailer* *keycloak* *tenant-conn* "t1"
-                                   server-name ruth-email author-claims ["auth=keycloak"])]
+          resp (user/create-invite *emailer* *keycloak* *tenant-conn* :keycloak "t1"
+                                   server-name ruth-email author-claims)]
       (is (= ::lib/ok (variant/tag resp)))
       (is (= (inc number-of-initial-invites)
              (-> (user/active-invites *tenant-conn*)
@@ -91,8 +91,8 @@
 
   (testing "Invite user"
 
-    (let [invite-resp (user/create-invite *emailer* *keycloak* *tenant-conn* "t1"
-                                   server-name ruth-email author-claims ["auth=keycloak"])
+    (let [invite-resp (user/create-invite *emailer* *keycloak* *tenant-conn* :keycloak "t1"
+                                   server-name ruth-email author-claims)
           number-of-original-users (-> (user/users *keycloak* "t1")
                                        variant/value :users count)
           invite-id (-> (user/active-invites *tenant-conn*)

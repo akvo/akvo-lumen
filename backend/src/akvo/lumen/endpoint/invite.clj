@@ -23,12 +23,12 @@
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body :as request}]
-                          (let [client-feature-flags  [(if (= (get jwt-claims "iss") (:issuer auth0))
-                                                         "auth=auth0"
-                                                         "auth=keycloak")]]
-                            (user/create-invite emailer keycloak (p/connection tenant-manager tenant)
+                          (let [auth-type            (if (= (get jwt-claims "iss") (:issuer auth0))
+                                                       :auth0
+                                                       :keycloak)]
+                            (user/create-invite emailer keycloak (p/connection tenant-manager tenant) auth-type
                                                 tenant (location (:invite-redirect config) request)
-                                                (get body "email") jwt-claims client-feature-flags)))}}]
+                                                (get body "email") jwt-claims)))}}]
    ["/:id" {:delete {:parameters {:path-params {:id string?}}
                      :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
