@@ -37,3 +37,7 @@
       {:success? false
        :message  (format "Cannot delete column. It is used in merge transformations of dataset: %s"
                          (str/join "," (map (comp :title second) merged-sources)))})))
+
+(defmethod engine/columns-used "core/delete-column"
+  [applied-transformation columns]
+  (:columnName (:args applied-transformation)))

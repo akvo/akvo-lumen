@@ -147,3 +147,16 @@
                                      "hidden"     false
                                      "direction"  nil
                                      "columnName" new-column-name})})))
+
+(defmethod engine/columns-used "core/derive"
+  [applied-transformation columns]
+  (let [code (-> applied-transformation :args :code)
+        computed (compute-transformation-code code columns)]
+    (reduce (fn [c r]
+              (conj c (if-let [column-name (:column-name r)]
+                        column-name
+                        (throw (ex-info "ups, no column name here!" {:transformation applied-transformation
+                                                                     :columns columns
+                                                                     :computed computed
+                                                                     :reference r}))))
+              ) [] (walk/keywordize-keys (get computed "references")))))
