@@ -63,7 +63,7 @@
   [{:keys [tenant-conn] :as deps} dataset-id command]
   (if-let [current-tx-job (pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
     (lib/bad-request {:message "A running transformation still exists, please wait to apply more ..."})
-    (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
+    (if-let [dataset (check-dataset-by-id tenant-conn {:id dataset-id})]
       (let [v (validate command)]
         (if-not (:valid? v)
           (lib/bad-request {:message (:message v)})
