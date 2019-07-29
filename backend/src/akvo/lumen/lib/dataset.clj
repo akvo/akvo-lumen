@@ -10,11 +10,13 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.set :refer (rename-keys)]
+            [clojure.walk :refer (keywordize-keys)]
             [hugsql.core :as hugsql]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
 (defn all*
   [tenant-conn]
@@ -111,12 +113,16 @@
   [tenant-conn import-config error-tracker dataset-id {refresh-token "refreshToken"}]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-    (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
-      (lib/conflict error)
-      (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
-        (update/update-dataset tenant-conn import-config error-tracker dataset-id data-source-id
-                               (assoc-in data-source-spec ["source" "refreshToken"] refresh-token))
-        (lib/bad-request {:error "Can't update uploaded dataset"})))
+    (let [initial-dataset-version (initial-dataset-version-to-update-by-dataset-id tenant-conn {:dataset-id dataset-id})
+          latest-dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+      (log/error :columns (keywordize-keys (:columns initial-dataset-version)))
+      (log/error :all-txs (keywordize-keys (:transformations latest-dataset-version)))
+     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn latest-dataset-version)]
+       (lib/conflict error)
+       (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
+         (update/update-dataset tenant-conn import-config error-tracker dataset-id data-source-id
+                                (assoc-in data-source-spec ["source" "refreshToken"] refresh-token))
+         (lib/bad-request {:error "Can't update uploaded dataset"}))))
     (lib/not-found {:id dataset-id})))
 
 (defn update-meta
