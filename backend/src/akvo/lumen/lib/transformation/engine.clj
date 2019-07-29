@@ -11,6 +11,27 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 
+(defmulti columns-used
+  (fn [applied-transformation columns]
+    (:op applied-transformation)))
+
+(defmethod columns-used :default
+  [applied-transformation columns]
+  (throw (ex-info (str "unimplemented defmulti columns-used for tx: " (:op applied-transformation))
+                  {:transformation applied-transformation})))
+
+(defmethod columns-used nil
+  [applied-transformation columns]
+  [])
+
+(defmulti avoidable-if-missing?
+  (fn [transformation]
+    (:op transformation)))
+
+(defmethod avoidable-if-missing? :default
+  [transformation]
+  false)
+
 (defn log-ex [e]
   (log/info e))
 
@@ -229,10 +250,10 @@
       (let [transformation       (adapt-transformation transformation old-columns columns)
             avoid-tranformation? (let [t (w/keywordize-keys transformation)]
                                    (and
-                                   (= "core/delete-column" (:op t))
-                                   ((complement contains?)
-                                    (set (map #(get % "columnName") columns))
-                                    (-> t :args :columnName))))]
+                                    (avoidable-if-missing? t)
+                                    ((complement set/subset?)
+                                     (set (columns-used t columns))
+                                     (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
           (recur (rest transformations) columns version applied-txs)
           (let [op (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
@@ -256,25 +277,3 @@
                                  :columns             (w/keywordize-keys columns)
                                  :transformations     (w/keywordize-keys (vec applied-txs))}))))
 
-(defmulti columns-used
-  (fn [applied-transformation columns]
-    (:op applied-transformation)))
-
-(defmethod columns-used :default
-  [applied-transformation columns]
-  (throw (ex-info (str "unimplemented defmulti columns-used for tx: " (:op applied-transformation))
-                  {:transformation applied-transformation})))
-
-(defmethod columns-used nil
-  [applied-transformation columns]
-  [])
-
-(defn undif-columns [tx columns]
-  (let [columns (reduce #(assoc % (:columnName %2) %2) {} columns)
-        cc (->> tx :changedColumns vals)
-        res (reduce (fn [c {:keys [before after]}]
-                      (if after
-                        (assoc c (:columnName after) after)
-                        (dissoc c (:columnName before))))
-                    columns cc)]
-    (vals res)))

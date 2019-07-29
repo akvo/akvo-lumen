@@ -40,6 +40,10 @@
   [applied-transformation columns]
   [(-> applied-transformation :args :columnName)])
 
+(defmethod engine/avoidable-if-missing? "core/sort-column"
+  [applied-transformation]
+  true)
+
 (defmethod engine/apply-operation "core/remove-sort"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
@@ -56,3 +60,7 @@
 (defmethod engine/columns-used "core/remove-sort"
   [applied-transformation columns]
   [(-> applied-transformation :args :columnName)])
+
+(defmethod engine/avoidable-if-missing? "core/remove-sort"
+  [applied-transformation]
+  true)

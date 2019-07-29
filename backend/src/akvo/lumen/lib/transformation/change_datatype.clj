@@ -115,3 +115,7 @@
 (defmethod engine/columns-used "core/change-datatype"
   [applied-transformation columns]
   [(:columnName (:args applied-transformation))])
+
+(defmethod engine/avoidable-if-missing? "core/change-datatype"
+  [applied-transformation]
+  true)
