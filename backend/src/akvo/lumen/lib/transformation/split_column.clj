@@ -115,4 +115,4 @@
 
 (defmethod engine/columns-used "core/split-column"
   [applied-transformation columns]
-  (:columnName (:selectedColumn (:args applied-transformation))))
+  [(:columnName (:selectedColumn (:args applied-transformation)))])

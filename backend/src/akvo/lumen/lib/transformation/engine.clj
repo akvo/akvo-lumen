@@ -214,7 +214,6 @@
   [op-spec older-columns new-columns]
   op-spec)
 
-
 (defn apply-transformation-log [conn table-name imported-table-name
                                 new-columns old-columns dataset-id job-execution-id
                                 {:keys [transformations version] :as dataset-version}]
@@ -248,3 +247,22 @@
                                  :version             (inc (:version dataset-version))
                                  :columns             (w/keywordize-keys columns)
                                  :transformations     (w/keywordize-keys (vec applied-txs))}))))
+
+(defmulti columns-used
+  (fn [applied-transformation columns]
+    (:op applied-transformation)))
+
+(defmethod columns-used :default
+  [applied-transformation columns]
+  (throw (ex-info (str "unimplemented defmulti columns-used for tx: " (:op applied-transformation))
+                  {:transformation applied-transformation})))
+
+(defn undif-columns [tx columns]
+  (let [columns (reduce #(assoc % (:columnName %2) %2) {} columns)
+        cc (->> tx :changedColumns vals)
+        res (reduce (fn [c {:keys [before after]}]
+                      (if after
+                        (assoc c (:columnName after) after)
+                        (dissoc c (:columnName before))))
+                    columns cc)]
+    (vals res)))
