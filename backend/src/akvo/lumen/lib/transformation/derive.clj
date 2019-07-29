@@ -24,6 +24,21 @@
           (throw (ex-info (str "Problem with js row template with code: " s) {:s s}))))
       single-quote-template)))
 
+(defn columnName>columnTitle
+  "Replace code column references and fall back to use code pattern if there is no
+  references."
+  [computed columns]
+  (let [columns (walk/keywordize-keys columns)]
+    (reduce (fn [code {:strs [column-name id pattern]}]
+              (if column-name
+                (str/replace code id (format (row-template-format pattern)
+                                             (-> (try (dataset.utils/find-column columns column-name)
+                                                      (catch Exception e nil))
+                                                 :title)))
+                (str/replace code id pattern)))
+            (get computed "template")
+            (get computed "references"))))
+
 (defn parse-row-object-references
   "Parse js code and return a sequence of row-references e.g. row.foo row['foo']
   or row[\"foo\"]. For every reference return a tuple with matched pattern and
@@ -53,21 +68,6 @@
             {"template" code
              "references" []}
             (parse-row-object-references code))))
-
-(defn columnName>columnTitle
-  "Replace code column references and fall back to use code pattern if there is no
-  references."
-  [computed columns]
-  (let [columns (walk/keywordize-keys columns)]
-    (reduce (fn [code {:strs [column-name id pattern]}]
-              (if column-name
-                (str/replace code id (format (row-template-format pattern)
-                                             (-> (try (dataset.utils/find-column columns column-name)
-                                                      (catch Exception e nil))
-                                                 :title)))
-                (str/replace code id pattern)))
-            (get computed "template")
-            (get computed "references"))))
 
 (defmethod engine/adapt-transformation "core/derive"
   [op-spec older-columns new-columns]
