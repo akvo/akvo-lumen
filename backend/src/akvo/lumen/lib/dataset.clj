@@ -115,8 +115,7 @@
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (let [initial-dataset-version (initial-dataset-version-to-update-by-dataset-id tenant-conn {:dataset-id dataset-id})
           latest-dataset-version (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-      (log/error :columns (keywordize-keys (:columns initial-dataset-version)))
-      (log/error :all-txs (keywordize-keys (:transformations latest-dataset-version)))
+      (update/consistency? initial-dataset-version latest-dataset-version)
      (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn latest-dataset-version)]
        (lib/conflict error)
        (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")

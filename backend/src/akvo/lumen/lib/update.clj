@@ -10,7 +10,8 @@
             [clojure.string :as string]
             [clojure.data :as d]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql]
+            [clojure.walk :as walk]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
@@ -153,3 +154,20 @@
            (p/track error-tracker e)
            (log/error e))))
      (lib/ok {"updateId" job-execution-id}))))
+
+
+(defn consistency? [initial-dataset-version latest-dataset-version]
+  (log/error :columns (walk/keywordize-keys (:columns initial-dataset-version)))
+  (log/error :all-txs (walk/keywordize-keys (:transformations latest-dataset-version)))
+
+
+  (let [res (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
+                   txs (-> latest-dataset-version :transformations walk/keywordize-keys)
+                   cols0 []]
+              (let [tx (first txs)
+                    cols1 (apply conj cols0 (engine/columns-used (first txs) columns))]
+                (if-let [txs (seq (next txs))]
+                  (recur (engine/undif-columns tx columns) txs cols1)
+                  cols1))
+              )]
+    (log/error :YUPIE res)))
