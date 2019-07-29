@@ -192,8 +192,8 @@
       {:diff diff
        :dataset-id (:datasetId merge-source-op)})))
 
-(defn consistency-error? [tenant-conn dataset-id]
-  (let [merged-sources (->> (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+(defn consistency-error? [tenant-conn latest-dataset-version]
+  (let [merged-sources (->> latest-dataset-version
                             :transformations
                             walk/keywordize-keys
                             (filter #(= "core/merge-datasets" (:op %)))
