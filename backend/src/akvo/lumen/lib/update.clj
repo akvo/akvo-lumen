@@ -17,6 +17,21 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
+(defn columns-used-in-txs [initial-dataset-version latest-dataset-version]
+  (log/debug :columns (walk/keywordize-keys (:columns initial-dataset-version)))
+  (log/debug :all-txs (walk/keywordize-keys (:transformations latest-dataset-version)))
+  (let [res (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
+                   txs (-> latest-dataset-version :transformations walk/keywordize-keys)
+                   cols0 #{}]
+              (let [tx (first txs)
+                    cols1 (apply  conj cols0 (engine/columns-used (first txs) columns))]
+                (if-let [txs (seq (next txs))]
+                  (recur (engine/undif-columns tx columns) txs cols1)
+                  cols1))
+              )]
+    (log/error :YUPIE res)
+    res))
+
 (defn- successful-update
   "On a successful update we need to create a new dataset-version that
   is similar to the previous one, except with an updated :version and
@@ -91,8 +106,16 @@
     (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
       (let [initial-dataset-version  (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
-            importer-columns         (p/columns importer)]
-        (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns importer-columns)]
+            importer-columns         (p/columns importer)
+
+            columns-used (columns-used-in-txs
+                          initial-dataset-version
+                          (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+            imported-dataset-columns-checked (reduce (fn [c co]
+                                                       (if (contains? columns-used (get co "columName"))
+                                                         (conj c co)
+                                                         c)) [] imported-dataset-columns)]
+        (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
           (failed-update conn job-execution-id
                          (cond-> "Column mismatch"
                            (seq (:missed-columns compatible-errors))
@@ -156,18 +179,5 @@
      (lib/ok {"updateId" job-execution-id}))))
 
 
-(defn consistency? [initial-dataset-version latest-dataset-version]
-  (log/error :columns (walk/keywordize-keys (:columns initial-dataset-version)))
-  (log/error :all-txs (walk/keywordize-keys (:transformations latest-dataset-version)))
 
 
-  (let [res (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
-                   txs (-> latest-dataset-version :transformations walk/keywordize-keys)
-                   cols0 []]
-              (let [tx (first txs)
-                    cols1 (apply conj cols0 (engine/columns-used (first txs) columns))]
-                (if-let [txs (seq (next txs))]
-                  (recur (engine/undif-columns tx columns) txs cols1)
-                  cols1))
-              )]
-    (log/error :YUPIE res)))
