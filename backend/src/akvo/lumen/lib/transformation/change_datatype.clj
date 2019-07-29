@@ -111,3 +111,7 @@
      :execution-log [(format "Changed column %s datatype from %s to %s"
                              column-name (engine/column-type columns column-name) new-type)]
      :columns (engine/update-column columns column-name assoc "type" new-type)}))
+
+(defmethod engine/columns-used "core/change-datatype"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])

@@ -41,3 +41,7 @@
                              "hidden" false
                              "direction" nil
                              "columnName" new-column-name})}))
+
+(defmethod engine/columns-used "core/combine"
+  [applied-transformation columns]
+  [(:columnNames (:args applied-transformation))])
