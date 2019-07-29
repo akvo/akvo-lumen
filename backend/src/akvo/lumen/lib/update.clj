@@ -17,20 +17,15 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
-(defn columns-used-in-txs [initial-dataset-version latest-dataset-version]
-  (log/debug :columns (walk/keywordize-keys (:columns initial-dataset-version)))
-  (log/debug :all-txs (walk/keywordize-keys (:transformations latest-dataset-version)))
-  (let [res (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
-                   txs (-> latest-dataset-version :transformations walk/keywordize-keys)
-                   cols0 #{}]
-              (let [tx (first txs)
-                    cols1 (apply  conj cols0 (engine/columns-used (first txs) columns))]
-                (if-let [txs (seq (next txs))]
-                  (recur (engine/undif-columns tx columns) txs cols1)
-                  cols1))
-              )]
-    (log/error :YUPIE res)
-    res))
+(defn- columns-used-in-txs [initial-dataset-version latest-dataset-version]
+  (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
+         txs (-> latest-dataset-version :transformations walk/keywordize-keys)
+         cols0 #{}]
+    (let [tx (first txs)
+          cols1 (apply  conj cols0 (engine/columns-used (first txs) columns))]
+      (if-let [txs (seq (next txs))]
+        (recur (engine/undif-columns tx columns) txs cols1)
+        cols1))))
 
 (defn- successful-update
   "On a successful update we need to create a new dataset-version that
@@ -177,7 +172,3 @@
            (p/track error-tracker e)
            (log/error e))))
      (lib/ok {"updateId" job-execution-id}))))
-
-
-
-
