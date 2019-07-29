@@ -14,7 +14,7 @@ UPDATE dataset
    SET modified=current_timestamp
  WHERE id = :id
 
--- :name check-dataset-by-id :? :1
+-- :name dataset-by-id :? :1
 -- :doc Checks the existence of a dataset for a given id
 SELECT id FROM dataset WHERE id = :id
 
