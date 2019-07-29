@@ -27,12 +27,21 @@
   [{:keys [tenant-conn]} table-name columns op-spec]
   (transform tenant-conn table-name columns op-spec "trim"))
 
+(defmethod engine/columns-used "core/trim"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])
+
+
 (defmethod engine/valid? "core/to-lowercase" [op-spec]
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/to-lowercase"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (transform tenant-conn table-name columns op-spec "lower"))
+
+(defmethod engine/columns-used "core/to-lowercase"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])
 
 (defmethod engine/valid? "core/to-uppercase" [op-spec]
   (valid? op-spec))
@@ -41,8 +50,16 @@
   [{:keys [tenant-conn]} table-name columns op-spec]
   (transform tenant-conn table-name columns op-spec "upper"))
 
+(defmethod engine/columns-used "core/to-uppercase"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])
+
 (defmethod engine/valid? "core/to-titlecase" [op-spec]
   (valid? op-spec))
+
+(defmethod engine/columns-used "core/to-titlecase"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])
 
 (defmethod engine/apply-operation "core/to-titlecase"
   [{:keys [tenant-conn]} table-name columns op-spec]
@@ -61,3 +78,7 @@
      :columns columns})
   {:success? true
    :columns columns})
+
+(defmethod engine/columns-used "core/trim-doublespace"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])

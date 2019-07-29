@@ -82,3 +82,7 @@
                                      "hidden"     false
                                      "direction"  nil
                                      "columnName" new-column-name})})))
+
+(defmethod engine/columns-used "core/derive-category"
+  [applied-transformation columns]
+  [(-> applied-transformation :args :source :column :columnName)])
