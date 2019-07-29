@@ -226,19 +226,27 @@
          version         (inc version)
          applied-txs     []]
     (if-let [transformation (first transformations)]
-      (let [transformation (adapt-transformation transformation old-columns columns)
-            op             (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
-        (when-not (:success? op)
-          (throw
-           (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
-        (let [applied-txs (conj applied-txs
-                                (assoc transformation "changedColumns"
-                                       (diff-columns columns (:columns op))))]
-          (update-dataset-version conn {:dataset-id      dataset-id
-                                        :version         version
-                                        :columns         (:columns op)
-                                        :transformations applied-txs})
-          (recur (rest transformations) (:columns op) (inc version) applied-txs)))
+      (let [transformation       (adapt-transformation transformation old-columns columns)
+            avoid-tranformation? (let [t (w/keywordize-keys transformation)]
+                                   (and
+                                   (= "core/delete-column" (:op t))
+                                   ((complement contains?)
+                                    (set (map #(get % "columnName") columns))
+                                    (-> t :args :columnName))))]
+        (if avoid-tranformation?
+          (recur (rest transformations) columns version applied-txs)
+          (let [op (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
+            (when-not (:success? op)
+              (throw
+               (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
+            (let [applied-txs (conj applied-txs
+                                    (assoc transformation "changedColumns"
+                                           (diff-columns columns (:columns op))))]
+              (update-dataset-version conn {:dataset-id      dataset-id
+                                            :version         version
+                                            :columns         (:columns op)
+                                            :transformations applied-txs})
+              (recur (rest transformations) (:columns op) (inc version) applied-txs)))))
       (new-dataset-version conn {:id                  (str (util/squuid))
                                  :dataset-id          dataset-id
                                  :job-execution-id    job-execution-id

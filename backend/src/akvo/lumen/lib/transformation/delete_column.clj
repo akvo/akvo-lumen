@@ -40,4 +40,4 @@
 
 (defmethod engine/columns-used "core/delete-column"
   [applied-transformation columns]
-  [(:columnName (:args applied-transformation))])
+  [])
