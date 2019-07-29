@@ -17,14 +17,25 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
+(defn- undif-columns [tx columns]
+  (let [columns (reduce #(assoc % (:columnName %2) %2) {} columns)
+        cc (->> tx :changedColumns vals)
+        res (reduce (fn [c {:keys [before after]}]
+                      (if after
+                        (assoc c (:columnName after) after)
+                        (dissoc c (:columnName before))))
+                    columns cc)]
+    (vals res)))
+
 (defn- columns-used-in-txs [initial-dataset-version latest-dataset-version]
   (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
          txs (-> latest-dataset-version :transformations walk/keywordize-keys)
          cols0 #{}]
     (let [tx (first txs)
-          cols1 (apply  conj cols0 (engine/columns-used (first txs) columns))]
+          cols1 (apply conj cols0 (when-not (engine/avoidable-if-missing? (first txs))
+                                    (engine/columns-used (first txs) columns)))]
       (if-let [txs (seq (next txs))]
-        (recur (engine/undif-columns tx columns) txs cols1)
+        (recur (undif-columns tx columns) txs cols1)
         cols1))))
 
 (defn- successful-update

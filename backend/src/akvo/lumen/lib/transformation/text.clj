@@ -31,6 +31,9 @@
   [applied-transformation columns]
   [(:columnName (:args applied-transformation))])
 
+(defmethod engine/avoidable-if-missing? "core/trim"
+  [applied-transformation]
+  true)
 
 (defmethod engine/valid? "core/to-lowercase" [op-spec]
   (valid? op-spec))
@@ -43,6 +46,10 @@
   [applied-transformation columns]
   [(:columnName (:args applied-transformation))])
 
+(defmethod engine/avoidable-if-missing? "core/to-lowercase"
+  [applied-transformation]
+  true)
+
 (defmethod engine/valid? "core/to-uppercase" [op-spec]
   (valid? op-spec))
 
@@ -54,12 +61,20 @@
   [applied-transformation columns]
   [(:columnName (:args applied-transformation))])
 
+(defmethod engine/avoidable-if-missing? "core/to-uppercase"
+  [applied-transformation]
+  true)
+
 (defmethod engine/valid? "core/to-titlecase" [op-spec]
   (valid? op-spec))
 
 (defmethod engine/columns-used "core/to-titlecase"
   [applied-transformation columns]
   [(:columnName (:args applied-transformation))])
+
+(defmethod engine/avoidable-if-missing? "core/to-titlecase"
+  [applied-transformation]
+  true)
 
 (defmethod engine/apply-operation "core/to-titlecase"
   [{:keys [tenant-conn]} table-name columns op-spec]
@@ -82,3 +97,8 @@
 (defmethod engine/columns-used "core/trim-doublespace"
   [applied-transformation columns]
   [(:columnName (:args applied-transformation))])
+
+
+(defmethod engine/avoidable-if-missing? "core/trim-doublespace"
+  [applied-transformation]
+  true)

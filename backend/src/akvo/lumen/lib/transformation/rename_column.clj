@@ -26,3 +26,7 @@
 (defmethod engine/columns-used "core/rename-column"
   [applied-transformation columns]
   [(-> applied-transformation :args :columnName)])
+
+(defmethod engine/avoidable-if-missing? "core/rename-column"
+  [applied-transformation]
+  true)
