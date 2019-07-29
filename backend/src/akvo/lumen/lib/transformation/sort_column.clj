@@ -36,6 +36,10 @@
     {:success? true
      :columns new-cols}))
 
+(defmethod engine/columns-used "core/sort-column"
+  [applied-transformation columns]
+  [(-> applied-transformation :args :columnName)])
+
 (defmethod engine/apply-operation "core/remove-sort"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
@@ -48,3 +52,7 @@
     (db-drop-index tenant-conn {:index-name idx-name})
     {:success? true
      :columns new-cols}))
+
+(defmethod engine/columns-used "core/remove-sort"
+  [applied-transformation columns]
+  [(-> applied-transformation :args :columnName)])

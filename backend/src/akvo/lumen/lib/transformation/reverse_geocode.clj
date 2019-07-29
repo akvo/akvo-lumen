@@ -49,3 +49,7 @@
                      "hidden" false
                      "direction" nil
                      "columnName" column-name})}))
+
+(defmethod engine/columns-used "core/reverse-geocode"
+  [applied-transformation columns]
+  [(-> applied-transformation :args :target :geopointColumn)])
