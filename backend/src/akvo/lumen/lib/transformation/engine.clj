@@ -257,6 +257,10 @@
   (throw (ex-info (str "unimplemented defmulti columns-used for tx: " (:op applied-transformation))
                   {:transformation applied-transformation})))
 
+(defmethod columns-used nil
+  [applied-transformation columns]
+  [])
+
 (defn undif-columns [tx columns]
   (let [columns (reduce #(assoc % (:columnName %2) %2) {} columns)
         cc (->> tx :changedColumns vals)
