@@ -5,7 +5,7 @@
             [akvo.lumen.component.hikaricp :as hikaricp]
             [environ.core :refer [env]]))
 
-(def http-client-req-defaults (http.client/req-opts 5000))
+(def http-client-req-defaults (http.client/req-opts 200000))
 
 (defn exec!
   "Execute SQL expression"
