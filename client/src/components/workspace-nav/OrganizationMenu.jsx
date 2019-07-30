@@ -1,20 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import * as auth from './../../utilities/auth';
+import UserMenu from './user-menu/UserMenu';
 
-function OrganizationMenu({ profile, authURL }) {
-  const url = (authURL && authURL.includes('auth0')) ? '#' : `${authURL}/realms/akvo/account`;
-  const logout = (authURL && authURL.includes('auth0')) ? <a onClick={() => auth.logout()}>&nbsp; <i className="fa fa-power-off" aria-hidden="true" /> LOGOUT</a> : '';
+function KeycloakUserMenu({ profile, authURL }) {
+  const url = `${authURL}/realms/akvo/account`;
   return (
-    <div className="OrganizationMenu">
+    <div className="KeycloakUserMenu">
       <div className="name">
         <a href={url}>
           <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
         </a>
-        {logout}
       </div>
       <div className="organization">Akvo Lumen</div>
+    </div>
+  );
+}
+
+KeycloakUserMenu.propTypes = {
+  authURL: PropTypes.string,
+  profile: PropTypes.shape({
+    username: PropTypes.string,
+  }).isRequired,
+};
+
+function OrganizationMenu({ profile, authURL }) {
+  const isAuth0 = (authURL && authURL.includes('auth0'));
+  return (
+    <div className="OrganizationMenu">
+      {isAuth0 ? (
+        <UserMenu profile={profile} />
+      ) : (
+        <KeycloakUserMenu authURL={authURL} profile={profile} />
+      )}
     </div>
   );
 }
