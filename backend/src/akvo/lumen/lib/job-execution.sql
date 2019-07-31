@@ -44,7 +44,7 @@ UPDATE job_execution
 
 
 -- :name job-execution-by-id :? :1
-SELECT j.id, j.status, j.error_log->>0 as "error-message", j.type as kind, dataset_id as "dataset-id"
+SELECT j.id, j.status, j.error_log->>0 as "error-message", j.type as kind, dataset_id as "dataset-id", data_source_id as "data-source-id"
   FROM job_execution j
    WHERE j.id = :id;
 
