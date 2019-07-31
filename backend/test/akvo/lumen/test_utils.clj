@@ -74,21 +74,13 @@
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
-  [tenant-conn error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind]}]
+  [tenant-conn error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind with-job?]}]
   (let [spec {"source" (with-meta {"kind" kind
                                    "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
         [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn {} error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (dh/with-retry {:retry-if (fn [v e] (not v))
-                    :max-retries 20
-                    :delay-ms 100}
-      (let [job (datasource-job-execution-by-id tenant-conn {:id updateId})
-            status (:status job)]
-        (when (not= "PENDING" status)
-          (if (= "OK" status)
-            (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id updateId}))
-            updateId))))))
+    (retry-job-execution tenant-conn updateId with-job?)))
 
 (defn rand-bol []
   (if (= 0 (rand-int 2)) false true))
