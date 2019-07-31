@@ -70,7 +70,7 @@
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))
-          updated-res (update-file *tenant-conn* *error-tracker* (:dataset_id job) (:data_source_id job)
+          updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data_source_id job)
                         {:kind "clj"
                          :data (i-c/sample-imported-dataset [:text :number] 2)})]
       (is (some? updated-res)))))
