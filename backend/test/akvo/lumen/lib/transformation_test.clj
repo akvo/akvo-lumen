@@ -304,9 +304,11 @@
                            (get-data *tenant-conn*))]
       (testing "Testing columns are removed without tx"
         (log/error :job job)
-       (let [updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data_source_id job)
+       (let [updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
                                       {:kind "clj"
+                                       :with-job? true
                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
+         (log/error :updated-res updated-res)
          (is (some? updated-res))))
       )))
 
