@@ -11,15 +11,15 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
-            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.import :as import.s]
             [akvo.lumen.specs.import.column :as import.column.s]
             [akvo.lumen.specs.import.values :as import.values.s]
             [akvo.lumen.specs.transformation :as transformation.s]
-            [akvo.lumen.test-utils :refer [import-file at-least-one-true retry-job-execution] :as tu]
+            [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
             [akvo.lumen.util :refer [conform squuid]]
             [cheshire.core :as json]
             [clj-time.coerce :as tcc]
@@ -286,6 +286,29 @@
         (is (= years (map (comp str tc/year tcc/from-long :c2) table-data)))
         (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
         (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
+
+
+
+(deftest ^:functional test-update-issue-2254
+  (testing "Testing https://github.com/akvo/akvo-lumen/issues/2254 "
+    (let [[job dataset] (import-file *tenant-conn* *error-tracker*
+                                     {:dataset-name "Padded titles"
+                                      :kind "clj"
+                                      :data (import.s/sample-imported-dataset [:text :number :text :number :text :number :text :number] 2)
+                                      :with-job? true})
+          dataset-id (:dataset_id dataset)
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                 {:dataset-id dataset-id})
+                           (get-data *tenant-conn*))]
+      (testing "Testing columns are removed without tx"
+        (log/error :job job)
+       (let [updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data_source_id job)
+                                      {:kind "clj"
+                                       :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
+         (is (some? updated-res))))
+      )))
 
 (deftest ^:functional derived-column-test
   (let [change-datatype-transformation (fn [column-name]
