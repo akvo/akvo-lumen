@@ -247,3 +247,7 @@
   [tenant-conn target-dataset-id]
   (let [origins (map :origin (sources-related tenant-conn target-dataset-id))]
     (when-not (empty? origins) origins)))
+
+(defmethod engine/columns-used "core/merge-datasets"
+  [applied-transformation columns]
+  [(-> applied-transformation :args :target :mergeColumn)])

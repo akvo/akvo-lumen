@@ -55,3 +55,7 @@
         (log/debug msg)
         {:success? false
          :message msg}))))
+
+(defmethod engine/columns-used "core/generate-geopoints"
+  [applied-transformation columns]
+  ((juxt :columnNameLat :columnNameLong) (:args applied-transformation)))

@@ -10,11 +10,33 @@
             [clojure.string :as string]
             [clojure.data :as d]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
+            [hugsql.core :as hugsql]
+            [clojure.walk :as walk]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
+
+(defn- undif-columns [tx columns]
+  (let [columns (reduce #(assoc % (:columnName %2) %2) {} columns)
+        cc (->> tx :changedColumns vals)
+        res (reduce (fn [c {:keys [before after]}]
+                      (if after
+                        (assoc c (:columnName after) after)
+                        (dissoc c (:columnName before))))
+                    columns cc)]
+    (vals res)))
+
+(defn- columns-used-in-txs [initial-dataset-version latest-dataset-version]
+  (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
+         txs (-> latest-dataset-version :transformations walk/keywordize-keys)
+         cols0 #{}]
+    (let [tx (first txs)
+          cols1 (apply conj cols0 (when-not (engine/avoidable-if-missing? (first txs))
+                                    (engine/columns-used (first txs) columns)))]
+      (if-let [txs (seq (next txs))]
+        (recur (undif-columns tx columns) txs cols1)
+        cols1))))
 
 (defn- successful-update
   "On a successful update we need to create a new dataset-version that
@@ -90,8 +112,16 @@
     (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
       (let [initial-dataset-version  (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
-            importer-columns         (p/columns importer)]
-        (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns importer-columns)]
+            importer-columns         (p/columns importer)
+
+            columns-used (columns-used-in-txs
+                          initial-dataset-version
+                          (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+            imported-dataset-columns-checked (reduce (fn [c co]
+                                                       (if (contains? columns-used (get co "columName"))
+                                                         (conj c co)
+                                                         c)) [] imported-dataset-columns)]
+        (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
           (failed-update conn job-execution-id
                          (cond-> "Column mismatch"
                            (seq (:missed-columns compatible-errors))

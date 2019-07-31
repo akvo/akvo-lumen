@@ -28,3 +28,11 @@
     {:success? true
      :execution-log [(str "Deleted " result " rows")]
      :columns columns}))
+
+(defmethod engine/columns-used "core/filter-column"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])
+
+(defmethod engine/avoidable-if-missing? "core/filter-column"
+  [applied-transformation]
+  true)

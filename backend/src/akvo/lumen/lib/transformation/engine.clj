@@ -11,6 +11,27 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 
+(defmulti columns-used
+  (fn [applied-transformation columns]
+    (:op applied-transformation)))
+
+(defmethod columns-used :default
+  [applied-transformation columns]
+  (throw (ex-info (str "unimplemented defmulti columns-used for tx: " (:op applied-transformation))
+                  {:transformation applied-transformation})))
+
+(defmethod columns-used nil
+  [applied-transformation columns]
+  [])
+
+(defmulti avoidable-if-missing?
+  (fn [transformation]
+    (:op transformation)))
+
+(defmethod avoidable-if-missing? :default
+  [transformation]
+  false)
+
 (defn log-ex [e]
   (log/info e))
 
@@ -214,7 +235,6 @@
   [op-spec older-columns new-columns]
   op-spec)
 
-
 (defn apply-transformation-log [conn table-name imported-table-name
                                 new-columns old-columns dataset-id job-execution-id
                                 {:keys [transformations version] :as dataset-version}]
@@ -227,19 +247,27 @@
          version         (inc version)
          applied-txs     []]
     (if-let [transformation (first transformations)]
-      (let [transformation (adapt-transformation transformation old-columns columns)
-            op             (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
-        (when-not (:success? op)
-          (throw
-           (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
-        (let [applied-txs (conj applied-txs
-                                (assoc transformation "changedColumns"
-                                       (diff-columns columns (:columns op))))]
-          (update-dataset-version conn {:dataset-id      dataset-id
-                                        :version         version
-                                        :columns         (:columns op)
-                                        :transformations applied-txs})
-          (recur (rest transformations) (:columns op) (inc version) applied-txs)))
+      (let [transformation       (adapt-transformation transformation old-columns columns)
+            avoid-tranformation? (let [t (w/keywordize-keys transformation)]
+                                   (and
+                                    (avoidable-if-missing? t)
+                                    ((complement set/subset?)
+                                     (set (columns-used t columns))
+                                     (set (map #(get % "columnName") columns)))))]
+        (if avoid-tranformation?
+          (recur (rest transformations) columns version applied-txs)
+          (let [op (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
+            (when-not (:success? op)
+              (throw
+               (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
+            (let [applied-txs (conj applied-txs
+                                    (assoc transformation "changedColumns"
+                                           (diff-columns columns (:columns op))))]
+              (update-dataset-version conn {:dataset-id      dataset-id
+                                            :version         version
+                                            :columns         (:columns op)
+                                            :transformations applied-txs})
+              (recur (rest transformations) (:columns op) (inc version) applied-txs)))))
       (new-dataset-version conn {:id                  (str (util/squuid))
                                  :dataset-id          dataset-id
                                  :job-execution-id    job-execution-id
@@ -248,3 +276,4 @@
                                  :version             (inc (:version dataset-version))
                                  :columns             (w/keywordize-keys columns)
                                  :transformations     (w/keywordize-keys (vec applied-txs))}))))
+
