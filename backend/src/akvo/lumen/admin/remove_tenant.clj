@@ -23,6 +23,7 @@
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.component.keycloak :as keycloak]
+            [clojure.string :as s]
             [cheshire.core :as json]))
 
 (defn remove-group
@@ -109,8 +110,8 @@
     (remove-group kc group-id)))
 
 (defn remove-tenant [label]
-  (let [tenant (str "tenant_" label)
-        lumen-db-uri (util/db-uri {:database "lumen"})
+  (let [tenant (str "tenant_" (s/replace label "-" "_"))
+        lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
         kc (util/create-keycloak)]
     (util/exec! lumen-db-uri "DROP DATABASE %s" tenant)
     (util/exec! lumen-db-uri "DROP ROLE %s" tenant)
