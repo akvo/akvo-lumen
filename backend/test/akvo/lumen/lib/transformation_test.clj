@@ -306,20 +306,37 @@
                                       :data (import.s/sample-imported-dataset [:text :number :text :number :text :number :text :number] 2)
                                       :with-job? true})
           dataset-id (:dataset_id dataset)
+          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))]
       (testing "Testing columns are removed without tx"
-        (log/error :job job)
-       (let [updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
-                                      {:kind "clj"
-                                       :with-job? true
-                                       :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
-         (log/error :updated-res updated-res)
-         (is (some? updated-res))))
-      )))
+        (let [updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
+          (is (some? updated-res))))
+
+      (testing "Removing column with change-datatype tx"
+        (let [_ (apply-transformation (change-datatype-tx "c6" "text"))
+              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text] 2)})]
+          (is (some? updated-res))))
+      (testing "Removing column with delete-column tx"
+        (let [_ (apply-transformation {:type :transformation
+                                       :transformation
+                                       (gen-transformation "core/delete-column"
+                                                           {::db.dataset-version.column.s/columnName "c5"
+})})
+              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
+          (is (some? updated-res)))))))
 
 (deftest ^:functional derived-column-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
