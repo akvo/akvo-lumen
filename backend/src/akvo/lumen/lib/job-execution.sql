@@ -7,8 +7,8 @@ INSERT INTO job_execution(id, data_source_id, type)
      VALUES (:id, :data-source-id, 'IMPORT');
 
 -- :name insert-dataset-update-job-execution :! :n
-INSERT INTO job_execution(id, data_source_id, type)
-     VALUES (:id, :data-source-id, 'UPDATE');
+INSERT INTO job_execution(id, data_source_id, dataset_id, type)
+     VALUES (:id, :data-source-id, :dataset-id, 'UPDATE');
 
 -- :name clone-data-table :! :n
 -- :doc Clone a data table
@@ -44,7 +44,7 @@ UPDATE job_execution
 
 
 -- :name job-execution-by-id :? :1
-SELECT j.id, j.status, j.error_log->>0 as "error-message", j.type as kind, dataset_id as "dataset-id"
+SELECT j.id, j.status, j.error_log->>0 as "error-message", j.type as kind, dataset_id as "dataset-id", data_source_id as "data-source-id"
   FROM job_execution j
    WHERE j.id = :id;
 

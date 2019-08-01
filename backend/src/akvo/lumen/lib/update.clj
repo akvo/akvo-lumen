@@ -169,7 +169,8 @@
     (lib/bad-request {:message "A running transformation still exists, please wait to update this dataset ..."})
     (let [job-execution-id (str (util/squuid))]
      (insert-dataset-update-job-execution tenant-conn {:id job-execution-id
-                                                       :data-source-id data-source-id})
+                                                       :data-source-id data-source-id
+                                                       :dataset-id dataset-id})
      (future
        (try
          (do-update tenant-conn
