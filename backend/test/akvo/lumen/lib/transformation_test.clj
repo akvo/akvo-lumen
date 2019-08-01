@@ -11,15 +11,15 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
-            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.import :as import.s]
             [akvo.lumen.specs.import.column :as import.column.s]
             [akvo.lumen.specs.import.values :as import.values.s]
             [akvo.lumen.specs.transformation :as transformation.s]
-            [akvo.lumen.test-utils :refer [import-file at-least-one-true retry-job-execution] :as tu]
+            [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
             [akvo.lumen.util :refer [conform squuid]]
             [cheshire.core :as json]
             [clj-time.coerce :as tcc]
@@ -116,6 +116,15 @@
     (conform ::transformation.engine.s/op-spec (assoc s :op op-name :args args))
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
+
+(def change-datatype-tx (fn [column-name & [new-type]]
+   {:type :transformation
+    :transformation
+    (-> (gen-transformation
+         "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
+                                 ::transformation.change-datatype.s/newType (or new-type "number")
+                                 ::transformation.engine.s/onError "default-value"})
+        (assoc-in ["args" "defaultValue"] nil))}))
 
 (deftest ^:functional test-transformations
   (testing "Transformation application"
@@ -287,20 +296,54 @@
         (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
         (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
 
+
+
+(deftest ^:functional test-update-issue-2254
+  (testing "Testing https://github.com/akvo/akvo-lumen/issues/2254 "
+    (let [[job dataset] (import-file *tenant-conn* *error-tracker*
+                                     {:dataset-name "Padded titles"
+                                      :kind "clj"
+                                      :data (import.s/sample-imported-dataset [:text :number :text :number :text :number :text :number] 2)
+                                      :with-job? true})
+          dataset-id (:dataset_id dataset)
+          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                 {:dataset-id dataset-id})
+                           (get-data *tenant-conn*))]
+      (testing "Testing columns are removed without tx"
+        (let [updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
+          (is (some? updated-res))))
+
+      (testing "Removing column with change-datatype tx"
+        (let [_ (apply-transformation (change-datatype-tx "c6" "text"))
+              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text] 2)})]
+          (is (some? updated-res))))
+      (testing "Removing column with delete-column tx"
+        (let [_ (apply-transformation {:type :transformation
+                                       :transformation
+                                       (gen-transformation "core/delete-column"
+                                                           {::db.dataset-version.column.s/columnName "c5"
+})})
+              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
+          (is (some? updated-res)))))))
+
 (deftest ^:functional derived-column-test
-  (let [change-datatype-transformation (fn [column-name]
-                                         {:type :transformation
-                                          :transformation
-                                          (-> (gen-transformation
-                                               "core/change-datatype" {::db.dataset-version.column.s/columnName "column-name"
-                                                                      ::transformation.change-datatype.s/newType "number"
-                                                                      ::transformation.engine.s/onError "default-value"})
-                                              (assoc-in ["args" "defaultValue"] nil))})
-        dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
                                                                :file "derived-column.csv"})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (do (apply-transformation (change-datatype-transformation "c2"))
-        (apply-transformation (change-datatype-transformation "c3")))
+    (do (apply-transformation (change-datatype-tx "c2"))
+        (apply-transformation (change-datatype-tx "c3")))
 
     (testing "Import and initial transforms"
       (is (= (latest-data dataset-id)

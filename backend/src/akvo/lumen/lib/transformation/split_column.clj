@@ -112,3 +112,7 @@
         {:success? false
          :message  (format "No results trying to split column '%s' with pattern '%s'"
                            (:title (selected-column args)) (pattern* args))}))))
+
+(defmethod engine/columns-used "core/split-column"
+  [applied-transformation columns]
+  [(:columnName (:selectedColumn (:args applied-transformation)))])
