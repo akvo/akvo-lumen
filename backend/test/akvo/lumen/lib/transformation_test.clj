@@ -117,6 +117,15 @@
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
+(def change-datatype-tx (fn [column-name & [new-type]]
+   {:type :transformation
+    :transformation
+    (-> (gen-transformation
+         "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
+                                 ::transformation.change-datatype.s/newType (or new-type "number")
+                                 ::transformation.engine.s/onError "default-value"})
+        (assoc-in ["args" "defaultValue"] nil))}))
+
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= [::lib/bad-request {:message "Dataset not found"} nil]
@@ -313,19 +322,11 @@
       )))
 
 (deftest ^:functional derived-column-test
-  (let [change-datatype-transformation (fn [column-name]
-                                         {:type :transformation
-                                          :transformation
-                                          (-> (gen-transformation
-                                               "core/change-datatype" {::db.dataset-version.column.s/columnName "column-name"
-                                                                      ::transformation.change-datatype.s/newType "number"
-                                                                      ::transformation.engine.s/onError "default-value"})
-                                              (assoc-in ["args" "defaultValue"] nil))})
-        dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
                                                                :file "derived-column.csv"})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (do (apply-transformation (change-datatype-transformation "c2"))
-        (apply-transformation (change-datatype-transformation "c3")))
+    (do (apply-transformation (change-datatype-tx "c2"))
+        (apply-transformation (change-datatype-tx "c3")))
 
     (testing "Import and initial transforms"
       (is (= (latest-data dataset-id)
