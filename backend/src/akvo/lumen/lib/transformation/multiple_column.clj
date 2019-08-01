@@ -28,6 +28,6 @@
   (-> (apply-operation deps table-name columns op-spec)
       (update :columns walk/stringify-keys)))
 
-(defmethod t.engine/columns-used "core/combine"
+(defmethod t.engine/columns-used "core/extract-multiple"
   [applied-transformation columns]
   [(:columnName (:selectedColumn (:args applied-transformation)))])
