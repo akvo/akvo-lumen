@@ -47,8 +47,9 @@ UserActionSelector.defaultProps = {
   },
 };
 
-function User({ getUserActions, invitationMode, onChange, user }) {
+function User({ getUserActions, invitationMode, onChange, onCancelEditing, user, currentEdition }) {
   const { active, admin, email, username } = user;
+  const isEditing = currentEdition.email === email && currentEdition.action === 'edit';
   return (
     <tr>
       {!invitationMode &&
@@ -66,6 +67,19 @@ function User({ getUserActions, invitationMode, onChange, user }) {
           user={user}
         />
       </td>
+      <td>
+        {isEditing &&
+          <div>
+            <button
+              className="overflow clickable "
+            >SAVE</button>&nbsp;
+            <button
+              className="overflow clickable "
+              onClick={onCancelEditing}
+            >CANCEL</button>
+          </div>
+        }
+      </td>
     </tr>
   );
 }
@@ -74,12 +88,14 @@ User.propTypes = {
   getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  onCancelEditing: PropTypes.func.isRequired,
   user: PropTypes.shape({
     active: PropTypes.bool.isRequired,
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
     username: PropTypes.string,
   }).isRequired,
+  currentEdition: PropTypes.object.isRequired,
 };
 
 User.defaultProps = {
@@ -89,7 +105,8 @@ User.defaultProps = {
   },
 };
 
-function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, users }) {
+// eslint-disable-next-line max-len
+function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, onCancelEditing, users, currentEdition }) {
   return (
     <table>
       <tbody>
@@ -108,12 +125,15 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, u
           <th>
             <FormattedMessage id="actions" />
           </th>
+          <th>X</th>
         </tr>
         {users.map(({ admin, email, id, username }) => (
           <User
+            currentEdition={currentEdition}
             getUserActions={getUserActions}
             key={id}
             onChange={onChange}
+            onCancelEditing={onCancelEditing}
             invitationMode={invitationMode}
             user={{
               active: email === activeUserEmail,
@@ -133,7 +153,9 @@ UserList.propTypes = {
   getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  onCancelEditing: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
+  currentEdition: PropTypes.object.isRequired,
 };
 
 class Users extends Component {
@@ -144,6 +166,7 @@ class Users extends Component {
         action: '',
         user: { email: '', id: '', username: '' },
       },
+      editingAction: { action: '', email: '' },
       invitationMode: false,
       invitations: [],
       isActionModalVisible: false,
@@ -155,6 +178,7 @@ class Users extends Component {
     this.getInvitations = this.getInvitations.bind(this);
     this.getUsers = this.getUsers.bind(this);
     this.handleUserAction = this.handleUserAction.bind(this);
+    this.handleCancelEditing = this.handleCancelEditing.bind(this);
     this.handleUserActionSelect = this.handleUserActionSelect.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
   }
@@ -233,8 +257,18 @@ class Users extends Component {
         userAction: { action, user },
       });
     } else {
-      console.log('edit');
+      this.setState({
+        isActionModalVisible: false,
+        editingAction: { action, email: user.email },
+      });
     }
+  }
+  handleCancelEditing() {
+    console.log('cancel editing');
+    this.setState({
+      isActionModalVisible: false,
+      editingAction: { action: '', email: '' },
+    });
   }
 
   handleUserAction() {
@@ -276,7 +310,7 @@ class Users extends Component {
     const saveStatus = '';
     const invitationMode = this.state.invitationMode;
     const title = invitationMode ? 'Invitations' : 'Members';
-
+    const currentEdition = this.state.editingAction;
     if (!admin) {
       return (
         <div>
@@ -294,6 +328,8 @@ class Users extends Component {
         />
         <div className="UserList">
           <UserList
+            currentEdition={currentEdition}
+            onCancelEditing={this.handleCancelEditing}
             activeUserEmail={email}
             getUserActions={this.getUserActions}
             onChange={this.handleUserActionSelect}
