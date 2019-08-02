@@ -47,9 +47,12 @@ UserActionSelector.defaultProps = {
   },
 };
 
-function User({ getUserActions, invitationMode, onChange, onCancelEditing, user, currentEdition }) {
+// eslint-disable-next-line max-len
+function User({ getUserActions, invitationMode, onChange, onCancelEditing, onSaveEditing, user, currentEdition }) {
   const { active, admin, email, username } = user;
   const isEditing = currentEdition.email === email && currentEdition.action === 'edit';
+  const cancel = u => () => onCancelEditing(u);
+  const save = u => () => onSaveEditing(u);
   return (
     <tr>
       {!invitationMode &&
@@ -72,10 +75,11 @@ function User({ getUserActions, invitationMode, onChange, onCancelEditing, user,
           <div>
             <button
               className="overflow clickable "
+              onClick={save(user)}
             >SAVE</button>&nbsp;
             <button
               className="overflow clickable "
-              onClick={onCancelEditing}
+              onClick={cancel(user)}
             >CANCEL</button>
           </div>
         }
@@ -89,6 +93,7 @@ User.propTypes = {
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   onCancelEditing: PropTypes.func.isRequired,
+  onSaveEditing: PropTypes.func.isRequired,
   user: PropTypes.shape({
     active: PropTypes.bool.isRequired,
     admin: PropTypes.bool,
@@ -106,7 +111,7 @@ User.defaultProps = {
 };
 
 // eslint-disable-next-line max-len
-function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, onCancelEditing, users, currentEdition }) {
+function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, onSaveEditing, onCancelEditing, users, currentEdition }) {
   return (
     <table>
       <tbody>
@@ -134,6 +139,7 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, o
             key={id}
             onChange={onChange}
             onCancelEditing={onCancelEditing}
+            onSaveEditing={onSaveEditing}
             invitationMode={invitationMode}
             user={{
               active: email === activeUserEmail,
@@ -154,6 +160,7 @@ UserList.propTypes = {
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   onCancelEditing: PropTypes.func.isRequired,
+  onSaveEditing: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
   currentEdition: PropTypes.object.isRequired,
 };
@@ -179,6 +186,7 @@ class Users extends Component {
     this.getUsers = this.getUsers.bind(this);
     this.handleUserAction = this.handleUserAction.bind(this);
     this.handleCancelEditing = this.handleCancelEditing.bind(this);
+    this.handleSaveEditing = this.handleSaveEditing.bind(this);
     this.handleUserActionSelect = this.handleUserActionSelect.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
   }
@@ -263,8 +271,18 @@ class Users extends Component {
       });
     }
   }
-  handleCancelEditing() {
-    console.log('cancel editing');
+
+  handleCancelEditing(user) {
+    console.log('cancel editing', user);
+    this.setState({
+      isActionModalVisible: false,
+      editingAction: { action: '', email: '' },
+    });
+  }
+
+  handleSaveEditing(user) {
+    console.log('save editing', user);
+    console.log('call backend api and update users');
     this.setState({
       isActionModalVisible: false,
       editingAction: { action: '', email: '' },
@@ -330,6 +348,7 @@ class Users extends Component {
           <UserList
             currentEdition={currentEdition}
             onCancelEditing={this.handleCancelEditing}
+            onSaveEditing={this.handleSaveEditing}
             activeUserEmail={email}
             getUserActions={this.getUserActions}
             onChange={this.handleUserActionSelect}
