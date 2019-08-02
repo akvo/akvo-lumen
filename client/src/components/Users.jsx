@@ -48,44 +48,77 @@ UserActionSelector.defaultProps = {
 };
 
 // eslint-disable-next-line max-len
-function User({ getUserActions, invitationMode, onChange, onCancelEditing, onSaveEditing, user, currentEdition }) {
-  const { active, admin, email, username } = user;
-  const isEditing = currentEdition.email === email && currentEdition.action === 'edit';
-  const cancel = u => () => onCancelEditing(u);
-  const save = u => () => onSaveEditing(u);
-  return (
-    <tr>
-      {!invitationMode &&
-        <td>
-          {username}
-          {active && <span className="isMe"> (me)</span>}
-        </td>
-      }
-      <td>{email}</td>
-      {!invitationMode && <td>{admin ? 'Admin' : 'User'}</td>}
-      <td>
-        <UserActionSelector
-          getUserActions={getUserActions}
-          onChange={onChange}
-          user={user}
-        />
-      </td>
-      <td>
-        {isEditing &&
-          <div>
-            <button
-              className="overflow clickable "
-              onClick={save(user)}
-            >SAVE</button>&nbsp;
-            <button
-              className="overflow clickable "
-              onClick={cancel(user)}
-            >CANCEL</button>
-          </div>
+//  { getUserActions, invitationMode, onChange, onCancelEditing, onSaveEditing, user, currentEdition }
+
+class User extends Component {
+  constructor(props) {
+    super(props);
+    const { user } = props;
+    this.state = user;
+    this.onEditUser = this.onEditUser.bind(this);
+    this.onCancelEditUser = this.onCancelEditUser.bind(this);
+  }
+
+  onEditUser(n) {
+    console.log('editing name', n);
+    this.setState({
+      username: n,
+    });
+  }
+  onCancelEditUser() {
+    console.log('cancel editing');
+    this.setState(this.props.user);
+  }
+
+  render() {
+    const { active, admin, email, username } = this.state;
+    // eslint-disable-next-line max-len
+    const { currentEdition, onCancelEditing, onSaveEditing, invitationMode, getUserActions, onChange, user } = this.props;
+    const isEditing = currentEdition.email === email && currentEdition.action === 'edit';
+    const cancel = u => () => { this.onCancelEditUser(); onCancelEditing(u); };
+    const save = () => () => onSaveEditing(this.state);
+    return (
+      <tr>
+        {!invitationMode &&
+          <td>
+            {isEditing ?
+              <input
+                className="entityTitleInput"
+                type="text"
+                ref={`entityTitle${email}`}
+                value={username}
+                onChange={evt => this.onEditUser(evt.target.value)}
+              /> :
+              username}
+            {active && <span className="isMe"> (me)</span>}
+          </td>
         }
-      </td>
-    </tr>
-  );
+        <td>{email}</td>
+        {!invitationMode && <td>{admin ? 'Admin' : 'User'}</td>}
+        <td>
+          <UserActionSelector
+            getUserActions={getUserActions}
+            onChange={onChange}
+            user={user}
+          />
+        </td>
+        <td>
+          {isEditing &&
+            <div>
+              <button
+                className="overflow clickable "
+                onClick={save(user)}
+              >SAVE</button>&nbsp;
+              <button
+                className="overflow clickable "
+                onClick={cancel(user)}
+              >CANCEL</button>
+            </div>
+          }
+        </td>
+      </tr>
+    );
+  }
 }
 
 User.propTypes = {
