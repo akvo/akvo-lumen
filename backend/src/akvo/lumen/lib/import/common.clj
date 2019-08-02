@@ -3,8 +3,11 @@
             [akvo.lumen.protocols :as p]
             [org.akvo.resumed :as resumed]))
 
+(defn importer-type [spec]
+  (get spec "kind"))
+
 (defn- dispatch-on-kind [spec]
-  (let [kind (get spec "kind")]
+  (let [kind (importer-type spec)]
     (if (#{"LINK" "DATA_FILE"} kind)
       "CSV" ;; TODO: Unify elsewhere
       kind)))
