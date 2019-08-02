@@ -213,7 +213,7 @@ class Users extends Component {
       actions = [['revoke', 'Revoke invitation', false]];
     } else {
       actions = [
-        ['edit', 'Edit user', true],
+        ['edit', 'Edit user', false],
         ['delete', 'Delete user', active],
       ];
       if (admin) {
@@ -226,10 +226,15 @@ class Users extends Component {
   }
 
   handleUserActionSelect(user, action) {
-    this.setState({
-      isActionModalVisible: true,
-      userAction: { action, user },
-    });
+    console.log(user, action);
+    if (action !== 'edit') {
+      this.setState({
+        isActionModalVisible: true,
+        userAction: { action, user },
+      });
+    } else {
+      console.log('edit');
+    }
   }
 
   handleUserAction() {
