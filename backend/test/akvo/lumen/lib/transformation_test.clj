@@ -326,6 +326,20 @@
                                         :with-job? true
                                         :data (import.s/sample-imported-dataset [:text :number :text :number :text] 2)})]
           (is (some? updated-res))))
+
+      (testing "Removing column with rename-name tx, should fails"
+        (let [jow (apply-transformation
+                 {:type :transformation
+                  :transformation (gen-transformation "core/rename-column"
+                                                      {::transformation.derive.s/newColumnTitle    "New Title"
+                                                       ::transformation.rename-column.s/columnName "c5"
+                                                       ::transformation.engine.s/onError           "fail"})})
+              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
+          (is (= "FAILED" (:status (first updated-res))))))
+
       (testing "Removing column with delete-column tx"
         (let [_ (apply-transformation {:type :transformation
                                        :transformation
