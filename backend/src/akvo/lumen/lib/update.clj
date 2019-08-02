@@ -27,16 +27,18 @@
                     columns cc)]
     (vals res)))
 
-(defn- columns-used-in-txs [initial-dataset-version latest-dataset-version]
-  (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
-         txs (-> latest-dataset-version :transformations walk/keywordize-keys)
-         cols0 #{}]
-    (let [tx (first txs)
-          cols1 (apply conj cols0 (when-not (engine/avoidable-if-missing? (first txs))
-                                    (engine/columns-used (first txs) columns)))]
-      (if-let [txs (seq (next txs))]
-        (recur (undif-columns tx columns) txs cols1)
-        cols1))))
+(defn- columns-used-in-txs [importer-type initial-dataset-version latest-dataset-version]
+  (if (contains? #{"LINK" "CSV"} importer-type)
+    (set (-> initial-dataset-version :columns))
+    (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
+           txs (-> latest-dataset-version :transformations walk/keywordize-keys)
+           cols0 #{}]
+      (let [tx (first txs)
+            cols1 (apply conj cols0 (when-not (engine/avoidable-if-missing? tx)
+                                      (engine/columns-used tx columns)))]
+        (if-let [txs (seq (next txs))]
+          (recur (undif-columns tx columns) txs cols1)
+          cols1)))))
 
 (defn- successful-update
   "On a successful update we need to create a new dataset-version that
@@ -115,10 +117,11 @@
             importer-columns         (p/columns importer)
 
             columns-used (columns-used-in-txs
+                          (import/importer-type (get data-source-spec "source"))
                           initial-dataset-version
                           (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
             imported-dataset-columns-checked (reduce (fn [c co]
-                                                       (if (contains? columns-used (get co "columName"))
+                                                       (if (contains? columns-used (get co "columnName"))
                                                          (conj c co)
                                                          c)) [] imported-dataset-columns)]
         (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
