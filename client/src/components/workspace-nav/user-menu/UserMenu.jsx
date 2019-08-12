@@ -1,6 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Manager, Reference, Popper } from 'react-popper';
 import * as auth from '../../../utilities/auth';
+
+const Example = () => (
+  <Manager>
+    <Reference>
+      {({ ref }) => (
+        <button type="button" ref={ref}>
+          Reference element
+        </button>
+      )}
+    </Reference>
+    <Popper placement="right">
+      {({ ref, style, placement, arrowProps }) => (
+        <div ref={ref} style={style} data-placement={placement}>
+          Popper element
+          <div ref={arrowProps.ref} style={arrowProps.style} />
+        </div>
+      )}
+    </Popper>
+  </Manager>
+);
 
 class UserMenu extends React.Component {
   constructor(props) {
@@ -25,26 +46,10 @@ class UserMenu extends React.Component {
   render() {
     const profile = this.props.profile;
     const isExpanded = this.state.expanded;
-    //
+
     return (
       <div className="UserMenu">
-        {isExpanded ? (
-          <div className="name">
-            <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
-            <a onClick={() => this.collapse()}>
-              <i className="fa fa-caret-up" />
-            </a>
-            <hr />
-            <a onClick={() => auth.logout()}>Logout</a>
-          </div>
-        ) : (
-          <div className="name">
-            <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
-            <a onClick={() => this.expand()}>
-              <i className="fa fa-caret-down" />
-            </a>
-          </div>
-        )}
+        <Example />
       </div>
     );
   }
@@ -58,3 +63,24 @@ UserMenu.propTypes = {
 };
 
 export default UserMenu;
+
+
+/*
+ 
+  {isExpanded ? (
+          <div className="name">
+            <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
+            <a onClick={() => this.collapse()}>&nbsp;<i className="fa fa-caret-up" /></a>
+            <h4>Language</h4>
+            English Espanol Francais
+            <div>
+              <a onClick={() => auth.logout()}>Logout</a>
+            </div>
+          </div>
+        ) : (
+          <div className="name">
+            <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
+            <a onClick={() => this.expand()}>&nbsp;<i className="fa fa-caret-down" /></a>
+          </div>
+        )} 
+ */
