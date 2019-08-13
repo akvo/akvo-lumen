@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as auth from '../../../utilities/auth';
-import { any } from 'prop-types';
 
 require('./UserMenuPopUp.scss');
 
@@ -25,11 +25,11 @@ const availableLocales = [{
 const Locale = ({ locale, setLocale }) => {
   if (locale.tag === 'en') {
     return (
-      <label className="btn btn-secondary active">
+      <label htmlFor="option-{locale.tag}" className="btn btn-secondary active">
         <input
           type="radio"
           name="options"
-          id="option1"
+          id="option1-{locale.tag}"
           value={locale.tag}
           autoComplete="off"
           onChange={setLocale}
@@ -38,21 +38,25 @@ const Locale = ({ locale, setLocale }) => {
         {locale.label}
       </label>
     );
-  } else {
-    return (
-      <label className="btn btn-secondary active">
-        <input
-          type="radio"
-          name="options"
-          id="option1"
-          value={locale.tag}
-          autoComplete="off"
-          onChange={setLocale}
-        />
-        {locale.label}
-      </label>
-    );
   }
+  return (
+    <label htmlFor="option-{locale.tag}" className="btn btn-secondary active">
+      <input
+        type="radio"
+        name="options"
+        id="option-{locale.tag}"
+        value={locale.tag}
+        autoComplete="off"
+        onChange={setLocale}
+      />
+      {locale.label}
+    </label>
+  );
+};
+
+Locale.propTypes = {
+  locale: PropTypes.object,
+  setLocale: PropTypes.func.isRequired,
 };
 
 class LocaleSelector extends React.Component {
@@ -94,6 +98,10 @@ const UserMenuPopUp = ({ profile }) => {
       <a onClick={() => auth.logout()}>Logout</a>
     </div>
   );
+};
+
+UserMenuPopUp.propTypes = {
+  profile: PropTypes.object,
 };
 
 export default UserMenuPopUp;
