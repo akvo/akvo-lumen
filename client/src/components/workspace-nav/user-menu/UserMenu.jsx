@@ -6,7 +6,7 @@ import UserMenuPopUp from './UserMenuPopUp';
 class UserMenu extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {isExpanded: false };
+    this.state = { isExpanded: false };
     this.toggle = this.toggle.bind(this);
   }
 

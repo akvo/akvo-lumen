@@ -90,15 +90,12 @@ class LocaleSelector extends React.Component {
   }
 }
 
-const UserMenuPopUp = ({ profile }) => {
-  return (
-    <div className="UserMenuPopUp">
-      <LocaleSelector profile={profile} />
-      <hr />
-      <a onClick={() => auth.logout()}>Logout</a>
-    </div>
-  );
-};
+const UserMenuPopUp = ({ profile }) =>
+  <div className="UserMenuPopUp">
+    <LocaleSelector profile={profile} />
+    <hr />
+    <a onClick={() => auth.logout()}>Logout</a>
+  </div>;
 
 UserMenuPopUp.propTypes = {
   profile: PropTypes.object,
