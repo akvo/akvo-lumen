@@ -1,15 +1,15 @@
 .UserMenuPopUp {
   background-color: #fff;
-  padding: 20px;
+  padding: 20px 10px;
 }
 
 div[data-placement="bottom-start"] {
   margin-top: 5px;
-  margin-left: 100px;
+  left: 75px !important;
   z-index: 9999;
-  width: 250px;
   border-width: 1px;
   border-color: #d0d0d0;
   border-style: solid;
   border-radius: 2px;
+  padding: 0;
 }
