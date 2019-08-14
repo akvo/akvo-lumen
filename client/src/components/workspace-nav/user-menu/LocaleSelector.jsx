@@ -75,7 +75,7 @@ LocaleSelector.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    locale: state.profile.attributes.locale[0],
+    locale: state.locale,
   };
 }
 export default connect(mapStateToProps)(LocaleSelector);
