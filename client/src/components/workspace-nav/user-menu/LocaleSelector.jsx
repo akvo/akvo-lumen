@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 require('./LocaleSelector.scss');
 
@@ -36,19 +37,22 @@ LocaleSelectorItem.propTypes = {
 class LocaleSelector extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { locale: 'en' };
+    // this.state = { locale: this.props };
     this.setLocale = this.setLocale.bind(this);
   }
 
   setLocale(e) {
     const newLocale = e.currentTarget.dataset.value;
-    this.setState({
-      locale: newLocale,
-    });
+    console.log(newLocale);
+
+    // this.setState({
+    //   locale: newLocale,
+    // });
   }
 
   render() {
-    const currentLocale = this.state.locale;
+    // const currentLocale = this.state.locale;
+    const currentLocale = this.props.locale;
     return (
       <div>
         {availableLocales.map(locale => (
@@ -65,7 +69,14 @@ class LocaleSelector extends React.Component {
 }
 
 LocaleSelector.propTypes = {
-  profile: PropTypes.object,
+  locale: PropTypes.string,
 };
 
-export default LocaleSelector;
+// export default LocaleSelector;
+
+function mapStateToProps(state) {
+  return {
+    locale: state.profile.attributes.locale[0],
+  };
+}
+export default connect(mapStateToProps)(LocaleSelector);

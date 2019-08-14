@@ -33,7 +33,7 @@ class UserMenu extends React.Component {
             <Popper placement="bottom-start">
               {({ ref, style, placement, arrowProps }) => (
                 <div ref={ref} style={style} data-placement={placement}>
-                  <UserMenuPopUp profile={profile} />
+                  <UserMenuPopUp />
                   <div ref={arrowProps.ref} style={arrowProps.style} />
                 </div>
               )}
