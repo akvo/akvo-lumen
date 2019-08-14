@@ -11,6 +11,7 @@ import es from 'react-intl/locale-data/es';
 import enTranslations from '../translations/en.json';
 import frTranslations from '../translations/fr.json';
 import esTranslations from '../translations/es.json';
+import { changeLocale } from '../actions/locale';
 
 addLocaleData(en);
 addLocaleData(fr);
@@ -57,6 +58,8 @@ class IntlWrapper extends Component {
     this.setState({
       messages: getMessages(locale),
     });
+
+    this.props.dispatch(changeLocale(locale));
   }
 
   render() {
@@ -73,6 +76,7 @@ class IntlWrapper extends Component {
 IntlWrapper.propTypes = {
   children: PropTypes.element.isRequired,
   locale: PropTypes.string.isRequired,
+  dispatch: PropTypes.func,
 };
 
 IntlWrapper.childContextTypes = {
