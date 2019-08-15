@@ -1,21 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
+import { availableLocales } from '../../../containers/IntlWrapper';
 import { changeLocale } from '../../../actions/locale';
 
 require('./LocaleSelector.scss');
 
-const availableLocales = [{
-  label: 'English',
-  tag: 'en',
-}, {
-  label: 'Espanol',
-  tag: 'es',
-}, {
-  label: 'Francais',
-  tag: 'fr',
-}];
 
 const LocaleSelectorItem = ({ locale, currentLocale, handleLocaleSelection }) => {
   const styleClasses = ['LocaleSelectorItem'];

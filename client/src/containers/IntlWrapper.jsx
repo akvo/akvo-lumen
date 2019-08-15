@@ -13,6 +13,17 @@ import frTranslations from '../translations/fr.json';
 import esTranslations from '../translations/es.json';
 import { changeLocale } from '../actions/locale';
 
+export const availableLocales = [{
+  label: 'English',
+  tag: 'en',
+}, {
+  label: 'Espanol',
+  tag: 'es',
+}, {
+  label: 'Francais',
+  tag: 'fr',
+}];
+
 addLocaleData(en);
 addLocaleData(fr);
 addLocaleData(es);
