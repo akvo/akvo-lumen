@@ -39,7 +39,6 @@ LocaleSelectorItem.propTypes = {
 class LocaleSelector extends React.Component {
   constructor(props) {
     super(props);
-    // this.state = { locale: this.props };
     this.handleLocaleSelection = this.handleLocaleSelection.bind(this);
   }
 

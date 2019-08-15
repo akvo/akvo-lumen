@@ -64,9 +64,8 @@ class IntlWrapper extends Component {
 
   render() {
     const { children, locale } = this.props;
-
     return (
-      <IntlProvider locale={locale} messages={this.state.messages}>
+      <IntlProvider key={locale} locale={locale} messages={this.state.messages}>
         {children}
       </IntlProvider>
     );
@@ -84,11 +83,14 @@ IntlWrapper.childContextTypes = {
 };
 
 function mapStateToProps(state) {
-  const { attributes } = state.profile;
-  if (attributes && attributes.locale && typeof attributes.locale[0] === 'string') {
-    return { locale: attributes.locale[0] };
+  if (state.locale === null) {
+    const { attributes } = state.profile;
+    if (attributes && attributes.locale && typeof attributes.locale[0] === 'string') {
+      return { locale: attributes.locale[0] };
+    }
+    return { locale: 'en' };
   }
-  return { locale: 'en' };
+  return { locale: state.locale };
 }
 
 export default connect(
