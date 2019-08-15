@@ -83,12 +83,17 @@ IntlWrapper.childContextTypes = {
 };
 
 function mapStateToProps(state) {
-  if (state.locale === null) {
-    const { attributes } = state.profile;
-    if (attributes && attributes.locale && typeof attributes.locale[0] === 'string') {
-      return { locale: attributes.locale[0] };
+  const stateLocale = state.locale;
+  if (stateLocale === null) { // locale in state?
+    const userSelectedLocale = window.localStorage.getItem('locale');
+    if (userSelectedLocale === null) { // locale in localstorage?
+      const { attributes } = state.profile;
+      if (attributes && attributes.locale && typeof attributes.locale[0] === 'string') { // locale from claims
+        return { locale: attributes.locale[0] };
+      }
+      return { locale: 'en' }; // default to en
     }
-    return { locale: 'en' };
+    return { locale: userSelectedLocale };
   }
   return { locale: state.locale };
 }

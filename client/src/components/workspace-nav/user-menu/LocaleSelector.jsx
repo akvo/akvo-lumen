@@ -46,6 +46,7 @@ class LocaleSelector extends React.Component {
     const currentLocale = this.props.locale;
     const newLocale = e.currentTarget.dataset.value;
     if (currentLocale !== newLocale) {
+      window.localStorage.setItem('locale', newLocale);
       this.props.dispatch(changeLocale(newLocale));
     }
   }
