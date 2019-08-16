@@ -17,21 +17,23 @@ class UserMenu extends React.Component {
   }
 
   render() {
-    const profile = this.props.profile;
-    const isExpanded = this.state.isExpanded;
+    const { profile } = this.props;
+    const { isExpanded } = this.state;
 
     return (
       <div className="UserMenu">
-        <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
+        <i className="fa fa-user-o" aria-hidden="true" />
+        {profile.username}
         <Manager>
           <Reference>
             {({ ref }) => (
               <a ref={ref} onClick={() => this.toggle()}>
-                &nbsp;<i className="fa fa-caret-down" />
+                &nbsp;
+                <i className="fa fa-caret-down" />
               </a>
             )}
           </Reference>
-          {isExpanded &&
+          {isExpanded && (
             <Popper placement="bottom-start">
               {({ ref, style, placement, arrowProps }) => (
                 <div ref={ref} style={style} data-placement={placement}>
@@ -40,7 +42,7 @@ class UserMenu extends React.Component {
                 </div>
               )}
             </Popper>
-          }
+          )}
         </Manager>
       </div>
     );

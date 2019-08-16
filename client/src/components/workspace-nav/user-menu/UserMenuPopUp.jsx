@@ -4,11 +4,12 @@ import * as auth from '../../../utilities/auth';
 
 require('./UserMenuPopUp.scss');
 
-const UserMenuPopUp = () =>
+const UserMenuPopUp = () => (
   <div className="UserMenuPopUp">
     <LocaleSelector />
     <hr />
-    <button onClick={() => auth.logout()}>Logout</button>
-  </div>;
+    <button type="button" onClick={() => auth.logout()}>Logout</button>
+  </div>
+);
 
 export default UserMenuPopUp;
