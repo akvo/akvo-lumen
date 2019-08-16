@@ -8,7 +8,7 @@ const UserMenuPopUp = () =>
   <div className="UserMenuPopUp">
     <LocaleSelector />
     <hr />
-    <a onClick={() => auth.logout()}>Logout</a>
+    <button onClick={() => auth.logout()}>Logout</button>
   </div>;
 
 export default UserMenuPopUp;

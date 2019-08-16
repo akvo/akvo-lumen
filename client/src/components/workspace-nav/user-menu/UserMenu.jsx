@@ -26,7 +26,9 @@ class UserMenu extends React.Component {
         <Manager>
           <Reference>
             {({ ref }) => (
-              <a ref={ref} onClick={() => this.toggle()}>&nbsp;<i className="fa fa-caret-down" /></a>
+              <a ref={ref} onClick={() => this.toggle()}>
+                &nbsp;<i className="fa fa-caret-down" />
+              </a>
             )}
           </Reference>
           {isExpanded &&

@@ -14,9 +14,9 @@ const LocaleSelectorItem = ({ locale, currentLocale, handleLocaleSelection }) =>
   }
   const classNames = styleClasses.join(' ');
   return (
-    <a onClick={handleLocaleSelection} className={classNames} data-value={locale.tag}>
+    <button onClick={handleLocaleSelection} className={classNames} data-value={locale.tag}>
       { locale.label }
-    </a>
+    </button>
   );
 };
 
