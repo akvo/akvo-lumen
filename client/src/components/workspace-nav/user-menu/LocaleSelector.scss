@@ -1,0 +1,12 @@
+button.LocaleSelectorItem {
+  margin-right: 1em;
+  padding: 0.4em;
+  border-radius: 3px;
+}
+button.LocaleSelectorItem:hover {
+  background-color: #f1f2f2;
+}
+
+button.LocaleSelectorItemSelected {
+  background-color: #f1f2f2;
+}
