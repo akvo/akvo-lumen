@@ -23,13 +23,19 @@
         :body
         :access_token)))
 
-
-(defn api-headers
-  [token]
-  {"Authorization" (format "Bearer %s" token)
-   "User-Agent" "lumen"
+(def commons-api-headers
+  {"User-Agent" "lumen"
    "Accept" "application/vnd.akvo.flow.v2+json"})
 
+(defn api-headers
+  "JWT token required thus the call could be used externally"
+  [token]
+  (merge commons-api-headers {"Authorization" (format "Bearer %s" token)}))
+
+(defn internal-api-headers
+  "No authorization is required thus it's an internal owned k8s call"
+  [email]
+  (merge commons-api-headers {"X-Akvo-Email" email}))
 
 (defn check-permissions
   [flow-api token body]
