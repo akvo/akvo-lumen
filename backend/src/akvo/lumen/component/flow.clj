@@ -8,33 +8,18 @@
 
 (def http-client-req-defaults (http.client/req-opts 5000))
 
-(defn access-token
-  "Fetch a new access token using a refresh token"
-  [this refresh-token]
-  (let [token-endpoint (format "%s/realms/%s/protocol/openid-connect/token"
-                               (-> this :keycloak :url)
-                               (-> this :keycloak :realm))]
-    (-> (http.client/post* token-endpoint
-                           (merge http-client-req-defaults
-                                 {:form-params {"client_id" "akvo-lumen"
-                                                "refresh_token" refresh-token
-                                                "grant_type" "refresh_token"}
-                                  :as :json}))
-        :body
-        :access_token)))
-
 (def commons-api-headers
   {"User-Agent" "lumen"
    "Accept" "application/vnd.akvo.flow.v2+json"})
 
 (defn api-headers
   "JWT token required thus the call could be used externally"
-  [token]
+  [{:keys [token]}]
   (merge commons-api-headers {"Authorization" (format "Bearer %s" token)}))
 
 (defn internal-api-headers
   "No authorization is required thus it's an internal owned k8s call"
-  [email]
+  [{:keys [email]}]
   (merge commons-api-headers {"X-Akvo-Email" email}))
 
 (defn check-permissions
