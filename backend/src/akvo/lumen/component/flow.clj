@@ -52,8 +52,9 @@
   opts)
 
 (s/def ::url string?)
+(s/def ::internal-url string?)
 (s/def ::keycloak :akvo.lumen.component.keycloak/data)
-(s/def ::config (s/keys :req-un [::url ::keycloak]))
+(s/def ::config (s/keys :req-un [::url ::internal-url ::keycloak]))
 
 (defmethod ig/pre-init-spec ::api [_]
   ::config)
