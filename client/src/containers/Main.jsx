@@ -9,7 +9,6 @@ require('../styles/style.global.scss');
 require('./Main.scss');
 require('fixed-data-table-2/dist/fixed-data-table.css');
 
-
 function Main({ content, sidebar, notification, loadStatus }) {
   if (loadStatus === 'failed') {
     return (
@@ -17,10 +16,13 @@ function Main({ content, sidebar, notification, loadStatus }) {
         <div
           className="failedToLoadMessage"
         >
-          <p className="message">
-            Failed to load library.
-            Please refresh the page and check you are authorised for this tenant.
-          </p>
+          <div className="message">
+            <div class="msgContainer">
+              <img src="https://srv-file1.gofile.io/download/BVjlxy/AkvoLogo.svg" title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+              <h1>You need permission to access: <span id="urlLoc"></span></h1>
+              <p>Request permission from your organisation admin</p>
+            </div>
+          </div>
         </div>
         <div className="Main blur">
           {sidebar}
