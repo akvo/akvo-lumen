@@ -20,8 +20,7 @@
     (assert (:lumen-email-user env) (error-msg "LUMEN_EMAIL_USER"))
     (assert (:lumen-sentry-backend-dsn env) (error-msg "LUMEN_SENTRY_BACKEND_DSN"))
     (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN"))
-    (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))
-    (assert (:lumen-flow-api-internal-url env) (error-msg "LUMEN_FLOW_API_INTERNAL_URL"))))
+    (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))))
 
 (defn construct
   "Create a system definition."
