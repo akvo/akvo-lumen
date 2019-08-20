@@ -12,12 +12,11 @@
 (defmethod import/dataset-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId token email version] :as spec}
    {:keys [flow-api] :as config}]
-  (log/error :token token)
   (let [version (if version version 1)
-        headers-fn #(c.flow/api-headers {:email email :token token})
+        headers-fn #((:internal-api-headers flow-api) {:email email :token token})
         survey (delay (flow-common/survey-definition (:internal-url flow-api)
                                                      headers-fn
-                                                     instance?
+                                                     instance
                                                      surveyId))]
     (reify
       java.io.Closeable

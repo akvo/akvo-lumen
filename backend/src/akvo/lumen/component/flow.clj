@@ -22,6 +22,18 @@
   [{:keys [email]}]
   (merge commons-api-headers {"X-Akvo-Email" email}))
 
+(defmethod ig/init-key ::api-headers  [_ _]
+  api-headers)
+
+(defmethod ig/init-key ::internal-api-headers  [_ _]
+  internal-api-headers)
+
+(defmethod ig/pre-init-spec ::api-headers [_]
+  empty?)
+
+(defmethod ig/pre-init-spec ::internal-api-headers [_]
+  empty?)
+
 (defn check-permissions
   [flow-api token body]
   (let [start (. System (nanoTime))
@@ -45,7 +57,9 @@
 (s/def ::url string?)
 (s/def ::internal-url string?)
 (s/def ::keycloak :akvo.lumen.component.keycloak/data)
-(s/def ::config (s/keys :req-un [::url ::internal-url ::keycloak]))
+(s/def ::api-headers fn?)
+(s/def ::internal-api-headers fn?)
+(s/def ::config (s/keys :req-un [::url ::internal-url ::keycloak ::api-headers ::internal-api-headers]))
 
 (defmethod ig/pre-init-spec ::api [_]
   ::config)

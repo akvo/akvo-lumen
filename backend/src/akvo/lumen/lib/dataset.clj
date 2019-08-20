@@ -108,7 +108,7 @@
     (lib/not-found {:error "Not found"})))
 
 (defn update
-  [tenant-conn import-config error-tracker dataset-id claims {:strs [token]}]
+  [tenant-conn import-config error-tracker dataset-id {:strs [token email]}]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
@@ -117,7 +117,7 @@
         (update/update-dataset tenant-conn import-config error-tracker dataset-id data-source-id
                                (-> data-source-spec
                                    (assoc-in ["source" "token"] token)
-                                   (assoc-in ["source" "email"] (get claims "email"))))
+                                   (assoc-in ["source" "email"] email)))
         (lib/bad-request {:error "Can't update uploaded dataset"})))
     (lib/not-found {:id dataset-id})))
 
