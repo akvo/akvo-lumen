@@ -16,19 +16,26 @@
 (defn claimed-roles [jwt-claims]
   (set (get-in jwt-claims ["realm_access" "roles"])))
 
+;; (defmulti tenant-user? (fn [_ issuer] issuer))
+;; (defmethod tenant-user? :default
+;;   [{:keys [tenant jwt-claims]} issuer]
+;;   (contains? (claimed-roles jwt-claims)
+;;              (format "akvo:lumen:%s" tenant)))
+;; (defmethod tenant-user? :auth0
+;;   [{:keys [tenant jwt-claims] :as req} issuer]
+;;   (clojure.pprint/pprint req)
+;;   (and (= issuer :auth0)
+;;        (string/includes? (get jwt-claims "email") "@akvo.org")))
+
 (defn tenant-user?
-  [{:keys [tenant jwt-claims]} issuer]
-  (or (contains? (claimed-roles jwt-claims)
-                 (format "akvo:lumen:%s" tenant))
-      (and (= issuer :auth0)
-           (string/includes? (get jwt-claims "email") "@akvo.org"))))
+  [{:keys [tenant jwt-claims]}]
+  (contains? (claimed-roles jwt-claims)
+             (format "akvo:lumen:%s" tenant)))
 
 (defn tenant-admin?
-  [{:keys [tenant jwt-claims]} issuer]
-  (or (contains? (claimed-roles jwt-claims)
-                 (format "akvo:lumen:%s:admin" tenant))
-      (and (= issuer :auth0)
-           (string/includes? (get jwt-claims "email") "@akvo.org"))))
+  [{:keys [tenant jwt-claims]}]
+  (contains? (claimed-roles jwt-claims)
+             (format "akvo:lumen:%s:admin" tenant)))
 
 (defn admin-path? [{:keys [path-info]}]
   (string/starts-with? path-info "/api/admin/"))
@@ -57,6 +64,42 @@
   API authz"
   [{:strs [family_name] :as jwt-claims}]
   (and (some? family_name) (string/ends-with? family_name "$auth")))
+
+(defn authorize-by-jwt
+  [handler {:keys [jwt-claims] :as request}]
+  (prn "@authorize-by-jwt")
+  (cond
+    (admin-path? request) (if (tenant-admin? request)
+                            (handler request)
+                            not-authorized)
+    (api-path? request) (if (tenant-user? request)
+                          (handler request)
+                          not-authorized)
+    :else not-authorized))
+
+(defn authorize-by-api
+  [handler {:keys [jwt-claims tenant] :as request} keycloak]
+  (prn "@authorize-by-api")
+  (if (and
+       (= tenant "t1")
+       (string/includes? (get jwt-claims "email") "@akvo.org"))
+    (handler request)
+    not-authorized))
+
+(defn wrap-auth
+  [keycloak auth0]
+  (prn "@wrap-auth")
+  (fn [handler]
+    (fn [{:keys [jwt-claims] :as request}]
+      (if (nil? jwt-claims)
+        not-authenticated
+        (let [issuer (condp = (get jwt-claims "iss")
+                       (:issuer keycloak) :keycloak
+                       (:issuer auth0) :auth0
+                       :other)]
+          (case issuer
+            :auth0 (authorize-by-api handler request keycloak)
+            (authorize-by-jwt handler request)))))))
 
 (defn wrap-auth
   "Wrap authentication for API. Allow GET to root / and share urls at /s/<id>.

@@ -41,7 +41,7 @@
   (user
     [this email tenant]
     "get user details")
-  
+
   (user?
     [this email]
     "Predicate to see if the email has a user in KC")
