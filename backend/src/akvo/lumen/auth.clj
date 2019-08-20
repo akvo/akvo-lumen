@@ -92,7 +92,9 @@
           (try
             (if-let [claims (or (jwt/verified-claims token keycloak-verifier (:issuer keycloak) {})
                                 (jwt/verified-claims token auth0-verifier (:issuer auth0) {}))]
-              (handler (assoc req :jwt-claims claims))
+              (handler (assoc req
+                              :jwt-claims claims
+                              :jwt-token token))
               (handler req))
             (catch ParseException e
               (handler req)))
