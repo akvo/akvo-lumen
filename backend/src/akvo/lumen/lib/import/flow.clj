@@ -10,11 +10,11 @@
 
 
 (defmethod import/dataset-importer "AKVO_FLOW"
-  [{:strs [instance surveyId formId refreshToken version] :as spec}
+  [{:strs [instance surveyId formId token email version] :as spec}
    {:keys [flow-api] :as config}]
   (let [version (if version version 1)
-        headers-fn #(c.flow/api-headers (c.flow/access-token flow-api refreshToken))
-        survey (delay (flow-common/survey-definition (:url flow-api)
+        headers-fn #((:internal-api-headers flow-api) {:email email :token token})
+        survey (delay (flow-common/survey-definition (:internal-url flow-api)
                                                      headers-fn
                                                      instance
                                                      surveyId))]

@@ -29,9 +29,12 @@
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              jwt-token :jwt-token
                               body :body}]
                           (dataset/create (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                          error-tracker jwt-claims (w/stringify-keys body)))}}]
+                                          error-tracker jwt-claims (-> (w/stringify-keys body)
+                                                                       (assoc-in ["source" "email"] (get jwt-claims "email"))
+                                                                       (assoc-in ["source" "token"] jwt-token))))}}]
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
@@ -80,10 +83,13 @@
      ["/update" {:post {:parameters {:path-params {:id string?}}
                         :handler (fn [{tenant :tenant
                                        jwt-claims :jwt-claims
+                                       jwt-token :jwt-token
                                        body :body
                                        {:keys [id]} :path-params}]
                                    (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                                   error-tracker id (w/stringify-keys body)))}}]]]])
+                                                   error-tracker id (assoc (w/stringify-keys body)
+                                                                           "token" jwt-token
+                                                                           "email" (get jwt-claims "email"))))}}]]]])
 
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
