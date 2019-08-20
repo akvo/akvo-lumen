@@ -11,6 +11,8 @@ require('fixed-data-table-2/dist/fixed-data-table.css');
 
 function Main({ content, sidebar, notification, loadStatus }) {
   if (loadStatus === 'failed') {
+    const currentLocation = window.location.href;
+    const currentLocationMinus = currentLocation.substr(7).slice(0, -13);
     return (
       <div className="Main">
         <div
@@ -19,7 +21,7 @@ function Main({ content, sidebar, notification, loadStatus }) {
           <div className="message">
             <div class="msgContainer">
               <img src="https://srv-file1.gofile.io/download/BVjlxy/AkvoLogo.svg" title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-              <h1>You need permission to access: <span id="urlLoc"></span></h1>
+              <h1>You need permission to access: <span id="urlLoc">{ currentLocationMinus }</span></h1>
               <p>Request permission from your organisation admin</p>
             </div>
           </div>
