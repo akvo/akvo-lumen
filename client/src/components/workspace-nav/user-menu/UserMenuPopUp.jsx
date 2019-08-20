@@ -1,6 +1,6 @@
 import React from 'react';
-import LocaleSelector from './LocaleSelector';
 import PropTypes from 'prop-types';
+import LocaleSelector from './LocaleSelector';
 import * as auth from '../../../utilities/auth';
 
 require('./UserMenuPopUp.scss');
