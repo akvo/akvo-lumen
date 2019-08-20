@@ -200,7 +200,7 @@
         (lib/ok (fetch-user-by-id headers api-root tenant user-id))
         (do
           (println (format "Tried to promote user: %s" user-id))
-          (lib/internal-server-error))))))
+          (lib/internal-server-error {}))))))
 
 (defn do-demote-user-from-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
@@ -219,7 +219,7 @@
         (lib/ok (fetch-user-by-id headers api-root tenant user-id))
         (do
           (println (format "Tried to demote user: %s" user-id))
-          (lib/internal-server-error))))))
+          (lib/internal-server-error {}))))))
 
 (defn do-remove-user
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
@@ -238,7 +238,7 @@
         (lib/ok {})
         (do
           (println (format "Tried to remove user: %s" user-id))
-          (lib/internal-server-error))))))
+          (lib/internal-server-error {}))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; API Authorization
