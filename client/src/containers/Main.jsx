@@ -19,7 +19,7 @@ function Main({ content, sidebar, notification, loadStatus }) {
           className="failedToLoadMessage"
         >
           <div className="message">
-            <div class="msgContainer">
+            <div className="msgContainer">
               <img src="https://srv-file1.gofile.io/download/BVjlxy/AkvoLogo.svg" title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
               <h1>You need permission to access: <span id="urlLoc">{ currentLocationMinus }</span></h1>
               <p>Request permission from your organisation admin</p>
