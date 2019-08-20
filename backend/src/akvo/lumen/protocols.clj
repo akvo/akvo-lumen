@@ -13,7 +13,7 @@
 (defprotocol SendEmail
   (send-email [this recipients email] "Send email"))
 
-(defprotocol KeycloakUserManagement
+(defprotocol UserManagement
   (add-user-with-email
     [this tenant-label email]
     "Add user to tenant")

@@ -295,7 +295,7 @@
 ;;;
 
 (defrecord KeycloakAgent [issuer openid-config api-root user-id-cache]
-  p/KeycloakUserManagement
+  p/UserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [headers  (request-headers keycloak)
           user-id  (get (fetch-user-by-email headers api-root email)
@@ -410,7 +410,7 @@
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
 (s/def ::config (s/keys :req-un [::data ::credentials ::max-user-ids-cache ::monitoring]))
 
-(s/def ::keycloak (s/and (partial satisfies? p/KeycloakUserManagement)
+(s/def ::keycloak (s/and (partial satisfies? p/UserManagement)
                          (partial satisfies? p/Authorizer)))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/keycloak [_]
