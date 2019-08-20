@@ -9,19 +9,16 @@ require('../styles/style.global.scss');
 require('./Main.scss');
 require('fixed-data-table-2/dist/fixed-data-table.css');
 
-function Main({ content, sidebar, notification, loadStatus }) {
+function Main({ content, sidebar, notification, loadStatus, env }) {
   if (loadStatus === 'failed') {
-    const currentLocation = window.location.href;
-    const currentLocationMinus = currentLocation.substr(7).slice(0, -13);
+    const { tenant } = env;
     return (
       <div className="Main">
-        <div
-          className="failedToLoadMessage"
-        >
+        <div className="failedToLoadMessage">
           <div className="message">
             <div className="msgContainer">
               <img src="https://srv-file1.gofile.io/download/BVjlxy/AkvoLogo.svg" title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-              <h1>You need permission to access: <span id="urlLoc">{ currentLocationMinus }</span></h1>
+              <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
               <p>Request permission from your organisation admin</p>
             </div>
           </div>
@@ -48,6 +45,7 @@ Main.propTypes = {
   sidebar: PropTypes.object,
   notification: PropTypes.object,
   loadStatus: PropTypes.string,
+  env: PropTypes.object,
 };
 
 function mapStateToProps(state) {
@@ -55,6 +53,7 @@ function mapStateToProps(state) {
     loadStatus: state.loadStatus,
     notification: state.notification,
     modalVisible: state.activeModal != null,
+    env: state.env,
   };
 }
 
