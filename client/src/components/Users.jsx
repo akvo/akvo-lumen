@@ -316,9 +316,17 @@ class Users extends Component {
   handleSaveEditing(user) {
     console.log('save editing', user);
     console.log('call backend api and update users');
-    this.setState({
-      isActionModalVisible: false,
-      editingAction: { action: '', email: '' },
+    const usersUrl = `/api/admin/users/${user.id}`;
+    api.patch(usersUrl, { name: user.username })
+    .then(() => {
+      this.getUsers();
+      this.setState({
+        isActionModalVisible: false,
+        editingAction: { action: '', email: '' },
+      });
+    })
+    .catch(() => {
+      this.props.dispatch(showNotification('error', 'Failed to change user name.'));
     });
   }
 

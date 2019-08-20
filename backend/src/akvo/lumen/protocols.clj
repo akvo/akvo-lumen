@@ -30,6 +30,9 @@
     [this tenant author-claims user-id]
     "Promote existing tenant member to admin")
 
+  (change-user-name
+    [this tenant author-claims user-id new-name])
+
   (reset-password
     [this headers user-id tmp-password]
     "Set temporary user password")

@@ -2,6 +2,7 @@
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.lib :as lib]
+            [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.keycloak :as keycloak]
             [integrant.core :as ig]))
@@ -13,6 +14,9 @@
 (defn- demote-user? [body]
   (and (contains? body "admin")
        (not (get body "admin"))))
+
+(defn- change-name? [body]
+  (contains? body "name"))
 
 (defn routes [{:keys [keycloak] :as opts}]
   [["/user/admin" {:get {:handler (fn [{tenant :tenant
@@ -33,7 +37,11 @@
                                       (user/demote-user-from-admin keycloak tenant jwt-claims id)
                                       (promote-user? body)
                                       (user/promote-user-to-admin keycloak tenant jwt-claims id)
-                                      :else (http/not-implemented)))}
+                                      (change-name? body)
+                                      (if (:admin (user/user keycloak tenant (get jwt-claims "email")))
+                                        (user/change-user-name keycloak tenant jwt-claims id (get body "name"))
+                                        (http/not-authorized {:admin false}))
+                                      :else (http/not-implemented {})))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
                                          jwt-claims :jwt-claims
