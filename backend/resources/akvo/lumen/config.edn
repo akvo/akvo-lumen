@@ -55,6 +55,7 @@
  :akvo.lumen.component.flow/internal-api-headers {}
 
  :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
+                                 :auth0-url #duct/env "LUMEN_FLOW_API_AUTH0_URL"
                                  :internal-url "http://flow-api-internal"
                                  :keycloak #ig/ref :akvo.lumen.component.keycloak/data
                                  :api-headers #ig/ref :akvo.lumen.component.flow/api-headers

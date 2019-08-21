@@ -24,7 +24,9 @@
          (cond-> {"authClientId" auth-client-id
                   "authURL" auth-url
                   "authProvider" auth-type
-                  "flowApiUrl" (:url flow-api)
+                  "flowApiUrl" (condp = auth-type
+                                 "keycloak" (:url flow-api)
+                                 "auth0"    (:auth0-url flow-api))
                   "piwikSiteId" piwik-site-id
                   "tenant" (:tenant request)}
            (string? sentry-client-dsn)

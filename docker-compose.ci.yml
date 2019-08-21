@@ -15,6 +15,7 @@ services:
      - LUMEN_EMAIL_USER=admin@akvo.org
      - LUMEN_EMAIL_PASSWORD=password
      - LUMEN_FLOW_API_URL=flow-url
+     - LUMEN_FLOW_API_AUTH0_URL=flow-auth0-url
      - LUMEN_PIWIK_SITE_ID=165
  client:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT}"
