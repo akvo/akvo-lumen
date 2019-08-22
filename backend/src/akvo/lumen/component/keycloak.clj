@@ -94,21 +94,25 @@
 
 (defn tenant-admin?
   [headers api-root tenant user-id]
-  (let [admin-group-id (-> (http.client/get* (format "%s/group-by-path/akvo/lumen/%s/admin"
-                                              api-root tenant)
-                                             (merge http-client-req-defaults
-                                                    {:headers headers}))
-                           :body json/decode (get "id"))
-        admins         (-> (http.client/get* (format "%s/groups/%s/members" api-root admin-group-id)
-                                             (merge http-client-req-defaults
-                                                    {:headers headers}))
-                           :body json/decode)
-        admin-ids      (into #{}
-                             (map #(get % "id"))
-                             (filter #(and (get % "emailVerified")
-                                           (get % "enabled"))
-                                     admins))]
-    (contains? (set admin-ids) user-id)))
+  (prn "@tenant-admin:")
+  (try
+    (let [resp1 (http.client/get* (format "%s/group-by-path/akvo/lumen/%s/admin"
+                                          api-root tenant)
+                                  (merge http-client-req-defaults
+                                         {:headers headers}))
+          admin-group-id (-> resp1 :body json/decode (get "id"))
+          admins         (-> (http.client/get* (format "%s/groups/%s/members" api-root admin-group-id)
+                                               (merge http-client-req-defaults
+                                                      {:headers headers}))
+                             :body json/decode)
+          admin-ids      (into #{}
+                               (map #(get % "id"))
+                               (filter #(and (get % "emailVerified")
+                                             (get % "enabled"))
+                                       admins))]
+      (contains? (set admin-ids) user-id))
+    (catch Exception e
+      false)))
 
 (defn fetch-user-by-id
   "Get user by email. Returns nil if not found."
@@ -336,16 +340,17 @@
     (do-remove-user this tenant author-claims user-id))
 
   (user [keycloak tenant email]
+    (prn "@keycloak/user")
     (let [headers (request-headers keycloak)
           user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")]
       (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
-  
+
   (user? [keycloak email]
     (let [headers (request-headers keycloak)]
       (not (nil? (fetch-user-by-email headers
                                       (:api-root keycloak)
                                       email)))))
-  
+
   (users [this tenant-label]
     (tenant-members this tenant-label))
 
