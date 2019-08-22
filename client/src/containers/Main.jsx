@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Modal from './Modal';
 import Notification from './Notification';
+import IMAGES from '../constants/images';
 
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
@@ -17,7 +18,7 @@ function Main({ content, sidebar, notification, loadStatus, env }) {
         <div className="failedToLoadMessage">
           <div className="message">
             <div className="msgContainer">
-              <img src="https://srv-file1.gofile.io/download/BVjlxy/AkvoLogo.svg" title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+              <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
               <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
               <p>Request permission from your organisation admin</p>
             </div>
