@@ -27,6 +27,7 @@ backend/dev/src/local.clj
 # CI
 ci/dev/deployment.yaml
 ci/prod/deployment.yaml
+ci/flipped.service.yaml
 
 # E2E tests
 client/e2e-test/cypress/plugins
