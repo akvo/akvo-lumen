@@ -10,7 +10,6 @@ import {
   removeTemporaryEntitiesFromCollection,
 } from './collection';
 import * as api from '../utilities/api';
-import * as auth from '../utilities/auth';
 
 /*
  * Fetch a dataset by id
@@ -489,11 +488,7 @@ export function updateDataset(id) {
     dispatch(showNotification('info', `Updating "${title}"`));
     api
       .post(
-        `/api/datasets/${id}/update`,
-        // Send the refreshToken as part of the update request as a workaround
-        // for not being able to get an offline token to the backend. It's TBD
-        // how we want to do that.
-        { refreshToken: auth.refreshToken() }
+        `/api/datasets/${id}/update`
       )
       .then(({ body: { updateId, error } }) => {
         if (updateId != null) {
