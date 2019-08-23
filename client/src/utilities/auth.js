@@ -44,13 +44,6 @@ export function token() {
   return lib().token(service());
 }
 
-export function refreshToken() {
-  if (service() == null) {
-    throw new Error('Auth not initialized');
-  }
-  return lib().refreshToken(service());
-}
-
 export function initService(env) {
   const {
     authClientId,

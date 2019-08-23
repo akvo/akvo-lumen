@@ -13,12 +13,6 @@ export function token(keycloak) {
   );
 }
 
-export function refreshToken(keycloak) {
-  if (keycloak == null) {
-    throw new Error('Keycloak not initialized');
-  }
-  return keycloak.refreshToken;
-}
 export function login(keycloak) {
   if (keycloak == null) {
     throw new Error('Keycloak not initialized');
@@ -38,7 +32,6 @@ export function init(env, keycloak) {
       onLoad: 'login-required',
       checkLoginIframe: false,
       token: queryParams.token,
-      refreshToken: queryParams.refresh_token,
     })
     .success((authenticated) => {
       if (authenticated) {
