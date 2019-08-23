@@ -2,6 +2,7 @@
   "wrapping http client calls so we have robust settings values"
   (:require
    [clj-http.client :as client]
+   [clojure.tools.logging :as log]
    [clj-http.conn-mgr :as http.conn-mgr]))
 
 (defn- default-connection-manager-opts
@@ -32,6 +33,7 @@
                              (some? (:socket-timeout %))))
 (defn get* [url opts]
   {:pre [(req-pre-condition opts)]}
+  (log/info :ulr url :opts opts)
   (client/get url opts))
 
 (defn post* [url opts]
