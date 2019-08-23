@@ -8,6 +8,10 @@
             [akvo.lumen.lib.import.flow-v3 :as v3]
             [clojure.tools.logging :as log]))
 
+(defn- read-flow-urls [flow-api]
+  {:internal (:internal-url flow-api)
+   :keycloak (:url flow-api)
+   :auth0 (:auth0-url flow-api)})
 
 (defmethod import/dataset-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId token email version] :as spec}
@@ -32,7 +36,9 @@
               (do
                 (log/error e)
                 (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
-                                (assoc ex-d :instance instance))))
+                                (assoc ex-d
+                                       :instance instance
+                                       :flow-urls (read-flow-urls flow-api)))))
               (throw e)))))
       (records [this]
         (try
@@ -42,5 +48,7 @@
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
-                              (assoc ex-d :instance instance)))
+                              (assoc ex-d
+                                     :instance instance
+                                     :flow-urls (read-flow-urls flow-api))))
               (throw e))))))))
