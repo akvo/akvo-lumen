@@ -10,12 +10,17 @@ class UserMenu extends React.Component {
     super(props);
     this.state = { isExpanded: false };
     this.toggle = this.toggle.bind(this);
+    this.close = this.close.bind(this);
   }
 
   toggle() {
     this.setState(prevState => ({
       isExpanded: !prevState.isExpanded,
     }));
+  }
+
+  close() {
+    this.setState({ isExpanded: false });
   }
 
   render() {
@@ -38,7 +43,7 @@ class UserMenu extends React.Component {
             <Popper placement="bottom-start">
               {({ ref, style, placement, arrowProps }) => (
                 <div ref={ref} style={style} data-placement={placement}>
-                  <UserMenuPopUp />
+                  <UserMenuPopUp close={this.close} />
                   <div ref={arrowProps.ref} style={arrowProps.style} />
                 </div>
               )}

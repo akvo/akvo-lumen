@@ -19,4 +19,7 @@ module.exports = {
     raster: require('../styles/img/icon-256-library-listing-raster.png'),
     visualisation: require('../styles/img/icon-256-library-listing-visualisation.png'),
   },
+  BRAND: {
+    logo: require('../styles/img/AkvoLogo.svg'),
+  },
 };

@@ -124,6 +124,11 @@ spec:
             configMapKeyRef:
               name: akvo
               key: flow.api.root
+        - name: LUMEN_FLOW_API_AUTH0_URL
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: flow.api.auth0.root
         - name: LUMEN_SENTRY_BACKEND_DSN
           valueFrom:
             secretKeyRef:
