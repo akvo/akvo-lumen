@@ -33,7 +33,7 @@
                              (some? (:socket-timeout %))))
 (defn get* [url opts]
   {:pre [(req-pre-condition opts)]}
-  (log/info :ulr url :opts opts)
+  (log/debug :ulr url :opts opts)
   (client/get url opts))
 
 (defn post* [url opts]
