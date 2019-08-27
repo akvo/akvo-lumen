@@ -183,9 +183,9 @@
                                    {:headers headers
                                     :body    (json/encode payload)})))
 
-(defn change-username
+(defn change-firstName
   [headers api-root user-id new-name]
-  (:status (change-user-representation headers api-root user-id {"username" new-name})))
+  (:status (change-user-representation headers api-root user-id {"firstName" new-name})))
 
 (defn set-user-have-verified-email
   "Returns status code from Keycloak response."
@@ -230,10 +230,10 @@
           (println (format "Tried to demote user: %s" user-id))
           (lib/internal-server-error {}))))))
 
-(defn change-user-name
+(defn change-first-name
   [{:keys [api-root] :as keycloak} tenant author-claims user-id new-name]
   (let [headers (request-headers keycloak)]
-    (if (= 204 (change-username headers api-root user-id new-name))
+    (if (= 204 (change-firstName headers api-root user-id new-name))
       (lib/ok (fetch-user-by-id headers api-root tenant user-id))
       (lib/internal-server-error {}))))
 
@@ -340,9 +340,9 @@
     [this tenant author-claims user-id]
     (do-promote-user-to-admin this tenant author-claims user-id))
 
-  (change-user-name
+  (change-first-name
     [this tenant author-claims user-id new-name]
-    (change-user-name this tenant author-claims user-id new-name))
+    (change-first-name this tenant author-claims user-id new-name))
 
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
     (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)

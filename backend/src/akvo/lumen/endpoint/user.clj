@@ -21,8 +21,8 @@
 (defn routes [{:keys [keycloak] :as opts}]
   [["/user/admin" {:get {:handler (fn [{tenant :tenant
                                         query-params :query-params}]
-                                    (lib/ok (select-keys (user/user keycloak tenant (get query-params "email"))
-                                                         [:email :admin])))}}]
+                                    (let [u (user/user keycloak tenant (get query-params "email"))]
+                                      (lib/ok (select-keys u [:email :admin :firstName]))))}}]
    ["/admin/users"
     ["" {:get {:handler (fn [{tenant :tenant}]
                           (user/users keycloak tenant))}}]
@@ -39,7 +39,7 @@
                                       (user/promote-user-to-admin keycloak tenant jwt-claims id)
                                       (change-name? body)
                                       (if (:admin (user/user keycloak tenant (get jwt-claims "email")))
-                                        (user/change-user-name keycloak tenant jwt-claims id (get body "name"))
+                                        (user/change-first-name keycloak tenant jwt-claims id (get body "name"))
                                         (http/not-authorized {:admin false}))
                                       :else (http/not-implemented {})))}
                  :delete {:parameters {:path-params {:id string?}}

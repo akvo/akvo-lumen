@@ -116,6 +116,6 @@
   [keycloak tenant author-claims user-id]
   (p/promote-user-to-admin keycloak tenant author-claims user-id))
 
-(defn change-user-name
+(defn change-first-name
   [keycloak tenant author-claims user-id new-name]
-  (p/change-user-name keycloak tenant author-claims user-id new-name))
+  (p/change-first-name keycloak tenant author-claims user-id new-name))

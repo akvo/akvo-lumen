@@ -34,7 +34,7 @@ class UserMenu extends React.Component {
             {({ ref }) => (
               <button type="button" ref={ref} onClick={() => this.toggle()}>
                 <i className="fa fa-user-o userIcon" aria-hidden="true" />
-                {profile.username}
+                {profile.firstName || profile.email}
                 <i className="fa fa-caret-down downArrow" />
               </button>
             )}

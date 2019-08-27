@@ -132,6 +132,7 @@ function dispatchOnMode() {
               get('/api/user/admin', { email: user.email }).then((response) => {
                 try {
                   userProfile.admin = response.body.admin;
+                  userProfile.firstName = response.body.firstName;
                 } catch (e) {
                   userProfile.admin = false;
                   Raven.captureException(e, {
@@ -140,7 +141,6 @@ function dispatchOnMode() {
                     },
                   });
                 }
-                userProfile.firstName = user.firstName || user.given_name;
                 userProfile.lastName = user.lastName || user.family_name;
                 userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
                 userProfile.username = user.username || user.nickname;

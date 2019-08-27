@@ -30,7 +30,7 @@
     [this tenant author-claims user-id]
     "Promote existing tenant member to admin")
 
-  (change-user-name
+  (change-first-name
     [this tenant author-claims user-id new-name])
 
   (reset-password
