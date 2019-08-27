@@ -57,7 +57,8 @@ class UserMenu extends React.Component {
 
 UserMenu.propTypes = {
   profile: PropTypes.shape({
-    username: PropTypes.string,
+    firstName: PropTypes.string,
+    email: PropTypes.string,
   }).isRequired,
 };
 

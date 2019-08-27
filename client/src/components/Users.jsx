@@ -60,13 +60,11 @@ class User extends Component {
   }
 
   onEditUser(n) {
-    console.log('editing name', n);
     this.setState({
       firstName: n,
     });
   }
   onCancelEditUser() {
-    console.log('cancel editing');
     this.setState(this.props.user);
   }
 
@@ -83,7 +81,7 @@ class User extends Component {
           <td>
             {isEditing ?
               <input
-                className="entityTitleInput"
+                className="entityTitleInput overflow"
                 type="text"
                 ref={`entityTitle${email}`}
                 value={firstName}
@@ -96,14 +94,7 @@ class User extends Component {
         <td>{email}</td>
         {!invitationMode && <td>{admin ? 'Admin' : 'User'}</td>}
         <td>
-          <UserActionSelector
-            getUserActions={getUserActions}
-            onChange={onChange}
-            user={user}
-          />
-        </td>
-        <td>
-          {isEditing &&
+          {isEditing ?
             <div>
               <button
                 className="overflow clickable "
@@ -114,6 +105,12 @@ class User extends Component {
                 onClick={cancel(user)}
               >CANCEL</button>
             </div>
+                :
+            <UserActionSelector
+              getUserActions={getUserActions}
+              onChange={onChange}
+              user={user}
+            />
           }
         </td>
       </tr>
@@ -163,7 +160,6 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, o
           <th>
             <FormattedMessage id="actions" />
           </th>
-          <th>X</th>
         </tr>
         {users.map(({ admin, email, id, firstName }) => (
           <User
@@ -291,7 +287,6 @@ class Users extends Component {
   }
 
   handleUserActionSelect(user, action) {
-    console.log(user, action);
     if (action !== 'edit') {
       this.setState({
         isActionModalVisible: true,
@@ -314,8 +309,6 @@ class Users extends Component {
   }
 
   handleSaveEditing(user) {
-    console.log('save editing', user);
-    console.log('call backend api and update users');
     const usersUrl = `/api/admin/users/${user.id}`;
     api.patch(usersUrl, { name: user.firstName })
     .then(() => {
