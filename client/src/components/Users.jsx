@@ -36,14 +36,14 @@ UserActionSelector.propTypes = {
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
-    username: PropTypes.string,
+    firstName: PropTypes.string,
   }),
 };
 
 UserActionSelector.defaultProps = {
   user: {
     admin: false,
-    username: '',
+    firstName: '',
   },
 };
 
@@ -62,7 +62,7 @@ class User extends Component {
   onEditUser(n) {
     console.log('editing name', n);
     this.setState({
-      username: n,
+      firstName: n,
     });
   }
   onCancelEditUser() {
@@ -71,7 +71,7 @@ class User extends Component {
   }
 
   render() {
-    const { active, admin, email, username } = this.state;
+    const { active, admin, email, firstName } = this.state;
     // eslint-disable-next-line max-len
     const { currentEdition, onCancelEditing, onSaveEditing, invitationMode, getUserActions, onChange, user } = this.props;
     const isEditing = currentEdition.email === email && currentEdition.action === 'edit';
@@ -86,10 +86,10 @@ class User extends Component {
                 className="entityTitleInput"
                 type="text"
                 ref={`entityTitle${email}`}
-                value={username}
+                value={firstName}
                 onChange={evt => this.onEditUser(evt.target.value)}
               /> :
-              username}
+              firstName}
             {active && <span className="isMe"> (me)</span>}
           </td>
         }
@@ -131,7 +131,7 @@ User.propTypes = {
     active: PropTypes.bool.isRequired,
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
-    username: PropTypes.string,
+    firstName: PropTypes.string,
   }).isRequired,
   currentEdition: PropTypes.object.isRequired,
 };
@@ -139,7 +139,7 @@ User.propTypes = {
 User.defaultProps = {
   user: {
     admin: false,
-    username: '',
+    firstName: '',
   },
 };
 
@@ -165,7 +165,7 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, o
           </th>
           <th>X</th>
         </tr>
-        {users.map(({ admin, email, id, username }) => (
+        {users.map(({ admin, email, id, firstName }) => (
           <User
             currentEdition={currentEdition}
             getUserActions={getUserActions}
@@ -179,7 +179,7 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, o
               admin,
               email,
               id,
-              username }}
+              firstName }}
           />
         ))}
       </tbody>
@@ -204,7 +204,7 @@ class Users extends Component {
     this.state = {
       userAction: {
         action: '',
-        user: { email: '', id: '', username: '' },
+        user: { email: '', id: '', firstName: '' },
       },
       editingAction: { action: '', email: '' },
       invitationMode: false,
@@ -305,8 +305,8 @@ class Users extends Component {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   handleCancelEditing(user) {
-    console.log('cancel editing', user);
     this.setState({
       isActionModalVisible: false,
       editingAction: { action: '', email: '' },
@@ -317,7 +317,7 @@ class Users extends Component {
     console.log('save editing', user);
     console.log('call backend api and update users');
     const usersUrl = `/api/admin/users/${user.id}`;
-    api.patch(usersUrl, { name: user.username })
+    api.patch(usersUrl, { name: user.firstName })
     .then(() => {
       this.getUsers();
       this.setState({
@@ -421,7 +421,7 @@ Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
-    username: PropTypes.string.isRequired,
+    firstName: PropTypes.string.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
 };
@@ -429,6 +429,6 @@ Users.propTypes = {
 Users.defaultProps = {
   profile: {
     admin: false,
-    username: '',
+    firstName: '',
   },
 };
