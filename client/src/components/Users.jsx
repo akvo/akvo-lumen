@@ -151,7 +151,7 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, o
         <tr>
           {!invitationMode && (
             <th>
-              <FormattedMessage id="name" />
+              <FormattedMessage id="first_name" />
             </th>
           )}
           <th><FormattedMessage id="email" /></th>
