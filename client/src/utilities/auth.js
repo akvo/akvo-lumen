@@ -71,7 +71,7 @@ export function initService(env) {
   return s;
 }
 
-export function init(env, s) {
+export function init(env, s, locale) {
   if (keycloak != null) {
     throw new Error('Keycloak already initialized');
   }
@@ -90,7 +90,7 @@ export function init(env, s) {
     return lib().init(env, service());
   } else if (env.authProvider === 'auth0') {
     auth0 = s;
-    auth0.authorize();
+    auth0.authorize({ ui_locales: locale });
     return new Promise(() => null);
   }
   return null;
