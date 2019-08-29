@@ -22,8 +22,8 @@
   (condp = expected
     201 (is (= "" (:body response)))
     200 (is (= "" (:body response)))
-    401 (is (= "Not authenticated" (:body response)))
-    403 (is (= "Not authorized" (:body response)))))
+    401 (is (= "\"Not authenticated\"" (:body response)))
+    403 (is (= "\"Not authorized\"" (:body response)))))
 
 (def wrap-auth (m/wrap-auth {:issuer "keyclaoak"} {:issuer "auth0"}))
 
