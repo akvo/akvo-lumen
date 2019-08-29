@@ -82,11 +82,8 @@ function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = `${msg} <a href='${loc.protocol}//${loc.host}'>${loc.protocol}//${loc.host}</a>`;
 }
 
-<<<<<<< HEAD
-function currentLocale(){
-=======
+
 function currentLocale() {
->>>>>>> b5d6468552b117ed9fcea508ad24535e4478a197
   return userLocale(window.localStorage.getItem('locale') || navigator.language || navigator.userLanguage);
 }
 
