@@ -59,6 +59,12 @@ const handleResponse = (response) => {
           throw new Error(body.error);
         });
       }
+      case 403: {
+        return { status: 403, body: 'not authorized' };
+      }
+      case 401: {
+        return { status: 401, body: 'not authenticated' };
+      }
       case 404:
       case 500: {
         const error = new Error(statusText);
