@@ -9,6 +9,7 @@ class UserMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = { isExpanded: false };
+    this.buttonRef = React.createRef();
     this.toggle = this.toggle.bind(this);
     this.close = this.close.bind(this);
   }
@@ -32,18 +33,20 @@ class UserMenu extends React.Component {
         <Manager>
           <Reference>
             {({ ref }) => (
-              <button type="button" ref={ref} onClick={() => this.toggle()}>
-                <i className="fa fa-user-o userIcon" aria-hidden="true" />
-                {profile.username}
-                <i className="fa fa-caret-down downArrow" />
-              </button>
+              <span ref={this.menuRef}>
+                <button type="button" ref={ref} onClick={() => this.toggle()}>
+                  <i className="fa fa-user-o userIcon" aria-hidden="true" />
+                  {profile.username}
+                  <i className="fa fa-caret-down downArrow" />
+                </button>
+              </span>
             )}
           </Reference>
           {isExpanded && (
             <Popper placement="bottom-start">
               {({ ref, style, placement, arrowProps }) => (
                 <div ref={ref} style={style} data-placement={placement}>
-                  <UserMenuPopUp close={this.close} />
+                  <UserMenuPopUp close={this.close} buttonRef={this.buttonRef} />
                   <div ref={arrowProps.ref} style={arrowProps.style} />
                 </div>
               )}
