@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import LocaleSelector from './LocaleSelector';
 import * as auth from '../../../utilities/auth';
+import { showModal } from '../../../actions/activeModal';
 
 require('./UserMenuPopUp.scss');
 
@@ -9,6 +11,7 @@ class UserMenuPopUp extends React.Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.handleShowEditUserModal = this.handleShowEditUserModal.bind(this);
   }
 
   componentWillMount() {
@@ -27,10 +30,15 @@ class UserMenuPopUp extends React.Component {
     close();
   };
 
+  handleShowEditUserModal() {
+    this.props.close();
+    this.props.dispatch(showModal('edit-user'));
+  }
+
   render() {
     return (
       <div className="UserMenuPopUp" ref={(node) => { this.node = node; }}>
-        <button type="button" onClick={() => console.log('@edit profile')}>Edit profile</button>
+        <button type="button" onClick={this.handleShowEditUserModal}>Edit profile</button>
         <hr />
         <LocaleSelector />
         <hr />
@@ -42,6 +50,7 @@ class UserMenuPopUp extends React.Component {
 
 UserMenuPopUp.propTypes = {
   close: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
 
-export default UserMenuPopUp;
+export default connect(state => state)(UserMenuPopUp);
