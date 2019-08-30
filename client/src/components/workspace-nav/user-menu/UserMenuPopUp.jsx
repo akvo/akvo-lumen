@@ -30,6 +30,8 @@ class UserMenuPopUp extends React.Component {
   render() {
     return (
       <div className="UserMenuPopUp" ref={(node) => { this.node = node; }}>
+        <button type="button" onClick={() => console.log('@edit profile')}>Edit profile</button>
+        <hr />
         <LocaleSelector />
         <hr />
         <button type="button" onClick={() => auth.logout()}>Logout</button>
