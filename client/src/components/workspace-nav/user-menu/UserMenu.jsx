@@ -33,7 +33,7 @@ class UserMenu extends React.Component {
         <Manager>
           <Reference>
             {({ ref }) => (
-              <span ref={this.menuRef}>
+              <span ref={this.buttonRef}>
                 <button type="button" ref={ref} onClick={() => this.toggle()}>
                   <i className="fa fa-user-o userIcon" aria-hidden="true" />
                   {profile.username}
