@@ -32,7 +32,7 @@ export function updateUser(user) {
       const { firstName, lastName } = updatedUser.body;
       dispatch(updateUserSuccess({ firstName, lastName }));
     })
-    .catch((error) => { 
+    .catch((error) => {
       dispatch(showNotification('error', 'Failed to update name.'));
       dispatch(updateUserFailure(error));
     });
