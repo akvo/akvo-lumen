@@ -131,8 +131,11 @@ function dispatchOnMode() {
               const userProfile = user;
               get('/api/user/admin', { email: user.email }).then((response) => {
                 try {
-                  userProfile.admin = response.body.admin;
-                  userProfile.firstName = response.body.firstName;
+                  const { admin, firstName, id, lastName } = response.body;
+                  userProfile.admin = admin;
+                  userProfile.firstName = firstName;
+                  userProfile.keycloakId = id;
+                  userProfile.lastName = lastName;
                 } catch (e) {
                   userProfile.admin = false;
                   Raven.captureException(e, {

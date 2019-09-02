@@ -187,6 +187,12 @@
   [headers api-root user-id new-name]
   (:status (change-user-representation headers api-root user-id {"firstName" new-name})))
 
+(defn patch-names
+  [headers api-root user-id first-name last-name]
+  (:status (change-user-representation headers api-root user-id
+                                       {"firstName" first-name
+                                        "lastName" last-name})))
+
 (defn set-user-have-verified-email
   "Returns status code from Keycloak response."
   [headers api-root user-id ]
@@ -236,6 +242,18 @@
     (if (= 204 (change-firstName headers api-root user-id new-name))
       (lib/ok (fetch-user-by-id headers api-root tenant user-id))
       (lib/internal-server-error {}))))
+
+(defn change-names
+  [{:keys [api-root] :as keycloak} tenant claims user-id first-name last-name]
+  (let [headers (request-headers keycloak)
+        keycloak-user (fetch-user-by-id headers api-root tenant user-id)]
+    (if (= (get keycloak-user "email") (get claims "email"))
+      (if (= (patch-names headers api-root user-id first-name last-name) 204)
+        (lib/ok (fetch-user-by-id headers api-root tenant user-id))
+        (lib/bad-request {:id user-id
+                          :error "Could not update name"}))
+      (lib/not-authorized {:id user-id
+                           :message "Email missmatch"}))))
 
 (defn do-remove-user
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
@@ -344,6 +362,10 @@
     [this tenant author-claims user-id new-name]
     (change-first-name this tenant author-claims user-id new-name))
 
+  (change-names
+    [this tenant author-claims user-id first-name last-name]
+    (change-names this tenant author-claims user-id first-name last-name))
+
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
     (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)
                       (merge http-client-req-defaults
@@ -359,13 +381,13 @@
     (let [headers (request-headers keycloak)
           user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")]
       (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
-  
+
   (user? [keycloak email]
     (let [headers (request-headers keycloak)]
       (not (nil? (fetch-user-by-email headers
                                       (:api-root keycloak)
                                       email)))))
-  
+
   (users [this tenant-label]
     (tenant-members this tenant-label))
 

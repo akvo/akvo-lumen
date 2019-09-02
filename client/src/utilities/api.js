@@ -59,6 +59,11 @@ const handleResponse = (response) => {
           throw new Error(body.error);
         });
       }
+      case 422: {
+        return response.json().then((body) => {
+          throw new Error(body.error.message);
+        });
+      }
       case 403: {
         return { status: 403, body: 'not authorized' };
       }

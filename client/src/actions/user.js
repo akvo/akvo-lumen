@@ -1,14 +1,40 @@
-import { createAction } from 'redux-actions';
+import * as api from '../utilities/api';
+import { showNotification } from './notification';
+import * as constants from '../constants/user';
 
-/* Edit an existing collection */
-export const editUserRequest = createAction('EDIT_USER_REQUEST');
-export const editUserFailure = createAction('EDIT_USER_FAILURE');
-export const editUserSuccess = createAction('EDIT_USER_SUCCESS');
+export function updateUserRequest(user) {
+  return {
+    type: constants.UPDATE_USER_REQUEST,
+    user,
+  };
+}
 
-export function editUser(user) {
+export function updateUserSuccess(user) {
+  return {
+    type: constants.UPDATE_USER_SUCCESS,
+    user,
+  };
+}
+
+export function updateUserFailure(user, error) {
+  return {
+    type: constants.UPDATE_USER_FAILURE,
+    user,
+    error,
+  };
+}
+
+export function updateUser(user) {
   return (dispatch) => {
-    dispatch(editUserRequest);
-    console.log('Do HTTP request');
-    dispatch(editUserSuccess(user));
+    dispatch(updateUserRequest);
+    api.patch('/api/user/me', user)
+    .then((updatedUser) => {
+      const { firstName, lastName } = updatedUser.body;
+      dispatch(updateUserSuccess({ firstName, lastName }));
+    })
+    .catch((error) => { 
+      dispatch(showNotification('error', 'Failed to update name.'));
+      dispatch(updateUserFailure(error));
+    });
   };
 }

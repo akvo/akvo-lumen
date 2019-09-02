@@ -19,10 +19,18 @@
   (contains? body "name"))
 
 (defn routes [{:keys [keycloak] :as opts}]
-  [["/user/admin" {:get {:handler (fn [{tenant :tenant
-                                        query-params :query-params}]
-                                    (let [u (user/user keycloak tenant (get query-params "email"))]
-                                      (lib/ok (select-keys u [:email :admin :firstName]))))}}]
+  [["/user"
+    ["/me" {:patch {:parameters {:body map?}
+                    :handler (fn [{tenant :tenant
+                                   jwt-claims :jwt-claims
+                                   {:strs [firstName id lastName]} :body
+                                   :as request}]
+                               (user/change-names keycloak tenant jwt-claims id
+                                                  firstName lastName))}}]
+    ["/admin" {:get {:handler (fn [{tenant :tenant
+                                    query-params :query-params}]
+                                (let [u (user/user keycloak tenant (get query-params "email"))]
+                                  (lib/ok (select-keys u [:admin :email :firstName :id :lastName]))))}}]]
    ["/admin/users"
     ["" {:get {:handler (fn [{tenant :tenant}]
                           (user/users keycloak tenant))}}]
