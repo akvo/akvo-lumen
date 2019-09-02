@@ -424,9 +424,9 @@ class DatasetTable extends Component {
       const formatCell = (props) => {
         const formattedCellValue =
           formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
-
+        const cellStyle = column.get('type') === 'number' ? { textAlign: 'right', width: '100%' } : { textAlign: 'left' };
         return (
-          <Cell>
+          <Cell style={cellStyle} className={column.get('type')}>
             <span
               title={formattedCellValue}
             >
