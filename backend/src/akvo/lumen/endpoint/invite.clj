@@ -15,7 +15,7 @@
     (format "https://%s" server-name)
     (format "%s://%s:%s" (name scheme) server-name client-port)))
 
-(defn admin-routes [{:keys [config emailer keycloak auth0 tenant-manager] :as opts}]
+(defn admin-routes [{:keys [config emailer keycloak auth0-public-client tenant-manager] :as opts}]
   ["/admin/invites"
    ["" {:get {:handler (fn [{tenant :tenant}]
                          (user/active-invites (p/connection tenant-manager tenant)))}
@@ -23,7 +23,7 @@
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body :as request}]
-                          (let [auth-type            (if (= (get jwt-claims "iss") (:issuer auth0))
+                          (let [auth-type            (if (= (get jwt-claims "iss") (:issuer auth0-public-client))
                                                        :auth0
                                                        :keycloak)]
                             (user/create-invite emailer keycloak (p/connection tenant-manager tenant) auth-type
@@ -51,12 +51,12 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
   (verify-routes opts))
 
-(s/def ::auth0 ::auth0/data)
+(s/def ::auth0-public-client ::auth0/public-client)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/invite [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
                    ::keycloak/keycloak
-                   ::auth0
+                   ::auth0-public-client
                    ::emailer/emailer]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/verify [_]

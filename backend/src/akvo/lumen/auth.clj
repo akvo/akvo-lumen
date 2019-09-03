@@ -75,12 +75,12 @@
   If request don't contain claims return 401. If current dns label (tenant) is
   not in claimed roles return 403.
   Otherwiese grant access. This implies that access is on tenant level."
-  [keycloak auth0]
+  [keycloak auth0-public-client]
   (fn [handler]
     (fn [{:keys [jwt-claims] :as request}]
       (let [issuer (condp = (get jwt-claims "iss")
                      (:issuer keycloak) :keycloak
-                     (:issuer auth0) :auth0
+                     (:issuer auth0-public-client) :auth0
                      :other)]
         (cond
           (nil? jwt-claims) not-authenticated
@@ -95,15 +95,15 @@
 (defn wrap-jwt
   "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
   be configured via the KEYCLOAK_URL env var."
-  [keycloak auth0]
+  [keycloak auth0-public-client]
   (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak))
-        auth0-verifier (RSASSAVerifier.  (:rsa-key auth0))]
+        auth0-verifier (RSASSAVerifier.  (:rsa-key auth0-public-client))]
     (fn [handler]
       (fn [req]
         (if-let [token (jwt/jwt-token req)]
           (try
             (if-let [claims (or (jwt/verified-claims token keycloak-verifier (:issuer keycloak) {})
-                                (jwt/verified-claims token auth0-verifier (:issuer auth0) {}))]
+                                (jwt/verified-claims token auth0-verifier (:issuer auth0-public-client) {}))]
               (handler (assoc req
                               :jwt-claims claims
                               :jwt-token token))
@@ -112,20 +112,20 @@
               (handler req)))
           (handler req))))))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ {:keys [keycloak auth0]}]
-  (wrap-auth keycloak auth0))
+(defmethod ig/init-key :akvo.lumen.auth/wrap-auth  [_ {:keys [keycloak auth0-public-client]}]
+  (wrap-auth keycloak auth0-public-client))
 
 (s/def ::keycloak ::keycloak/data)
-(s/def ::auth0 ::auth0/data)
+(s/def ::auth0-public-client ::auth0/public-client)
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-auth [_]
-  (s/keys :req-un [::keycloak ::auth0]))
+  (s/keys :req-un [::keycloak ::auth0-public-client]))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak auth0]}]
-  (wrap-jwt keycloak auth0))
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt  [_ {:keys [keycloak auth0-public-client]}]
+  (wrap-jwt keycloak auth0-public-client))
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt [_]
-  (s/keys :req-un [::keycloak ::auth0]))
+  (s/keys :req-un [::keycloak ::auth0-public-client]))
 
 (defn api-tenant-admin?
   [tenant allowed-paths]

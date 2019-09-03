@@ -13,7 +13,7 @@
 
 (def http-client-req-defaults (http.client/req-opts 5000))
 
-(defmethod ig/init-key :akvo.lumen.component.auth0/data  [_ {:keys [url] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.auth0/public-client  [_ {:keys [url] :as opts}]
   (try
     (let [issuer (format "%s/" url)
           rsa-key  (-> (format  "%s.well-known/jwks.json" issuer)
@@ -30,7 +30,7 @@
 (s/def ::url string?)
 (s/def ::client-id string?)
 
-(s/def ::data (s/keys :req-un [::url ::client-id]))
+(s/def ::public-client (s/keys :req-un [::url ::client-id]))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.auth0/data [_]
-  ::data)
+(defmethod ig/pre-init-spec :akvo.lumen.component.auth0/public-client [_]
+  ::public-client)
