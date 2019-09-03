@@ -9,6 +9,7 @@ import InviteUser from './InviteUser';
 import User from './User';
 import * as api from '../../utilities/api';
 import { showNotification } from '../../actions/notification';
+import { false } from 'datalib/src/util';
 
 require('../entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
@@ -70,6 +71,10 @@ UserList.propTypes = {
   users: PropTypes.array.isRequired,
 };
 
+UserList.defaultProps = {
+  invitationMode: false
+};
+
 class Users extends Component {
   constructor(props) {
     super(props);
@@ -96,34 +101,38 @@ class Users extends Component {
   }
 
   componentDidMount() {
-    if (this.props.profile.admin) {
+    const { profile } = this.props;
+    if (profile.admin) {
       this.getInvitations();
       this.getUsers();
     }
   }
 
   onInviteUser(email) {
+    const { dispatch } = this.props;
     this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', { email })
       .then(() => this.getInvitations())
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to invite user.'));
+        dispatch(showNotification('error', 'Failed to invite user.'));
       });
   }
 
   getUsers() {
+    const { dispatch } = this.props;
     api.get('/api/admin/users')
       .then(({ body: { users } }) => this.setState({ users }))
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to fetch users.'));
+        dispatch(showNotification('error', 'Failed to fetch users.'));
       });
   }
 
   getInvitations() {
+    const { dispatch } = this.props;
     api.get('/api/admin/invites')
       .then(({ body: { invites } }) => this.setState({ invitations: invites }))
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to fetch invitations.'));
+        dispatch(showNotification('error', 'Failed to fetch invitations.'));
       });
   }
 
@@ -143,9 +152,10 @@ class Users extends Component {
   }
 
   getUserActions(user) {
+    const { invitationMode } = this.state;
     const { currentUser, admin } = user;
     let actions = [];
-    if (this.state.invitationMode) {
+    if (invitationMode) {
       actions = [['revoke', 'Revoke invitation', false]];
     } else {
       actions = [
@@ -168,7 +178,9 @@ class Users extends Component {
   }
 
   handleUserAction() {
-    const { action, user } = this.state.userAction;
+    const { dispatch } = this.props;
+    const { userAction } = this.state;
+    const { action, user } = userAction;
     const { id } = user;
     this.setState({ isActionModalVisible: false });
     const usersUrl = `/api/admin/users/${id}`;
@@ -177,34 +189,38 @@ class Users extends Component {
       api.del(usersUrl)
         .then(() => this.getUsers())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     } else if (action === 'demote') {
       api.patch(usersUrl, { admin: false })
         .then(() => this.getUsers())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     } else if (action === 'promote') {
       api.patch(usersUrl, { admin: true })
         .then(() => this.getUsers())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     } else if (action === 'revoke') {
       api.del(invitesUrl)
         .then(() => this.getInvitations())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     }
   }
 
   render() {
+    const { profile } = this.props;
+    const { admin, email } = profile;
+    const { 
+      invitationMode, isActionModalVisible, isInviteModalVisible, invitations, users, userAction,
+    } = this.state;
     const actionButtons = this.getUserActionButtons();
-    const { admin, email } = this.props.profile;
     const saveStatus = '';
-    const invitationMode = this.state.invitationMode;
+
     const title = invitationMode ? 'Invitations' : 'Members';
     if (!admin) {
       return (
@@ -227,19 +243,19 @@ class Users extends Component {
             getUserActions={this.getUserActions}
             onChange={this.handleUserActionSelect}
             invitationMode={invitationMode}
-            users={invitationMode ? this.state.invitations : this.state.users}
+            users={invitationMode ? invitations : users}
           />
         </div>
         <InviteUser
-          isOpen={this.state.isInviteModalVisible}
+          isOpen={isInviteModalVisible}
           onClose={() => this.setState({ isInviteModalVisible: false })}
           onInviteUser={this.onInviteUser}
         />
         <ConfirmUserAction
-          isOpen={this.state.isActionModalVisible}
+          isOpen={isActionModalVisible}
           onChange={this.handleUserAction}
           onClose={() => this.setState({ isActionModalVisible: false })}
-          userAction={this.state.userAction}
+          userAction={userAction}
         />
       </div>
     );
@@ -254,14 +270,6 @@ Users.propTypes = {
     lastName: PropTypes.string.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
-};
-
-Users.defaultProps = {
-  profile: {
-    admin: false,
-    firstName: '',
-    lastName: '',
-  },
 };
 
 export default connect(state => ({
