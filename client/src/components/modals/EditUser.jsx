@@ -46,28 +46,30 @@ class EditUser extends Component {
         <div className="EditUserForms">
           <div>
             <label htmlFor="firstNameInput">
-              <FormattedMessage id="first_name" />:
+              <FormattedMessage id="first_name" />
+              :
+              <input
+                id="firstNameInput"
+                className="firstNameInput"
+                value={firstName}
+                onChange={this.handleFirstNameChange}
+                type="text"
+                maxLength={127}
+              />
             </label>
-            <input
-              id="firstNameInput"
-              className="firstNameInput"
-              value={firstName}
-              onChange={this.handleFirstNameChange}
-              type="text"
-              maxLength={127}
-            />
           </div>
           <div>
             <label htmlFor="lastNameInput">
-              <FormattedMessage id="last_name" />:
+              <FormattedMessage id="last_name" />
+              :
+              <input
+                id="lastNameInput"
+                value={lastName}
+                onChange={this.handleLastNameChange}
+                type="text"
+                maxLength={127}
+              />
             </label>
-            <input
-              id="lastNameInput"
-              value={lastName}
-              onChange={this.handleLastNameChange}
-              type="text"
-              maxLength={127}
-            />
           </div>
         </div>
         <ModalFooter

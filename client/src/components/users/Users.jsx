@@ -13,7 +13,9 @@ import { showNotification } from '../../actions/notification';
 require('../entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
 
-function UserList({ currentUserEmail, getUserActions, invitationMode, onChange, users }) {
+function UserList({
+  currentUserEmail, getUserActions, invitationMode, onChange, users,
+}) {
   return (
     <table>
       <tbody>
@@ -37,7 +39,8 @@ function UserList({ currentUserEmail, getUserActions, invitationMode, onChange, 
             <FormattedMessage id="actions" />
           </th>
         </tr>
-        {users.map(({ admin, email, id, firstName, lastName }) => (
+        {users.map(({ admin, email, id, firstName, lastName,
+        }) => (
           <User
             getUserActions={getUserActions}
             key={id}
@@ -73,7 +76,6 @@ class Users extends Component {
         action: '',
         user: { email: '', id: '', firstName: '', lastName: '' },
       },
-      editingAction: { action: '', email: '' },
       invitationMode: false,
       invitations: [],
       isActionModalVisible: false,

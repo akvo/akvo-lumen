@@ -36,23 +36,31 @@ UserActionSelector.defaultProps = {
   },
 };
 
-function User({ getUserActions, invitationMode, onChange, user }) {
-  const { currentUser, admin, email, firstName, lastName } = user;
+function User({
+  getUserActions, invitationMode, onChange, user,
+  }) {
+  const {
+    currentUser, admin, email, firstName, lastName,
+  } = user;
   return (
     <tr>
-      {!invitationMode && (
+      {!invitationMode
+      && (
         <td>
-          {currentUser && (
+          {currentUser
+          && (
             <span className="isMe">
               <i className="fa fa-user-o userIcon" aria-hidden="true" />
             </span>
           )}
         </td>
       )}
-      {!invitationMode &&
+      {!invitationMode
+      &&
         <td>{firstName}</td>
       }
-      {!invitationMode &&
+      {!invitationMode
+      &&
         <td>{lastName}</td>
       }
       <td>{email}</td>
@@ -84,12 +92,7 @@ User.propTypes = {
 };
 
 User.defaultProps = {
-  user: {
-    admin: false,
-    currentUser: false,
-    firstName: '',
-    lastName: '',
-  },
+  invitationMode: false,
 };
 
 export default injectIntl(User);
