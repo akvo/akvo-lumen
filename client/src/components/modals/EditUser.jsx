@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { updateUser } from '../../actions/user';
 import ModalFooter from './ModalFooter';
 
+require('./EditUser.scss');
 
 class EditUser extends Component {
   constructor(props) {
@@ -42,34 +43,33 @@ class EditUser extends Component {
     return (
       <div className="EditUser">
         <h2>User</h2>
-        <form onSubmit={this.handleSubmit}>
-          <label htmlFor="firstNameInput">
-            Given name
+        <div className="EditUserForms">
+          <div>
+            <label htmlFor="firstNameInput">
+              <FormattedMessage id="first_name" />:
+            </label>
             <input
               id="firstNameInput"
+              className="firstNameInput"
               value={firstName}
               onChange={this.handleFirstNameChange}
               type="text"
-              placeholder="Given name"
               maxLength={127}
             />
-          </label>
-          <br />
-          <br />
-          <label htmlFor="lastNameInput">
-            Family name
+          </div>
+          <div>
+            <label htmlFor="lastNameInput">
+              <FormattedMessage id="last_name" />:
+            </label>
             <input
               id="lastNameInput"
               value={lastName}
               onChange={this.handleLastNameChange}
               type="text"
-              placeholder="Family name"
               maxLength={127}
             />
-          </label>
-        </form>
-        <br />
-        <br />
+          </div>
+        </div>
         <ModalFooter
           leftButton={{
             text: 'Cancel',
