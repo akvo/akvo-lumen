@@ -347,6 +347,7 @@
                                           "emailVerified" false
                                           "enabled" true})
                                :headers headers})))
+
   (demote-user-from-admin
     [this tenant author-claims user-id]
     (do-demote-user-from-admin this tenant author-claims user-id))
@@ -366,6 +367,7 @@
                                                   "type" "password"
                                                   "value" tmp-password})
                               :headers headers})))
+
   (remove-user
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
@@ -391,7 +393,6 @@
 (defn- init-keycloak [{:keys [credentials url realm max-user-ids-cache]}]
   (map->KeycloakAgent {:api-root      (format "%s/admin/realms/%s" url realm)
                        :credentials   credentials
-                       :issuer        (format "%s/realms/%s" url realm)
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
@@ -421,11 +422,11 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
-  (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
-        connection-manager                               (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
-        openid-config                                    (fetch-openid-configuration issuer {})]
+  (let [issuer (format "%s/realms/%s" (:url data) (:realm data))
+        connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
+        openid-config      (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
-    (assoc this
+    (assoc (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
            :connection-manager connection-manager
            :openid-config openid-config
            :monitoring monitoring)))
