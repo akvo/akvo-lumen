@@ -10,7 +10,7 @@
 
 (defn- read-flow-urls [flow-api]
   {:internal (:internal-url flow-api)
-   :keycloak (:url flow-api)
+   :keycloak (:url flow-api) ;; nginx auth in flow-api side
    :auth0 (:auth0-url flow-api)})
 
 (defmethod import/dataset-importer "AKVO_FLOW"

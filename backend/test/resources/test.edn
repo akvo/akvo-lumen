@@ -15,7 +15,7 @@
 
  :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 
- :akvo.lumen.component.keycloak/data {:url "http://auth.lumen.local:8080/auth"
+ :akvo.lumen.component.keycloak/public-client {:url "http://auth.lumen.local:8080/auth"
                                       :realm "akvo"
                                       :client-id "akvo-lumen"}
 
@@ -46,7 +46,7 @@
 
  :akvo.lumen.component.flow/api {:url "https://api.akvotest.org/flow"
                                  :auth0-url "https://api-auth0.akvotest.org/flow"
-                                 :internal-url "https://api.akvotest.org/flow"
+                                 :internal-url "https://api-auth0.akvotest.org/flow"
                                  :internal-api-headers #ig/ref :akvo.lumen.component.flow/api-headers}
 
  :akvo.lumen.endpoint.env/env {:sentry-client-dsn "dev-sentry-client-dsn"
