@@ -1,4 +1,5 @@
-(ns akvo.lumen.protocols)
+(ns akvo.lumen.protocols
+  (:require [clojure.spec.alpha :as s]))
 
 (defprotocol IErrorTracker
   (track [this error]))
@@ -118,3 +119,7 @@
     "Provisional workaround for
      https://github.com/akvo/akvo-lumen/issues/2080
     'Refactor api/collections payload'"))
+
+
+(s/def ::authorizer (s/and (partial satisfies? KeycloakUserManagement)
+                           (partial satisfies? Authorizer)))

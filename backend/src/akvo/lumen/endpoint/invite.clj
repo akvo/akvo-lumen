@@ -55,10 +55,10 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/invite [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
-                   ::keycloak/keycloak
+                   ::p/authorizer
                    ::auth0-public-client
                    ::emailer/emailer]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/verify [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
-                   ::keycloak/keycloak]))
+                   ::p/authorizer]))

@@ -30,7 +30,7 @@
  :akvo.lumen.auth/wrap-auth {:keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
                              :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client}
 
- :akvo.lumen.auth/wrap-api-authorization {:keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service}
+ :akvo.lumen.auth/wrap-api-authorization {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
@@ -84,12 +84,12 @@
  :akvo.lumen.endpoint.healthz/healthz {}
 
  :akvo.lumen.endpoint.invite/invite {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                                     :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
                                      :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
                                      :emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.endpoint.invite/verify {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service}
+                                     :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.endpoint.job-execution/job-execution {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
@@ -114,7 +114,7 @@
  :akvo.lumen.endpoint.transformation/transformation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                      :caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
- :akvo.lumen.endpoint.user/user {:keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service}
+ :akvo.lumen.endpoint.user/user {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.endpoint.visualisation/visualisation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                    :windshaft-url "http://localhost:4000"}
