@@ -8,7 +8,7 @@ import Dataset from './Dataset';
 import Raster from './Raster';
 import Transformation from './Transformation';
 import Dashboard from './Dashboard';
-import Users from '../components/Users';
+import Users from '../components/users/Users';
 import Resources from '../components/Resources';
 import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';

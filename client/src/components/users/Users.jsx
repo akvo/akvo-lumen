@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 
-import EntityTypeHeader from './entity-editor/EntityTypeHeader';
-import ConfirmUserAction from './users/ConfirmUserAction';
-import InviteUser from './users/InviteUser';
-import * as api from '../utilities/api';
-import { showNotification } from '../actions/notification';
+import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
+import ConfirmUserAction from './ConfirmUserAction';
+import InviteUser from './InviteUser';
+import * as api from '../../utilities/api';
+import { showNotification } from '../../actions/notification';
 
-require('./entity-editor/EntityTypeHeader.scss');
+require('../entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
 
 function UserActionSelector({ getUserActions, onChange, user }) {
