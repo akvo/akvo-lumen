@@ -138,13 +138,13 @@
    (contains? allowed-paths tenant)))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-api-authorization
-  [_ {:keys [keycloak]}]
+  [_ {:keys [authorizer]}]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
       (if (api-authz? jwt-claims)
         (try
           (let [email (get jwt-claims "email")
-                allowed-paths (delay (p/allowed-paths keycloak email))]
+                allowed-paths (delay (p/allowed-paths authorizer email))]
             (cond
               (nil? jwt-claims) not-authenticated
               (admin-path? request) (if (api-tenant-admin? tenant @allowed-paths)
@@ -163,4 +163,4 @@
         (handler request)))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-api-authorization [_]
-  (s/keys :req-un [::keycloak/keycloak]))
+  (s/keys :req-un [::p/authorizer]))
