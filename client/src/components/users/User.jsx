@@ -38,7 +38,7 @@ UserActionSelector.defaultProps = {
 
 function User({
   getUserActions, invitationMode, onChange, user,
-  }) {
+}) {
   const {
     currentUser, admin, email, firstName, lastName,
   } = user;
@@ -56,17 +56,18 @@ function User({
         </td>
       )}
       {!invitationMode
-      &&
+      && (
         <td>{firstName}</td>
-      }
+      )}
       {!invitationMode
-      &&
+      && (
         <td>{lastName}</td>
-      }
+      )}
       <td>{email}</td>
-      {!invitationMode &&
+      {!invitationMode
+      && (
         <td className="UserRole">{admin ? <FormattedMessage id="admin" /> : <FormattedMessage id="user" />}</td>
-      }
+      )}
       <td>
         <UserActionSelector
           getUserActions={getUserActions}

@@ -39,7 +39,8 @@ function UserList({
             <FormattedMessage id="actions" />
           </th>
         </tr>
-        {users.map(({ admin, email, id, firstName, lastName,
+        {users.map(({
+          admin, email, id, firstName, lastName,
         }) => (
           <User
             getUserActions={getUserActions}
@@ -52,7 +53,8 @@ function UserList({
               email,
               id,
               firstName,
-              lastName }}
+              lastName,
+            }}
           />
         ))}
       </tbody>
@@ -74,7 +76,9 @@ class Users extends Component {
     this.state = {
       userAction: {
         action: '',
-        user: { email: '', id: '', firstName: '', lastName: '' },
+        user: {
+          email: '', id: '', firstName: '', lastName: '',
+        },
       },
       invitationMode: false,
       invitations: [],

@@ -129,7 +129,9 @@ function dispatchOnMode() {
               }
               // Now you have the user's infomation
               const userProfile = user;
-              get('/api/user/admin', { email: user.email })
+              get('/api/user/admin', {
+                email: user.email,
+              })
               .then((response) => {
                 try {
                   const {
