@@ -179,13 +179,9 @@
   "Returns status code from Keycloak response."
   [headers api-root user-id payload]
   (http.client/put* (format "%s/users/%s" api-root user-id)
-                            (merge http-client-req-defaults
-                                   {:headers headers
-                                    :body    (json/encode payload)})))
-
-(defn change-firstName
-  [headers api-root user-id new-name]
-  (:status (change-user-representation headers api-root user-id {"firstName" new-name})))
+                    (merge http-client-req-defaults
+                           {:headers headers
+                            :body    (json/encode payload)})))
 
 (defn patch-names
   [headers api-root user-id first-name last-name]
@@ -235,13 +231,6 @@
         (do
           (println (format "Tried to demote user: %s" user-id))
           (lib/internal-server-error {}))))))
-
-(defn change-first-name
-  [{:keys [api-root] :as keycloak} tenant author-claims user-id new-name]
-  (let [headers (request-headers keycloak)]
-    (if (= 204 (change-firstName headers api-root user-id new-name))
-      (lib/ok (fetch-user-by-id headers api-root tenant user-id))
-      (lib/internal-server-error {}))))
 
 (defn change-names
   [{:keys [api-root] :as keycloak} tenant claims user-id first-name last-name]
@@ -345,10 +334,10 @@
     (http.client/post* (format "%s/users" api-root)
                        (merge http-client-req-defaults
                               {:body    (json/encode
-                                         {"username"      email
-                                          "email"         email
+                                         {"username" email
+                                          "email" email
                                           "emailVerified" false
-                                          "enabled"       true})
+                                          "enabled" true})
                                :headers headers})))
   (demote-user-from-admin
     [this tenant author-claims user-id]
@@ -358,10 +347,6 @@
     [this tenant author-claims user-id]
     (do-promote-user-to-admin this tenant author-claims user-id))
 
-  (change-first-name
-    [this tenant author-claims user-id new-name]
-    (change-first-name this tenant author-claims user-id new-name))
-
   (change-names
     [this tenant author-claims user-id first-name last-name]
     (change-names this tenant author-claims user-id first-name last-name))
@@ -369,9 +354,9 @@
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
     (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)
                       (merge http-client-req-defaults
-                             {:body    (json/encode {"temporary" true
-                                                     "type"      "password"
-                                                     "value"     tmp-password})
+                             {:body (json/encode {"temporary" true
+                                                  "type" "password"
+                                                  "value" tmp-password})
                               :headers headers})))
   (remove-user
     [this tenant author-claims user-id]

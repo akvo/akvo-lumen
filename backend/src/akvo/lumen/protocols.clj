@@ -30,9 +30,6 @@
     [this tenant author-claims user-id]
     "Promote existing tenant member to admin")
 
-  (change-first-name
-    [this tenant author-claims user-id new-name])
-
   (change-names
     [this tenant author-claims user-id first-name last-name])
 

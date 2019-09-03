@@ -45,10 +45,6 @@
                                       (user/demote-user-from-admin keycloak tenant jwt-claims id)
                                       (promote-user? body)
                                       (user/promote-user-to-admin keycloak tenant jwt-claims id)
-                                      (change-name? body)
-                                      (if (:admin (user/user keycloak tenant (get jwt-claims "email")))
-                                        (user/change-first-name keycloak tenant jwt-claims id (get body "name"))
-                                        (http/not-authorized {:admin false}))
                                       :else (http/not-implemented {})))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
