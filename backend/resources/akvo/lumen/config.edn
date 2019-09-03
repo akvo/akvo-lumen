@@ -27,7 +27,7 @@
                                                           :content-types true
                                                           :default-charset "utf-8"}}
 
- :akvo.lumen.auth/wrap-auth {:keycloak #ig/ref :akvo.lumen.component.keycloak/data
+ :akvo.lumen.auth/wrap-auth {:keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
                              :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client}
 
  :akvo.lumen.auth/wrap-api-authorization {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
@@ -36,7 +36,7 @@
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
                                           :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
 
- :akvo.lumen.auth/wrap-jwt {:keycloak #ig/ref :akvo.lumen.component.keycloak/data
+ :akvo.lumen.auth/wrap-jwt {:keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
                             :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client}
 
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
@@ -57,7 +57,6 @@
  :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
                                  :auth0-url #duct/env "LUMEN_FLOW_API_AUTH0_URL"
                                  :internal-url "http://flow-api-internal"
-                                 :keycloak #ig/ref :akvo.lumen.component.keycloak/data
                                  :api-headers #ig/ref :akvo.lumen.component.flow/api-headers
                                  :internal-api-headers #ig/ref :akvo.lumen.component.flow/internal-api-headers}
 
@@ -70,7 +69,7 @@
 
  :akvo.lumen.endpoint.env/env {:routes-opts
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
-                               :keycloak #ig/ref :akvo.lumen.component.keycloak/data
+                               :keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
                                :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
@@ -94,8 +93,7 @@
 
  :akvo.lumen.endpoint.job-execution/job-execution {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
- :akvo.lumen.endpoint.library/library {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak
-                                       :tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
+ :akvo.lumen.endpoint.library/library {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.endpoint.multiple-column/multiple-column {:caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
@@ -182,14 +180,14 @@
 
  :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://s3-eu-west-1.amazonaws.com/akvoflow-public/caddisfly-tests-v2.json"]}
 
- :akvo.lumen.component.keycloak/data {:url #duct/env "LUMEN_KEYCLOAK_URL"
-                                      :realm "akvo"
-                                      :client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]}
+ :akvo.lumen.component.keycloak/public-client {:url #duct/env "LUMEN_KEYCLOAK_URL"
+                                               :realm "akvo"
+                                               :client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]}
 
  :akvo.lumen.component.auth0/public-client {:url #duct/env ["LUMEN_AUTH0_URL" :or "https://akvotest.eu.auth0.com"]
                                             :client-id #duct/env [ "LUMEN_AUTH0_PUBLIC_CLIENT_ID" :or "D5LayiXP1pzq-6g2B_QVvzCw_eycZxQK"]}
 
- :akvo.lumen.component.keycloak/keycloak {:data #ig/ref :akvo.lumen.component.keycloak/data
+ :akvo.lumen.component.keycloak/keycloak {:public-client #ig/ref :akvo.lumen.component.keycloak/public-client
                                           :max-user-ids-cache 1000
                                           :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}
                                           :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]

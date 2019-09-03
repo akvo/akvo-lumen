@@ -360,7 +360,7 @@
                        :credentials   credentials
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/public-client  [_ {:keys [url realm] :as opts}]
   (try
     (let [issuer (str url "/realms/" realm)
           rsa-key (-> (str issuer "/protocol/openid-connect/certs")
@@ -378,20 +378,20 @@
 (s/def ::client-id string?)
 (s/def ::realm string?)
 
-(s/def ::data (s/keys :req-un [::url
-                               ::realm
-                               ::client-id]))
+(s/def ::public-client (s/keys :req-un [::url
+                                        ::realm
+                                        ::client-id]))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
-  ::data)
+(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/public-client [_]
+  ::public-client)
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache monitoring] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
-  (let [issuer (format "%s/realms/%s" (:url data) (:realm data))
+  (let [issuer (format "%s/realms/%s" (:url public-client) (:realm public-client))
         connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
         openid-config      (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
-    (assoc (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
+    (assoc (init-keycloak (assoc public-client :credentials credentials :max-user-ids-cache max-user-ids-cache))
            :connection-manager connection-manager
            :openid-config openid-config
            :monitoring monitoring)))
@@ -409,7 +409,7 @@
 
 (s/def ::max-user-ids-cache pos-int?)
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
-(s/def ::config (s/keys :req-un [::data ::credentials ::max-user-ids-cache ::monitoring]))
+(s/def ::config (s/keys :req-un [::public-client ::credentials ::max-user-ids-cache ::monitoring]))
 
 (s/def ::keycloak (s/and (partial satisfies? p/KeycloakUserManagement)
                          (partial satisfies? p/Authorizer)))
