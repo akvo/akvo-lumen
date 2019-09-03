@@ -387,7 +387,7 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
-  (let [issuer (format "%s/realms/%s" (:url public-client) (:realm public-client))
+  (let [issuer (:issuer public-client)
         connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
         openid-config      (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
