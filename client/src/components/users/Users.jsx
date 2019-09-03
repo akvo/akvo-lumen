@@ -13,8 +13,7 @@ import { showNotification } from '../../actions/notification';
 require('../entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
 
-// eslint-disable-next-line max-len
-function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, onSaveEditing, onCancelEditing, users, currentEdition }) {
+function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, users }) {
   return (
     <table>
       <tbody>
@@ -24,6 +23,7 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, o
               <FormattedMessage id="first_name" />
             </th>
           )}
+          <th><FormattedMessage id="last_name" /></th>
           <th><FormattedMessage id="email" /></th>
           {!invitationMode && (
             <th>
@@ -34,21 +34,19 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, o
             <FormattedMessage id="actions" />
           </th>
         </tr>
-        {users.map(({ admin, email, id, firstName }) => (
+        {users.map(({ admin, email, id, firstName, lastName }) => (
           <User
-            currentEdition={currentEdition}
             getUserActions={getUserActions}
             key={id}
             onChange={onChange}
-            onCancelEditing={onCancelEditing}
-            onSaveEditing={onSaveEditing}
             invitationMode={invitationMode}
             user={{
               active: email === activeUserEmail,
               admin,
               email,
               id,
-              firstName }}
+              firstName,
+              lastName }}
           />
         ))}
       </tbody>
@@ -61,10 +59,7 @@ UserList.propTypes = {
   getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
-  onCancelEditing: PropTypes.func.isRequired,
-  onSaveEditing: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
-  currentEdition: PropTypes.object.isRequired,
 };
 
 class Users extends Component {
@@ -73,7 +68,7 @@ class Users extends Component {
     this.state = {
       userAction: {
         action: '',
-        user: { email: '', id: '', firstName: '' },
+        user: { email: '', id: '', firstName: '', lastName: '' },
       },
       editingAction: { action: '', email: '' },
       invitationMode: false,
@@ -87,8 +82,6 @@ class Users extends Component {
     this.getInvitations = this.getInvitations.bind(this);
     this.getUsers = this.getUsers.bind(this);
     this.handleUserAction = this.handleUserAction.bind(this);
-    this.handleCancelEditing = this.handleCancelEditing.bind(this);
-    this.handleSaveEditing = this.handleSaveEditing.bind(this);
     this.handleUserActionSelect = this.handleUserActionSelect.bind(this);
     this.onInviteUser = this.onInviteUser.bind(this);
   }
@@ -147,7 +140,6 @@ class Users extends Component {
       actions = [['revoke', 'Revoke invitation', false]];
     } else {
       actions = [
-        ['edit', 'Edit user', false],
         ['delete', 'Delete user', active],
       ];
       if (admin) {
@@ -160,39 +152,9 @@ class Users extends Component {
   }
 
   handleUserActionSelect(user, action) {
-    if (action !== 'edit') {
-      this.setState({
-        isActionModalVisible: true,
-        userAction: { action, user },
-      });
-    } else {
-      this.setState({
-        isActionModalVisible: false,
-        editingAction: { action, email: user.email },
-      });
-    }
-  }
-
-  // eslint-disable-next-line no-unused-vars
-  handleCancelEditing(user) {
     this.setState({
-      isActionModalVisible: false,
-      editingAction: { action: '', email: '' },
-    });
-  }
-
-  handleSaveEditing(user) {
-    const usersUrl = `/api/admin/users/${user.id}`;
-    api.patch(usersUrl, { name: user.firstName })
-    .then(() => {
-      this.getUsers();
-      this.setState({
-        isActionModalVisible: false,
-        editingAction: { action: '', email: '' },
-      });
-    })
-    .catch(() => {
-      this.props.dispatch(showNotification('error', 'Failed to change user name.'));
+      isActionModalVisible: true,
+      userAction: { action, user },
     });
   }
 
@@ -235,7 +197,6 @@ class Users extends Component {
     const saveStatus = '';
     const invitationMode = this.state.invitationMode;
     const title = invitationMode ? 'Invitations' : 'Members';
-    const currentEdition = this.state.editingAction;
     if (!admin) {
       return (
         <div>
@@ -253,9 +214,6 @@ class Users extends Component {
         />
         <div className="UserList">
           <UserList
-            currentEdition={currentEdition}
-            onCancelEditing={this.handleCancelEditing}
-            onSaveEditing={this.handleSaveEditing}
             activeUserEmail={email}
             getUserActions={this.getUserActions}
             onChange={this.handleUserActionSelect}
@@ -284,6 +242,7 @@ Users.propTypes = {
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
     firstName: PropTypes.string.isRequired,
+    lastName: PropTypes.string.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
 };
@@ -292,6 +251,7 @@ Users.defaultProps = {
   profile: {
     admin: false,
     firstName: '',
+    lastName: '',
   },
 };
 
