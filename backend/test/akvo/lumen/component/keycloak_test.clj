@@ -12,8 +12,8 @@
 
 (defn fixture [f]
   (let [system (ig/init (tu/start-config)
-                        [:akvo.lumen.component.keycloak/keycloak])]
-    (binding [*keycloak* (:akvo.lumen.component.keycloak/keycloak system)]
+                        [:akvo.lumen.component.keycloak/authorization-service])]
+    (binding [*keycloak* (:akvo.lumen.component.keycloak/authorization-service system)]
       (f))
     (ig/halt! system)))
 

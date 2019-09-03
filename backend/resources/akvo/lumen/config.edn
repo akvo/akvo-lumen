@@ -30,7 +30,7 @@
  :akvo.lumen.auth/wrap-auth {:keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
                              :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client}
 
- :akvo.lumen.auth/wrap-api-authorization {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
+ :akvo.lumen.auth/wrap-api-authorization {:keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
@@ -84,12 +84,12 @@
  :akvo.lumen.endpoint.healthz/healthz {}
 
  :akvo.lumen.endpoint.invite/invite {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak
+                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service
                                      :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
                                      :emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.endpoint.invite/verify {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
+                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.endpoint.job-execution/job-execution {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
@@ -114,7 +114,7 @@
  :akvo.lumen.endpoint.transformation/transformation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                      :caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
- :akvo.lumen.endpoint.user/user {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
+ :akvo.lumen.endpoint.user/user {:keycloak #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.endpoint.visualisation/visualisation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                    :windshaft-url "http://localhost:4000"}
@@ -187,11 +187,11 @@
  :akvo.lumen.component.auth0/public-client {:url #duct/env ["LUMEN_AUTH0_URL" :or "https://akvotest.eu.auth0.com"]
                                             :client-id #duct/env [ "LUMEN_AUTH0_PUBLIC_CLIENT_ID" :or "D5LayiXP1pzq-6g2B_QVvzCw_eycZxQK"]}
 
- :akvo.lumen.component.keycloak/keycloak {:public-client #ig/ref :akvo.lumen.component.keycloak/public-client
-                                          :max-user-ids-cache 1000
-                                          :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}
-                                          :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
-                                                        :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
+ :akvo.lumen.component.keycloak/authorization-service {:public-client #ig/ref :akvo.lumen.component.keycloak/public-client
+                                                       :max-user-ids-cache 1000
+                                                       :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}
+                                                       :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
+                                                                     :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
 
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
                                                    :email-user #duct/env "LUMEN_EMAIL_USER"
