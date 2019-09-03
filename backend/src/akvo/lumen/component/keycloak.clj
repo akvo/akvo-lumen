@@ -420,7 +420,7 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/public-client [_]
   ::public-client)
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
   (let [issuer (format "%s/realms/%s" (:url public-client) (:realm public-client))
         connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
@@ -431,7 +431,7 @@
            :openid-config openid-config
            :monitoring monitoring)))
 
-(defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.component.keycloak/authorization-service  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))
   (http.client/shutdown-manager (:connection-manager opts)))
 
@@ -449,5 +449,5 @@
 (s/def ::keycloak (s/and (partial satisfies? p/UserManagement)
                          (partial satisfies? p/Authorizer)))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/keycloak [_]
+(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)
