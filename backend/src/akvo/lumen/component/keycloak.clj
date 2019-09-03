@@ -235,12 +235,20 @@
 (defn change-names
   [{:keys [api-root] :as keycloak} tenant claims user-id first-name last-name]
   (let [headers (request-headers keycloak)
-        keycloak-user (fetch-user-by-id headers api-root tenant user-id)]
-    (if (= (get keycloak-user "email") (get claims "email"))
+        keycloak-user (fetch-user-by-id headers api-root tenant user-id)
+        keycloak-user-email (get keycloak-user "email")
+        claims-user-email (get claims "email")]
+    (if (= keycloak-user-email claims-user-email)
       (if (= (patch-names headers api-root user-id first-name last-name) 204)
         (lib/ok (fetch-user-by-id headers api-root tenant user-id))
-        (lib/bad-request {:id user-id
-                          :error "Could not update name"}))
+        (let [log-data {:jwt-claims-email claims-user-email
+                        :keycloak-user-email keycloak-user-email
+                        :tenant tenant
+                        :user user-id}]
+          (log/error ::change-names-email-missmatch
+                     "Email from Keycloak and JWT claims did not match" log-data)
+          (lib/bad-request {:id user-id
+                            :error "Could not update name"})))
       (lib/not-authorized {:id user-id
                            :message "Email missmatch"}))))
 
