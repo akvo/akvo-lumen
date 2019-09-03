@@ -131,8 +131,7 @@ function dispatchOnMode() {
               const userProfile = user;
               get('/api/user/admin', {
                 email: user.email,
-              })
-              .then((response) => {
+              }).then((response) => {
                 try {
                   const {
                     admin, firstName, id, lastName,
