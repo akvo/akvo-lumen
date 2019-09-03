@@ -127,28 +127,31 @@ function dispatchOnMode() {
               if (err2) {
                 throw err2;
               }
-              // Now you have the user's information
+              // Now you have the user's infomation
               const userProfile = user;
-              get('/api/user/admin', { email: user.email }).then((response) => {
-                try {
-                  const { admin, firstName, id, lastName } = response.body;
-                  userProfile.admin = admin;
-                  userProfile.firstName = firstName;
-                  userProfile.keycloakId = id;
-                  userProfile.lastName = lastName;
-                } catch (e) {
-                  userProfile.admin = false;
-                  Raven.captureException(e, {
-                    extra: {
-                      user,
-                    },
-                  });
-                }
-                userProfile.lastName = user.lastName || user.family_name;
-                userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
-                userProfile.username = user.username || user.nickname;
-                initAuthenticated(userProfile, body);
-              });
+              get('/api/user/admin', { email: user.email })
+                .then((response) => {
+                  try {
+                    const {
+                      admin, firstName, id, lastName,
+                    } = response.body;
+                    userProfile.admin = admin;
+                    userProfile.firstName = firstName;
+                    userProfile.keycloakId = id;
+                    userProfile.lastName = lastName;
+                  } catch (e) {
+                    userProfile.admin = false;
+                    Raven.captureException(e, {
+                      extra: {
+                        user,
+                      },
+                    });
+                  }
+                  userProfile.lastName = user.lastName || user.family_name;
+                  userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+                  userProfile.username = user.username || user.nickname;
+                  initAuthenticated(userProfile, body);
+                });
             });
           }
           // eslint-disable-next-line consistent-return

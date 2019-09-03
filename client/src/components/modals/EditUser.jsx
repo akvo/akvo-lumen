@@ -9,9 +9,10 @@ import ModalFooter from './ModalFooter';
 class EditUser extends Component {
   constructor(props) {
     super(props);
+    const { profile } = this.props;
     this.state = {
-      firstName: this.props.profile.firstName,
-      lastName: this.props.profile.lastName,
+      firstName: profile.firstName,
+      lastName: profile.lastName,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleFirstNameChange = this.handleFirstNameChange.bind(this);
@@ -27,11 +28,12 @@ class EditUser extends Component {
   }
 
   handleSubmit() {
+    const { onSubmit, profile } = this.props;
     const user = {
       ...this.state,
-      id: this.props.profile.keycloakId,
+      id: profile.keycloakId,
     };
-    this.props.onSubmit(updateUser(user));
+    onSubmit(updateUser(user));
   }
 
   render() {
@@ -41,19 +43,21 @@ class EditUser extends Component {
       <div className="EditUser">
         <h2>User</h2>
         <form onSubmit={this.handleSubmit}>
-          <label htmlFor="firstNameInput">Given name
+          <label htmlFor="firstNameInput">
+            Given name
             <input
               id="firstNameInput"
               value={firstName}
               onChange={this.handleFirstNameChange}
               type="text"
               placeholder="Given name"
-              autoFocus
               maxLength={127}
             />
           </label>
-          <br /><br />
-          <label htmlFor="lastNameInput">Family name
+          <br />
+          <br />
+          <label htmlFor="lastNameInput">
+            Family name
             <input
               id="lastNameInput"
               value={lastName}
@@ -64,7 +68,8 @@ class EditUser extends Component {
             />
           </label>
         </form>
-        <br /><br />
+        <br />
+        <br />
         <ModalFooter
           leftButton={{
             text: 'Cancel',

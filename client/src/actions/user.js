@@ -28,13 +28,13 @@ export function updateUser(user) {
   return (dispatch) => {
     dispatch(updateUserRequest);
     api.patch('/api/user/me', user)
-    .then((updatedUser) => {
-      const { firstName, lastName } = updatedUser.body;
-      dispatch(updateUserSuccess({ firstName, lastName }));
-    })
-    .catch((error) => {
-      dispatch(showNotification('error', 'Failed to update name.'));
-      dispatch(updateUserFailure(error));
-    });
+      .then((updatedUser) => {
+        const { firstName, lastName } = updatedUser.body;
+        dispatch(updateUserSuccess({ firstName, lastName }));
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to update name.'));
+        dispatch(updateUserFailure(error));
+      });
   };
 }

@@ -31,8 +31,9 @@ class UserMenuPopUp extends React.Component {
   };
 
   handleShowEditUserModal() {
-    this.props.close();
-    this.props.dispatch(showModal('edit-user'));
+    const { close, dispatch } = this.props;
+    close();
+    dispatch(showModal('edit-user'));
   }
 
   render() {
