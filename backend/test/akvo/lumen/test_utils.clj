@@ -171,7 +171,7 @@
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
-(defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [keycloak]}]
+(defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [public-client]}]
   (fn [handler]
     (fn [req]
       (handler (assoc req :jwt-claims {"typ" "Bearer"

@@ -1,6 +1,6 @@
 {:akvo.lumen.component.handler/handler-verify {:middleware ^:replace [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
                                                                       #ig/ref :akvo.lumen.component.handler/common-middleware]}
- :akvo.lumen.test-utils/wrap-jwt-mock {:keycloak #ig/ref :akvo.lumen.component.keycloak/public-client}
+ :akvo.lumen.test-utils/wrap-jwt-mock {:public-client #ig/ref :akvo.lumen.component.keycloak/public-client}
  :akvo.lumen.test-utils/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.component.handler/handler-api {:middleware ^:replace [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
