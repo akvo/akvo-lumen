@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+
+require('./User.scss');
 
 function UserActionSelector({ getUserActions, onChange, user }) {
   const actions = getUserActions(user);
@@ -22,36 +24,41 @@ UserActionSelector.propTypes = {
   getUserActions: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
-    active: PropTypes.bool.isRequired,
+    currentUser: PropTypes.bool.isRequired,
     admin: PropTypes.bool,
-    email: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
-    firstName: PropTypes.string,
-    lastName: PropTypes.string,
   }),
 };
 
 UserActionSelector.defaultProps = {
   user: {
     admin: false,
-    firstName: '',
-    lastName: '',
   },
 };
 
 function User({ getUserActions, invitationMode, onChange, user }) {
-  const { active, admin, email, firstName, lastName } = user;
+  const { currentUser, admin, email, firstName, lastName } = user;
   return (
     <tr>
-      {!invitationMode &&
+      {!invitationMode && (
         <td>
-          {firstName}
-          {active && <span className="isMe"> (me)</span>}
+          {currentUser && (
+            <span className="isMe">
+              <i className="fa fa-user-o userIcon" aria-hidden="true" />
+            </span>
+          )}
         </td>
+      )}
+      {!invitationMode &&
+        <td>{firstName}</td>
       }
-      <td>{lastName}</td>
+      {!invitationMode &&
+        <td>{lastName}</td>
+      }
       <td>{email}</td>
-      {!invitationMode && <td>{admin ? 'Admin' : 'User'}</td>}
+      {!invitationMode &&
+        <td className="UserRole">{admin ? <FormattedMessage id="admin" /> : <FormattedMessage id="user" />}</td>
+      }
       <td>
         <UserActionSelector
           getUserActions={getUserActions}
@@ -68,7 +75,7 @@ User.propTypes = {
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   user: PropTypes.shape({
-    active: PropTypes.bool.isRequired,
+    currentUser: PropTypes.bool.isRequired,
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
     firstName: PropTypes.string,
@@ -79,6 +86,7 @@ User.propTypes = {
 User.defaultProps = {
   user: {
     admin: false,
+    currentUser: false,
     firstName: '',
     lastName: '',
   },

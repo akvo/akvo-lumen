@@ -13,17 +13,20 @@ import { showNotification } from '../../actions/notification';
 require('../entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
 
-function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, users }) {
+function UserList({ currentUserEmail, getUserActions, invitationMode, onChange, users }) {
   return (
     <table>
       <tbody>
         <tr>
           {!invitationMode && (
-            <th>
-              <FormattedMessage id="first_name" />
-            </th>
+            <th />
           )}
-          <th><FormattedMessage id="last_name" /></th>
+          {!invitationMode && (
+            <th><FormattedMessage id="first_name" /></th>
+          )}
+          {!invitationMode && (
+            <th><FormattedMessage id="last_name" /></th>
+          )}
           <th><FormattedMessage id="email" /></th>
           {!invitationMode && (
             <th>
@@ -41,7 +44,7 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, u
             onChange={onChange}
             invitationMode={invitationMode}
             user={{
-              active: email === activeUserEmail,
+              currentUser: email === currentUserEmail,
               admin,
               email,
               id,
@@ -55,7 +58,7 @@ function UserList({ activeUserEmail, getUserActions, invitationMode, onChange, u
 }
 
 UserList.propTypes = {
-  activeUserEmail: PropTypes.string.isRequired,
+  currentUserEmail: PropTypes.string.isRequired,
   getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
@@ -134,16 +137,16 @@ class Users extends Component {
   }
 
   getUserActions(user) {
-    const { active, admin } = user;
+    const { currentUser, admin } = user;
     let actions = [];
     if (this.state.invitationMode) {
       actions = [['revoke', 'Revoke invitation', false]];
     } else {
       actions = [
-        ['delete', 'Delete user', active],
+        ['delete', 'Delete user', currentUser],
       ];
       if (admin) {
-        actions.push(['demote', 'Revoke admin privileges', (!admin || active)]);
+        actions.push(['demote', 'Revoke admin privileges', (!admin || currentUser)]);
       } else {
         actions.push(['promote', 'Enable admin privileges', admin]);
       }
@@ -214,7 +217,7 @@ class Users extends Component {
         />
         <div className="UserList">
           <UserList
-            activeUserEmail={email}
+            currentUserEmail={email}
             getUserActions={this.getUserActions}
             onChange={this.handleUserActionSelect}
             invitationMode={invitationMode}
