@@ -294,7 +294,7 @@
 ;;; KeycloakAgent Component
 ;;;
 
-(defrecord KeycloakAgent [issuer openid-config api-root user-id-cache]
+(defrecord KeycloakAgent [issuer api-root user-id-cache]
   p/KeycloakUserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [headers  (request-headers keycloak)
