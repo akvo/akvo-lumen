@@ -23,8 +23,8 @@ class UserMenuPopUp extends React.Component {
   }
 
   handleClick = (e) => {
-    const { close } = this.props;
-    if (this.node.contains(e.target)) {
+    const { close, buttonRef } = this.props;
+    if (this.node.contains(e.target) || buttonRef.current.contains(e.target)) {
       return;
     }
     close();
@@ -50,6 +50,7 @@ class UserMenuPopUp extends React.Component {
 }
 
 UserMenuPopUp.propTypes = {
+  buttonRef: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
   close: PropTypes.func.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
