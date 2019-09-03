@@ -46,7 +46,7 @@
 
  :akvo.lumen.component.flow/api {:url "https://api.akvotest.org/flow"
                                  :auth0-url "https://api-auth0.akvotest.org/flow"
-                                 :internal-url "https://api-auth0.akvotest.org/flow"
+                                 :internal-url "https://api.akvotest.org/flow"
                                  :internal-api-headers #ig/ref :akvo.lumen.component.flow/api-headers}
 
  :akvo.lumen.endpoint.env/env {:sentry-client-dsn "dev-sentry-client-dsn"
