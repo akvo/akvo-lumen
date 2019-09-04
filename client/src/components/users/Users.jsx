@@ -71,7 +71,7 @@ UserList.propTypes = {
 };
 
 UserList.defaultProps = {
-  invitationMode: false
+  invitationMode: false,
 };
 
 class Users extends Component {
@@ -214,7 +214,7 @@ class Users extends Component {
   render() {
     const { profile } = this.props;
     const { admin, email } = profile;
-    const { 
+    const {
       invitationMode, isActionModalVisible, isInviteModalVisible, invitations, users, userAction,
     } = this.state;
     const actionButtons = this.getUserActionButtons();
