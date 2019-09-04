@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Modal from './Modal';
+import { showModal } from '../actions/activeModal';
+import { every } from 'lodash';
 import Notification from './Notification';
 import IMAGES from '../constants/images';
 
@@ -10,35 +12,48 @@ require('../styles/style.global.scss');
 require('./Main.scss');
 require('fixed-data-table-2/dist/fixed-data-table.css');
 
-function Main({ content, sidebar, notification, loadStatus, env }) {
-  if (loadStatus === 'failed') {
-    const { tenant } = env;
-    return (
-      <div className="Main">
-        <div className="failedToLoadMessage">
-          <div className="message">
-            <div className="msgContainer">
-              <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-              <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
-              <p>Request permission from your organisation admin</p>
+class Main extends Component {
+  componentDidMount() {
+    const {
+      dispatch,
+      profile: { firstName, lastName },
+    } = this.props;
+    if (!every([firstName, lastName], Boolean)) {
+      dispatch(showModal('edit-user'));
+    }
+  }
+  render() {
+    const {
+      content, sidebar, notification, loadStatus, env,
+    } = this.props;
+    if (loadStatus === 'failed') {
+      const { tenant } = env;
+      return (
+        <div className="Main">
+          <div className="failedToLoadMessage">
+            <div className="message">
+              <div className="msgContainer">
+                <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+                <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
+                <p>Request permission from your organisation admin</p>
+              </div>
             </div>
           </div>
+          <div className="Main blur">
+            {sidebar}
+          </div>
         </div>
-        <div className="Main blur">
-          {sidebar}
-        </div>
+      );
+    }
+    return (
+      <div className="Main">
+        {notification && <Notification {...notification} />}
+        {sidebar}
+        {content}
+        <Modal />
       </div>
     );
   }
-
-  return (
-    <div className="Main">
-      {notification && <Notification {...notification} />}
-      {sidebar}
-      {content}
-      <Modal />
-    </div>
-  );
 }
 
 Main.propTypes = {
@@ -47,6 +62,11 @@ Main.propTypes = {
   notification: PropTypes.object,
   loadStatus: PropTypes.string,
   env: PropTypes.object,
+  dispatch: PropTypes.func.isRequired,
+  profile: PropTypes.shape({
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+  }).isRequired,
 };
 
 function mapStateToProps(state) {
@@ -55,6 +75,7 @@ function mapStateToProps(state) {
     notification: state.notification,
     modalVisible: state.activeModal != null,
     env: state.env,
+    profile: state.profile,
   };
 }
 
