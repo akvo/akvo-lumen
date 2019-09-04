@@ -9,7 +9,6 @@ import InviteUser from './InviteUser';
 import User from './User';
 import * as api from '../../utilities/api';
 import { showNotification } from '../../actions/notification';
-import { false } from 'datalib/src/util';
 
 require('../entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
