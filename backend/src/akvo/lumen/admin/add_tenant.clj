@@ -1,8 +1,8 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
-  ENCRYPTION_KEY, KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  LUMEN_ENCRYPTION_KEY, LUMEN_KEYCLOAK_URL, LUMEN_KEYCLOAK_CLIENT_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
   
-  ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
+  LUMEN_ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
   encrypting the db_uri which can be found in the lumen secret in K8s.
 
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
@@ -17,7 +17,7 @@
   > Realms > Akvo > Clients > akvo-lumen-confidential > Credentials > Secret.
   
   Use this as follow
-  $ env ENCRYPTION_KEY=*** \\
+  $ env LUMEN_ENCRYPTION_KEY=*** \\
         LUMEN_KEYCLOAK_URL=https://*** LUMEN_KEYCLOAK_CLIENT_SECRET=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
@@ -148,7 +148,7 @@
                 "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
     (util/exec! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
-    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:encryption-key env) tenant-db-uri)
+    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:lumen-encryption-key env) tenant-db-uri)
                                          :label label :title title})
     (migrate-tenant tenant-db-uri)))
 
@@ -216,7 +216,7 @@
      :url url}))
 
 (defn check-env-vars []
-  (assert (:encryption-key env) (error-msg "Specify ENCRYPTION_KEY env var"))
+  (assert (:lumen-encryption-key env) (error-msg "Specify LUMEN_ENCRYPTION_KEY env var"))
   (assert (:lumen-keycloak-url env) (error-msg "Specify LUMEN_KEYCLOAK_URL env var"))
   (assert (:lumen-keycloak-client-secret env)
           (do
