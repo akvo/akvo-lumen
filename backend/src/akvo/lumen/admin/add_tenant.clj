@@ -126,9 +126,9 @@
                                     :user tenant
                                     :password tenant-password})
         tenant-db-uri-with-superuser (util/db-uri {:database tenant})]
-    (util/exec! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;"
+    (util/exec-no-transact! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;"
                 tenant tenant-password)
-    (util/exec! db-uri
+    (util/exec-no-transact! db-uri
                 (str "CREATE DATABASE %1$s "
                      "WITH OWNER = %1$s "
                      "TEMPLATE = template0 "
@@ -136,13 +136,13 @@
                      "LC_COLLATE = 'en_US.UTF-8' "
                      "LC_CTYPE = 'en_US.UTF-8';")
                 tenant)
-    (util/exec! tenant-db-uri-with-superuser
+    (util/exec-no-transact! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
-    (util/exec! tenant-db-uri-with-superuser
+    (util/exec-no-transact! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-    (util/exec! tenant-db-uri-with-superuser
+    (util/exec-no-transact! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-    (util/exec! tenant-db-uri-with-superuser
+    (util/exec-no-transact! tenant-db-uri-with-superuser
                 "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
     (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:lumen-encryption-key env) tenant-db-uri)
                                          :label label :title title})
