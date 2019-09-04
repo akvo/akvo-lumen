@@ -27,9 +27,11 @@
 
 (defn fetch-openid-configuration
   "Get the openid configuration"
-  ([issuer req-opts]
-   (let [url (format "%s/.well-known/openid-configuration" issuer)]
-     (-> (http.client/get* url (merge http-client-req-defaults req-opts)) :body json/decode))))
+  [issuer req-opts]
+  (let [url (format "%s/.well-known/openid-configuration" issuer)
+        res (-> (http.client/get* url (merge http-client-req-defaults req-opts)) :body json/decode)]
+    (log/info "Successfully got openid-config from provider.")
+    res))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
@@ -387,14 +389,10 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
-  (let [issuer (:issuer public-client)
-        connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
-        openid-config      (fetch-openid-configuration issuer {})]
-    (log/info "Successfully got openid-config from provider.")
-    (assoc (init-keycloak (assoc public-client :credentials credentials :max-user-ids-cache max-user-ids-cache))
-           :connection-manager connection-manager
-           :openid-config openid-config
-           :monitoring monitoring)))
+  (assoc (init-keycloak (assoc public-client :credentials credentials :max-user-ids-cache max-user-ids-cache))
+         :connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
+         :openid-config (fetch-openid-configuration (:issuer public-client) {})
+         :monitoring monitoring))
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/authorization-service  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))
