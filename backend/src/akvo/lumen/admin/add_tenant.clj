@@ -27,6 +27,7 @@
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.http.client :as http.client]
+            [akvo.lumen.migrate :as migrate]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [conform-email squuid]]
@@ -115,11 +116,6 @@
 ;;; Database
 ;;;
 
-(defn migrate-tenant [db-uri]
-  (ragtime.repl/migrate
-   {:datastore (ragtime.jdbc/sql-database db-uri)
-    :migrations (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants")}))
-
 (defn setup-database
   [label title]
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
@@ -150,7 +146,8 @@
                 "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
     (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:lumen-encryption-key env) tenant-db-uri)
                                          :label label :title title})
-    (migrate-tenant tenant-db-uri)))
+    (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
+                        (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants"))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
