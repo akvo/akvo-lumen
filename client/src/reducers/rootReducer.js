@@ -7,10 +7,7 @@ import activeModal from './activeModal';
 import notification from './notification';
 import print from './print';
 import locale from './locale';
-
-function profile(state = {}) {
-  return state;
-}
+import profile from './profile';
 
 function env(state = {}) {
   return state;
@@ -22,11 +19,11 @@ const rootReducer = combineReducers({
   library,
   collections,
   activeModal,
-  profile,
   env,
   notification,
   print,
   locale,
+  profile,
 });
 
 export default rootReducer;

@@ -6,6 +6,7 @@ import IntlWrapper from './IntlWrapper';
 import CreateDataset from '../components/modals/CreateDataset';
 import CreateCollection from '../components/modals/CreateCollection';
 import DeleteCollection from '../components/modals/DeleteCollection';
+import EditUser from '../components/modals/EditUser';
 import { hideModal } from '../actions/activeModal';
 
 require('./Modal.scss');
@@ -73,6 +74,13 @@ class Modal extends Component {
             onCancel={this.handleOnCancel}
             onSubmit={this.handleOnSubmit}
             collection={this.props.activeModal.collection || {}}
+          />
+        );
+      case 'edit-user':
+        return (
+          <EditUser
+            onCancel={this.handleOnCancel}
+            onSubmit={this.handleOnSubmit}
           />
         );
       default: return null;

@@ -2,6 +2,7 @@
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.lib :as lib]
+            [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.keycloak :as keycloak]
             [integrant.core :as ig]))
@@ -14,11 +15,22 @@
   (and (contains? body "admin")
        (not (get body "admin"))))
 
+(defn- change-name? [body]
+  (contains? body "name"))
+
 (defn routes [{:keys [keycloak] :as opts}]
-  [["/user/admin" {:get {:handler (fn [{tenant :tenant
-                                        query-params :query-params}]
-                                    (lib/ok (select-keys (user/user keycloak tenant (get query-params "email"))
-                                                         [:email :admin])))}}]
+  [["/user"
+    ["/me" {:patch {:parameters {:body map?}
+                    :handler (fn [{tenant :tenant
+                                   jwt-claims :jwt-claims
+                                   {:strs [firstName id lastName]} :body
+                                   :as request}]
+                               (user/change-names keycloak tenant jwt-claims id
+                                                  firstName lastName))}}]
+    ["/admin" {:get {:handler (fn [{tenant :tenant
+                                    query-params :query-params}]
+                                (let [u (user/user keycloak tenant (get query-params "email"))]
+                                  (lib/ok (select-keys u [:admin :email :firstName :id :lastName]))))}}]]
    ["/admin/users"
     ["" {:get {:handler (fn [{tenant :tenant}]
                           (user/users keycloak tenant))}}]
@@ -33,7 +45,7 @@
                                       (user/demote-user-from-admin keycloak tenant jwt-claims id)
                                       (promote-user? body)
                                       (user/promote-user-to-admin keycloak tenant jwt-claims id)
-                                      :else (http/not-implemented)))}
+                                      :else (http/not-implemented {})))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
                                          jwt-claims :jwt-claims
