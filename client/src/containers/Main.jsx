@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { every } from 'lodash';
 import Modal from './Modal';
 import { showModal } from '../actions/activeModal';
-import { every } from 'lodash';
 import Notification from './Notification';
 import IMAGES from '../constants/images';
 
