@@ -2,6 +2,7 @@
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.protocols :as p]
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [integrant.core :as ig]))
@@ -44,7 +45,7 @@
                                       (user/demote-user-from-admin authorizer tenant jwt-claims id)
                                       (promote-user? body)
                                       (user/promote-user-to-admin authorizer tenant jwt-claims id)
-                                      :else http/not-implemented {}))}
+                                      :else (http/not-implemented {})))}
                  :delete {:parameters {:path-params {:id string?}}
                           :handler (fn [{tenant :tenant
                                          jwt-claims :jwt-claims
