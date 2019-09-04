@@ -15,6 +15,7 @@
   (and (contains? body "admin")
        (not (get body "admin"))))
 
+
 (defn- change-name? [body]
   (contains? body "name"))
 

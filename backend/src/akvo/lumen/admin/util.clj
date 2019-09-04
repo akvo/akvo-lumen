@@ -7,7 +7,7 @@
 
 (def http-client-req-defaults (http.client/req-opts 200000))
 
-(defn exec!
+(defn exec-no-transact!
   "Execute SQL expression"
   [db-uri format-str & args]
   (jdbc/execute! db-uri

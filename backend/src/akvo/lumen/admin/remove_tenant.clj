@@ -113,9 +113,9 @@
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
         lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
         kc (util/create-keycloak)]
-    (util/exec! lumen-db-uri "DROP DATABASE %s" tenant)
-    (util/exec! lumen-db-uri "DROP ROLE %s" tenant)
-    (util/exec! lumen-db-uri "DELETE FROM tenants WHERE label='%s'" label)
+    (util/exec-no-transact! lumen-db-uri "DROP DATABASE %s" tenant)
+    (util/exec-no-transact! lumen-db-uri "DROP ROLE %s" tenant)
+    (util/exec-no-transact! lumen-db-uri "DELETE FROM tenants WHERE label='%s'" label)
     (cleanup-keycloak kc label)))
 
 (defn -main [label]

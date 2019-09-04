@@ -18,5 +18,5 @@
                                   ["SELECT label FROM tenants"]))]
       (doseq [label labels]
         (remove-tenant label))
-      (util/exec! db-uri "DROP DATABASE lumen")
-      (util/exec! db-uri "DROP ROLE lumen")))
+      (util/exec-no-transact! db-uri "DROP DATABASE lumen")
+      (util/exec-no-transact! db-uri "DROP ROLE lumen")))
