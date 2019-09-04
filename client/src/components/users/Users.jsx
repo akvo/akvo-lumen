@@ -74,6 +74,22 @@ UserList.defaultProps = {
   invitationMode: false,
 };
 
+function byRoleAndFirstName(a, b) {
+  if (a.admin === true && b.admin === false) {
+    return -1;
+  }
+  if (a.admin === false && b.admin === true) {
+    return 1;
+  }
+  if (a.firstName < b.firstName) {
+    return -1;
+  }
+  if (a.firstName > b.firstName) {
+    return 1;
+  }
+  return 0;
+}
+
 class Users extends Component {
   constructor(props) {
     super(props);
@@ -120,7 +136,10 @@ class Users extends Component {
   getUsers() {
     const { dispatch } = this.props;
     api.get('/api/admin/users')
-      .then(({ body: { users } }) => this.setState({ users }))
+      .then(({ body: { users } }) => {
+        users.sort(byRoleAndFirstName);
+        this.setState({ users });
+      })
       .catch(() => {
         dispatch(showNotification('error', 'Failed to fetch users.'));
       });
@@ -136,7 +155,7 @@ class Users extends Component {
   }
 
   getUserActionButtons() {
-    const invitationMode = this.state.invitationMode;
+    const { invitationMode } = this.state;
     const buttons = [
       {
         buttonText: invitationMode ? 'Manage users' : 'Manage invitations',
