@@ -10,15 +10,15 @@
 
 (def auth-data (juxt :url :client-id))
 
-(defn handler [{:keys [keycloak flow-api auth0
+(defn handler [{:keys [keycloak-public-client flow-api auth0-public-client
                        piwik-site-id sentry-client-dsn] :as opts}]
   (fn [{tenant :tenant
         query-params :query-params
         :as request}]
     (let [auth-type (get query-params "auth" "keycloak")
           [auth-url auth-client-id] (condp = auth-type
-                                      "keycloak" (auth-data keycloak)
-                                      "auth0" (auth-data auth0))]
+                                      "keycloak" (auth-data keycloak-public-client)
+                                      "auth0" (auth-data auth0-public-client))]
       (if (s/valid? ::auth-type auth-type)
         (response/response
          (cond-> {"authClientId" auth-client-id
@@ -43,15 +43,15 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
   (routes opts))
 
-(s/def ::keycloak :akvo.lumen.component.keycloak/data)
-(s/def ::auth0 :akvo.lumen.component.auth0/data)
+(s/def ::keycloak-public-client :akvo.lumen.component.keycloak/public-client)
+(s/def ::auth0-public-client :akvo.lumen.component.auth0/public-client)
 (s/def ::flow-api :akvo.lumen.component.flow/config)
 (s/def ::sentry-client-dsn string?)
 (s/def ::piwik-site-id string?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
-  (s/keys :req-un [::keycloak
-                   ::auth0
+  (s/keys :req-un [::keycloak-public-client
+                   ::auth0-public-client
                    ::flow-api
                    ::sentry-client-dsn
                    ::piwik-site-id]))

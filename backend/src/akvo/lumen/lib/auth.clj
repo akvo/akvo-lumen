@@ -195,7 +195,6 @@
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 
-
 (defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api monitoring] :as opts}]
   (wrap-auth-datasets tenant-manager flow-api (:collector monitoring)))
 

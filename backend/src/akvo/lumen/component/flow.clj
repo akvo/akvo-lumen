@@ -57,10 +57,9 @@
 (s/def ::url string?)
 (s/def ::auth0-url string?)
 (s/def ::internal-url string?)
-(s/def ::keycloak :akvo.lumen.component.keycloak/data)
 (s/def ::api-headers fn?)
 (s/def ::internal-api-headers fn?)
-(s/def ::config (s/keys :req-un [::url ::auth0-url ::internal-url ::keycloak ::api-headers ::internal-api-headers]))
+(s/def ::config (s/keys :req-un [::url ::auth0-url ::internal-url ::api-headers ::internal-api-headers]))
 
 (defmethod ig/pre-init-spec ::api [_]
   ::config)

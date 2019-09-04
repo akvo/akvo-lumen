@@ -347,6 +347,7 @@
                                           "emailVerified" false
                                           "enabled" true})
                                :headers headers})))
+
   (demote-user-from-admin
     [this tenant author-claims user-id]
     (do-demote-user-from-admin this tenant author-claims user-id))
@@ -366,6 +367,7 @@
                                                   "type" "password"
                                                   "value" tmp-password})
                               :headers headers})))
+
   (remove-user
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
@@ -391,10 +393,9 @@
 (defn- init-keycloak [{:keys [credentials url realm max-user-ids-cache]}]
   (map->KeycloakAgent {:api-root      (format "%s/admin/realms/%s" url realm)
                        :credentials   credentials
-                       :issuer        (format "%s/realms/%s" url realm)
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/data  [_ {:keys [url realm] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/public-client  [_ {:keys [url realm] :as opts}]
   (try
     (let [issuer (str url "/realms/" realm)
           rsa-key (-> (str issuer "/protocol/openid-connect/certs")
@@ -412,25 +413,25 @@
 (s/def ::client-id string?)
 (s/def ::realm string?)
 
-(s/def ::data (s/keys :req-un [::url
-                               ::realm
-                               ::client-id]))
+(s/def ::public-client (s/keys :req-un [::url
+                                        ::realm
+                                        ::client-id]))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/data [_]
-  ::data)
+(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/public-client [_]
+  ::public-client)
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/keycloak  [_ {:keys [credentials data max-user-ids-cache monitoring] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
-  (let [{:keys [issuer openid-config api-root] :as this} (init-keycloak (assoc data :credentials credentials :max-user-ids-cache max-user-ids-cache))
-        connection-manager                               (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
-        openid-config                                    (fetch-openid-configuration issuer {})]
+  (let [issuer (:issuer public-client)
+        connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
+        openid-config      (fetch-openid-configuration issuer {})]
     (log/info "Successfully got openid-config from provider.")
-    (assoc this
+    (assoc (init-keycloak (assoc public-client :credentials credentials :max-user-ids-cache max-user-ids-cache))
            :connection-manager connection-manager
            :openid-config openid-config
            :monitoring monitoring)))
 
-(defmethod ig/halt-key! :akvo.lumen.component.keycloak/keycloak  [_ opts]
+(defmethod ig/halt-key! :akvo.lumen.component.keycloak/authorization-service  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))
   (http.client/shutdown-manager (:connection-manager opts)))
 
@@ -443,10 +444,7 @@
 
 (s/def ::max-user-ids-cache pos-int?)
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
-(s/def ::config (s/keys :req-un [::data ::credentials ::max-user-ids-cache ::monitoring]))
+(s/def ::config (s/keys :req-un [::public-client ::credentials ::max-user-ids-cache ::monitoring]))
 
-(s/def ::keycloak (s/and (partial satisfies? p/UserManagement)
-                         (partial satisfies? p/Authorizer)))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/keycloak [_]
+(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)
