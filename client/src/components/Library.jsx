@@ -70,8 +70,9 @@ class Library extends Component {
   }
 
   componentDidMount() {
+    const { dispatch } = this.props;
+    dispatch(fetchLibrary());
     trackPageView('Library');
-    this.props.dispatch(fetchLibrary());
   }
 
   componentWillReceiveProps(nextProps) {

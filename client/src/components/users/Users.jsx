@@ -74,18 +74,24 @@ UserList.defaultProps = {
   invitationMode: false,
 };
 
-function byRoleAndFirstName(a, b) {
-  if (a.admin === true && b.admin === false) {
-    return -1;
-  }
-  if (a.admin === false && b.admin === true) {
+function compareByRoleAndNames(a, b) {
+  if (a.admin < b.admin) {
     return 1;
   }
-  if (a.firstName < b.firstName) {
+  if (a.admin > b.admin) {
     return -1;
   }
-  if (a.firstName > b.firstName) {
+  if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) {
     return 1;
+  }
+  if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) {
+    return -1;
+  }
+  if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) {
+    return 1;
+  }
+  if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) {
+    return -1;
   }
   return 0;
 }
@@ -137,7 +143,7 @@ class Users extends Component {
     const { dispatch } = this.props;
     api.get('/api/admin/users')
       .then(({ body: { users } }) => {
-        users.sort(byRoleAndFirstName);
+        users.sort(compareByRoleAndNames);
         this.setState({ users });
       })
       .catch(() => {
