@@ -194,15 +194,14 @@
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
   [authorizer label email url]
-  (let [{:keys [api-root] :as kc} (util/create-keycloak)
-        headers (keycloak/request-headers authorizer)
+  (let [headers (keycloak/request-headers authorizer)
         lumen-group-id (-> (keycloak/root-group authorizer headers)
                            (get "id"))
         tenant-id (keycloak/create-group authorizer headers lumen-group-id (format "akvo:lumen:%s" label) label)
         tenant-admin-id (keycloak/create-group authorizer headers tenant-id (format "akvo:lumen:%s:admin" label) "admin")
         {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
-    (add-tenant-urls-to-clients kc headers url)
-    (keycloak/add-user-to-group headers api-root user-id tenant-admin-id)
+    (add-tenant-urls-to-clients authorizer headers url)
+    (keycloak/add-user-to-group headers (:api-root authorizer) user-id tenant-admin-id)
     (assoc user-rep :url url)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
