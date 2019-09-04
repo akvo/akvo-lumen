@@ -30,6 +30,7 @@
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.util :refer [conform-email squuid]]
+            [akvo.lumen.protocols :as p]
             [cheshire.core :as json]
             [clojure.java.browse :as browse]
             [clojure.java.jdbc :as jdbc]
@@ -156,96 +157,26 @@
 ;;; Keycloak
 ;;;
 
-(defn root-group-id
-  "Returns the id of group on path akvo/lumen"
-  [headers api-root]
-  (-> (http.client/get* (format "%s/group-by-path/%s" api-root "akvo/lumen")
-                        (merge util/http-client-req-defaults {:headers headers}))
-      :body json/decode (get "id")))
-
-(defn create-group
-  [headers api-root root-group-id role group-name]
-  (http.client/post* (format "%s/roles" api-root)
-                     (merge
-                      util/http-client-req-defaults 
-                      {:body (json/encode {"name" role})
-                       :headers headers}))
-  (let [new-group-id (-> (http.client/post*
-                          (format "%s/groups/%s/children"
-                                  api-root root-group-id)
-                          (merge util/http-client-req-defaults
-                                 {:body (json/encode {"name" group-name})
-                                  :headers headers}))
-                         :body json/decode (get "id"))
-        available-roles (-> (http.client/get*
-                             (format "%s/groups/%s/role-mappings/realm/available"
-                                     api-root root-group-id)
-                             (merge util/http-client-req-defaults {:headers headers}))
-                            :body json/decode)
-        role-id (-> (filter #(= role (get % "name"))
-                            available-roles)
-                    first
-                    (get "id"))
-        pair-resp (http.client/post*
-                   (format "%s/groups/%s/role-mappings/realm" api-root new-group-id)
-                   (merge util/http-client-req-defaults
-                          {:body (json/encode [{"id" role-id
-                                                "name" role
-                                                "scopeParamRequired" false
-                                                "composite" false
-                                                "clientRole" false
-                                                "containerId" "Akvo"}])
-                           :headers headers}))]
-    new-group-id))
-
 (defn create-new-user
   "Creates a new user and return a map containing email, and
    new user-id and temporary password."
-  [headers api-root email]
+  [authorizer headers email]
   (let [tmp-password (random-url-safe-string 6)
-        user-id (-> (http.client/post* (format "%s/users" api-root)
-                                       (merge util/http-client-req-defaults
-                                              {:body (json/encode
-                                                      {"username" email
-                                                       "email" email
-                                                       "emailVerified" false
-                                                       "enabled" true})
-                                               :headers headers}))
+        user-id (-> (p/create-user authorizer headers email)
                     (get-in [:headers "Location"])
                     (s/split #"/")
                     last)]
-    (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)
-                      (merge util/http-client-req-defaults
-                             {:body (json/encode {"temporary" true
-                                                  "type" "password"
-                                                  "value" tmp-password})
-                              :headers headers}))
+    (p/reset-password authorizer headers user-id tmp-password)
     {:email email
      :user-id user-id
      :tmp-password tmp-password}))
 
 (defn user-representation
-  [headers api-root email]
-  (if-let [user (keycloak/fetch-user-by-email headers api-root email)]
+  [authorizer headers email]
+  (if-let [user (keycloak/fetch-user-by-email headers (:api-root authorizer) email)]
     {:email email
      :user-id (get user "id")}
-    (create-new-user headers api-root email)))
-
-
-(defn fetch-client
-  [headers api-root client-id]
-  (-> (http.client/get* (format "%s/clients" api-root)
-                        (merge util/http-client-req-defaults
-                               {:query-params {"clientId" client-id}
-                                :headers headers}))
-      :body json/decode first))
-
-(defn update-client
-  [headers api-root {:strs [id] :as client}]
-  (http.client/put* (format "%s/clients/%s" api-root id)
-                    (merge util/http-client-req-defaults
-                           {:body (json/encode client)
-                            :headers headers})))
+    (create-new-user authorizer headers email)))
 
 (defn add-tenant-urls-to-client
   [client url]
@@ -254,27 +185,22 @@
       (update "redirectUris" conj (format "%s/*" url))))
 
 (defn add-tenant-urls-to-clients
-  [{:keys [api-root]} headers url]
-  (let [confidential-client (fetch-client headers api-root "akvo-lumen-confidential")
-        public-client (fetch-client headers api-root "akvo-lumen")]
-    (update-client headers api-root
-                   (add-tenant-urls-to-client confidential-client url))
-    (update-client headers api-root
-                   (add-tenant-urls-to-client public-client url))))
+  [authorizer headers url]
+  (let [confidential-client (keycloak/fetch-client authorizer headers "akvo-lumen-confidential")
+        public-client (keycloak/fetch-client authorizer headers "akvo-lumen")]
+    (keycloak/update-client authorizer headers (add-tenant-urls-to-client confidential-client url))
+    (keycloak/update-client authorizer headers (add-tenant-urls-to-client public-client url))))
 
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
-  [label email url]
+  [authorizer label email url]
   (let [{:keys [api-root] :as kc} (util/create-keycloak)
-        headers (keycloak/request-headers kc)
-        lumen-group-id (root-group-id headers api-root)
-        tenant-id (create-group headers api-root lumen-group-id
-                                (format "akvo:lumen:%s" label) label)
-        tenant-admin-id (create-group headers api-root tenant-id
-                                      (format "akvo:lumen:%s:admin" label)
-                                      "admin")
-        {:keys [user-id email tmp-password] :as user-rep}
-        (user-representation headers api-root email)]
+        headers (keycloak/request-headers authorizer)
+        lumen-group-id (-> (keycloak/root-group authorizer headers)
+                           (get "id"))
+        tenant-id (keycloak/create-group authorizer headers lumen-group-id (format "akvo:lumen:%s" label) label)
+        tenant-admin-id (keycloak/create-group authorizer headers tenant-id (format "akvo:lumen:%s:admin" label) "admin")
+        {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
     (add-tenant-urls-to-clients kc headers url)
     (keycloak/add-user-to-group headers api-root user-id tenant-admin-id)
     (assoc user-rep :url url)))
@@ -319,10 +245,10 @@
 (defn -main [url title email]
   (try
     (check-env-vars)
-    (admin-system)
-    #_(let [{:keys [email label title url]} (conform-input url title email)]
+    (let [{:keys [email label title url]} (conform-input url title email)
+          authorizer (:akvo.lumen.component.keycloak/authorization-service (admin-system))]
       (setup-database label title)
-      (let [user-creds (setup-tenant-in-keycloak label email url)]
+      (let [user-creds (setup-tenant-in-keycloak authorizer label email url)]
         (println "Credentials:")
         (pprint user-creds)
         (println "Remember to add a new plan to the new tenant.")))
