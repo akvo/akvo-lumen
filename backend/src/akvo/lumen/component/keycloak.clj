@@ -462,9 +462,7 @@
 
 (s/def ::max-user-ids-cache pos-int?)
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
-(s/def ::config (s/keys :req-un [::public-client ::credentials ::max-user-ids-cache]
-                        ;; monitoring is so far used in allowed-paths functionality so not injected in admin tasks yet
-                        :opt-un [::monitoring]))
+(s/def ::config (s/keys :req-un [::public-client ::credentials ::max-user-ids-cache ::monitoring]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)

@@ -232,9 +232,9 @@
 (defn admin-system []
   (let [conf (-> (config/construct "akvo/lumen/config.edn")
                  (select-keys [:akvo.lumen.component.keycloak/authorization-service
-                               :akvo.lumen.component.keycloak/public-client])
-                 (update :akvo.lumen.component.keycloak/authorization-service dissoc :monitoring)
-                 )]
+                               :akvo.lumen.component.keycloak/public-client
+                               :akvo.lumen.monitoring/dropwizard-registry
+                               :akvo.lumen.monitoring/collector]))]
     (pprint conf)
     (ig/load-namespaces conf)
     (ig/init conf)))
