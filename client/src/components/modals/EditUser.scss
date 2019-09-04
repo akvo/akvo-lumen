@@ -1,0 +1,21 @@
+.EditUser {
+  
+  .EditUserForms {
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+
+    div {
+      margin-bottom: 0.5rem;
+    }
+
+    label, input {
+      padding: 0.25rem;
+    }
+      
+    input {
+      width: 20rem;
+      max-width: 60%;
+      margin-left: 0.5rem;
+    }
+  }
+}

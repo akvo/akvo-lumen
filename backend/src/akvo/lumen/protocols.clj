@@ -14,7 +14,7 @@
 (defprotocol SendEmail
   (send-email [this recipients email] "Send email"))
 
-(defprotocol KeycloakUserManagement
+(defprotocol UserManagement
   (add-user-with-email
     [this tenant-label email]
     "Add user to tenant")
@@ -31,6 +31,9 @@
     [this tenant author-claims user-id]
     "Promote existing tenant member to admin")
 
+  (change-names
+    [this tenant author-claims user-id first-name last-name])
+
   (reset-password
     [this headers user-id tmp-password]
     "Set temporary user password")
@@ -42,7 +45,7 @@
   (user
     [this email tenant]
     "get user details")
-  
+
   (user?
     [this email]
     "Predicate to see if the email has a user in KC")
@@ -121,5 +124,5 @@
     'Refactor api/collections payload'"))
 
 
-(s/def ::authorizer (s/and (partial satisfies? KeycloakUserManagement)
+(s/def ::authorizer (s/and (partial satisfies? UserManagement)
                            (partial satisfies? Authorizer)))

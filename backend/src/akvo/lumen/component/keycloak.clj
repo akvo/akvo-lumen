@@ -232,13 +232,24 @@
                                 (merge http-client-req-defaults
                                        {:headers headers}))))
 
+(defn change-user-representation
+  "Returns status code from Keycloak response."
+  [headers api-root user-id payload]
+  (http.client/put* (format "%s/users/%s" api-root user-id)
+                    (merge http-client-req-defaults
+                           {:headers headers
+                            :body    (json/encode payload)})))
+
+(defn patch-names
+  [headers api-root user-id first-name last-name]
+  (:status (change-user-representation headers api-root user-id
+                                       {"firstName" first-name
+                                        "lastName" last-name})))
+
 (defn set-user-have-verified-email
   "Returns status code from Keycloak response."
-  [headers api-root user-id]
-  (:status (http.client/put* (format "%s/users/%s" api-root user-id)
-                             (merge http-client-req-defaults
-                                    {:body    (json/encode {"emailVerified" true})
-                                     :headers headers}))))
+  [headers api-root user-id ]
+  (:status (change-user-representation headers api-root user-id {"emailVerified" true})))
 
 (defn do-promote-user-to-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
@@ -257,7 +268,7 @@
         (lib/ok (fetch-user-by-id headers api-root tenant user-id))
         (do
           (println (format "Tried to promote user: %s" user-id))
-          (lib/internal-server-error))))))
+          (lib/internal-server-error {}))))))
 
 (defn do-demote-user-from-admin
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
@@ -276,7 +287,27 @@
         (lib/ok (fetch-user-by-id headers api-root tenant user-id))
         (do
           (println (format "Tried to demote user: %s" user-id))
-          (lib/internal-server-error))))))
+          (lib/internal-server-error {}))))))
+
+(defn change-names
+  [{:keys [api-root] :as keycloak} tenant claims user-id first-name last-name]
+  (let [headers (request-headers keycloak)
+        keycloak-user (fetch-user-by-id headers api-root tenant user-id)
+        keycloak-user-email (get keycloak-user "email")
+        claims-user-email (get claims "email")]
+    (if (= keycloak-user-email claims-user-email)
+      (if (= (patch-names headers api-root user-id first-name last-name) 204)
+        (lib/ok (fetch-user-by-id headers api-root tenant user-id))
+        (let [log-data {:jwt-claims-email claims-user-email
+                        :keycloak-user-email keycloak-user-email
+                        :tenant tenant
+                        :user user-id}]
+          (log/error ::change-names-email-missmatch
+                     "Email from Keycloak and JWT claims did not match" log-data)
+          (lib/bad-request {:id user-id
+                            :error "Could not update name"})))
+      (lib/not-authorized {:id user-id
+                           :message "Email missmatch"}))))
 
 (defn do-remove-user
   [{:keys [api-root] :as keycloak} tenant author-claims user-id]
@@ -295,7 +326,7 @@
         (lib/ok {})
         (do
           (println (format "Tried to remove user: %s" user-id))
-          (lib/internal-server-error))))))
+          (lib/internal-server-error {}))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; API Authorization
@@ -352,7 +383,7 @@
 ;;;
 
 (defrecord KeycloakAgent [api-root credentials user-id-cache]
-  p/KeycloakUserManagement
+  p/UserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [headers  (request-headers keycloak)
           user-id  (get (fetch-user-by-email headers api-root email)
@@ -368,10 +399,10 @@
     (http.client/post* (format "%s/users" api-root)
                        (merge http-client-req-defaults
                               {:body    (json/encode
-                                         {"username"      email
-                                          "email"         email
+                                         {"username" email
+                                          "email" email
                                           "emailVerified" false
-                                          "enabled"       true})
+                                          "enabled" true})
                                :headers headers})))
 
   (demote-user-from-admin
@@ -382,12 +413,16 @@
     [this tenant author-claims user-id]
     (do-promote-user-to-admin this tenant author-claims user-id))
 
+  (change-names
+    [this tenant author-claims user-id first-name last-name]
+    (change-names this tenant author-claims user-id first-name last-name))
+
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
     (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)
                       (merge http-client-req-defaults
-                             {:body    (json/encode {"temporary" true
-                                                     "type"      "password"
-                                                     "value"     tmp-password})
+                             {:body (json/encode {"temporary" true
+                                                  "type" "password"
+                                                  "value" tmp-password})
                               :headers headers})))
 
   (remove-user
@@ -398,13 +433,13 @@
     (let [headers (request-headers keycloak)
           user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")]
       (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
-  
+
   (user? [keycloak email]
     (let [headers (request-headers keycloak)]
       (not (nil? (fetch-user-by-email headers
                                       (:api-root keycloak)
                                       email)))))
-  
+
   (users [this tenant-label]
     (tenant-members this tenant-label))
 
@@ -448,6 +483,7 @@
          :connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
          :openid-config (fetch-openid-configuration (:issuer public-client) {})
          :monitoring monitoring))
+
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/authorization-service  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))

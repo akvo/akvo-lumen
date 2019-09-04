@@ -47,6 +47,13 @@
         text-overflow: ellipsis;
         width: 100px;
     }
+    .overflow {
+        border: 0.1rem solid $lightBlueGrey;
+        @include border-radius(3px);
+        padding: 0.5rem;
+        margin: 0.25rem 0.5rem;
+    }
+
 }
 
 .ConfirmUserActionModal, .InviteUserModal {

@@ -127,11 +127,19 @@ function dispatchOnMode() {
               if (err2) {
                 throw err2;
               }
-              // Now you have the user's information
+              // Now you have the user's infomation
               const userProfile = user;
-              get('/api/user/admin', { email: user.email }).then((response) => {
+              get('/api/user/admin', {
+                email: user.email,
+              }).then((response) => {
                 try {
-                  userProfile.admin = response.body.admin;
+                  const {
+                    admin, firstName, id, lastName,
+                  } = response.body;
+                  userProfile.admin = admin;
+                  userProfile.firstName = firstName;
+                  userProfile.keycloakId = id;
+                  userProfile.lastName = lastName;
                 } catch (e) {
                   userProfile.admin = false;
                   Raven.captureException(e, {
@@ -140,7 +148,6 @@ function dispatchOnMode() {
                     },
                   });
                 }
-                userProfile.firstName = user.firstName || user.given_name;
                 userProfile.lastName = user.lastName || user.family_name;
                 userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
                 userProfile.username = user.username || user.nickname;
@@ -155,4 +162,3 @@ function dispatchOnMode() {
 }
 
 dispatchOnMode();
-
