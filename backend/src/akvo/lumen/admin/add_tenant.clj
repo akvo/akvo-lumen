@@ -25,7 +25,7 @@
   "
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.config :refer [error-msg]]
+            [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
@@ -37,6 +37,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [environ.core :refer [env]]
+            [integrant.core :as ig]
             [ragtime.jdbc]
             [ragtime.repl])
   (:import java.net.URL))
@@ -291,22 +292,35 @@
 
 (defn check-env-vars []
   (assert (:encryption-key env) (error-msg "Specify ENCRYPTION_KEY env var"))
-  (assert (:kc-url env) (error-msg "Specify KC_URL env var"))
-  (assert (:kc-secret env)
+  (assert (:lumen-keycloak-url env) (error-msg "Specify LUMEN_KEYCLOAK_URL env var"))
+  (assert (:lumen-keycloak-client-secret env)
           (do
             (browse/browse-url
              (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
-            (error-msg "Specify KC_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
+            (error-msg "Specify LUMEN_KEYCLOAK_CLIENT_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
   (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
   (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
   (assert (:pg-user env) (error-msg "Specify PG_USER env var"))
   (when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
+(defn admin-system []
+  (let [conf (-> (config/construct "akvo/lumen/config.edn")
+                 (select-keys [:akvo.lumen.component.keycloak/authorization-service
+                               :akvo.lumen.component.keycloak/public-client])
+                 (update :akvo.lumen.component.keycloak/authorization-service dissoc :monitoring)
+                 )]
+    (pprint conf)
+    (ig/load-namespaces conf)
+    (ig/init conf)))
+
+
+
 (defn -main [url title email]
   (try
     (check-env-vars)
-    (let [{:keys [email label title url]} (conform-input url title email)]
+    (admin-system)
+    #_(let [{:keys [email label title url]} (conform-input url title email)]
       (setup-database label title)
       (let [user-creds (setup-tenant-in-keycloak label email url)]
         (println "Credentials:")
