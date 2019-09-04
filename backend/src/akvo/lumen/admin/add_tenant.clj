@@ -8,17 +8,17 @@
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
   instance.
 
-  KC_URL is the url to keycloak (without trailing /auth). Probably one of:
+  LUMEN_KEYCLOAK_URL is the url to keycloak (with trailing /auth). Probably one of:
   - http://localhost:8080 for local development
   - https://login.akvo.org for production
   - https://kc.akvotest.org for the test environment
 
-  KC_SECRET is the client secret found in the Keycloak admin at:
+  LUMEN_KEYCLOAK_CLIENT_SECRET is the client secret found in the Keycloak admin at:
   > Realms > Akvo > Clients > akvo-lumen-confidential > Credentials > Secret.
   
   Use this as follow
   $ env ENCRYPTION_KEY=*** \\
-        KC_URL=https://*** KC_SECRET=*** \\
+        LUMEN_KEYCLOAK_URL=https://*** LUMEN_KEYCLOAK_CLIENT_SECRET=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
