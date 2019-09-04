@@ -239,8 +239,6 @@
     (ig/load-namespaces conf)
     (ig/init conf)))
 
-
-
 (defn -main [url title email]
   (try
     (check-env-vars)

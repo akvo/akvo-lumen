@@ -103,8 +103,8 @@
   For example:
     (group-by-path keycloak headers \"/akvo/lumen/t1/admin\") -> uuid"
   [{:keys [api-root credentials openid-config]} headers path]
-  (let [path (if path (str "/" path) "")]
-    (-> (http.client/get* (format "%s/group-by-path/%s" api-root (format "akvo/lumen" path))
+  (let [path (if (some? path) (str "/" path) "")]
+    (-> (http.client/get* (format "%s/group-by-path/%s" api-root (format "akvo/lumen%s" path))
                           (merge http-client-req-defaults
                                  {:headers headers}))
         :body json/decode)))
