@@ -75,22 +75,27 @@ UserList.defaultProps = {
 };
 
 function compareByRoleAndNames(a, b) {
+  const aFirstName = a.firstName && a.firstName.toLowerCase();
+  const aLastName = a.lastName && a.lastName.toLowerCase();
+  const bFirstName = b.firstName && b.firstName.toLowerCase();
+  const bLastName = b.lastName && b.lastName.toLowerCase();
+
   if (a.admin < b.admin) {
     return 1;
   }
   if (a.admin > b.admin) {
     return -1;
   }
-  if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) {
+  if (aFirstName > bFirstName) {
     return 1;
   }
-  if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) {
+  if (aFirstName < bFirstName) {
     return -1;
   }
-  if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) {
+  if (aLastName > bLastName) {
     return 1;
   }
-  if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) {
+  if (aLastName < bLastName) {
     return -1;
   }
   return 0;
