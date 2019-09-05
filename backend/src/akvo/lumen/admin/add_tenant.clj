@@ -26,6 +26,7 @@
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
   "
   (:require [akvo.lumen.admin.util :as util]
+            [akvo.lumen.admin.new-plan :as new-plan]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.http.client :as http.client]
@@ -250,6 +251,7 @@
       (let [user-creds (setup-tenant-in-keycloak authorizer label email url)]
         (println "Credentials:")
         (pprint user-creds)
+        (new-plan/exec (label url))
         (println "Remember to add a new plan to the new tenant.")))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
