@@ -19,7 +19,7 @@
    [ring.util.response :refer [response]]))
 
 
-(def http-client-req-defaults (http.client/req-opts 5000))
+(def ^:dynamic http-client-req-defaults (http.client/req-opts 5000))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns

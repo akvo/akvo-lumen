@@ -273,7 +273,8 @@
           emailer (:akvo.lumen.component.emailer/mailjet-v3-emailer system)
           dropwizard-registry (:akvo.lumen.monitoring/dropwizard-registry system)
           {:keys [tenant-db-uri]} (setup-database label title)
-          {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
+          {:keys [user-id email tmp-password] :as user-creds} (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
+                                                                (setup-tenant-in-keycloak authorizer label email url))]
       (log/error "User Credentials:" [user-id email tmp-password])
       (let [text-part (if (some? tmp-password)
                         (let [invite-id
