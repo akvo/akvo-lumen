@@ -2,7 +2,6 @@
   "The following env vars are assumed to be present:
   LUMEN_ENCRYPTION_KEY, LUMEN_KEYCLOAK_URL, LUMEN_KEYCLOAK_CLIENT_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD,
   LUMEN_EMAIL_PASSWORD, LUMEN_EMAIL_USER
-  
   LUMEN_ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
   encrypting the db_uri which can be found in the lumen secret in K8s.
 
@@ -23,7 +22,7 @@
         LUMEN_EMAIL_USER=https://*** LUMEN_EMAIL_PASSWORD=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
-        lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
+        lein run -m akvo.lumen.admin.add-tenant <url> <title> <email> <auth-type>
   "
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.admin.new-plan :as new-plan]
@@ -44,7 +43,8 @@
             [environ.core :refer [env]]
             [integrant.core :as ig]
             [ragtime.jdbc]
-            [ragtime.repl])
+            [ragtime.repl]
+            [selmer.parser :as selmer])
   (:import java.net.URL))
 
 (def blacklist #{"admin"
@@ -208,11 +208,20 @@
 ;;; Main
 ;;;
 
-(defn conform-input [url title email]
+(defn conform-auth-type
+  "Returns valid kw auth-type or throws."
+  [v]
+  (condp = v
+    "keycloak" :keycloak
+    "auth0" :auth0
+    (throw (ex-info "auth-type not valid." {:auth-type v}))))
+
+(defn conform-input [url title email auth-type]
   (let [url (conform-url url)]
     {:email (conform-email email)
      :label (label url)
      :title title
+     :auth-type (conform-auth-type auth-type)
      :url url}))
 
 (defn check-env-vars []
@@ -242,17 +251,28 @@
     (ig/load-namespaces conf)
     (ig/init conf)))
 
-(defn -main [url title email]
+(defn -main [url title email auth-type]
   (try
     (check-env-vars)
-    (let [{:keys [email label title url]} (conform-input url title email)
-          authorizer (:akvo.lumen.component.keycloak/authorization-service (admin-system))]
+    (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
+          system (admin-system)
+          authorizer (:akvo.lumen.component.keycloak/authorization-service system)
+          emailer (:akvo.lumen.component.emailer/mailjet-v3-emailer system)]
       (setup-database label title)
-      (let [user-creds (setup-tenant-in-keycloak authorizer label email url)]
-        (println "Credentials:")
-        (pprint user-creds)
-        (new-plan/exec (label url))
-        (println "Remember to add a new plan to the new tenant.")))
+      (let [{:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
+        (println "User Credentials:" [user-id email tmp-password])
+        (let [text-part (if (some? tmp-password)
+                          (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_non_existent_user.txt" (name auth-type))
+                                              {:email email
+                                               :invite-id "invite-id"
+                                               :tmp-password tmp-password
+                                               :location url})
+                          (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_existent_user.txt" (name auth-type))
+                                              {:email email
+                                               :location url}))]
+          (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
+                                         "Text-part" text-part}))
+        (new-plan/exec label)))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e
