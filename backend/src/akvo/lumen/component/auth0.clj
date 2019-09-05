@@ -8,6 +8,7 @@
             [integrant.core :as ig]
             [clojure.spec.alpha :as s]
             [clojure.set :as set]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [ring.util.response :refer [response]]))
 
@@ -34,3 +35,8 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.auth0/public-client [_]
   ::public-client)
+
+(defn path->role [path]
+  (let [s (apply str (next path))]
+  (str/replace  s "/" ":")))
+

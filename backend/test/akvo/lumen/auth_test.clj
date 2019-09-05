@@ -1,6 +1,8 @@
 (ns akvo.lumen.auth-test
   (:require [akvo.lumen.auth :as m]
             [clojure.test :refer [deftest testing is]]
+            [clojure.tools.logging :as log]
+            [akvo.lumen.component.keycloak :as keycloak]
             [ring.mock.request :as mock]))
 
 (defn- test-handler
@@ -25,7 +27,10 @@
     401 (is (= "\"Not authenticated\"" (:body response)))
     403 (is (= "\"Not authorized\"" (:body response)))))
 
-(def wrap-auth (m/wrap-auth {:issuer "keycloak"} {:issuer "auth0"}))
+(def wrap-auth (m/wrap-jwt-authorization {:issuer "keycloak"} {:issuer "auth0"}))
+
+(defn update-auth-roles [o]
+  (assoc o :auth-roles (keycloak/claimed-roles (:jwt-claims o))))
 
 (deftest wrap-auth-test
   (testing "GET / without claims"
@@ -42,17 +47,17 @@
     (check-response
      ((wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
-          (assoc-in [:jwt-claims "realm_access" "roles"]
-                    ["akvo:lumen:t0"])))
+          (assoc-in [:jwt-claims "realm_access" "roles"] ["akvo:lumen:t0"])
+          update-auth-roles))
      403))
 
   (testing "GET resource with claims and tenant"
     (check-response
      ((wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
-          (assoc-in [:jwt-claims "realm_access" "roles"]
-                    ["akvo:lumen:t0"])
-          (assoc :tenant "t0")))
+          (assoc-in [:jwt-claims "realm_access" "roles"] ["akvo:lumen:t0"])
+          (assoc :tenant "t0")
+          update-auth-roles))
      200))
 
   (testing "GET resource as admin with claims and tenant"
@@ -62,7 +67,8 @@
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"
                      "akvo:lumen:t0:admin"])
-          (assoc :tenant "t0")))
+          (assoc :tenant "t0")
+          update-auth-roles))
      200))
 
   (testing "GET admin resource as admin with claims and tenant"
@@ -72,7 +78,8 @@
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"
                      "akvo:lumen:t0:admin"])
-          (assoc :tenant "t0")))
+          (assoc :tenant "t0")
+          update-auth-roles))
      200))
 
   (testing "GET admin resource as non admin with claims and tenant"
