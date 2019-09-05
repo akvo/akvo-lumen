@@ -1,6 +1,7 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
-  LUMEN_ENCRYPTION_KEY, LUMEN_KEYCLOAK_URL, LUMEN_KEYCLOAK_CLIENT_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  LUMEN_ENCRYPTION_KEY, LUMEN_KEYCLOAK_URL, LUMEN_KEYCLOAK_CLIENT_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD,
+  LUMEN_EMAIL_PASSWORD, LUMEN_EMAIL_USER
   
   LUMEN_ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
   encrypting the db_uri which can be found in the lumen secret in K8s.
@@ -19,6 +20,7 @@
   Use this as follow
   $ env LUMEN_ENCRYPTION_KEY=*** \\
         LUMEN_KEYCLOAK_URL=https://*** LUMEN_KEYCLOAK_CLIENT_SECRET=*** \\
+        LUMEN_EMAIL_USER=https://*** LUMEN_EMAIL_PASSWORD=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
@@ -215,6 +217,8 @@
 (defn check-env-vars []
   (assert (:lumen-encryption-key env) (error-msg "Specify LUMEN_ENCRYPTION_KEY env var"))
   (assert (:lumen-keycloak-url env) (error-msg "Specify LUMEN_KEYCLOAK_URL env var"))
+  (assert (:lumen-email-user env) (error-msg "Specify LUMEN_EMAIL_USER env var"))
+  (assert (:lumen-email-password env) (error-msg "Specify LUMEN_EMAIL_PASSWORD env var"))
   (assert (:lumen-keycloak-client-secret env)
           (do
             (browse/browse-url
@@ -231,7 +235,8 @@
                  (select-keys [:akvo.lumen.component.keycloak/authorization-service
                                :akvo.lumen.component.keycloak/public-client
                                :akvo.lumen.monitoring/dropwizard-registry
-                               :akvo.lumen.monitoring/collector]))]
+                               :akvo.lumen.monitoring/collector
+                               :akvo.lumen.component.emailer/mailjet-v3-emailer]))]
     (pprint conf)
     (ig/load-namespaces conf)
     (ig/init conf)))

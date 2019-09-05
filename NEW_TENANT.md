@@ -16,7 +16,7 @@ used) we run the scripts our docker container.
 
 ## To create a new tenant
 ```
-$ docker-compose exec backend run-as-user.sh env LUMEN_ENCRYPTION_KEY=... LUMEN_KEYCLOAK_URL=... LUMEN_KEYCLOAK_CLIENT_SECRET=... PG_HOST=... PG_DATABASE=... PG_USER=... PG_PASSWORD=... lein run -m akvo.lumen.admin.add-tenant "<FULL TENANT URL>" "<TENANT TITLE>" "<ADMIN EMAIL>"
+$ docker-compose exec backend run-as-user.sh env LUMEN_ENCRYPTION_KEY=... LUMEN_KEYCLOAK_URL=... LUMEN_KEYCLOAK_CLIENT_SECRET=... LUMEN_EMAIL_PASSWORD=... LUMEN_EMAIL_USER=... PG_HOST=... PG_DATABASE=... PG_USER=... PG_PASSWORD=... lein run -m akvo.lumen.admin.add-tenant "<FULL TENANT URL>" "<TENANT TITLE>" "<ADMIN EMAIL>"
 ```
 - LUMEN_KEYCLOAK_URL ends in /auth e.g: https://login.akvo.org/auth
 - LUMEN_ENCRYPTION_KEY is a key specific for the Kubernetes environment used for encrypting the db_uri which can be found in the lumen secret in K8s.
