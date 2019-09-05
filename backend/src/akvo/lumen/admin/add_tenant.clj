@@ -24,17 +24,21 @@
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email> <auth-type>
   "
-  (:require [akvo.lumen.admin.util :as util]
-            [akvo.lumen.admin.new-plan :as new-plan]
+  (:require [akvo.lumen.admin.new-plan :as new-plan]
+            [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.http.client :as http.client]
-            [akvo.lumen.migrate :as migrate]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
-            [akvo.lumen.util :refer [conform-email squuid]]
+            [akvo.lumen.lib.user :as lib.user]
+            [akvo.lumen.migrate :as migrate]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
+            [clojure.tools.logging :as log]
+            [akvo.lumen.component.hikaricp :as hikaricp]
             [clojure.java.browse :as browse]
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
@@ -124,11 +128,13 @@
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
         tenant-password (s/replace (squuid) "-" "")
         db-uri (util/db-uri)
+        
         lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
         tenant-db-uri (util/db-uri {:database tenant
                                     :user tenant
                                     :password tenant-password})
-        tenant-db-uri-with-superuser (util/db-uri {:database tenant})]
+        tenant-db-uri-with-superuser (util/db-uri {:database tenant})
+        dbs {:db-uri db-uri :lumen-db-uri lumen-db-uri :tenant-db-uri tenant-db-uri :tenant-db-uri-with-superuser tenant-db-uri-with-superuser}]
     (util/exec-no-transact! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;"
                 tenant tenant-password)
     (util/exec-no-transact! db-uri
@@ -150,7 +156,9 @@
     (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:lumen-encryption-key env) tenant-db-uri)
                                          :label label :title title})
     (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
-                        (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants"))))
+                        (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants"))
+    (log/error :dbs dbs)
+    dbs))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -251,28 +259,41 @@
     (ig/load-namespaces conf)
     (ig/init conf)))
 
+(defn tenant-conn* [dropwizard-registry tenant-label db-uri]
+  (tenant-manager/pool {:db_uri              db-uri 
+                        :dropwizard-registry dropwizard-registry
+                        :label               tenant-label}))
+
 (defn -main [url title email auth-type]
   (try
     (check-env-vars)
     (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
           system (admin-system)
           authorizer (:akvo.lumen.component.keycloak/authorization-service system)
-          emailer (:akvo.lumen.component.emailer/mailjet-v3-emailer system)]
-      (setup-database label title)
-      (let [{:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
-        (println "User Credentials:" [user-id email tmp-password])
-        (let [text-part (if (some? tmp-password)
+          emailer (:akvo.lumen.component.emailer/mailjet-v3-emailer system)
+          dropwizard-registry (:akvo.lumen.monitoring/dropwizard-registry system)
+          {:keys [tenant-db-uri]} (setup-database label title)
+          {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
+      (log/error "User Credentials:" [user-id email tmp-password])
+      (let [text-part (if (some? tmp-password)
+                        (let [invite-id
+                              (:id (util/exec-no-transact-return!
+                                    tenant-db-uri
+                                    (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
+                                            email
+                                            (lib.user/expire-time)
+                                            (json/encode {:email "admin@akvo.org"}))))]
                           (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_non_existent_user.txt" (name auth-type))
                                               {:email email
-                                               :invite-id "invite-id"
+                                               :invite-id invite-id
                                                :tmp-password tmp-password
-                                               :location url})
-                          (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_existent_user.txt" (name auth-type))
-                                              {:email email
-                                               :location url}))]
-          (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                         "Text-part" text-part}))
-        (new-plan/exec label)))
+                                               :location url}))
+                        (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_existent_user.txt" (name auth-type))
+                                            {:email email
+                                             :location url}))]
+        (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
+                                       "Text-part" text-part}))
+      #_(new-plan/exec label))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e

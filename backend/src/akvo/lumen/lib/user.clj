@@ -11,12 +11,15 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/user.sql")
 
+(defn expire-time []
+  (c/to-sql-time (t/plus (t/now)
+                         (t/weeks 2))))
+
 (defn- invite-id* [tenant-conn author email]
   (-> (insert-invite tenant-conn
                      {:author author
                       :email email
-                      :expire (c/to-sql-time (t/plus (t/now)
-                                                     (t/weeks 2)))})
+                      :expire (expire-time)})
       first :id))
 
 (defn invite-to-tenant

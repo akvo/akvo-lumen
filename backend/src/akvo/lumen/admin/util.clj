@@ -14,6 +14,15 @@
                  [(apply format format-str args)]
                  {:transaction? false}))
 
+(defn exec-no-transact-return!
+  "Execute SQL expression"
+  [db-uri format-str & args]
+  (jdbc/execute! db-uri
+                 [(apply format format-str args)]
+                 {:transaction? false
+                  :return-keys true}))
+
+
 (defn db-uri
   "Build a db uri string using standard PG environment variables as fallback"
   ([] (db-uri {}))
