@@ -374,7 +374,7 @@
                              {:body    (json/encode {"temporary" true
                                                      "type"      "password"
                                                      "value"     tmp-password})
-                              "headers" headers})))
+                              :headers headers})))
   (remove-user
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
