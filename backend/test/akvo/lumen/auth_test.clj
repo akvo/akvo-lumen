@@ -25,7 +25,7 @@
     401 (is (= "\"Not authenticated\"" (:body response)))
     403 (is (= "\"Not authorized\"" (:body response)))))
 
-(def wrap-auth (m/wrap-auth {:issuer "keycloak"} {:issuer "auth0"}))
+(def wrap-auth (m/wrap-jwt-authorization {:issuer "keyclaoak"} {:issuer "auth0"}))
 
 (deftest wrap-auth-test
   (testing "GET / without claims"

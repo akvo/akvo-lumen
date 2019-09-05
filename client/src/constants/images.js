@@ -20,6 +20,6 @@ module.exports = {
     visualisation: require('../styles/img/icon-256-library-listing-visualisation.png'),
   },
   BRAND: {
-    logo: require('../styles/img/AkvoLogo.svg'),
+    logo: 'https://akvo-public.storage.googleapis.com/AkvoLogo.svg',
   },
 };

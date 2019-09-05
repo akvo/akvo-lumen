@@ -54,7 +54,11 @@ const handleResponse = (response) => {
           throw error;
         });
       }
+      case 403: {
+        throw new Error(statusText);
+      }
       case 409: {
+        console.log('@403:409');
         return response.json().then((body) => {
           throw new Error(body.error);
         });

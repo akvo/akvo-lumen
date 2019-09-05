@@ -18,7 +18,7 @@
    [integrant.core :as ig]
    [ring.util.response :refer [response]]))
 
-
+(declare user-groups)
 (def http-client-req-defaults (http.client/req-opts 5000))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -94,21 +94,25 @@
 
 (defn tenant-admin?
   [headers api-root tenant user-id]
-  (let [admin-group-id (-> (http.client/get* (format "%s/group-by-path/akvo/lumen/%s/admin"
-                                              api-root tenant)
-                                             (merge http-client-req-defaults
-                                                    {:headers headers}))
-                           :body json/decode (get "id"))
-        admins         (-> (http.client/get* (format "%s/groups/%s/members" api-root admin-group-id)
-                                             (merge http-client-req-defaults
-                                                    {:headers headers}))
-                           :body json/decode)
-        admin-ids      (into #{}
-                             (map #(get % "id"))
-                             (filter #(and (get % "emailVerified")
-                                           (get % "enabled"))
-                                     admins))]
-    (contains? (set admin-ids) user-id)))
+  (try
+    (let [admin-group-id (-> (http.client/get* (format "%s/group-by-path/akvo/lumen/%s/admin"
+                                                       api-root tenant)
+                                               (merge http-client-req-defaults
+                                                      {:headers headers}))
+                             :body json/decode (get "id"))
+          admins         (-> (http.client/get* (format "%s/groups/%s/members" api-root admin-group-id)
+                                               (merge http-client-req-defaults
+                                                      {:headers headers}))
+                             :body json/decode)
+          admin-ids      (into #{}
+                               (map #(get % "id"))
+                               (filter #(and (get % "emailVerified")
+                                             (get % "enabled"))
+                                       admins))]
+      (contains? (set admin-ids) user-id))
+    (catch clojure.lang.ExceptionInfo e
+      (log/error e "Error determine if user was tenant admin, missing Keycloak groups?")
+      false)))
 
 (defn fetch-user-by-id
   "Get user by email. Returns nil if not found."
@@ -116,10 +120,11 @@
   (let [resp (-> (http.client/get* (format "%s/users/%s" api-root user-id)
                                    (merge http-client-req-defaults
                                           {:headers headers}))
-                 :body json/decode)]
+                 :body json/decode)
+        paths (map #(get % "path") (user-groups (merge http-client-req-defaults {:headers headers}) api-root user-id))]
     (assoc resp
-           "admin"
-           (tenant-admin? headers api-root tenant user-id))))
+           "admin" (tenant-admin? headers api-root tenant user-id)
+           "path-groups" paths)))
 
 (defn fetch-user-by-email
   "Get user by email. Returns nil if none found."
@@ -301,6 +306,11 @@
           (swap! assoc email user-id)
           (get email)))))
 
+(defn user-groups [req-opts api-root user-id]
+  (->> (http.client/get* (format "%s/users/%s/groups" api-root user-id) req-opts)
+               :body
+               json/decode))
+
 (defn- allowed-paths
   "Provided an email address from the authentication process dig out the
   Keycloak user and get allowed set of paths, as in #{\"demo/admin\" \"t1\"}
@@ -312,11 +322,9 @@
     (when-let [headers (request-headers keycloak)]
       (let [req-opts {:headers headers :connection-manager connection-manager}]
         (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-          (->> (http.client/get* (format "%s/users/%s/groups" api-root user-id) (merge http-client-req-defaults
-                                                                                       req-opts))
-               :body
-               json/decode
-               (reduce (fn [paths {:strs [path]}]
+          (->>
+           (user-groups (merge http-client-req-defaults req-opts) api-root user-id)
+           (reduce (fn [paths {:strs [path]}]
                          (conj paths (subs path 12)))
                        #{})))))))
 
@@ -363,11 +371,10 @@
   (reset-password [{:keys [api-root]} headers user-id tmp-password]
     (http.client/put* (format "%s/users/%s/reset-password" api-root user-id)
                       (merge http-client-req-defaults
-                             {:body (json/encode {"temporary" true
-                                                  "type" "password"
-                                                  "value" tmp-password})
-                              :headers headers})))
-
+                             {:body    (json/encode {"temporary" true
+                                                     "type"      "password"
+                                                     "value"     tmp-password})
+                              "headers" headers})))
   (remove-user
     [this tenant author-claims user-id]
     (do-remove-user this tenant author-claims user-id))
@@ -448,3 +455,6 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)
+
+(defn claimed-roles [jwt-claims]
+  (set (get-in jwt-claims ["realm_access" "roles"])))
