@@ -34,7 +34,7 @@
    (hikaricp/ssl-url
     (format "jdbc:postgresql://%s/%s?ssl=true&user=%s%s"
             host database user
-            (if (or (= host "localhost") (= host "postgres"))
+            (if-not password #_(or (= host "localhost") (= host "postgres"))
               ""
               (format "&password=%s" password))))))
 

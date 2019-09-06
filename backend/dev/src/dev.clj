@@ -98,15 +98,23 @@
             (add-tenant/admin-system
              (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file prod?])
              ks)))
-   (keys (:akvo.lumen.admin/add-tenant s)))
-  (let [o (:akvo.lumen.admin/add-tenant s)]
-    (add-tenant/exec-mail (merge (select-keys o [:emailer :auth-type])
-                                 {:user-creds {:user-id "user-id" :email "juan@akvo.org" :tmp-password "hola"}
-                                  :tenant-db-uri (.getJdbcUrl (:datasource (db-conn)))
-                                  :url "http://t1.lumen.local:3030"}))
-    )
+   (keys (:akvo.lumen.admin/add-tenant s))
+   (let [o (:akvo.lumen.admin/add-tenant s)]
+     (add-tenant/exec-mail (merge (select-keys o [:emailer])
+                                  {:user-creds {:user-id "user-id" :email "juan@akvo.org" :tmp-password "hola"}
+                                   :tenant-db (.getJdbcUrl (:datasource (db-conn)))
+                                   :url "http://t1.lumen.local:3030"
+                                   :auth-type "auth0"}))))
+
+
+  
+  (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
+    (let [dbs (add-tenant/db-uris "hola" "jor")]
+      (add-tenant/create-tenant-db "(:root-db dbs)" "example" "passs-example")
+      ))
+
+
+  
+  
   )
-
-
-
 

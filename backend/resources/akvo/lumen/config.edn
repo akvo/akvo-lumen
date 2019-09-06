@@ -213,4 +213,8 @@
 
  :akvo.lumen.admin/add-tenant {:emailer #ig/ref :akvo.lumen.component.emailer/emailer
                                :auth-type "keycloak"
-                               :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}}
+                               :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                               :db {:password "akvo"
+                                    :database "lumen"
+                                    :user "postgres"
+                                    :host "postgres"}}}

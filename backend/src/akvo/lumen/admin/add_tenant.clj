@@ -122,16 +122,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Database
 ;;;
+(defn drop-tenant-db [db-uri tenant]
+  (util/exec-no-transact! db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
+  (util/exec-no-transact! db-uri "DROP ROLE IF EXISTS \"%s\" " tenant))
 
 (defn create-tenant-db [db-uri tenant tenant-password]
-  (util/exec-no-transact! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
-  (util/exec-no-transact! db-uri (str "CREATE DATABASE %1$s "
-                                           "WITH OWNER = %1$s "
-                                           "TEMPLATE = template0 "
-                                           "ENCODING = 'UTF8' "
-                                           "LC_COLLATE = 'en_US.UTF-8' "
-                                           "LC_CTYPE = 'en_US.UTF-8';")
-                          tenant))
+  (try
+    (drop-tenant-db db-uri tenant)
+    (util/exec-no-transact! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+    (util/exec-no-transact! db-uri (str "CREATE DATABASE %1$s "
+                                        "WITH OWNER = %1$s "
+                                        "TEMPLATE = template0 "
+                                        "ENCODING = 'UTF8' "
+                                        "LC_COLLATE = 'en_US.UTF-8' "
+                                        "LC_CTYPE = 'en_US.UTF-8';") tenant)
+    (catch Exception e
+      (do
+        (log/error e)
+        (try (drop-tenant-db db-uri tenant)
+             (catch Exception e))
+        (throw e)))))
+
+
 
 (defn configure-tenant-db [db-uri tenant-db-uri]
   (util/exec-no-transact! db-uri
@@ -147,24 +159,41 @@
 
 (defn add-tenant-to-lumen-db [lumen-encryption-key lumen-db-uri tenant-db-uri label title]
   (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
-                                         :label label :title title}))
+                                       :label label :title title}))
+
+(def ^:dynamic env-vars
+  (let [ks-mapping {:pg-host :host
+                    :pg-database :database
+                    :pg-user :user
+                    :pg-password :password}]
+    (set/rename-keys ks-mapping (select-keys env (keys ks-mapping)))))
+
+(defn db-uri*
+  ([] (db-uri* {}))
+  ([data]
+   (util/db-uri (merge env-vars data))))
+
+(defn db-uris [tenant tenant-password ]
+  (let [main-db-uri (db-uri*)
+        lumen-db-uri (db-uri* {:database "lumen" :user "lumen"})
+        tenant-db-uri (db-uri* {:database tenant
+                                :user tenant
+                                :password tenant-password})
+        tenant-db-uri-with-superuser (db-uri* {:database tenant})]
+    {:root-db main-db-uri
+     :lumen-db lumen-db-uri
+     :tenant-db tenant-db-uri
+     :root-tenant-db tenant-db-uri-with-superuser}))
 
 (defn setup-database
   [label title]
   (log/error :setup-database label title)
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
         tenant-password (s/replace (squuid) "-" "")
-        main-db-uri (util/db-uri)
-        
-        lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
-        tenant-db-uri (util/db-uri {:database tenant
-                                    :user tenant
-                                    :password tenant-password})
-        tenant-db-uri-with-superuser (util/db-uri {:database tenant})
-        dbs {:main-db-uri main-db-uri :lumen-db-uri lumen-db-uri :tenant-db-uri tenant-db-uri :tenant-db-uri-with-superuser tenant-db-uri-with-superuser}]
-    (create-tenant-db main-db-uri tenant tenant-password)
-    (configure-tenant-db tenant-db-uri-with-superuser tenant-db-uri)
-    (add-tenant-to-lumen-db (:lumen-encryption-key env) lumen-db-uri tenant-db-uri label title)
+        {:keys [root-db lumen-db tenant-db root-tenant-db] :as dbs} (db-uris tenant tenant-password)]
+    (create-tenant-db root-db tenant tenant-password)
+    (configure-tenant-db root-tenant-db tenant-db)
+    (add-tenant-to-lumen-db (:lumen-encryption-key env) lumen-db tenant-db label title)
     (log/error :setup-database-finished :dbs dbs)
     dbs))
 
@@ -284,16 +313,15 @@
                         :dropwizard-registry dropwizard-registry
                         :label               tenant-label}))
 
-(defn exec-mail [{:keys [emailer user-creds tenant-db-uri auth-type url]}]
+(defn exec-mail [{:keys [emailer user-creds tenant-db auth-type url]}]
   (let [{:keys [user-id email tmp-password]} user-creds
         text-part (if (some? tmp-password)
                     (let [invite-id
-                          (:id (util/exec-no-transact-return!
-                                tenant-db-uri
-                                (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
-                                        email
-                                        (lib.user/expire-time)
-                                        (json/encode {:email "admin@akvo.org"}))))]
+                          (:id (util/exec-no-transact-return! tenant-db
+                                                              (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
+                                                                      email
+                                                                      (lib.user/expire-time)
+                                                                      (json/encode {:email "admin@akvo.org"}))))]
                       (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_non_existent_user.txt" (name auth-type))
                                           {:email email
                                            :invite-id invite-id
@@ -302,17 +330,16 @@
                     (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_existent_user.txt" (name auth-type))
                                         {:email email
                                          :location url}))]
-    (do
-      (log/error :sending email text-part)
-      (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                     "Text-part" text-part}))))
+    (log/info :sending email text-part)
+    (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
+                                   "Text-part" text-part})))
 
 (defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type] :as data}]
   (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db-uri]} (setup-database label title)
+        {:keys [tenant-db]} (setup-database label title)
         {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
     (exec-mail (merge administer {:user-creds user-creds
-                                  :tenant-db-uri tenant-db-uri
+                                  :tenant-db tenant-db
                                   :auth-type auth-type
                                   :url url}))))
 
