@@ -123,41 +123,48 @@
 ;;; Database
 ;;;
 
+(defn create-tenant-db [db-uri tenant tenant-password]
+  (util/exec-no-transact! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+  (util/exec-no-transact! db-uri (str "CREATE DATABASE %1$s "
+                                           "WITH OWNER = %1$s "
+                                           "TEMPLATE = template0 "
+                                           "ENCODING = 'UTF8' "
+                                           "LC_COLLATE = 'en_US.UTF-8' "
+                                           "LC_CTYPE = 'en_US.UTF-8';")
+                          tenant))
+
+(defn configure-tenant-db [db-uri tenant-db-uri]
+  (util/exec-no-transact! db-uri
+                          "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
+  (util/exec-no-transact! db-uri
+                          "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
+  (util/exec-no-transact! db-uri
+                          "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
+  (util/exec-no-transact! db-uri
+                          "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
+  (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
+                      (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants")))
+
+(defn add-tenant-to-lumen-db [lumen-encryption-key lumen-db-uri tenant-db-uri label title]
+  (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
+                                         :label label :title title}))
+
 (defn setup-database
   [label title]
   (log/error :setup-database label title)
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
         tenant-password (s/replace (squuid) "-" "")
-        db-uri (util/db-uri)
+        main-db-uri (util/db-uri)
         
         lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
         tenant-db-uri (util/db-uri {:database tenant
                                     :user tenant
                                     :password tenant-password})
         tenant-db-uri-with-superuser (util/db-uri {:database tenant})
-        dbs {:db-uri db-uri :lumen-db-uri lumen-db-uri :tenant-db-uri tenant-db-uri :tenant-db-uri-with-superuser tenant-db-uri-with-superuser}]
-    (util/exec-no-transact! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;"
-                tenant tenant-password)
-    (util/exec-no-transact! db-uri
-                (str "CREATE DATABASE %1$s "
-                     "WITH OWNER = %1$s "
-                     "TEMPLATE = template0 "
-                     "ENCODING = 'UTF8' "
-                     "LC_COLLATE = 'en_US.UTF-8' "
-                     "LC_CTYPE = 'en_US.UTF-8';")
-                tenant)
-    (util/exec-no-transact! tenant-db-uri-with-superuser
-                "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
-    (util/exec-no-transact! tenant-db-uri-with-superuser
-                "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-    (util/exec-no-transact! tenant-db-uri-with-superuser
-                "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-    (util/exec-no-transact! tenant-db-uri-with-superuser
-                "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
-    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt (:lumen-encryption-key env) tenant-db-uri)
-                                         :label label :title title})
-    (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
-                        (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants"))
+        dbs {:main-db-uri main-db-uri :lumen-db-uri lumen-db-uri :tenant-db-uri tenant-db-uri :tenant-db-uri-with-superuser tenant-db-uri-with-superuser}]
+    (create-tenant-db main-db-uri tenant tenant-password)
+    (configure-tenant-db tenant-db-uri-with-superuser tenant-db-uri)
+    (add-tenant-to-lumen-db (:lumen-encryption-key env) lumen-db-uri tenant-db-uri label title)
     (log/error :setup-database-finished :dbs dbs)
     dbs))
 
@@ -300,7 +307,7 @@
       (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                      "Text-part" text-part}))))
 
-(defn exec [{:keys [emailer auth-type authorizer] :as administer} {:keys [url title email auth-type] :as data}]
+(defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type] :as data}]
   (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
         {:keys [tenant-db-uri]} (setup-database label title)
         {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
