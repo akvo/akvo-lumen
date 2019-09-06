@@ -122,15 +122,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Database
 ;;;
-(defn drop-tenant-db [db-uri tenant]
-  (util/exec-no-transact! db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
-  (util/exec-no-transact! db-uri "DROP ROLE IF EXISTS \"%s\" " tenant))
+(defn drop-tenant-db [root-db-uri tenant]
+  (util/exec-no-transact! root-db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
+  (util/exec-no-transact! root-db-uri "DROP ROLE IF EXISTS \"%s\" " tenant))
 
-(defn create-tenant-db [db-uri tenant tenant-password]
+(defn create-tenant-db [root-db-uri tenant tenant-password]
   (try
-    (drop-tenant-db db-uri tenant)
-    (util/exec-no-transact! db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
-    (util/exec-no-transact! db-uri (str "CREATE DATABASE %1$s "
+    (drop-tenant-db root-db-uri tenant)
+    (util/exec-no-transact! root-db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+    (util/exec-no-transact! root-db-uri (str "CREATE DATABASE %1$s "
                                         "WITH OWNER = %1$s "
                                         "TEMPLATE = template0 "
                                         "ENCODING = 'UTF8' "
@@ -139,27 +139,55 @@
     (catch Exception e
       (do
         (log/error e)
-        (try (drop-tenant-db db-uri tenant)
+        (try (drop-tenant-db root-db-uri tenant)
              (catch Exception e))
         (throw e)))))
 
 
 
-(defn configure-tenant-db [db-uri tenant-db-uri]
-  (util/exec-no-transact! db-uri
-                          "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
-  (util/exec-no-transact! db-uri
-                          "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-  (util/exec-no-transact! db-uri
-                          "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-  (util/exec-no-transact! db-uri
-                          "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
-  (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
-                      (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants")))
+(defn configure-tenant-db [root-db-uri tenant root-tenant-db-uri tenant-db-uri]
+  (try
+    (util/exec-no-transact! root-tenant-db-uri
+                            "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
+    (util/exec-no-transact! root-tenant-db-uri
+                            "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
+    (util/exec-no-transact! root-tenant-db-uri
+                            "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
+    (util/exec-no-transact! root-tenant-db-uri
+                            "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
+    (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
+                        (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants"))
+    (catch Exception e
+      (do
+        (drop-tenant-db root-db-uri tenant)
+        (log/error e)
+        (throw e))))
+  )
 
-(defn add-tenant-to-lumen-db [lumen-encryption-key lumen-db-uri tenant-db-uri label title]
-  (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
-                                       :label label :title title}))
+
+(defn drop-tenant-from-lumen-db [lumen-encryption-key lumen-db-uri tenant-db-uri]
+  (try
+    (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where db_uri='%s'" (aes/encrypt lumen-encryption-key tenant-db-uri)))
+    (catch Exception e
+      (do
+        (log/error e)
+        (throw e)))))
+
+(defn add-tenant-to-lumen-db [lumen-encryption-key root-db-uri lumen-db-uri tenant-db-uri tenant label title]
+  (try
+    (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri tenant-db-uri)
+    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
+                                         :label label :title title})
+    (catch Exception e
+      (do
+        (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri tenant-db-uri)
+        (drop-tenant-db root-db-uri tenant)
+        (log/error e)
+        (throw e)))
+    ))
+
+
+
 
 (def ^:dynamic env-vars
   (let [ks-mapping {:pg-host :host
@@ -173,9 +201,9 @@
   ([data]
    (util/db-uri (merge env-vars data))))
 
-(defn db-uris [tenant tenant-password ]
+(defn db-uris [tenant tenant-password & [lumen-db-password]]
   (let [main-db-uri (db-uri*)
-        lumen-db-uri (db-uri* {:database "lumen" :user "lumen"})
+        lumen-db-uri (db-uri* {:database "lumen" :user "lumen" :password lumen-db-password})
         tenant-db-uri (db-uri* {:database tenant
                                 :user tenant
                                 :password tenant-password})
@@ -186,14 +214,14 @@
      :root-tenant-db tenant-db-uri-with-superuser}))
 
 (defn setup-database
-  [label title]
+  [label title lumen-encryption-key]
   (log/error :setup-database label title)
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
         tenant-password (s/replace (squuid) "-" "")
         {:keys [root-db lumen-db tenant-db root-tenant-db] :as dbs} (db-uris tenant tenant-password)]
     (create-tenant-db root-db tenant tenant-password)
-    (configure-tenant-db root-tenant-db tenant-db)
-    (add-tenant-to-lumen-db (:lumen-encryption-key env) lumen-db tenant-db label title)
+    (configure-tenant-db root-db tenant root-tenant-db tenant-db)
+    (add-tenant-to-lumen-db lumen-encryption-key root-db lumen-db tenant-db tenant label title)
     (log/error :setup-database-finished :dbs dbs)
     dbs))
 
@@ -304,7 +332,8 @@
                                                :akvo.lumen.component.emailer/emailer
                                                :akvo.lumen.component.keycloak/authorization-service
                                                :akvo.lumen.component.keycloak/public-client
-                                               :akvo.lumen.admin/add-tenant])))]
+                                               :akvo.lumen.admin/add-tenant
+                                               :akvo.lumen.component.tenant-manager/data])))]
      (ig/load-namespaces conf)
      (ig/init conf))))
 
@@ -336,7 +365,7 @@
 
 (defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type] :as data}]
   (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db]} (setup-database label title)
+        {:keys [tenant-db]} (setup-database (:encryption-key env) label title)
         {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
     (exec-mail (merge administer {:user-creds user-creds
                                   :tenant-db tenant-db

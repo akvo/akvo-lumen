@@ -89,32 +89,42 @@
 
 (comment
   (do
-   (def s (let [prod? false
-                [ks edn-file] (if prod?
-                                [(do (add-tenant/ig-derives)
-                                     (add-tenant/ig-select-keys)) "prod.edn"]
-                                [(do (dev-ig-derives)
-                                     [:akvo.lumen.component.emailer/dev-emailer]) "local.edn"])]
-            (add-tenant/admin-system
-             (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file prod?])
-             ks)))
-   (keys (:akvo.lumen.admin/add-tenant s))
-   (let [o (:akvo.lumen.admin/add-tenant s)]
-     (add-tenant/exec-mail (merge (select-keys o [:emailer])
-                                  {:user-creds {:user-id "user-id" :email "juan@akvo.org" :tmp-password "hola"}
-                                   :tenant-db (.getJdbcUrl (:datasource (db-conn)))
-                                   :url "http://t1.lumen.local:3030"
-                                   :auth-type "auth0"}))))
+    (def s (let [prod? false
+                 [ks edn-file] (if prod?
+                                 [(do (add-tenant/ig-derives)
+                                      (add-tenant/ig-select-keys)) "prod.edn"]
+                                 [(do (dev-ig-derives)
+                                      [:akvo.lumen.component.emailer/dev-emailer]) "local.edn"])]
+             (add-tenant/admin-system
+              (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file prod?])
+              ks)))
+    (keys (:akvo.lumen.admin/add-tenant s))
+    (let [o (:akvo.lumen.admin/add-tenant s)]
+      (add-tenant/exec-mail (merge (select-keys o [:emailer])
+                                   {:user-creds {:user-id "user-id" :email "juan@akvo.org" :tmp-password "hola"}
+                                    :tenant-db (.getJdbcUrl (:datasource (db-conn)))
+                                    :url "http://t1.lumen.local:3030"
+                                    :auth-type "auth0"}))
+
+      (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
+        (let [encryption-key (-> o :db-settings :encryption-key)
+              tenant "examplee"
+              pass "jor"
+              label "label-examplee"
+              title "title-example"
+              dbs (add-tenant/db-uris tenant pass "password")]
+          (add-tenant/create-tenant-db (:root-db dbs) tenant pass)
+          (add-tenant/configure-tenant-db (:root-db dbs) tenant  (:root-tenant-db dbs) (:tenant-db dbs))
+          (add-tenant/add-tenant-to-lumen-db encryption-key (:root-db dbs) (:lumen-db dbs) (:tenant-db dbs) tenant label title)
+          
+          
+          ))
+      )
+
+    )
 
 
-  
-  (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
-    (let [dbs (add-tenant/db-uris "hola" "jor")]
-      (add-tenant/create-tenant-db "(:root-db dbs)" "example" "passs-example")
-      ))
-
-
-  
+{:root-db "jdbc:postgresql://postgres/lumen?ssl=true&user=postgres&password=akvo&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory", :lumen-db "jdbc:postgresql://postgres/lumen?ssl=true&user=lumen&password=akvo&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory", :tenant-db "jdbc:postgresql://postgres/example?ssl=true&user=example&password=jor&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory", :root-tenant-db "jdbc:postgresql://postgres/example?ssl=true&user=postgres&password=akvo&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory"}  
   
   )
 
