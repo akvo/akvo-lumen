@@ -12,6 +12,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
+            [akvo.lumen.component.tenant-manager]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
@@ -21,6 +22,7 @@
             [duct.generate :as gen]
             [integrant.core :as ig]
             [integrant.repl :as ir]
+            [akvo.lumen.admin.add-tenant :as add-tenant]
             [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
 
@@ -77,3 +79,34 @@
 (defn reset-db []
   (rollback)
   (migrate))
+
+(defn db-conn
+  ([label] (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) label))
+  ([] (db-conn "t1")))
+
+(defn dev-ig-derives []
+  (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer))
+
+(comment
+  (do
+   (def s (let [prod? false
+                [ks edn-file] (if prod?
+                                [(do (add-tenant/ig-derives)
+                                     (add-tenant/ig-select-keys)) "prod.edn"]
+                                [(do (dev-ig-derives)
+                                     [:akvo.lumen.component.emailer/dev-emailer]) "local.edn"])]
+            (add-tenant/admin-system
+             (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file prod?])
+             ks)))
+   (keys (:akvo.lumen.admin/add-tenant s)))
+  (let [o (:akvo.lumen.admin/add-tenant s)]
+    (add-tenant/exec-mail (merge (select-keys o [:emailer :auth-type])
+                                 {:user-creds {:user-id "user-id" :email "juan@akvo.org" :tmp-password "hola"}
+                                  :tenant-db-uri (.getJdbcUrl (:datasource (db-conn)))
+                                  :url "http://t1.lumen.local:3030"}))
+    )
+  )
+
+
+
+

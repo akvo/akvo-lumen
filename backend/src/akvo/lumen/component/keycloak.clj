@@ -484,6 +484,13 @@
          :openid-config (fetch-openid-configuration (:issuer public-client) {})
          :monitoring monitoring))
 
+(def map-print-method
+  (get-method clojure.core/print-method clojure.lang.PersistentArrayMap))
+
+(defmethod clojure.core/print-method KeycloakAgent
+  [ka ^java.io.Writer writer]
+  (.write writer (map-print-method (update ka :openid-config #(hash-map :issuer (get % "issuer"))) writer)))
+
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/authorization-service  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))
@@ -502,3 +509,8 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)
+
+
+(defmethod clojure.core/print-method sun.security.rsa.RSAPublicKeyImpl
+  [system ^java.io.Writer writer]
+  (.write writer "#<RSAPublicKey>"))

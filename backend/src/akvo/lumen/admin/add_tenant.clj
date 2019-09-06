@@ -125,6 +125,7 @@
 
 (defn setup-database
   [label title]
+  (log/error :setup-database label title)
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
         tenant-password (s/replace (squuid) "-" "")
         db-uri (util/db-uri)
@@ -157,7 +158,7 @@
                                          :label label :title title})
     (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
                         (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants"))
-    (log/error :dbs dbs)
+    (log/error :setup-database-finished :dbs dbs)
     dbs))
 
 
@@ -202,6 +203,7 @@
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
   [authorizer label email url]
+  (log/error :setup-tenant-in-keycloak label email url)
   (let [headers (keycloak/request-headers authorizer)
         lumen-group-id (-> (keycloak/root-group authorizer headers)
                            (get "id"))
@@ -210,6 +212,7 @@
         {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
     (add-tenant-urls-to-clients authorizer headers url)
     (keycloak/add-user-to-group headers (:api-root authorizer) user-id tenant-admin-id)
+    (log/error "User Credentials:" user-rep)
     (assoc user-rep :url url)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -248,53 +251,71 @@
   (when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
-(defn admin-system []
-  (let [conf (-> (config/construct "akvo/lumen/config.edn")
-                 (select-keys [:akvo.lumen.component.keycloak/authorization-service
-                               :akvo.lumen.component.keycloak/public-client
-                               :akvo.lumen.monitoring/dropwizard-registry
-                               :akvo.lumen.monitoring/collector
-                               :akvo.lumen.component.emailer/mailjet-v3-emailer]))]
-    (pprint conf)
-    (ig/load-namespaces conf)
-    (ig/init conf)))
+(defn ig-select-keys []
+  [:akvo.lumen.component.emailer/mailjet-v3-emailer])
+
+
+(defn ig-derives []
+  (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer))
+
+(defn admin-system
+  ([]
+   (admin-system (config/construct "akvo/lumen/config.edn") (ig-select-keys)))
+  ([c ks]
+   (let [conf (-> c
+                  (select-keys (apply conj ks [:akvo.lumen.monitoring/dropwizard-registry
+                                               :akvo.lumen.monitoring/collector
+                                               :akvo.lumen.component.emailer/emailer
+                                               :akvo.lumen.component.keycloak/authorization-service
+                                               :akvo.lumen.component.keycloak/public-client
+                                               :akvo.lumen.admin/add-tenant])))]
+     (ig/load-namespaces conf)
+     (ig/init conf))))
 
 (defn tenant-conn* [dropwizard-registry tenant-label db-uri]
   (tenant-manager/pool {:db_uri              db-uri 
                         :dropwizard-registry dropwizard-registry
                         :label               tenant-label}))
 
+(defn exec-mail [{:keys [emailer user-creds tenant-db-uri auth-type url]}]
+  (let [{:keys [user-id email tmp-password]} user-creds
+        text-part (if (some? tmp-password)
+                    (let [invite-id
+                          (:id (util/exec-no-transact-return!
+                                tenant-db-uri
+                                (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
+                                        email
+                                        (lib.user/expire-time)
+                                        (json/encode {:email "admin@akvo.org"}))))]
+                      (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_non_existent_user.txt" (name auth-type))
+                                          {:email email
+                                           :invite-id invite-id
+                                           :tmp-password tmp-password
+                                           :location url}))
+                    (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_existent_user.txt" (name auth-type))
+                                        {:email email
+                                         :location url}))]
+    (do
+      (log/error :sending email text-part)
+      (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
+                                     "Text-part" text-part}))))
+
+(defn exec [{:keys [emailer auth-type authorizer] :as administer} {:keys [url title email auth-type] :as data}]
+  (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
+        {:keys [tenant-db-uri]} (setup-database label title)
+        {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
+    (exec-mail (merge administer {:user-creds user-creds
+                                  :tenant-db-uri tenant-db-uri
+                                  :auth-type auth-type
+                                  :url url}))))
+
 (defn -main [url title email auth-type]
   (try
     (check-env-vars)
-    (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
-          system (admin-system)
-          authorizer (:akvo.lumen.component.keycloak/authorization-service system)
-          emailer (:akvo.lumen.component.emailer/mailjet-v3-emailer system)
-          dropwizard-registry (:akvo.lumen.monitoring/dropwizard-registry system)
-          {:keys [tenant-db-uri]} (setup-database label title)
-          {:keys [user-id email tmp-password] :as user-creds} (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
-                                                                (setup-tenant-in-keycloak authorizer label email url))]
-      (log/error "User Credentials:" [user-id email tmp-password])
-      (let [text-part (if (some? tmp-password)
-                        (let [invite-id
-                              (:id (util/exec-no-transact-return!
-                                    tenant-db-uri
-                                    (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
-                                            email
-                                            (lib.user/expire-time)
-                                            (json/encode {:email "admin@akvo.org"}))))]
-                          (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_non_existent_user.txt" (name auth-type))
-                                              {:email email
-                                               :invite-id invite-id
-                                               :tmp-password tmp-password
-                                               :location url}))
-                        (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_existent_user.txt" (name auth-type))
-                                            {:email email
-                                             :location url}))]
-        (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                       "Text-part" text-part}))
-      #_(new-plan/exec label))
+    (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
+      (exec (:akvo.lumen.admin/add-tenant (admin-system))
+            {:url url :title title :email email :auth-type auth-type}))
+    #_(new-plan/exec label)
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e
@@ -302,3 +323,7 @@
       (prn (.getMessage e))
       (when (= (type e) clojure.lang.ExceptionInfo)
         (prn (ex-data e))))))
+
+
+(defmethod ig/init-key :akvo.lumen.admin/add-tenant [_ {:keys [emailer auth-type] :as opts}]
+  opts)
