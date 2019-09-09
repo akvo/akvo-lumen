@@ -13,24 +13,77 @@
   (:import com.nimbusds.jose.crypto.RSASSAVerifier
            java.text.ParseException))
 
-(declare tenant-admin?)
 
-(defn tenant-user?
-  [{:keys [tenant jwt-claims auth-roles] :as data} issuer]
-  (or (tenant-admin? data issuer)
-      (contains? auth-roles
-                 (format "akvo:lumen:%s" tenant))))
+(defn issuer-type [jwt-claims keycloak-public-client auth0-public-client]
+  (condp = (get jwt-claims "iss")
+    (:issuer keycloak-public-client) :keycloak
+    (:issuer auth0-public-client) :auth0
+    :other))
 
-(defn tenant-admin?
-  [{:keys [tenant jwt-claims auth-roles]} issuer]
-  (contains? auth-roles
-             (format "akvo:lumen:%s:admin" tenant)))
+(s/def ::keycloak-public-client ::keycloak/public-client)
+(s/def ::auth0-public-client ::auth0/public-client)
 
-(defn admin-path? [{:keys [path-info]}]
-  (string/starts-with? path-info "/api/admin/"))
 
-(defn api-path? [{:keys [path-info]}]
-  (string/starts-with? path-info "/api/"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; JWT Authentication
+;;;
+
+(defn wrap-jwt-authentication
+  "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
+  be configured via the KEYCLOAK_URL env var."
+  [keycloak-public-client auth0-public-client authorizer]
+  (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak-public-client))
+        auth0-verifier (RSASSAVerifier.  (:rsa-key auth0-public-client))]
+    (fn [handler]
+      (fn [{:keys [tenant] :as req}]
+        (if-let [token (jwt/jwt-token req)]
+          (try
+            (if-let [claims (or (jwt/verified-claims token keycloak-verifier
+                                                     (:issuer keycloak-public-client)
+                                                     {})
+                                (jwt/verified-claims token auth0-verifier
+                                                     (:issuer auth0-public-client)
+                                                     {}))]
+              (handler (assoc req
+                              :jwt-claims claims
+                              :auth-roles (if (= :keycloak
+                                                 (issuer-type claims
+                                                              keycloak-public-client
+                                                              auth0-public-client))
+                                            (keycloak/claimed-roles claims)
+                                            (set (map auth0/path->role
+                                                      (:path-groups (p/user authorizer
+                                                                            tenant
+                                                                            (get claims "email"))))))
+                              :jwt-token token))
+              (handler req))
+            (catch ParseException e
+              (handler req)))
+          (handler req))))))
+
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-authentication
+  [_ {:keys [keycloak-public-client auth0-public-client authorizer]}]
+  (wrap-jwt-authentication keycloak-public-client auth0-public-client authorizer))
+
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt-authentication
+  [_]
+  (s/keys :req-un [::keycloak-public-client ::auth0-public-client ::p/authorizer]))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Authorization helpers
+;;;
+
+;; Currently Keycloak API authz is not available when authenticating with Auth0
+;; but only for users with app_metadata set to true in path -> lumen -> features
+;; -> apiAuthz and akvo.org email.
+(defn api-authz? [{:strs [email email_verified] :as jwt-claims}]
+  (let [flag-path ["https://akvo.org/app_metadata" "lumen" "features"
+                   "apiAuthz"]
+        flag (get-in jwt-claims flag-path)]
+    (and (and (some? flag) flag)
+         (and (some? email_verified) email_verified)
+         (and (some? email) (string/ends-with? email "@akvo.org")))))
 
 (defn- application-json-type
   "code taken from ring.middleware.json/wrap-json-response"
@@ -50,29 +103,27 @@
       (response/status 403)
       application-json-type))
 
-(def service-unavailable
-  (-> (response/response "Service Unavailable")
-      (response/status 503)
-      application-json-type))
+(defn admin-path? [{:keys [path-info]}]
+  (string/starts-with? path-info "/api/admin/"))
 
-(def internal-server-error
-  (-> (response/response "Internal server errror")
-      (response/status 500)
-      application-json-type))
+(defn api-path? [{:keys [path-info]}]
+  (string/starts-with? path-info "/api/"))
 
-(defn api-authz? [{:strs [email email_verified] :as jwt-claims}]
-  (let [flag-path ["https://akvo.org/app_metadata" "lumen" "features"
-                   "apiAuthz"]
-        flag (get-in jwt-claims flag-path)]
-    (and (and (some? flag) flag)
-         (and (some? email_verified) email_verified)
-         (and (some? email) (string/ends-with? email "@akvo.org")))))
 
-(defn issuer-type [jwt-claims keycloak-public-client auth0-public-client]
-  (condp = (get jwt-claims "iss")
-    (:issuer keycloak-public-client) :keycloak
-    (:issuer auth0-public-client) :auth0
-    :other))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; JWT Authorization
+;;;
+
+(defn tenant-admin?
+  [{:keys [tenant jwt-claims auth-roles]} issuer]
+  (contains? auth-roles
+             (format "akvo:lumen:%s:admin" tenant)))
+
+(defn tenant-user?
+  [{:keys [tenant jwt-claims auth-roles] :as data} issuer]
+  (or (tenant-admin? data issuer)
+      (contains? auth-roles
+                 (format "akvo:lumen:%s" tenant))))
 
 (defn wrap-jwt-authorization
   "Wrap authorization for the API via JWT claims as:
@@ -96,45 +147,18 @@
                                   not-authorized)
             :else not-authorized))))))
 
-(defn wrap-jwt-authentication
-  "Go get cert from Keycloak and feed it to wrap-jwt-claims. Keycloak url can
-  be configured via the KEYCLOAK_URL env var."
-  [keycloak-public-client auth0-public-client authorizer]
-  (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak-public-client))
-        auth0-verifier (RSASSAVerifier.  (:rsa-key auth0-public-client))]
-    (fn [handler]
-      (fn [{:keys [tenant] :as req}]
-        (if-let [token (jwt/jwt-token req)]
-          (try
-            (if-let [claims (or (jwt/verified-claims token keycloak-verifier (:issuer keycloak-public-client) {})
-                                (jwt/verified-claims token auth0-verifier (:issuer auth0-public-client) {}))]
-              (handler (assoc req
-                              :jwt-claims claims
-                              :auth-roles (if (= :keycloak (issuer-type claims keycloak-public-client auth0-public-client))
-                                            (keycloak/claimed-roles claims)
-                                            (set (map
-                                                  auth0/path->role
-                                                  (:path-groups (p/user authorizer tenant (get claims "email"))))))
-                              :jwt-token token))
-              (handler req))
-            (catch ParseException e
-              (handler req)))
-          (handler req))))))
-
-(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-authorization  [_ {:keys [keycloak-public-client auth0-public-client]}]
-  (wrap-jwt-authorization keycloak-public-client auth0-public-client))
-
-(s/def ::keycloak-public-client ::keycloak/public-client)
-(s/def ::auth0-public-client ::auth0/public-client)
-
-(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt-authorization [_]
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt-authorization
+  [_]
   (s/keys :req-un [::keycloak-public-client ::auth0-public-client]))
 
-(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-authentication  [_ {:keys [keycloak-public-client auth0-public-client authorizer]}]
-  (wrap-jwt-authentication keycloak-public-client auth0-public-client authorizer))
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-authorization
+  [_ {:keys [keycloak-public-client auth0-public-client]}]
+  (wrap-jwt-authorization keycloak-public-client auth0-public-client))
 
-(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt-authentication [_]
-  (s/keys :req-un [::keycloak-public-client ::auth0-public-client ::p/authorizer]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; API Authorization
+;;;
 
 (defn api-tenant-admin?
   [tenant allowed-paths]
@@ -145,6 +169,16 @@
   (or
    (api-tenant-admin? tenant allowed-paths)
    (contains? allowed-paths tenant)))
+
+(def service-unavailable
+  (-> (response/response "Service Unavailable")
+      (response/status 503)
+      application-json-type))
+
+(def internal-server-error
+  (-> (response/response "Internal server errror")
+      (response/status 500)
+      application-json-type))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-api-authorization
   [_ {:keys [authorizer]}]
