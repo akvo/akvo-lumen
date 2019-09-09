@@ -111,7 +111,11 @@
                                        admins))]
       (contains? (set admin-ids) user-id))
     (catch clojure.lang.ExceptionInfo e
-      (log/error e "Error determine if user was tenant admin, missing Keycloak groups?")
+      (when (not (= 404
+                    (-> e ex-data :status)))
+        (log/error ::tenant-admin? "Error determine if user was tenant admin, missing Keycloak groups?"
+                   {:tenant tenant
+                    :user-id user-id}))
       false)))
 
 (defn fetch-user-by-id
