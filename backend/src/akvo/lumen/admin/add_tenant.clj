@@ -51,6 +51,13 @@
             [selmer.parser :as selmer])
   (:import java.net.URL))
 
+(def ^:dynamic env-vars
+  (let [ks-mapping {:pg-host :host
+                    :pg-database :database
+                    :pg-user :user
+                    :pg-password :password}]
+    (set/rename-keys ks-mapping (select-keys env (keys ks-mapping)))))
+
 (def blacklist #{"admin"
                  "console"
                  "deck"
@@ -128,7 +135,6 @@
 
 (defn create-tenant-db [root-db-uri tenant tenant-password]
   (try
-    (drop-tenant-db root-db-uri tenant)
     (util/exec-no-transact! root-db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
     (util/exec-no-transact! root-db-uri (str "CREATE DATABASE %1$s "
                                         "WITH OWNER = %1$s "
@@ -142,8 +148,6 @@
         (try (drop-tenant-db root-db-uri tenant)
              (catch Exception e))
         (throw e)))))
-
-
 
 (defn configure-tenant-db [root-db-uri tenant root-tenant-db-uri tenant-db-uri]
   (try
@@ -164,7 +168,6 @@
         (throw e))))
   )
 
-
 (defn drop-tenant-from-lumen-db [lumen-encryption-key lumen-db-uri tenant-db-uri]
   (try
     (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where db_uri='%s'" (aes/encrypt lumen-encryption-key tenant-db-uri)))
@@ -183,48 +186,45 @@
         (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri tenant-db-uri)
         (drop-tenant-db root-db-uri tenant)
         (log/error e)
-        (throw e)))
-    ))
-
-
-
-
-(def ^:dynamic env-vars
-  (let [ks-mapping {:pg-host :host
-                    :pg-database :database
-                    :pg-user :user
-                    :pg-password :password}]
-    (set/rename-keys ks-mapping (select-keys env (keys ks-mapping)))))
+        (throw e)))))
 
 (defn db-uri*
   ([] (db-uri* {}))
   ([data]
    (util/db-uri (merge env-vars data))))
 
-(defn db-uris [tenant tenant-password & [lumen-db-password]]
-  (let [main-db-uri (db-uri*)
+(defn db-uris [label tenant-password & [lumen-db-password]]
+  (let [tenant (str "tenant_" (s/replace label "-" "_"))
+        main-db-uri (db-uri*)
         lumen-db-uri (db-uri* {:database "lumen" :user "lumen" :password lumen-db-password})
         tenant-db-uri (db-uri* {:database tenant
-                                :user tenant
+                                :user     tenant
                                 :password tenant-password})
         tenant-db-uri-with-superuser (db-uri* {:database tenant})]
     {:root-db main-db-uri
      :lumen-db lumen-db-uri
      :tenant-db tenant-db-uri
-     :root-tenant-db tenant-db-uri-with-superuser}))
+     :root-tenant-db tenant-db-uri-with-superuser
+     :tenant tenant
+     :tenant-password tenant-password}))
 
-(defn setup-database
-  [label title lumen-encryption-key]
-  (log/error :setup-database label title)
-  (let [tenant (str "tenant_" (s/replace label "-" "_"))
-        tenant-password (s/replace (squuid) "-" "")
-        {:keys [root-db lumen-db tenant-db root-tenant-db] :as dbs} (db-uris tenant tenant-password)]
+(defn drop-tenant-database
+  [lumen-encryption-key db-uris]
+  (log/error :drop-tenant-database (:tenant db-uris))
+  (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
+    (drop-tenant-from-lumen-db lumen-encryption-key lumen-db tenant-db)
+    (drop-tenant-db root-db tenant)))
+
+(defn setup-tenant-database
+  [label title lumen-encryption-key db-uris]
+  (drop-tenant-database lumen-encryption-key db-uris)
+  (log/error :setup-tenant-database label title)
+  (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
     (create-tenant-db root-db tenant tenant-password)
     (configure-tenant-db root-db tenant root-tenant-db tenant-db)
     (add-tenant-to-lumen-db lumen-encryption-key root-db lumen-db tenant-db tenant label title)
-    (log/error :setup-database-finished :dbs dbs)
-    dbs))
-
+    (log/error :setup-tenant-database-finished :dbs db-uris)
+    true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Keycloak
@@ -318,7 +318,6 @@
 (defn ig-select-keys []
   [:akvo.lumen.component.emailer/mailjet-v3-emailer])
 
-
 (defn ig-derives []
   (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer))
 
@@ -365,7 +364,8 @@
 
 (defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type] :as data}]
   (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db]} (setup-database (:encryption-key env) label title)
+        {:keys [tenant-db] :as db-uris} (db-uris label (s/replace (squuid) "-" ""))
+        _ (setup-tenant-database (:encryption-key env) label title db-uris)
         {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
     (exec-mail (merge administer {:user-creds user-creds
                                   :tenant-db tenant-db

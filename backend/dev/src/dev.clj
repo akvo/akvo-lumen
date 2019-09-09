@@ -105,26 +105,17 @@
                                     :tenant-db (.getJdbcUrl (:datasource (db-conn)))
                                     :url "http://t1.lumen.local:3030"
                                     :auth-type "auth0"}))
-
       (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
         (let [encryption-key (-> o :db-settings :encryption-key)
-              tenant "examplee"
-              pass "jor"
-              label "label-examplee"
-              title "title-example"
-              dbs (add-tenant/db-uris tenant pass "password")]
-          (add-tenant/create-tenant-db (:root-db dbs) tenant pass)
-          (add-tenant/configure-tenant-db (:root-db dbs) tenant  (:root-tenant-db dbs) (:tenant-db dbs))
-          (add-tenant/add-tenant-to-lumen-db encryption-key (:root-db dbs) (:lumen-db dbs) (:tenant-db dbs) tenant label title)
-          
-          
-          ))
+              label "yepepo"
+              title "title-milo"
+              dbs (add-tenant/db-uris label "tenant-pass" "password")]
+          (add-tenant/setup-tenant-database label title encryption-key dbs)
+          #_(add-tenant/create-tenant-db (:root-db dbs) (:tenant dbs) (:tenant-password dbs))
+          #_(add-tenant/configure-tenant-db (:root-db dbs) (:tenant dbs)  (:root-tenant-db dbs) (:tenant-db dbs))
+          #_(add-tenant/add-tenant-to-lumen-db encryption-key (:root-db dbs) (:lumen-db dbs) (:tenant-db dbs) (:tenant dbs) label title)))
       )
 
     )
-
-
-{:root-db "jdbc:postgresql://postgres/lumen?ssl=true&user=postgres&password=akvo&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory", :lumen-db "jdbc:postgresql://postgres/lumen?ssl=true&user=lumen&password=akvo&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory", :tenant-db "jdbc:postgresql://postgres/example?ssl=true&user=example&password=jor&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory", :root-tenant-db "jdbc:postgresql://postgres/example?ssl=true&user=postgres&password=akvo&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory"}  
-  
   )
 

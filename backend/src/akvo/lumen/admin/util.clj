@@ -22,7 +22,6 @@
                  {:transaction? false
                   :return-keys true}))
 
-
 (defn db-uri
   "Build a db uri string using standard PG environment variables as fallback"
   ([] (db-uri {}))
