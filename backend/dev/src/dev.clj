@@ -2,11 +2,13 @@
   (:refer-clojure :exclude [test])
   (:require [akvo.lumen.config :as config]
             [akvo.lumen.endpoint.commons]
+            [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs]
             [akvo.lumen.test-utils :as tu]
+            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
@@ -23,6 +25,7 @@
             [integrant.core :as ig]
             [integrant.repl :as ir]
             [akvo.lumen.admin.add-tenant :as add-tenant]
+            [akvo.lumen.admin.remove-tenant :as remove-tenant]
             [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
 
@@ -98,24 +101,40 @@
              (add-tenant/admin-system
               (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file prod?])
               ks)))
-    (keys (:akvo.lumen.admin/add-tenant s))
+    (keys (:akvo.lumen.admin/add-tenant s))    
+    #_(let [authz (:authorizer (:akvo.lumen.admin/add-tenant s))
+          h (keycloak/request-headers authz)
+          id (get (keycloak/fetch-client authz h "akvo-lumen-confidential") "id")]
+      (pprint (map (juxt :id :name) (-> (keycloak/get-roles authz  h)
+                                 :body
+                                 (json/parse-string keyword)
+                                
+                                 )))
+       
+      )
     (let [o (:akvo.lumen.admin/add-tenant s)]
-      (add-tenant/exec-mail (merge (select-keys o [:emailer])
-                                   {:user-creds {:user-id "user-id" :email "juan@akvo.org" :tmp-password "hola"}
-                                    :tenant-db (.getJdbcUrl (:datasource (db-conn)))
-                                    :url "http://t1.lumen.local:3030"
-                                    :auth-type "auth0"}))
       (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
         (let [encryption-key (-> o :db-settings :encryption-key)
-              label "yepepo"
+              label "once"
+              email "juan@akvo.org"
+              url "http://t3.lumen.local"
               title "title-milo"
               dbs (add-tenant/db-uris label "tenant-pass" "password")]
           (add-tenant/setup-tenant-database label title encryption-key dbs)
-          #_(add-tenant/create-tenant-db (:root-db dbs) (:tenant dbs) (:tenant-password dbs))
-          #_(add-tenant/configure-tenant-db (:root-db dbs) (:tenant dbs)  (:root-tenant-db dbs) (:tenant-db dbs))
-          #_(add-tenant/add-tenant-to-lumen-db encryption-key (:root-db dbs) (:lumen-db dbs) (:tenant-db dbs) (:tenant dbs) label title)))
-      )
+          #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
+          (add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url)
+          #_(add-tenant/exec-mail (merge (select-keys o [:emailer])
+                                       {:user-creds {:user-id "user-id" :email email :tmp-password "hola"}
+                                        :tenant-db (.getJdbcUrl (:datasource (db-conn)))
+                                        :url url
+                                        :auth-type "keycloak"}))
+)))
+    (let [authz (:authorizer (:akvo.lumen.admin/add-tenant s))]
+      (remove-tenant/get-groups authz))
 
     )
-  )
+  
+)
+
+
 

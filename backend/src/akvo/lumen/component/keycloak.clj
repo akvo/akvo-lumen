@@ -33,8 +33,15 @@
     (log/info "Successfully got openid-config from provider.")
     res))
 
+(defn get-roles [{:keys [api-root]} headers]
+  (http.client/get* (format "%s/roles" api-root)
+                     (merge
+                      http-client-req-defaults
+                      {:headers headers})))
+
 (defn create-group
   [{:keys [api-root credentials openid-config]} headers root-group-id role group-name]
+  (log/error :create-role :name role)
   (http.client/post* (format "%s/roles" api-root)
                      (merge
                       http-client-req-defaults
@@ -47,6 +54,7 @@
                                  {:body (json/encode {"name" group-name})
                                   :headers headers}))
                          :body json/decode (get "id"))
+        _ (log/error :create-group :group-name group-name :new-group-id new-group-id)
         available-roles (-> (http.client/get*
                              (format "%s/groups/%s/role-mappings/realm/available"
                                      api-root root-group-id)
@@ -66,6 +74,7 @@
                                                 "clientRole" false
                                                 "containerId" "Akvo"}])
                            :headers headers}))]
+    (log/error :create-group :role-mappings :new-group-id new-group-id :role-id role-id :pair-resp pair-resp)
     new-group-id))
 
 (defn update-client

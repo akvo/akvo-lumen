@@ -46,3 +46,7 @@
      :connection-manager (http.client/new-connection-manager)
      :credentials {"client_id" (:kc-id env "akvo-lumen-confidential")
                    "client_secret" (:kc-secret env)}}))
+
+(defn role-name [label & [admin?]]
+  (let [s (if admin? "akvo:lumen:%s:admin" "akvo:lumen:%s")]
+    (format s label)))

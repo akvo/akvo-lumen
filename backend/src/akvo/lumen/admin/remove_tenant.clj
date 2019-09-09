@@ -23,12 +23,15 @@
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.component.keycloak :as keycloak]
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [clojure.string :as s]
             [cheshire.core :as json]))
 
 (defn remove-group
   "Remove keycloak group by id"
   [kc id]
+  (log/error :remove-group :id id)
   (http.client/delete* (format "%s/groups/%s" (:api-root kc) id)
                        (merge util/http-client-req-defaults
                               {:headers (keycloak/request-headers kc)
@@ -38,14 +41,6 @@
   "List all keycloak groups and sub groups"
   [kc]
   (:body (http.client/get* (format "%s/groups" (:api-root kc))
-                           (merge util/http-client-req-defaults
-                                  {:headers (keycloak/request-headers kc)
-                                   :as :json}))))
-
-(defn get-clients
-  "List all keycloak clients"
-  [kc]
-  (:body (http.client/get* (format "%s/clients" (:api-root kc))
                            (merge util/http-client-req-defaults
                                   {:headers (keycloak/request-headers kc)
                                    :as :json}))))
@@ -79,11 +74,6 @@
         tenant-group (find-group (:subGroups lumen-group) tenant-label)]
     (:id tenant-group)))
 
-(defn find-client
-  "Find a keycloak client by name"
-  [clients client-name]
-  (search #(= (:clientId %) client-name) clients))
-
 (defn remove-re
   "Remove all strings in xs that matches re"
   [xs re]
@@ -97,24 +87,52 @@
         (update :webOrigins remove-re re)
         (update :redirectUris remove-re re))))
 
+(defn remove-role [{:keys [api-root]} headers role-name]
+  (log/error :remove-role api-root role-name)
+  (http.client/delete* (format "%s/roles/%s" api-root role-name )
+                     (merge
+                      util/http-client-req-defaults
+                      {:headers headers})))
+
+(defn unpair [{:keys [api-root]} headers group-id]
+  (http.client/delete*
+   (format "%s/groups/%s/role-mappings/realm" api-root group-id)
+   (merge util/http-client-req-defaults
+          {:headers headers})))
+
 (defn cleanup-keycloak
   "Cleanup (remove) tenant-label from keycloak.
   - Remove redirect uri's associated with tenant-label
   - Remove the tenant-label's group"
   [kc tenant-label]
-  (let [client (-> (get-clients kc)
-                   (find-client "akvo-lumen")
-                   (remove-client-redirect-uris tenant-label))
+  (let [headers (keycloak/request-headers kc)
+        confidential-client (-> (keycloak/fetch-client kc headers "akvo-lumen-confidential")
+                              w/keywordize-keys
+                              (remove-client-redirect-uris tenant-label))
+        public-client (-> (keycloak/fetch-client kc headers "akvo-lumen")
+                              w/keywordize-keys
+                              (remove-client-redirect-uris tenant-label))
         group-id (find-group-id kc tenant-label)]
-    (update-client kc client)
-    (remove-group kc group-id)))
+
+    (log/error :cleanup-keycloak :group-id group-id)
+    (when (some? group-id)
+      (log/info :udpate-public-client (update-client kc public-client))
+      (log/info :udpate-confidential-client (update-client kc confidential-client))
+      (log/info :unpair (unpair kc headers group-id))
+      (log/info :remove-group (remove-group kc group-id))
+      (log/info :remove-role (remove-role kc headers (util/role-name tenant-label)))
+      (log/info :remove-role (remove-role kc headers (util/role-name tenant-label true)))
+      )))
 
 (defn remove-tenant [label]
   (let [tenant (str "tenant_" (s/replace label "-" "_"))
         lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})
         kc (util/create-keycloak)]
+    (log/error lumen-db-uri "DROP DATABASE %s" tenant)
     (util/exec-no-transact! lumen-db-uri "DROP DATABASE %s" tenant)
+    (log/error lumen-db-uri "DROP ROLE %s" tenant)
     (util/exec-no-transact! lumen-db-uri "DROP ROLE %s" tenant)
+    (log/error lumen-db-uri "DELETE FROM tenants WHERE label='%s'" label)
     (util/exec-no-transact! lumen-db-uri "DELETE FROM tenants WHERE label='%s'" label)
     (cleanup-keycloak kc label)))
 

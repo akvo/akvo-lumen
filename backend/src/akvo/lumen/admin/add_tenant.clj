@@ -30,6 +30,7 @@
             [akvo.lumen.admin.add-tenant.db :as db]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.config :refer [error-msg] :as config]
+            [akvo.lumen.admin.remove-tenant :as remove-tenant]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.lib.user :as lib.user]
@@ -206,11 +207,12 @@
   "Create two new groups as children to the akvo:lumen group"
   [authorizer label email url]
   (log/error :setup-tenant-in-keycloak label email url)
+  (remove-tenant/cleanup-keycloak authorizer label)
   (let [headers (keycloak/request-headers authorizer)
         lumen-group-id (-> (keycloak/root-group authorizer headers)
                            (get "id"))
-        tenant-id (keycloak/create-group authorizer headers lumen-group-id (format "akvo:lumen:%s" label) label)
-        tenant-admin-id (keycloak/create-group authorizer headers tenant-id (format "akvo:lumen:%s:admin" label) "admin")
+        tenant-id (keycloak/create-group authorizer headers lumen-group-id (util/role-name label) label)
+        tenant-admin-id (keycloak/create-group authorizer headers tenant-id (util/role-name label true) "admin")
         {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
     (add-tenant-urls-to-clients authorizer headers url)
     (keycloak/add-user-to-group headers (:api-root authorizer) user-id tenant-admin-id)
