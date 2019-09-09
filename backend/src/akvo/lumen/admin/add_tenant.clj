@@ -27,27 +27,23 @@
   (:require [akvo.lumen.admin.new-plan :as new-plan]
             [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
+            [akvo.lumen.admin.add-tenant.db :as db]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.http.client :as http.client]
-            [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.lib.user :as lib.user]
-            [akvo.lumen.migrate :as migrate]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [akvo.lumen.component.hikaricp :as hikaricp]
             [clojure.java.browse :as browse]
-            [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
             [clojure.set :as set]
             [clojure.string :as s]
             [environ.core :refer [env]]
             [integrant.core :as ig]
-            [ragtime.jdbc]
-            [ragtime.repl]
             [selmer.parser :as selmer])
   (:import java.net.URL))
 
@@ -129,64 +125,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Database
 ;;;
-(defn drop-tenant-db [root-db-uri tenant]
-  (util/exec-no-transact! root-db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
-  (util/exec-no-transact! root-db-uri "DROP ROLE IF EXISTS \"%s\" " tenant))
-
-(defn create-tenant-db [root-db-uri tenant tenant-password]
-  (try
-    (util/exec-no-transact! root-db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
-    (util/exec-no-transact! root-db-uri (str "CREATE DATABASE %1$s "
-                                        "WITH OWNER = %1$s "
-                                        "TEMPLATE = template0 "
-                                        "ENCODING = 'UTF8' "
-                                        "LC_COLLATE = 'en_US.UTF-8' "
-                                        "LC_CTYPE = 'en_US.UTF-8';") tenant)
-    (catch Exception e
-      (do
-        (log/error e)
-        (try (drop-tenant-db root-db-uri tenant)
-             (catch Exception e))
-        (throw e)))))
-
-(defn configure-tenant-db [root-db-uri tenant root-tenant-db-uri tenant-db-uri]
-  (try
-    (util/exec-no-transact! root-tenant-db-uri
-                            "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
-    (util/exec-no-transact! root-tenant-db-uri
-                            "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-    (util/exec-no-transact! root-tenant-db-uri
-                            "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-    (util/exec-no-transact! root-tenant-db-uri
-                            "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
-    (migrate/do-migrate (ragtime.jdbc/sql-database tenant-db-uri)
-                        (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenants"))
-    (catch Exception e
-      (do
-        (drop-tenant-db root-db-uri tenant)
-        (log/error e)
-        (throw e))))
-  )
-
-(defn drop-tenant-from-lumen-db [lumen-encryption-key lumen-db-uri tenant-db-uri]
-  (try
-    (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where db_uri='%s'" (aes/encrypt lumen-encryption-key tenant-db-uri)))
-    (catch Exception e
-      (do
-        (log/error e)
-        (throw e)))))
-
-(defn add-tenant-to-lumen-db [lumen-encryption-key root-db-uri lumen-db-uri tenant-db-uri tenant label title]
-  (try
-    (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri tenant-db-uri)
-    (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
-                                         :label label :title title})
-    (catch Exception e
-      (do
-        (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri tenant-db-uri)
-        (drop-tenant-db root-db-uri tenant)
-        (log/error e)
-        (throw e)))))
 
 (defn db-uri*
   ([] (db-uri* {}))
@@ -212,17 +150,17 @@
   [lumen-encryption-key db-uris]
   (log/error :drop-tenant-database (:tenant db-uris))
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
-    (drop-tenant-from-lumen-db lumen-encryption-key lumen-db tenant-db)
-    (drop-tenant-db root-db tenant)))
+    (db/drop-tenant-from-lumen-db lumen-encryption-key lumen-db tenant-db)
+    (db/drop-tenant-db root-db tenant)))
 
 (defn setup-tenant-database
   [label title lumen-encryption-key db-uris]
   (drop-tenant-database lumen-encryption-key db-uris)
   (log/error :setup-tenant-database label title)
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
-    (create-tenant-db root-db tenant tenant-password)
-    (configure-tenant-db root-db tenant root-tenant-db tenant-db)
-    (add-tenant-to-lumen-db lumen-encryption-key root-db lumen-db tenant-db tenant label title)
+    (db/create-tenant-db root-db tenant tenant-password)
+    (db/configure-tenant-db root-db tenant root-tenant-db tenant-db)
+    (db/add-tenant-to-lumen-db lumen-encryption-key root-db lumen-db tenant-db tenant label title)
     (log/error :setup-tenant-database-finished :dbs db-uris)
     true))
 
