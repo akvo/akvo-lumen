@@ -109,17 +109,17 @@
               ks)))
     (keys s)    
     (let [o (:akvo.lumen.admin/add-tenant s)]
-      (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
+      (binding [add-tenant/env-vars (:db o)]
         (let [encryption-key (-> o :db-settings :encryption-key)
-              label "milo"
-              email "juan@akvo.org"
+              label "milo2"
+              email "juanantonioruz@gmail.com"
               url (format "https://%s.akvolumen.org" label)
               title "title-milo"
               dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (:password add-tenant/env-vars))]
 
-          
-          (remove-tenant/cleanup-keycloak (:authorizer o) label)
-          (add-tenant/drop-tenant-database encryption-key dbs)
+          (add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
+          #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
+          #_(add-tenant/drop-tenant-database encryption-key label dbs)
           #_(add-tenant/setup-tenant-database label title encryption-key dbs)
           #_(add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url))))
 

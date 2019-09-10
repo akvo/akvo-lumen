@@ -61,7 +61,7 @@
                                          :label label :title title})
     (catch Exception e
       (do
-        (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri tenant-db-uri)
+        (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label)
         (drop-tenant-db root-db-uri tenant)
         (log/error e)
         (throw e)))))

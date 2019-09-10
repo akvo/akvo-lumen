@@ -148,15 +148,15 @@
      :tenant-password tenant-password}))
 
 (defn drop-tenant-database
-  [lumen-encryption-key db-uris]
+  [lumen-encryption-key label db-uris]
   (log/info :drop-tenant-database (:tenant db-uris))
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
-    (log/info :drop-tenant-from-lumen-db (db/drop-tenant-from-lumen-db lumen-encryption-key lumen-db tenant-db))
+    (log/info :drop-tenant-from-lumen-db :label label (db/drop-tenant-from-lumen-db lumen-encryption-key lumen-db label))
     (log/info :drop-tenant-db (db/drop-tenant-db root-db tenant))))
 
 (defn setup-tenant-database
   [label title lumen-encryption-key db-uris]
-  (drop-tenant-database lumen-encryption-key db-uris)
+  (drop-tenant-database lumen-encryption-key label db-uris)
   (log/info :setup-tenant-database :label label title title :db-uris db-uris)
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
     (db/create-tenant-db root-db tenant tenant-password)
@@ -290,10 +290,10 @@
 (defn new-tenant-db-pass []
   (s/replace (squuid) "-" ""))
 
-(defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type] :as data}]
+(defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type dbs] :as data}]
   (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db] :as db-uris} (db-uris label (new-tenant-db-pass))
-        _ (setup-tenant-database (:encryption-key env) label title db-uris)
+        {:keys [tenant-db] :as db-uris} (if dbs dbs (db-uris label (new-tenant-db-pass)))
+        _ (setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris)
         {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
     (exec-mail (merge administer {:user-creds user-creds
                                   :tenant-db tenant-db
