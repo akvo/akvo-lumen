@@ -75,12 +75,12 @@
 
     (log/error :cleanup-keycloak :group-id group-id)
     (when (some? group-id)
-      (log/info :update-public-client (keycloak/update-client kc headers public-client util/http-client-req-defaults))
-      (log/info :update-confidential-client (keycloak/update-client kc headers confidential-client util/http-client-req-defaults))
-      (log/info :unpair (keycloak/remove-role-mappings kc headers group-id util/http-client-req-defaults))
-      (log/info :remove-group (keycloak/remove-group kc headers group-id util/http-client-req-defaults))
-      (log/info :remove-role (keycloak/remove-role kc headers (util/role-name tenant-label) util/http-client-req-defaults))
-      (log/info :remove-role (keycloak/remove-role kc headers (util/role-name tenant-label true) util/http-client-req-defaults))
+      (log/info :update-public-client (:status (keycloak/update-client kc headers public-client util/http-client-req-defaults)))
+      (log/info :update-confidential-client (:status (keycloak/update-client kc headers confidential-client util/http-client-req-defaults)))
+      (log/info :remove-role-mappings (:status (keycloak/remove-role-mappings kc headers group-id util/http-client-req-defaults)))
+      (log/info :remove-group (:status (keycloak/remove-group kc headers group-id util/http-client-req-defaults)))
+      (log/info :remove-role (:status (keycloak/remove-role kc headers (util/role-name tenant-label) util/http-client-req-defaults)))
+      (log/info :remove-admin-role (:status (keycloak/remove-role kc headers (util/role-name tenant-label true) util/http-client-req-defaults)))
       )))
 
 (defn remove-tenant [label]

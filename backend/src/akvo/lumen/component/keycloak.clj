@@ -42,7 +42,7 @@
 (defn remove-group
   "Remove keycloak group by id"
   [{:keys [api-root]} headers id & [req-settings]]
-  (log/error :remove-group :id id)
+  (log/debug :remove-group :id id)
   (http.client/delete* (format "%s/groups/%s" api-root id)
                        (merge http-client-req-defaults
                               req-settings
@@ -66,7 +66,7 @@
           {:headers headers})))
 
 (defn remove-role [{:keys [api-root]} headers role-name & [req-settings]]
-  (log/error :remove-role api-root role-name)
+  (log/debug :remove-role api-root role-name)
   (http.client/delete* (format "%s/roles/%s" api-root role-name )
                        (merge                        
                         http-client-req-defaults
@@ -75,7 +75,7 @@
 
 (defn create-group
   [{:keys [api-root credentials openid-config]} headers root-group-id role group-name]
-  (log/error :create-role :name role)
+  (log/debug :create-role :name role)
   (http.client/post* (format "%s/roles" api-root)
                      (merge
                       http-client-req-defaults
@@ -88,7 +88,7 @@
                                  {:body (json/encode {"name" group-name})
                                   :headers headers}))
                          :body json/decode (get "id"))
-        _ (log/error :create-group :group-name group-name :new-group-id new-group-id)
+        _ (log/debug :create-group :group-name group-name :new-group-id new-group-id)
         available-roles (-> (http.client/get*
                              (format "%s/groups/%s/role-mappings/realm/available"
                                      api-root root-group-id)
@@ -98,17 +98,17 @@
                             available-roles)
                     first
                     (get "id"))
-        pair-resp (http.client/post*
-                   (format "%s/groups/%s/role-mappings/realm" api-root new-group-id)
-                   (merge http-client-req-defaults
-                          {:body (json/encode [{"id" role-id
-                                                "name" role
-                                                "scopeParamRequired" false
-                                                "composite" false
-                                                "clientRole" false
-                                                "containerId" "Akvo"}])
-                           :headers headers}))]
-    (log/error :create-group :role-mappings :new-group-id new-group-id :role-id role-id :pair-resp pair-resp)
+        role-mappings (http.client/post*
+                       (format "%s/groups/%s/role-mappings/realm" api-root new-group-id)
+                       (merge http-client-req-defaults
+                              {:body (json/encode [{"id" role-id
+                                                    "name" role
+                                                    "scopeParamRequired" false
+                                                    "composite" false
+                                                    "clientRole" false
+                                                    "containerId" "Akvo"}])
+                               :headers headers}))]
+    (log/debug :create-group :role-mappings :new-group-id new-group-id :role-id role-id :role-mappings-status (:status role-mappings))
     new-group-id))
 
 (defn update-client

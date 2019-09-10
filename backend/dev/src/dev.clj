@@ -115,7 +115,7 @@
     (let [o (:akvo.lumen.admin/add-tenant s)]
       (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
         (let [encryption-key (-> o :db-settings :encryption-key)
-              label "once"
+              label "marcus-level"
               email "juan@akvo.org"
               url "http://t3.lumen.local"
               title "title-milo"
@@ -129,7 +129,7 @@
                                         :url url
                                         :auth-type "keycloak"}))
 )))
-    (let [authz (:authorizer (:akvo.lumen.admin/add-tenant s))]
+    #_(let [authz (:authorizer (:akvo.lumen.admin/add-tenant s))]
       (remove-tenant/get-groups authz))
 
     )

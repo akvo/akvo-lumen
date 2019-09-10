@@ -157,12 +157,11 @@
 (defn setup-tenant-database
   [label title lumen-encryption-key db-uris]
   (drop-tenant-database lumen-encryption-key db-uris)
-  (log/error :setup-tenant-database label title)
+  (log/info :setup-tenant-database :label label title title :db-uris db-uris)
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
     (db/create-tenant-db root-db tenant tenant-password)
     (db/configure-tenant-db root-db tenant root-tenant-db tenant-db)
     (db/add-tenant-to-lumen-db lumen-encryption-key root-db lumen-db tenant-db tenant label title)
-    (log/error :setup-tenant-database-finished :dbs db-uris)
     true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
