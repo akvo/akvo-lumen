@@ -149,7 +149,7 @@
 
 (defn drop-tenant-database
   [lumen-encryption-key db-uris]
-  (log/error :drop-tenant-database (:tenant db-uris))
+  (log/info :drop-tenant-database (:tenant db-uris))
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
     (db/drop-tenant-from-lumen-db lumen-encryption-key lumen-db tenant-db)
     (db/drop-tenant-db root-db tenant)))
@@ -191,7 +191,7 @@
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
   [authorizer label email url]
-  (log/error :setup-tenant-in-keycloak label email url)
+  (log/info :setup-tenant-in-keycloak label email url)
   (remove-tenant/cleanup-keycloak authorizer label)
   (let [headers (keycloak/request-headers authorizer)
         lumen-group-id (-> (keycloak/root-group authorizer headers)
@@ -201,7 +201,7 @@
         {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
     (add-tenant-urls-to-clients authorizer headers url)
     (keycloak/add-user-to-group headers (:api-root authorizer) user-id tenant-admin-id)
-    (log/error "User Credentials:" user-rep)
+    (log/info "User Credentials:" user-rep)
     (assoc user-rep :url url)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

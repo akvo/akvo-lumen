@@ -91,6 +91,12 @@
   (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer))
 
 (comment
+
+  #_(add-tenant/exec-mail (merge (select-keys o [:emailer])
+                                 {:user-creds {:user-id "user-id" :email email :tmp-password "hola"}
+                                  :tenant-db (.getJdbcUrl (:datasource (db-conn)))
+                                  :url url
+                                  :auth-type "keycloak"}))
   (do
     (def s (let [prod? false
                  [ks edn-file] (if prod?
@@ -102,38 +108,21 @@
               (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file prod?])
               ks)))
     (keys (:akvo.lumen.admin/add-tenant s))    
-    #_(let [authz (:authorizer (:akvo.lumen.admin/add-tenant s))
-          h (keycloak/request-headers authz)
-          id (get (keycloak/fetch-client authz h "akvo-lumen-confidential") "id")]
-      (pprint (map (juxt :id :name) (-> (keycloak/get-roles authz  h)
-                                 :body
-                                 (json/parse-string keyword)
-                                
-                                 )))
-       
-      )
     (let [o (:akvo.lumen.admin/add-tenant s)]
       (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
         (let [encryption-key (-> o :db-settings :encryption-key)
-              label "marcus-level"
-              email "juan@akvo.org"
-              url "http://t3.lumen.local"
+              label "t3"
+              email "jerome@t3.lumen.localhost"
+              url (format "http://%s.lumen.local:3030" label)
               title "title-milo"
               dbs (add-tenant/db-uris label "tenant-pass" "password")]
-          (add-tenant/setup-tenant-database label title encryption-key dbs)
+
           #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
-          (add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url)
-          #_(add-tenant/exec-mail (merge (select-keys o [:emailer])
-                                       {:user-creds {:user-id "user-id" :email email :tmp-password "hola"}
-                                        :tenant-db (.getJdbcUrl (:datasource (db-conn)))
-                                        :url url
-                                        :auth-type "keycloak"}))
-)))
-    #_(let [authz (:authorizer (:akvo.lumen.admin/add-tenant s))]
-      (remove-tenant/get-groups authz))
+          
+          (add-tenant/setup-tenant-database label title encryption-key dbs)
+          (add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url))))
 
     )
-  
 )
 
 
