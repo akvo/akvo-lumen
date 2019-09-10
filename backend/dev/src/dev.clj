@@ -98,31 +98,34 @@
                                   :url url
                                   :auth-type "keycloak"}))
   (do
-    (def s (let [prod? false
+    (def s (let [prod? true
                  [ks edn-file] (if prod?
                                  [(do (add-tenant/ig-derives)
                                       (add-tenant/ig-select-keys)) "prod.edn"]
                                  [(do (dev-ig-derives)
                                       [:akvo.lumen.component.emailer/dev-emailer]) "local.edn"])]
              (add-tenant/admin-system
-              (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file prod?])
+              (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file ] prod?)
               ks)))
-    (keys (:akvo.lumen.admin/add-tenant s))    
+    (keys s)    
     (let [o (:akvo.lumen.admin/add-tenant s)]
       (binding [add-tenant/env-vars (:db (:akvo.lumen.admin/add-tenant s))]
         (let [encryption-key (-> o :db-settings :encryption-key)
-              label "t3"
-              email "jerome@t3.lumen.localhost"
-              url (format "http://%s.lumen.local:3030" label)
+              label "milo"
+              email "juan@akvo.org"
+              url (format "https://%s.akvolumen.org" label)
               title "title-milo"
-              dbs (add-tenant/db-uris label "tenant-pass" "password")]
+              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (:password add-tenant/env-vars))]
 
-          #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
           
-          (add-tenant/setup-tenant-database label title encryption-key dbs)
-          (add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url))))
+          (remove-tenant/cleanup-keycloak (:authorizer o) label)
+          (add-tenant/drop-tenant-database encryption-key dbs)
+          #_(add-tenant/setup-tenant-database label title encryption-key dbs)
+          #_(add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url))))
 
     )
+
+
 )
 
 

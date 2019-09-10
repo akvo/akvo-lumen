@@ -42,10 +42,12 @@
 (defn find-group-id
   "Find the keycloak group id for tenant-label, or nil if not found"
   [kc headers tenant-label]
+  (log/debug :tt tenant-label)
   (let [all-groups (keycloak/get-groups kc headers util/http-client-req-defaults)
         akvo-group (find-group all-groups "akvo")
         lumen-group (find-group (:subGroups akvo-group) "lumen")
         tenant-group (find-group (:subGroups lumen-group) tenant-label)]
+    (log/debug :find-group-id :akvo-group akvo-group :lumen-group lumen-group :tenant-group tenant-group)
     (:id tenant-group)))
 
 (defn- remove-re
@@ -68,7 +70,7 @@
   [kc tenant-label]
   (let [headers (keycloak/request-headers kc)
         confidential-client (-> (keycloak/fetch-client kc headers "akvo-lumen-confidential")
-                              (remove-client-redirect-uris tenant-label))
+                                (remove-client-redirect-uris tenant-label))
         public-client (-> (keycloak/fetch-client kc headers "akvo-lumen")
                               (remove-client-redirect-uris tenant-label))
         group-id (find-group-id kc headers tenant-label)]

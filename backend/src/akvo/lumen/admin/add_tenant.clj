@@ -151,8 +151,8 @@
   [lumen-encryption-key db-uris]
   (log/info :drop-tenant-database (:tenant db-uris))
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
-    (db/drop-tenant-from-lumen-db lumen-encryption-key lumen-db tenant-db)
-    (db/drop-tenant-db root-db tenant)))
+    (log/info :drop-tenant-from-lumen-db (db/drop-tenant-from-lumen-db lumen-encryption-key lumen-db tenant-db))
+    (log/info :drop-tenant-db (db/drop-tenant-db root-db tenant))))
 
 (defn setup-tenant-database
   [label title lumen-encryption-key db-uris]
@@ -287,9 +287,12 @@
     (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
                                    "Text-part" text-part})))
 
+(defn new-tenant-db-pass []
+  (s/replace (squuid) "-" ""))
+
 (defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type] :as data}]
   (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db] :as db-uris} (db-uris label (s/replace (squuid) "-" ""))
+        {:keys [tenant-db] :as db-uris} (db-uris label (new-tenant-db-pass))
         _ (setup-tenant-database (:encryption-key env) label title db-uris)
         {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
     (exec-mail (merge administer {:user-creds user-creds

@@ -52,11 +52,11 @@
 (defn get-groups
   "List all keycloak groups and sub groups"
   [{:keys [api-root]} headers & [req-settings]]
-  (:body (http.client/get* (format "%s/groups" api-root)
+  (let [res (http.client/get* (format "%s/groups" api-root)
                            (merge http-client-req-defaults
                                   req-settings
-                                  {:headers headers
-                                   :as :json}))))
+                                  {:headers headers}))]
+    (json/parse-string (:body res) keyword)))
 
 (defn remove-role-mappings [{:keys [api-root]} headers group-id & [req-settings]]
   (http.client/delete*

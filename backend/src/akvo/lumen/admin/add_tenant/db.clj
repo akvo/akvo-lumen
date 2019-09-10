@@ -46,9 +46,9 @@
         (throw e))))
   )
 
-(defn drop-tenant-from-lumen-db [lumen-encryption-key lumen-db-uri tenant-db-uri]
+(defn drop-tenant-from-lumen-db [lumen-encryption-key lumen-db-uri label]
   (try
-    (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where db_uri='%s'" (aes/encrypt lumen-encryption-key tenant-db-uri)))
+    (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where label='%s'" label))
     (catch Exception e
       (do
         (log/error e)
@@ -56,7 +56,7 @@
 
 (defn add-tenant-to-lumen-db [lumen-encryption-key root-db-uri lumen-db-uri tenant-db-uri tenant label title]
   (try
-    (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri tenant-db-uri)
+    (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label)
     (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
                                          :label label :title title})
     (catch Exception e
