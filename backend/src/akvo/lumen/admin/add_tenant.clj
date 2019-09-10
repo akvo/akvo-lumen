@@ -124,7 +124,7 @@
     (format "%s://%s" (.getProtocol url) (.getHost url))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Database
+;;; tenant-database
 ;;;
 
 (defn db-uri*
@@ -166,7 +166,7 @@
     true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Keycloak
+;;; user
 ;;;
 
 (defn user-representation
@@ -176,7 +176,7 @@
      :user-id (get user "id")}
     (lib.user/create-new-account authorizer headers email)))
 
-(defn add-tenant-urls-to-client
+(defn- add-tenant-urls
   [client url]
   (-> client
       (update "webOrigins" conj url)
@@ -186,8 +186,8 @@
   [authorizer headers url]
   (let [confidential-client (keycloak/fetch-client authorizer headers "akvo-lumen-confidential")
         public-client (keycloak/fetch-client authorizer headers "akvo-lumen")]
-    (keycloak/update-client authorizer headers (add-tenant-urls-to-client confidential-client url))
-    (keycloak/update-client authorizer headers (add-tenant-urls-to-client public-client url))))
+    (keycloak/update-client authorizer headers (add-tenant-urls confidential-client url) util/http-client-req-defaults)
+    (keycloak/update-client authorizer headers (add-tenant-urls public-client url) util/http-client-req-defaults)))
 
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
@@ -312,7 +312,6 @@
       (prn (.getMessage e))
       (when (= (type e) clojure.lang.ExceptionInfo)
         (prn (ex-data e))))))
-
 
 (defmethod ig/init-key :akvo.lumen.admin/add-tenant [_ {:keys [emailer auth-type] :as opts}]
   opts)

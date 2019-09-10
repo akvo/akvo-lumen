@@ -1,6 +1,6 @@
 (ns akvo.lumen.admin.remove-tenant
   "The following env vars are assumed to be present:
-  ENCRYPTION_KEY, KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
+  KC_URL, KC_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD
   ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
   encrypting the db_uri.
   The PG_* env vars can be found in the ElephantSQL console for the appropriate
@@ -28,77 +28,38 @@
             [clojure.string :as s]
             [cheshire.core :as json]))
 
-(defn remove-group
-  "Remove keycloak group by id"
-  [kc id]
-  (log/error :remove-group :id id)
-  (http.client/delete* (format "%s/groups/%s" (:api-root kc) id)
-                       (merge util/http-client-req-defaults
-                              {:headers (keycloak/request-headers kc)
-                               :as :json})))
-
-(defn get-groups
-  "List all keycloak groups and sub groups"
-  [kc]
-  (:body (http.client/get* (format "%s/groups" (:api-root kc))
-                           (merge util/http-client-req-defaults
-                                  {:headers (keycloak/request-headers kc)
-                                   :as :json}))))
-
-(defn update-client
-  "Update keycloak client"
-  [kc client]
-  (http.client/put* (format "%s/clients/%s" (:api-root kc) (:id client))
-                    (merge util/http-client-req-defaults
-                           {:headers (keycloak/request-headers kc)
-                            :body (json/generate-string client)
-                            :content-type :json})))
-
-(defn search
+(defn- search
   "Performs a linear search for an item in a collection for which (pred item) is truthy.
   Similar to `clojure.core/some` but returns the item instead of the predicate result."
   [pred xs]
   (some #(when (pred %) %) xs))
 
-(defn find-group
+(defn- find-group
   "Find group by name in a sequence of groups"
   [groups group-name]
   (search #(= (:name %) group-name) groups))
 
 (defn find-group-id
   "Find the keycloak group id for tenant-label, or nil if not found"
-  [kc tenant-label]
-  (let [all-groups (get-groups kc)
+  [kc headers tenant-label]
+  (let [all-groups (keycloak/get-groups kc headers util/http-client-req-defaults)
         akvo-group (find-group all-groups "akvo")
         lumen-group (find-group (:subGroups akvo-group) "lumen")
         tenant-group (find-group (:subGroups lumen-group) tenant-label)]
     (:id tenant-group)))
 
-(defn remove-re
+(defn- remove-re
   "Remove all strings in xs that matches re"
   [xs re]
   (vec (remove #(re-matches (re-pattern re) %) xs)))
 
-(defn remove-client-redirect-uris
+(defn- remove-client-redirect-uris
   "Remove tenant label uri's from web origins and redirect uris"
   [client tenant-label]
   (let [re (format "https?://%s\\..+" tenant-label)]
     (-> client
-        (update :webOrigins remove-re re)
-        (update :redirectUris remove-re re))))
-
-(defn remove-role [{:keys [api-root]} headers role-name]
-  (log/error :remove-role api-root role-name)
-  (http.client/delete* (format "%s/roles/%s" api-root role-name )
-                     (merge
-                      util/http-client-req-defaults
-                      {:headers headers})))
-
-(defn unpair [{:keys [api-root]} headers group-id]
-  (http.client/delete*
-   (format "%s/groups/%s/role-mappings/realm" api-root group-id)
-   (merge util/http-client-req-defaults
-          {:headers headers})))
+        (update "webOrigins" remove-re re)
+        (update "redirectUris" remove-re re))))
 
 (defn cleanup-keycloak
   "Cleanup (remove) tenant-label from keycloak.
@@ -107,21 +68,19 @@
   [kc tenant-label]
   (let [headers (keycloak/request-headers kc)
         confidential-client (-> (keycloak/fetch-client kc headers "akvo-lumen-confidential")
-                              w/keywordize-keys
                               (remove-client-redirect-uris tenant-label))
         public-client (-> (keycloak/fetch-client kc headers "akvo-lumen")
-                              w/keywordize-keys
                               (remove-client-redirect-uris tenant-label))
-        group-id (find-group-id kc tenant-label)]
+        group-id (find-group-id kc headers tenant-label)]
 
     (log/error :cleanup-keycloak :group-id group-id)
     (when (some? group-id)
-      (log/info :udpate-public-client (update-client kc public-client))
-      (log/info :udpate-confidential-client (update-client kc confidential-client))
-      (log/info :unpair (unpair kc headers group-id))
-      (log/info :remove-group (remove-group kc group-id))
-      (log/info :remove-role (remove-role kc headers (util/role-name tenant-label)))
-      (log/info :remove-role (remove-role kc headers (util/role-name tenant-label true)))
+      (log/info :update-public-client (keycloak/update-client kc headers public-client util/http-client-req-defaults))
+      (log/info :update-confidential-client (keycloak/update-client kc headers confidential-client util/http-client-req-defaults))
+      (log/info :unpair (keycloak/remove-role-mappings kc headers group-id util/http-client-req-defaults))
+      (log/info :remove-group (keycloak/remove-group kc headers group-id util/http-client-req-defaults))
+      (log/info :remove-role (keycloak/remove-role kc headers (util/role-name tenant-label) util/http-client-req-defaults))
+      (log/info :remove-role (keycloak/remove-role kc headers (util/role-name tenant-label true) util/http-client-req-defaults))
       )))
 
 (defn remove-tenant [label]

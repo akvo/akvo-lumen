@@ -39,6 +39,40 @@
                       http-client-req-defaults
                       {:headers headers})))
 
+(defn remove-group
+  "Remove keycloak group by id"
+  [{:keys [api-root]} headers id & [req-settings]]
+  (log/error :remove-group :id id)
+  (http.client/delete* (format "%s/groups/%s" api-root id)
+                       (merge http-client-req-defaults
+                              req-settings
+                              {:headers headers
+                               :as :json})))
+
+(defn get-groups
+  "List all keycloak groups and sub groups"
+  [{:keys [api-root]} headers & [req-settings]]
+  (:body (http.client/get* (format "%s/groups" api-root)
+                           (merge http-client-req-defaults
+                                  req-settings
+                                  {:headers headers
+                                   :as :json}))))
+
+(defn remove-role-mappings [{:keys [api-root]} headers group-id & [req-settings]]
+  (http.client/delete*
+   (format "%s/groups/%s/role-mappings/realm" api-root group-id)
+   (merge http-client-req-defaults
+          req-settings
+          {:headers headers})))
+
+(defn remove-role [{:keys [api-root]} headers role-name & [req-settings]]
+  (log/error :remove-role api-root role-name)
+  (http.client/delete* (format "%s/roles/%s" api-root role-name )
+                       (merge                        
+                        http-client-req-defaults
+                        req-settings
+                        {:headers headers})))
+
 (defn create-group
   [{:keys [api-root credentials openid-config]} headers root-group-id role group-name]
   (log/error :create-role :name role)
@@ -78,9 +112,10 @@
     new-group-id))
 
 (defn update-client
-  [{:keys [api-root]} headers {:strs [id] :as client}]
+  [{:keys [api-root]} headers {:strs [id] :as client} & [req-settings]]
   (http.client/put* (format "%s/clients/%s" api-root id)
                     (merge http-client-req-defaults
+                           req-settings
                            {:body (json/encode client)
                             :headers headers})))
 
@@ -121,7 +156,6 @@
 (defn root-group
   [{:keys [api-root credentials openid-config] :as data} headers]
   (group-by-path data headers nil))
-
 
 (defn group-members
   "Return groups memebers using a group id"
