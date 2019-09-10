@@ -33,7 +33,7 @@
   be configured via the KEYCLOAK_URL env var."
   [keycloak-public-client auth0-public-client authorizer]
   (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak-public-client))
-        auth0-verifier (RSASSAVerifier.  (:rsa-key auth0-public-client))]
+        auth0-verifier (RSASSAVerifier. (:rsa-key auth0-public-client))]
     (fn [handler]
       (fn [{:keys [tenant] :as req}]
         (if-let [token (jwt/jwt-token req)]
@@ -74,16 +74,32 @@
 ;;; Authorization helpers
 ;;;
 
-;; Currently Keycloak API authz is not available when authenticating with Auth0
-;; but only for users with app_metadata set to true in path -> lumen -> features
-;; -> apiAuthz and akvo.org email.
-(defn api-authz? [{:strs [email email_verified] :as jwt-claims}]
-  (let [flag-path ["https://akvo.org/app_metadata" "lumen" "features"
-                   "apiAuthz"]
-        flag (get-in jwt-claims flag-path)]
-    (and (and (some? flag) flag)
-         (and (some? email_verified) email_verified)
-         (and (some? email) (string/ends-with? email "@akvo.org")))))
+(defmulti api-authz?
+  (fn [{:strs [iss] :as jwt-claims}]
+    (cond
+      (string/ends-with? iss "eu.auth0.com/") :auth0
+      (or (= iss "https://kc.akvotest.org/auth/realms/akvo")
+          (= iss "https://login.akvo.org/auth/realms/akvo")) :keycloak)))
+
+#_(defmethod api-authz? :auth0
+    [{:strs [email email_verified] :as jwt-claims}]
+    (let [flag-path ["https://akvo.org/app_metadata" "lumen" "features"
+                     "apiAuthz"]
+          flag (get-in jwt-claims flag-path)]
+      (and (and (some? flag) flag)
+           (and (some? email_verified) email_verified)
+           (and (some? email) (string/ends-with? email "@akvo.org")))))
+
+;; If authenticated with auth0 API authz is required
+(defmethod api-authz? :auth0
+  [{:strs [email email_verified] :as jwt-claims}]
+  true)
+
+(defmethod api-authz? :keycloak
+  [{:strs [email family_name]}]
+  (and
+   (and (some? family_name) (string/ends-with? family_name "$auth"))
+   (and (some? email) (string/ends-with? email "@akvo.org"))))
 
 (defn- application-json-type
   "code taken from ring.middleware.json/wrap-json-response"
@@ -176,9 +192,30 @@
       application-json-type))
 
 (def internal-server-error
-  (-> (response/response "Internal server errror")
+  (-> (response/response "Internal server error")
       (response/status 500)
       application-json-type))
+
+(defn handle-api-authorization
+  [authorizer handler {:keys [jwt-claims tenant] :as request}]
+  (try
+    (let [email (get jwt-claims "email")
+          allowed-paths (delay (p/allowed-paths authorizer email))]
+      (cond
+        (nil? jwt-claims) not-authorized
+        (admin-path? request) (if (api-tenant-admin? tenant @allowed-paths)
+                                (handler request)
+                                not-authorized)
+        (api-path? request) (if (api-tenant-member? tenant @allowed-paths)
+                              (handler request)
+                              not-authorized)
+        :else not-authorized))
+    (catch Exception e
+      (let [wrap-info (fn [e v] (log/info (.getMessage e)) v)]
+        (case (-> e ex-data :response-code)
+          503 (wrap-info e service-unavailable)
+          401 not-authorized
+          (wrap-info e internal-server-error))))))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-api-authorization
   [_ {:keys [authorizer]}]
@@ -204,6 +241,7 @@
                 401 not-authorized
                 (wrap-info e internal-server-error)))))
         (handler request)))))
+
 
 (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-api-authorization [_]
   (s/keys :req-un [::p/authorizer]))
