@@ -49,14 +49,15 @@
 
 (defn create-new-account [keycloak tenant-conn email]
   (let [headers (keycloak/request-headers keycloak)
-        user-id (as-> (p/create-user keycloak headers email) x
-                  (:headers x)
-                  (get x "Location")
-                  (str/split x #"/")
-                  (last x))
+        user-id (-> (p/create-user keycloak headers email)
+                    (get-in [:headers "Location"])
+                    (str/split #"/")
+                    last)
         tmp-password (random-url-safe-string 6)]
     (p/reset-password keycloak headers user-id tmp-password)
-    tmp-password))
+    {:email email
+     :user-id user-id
+     :tmp-password tmp-password}))
 
 (defn create-invite
   "First check if user is already a member of current tenant, then don't invite.
@@ -71,7 +72,7 @@
     (p/user? keycloak email) (invite-to-tenant emailer tenant-conn auth-type location email
                                        author-claims)
     :else
-    (let [tmp-password (create-new-account keycloak tenant-conn email)
+    (let [tmp-password (:tmp-password (create-new-account keycloak tenant-conn email))
           invitation-id (new-invitation-id tenant-conn author-claims email)
           sender-email (get author-claims "email")]
       (send-invitation-account-email emailer sender-email email location invitation-id tmp-password auth-type)))

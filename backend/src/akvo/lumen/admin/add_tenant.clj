@@ -169,26 +169,12 @@
 ;;; Keycloak
 ;;;
 
-(defn create-new-user
-  "Creates a new user and return a map containing email, and
-   new user-id and temporary password."
-  [authorizer headers email]
-  (let [tmp-password (random-url-safe-string 6)
-        user-id (-> (p/create-user authorizer headers email)
-                    (get-in [:headers "Location"])
-                    (s/split #"/")
-                    last)]
-    (p/reset-password authorizer headers user-id tmp-password)
-    {:email email
-     :user-id user-id
-     :tmp-password tmp-password}))
-
 (defn user-representation
   [authorizer headers email]
   (if-let [user (keycloak/fetch-user-by-email headers (:api-root authorizer) email)]
     {:email email
      :user-id (get user "id")}
-    (create-new-user authorizer headers email)))
+    (lib.user/create-new-account authorizer headers email)))
 
 (defn add-tenant-urls-to-client
   [client url]
