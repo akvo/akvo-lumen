@@ -16,13 +16,13 @@
 (s/def ::auth0-public-client ::auth0/public-client)
 
 
-;; (defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-authentication
-;;   [_ {:keys [keycloak-public-client auth0-public-client authorizer]}]
-;;   (wrap-jwt-authentication keycloak-public-client auth0-public-client authorizer))
+(defmethod ig/init-key :akvo.lumen.auth/wrap-jwt-authentication
+  [_ {:keys [keycloak-public-client auth0-public-client authorizer]}]
+  (wrap-jwt-authentication keycloak-public-client auth0-public-client authorizer))
 
-;; (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt-authentication
-;;   [_]
-;;   (s/keys :req-un [::keycloak-public-client ::auth0-public-client ::p/authorizer]))
+(defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt-authentication
+  [_]
+  (s/keys :req-un [::keycloak-public-client ::auth0-public-client ::p/authorizer]))
 
 ;; (defmethod ig/pre-init-spec :akvo.lumen.auth/wrap-jwt-authorization
 ;;   [_]
