@@ -14,24 +14,24 @@
       (contains? auth-roles
                  (format "akvo:lumen:%s" tenant))))
 
+(defn jwt-authorization
+  [handler {:keys [jwt-claims] :as request}
+   {:keys [keycloak-public-client auth0-public-client]}]
+  (let [issuer (u/issuer-type jwt-claims keycloak-public-client auth0-public-client)]
+    (cond
+      (nil? jwt-claims) u/not-authenticated
+      (u/admin-path? request) (if (tenant-admin? request issuer)
+                                (handler request)
+                                u/not-authorized)
+      (u/api-path? request) (if (tenant-user? request issuer)
+                              (handler request)
+                              u/not-authorized)
+      :else u/not-authorized)))
+
 (defn wrap-jwt-authorization
-  "Wrap authorization for the API via JWT claims as:
-  - No claims -> Not authenticated.
-  - Request to admin path -> needs admin role on current tenant.
-  - Request to api path -> needs to be member role on current tenant.
-  - Otherwise not authorized."
   [keycloak-public-client auth0-public-client]
   (fn [handler]
-    (fn [{:keys [jwt-claims] :as request}]
-      (if (u/api-authz? jwt-claims)
-        (handler request)
-        (let [issuer (u/issuer-type jwt-claims keycloak-public-client auth0-public-client)]
-          (cond
-            (nil? jwt-claims) u/not-authenticated
-            (u/admin-path? request) (if (tenant-admin? request issuer)
-                                      (handler request)
-                                      u/not-authorized)
-            (u/api-path? request) (if (tenant-user? request issuer)
-                                    (handler request)
-                                    u/not-authorized)
-            :else u/not-authorized))))))
+    (fn [request]
+      (jwt-authorization
+       handler request {:auth0-public-client auth0-public-client
+                        :keycloak-public-client keycloak-public-client}))))

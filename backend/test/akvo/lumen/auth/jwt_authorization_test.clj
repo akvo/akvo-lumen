@@ -132,25 +132,3 @@
                               [:jwt-claims]
                               "realm_access"))]
       (check-response response 403))))
-
-
-
-
-
-(deftest api-tenant-member?-test
-  (let [tf (fn [cxt tenant allowed-paths bool]
-             (testing cxt
-               (is (= bool (m/api-tenant-member? tenant allowed-paths)))))]
-
-    (tf "Nil case"
-        "demo" nil false)
-    (tf "No allowed paths"
-        "demo" #{} false)
-    (tf "A user on the tenant"
-        "demo" #{"demo" "t1"} true)
-    (tf "A user on another tenant"
-        "demo" #{"t1"} false)
-    (tf "An admin on another tenant"
-        "demo" #{"t1/admin"} false)
-    (tf "An admin"
-        "demo" #{"demo/admin"} true)))
