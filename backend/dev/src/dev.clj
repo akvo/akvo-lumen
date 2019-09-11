@@ -91,12 +91,6 @@
   (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer))
 
 (comment
-
-  #_(add-tenant/exec-mail (merge (select-keys o [:emailer])
-                                 {:user-creds {:user-id "user-id" :email email :tmp-password "hola"}
-                                  :tenant-db (.getJdbcUrl (:datasource (db-conn)))
-                                  :url url
-                                  :auth-type "keycloak"}))
   (do
     (def s (let [prod? false
                  [ks edn-file] (if prod?
@@ -117,17 +111,13 @@
               title "milo4"
               dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (-> o :db :lumen :password))
               ]
-          #_(add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
-          (remove-tenant/cleanup-keycloak (:authorizer o) label)
-          (add-tenant/drop-tenant-database encryption-key label dbs)
+          (add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
+          #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
+          #_(add-tenant/drop-tenant-database encryption-key label dbs)
           #_(add-tenant/setup-tenant-database label title encryption-key dbs drop-if-exists?)
           #_(add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url))))
 
     )
-
-
-  
-
 )
 
 

@@ -33,6 +33,7 @@
             [akvo.lumen.admin.remove-tenant :as remove-tenant]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
+            [slingshot.slingshot :as slingshot]
             [akvo.lumen.lib.user :as lib.user]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.util :refer [conform-email squuid]]
@@ -190,19 +191,27 @@
 
 (defn setup-tenant-in-keycloak
   "Create two new groups as children to the akvo:lumen group"
-  [authorizer label email url]
+  [authorizer label email url drop-if-exists?]
   (log/info :setup-tenant-in-keycloak label email url)
-  (remove-tenant/cleanup-keycloak authorizer label)
-  (let [headers (keycloak/request-headers authorizer)
-        lumen-group-id (-> (keycloak/root-group authorizer headers)
-                           (get "id"))
-        tenant-id (keycloak/create-group authorizer headers lumen-group-id (util/role-name label) label)
-        tenant-admin-id (keycloak/create-group authorizer headers tenant-id (util/role-name label true) "admin")
-        {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
-    (add-tenant-urls-to-clients authorizer headers url)
-    (keycloak/add-user-to-group headers (:api-root authorizer) user-id tenant-admin-id)
-    (log/info "User Credentials:" user-rep)
-    (assoc user-rep :url url)))
+  (when drop-if-exists? (remove-tenant/cleanup-keycloak authorizer label))
+  (slingshot/try+
+    (let [headers (keycloak/request-headers authorizer)
+          lumen-group-id (-> (keycloak/root-group authorizer headers)
+                             (get "id"))
+          tenant-id (keycloak/create-group authorizer headers lumen-group-id (util/role-name label) label)
+          tenant-admin-id (keycloak/create-group authorizer headers tenant-id (util/role-name label true) "admin")
+          {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
+      (add-tenant-urls-to-clients authorizer headers url)
+      (keycloak/add-user-to-group headers (:api-root authorizer) user-id tenant-admin-id)
+      (log/info "User Credentials:" user-rep)
+      (assoc user-rep :url url))
+    (catch [:status 409] {:keys [body] :as o}
+      (if (s/includes? body "already exists")
+        (throw (ex-info "Keycloak data conflict problem, maybe you need to use :drop-if-exists? true "
+                        {:body body
+                         :status 409
+                         :current-values {:drop-if-exists? drop-if-exists?}}))
+        (slingshot/throw+)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main
@@ -291,10 +300,11 @@
   (s/replace (squuid) "-" ""))
 
 (defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type dbs] :as data}]
-  (let [{:keys [email label title url auth-type]} (conform-input url title email auth-type)
+  (let [drop-if-exists? (boolean (:drop-if-exists? administer))
+        {:keys [email label title url auth-type]} (conform-input url title email auth-type)
         {:keys [tenant-db] :as db-uris} (if dbs dbs (db-uris label (new-tenant-db-pass)))
-        _ (setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris (boolean (:drop-if-exists? administer)))
-        {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url)]
+        _ (setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
+        {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url  drop-if-exists?)]
     (exec-mail (merge administer {:user-creds user-creds
                                   :tenant-db tenant-db
                                   :auth-type auth-type
