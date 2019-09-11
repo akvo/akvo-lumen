@@ -2,13 +2,20 @@
   (:require [akvo.lumen.admin.util :as util]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str]
             [ragtime.jdbc :as r.jdbc]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as migrate]))
 
 
 (defn drop-tenant-db [root-db-uri tenant]
-  (util/exec-no-transact! root-db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
+  (try
+    (util/exec-no-transact! root-db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
+    (catch Exception e (let [message (.getMessage e)]
+                         (log/error e)
+                         (if (str/includes? message "is being accessed by other users")
+                           (throw (ex-info (format "Right now it's not possible to drop the database %s, there are still active connections to this db, don't hit the web application related, wait for a few minutes, then try again" tenant) {:tenant tenant} e))
+                           (throw e)))))
   (util/exec-no-transact! root-db-uri "DROP ROLE IF EXISTS \"%s\" " tenant))
 
 (defn create-tenant-db [root-db-uri tenant tenant-password drop-if-exists?]
