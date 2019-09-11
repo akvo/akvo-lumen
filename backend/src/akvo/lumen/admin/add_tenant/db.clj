@@ -11,7 +11,7 @@
   (util/exec-no-transact! root-db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
   (util/exec-no-transact! root-db-uri "DROP ROLE IF EXISTS \"%s\" " tenant))
 
-(defn create-tenant-db [root-db-uri tenant tenant-password]
+(defn create-tenant-db [root-db-uri tenant tenant-password drop-if-exists?]
   (try
     (util/exec-no-transact! root-db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
     (util/exec-no-transact! root-db-uri (str "CREATE DATABASE %1$s "
@@ -23,11 +23,13 @@
     (catch Exception e
       (do
         (log/error e)
-        (try (drop-tenant-db root-db-uri tenant)
-             (catch Exception e))
-        (throw e)))))
+        (try (when drop-if-exists?
+               (drop-tenant-db root-db-uri tenant))
+             (catch Exception e (do (log/error e) e)))
+        (throw (ex-info "seems that the database you try to create already exists, try to use :drop-if-exists? true if you want to recreate it" {:current-values {:tenant tenant
+                                                                                                                                                                  :drop-if-exists? drop-if-exists?}} e))))))
 
-(defn configure-tenant-db [root-db-uri tenant root-tenant-db-uri tenant-db-uri]
+(defn configure-tenant-db [root-db-uri tenant root-tenant-db-uri tenant-db-uri drop-if-exists?]
   (try
     (util/exec-no-transact! root-tenant-db-uri
                             "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
@@ -41,7 +43,8 @@
                         (r.jdbc/load-resources "akvo/lumen/migrations/tenants"))
     (catch Exception e
       (do
-        (drop-tenant-db root-db-uri tenant)
+        (when drop-if-exists?
+          (drop-tenant-db root-db-uri tenant))
         (log/error e)
         (throw e))))
   )
@@ -54,14 +57,15 @@
         (log/error e)
         (throw e)))))
 
-(defn add-tenant-to-lumen-db [lumen-encryption-key root-db-uri lumen-db-uri tenant-db-uri tenant label title]
+(defn add-tenant-to-lumen-db [lumen-encryption-key root-db-uri lumen-db-uri tenant-db-uri tenant label title drop-if-exists?]
   (try
-    (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label)
+    (when drop-if-exists? (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label))
     (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
                                          :label label :title title})
     (catch Exception e
       (do
-        (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label)
-        (drop-tenant-db root-db-uri tenant)
+        (when drop-if-exists?
+          (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label)
+          (drop-tenant-db root-db-uri tenant))
         (log/error e)
         (throw e)))))
