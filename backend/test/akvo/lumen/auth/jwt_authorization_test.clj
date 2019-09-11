@@ -1,9 +1,10 @@
-(ns akvo.lumen.auth-test
-  (:require [akvo.lumen.auth :as m]
+(ns akvo.lumen.auth.jwt-authorization-test
+  (:require [akvo.lumen.auth.jwt-authorization :as m]
             [clojure.test :refer [deftest testing is]]
             [clojure.tools.logging :as log]
             [akvo.lumen.component.keycloak :as keycloak]
             [ring.mock.request :as mock]))
+
 
 (defn- test-handler
   [request]
@@ -133,23 +134,7 @@
       (check-response response 403))))
 
 
-(deftest api-tenant-admin?-test
-  (let [tf (fn [cxt tenant allowed-paths bool]
-             (testing cxt
-               (is (= bool (m/api-tenant-admin? tenant allowed-paths)))))]
 
-    (tf "Nil case"
-        "demo" nil false)
-    (tf "No allowed paths"
-        "demo" #{} false)
-    (tf "A user on the tenant"
-        "demo" #{"demo" "t1"} false)
-    (tf "A user on another tenant"
-        "demo" #{"t1"} false)
-    (tf "An admin on another tenant"
-        "demo" #{"t1/admin"} false)
-    (tf "An admin"
-        "demo" #{"demo/admin"} true)))
 
 
 (deftest api-tenant-member?-test
