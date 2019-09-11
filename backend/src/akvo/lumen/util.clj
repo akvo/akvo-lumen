@@ -72,7 +72,7 @@
 (defn valid-type? [s]
   (#{"text" "number" "date" "geopoint"} s))
 
-(defn conform  
+(defn conform
   ([s d]
    (when-not (s/valid? s d)
      (log/info (str s " spec problem!")
@@ -85,3 +85,11 @@
   ([s d adapter]
    (conform s (adapter d))
    d))
+
+(defmacro as-middleware
+  "f should be a function of 3 arguments with a signature as (handler request opts)."
+  {:arglist '(f opts)}
+  [f opts]
+  (list 'fn ['handler]
+        (list 'fn ['request]
+              (list f 'handler 'request opts))))

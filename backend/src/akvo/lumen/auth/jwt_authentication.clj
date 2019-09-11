@@ -9,35 +9,38 @@
    com.nimbusds.jose.crypto.RSASSAVerifier
    java.text.ParseException))
 
+(defn create-RSASSAVerifier
+  [public-key]
+  (RSASSAVerifier. public-key))
 
-(defn wrap-jwt-authentication
-  "Verify JWT with correct verifier and attach valid claims to request"
-  [keycloak-public-client auth0-public-client authorizer]
-  (let [keycloak-verifier (RSASSAVerifier. (:rsa-key keycloak-public-client))
-        auth0-verifier (RSASSAVerifier. (:rsa-key auth0-public-client))]
-    (fn [handler]
-      (fn [{:keys [tenant] :as req}]
-        (if-let [token (jwt/jwt-token req)]
-          (try
-            (if-let [claims (or (jwt/verified-claims token keycloak-verifier
-                                                     (:issuer keycloak-public-client)
-                                                     {})
-                                (jwt/verified-claims token auth0-verifier
-                                                     (:issuer auth0-public-client)
-                                                     {}))]
-              (handler (assoc req
-                              :jwt-claims claims
-                              :auth-roles (if (= :keycloak
-                                                 (issuer-type claims
-                                                              keycloak-public-client
-                                                              auth0-public-client))
-                                            (keycloak/claimed-roles claims)
-                                            (set (map auth0/path->role
-                                                      (:path-groups (p/user authorizer
-                                                                            tenant
-                                                                            (get claims "email"))))))
-                              :jwt-token token))
-              (handler req))
-            (catch ParseException e
-              (handler req)))
-          (handler req))))))
+(def RSASSA-verifier (memoize create-RSASSAVerifier))
+
+(defn jwt-authentication
+  [handler {:keys [tenant] :as request}
+   {:keys [keycloak-public-client auth0-public-client authorizer]}]
+  (let [auth0-verifier (RSASSA-verifier (:rsa-key auth0-public-client))
+        keycloak-verifier (RSASSA-verifier (:rsa-key keycloak-public-client))]
+    (if-let [token (jwt/jwt-token request)]
+      (try
+        (if-let [claims (or (jwt/verified-claims token keycloak-verifier
+                                                 (:issuer keycloak-public-client)
+                                                 {})
+                            (jwt/verified-claims token auth0-verifier
+                                                 (:issuer auth0-public-client)
+                                                 {}))]
+          (handler (assoc request
+                          :jwt-claims claims
+                          :auth-roles (if (= :keycloak
+                                             (issuer-type claims
+                                                          keycloak-public-client
+                                                          auth0-public-client))
+                                        (keycloak/claimed-roles claims)
+                                        (set (map auth0/path->role
+                                                  (:path-groups (p/user authorizer
+                                                                        tenant
+                                                                        (get claims "email"))))))
+                          :jwt-token token))
+          (handler request))
+        (catch ParseException e
+          (handler request)))
+      (handler request))))

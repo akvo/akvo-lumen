@@ -27,15 +27,10 @@
                                                           :content-types true
                                                           :default-charset "utf-8"}}
 
- ;; :akvo.lumen.auth/wrap-jwt-authorization {:keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
- ;;                                          :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client}
-
- ;; :akvo.lumen.auth/wrap-api-authorization {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
-
  :akvo.lumen.auth/wrap-authorization {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
                                       :keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
                                       :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
-                                      :api-authz-probability #duct/env ["API_AUTHZ_PROBABILITY" :or 0]}
+                                      :api-authz-probability #duct/env ["API_AUTHZ_PROBABILITY" :or 0.0]}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
@@ -132,8 +127,6 @@
                                                          #ig/ref :akvo.lumen.component.handler/common-middleware
                                                          #ig/ref :akvo.lumen.auth/wrap-jwt-authentication
                                                          #ig/ref :akvo.lumen.auth/wrap-authorization
-                                                         ;; #ig/ref :akvo.lumen.auth/wrap-jwt-authorization
-                                                         ;; #ig/ref :akvo.lumen.auth/wrap-api-authorization
                                                          #ig/ref :akvo.lumen.lib.auth/wrap-auth-datasets
                                                          #ig/ref :akvo.lumen.monitoring/middleware]
                                             :routes [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation

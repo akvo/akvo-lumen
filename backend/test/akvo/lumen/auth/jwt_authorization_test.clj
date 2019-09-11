@@ -1,5 +1,6 @@
 (ns akvo.lumen.auth.jwt-authorization-test
   (:require [akvo.lumen.auth.jwt-authorization :as m]
+            [akvo.lumen.util :refer [as-middleware]]
             [clojure.test :refer [deftest testing is]]
             [clojure.tools.logging :as log]
             [akvo.lumen.component.keycloak :as keycloak]
@@ -28,7 +29,10 @@
     401 (is (= "\"Not authenticated\"" (:body response)))
     403 (is (= "\"Not authorized\"" (:body response)))))
 
-(def wrap-auth (m/wrap-jwt-authorization {:issuer "keycloak"} {:issuer "auth0"}))
+(def wrap-auth (as-middleware m/jwt-authorization
+                              {:auth0-public-client {:issuer "auth0"}
+                               :keycloak-public-client {:issuer "keycloak"}} ))
+
 
 (defn update-auth-roles [o]
   (assoc o :auth-roles (keycloak/claimed-roles (:jwt-claims o))))
