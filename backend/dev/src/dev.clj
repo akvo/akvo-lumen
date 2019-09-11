@@ -98,33 +98,34 @@
                                   :url url
                                   :auth-type "keycloak"}))
   (do
-    (def s (let [prod? true
+    (def s (let [prod? false
                  [ks edn-file] (if prod?
                                  [(do (add-tenant/ig-derives)
                                       (add-tenant/ig-select-keys)) "prod.edn"]
                                  [(do (dev-ig-derives)
                                       [:akvo.lumen.component.emailer/dev-emailer]) "local.edn"])]
              (add-tenant/admin-system
-              (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file ] prod?)
+              (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file] prod?)
               ks)))
-    (keys s)    
     (let [o (:akvo.lumen.admin/add-tenant s)]
-      (binding [add-tenant/env-vars (:db o)]
+      (binding [add-tenant/env-vars (:root (:db o))]
         (let [encryption-key (-> o :db-settings :encryption-key)
               drop-if-exists? (-> o :drop-if-exists?)
-              label "milo3"
+              label "milo4"
               email "juan@akvo.org"
               url (format "https://%s.akvolumen.org" label)
-              title "milo3"
-              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (:password add-tenant/env-vars))]
-
-          (add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
-          #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
-          #_(add-tenant/drop-tenant-database encryption-key label dbs)
+              title "milo4"
+              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (-> o :db :lumen :password))
+              ]
+          #_(add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
+          (remove-tenant/cleanup-keycloak (:authorizer o) label)
+          (add-tenant/drop-tenant-database encryption-key label dbs)
           #_(add-tenant/setup-tenant-database label title encryption-key dbs drop-if-exists?)
           #_(add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url))))
 
     )
+
+
   
 
 )
