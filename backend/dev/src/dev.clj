@@ -25,6 +25,7 @@
             [integrant.core :as ig]
             [integrant.repl :as ir]
             [akvo.lumen.admin.add-tenant :as add-tenant]
+            [akvo.lumen.admin.db :as admin.db]
             [akvo.lumen.admin.remove-tenant :as remove-tenant]
             [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
@@ -102,15 +103,14 @@
               (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file] prod?)
               ks)))
     (let [o (:akvo.lumen.admin/add-tenant s)]
-      (binding [add-tenant/env-vars (:root (:db o))]
+      (binding [admin.db/env-vars (:root (:db o))]
         (let [encryption-key (-> o :db-settings :encryption-key)
               drop-if-exists? (-> o :drop-if-exists?)
               label "milo4"
               email "juan@akvo.org"
               url (format "https://%s.akvolumen.org" label)
               title "milo4"
-              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (-> o :db :lumen :password))
-              ]
+              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (-> o :db :lumen :password))]
           (add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
           #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
           #_(add-tenant/drop-tenant-database encryption-key label dbs)

@@ -27,7 +27,8 @@
   (:require [akvo.lumen.admin.new-plan :as new-plan]
             [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.admin.add-tenant.db :as db]
+            [akvo.lumen.admin.db :as db]
+            [akvo.lumen.admin.system :as admin.system]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.admin.remove-tenant :as remove-tenant]
@@ -48,13 +49,6 @@
             [integrant.core :as ig]
             [selmer.parser :as selmer])
   (:import java.net.URL))
-
-(def ^:dynamic env-vars
-  (let [ks-mapping {:pg-host :host
-                    :pg-database :database
-                    :pg-user :user
-                    :pg-password :password}]
-    (set/rename-keys ks-mapping (select-keys env (keys ks-mapping)))))
 
 (def blacklist #{"admin"
                  "console"
@@ -123,47 +117,6 @@
       (when (not= (.getProtocol url) "https")
         (throw (ex-info "Url should use https" {:url v}))))
     (format "%s://%s" (.getProtocol url) (.getHost url))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; tenant-database
-;;;
-
-(defn db-uri*
-  ([] (db-uri* {}))
-  ([data]
-   (util/db-uri (merge env-vars data))))
-
-(defn db-uris [label tenant-password & [lumen-db-password]]
-  (let [tenant (str "tenant_" (s/replace label "-" "_"))
-        main-db-uri (db-uri*)
-        lumen-db-uri (db-uri* {:database "lumen" :user "lumen" :password lumen-db-password})
-        tenant-db-uri (db-uri* {:database tenant
-                                :user     tenant
-                                :password tenant-password})
-        tenant-db-uri-with-superuser (db-uri* {:database tenant})]
-    {:root-db main-db-uri
-     :lumen-db lumen-db-uri
-     :tenant-db tenant-db-uri
-     :root-tenant-db tenant-db-uri-with-superuser
-     :tenant tenant
-     :tenant-password tenant-password}))
-
-(defn drop-tenant-database
-  [lumen-encryption-key label db-uris]
-  (log/info :drop-tenant-database (:tenant db-uris))
-  (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
-    (log/info :drop-tenant-from-lumen-db :label label (db/drop-tenant-from-lumen-db lumen-encryption-key lumen-db label))
-    (log/info :drop-tenant-db (db/drop-tenant-db root-db tenant))))
-
-(defn setup-tenant-database
-  [label title lumen-encryption-key db-uris drop-if-exists?]
-  (when drop-if-exists? (drop-tenant-database lumen-encryption-key label db-uris))
-  (log/info :setup-tenant-database :label label :drop-if-exists? drop-if-exists? :title title :db-uris db-uris)
-  (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
-    (db/create-tenant-db root-db tenant tenant-password drop-if-exists?)
-    (db/configure-tenant-db root-db tenant root-tenant-db tenant-db drop-if-exists?)
-    (db/add-tenant-to-lumen-db lumen-encryption-key root-db lumen-db tenant-db tenant label title drop-if-exists?)
-    true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; user
@@ -249,27 +202,6 @@
   (when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
-(defn ig-select-keys []
-  [:akvo.lumen.component.emailer/mailjet-v3-emailer])
-
-(defn ig-derives []
-  (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer))
-
-(defn admin-system
-  ([]
-   (admin-system (config/construct "akvo/lumen/config.edn") (ig-select-keys)))
-  ([c ks]
-   (let [conf (-> c
-                  (select-keys (apply conj ks [:akvo.lumen.monitoring/dropwizard-registry
-                                               :akvo.lumen.monitoring/collector
-                                               :akvo.lumen.component.emailer/emailer
-                                               :akvo.lumen.component.keycloak/authorization-service
-                                               :akvo.lumen.component.keycloak/public-client
-                                               :akvo.lumen.admin/add-tenant
-                                               :akvo.lumen.component.tenant-manager/data])))]
-     (ig/load-namespaces conf)
-     (ig/init conf))))
-
 (defn tenant-conn* [dropwizard-registry tenant-label db-uri]
   (tenant-manager/pool {:db_uri              db-uri 
                         :dropwizard-registry dropwizard-registry
@@ -302,8 +234,8 @@
 (defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type dbs] :as data}]
   (let [drop-if-exists? (boolean (:drop-if-exists? administer))
         {:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db] :as db-uris} (if dbs dbs (db-uris label (new-tenant-db-pass)))
-        _ (setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
+        {:keys [tenant-db] :as db-uris} (if dbs dbs (db/db-uris label (new-tenant-db-pass)))
+        _ (db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
         {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url  drop-if-exists?)]
     (exec-mail (merge administer {:user-creds user-creds
                                   :tenant-db tenant-db
@@ -314,7 +246,7 @@
   (try
     (check-env-vars)
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
-      (exec (:akvo.lumen.admin/add-tenant (admin-system))
+      (exec (:akvo.lumen.admin/add-tenant (admin.system/admin-system))
             {:url url :title title :email email :auth-type auth-type}))
     #_(new-plan/exec label)
     (catch java.lang.AssertionError e
