@@ -8,9 +8,9 @@
 (defn ig-derives []
   (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer))
 
-(defn admin-system
+(defn new-system
   ([ks]
-   (admin-system (config/construct "akvo/lumen/config.edn") (ig-select-keys ks)))
+   (new-system (config/construct "akvo/lumen/config.edn") (ig-select-keys ks)))
   ([c ks]
    (let [conf (-> c
                   (select-keys (apply conj ks [:akvo.lumen.monitoring/dropwizard-registry

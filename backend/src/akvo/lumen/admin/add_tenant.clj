@@ -24,13 +24,11 @@
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email> <auth-type>
   "
-  (:require [akvo.lumen.admin.db :as db]
+  (:require [akvo.lumen.admin.db :as admin.db]
             [akvo.lumen.admin.keycloak :as admin.keycloak]
-            [akvo.lumen.admin.new-plan :as new-plan]
+            [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.admin.system :as admin.system]
             [akvo.lumen.admin.util :as util]
-            [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib.user :as lib.user]
@@ -44,8 +42,7 @@
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [integrant.core :as ig]
-            [selmer.parser :as selmer]
-)
+            [selmer.parser :as selmer])
   (:import java.net.URL))
 
 (def blacklist #{"admin"
@@ -116,15 +113,6 @@
         (throw (ex-info "Url should use https" {:url v}))))
     (format "%s://%s" (.getProtocol url) (.getHost url))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; user
-;;;
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Main
-;;;
-
 (defn conform-auth-type
   "Returns valid kw auth-type or throws."
   [v]
@@ -157,11 +145,6 @@
   (when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
-(defn tenant-conn* [dropwizard-registry tenant-label db-uri]
-  (tenant-manager/pool {:db_uri              db-uri 
-                        :dropwizard-registry dropwizard-registry
-                        :label               tenant-label}))
-
 (defn exec-mail [{:keys [emailer user-creds tenant-db auth-type url]}]
   (let [{:keys [user-id email tmp-password]} user-creds
         text-part (if (some? tmp-password)
@@ -186,24 +169,24 @@
 (defn new-tenant-db-pass []
   (s/replace (squuid) "-" ""))
 
-(defn exec [{:keys [emailer authorizer] :as administer} {:keys [url title email auth-type dbs] :as data}]
+(defn exec [{:keys [emailer authorizer dbs] :as administer} {:keys [url title email auth-type] :as data}]
   (let [drop-if-exists? (boolean (:drop-if-exists? administer))
         {:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db] :as db-uris} (if dbs dbs (db/db-uris label (new-tenant-db-pass)))
-        _ (db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
+        {:keys [tenant-db] :as db-uris} (admin.db/db-uris label (new-tenant-db-pass) (-> dbs :lumen :password))
+        _ (admin.db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
         {:keys [user-id email tmp-password] :as user-creds} (admin.keycloak/setup-tenant authorizer label email url  drop-if-exists?)]
     (exec-mail (merge administer {:user-creds user-creds
                                   :tenant-db tenant-db
                                   :auth-type auth-type
-                                  :url url}))))
+                                  :url url}))
+    true))
 
 (defn -main [url title email auth-type]
   (try
     (check-env-vars)
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
-      (exec (:akvo.lumen.admin/add-tenant (admin.system/admin-system [:akvo.lumen.admin/add-tenant]))
+      (exec (:akvo.lumen.admin/add-tenant (admin.system/new-system [:akvo.lumen.admin/add-tenant]))
             {:url url :title title :email email :auth-type auth-type}))
-    #_(new-plan/exec label)
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e

@@ -77,6 +77,7 @@
                                                                                                                                                                   :drop-if-exists? drop-if-exists?}} e))))))
 
 (defn- drop-tenant-from-lumen-db [lumen-db-uri label]
+  (log/error :lumen-db-uri lumen-db-uri)
   (try
     (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where label='%s'" label))
     (catch Exception e

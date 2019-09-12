@@ -24,28 +24,29 @@
             [akvo.lumen.admin.db :as admin.db]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.admin.keycloak :as admin.keycloak]
-
             [akvo.lumen.admin.system :as admin.system]
             [clojure.tools.logging :as log]
-            [clojure.walk :as w]
             [integrant.core :as ig]
-            [clojure.string :as s]
+            [clojure.string :as str]
             [cheshire.core :as json]))
 
-(defn remove-tenant [{:keys [administer dbs]} label]
-  (let [tenant (str "tenant_" (s/replace label "-" "_"))
-        db-uris (admin.db/db-uris label (-> dbs :lumen :password))]
-    (admin.db/drop-tenant-database label db-uris)
-    (admin.keycloak/remove-tenant (:authorizer administer) label)))
+(defn exec [{:keys [authorizer dbs]} label]
+  (let [tenant (str "tenant_" (str/replace label "-" "_"))
+        db-uris (admin.db/db-uris label nil (-> dbs :lumen :password))]
+    (admin.db/drop-tenant-database label db-uris )
+    (admin.keycloak/remove-tenant authorizer label)
+    true))
 
 (defn -main [label]
   (printf "Are you sure you want to remove tenant \"%s\" ('Yes' | 'No')? " label)
   (flush)
   (if (= (read-line) "Yes")
-    (do (remove-tenant (:akvo.lumen.admin/remove-tenant (admin.system/admin-system [:akvo.lumen.admin/remove-tenant])) label)
+    (do
+      (exec
+       (:akvo.lumen.admin/remove-tenant (admin.system/new-system [:akvo.lumen.admin/remove-tenant]))
+       label)
         (println "Ok"))
     (println "Aborted")))
-
 
 (defmethod ig/init-key :akvo.lumen.admin/remove-tenant [_ {:keys [authorizer] :as opts}]
   opts)

@@ -94,32 +94,39 @@
 
 (comment
   (do
-    (def s (let [prod? false
-                 [ks edn-file] (if prod?
-                                 [(do (admin.system/ig-derives)
-                                      (admin.system/ig-select-keys)) "prod.edn"]
-                                 [(do (dev-ig-derives)
-                                      [:akvo.lumen.component.emailer/dev-emailer]) "local-admin.edn"])]
-             (admin.system/admin-system
-              (commons/config ["akvo/lumen/config.edn" "admin.edn" "test.edn" edn-file] prod?)
-              ks)))
-    (:akvo.lumen.component.keycloak/public-client s)
-    #_(let [o (:akvo.lumen.admin/add-tenant s)]
-      (binding [admin.db/env-vars (:root (:dbs o))]
-        (let [encryption-key (-> o :db-settings :encryption-key)
-              drop-if-exists? (-> o :drop-if-exists?)
+    (let [prod? false
+          [ks edn-file] (if prod?
+                          [(do (admin.system/ig-derives)
+                               (admin.system/ig-select-keys
+                                [:akvo.lumen.admin/dbs
+                                 :akvo.lumen.admin/remove-tenant
+                                 :akvo.lumen.admin/add-tenant])) "prod.edn"]
+                          [(do (dev-ig-derives)
+                               [:akvo.lumen.component.emailer/dev-emailer
+                                :akvo.lumen.admin/dbs
+                                :akvo.lumen.admin/remove-tenant
+                                :akvo.lumen.admin/add-tenant
+                                ]) "local-admin.edn"])
+          c* (commons/config ["akvo/lumen/config.edn" "akvo/lumen/admin.edn" "test.edn" edn-file] prod?)
+          s (admin.system/new-system c* ks)
+          admin-add-tenant (:akvo.lumen.admin/add-tenant s)
+          admin-remove-tenant (:akvo.lumen.admin/remove-tenant s)]
+      (binding [admin.db/env-vars (:root (:dbs admin-add-tenant))]
+        (let [encryption-key (-> admin-add-tenant :db-settings :encryption-key)
+              drop-if-exists? (-> admin-add-tenant :drop-if-exists?)
               label "milo4"
               email "juan@akvo.org"
               url (format "https://%s.akvolumen.org" label)
-              title "milo4"
-              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (-> o :dbs :lumen :password))]
-          (add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
-          #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
-          #_(add-tenant/drop-tenant-database encryption-key label dbs)
-          #_(add-tenant/setup-tenant-database label title encryption-key dbs drop-if-exists?)
-          #_(add-tenant/setup-tenant-in-keycloak (:authorizer o) label email url))))
+              title "milo4"]
+          #_(add-tenant/exec admin-add-tenant {:url url :title title :email email :auth-type "keycloak"})
+          (remove-tenant/exec admin-remove-tenant label)))
+      
+      )
+    
 
     )
+
+
 )
 
 

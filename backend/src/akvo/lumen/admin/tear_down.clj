@@ -1,5 +1,5 @@
 (ns akvo.lumen.admin.tear-down
-  (:require [akvo.lumen.admin.remove-tenant :refer (remove-tenant)]
+  (:require [akvo.lumen.admin.remove-tenant]
             [akvo.lumen.admin.util :as util]
             [clojure.java.jdbc :as jdbc]))
 
