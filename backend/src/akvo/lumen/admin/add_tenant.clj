@@ -130,22 +130,6 @@
      :auth-type (conform-auth-type auth-type)
      :url url}))
 
-(defn check-env-vars []
-;;  (assert (:lumen-encryption-key env) (error-msg "Specify LUMEN_ENCRYPTION_KEY env var"))
-;;  (assert (:lumen-keycloak-url env) (error-msg "Specify LUMEN_KEYCLOAK_URL env var"))
-;;  (assert (:lumen-email-user env) (error-msg "Specify LUMEN_EMAIL_USER env var"))
-;;  (assert (:lumen-email-password env) (error-msg "Specify LUMEN_EMAIL_PASSWORD env var"))
-  #_(assert (:lumen-keycloak-client-secret env)
-          (do
-            (browse/browse-url
-             (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
-            (error-msg "Specify LUMEN_KEYCLOAK_CLIENT_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
-;;  (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
-;;  (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
-;; (assert (:pg-user env) (error-msg "Specify PG_USER env var"))
-  #_(when (not (= (:pg-host env) "localhost"))
-    (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
-
 (defn exec-mail [{:keys [emailer user-creds tenant-db auth-type url]}]
   (let [{:keys [user-id email tmp-password]} user-creds
         text-part (if (some? tmp-password)
@@ -184,14 +168,12 @@
 
 (defn -main [url title email auth-type edn-file]
   (try
-    (check-env-vars)
     (admin.system/ig-derives)
-
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
       (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "prod.edn"))
-                                                  (admin.system/ig-select-keys [:akvo.lumen.admin/add-tenant]))]
-        (exec (:akvo.lumen.admin/add-tenant admin-system)
-              {:url url :title title :email email :auth-type auth-type})))
+                                                  (admin.system/ig-select-keys [:akvo.lumen.admin/add-tenant]))
+            administer (:akvo.lumen.admin/add-tenant admin-system)]
+        (exec administer {:url url :title title :email email :auth-type auth-type})))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e
