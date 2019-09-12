@@ -11,8 +11,8 @@
 (defn new-config [& paths]
   (apply config/construct (flatten ["akvo/lumen/config.edn" "akvo/lumen/admin.edn" paths])))
 
-(assert (not (:drop-if-exists? (:akvo.lumen.admin/add-tenant (new-config)))))
-(assert (:drop-if-exists? (:akvo.lumen.admin/add-tenant (new-config "local-admin.edn"))))
+(comment (assert (not (:drop-if-exists? (:akvo.lumen.admin/add-tenant (new-config)))))
+         (assert (:drop-if-exists? (:akvo.lumen.admin/add-tenant (new-config "local-admin.edn")))))
 
 
 (defn new-system

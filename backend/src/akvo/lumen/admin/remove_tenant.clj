@@ -22,6 +22,7 @@
   https://dba.stackexchange.com/questions/11893/force-drop-db-while-others-may-be-connected"
   (:require [akvo.lumen.admin.util :as util]
             [akvo.lumen.admin.db :as admin.db]
+            [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.admin.keycloak :as admin.keycloak]
             [akvo.lumen.admin.system :as admin.system]
@@ -31,21 +32,25 @@
             [cheshire.core :as json]))
 
 (defn exec [{:keys [authorizer dbs]} label]
-  (let [tenant (str "tenant_" (str/replace label "-" "_"))
-        db-uris (admin.db/db-uris label nil (-> dbs :lumen :password))]
-    (admin.db/drop-tenant-database label db-uris )
-    (admin.keycloak/remove-tenant authorizer label)
-    true))
+  (binding [admin.db/env-vars (:root dbs)]
+    (let [tenant (str "tenant_" (str/replace label "-" "_"))
+         db-uris (admin.db/db-uris label nil (-> dbs :lumen :password))]
+     (admin.db/drop-tenant-database label db-uris)
+     (admin.keycloak/remove-tenant authorizer label)
+     true)))
 
-(defn -main [label]
+(defn -main [label & [edn-file]]
   (printf "Are you sure you want to remove tenant \"%s\" ('Yes' | 'No')? " label)
   (flush)
-  (if (= (read-line) "Yes")
-    (do
-      (exec
-       (:akvo.lumen.admin/remove-tenant (admin.system/new-system [:akvo.lumen.admin/remove-tenant]))
-       label)
-        (println "Ok"))
+  (if (= (read-line) "Yes")    
+    (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
+      (admin.system/ig-derives)
+      (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "prod.edn"))
+                                                  (admin.system/ig-select-keys [:akvo.lumen.admin/remove-tenant]))
+            administer (:akvo.lumen.admin/remove-tenant admin-system)]
+        (exec administer label)
+        (println "Ok")
+        ))
     (println "Aborted")))
 
 (defmethod ig/init-key :akvo.lumen.admin/remove-tenant [_ {:keys [authorizer] :as opts}]

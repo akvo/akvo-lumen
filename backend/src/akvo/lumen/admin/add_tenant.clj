@@ -155,21 +155,22 @@
   (str/replace (squuid) "-" ""))
 
 (defn exec [{:keys [emailer authorizer dbs] :as administer} {:keys [url title email auth-type] :as data}]
-  (let [drop-if-exists? (boolean (:drop-if-exists? administer))
-        {:keys [email label title url auth-type]} (conform-input url title email auth-type)
-        {:keys [tenant-db] :as db-uris} (admin.db/db-uris label (new-tenant-db-pass) (-> dbs :lumen :password))
-        _ (admin.db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
-        {:keys [user-id email tmp-password] :as user-creds} (admin.keycloak/setup-tenant authorizer label email url  drop-if-exists?)]
-    (exec-mail (merge administer {:user-creds user-creds
-                                  :tenant-db tenant-db
-                                  :auth-type auth-type
-                                  :url url}))
-    true))
+  (binding [admin.db/env-vars (:root dbs)]
+    (let [drop-if-exists? (boolean (:drop-if-exists? administer))
+          {:keys [email label title url auth-type]} (conform-input url title email auth-type)
+          {:keys [tenant-db] :as db-uris} (admin.db/db-uris label (new-tenant-db-pass) (-> dbs :lumen :password))
+          _ (admin.db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
+          {:keys [user-id email tmp-password] :as user-creds} (admin.keycloak/setup-tenant authorizer label email url  drop-if-exists?)]
+      (exec-mail (merge administer {:user-creds user-creds
+                                    :tenant-db tenant-db
+                                    :auth-type auth-type
+                                    :url url}))
+      true)))
 
-(defn -main [url title email auth-type edn-file]
+(defn -main [url title email auth-type & [edn-file]]
   (try
-    (admin.system/ig-derives)
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
+      (admin.system/ig-derives)
       (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "prod.edn"))
                                                   (admin.system/ig-select-keys [:akvo.lumen.admin/add-tenant]))
             administer (:akvo.lumen.admin/add-tenant admin-system)]
