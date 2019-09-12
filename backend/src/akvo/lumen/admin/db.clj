@@ -20,7 +20,7 @@
 (defn db-uri*
   ([] (db-uri* {}))
   ([data]
-   (util/db-uri (merge env-vars data))))
+   (util/db-uri-db (merge env-vars data))))
 
 (defn db-uris [label tenant-password & [lumen-db-password]]
   (let [tenant (str "tenant_" (str/replace label "-" "_"))
@@ -76,7 +76,7 @@
         (throw (ex-info "seems that the database you try to create already exists, try to use :drop-if-exists? true if you want to recreate it" {:current-values {:tenant tenant
                                                                                                                                                                   :drop-if-exists? drop-if-exists?}} e))))))
 
-(defn- drop-tenant-from-lumen-db [lumen-encryption-key lumen-db-uri label]
+(defn- drop-tenant-from-lumen-db [lumen-db-uri label]
   (try
     (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where label='%s'" label))
     (catch Exception e
@@ -86,27 +86,27 @@
 
 (defn- add-tenant-to-lumen-db [lumen-encryption-key root-db-uri lumen-db-uri tenant-db-uri tenant label title drop-if-exists?]
   (try
-    (when drop-if-exists? (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label))
+    (when drop-if-exists? (drop-tenant-from-lumen-db lumen-db-uri label))
     (jdbc/insert! lumen-db-uri :tenants {:db_uri (aes/encrypt lumen-encryption-key tenant-db-uri)
                                          :label label :title title})
     (catch Exception e
       (do
         (when drop-if-exists?
-          (drop-tenant-from-lumen-db lumen-encryption-key lumen-db-uri label)
+          (drop-tenant-from-lumen-db lumen-db-uri label)
           (drop-tenant-db root-db-uri tenant))
         (log/error e)
         (throw e)))))
 
 (defn drop-tenant-database
-  [lumen-encryption-key label db-uris]
+  [label db-uris]
   (log/info :drop-tenant-database (:tenant db-uris))
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
-    (log/info :drop-tenant-from-lumen-db :label label (drop-tenant-from-lumen-db lumen-encryption-key lumen-db label))
+    (log/info :drop-tenant-from-lumen-db :label label (drop-tenant-from-lumen-db lumen-db label))
     (log/info :drop-tenant-db (drop-tenant-db root-db tenant))))
 
 (defn setup-tenant-database
   [label title lumen-encryption-key db-uris drop-if-exists?]
-  (when drop-if-exists? (drop-tenant-database lumen-encryption-key label db-uris))
+  (when drop-if-exists? (drop-tenant-database label db-uris))
   (log/info :setup-tenant-database :label label :drop-if-exists? drop-if-exists? :title title :db-uris db-uris)
   (let [{:keys [root-db lumen-db tenant-db root-tenant-db tenant tenant-password]} db-uris]
     (create-tenant-db root-db root-tenant-db tenant-db tenant tenant-password drop-if-exists?)

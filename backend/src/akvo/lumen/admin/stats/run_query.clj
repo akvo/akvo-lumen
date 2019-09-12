@@ -13,7 +13,7 @@
 (defn -main [tenant-labels query]
   (let [tenant-labels (s/split tenant-labels #",")
         uris (->> ["SELECT label as \"tenant-label\", db_uri as \"db-uri\" FROM tenants"]
-                  (jdbc/query (util/db-uri {:database "lumen"}))
+                  (jdbc/query (util/db-uri-db {:database "lumen"}))
                   (filter #((set tenant-labels) (:tenant-label %))))]
     (json/generate-stream
      (for [{:keys [db-uri tenant-label]} uris]

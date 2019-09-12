@@ -20,8 +20,8 @@
     :migrations (ragtime.jdbc/load-resources "akvo/lumen/migrations/tenant_manager")}))
 
 (defn -main []
-  (let [db-uri (util/db-uri)
-        lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})]
+  (let [db-uri (util/db-uri-db)
+        lumen-db-uri (util/db-uri-db {:database "lumen" :user "lumen"})]
     (util/exec-no-transact! db-uri "CREATE ROLE lumen WITH PASSWORD '%s' SUPERUSER LOGIN;" (env :pgpassword))
     (util/exec-no-transact! db-uri (str "CREATE DATABASE lumen "
                             "WITH OWNER = lumen "

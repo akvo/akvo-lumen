@@ -103,14 +103,14 @@
               (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file] prod?)
               ks)))
     (let [o (:akvo.lumen.admin/add-tenant s)]
-      (binding [admin.db/env-vars (:root (:db o))]
+      (binding [admin.db/env-vars (:root (:dbs o))]
         (let [encryption-key (-> o :db-settings :encryption-key)
               drop-if-exists? (-> o :drop-if-exists?)
               label "milo4"
               email "juan@akvo.org"
               url (format "https://%s.akvolumen.org" label)
               title "milo4"
-              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (-> o :db :lumen :password))]
+              dbs (add-tenant/db-uris label (add-tenant/new-tenant-db-pass) (-> o :dbs :lumen :password))]
           (add-tenant/exec o {:url url :title title :email email :auth-type "keycloak" :dbs dbs})
           #_(remove-tenant/cleanup-keycloak (:authorizer o) label)
           #_(add-tenant/drop-tenant-database encryption-key label dbs)

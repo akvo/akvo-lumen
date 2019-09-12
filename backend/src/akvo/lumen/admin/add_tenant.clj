@@ -24,30 +24,28 @@
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email> <auth-type>
   "
-  (:require [akvo.lumen.admin.new-plan :as new-plan]
+  (:require [akvo.lumen.admin.db :as db]
+            [akvo.lumen.admin.keycloak :as admin.keycloak]
+            [akvo.lumen.admin.new-plan :as new-plan]
+            [akvo.lumen.admin.system :as admin.system]
             [akvo.lumen.admin.util :as util]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.admin.db :as db]
-            [akvo.lumen.admin.system :as admin.system]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.config :refer [error-msg] :as config]
-            [akvo.lumen.admin.remove-tenant :as remove-tenant]
             [akvo.lumen.http.client :as http.client]
-            [akvo.lumen.lib.share :refer [random-url-safe-string]]
-            [slingshot.slingshot :as slingshot]
             [akvo.lumen.lib.user :as lib.user]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.util :refer [conform-email squuid]]
             [cheshire.core :as json]
-            [clojure.tools.logging :as log]
-            [akvo.lumen.component.hikaricp :as hikaricp]
             [clojure.java.browse :as browse]
             [clojure.pprint :refer [pprint]]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [integrant.core :as ig]
-            [selmer.parser :as selmer])
+            [selmer.parser :as selmer]
+)
   (:import java.net.URL))
 
 (def blacklist #{"admin"
@@ -122,49 +120,6 @@
 ;;; user
 ;;;
 
-(defn user-representation
-  [authorizer headers email]
-  (if-let [user (keycloak/fetch-user-by-email headers (:api-root authorizer) email)]
-    {:email email
-     :user-id (get user "id")}
-    (lib.user/create-new-account authorizer headers email)))
-
-(defn- add-tenant-urls
-  [client url]
-  (-> client
-      (update "webOrigins" conj url)
-      (update "redirectUris" conj (format "%s/*" url))))
-
-(defn add-tenant-urls-to-clients
-  [authorizer headers url]
-  (let [confidential-client (keycloak/fetch-client authorizer headers "akvo-lumen-confidential")
-        public-client (keycloak/fetch-client authorizer headers "akvo-lumen")]
-    (keycloak/update-client authorizer headers (add-tenant-urls confidential-client url) util/http-client-req-defaults)
-    (keycloak/update-client authorizer headers (add-tenant-urls public-client url) util/http-client-req-defaults)))
-
-(defn setup-tenant-in-keycloak
-  "Create two new groups as children to the akvo:lumen group"
-  [authorizer label email url drop-if-exists?]
-  (log/info :setup-tenant-in-keycloak label email url)
-  (when drop-if-exists? (remove-tenant/cleanup-keycloak authorizer label))
-  (slingshot/try+
-    (let [headers (keycloak/request-headers authorizer)
-          lumen-group-id (-> (keycloak/root-group authorizer headers)
-                             (get "id"))
-          tenant-id (keycloak/create-group authorizer headers lumen-group-id (util/role-name label) label)
-          tenant-admin-id (keycloak/create-group authorizer headers tenant-id (util/role-name label true) "admin")
-          {:keys [user-id email tmp-password] :as user-rep} (user-representation authorizer headers email)]
-      (add-tenant-urls-to-clients authorizer headers url)
-      (keycloak/add-user-to-group headers (:api-root authorizer) user-id tenant-admin-id)
-      (log/info "User Credentials:" user-rep)
-      (assoc user-rep :url url))
-    (catch [:status 409] {:keys [body] :as o}
-      (if (s/includes? body "already exists")
-        (throw (ex-info "Keycloak data conflict problem, maybe you need to use :drop-if-exists? true "
-                        {:body body
-                         :status 409
-                         :current-values {:drop-if-exists? drop-if-exists?}}))
-        (slingshot/throw+)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main
@@ -236,7 +191,7 @@
         {:keys [email label title url auth-type]} (conform-input url title email auth-type)
         {:keys [tenant-db] :as db-uris} (if dbs dbs (db/db-uris label (new-tenant-db-pass)))
         _ (db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
-        {:keys [user-id email tmp-password] :as user-creds} (setup-tenant-in-keycloak authorizer label email url  drop-if-exists?)]
+        {:keys [user-id email tmp-password] :as user-creds} (admin.keycloak/setup-tenant authorizer label email url  drop-if-exists?)]
     (exec-mail (merge administer {:user-creds user-creds
                                   :tenant-db tenant-db
                                   :auth-type auth-type
@@ -246,7 +201,7 @@
   (try
     (check-env-vars)
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
-      (exec (:akvo.lumen.admin/add-tenant (admin.system/admin-system))
+      (exec (:akvo.lumen.admin/add-tenant (admin.system/admin-system [:akvo.lumen.admin/add-tenant]))
             {:url url :title title :email email :auth-type auth-type}))
     #_(new-plan/exec label)
     (catch java.lang.AssertionError e
@@ -258,4 +213,6 @@
         (prn (ex-data e))))))
 
 (defmethod ig/init-key :akvo.lumen.admin/add-tenant [_ {:keys [emailer auth-type] :as opts}]
+  opts)
+(defmethod ig/init-key :akvo.lumen.admin/dbs [_ opts]
   opts)
