@@ -26,9 +26,9 @@
   "
   (:require [akvo.lumen.admin.db :as admin.db]
             [akvo.lumen.admin.keycloak :as admin.keycloak]
-            [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.admin.system :as admin.system]
             [akvo.lumen.admin.util :as util]
+            [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.config :refer [error-msg] :as config]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib.user :as lib.user]
@@ -38,7 +38,8 @@
             [clojure.java.browse :as browse]
             [clojure.pprint :refer [pprint]]
             [clojure.set :as set]
-            [clojure.string :as s]
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [integrant.core :as ig]
@@ -73,7 +74,7 @@
     (contains? blacklist label)
     (throw
      (ex-info (format "Label in blacklist: [%s]"
-                      (s/join ", "  blacklist))
+                      (str/join ", "  blacklist))
               {:label label}))
 
     (not (Character/isLetter (get label 0)))
@@ -86,7 +87,7 @@
      (ex-info "Label is only allowed to be a-z 0-9 or hyphen"
               {:label label}))
 
-    (s/starts-with? label "dark-")
+    (str/starts-with? label "dark-")
     (throw
      (ex-info "Label is not allowed to start with dark-"
               {:label label}))
@@ -95,9 +96,9 @@
 
 (defn label [url]
   (-> url
-      (s/split #"//")
+      (str/split #"//")
       second
-      (s/split #"\.")
+      (str/split #"\.")
       first
       conform-label))
 
@@ -130,19 +131,19 @@
      :url url}))
 
 (defn check-env-vars []
-  (assert (:lumen-encryption-key env) (error-msg "Specify LUMEN_ENCRYPTION_KEY env var"))
-  (assert (:lumen-keycloak-url env) (error-msg "Specify LUMEN_KEYCLOAK_URL env var"))
-  (assert (:lumen-email-user env) (error-msg "Specify LUMEN_EMAIL_USER env var"))
-  (assert (:lumen-email-password env) (error-msg "Specify LUMEN_EMAIL_PASSWORD env var"))
-  (assert (:lumen-keycloak-client-secret env)
+;;  (assert (:lumen-encryption-key env) (error-msg "Specify LUMEN_ENCRYPTION_KEY env var"))
+;;  (assert (:lumen-keycloak-url env) (error-msg "Specify LUMEN_KEYCLOAK_URL env var"))
+;;  (assert (:lumen-email-user env) (error-msg "Specify LUMEN_EMAIL_USER env var"))
+;;  (assert (:lumen-email-password env) (error-msg "Specify LUMEN_EMAIL_PASSWORD env var"))
+  #_(assert (:lumen-keycloak-client-secret env)
           (do
             (browse/browse-url
              (format "%s/auth/admin/master/console/#/realms/akvo/clients" (:kc-url env)))
             (error-msg "Specify LUMEN_KEYCLOAK_CLIENT_SECRET env var from the Keycloak admin opened in the browser window at Client (akvo-lumen-confidential) -> Credentials -> Secret.")))
-  (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
-  (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
-  (assert (:pg-user env) (error-msg "Specify PG_USER env var"))
-  (when (not (= (:pg-host env) "localhost"))
+;;  (assert (:pg-host env) (error-msg "Specify PG_HOST env var"))
+;;  (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
+;; (assert (:pg-user env) (error-msg "Specify PG_USER env var"))
+  #_(when (not (= (:pg-host env) "localhost"))
     (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))))
 
 (defn exec-mail [{:keys [emailer user-creds tenant-db auth-type url]}]
@@ -167,7 +168,7 @@
                                    "Text-part" text-part})))
 
 (defn new-tenant-db-pass []
-  (s/replace (squuid) "-" ""))
+  (str/replace (squuid) "-" ""))
 
 (defn exec [{:keys [emailer authorizer dbs] :as administer} {:keys [url title email auth-type] :as data}]
   (let [drop-if-exists? (boolean (:drop-if-exists? administer))
@@ -181,12 +182,16 @@
                                   :url url}))
     true))
 
-(defn -main [url title email auth-type]
+(defn -main [url title email auth-type edn-file]
   (try
     (check-env-vars)
+    (admin.system/ig-derives)
+
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
-      (exec (:akvo.lumen.admin/add-tenant (admin.system/new-system [:akvo.lumen.admin/add-tenant]))
-            {:url url :title title :email email :auth-type auth-type}))
+      (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "prod.edn"))
+                                                  (admin.system/ig-select-keys [:akvo.lumen.admin/add-tenant]))]
+        (exec (:akvo.lumen.admin/add-tenant admin-system)
+              {:url url :title title :email email :auth-type auth-type})))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e
@@ -196,7 +201,4 @@
         (prn (ex-data e))))))
 
 (defmethod ig/init-key :akvo.lumen.admin/add-tenant [_ {:keys [emailer auth-type] :as opts}]
-  opts)
-
-(defmethod ig/init-key :akvo.lumen.admin/dbs [_ opts]
   opts)

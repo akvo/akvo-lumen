@@ -1,7 +1,6 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [akvo.lumen.config :as config]
-            [akvo.lumen.endpoint.commons]
+  (:require [akvo.lumen.endpoint.commons]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
@@ -98,12 +97,11 @@
           [ks edn-file] (if prod?
                           [(do (admin.system/ig-derives)
                                (admin.system/ig-select-keys
-                                [:akvo.lumen.admin/dbs
-                                 :akvo.lumen.admin/remove-tenant
+                                [:akvo.lumen.admin/remove-tenant
                                  :akvo.lumen.admin/add-tenant])) "prod.edn"]
                           [(do (dev-ig-derives)
                                [:akvo.lumen.component.emailer/dev-emailer
-                                :akvo.lumen.admin/dbs
+                                :akvo.lumen.admin.db/config
                                 :akvo.lumen.admin/remove-tenant
                                 :akvo.lumen.admin/add-tenant
                                 ]) "local-admin.edn"])
@@ -118,8 +116,8 @@
               email "juan@akvo.org"
               url (format "https://%s.akvolumen.org" label)
               title "milo4"]
-          #_(add-tenant/exec admin-add-tenant {:url url :title title :email email :auth-type "keycloak"})
-          (remove-tenant/exec admin-remove-tenant label)))
+          (add-tenant/exec admin-add-tenant {:url url :title title :email email :auth-type "keycloak"})
+          #_(remove-tenant/exec admin-remove-tenant label)))
       
       )
     

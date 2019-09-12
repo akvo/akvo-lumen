@@ -3,14 +3,21 @@
             [akvo.lumen.config :refer [error-msg] :as config]))
 
 (defn ig-select-keys [& more]
-  (vec (flatten (apply conj [:akvo.lumen.component.emailer/mailjet-v3-emailer] more))))
+  (vec (flatten (apply conj [:akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.admin.db/config] more))))
 
 (defn ig-derives []
   (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer))
 
+(defn new-config [& paths]
+  (apply config/construct (flatten ["akvo/lumen/config.edn" "akvo/lumen/admin.edn" paths])))
+
+(assert (not (:drop-if-exists? (:akvo.lumen.admin/add-tenant (new-config)))))
+(assert (:drop-if-exists? (:akvo.lumen.admin/add-tenant (new-config "local-admin.edn"))))
+
+
 (defn new-system
   ([ks]
-   (new-system (config/construct "akvo/lumen/config.edn") (ig-select-keys ks)))
+   (new-system (new-config) (ig-select-keys ks)))
   ([c ks]
    (let [conf (-> c
                   (select-keys (apply conj ks [:akvo.lumen.monitoring/dropwizard-registry

@@ -2,8 +2,10 @@
   (:require [akvo.lumen.admin.util :as util]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
+            [integrant.core :as ig]
             [clojure.string :as str]
             [clojure.set :as set]
+            [clojure.spec.alpha :as s]
             [ragtime.jdbc :as r.jdbc]
             [akvo.lumen.lib.aes :as aes]
             [environ.core :refer [env]]
@@ -113,3 +115,23 @@
     (create-tenant-db root-db root-tenant-db tenant-db tenant tenant-password drop-if-exists?)
     (add-tenant-to-lumen-db lumen-encryption-key root-db lumen-db tenant-db tenant label title drop-if-exists?)
     true))
+
+
+(defmethod ig/init-key :akvo.lumen.admin.db/config [_ opts]
+  opts)
+
+(s/def ::password string?)
+(s/def ::database string?)
+(s/def ::user string?)
+(s/def ::host string?)
+
+(s/def ::root (s/keys :req-un [::password
+                               ::database
+                               ::user
+                               ::host]))
+
+(s/def ::lumen (s/keys :req-un [::password]))
+
+(defmethod ig/pre-init-spec :akvo.lumen.admin.db/config [_]
+  (s/keys :req-un [::root
+                   ::lumen]))

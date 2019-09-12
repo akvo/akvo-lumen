@@ -15,7 +15,6 @@
           :akvo.lumen.component.caddisfly/prod
           :akvo.lumen.component.error-tracker/prod))
 
-
 (defn config
   ([]
    (config false))
