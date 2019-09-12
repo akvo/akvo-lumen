@@ -26,6 +26,7 @@
             [integrant.repl :as ir]
             [akvo.lumen.admin.add-tenant :as add-tenant]
             [akvo.lumen.admin.db :as admin.db]
+            [akvo.lumen.admin.system :as admin.system]
             [akvo.lumen.admin.remove-tenant :as remove-tenant]
             [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]))
@@ -95,14 +96,15 @@
   (do
     (def s (let [prod? false
                  [ks edn-file] (if prod?
-                                 [(do (add-tenant/ig-derives)
-                                      (add-tenant/ig-select-keys)) "prod.edn"]
+                                 [(do (admin.system/ig-derives)
+                                      (admin.system/ig-select-keys)) "prod.edn"]
                                  [(do (dev-ig-derives)
-                                      [:akvo.lumen.component.emailer/dev-emailer]) "local.edn"])]
-             (add-tenant/admin-system
-              (commons/config ["akvo/lumen/config.edn" "test.edn" edn-file] prod?)
+                                      [:akvo.lumen.component.emailer/dev-emailer]) "local-admin.edn"])]
+             (admin.system/admin-system
+              (commons/config ["akvo/lumen/config.edn" "admin.edn" "test.edn" edn-file] prod?)
               ks)))
-    (let [o (:akvo.lumen.admin/add-tenant s)]
+    (:akvo.lumen.component.keycloak/public-client s)
+    #_(let [o (:akvo.lumen.admin/add-tenant s)]
       (binding [admin.db/env-vars (:root (:dbs o))]
         (let [encryption-key (-> o :db-settings :encryption-key)
               drop-if-exists? (-> o :drop-if-exists?)

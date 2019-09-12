@@ -1,0 +1,15 @@
+{:akvo.lumen.admin/dbs {:root {:password "akvo"
+                               :database "lumen"
+                               :user "postgres"
+                               :host "postgres"}
+                        :lumen {:password "password"}}
+ 
+ :akvo.lumen.admin/add-tenant {:emailer #ig/ref :akvo.lumen.component.emailer/emailer
+                               :auth-type "keycloak"
+                               :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                               :db-settings #ig/ref :akvo.lumen.component.tenant-manager/data
+                               :drop-if-exists? false
+                               :dbs #ig/ref :akvo.lumen.admin/dbs}
+
+ :akvo.lumen.admin/remove-tenant {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                                  :dbs #ig/ref :akvo.lumen.admin/dbs}}

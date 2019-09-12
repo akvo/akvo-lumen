@@ -214,5 +214,6 @@
 
 (defmethod ig/init-key :akvo.lumen.admin/add-tenant [_ {:keys [emailer auth-type] :as opts}]
   opts)
+
 (defmethod ig/init-key :akvo.lumen.admin/dbs [_ opts]
   opts)

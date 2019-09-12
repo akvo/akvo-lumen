@@ -1,5 +1,6 @@
 (ns dev.commons
   (:require [akvo.lumen.test-utils :as tu]
+            [akvo.lumen.config :as config]
             [clojure.java.io :as io]
             [integrant.core :as ig]
             [integrant.repl :as ir]))
@@ -22,7 +23,7 @@
    (config ["akvo/lumen/config.edn" "test.edn" "dev.edn"
             (when (io/resource "local.edn") "local.edn")] prod?))
   ([config-files prod?]
-   (let [config-files* (apply tu/prep config-files)
+   (let [config-files* (config/prep config-files)
          config-files* (if-not prod? (dissoc-prod-components config-files*) config-files*)]
      (ir/set-prep! (fn [] config-files*))
      (ig/load-namespaces config-files*)
