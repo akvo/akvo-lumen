@@ -385,8 +385,10 @@
 
   (user [keycloak tenant email]
     (let [headers (request-headers keycloak)
-          user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")]
-      (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))))
+          user-id (get (fetch-user-by-email headers (:api-root keycloak) email) "id")
+          res (w/keywordize-keys (fetch-user-by-id headers (:api-root keycloak) tenant user-id))]
+      (log/error :user res)
+      res))
 
   (user? [keycloak email]
     (let [headers (request-headers keycloak)]

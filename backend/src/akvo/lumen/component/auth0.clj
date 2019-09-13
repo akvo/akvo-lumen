@@ -35,8 +35,3 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.auth0/public-client [_]
   ::public-client)
-
-(defn path->role [path]
-  (let [s (apply str (next path))]
-  (str/replace  s "/" ":")))
-

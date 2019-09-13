@@ -28,18 +28,7 @@
                             (jwt/verified-claims token auth0-verifier
                                                  (:issuer auth0-public-client)
                                                  {}))]
-          (handler (assoc request
-                          :jwt-claims claims
-                          :auth-roles (if (= :keycloak
-                                             (issuer-type claims
-                                                          keycloak-public-client
-                                                          auth0-public-client))
-                                        (keycloak/claimed-roles claims)
-                                        (set (map auth0/path->role
-                                                  (:path-groups (p/user authorizer
-                                                                        tenant
-                                                                        (get claims "email"))))))
-                          :jwt-token token))
+          (handler (assoc request :jwt-claims claims :jwt-token token))
           (handler request))
         (catch ParseException e
           (handler request)))
