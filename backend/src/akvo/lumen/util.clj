@@ -86,10 +86,8 @@
    (conform s (adapter d))
    d))
 
-(defmacro as-middleware
-  "f should be a function of 3 arguments with a signature as (handler request opts)."
-  {:arglist '(f opts)}
+(defn as-middleware
   [f opts]
-  (list 'fn ['handler]
-        (list 'fn ['request]
-              (list f 'handler 'request opts))))
+  (fn [handler]
+    (fn [request]
+      (f handler request opts))))
