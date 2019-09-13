@@ -82,6 +82,8 @@ spec:
           limits:
             cpu: "1000m"
         env:
+        - name: LUMEN_API_AUTHZ_PROBABILITY
+          value: "0.0"
         - name: LUMEN_CONFORM_SPECS
           valueFrom:
             secretKeyRef:
