@@ -4,6 +4,7 @@
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
+            [akvo.lumen.config :as config]
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
@@ -113,9 +114,7 @@
 
 ;; system utils
 
-(defn read-config
-  [resource-path]
-  (duct/read-config (io/resource resource-path)))
+
 
 (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
@@ -128,10 +127,6 @@
         ks (if more-ks (apply conj ks more-ks) ks)]
     (apply dissoc c ks)))
 
-
-(defn prep [& paths]
-  (ig/prep (apply duct/merge-configs (map read-config (filter some? paths)))))
-
 (defn halt-system [system]
   (when system (ig/halt! system)))
 
@@ -139,7 +134,7 @@
   ([]
    (start-config nil nil))
   ([edn-config more-ks]
-   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "test.edn" edn-config)
+   (let [c (dissoc-prod-components (config/prep ["akvo/lumen/config.edn" "test.edn" edn-config])
                                    more-ks)]
      (ig/load-namespaces c)
      c)))

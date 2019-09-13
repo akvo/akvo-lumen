@@ -18,8 +18,10 @@
    [integrant.core :as ig]
    [ring.util.response :refer [response]]))
 
+
 (declare user-groups)
-(def http-client-req-defaults (http.client/req-opts 5000))
+(def ^:dynamic http-client-req-defaults (http.client/req-opts 5000))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helper fns
@@ -27,9 +29,105 @@
 
 (defn fetch-openid-configuration
   "Get the openid configuration"
-  ([issuer req-opts]
-   (let [url (format "%s/.well-known/openid-configuration" issuer)]
-     (-> (http.client/get* url (merge http-client-req-defaults req-opts)) :body json/decode))))
+  [issuer req-opts]
+  (let [url (format "%s/.well-known/openid-configuration" issuer)
+        res (-> (http.client/get* url (merge http-client-req-defaults req-opts)) :body json/decode)]
+    (log/info "Successfully got openid-config from provider.")
+    res))
+
+(defn get-roles [{:keys [api-root]} headers]
+  (http.client/get* (format "%s/roles" api-root)
+                     (merge
+                      http-client-req-defaults
+                      {:headers headers})))
+
+(defn remove-group
+  "Remove keycloak group by id"
+  [{:keys [api-root]} headers id & [req-settings]]
+  (log/debug :remove-group :id id)
+  (http.client/delete* (format "%s/groups/%s" api-root id)
+                       (merge http-client-req-defaults
+                              req-settings
+                              {:headers headers
+                               :as :json})))
+
+(defn get-groups
+  "List all keycloak groups and sub groups"
+  [{:keys [api-root]} headers & [req-settings]]
+  (let [res (http.client/get* (format "%s/groups" api-root)
+                           (merge http-client-req-defaults
+                                  req-settings
+                                  {:headers headers}))]
+    (json/parse-string (:body res) keyword)))
+
+(defn remove-role-mappings [{:keys [api-root]} headers group-id & [req-settings]]
+  (http.client/delete*
+   (format "%s/groups/%s/role-mappings/realm" api-root group-id)
+   (merge http-client-req-defaults
+          req-settings
+          {:headers headers})))
+
+(defn remove-role [{:keys [api-root]} headers role-name & [req-settings]]
+  (log/debug :remove-role api-root role-name)
+  (http.client/delete* (format "%s/roles/%s" api-root role-name )
+                       (merge                        
+                        http-client-req-defaults
+                        req-settings
+                        {:headers headers})))
+
+(defn create-group
+  [{:keys [api-root credentials openid-config]} headers root-group-id role group-name]
+  (log/debug :create-role :name role)
+  (http.client/post* (format "%s/roles" api-root)
+                     (merge
+                      http-client-req-defaults
+                      {:body (json/encode {"name" role})
+                       :headers headers}))
+  (let [new-group-id (-> (http.client/post*
+                          (format "%s/groups/%s/children"
+                                  api-root root-group-id)
+                          (merge http-client-req-defaults
+                                 {:body (json/encode {"name" group-name})
+                                  :headers headers}))
+                         :body json/decode (get "id"))
+        _ (log/debug :create-group :group-name group-name :new-group-id new-group-id)
+        available-roles (-> (http.client/get*
+                             (format "%s/groups/%s/role-mappings/realm/available"
+                                     api-root root-group-id)
+                             (merge http-client-req-defaults {:headers headers}))
+                            :body json/decode)
+        role-id (-> (filter #(= role (get % "name"))
+                            available-roles)
+                    first
+                    (get "id"))
+        role-mappings (http.client/post*
+                       (format "%s/groups/%s/role-mappings/realm" api-root new-group-id)
+                       (merge http-client-req-defaults
+                              {:body (json/encode [{"id" role-id
+                                                    "name" role
+                                                    "scopeParamRequired" false
+                                                    "composite" false
+                                                    "clientRole" false
+                                                    "containerId" "Akvo"}])
+                               :headers headers}))]
+    (log/debug :create-group :role-mappings :new-group-id new-group-id :role-id role-id :role-mappings-status (:status role-mappings))
+    new-group-id))
+
+(defn update-client
+  [{:keys [api-root]} headers {:strs [id] :as client} & [req-settings]]
+  (http.client/put* (format "%s/clients/%s" api-root id)
+                    (merge http-client-req-defaults
+                           req-settings
+                           {:body (json/encode client)
+                            :headers headers})))
+
+(defn fetch-client
+  [{:keys [api-root]} headers client-id]
+  (-> (http.client/get* (format "%s/clients" api-root)
+                        (merge http-client-req-defaults
+                               {:query-params {"clientId" client-id}
+                                :headers headers}))
+      :body json/decode first))
 
 (defn request-headers
   "Create a set of request headers to use for interaction with the Keycloak
@@ -51,11 +149,15 @@
   For example:
     (group-by-path keycloak headers \"/akvo/lumen/t1/admin\") -> uuid"
   [{:keys [api-root credentials openid-config]} headers path]
-  (-> (http.client/get* (format "%s/group-by-path/%s"
-                         api-root (format "akvo/lumen/%s" path))
-                        (merge http-client-req-defaults
-                               {:headers headers}))
-      :body json/decode))
+  (let [path (if (some? path) (str "/" path) "")]
+    (-> (http.client/get* (format "%s/group-by-path/%s" api-root (format "akvo/lumen%s" path))
+                          (merge http-client-req-defaults
+                                 {:headers headers}))
+        :body json/decode)))
+
+(defn root-group
+  [{:keys [api-root credentials openid-config] :as data} headers]
+  (group-by-path data headers nil))
 
 (defn group-members
   "Return groups memebers using a group id"
@@ -337,7 +439,7 @@
 ;;; KeycloakAgent Component
 ;;;
 
-(defrecord KeycloakAgent [issuer openid-config api-root user-id-cache]
+(defrecord KeycloakAgent [api-root credentials user-id-cache]
   p/UserManagement
   (add-user-with-email [{:keys [api-root] :as keycloak} tenant-label email]
     (let [headers  (request-headers keycloak)
@@ -433,14 +535,18 @@
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
   (log/info "Starting keycloak")
-  (let [issuer (:issuer public-client)
-        connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
-        openid-config      (fetch-openid-configuration issuer {})]
-    (log/info "Successfully got openid-config from provider.")
-    (assoc (init-keycloak (assoc public-client :credentials credentials :max-user-ids-cache max-user-ids-cache))
-           :connection-manager connection-manager
-           :openid-config openid-config
-           :monitoring monitoring)))
+  (assoc (init-keycloak (assoc public-client :credentials credentials :max-user-ids-cache max-user-ids-cache))
+         :connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
+         :openid-config (fetch-openid-configuration (:issuer public-client) {})
+         :monitoring monitoring))
+
+(def map-print-method
+  (get-method clojure.core/print-method clojure.lang.PersistentArrayMap))
+
+(defmethod clojure.core/print-method KeycloakAgent
+  [ka ^java.io.Writer writer]
+  (.write writer (map-print-method (update ka :openid-config #(hash-map :issuer (get % "issuer"))) writer)))
+
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/authorization-service  [_ opts]
   (log/info :keycloak "closing connection manager" (:connection-manager opts))
@@ -460,5 +566,10 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)
 
+
 (defn claimed-roles [jwt-claims]
   (set (get-in jwt-claims ["realm_access" "roles"])))
+
+(defmethod clojure.core/print-method sun.security.rsa.RSAPublicKeyImpl
+  [system ^java.io.Writer writer]
+  (.write writer "#<RSAPublicKey>"))

@@ -1,0 +1,14 @@
+Hi!
+
+You have been invited to join Akvo Lumen.
+
+To complete the invitation process please visit:
+{{location}}/verify/{{invite-id}}
+
+Using your email: {{email}}
+and the temporary password: {{tmp-password}} to login.
+
+
+Thank you
+
+The Akvo Lumen Team

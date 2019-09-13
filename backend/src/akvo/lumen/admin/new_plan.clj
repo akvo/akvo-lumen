@@ -28,15 +28,16 @@
   (assert (:pg-password env) (error-msg "Specify PG_PASSWORD env var"))
   (assert (:pg-user env) (error-msg "Specify PG_USER env var")))
 
-(defn -main [label tier]
-  (try
-    (check-env-vars)
-    (with-db-transaction [tx (db-uri {:database "lumen" :user "lumen"})]
-      (end-tenant-plan tx {:label label})
-      (add-new-plan tx {:label label
-                        :tier (doto (PGobject.)
-                                (.setType "tier")
-                                (.setValue tier))}))
-    (println "Done!")
-    (catch SQLException e
-      (print-sql-exception-chain e))))
+(defn exec [label]
+  (let [tier "standard"]
+   (try
+     (check-env-vars)
+     (with-db-transaction [tx (db-uri {:database "lumen" :user "lumen"})]
+       (end-tenant-plan tx {:label label})
+       (add-new-plan tx {:label label
+                         :tier (doto (PGobject.)
+                                 (.setType "tier")
+                                 (.setValue tier))}))
+     (println "Done!")
+     (catch SQLException e
+       (print-sql-exception-chain e)))))

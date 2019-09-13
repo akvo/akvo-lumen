@@ -22,13 +22,13 @@
 (defn -main []
   (let [db-uri (util/db-uri)
         lumen-db-uri (util/db-uri {:database "lumen" :user "lumen"})]
-    (util/exec! db-uri "CREATE ROLE lumen WITH PASSWORD '%s' SUPERUSER LOGIN;" (env :pgpassword))
-    (util/exec! db-uri (str "CREATE DATABASE lumen "
-                            "WITH OWNER = lumen "
-                            "TEMPLATE = template0 "
-                            "ENCODING = 'UTF8' "
-                            "LC_COLLATE = 'en_US.UTF-8' "
-                            "LC_CTYPE = 'en_US.UTF-8';"))
-    (util/exec! lumen-db-uri "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-    (util/exec! lumen-db-uri "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
+    (util/exec! db-uri {} "CREATE ROLE lumen WITH PASSWORD '%s' SUPERUSER LOGIN;" (env :pgpassword))
+    (util/exec! db-uri {} (str "CREATE DATABASE lumen "
+                               "WITH OWNER = lumen "
+                               "TEMPLATE = template0 "
+                               "ENCODING = 'UTF8' "
+                               "LC_COLLATE = 'en_US.UTF-8' "
+                               "LC_CTYPE = 'en_US.UTF-8';"))
+    (util/exec! lumen-db-uri {} "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
+    (util/exec! lumen-db-uri {} "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
     (migrate lumen-db-uri)))

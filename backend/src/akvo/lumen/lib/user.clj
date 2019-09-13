@@ -11,49 +11,53 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/user.sql")
 
+(defn expire-time []
+  (c/to-sql-time (t/plus (t/now)
+                         (t/weeks 2))))
+
+(defn- invite-id* [tenant-conn author email]
+  (-> (insert-invite tenant-conn
+                     {:author author
+                      :email email
+                      :expire (expire-time)})
+      first :id))
+
 (defn invite-to-tenant
   "Create an invite and use provider emailer to send an invitation email."
   [emailer tenant-conn auth-type location email author-claims]
-  (let [invite-id (-> (insert-invite tenant-conn
-                        {:author author-claims
-                         :email email
-                         :expire (c/to-sql-time (t/plus (t/now)
-                                                  (t/weeks 2)))})
-                    first :id)
+  (let [invite-id (invite-id* tenant-conn author-claims email)
         text-part (selmer/render-file (format "akvo/lumen/email/%s/invite_to_tenant.txt" (name auth-type))
                     {:author-email (get author-claims "email")
                      :invite-id invite-id
                      :location location})]
     (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                         "Text-part" text-part})))
+                                   "Text-part" text-part})))
 
-(defn create-new-account-and-invite-to-tenant
-  ""
-  [emailer keycloak tenant-conn auth-type location email
-   author-claims]
-  (let [headers (keycloak/request-headers keycloak)
-        user-id (as-> (p/create-user keycloak headers email) x
-                  (:headers x)
-                  (get x "Location")
-                  (str/split x #"/")
-                  (last x))
-        tmp-password (random-url-safe-string 6)
-        invite-id (-> (insert-invite tenant-conn
-                        {:author author-claims
-                         :email email
-                         :expire (c/to-sql-time (t/plus (t/now)
-                                                  (t/weeks 2)))})
-                    first :id)
-         text-part (selmer/render-file
-                    (format "akvo/lumen/email/%s/create_new_account_and_invite_to_tenant.txt" (name auth-type))
-                    {:author-email (get author-claims "email")
-                     :email email
-                     :invite-id invite-id
-                     :location location
-                     :tmp-password tmp-password})]
-    (p/reset-password keycloak headers user-id tmp-password)
+(defn new-invitation-id [tenant-conn author-claims email]
+  (invite-id* tenant-conn author-claims email))
+
+(defn send-invitation-account-email [emailer sender-email email location invite-id tmp-password auth-type]
+  (let [text-part (selmer/render-file
+                   (format "akvo/lumen/email/%s/create_new_account_and_invite_to_tenant.txt" (name auth-type))
+                   {:author-email sender-email
+                    :email email
+                    :invite-id invite-id
+                    :location location
+                    :tmp-password tmp-password})]
     (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                         "Text-part" text-part})))
+                                   "Text-part" text-part})))
+
+(defn create-new-account [keycloak tenant-conn email]
+  (let [headers (keycloak/request-headers keycloak)
+        user-id (-> (p/create-user keycloak headers email)
+                    (get-in [:headers "Location"])
+                    (str/split #"/")
+                    last)
+        tmp-password (random-url-safe-string 6)]
+    (p/reset-password keycloak headers user-id tmp-password)
+    {:email email
+     :user-id user-id
+     :tmp-password tmp-password}))
 
 (defn create-invite
   "First check if user is already a member of current tenant, then don't invite.
@@ -68,8 +72,10 @@
     (p/user? keycloak email) (invite-to-tenant emailer tenant-conn auth-type location email
                                        author-claims)
     :else
-    (create-new-account-and-invite-to-tenant
-     emailer keycloak tenant-conn auth-type location email author-claims))
+    (let [tmp-password (:tmp-password (create-new-account keycloak tenant-conn email))
+          invitation-id (new-invitation-id tenant-conn author-claims email)
+          sender-email (get author-claims "email")]
+      (send-invitation-account-email emailer sender-email email location invitation-id tmp-password auth-type)))
   (lib/ok {}))
 
 (defn active-invites [tenant-conn]
