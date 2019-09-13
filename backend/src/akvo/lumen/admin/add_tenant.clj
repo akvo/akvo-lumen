@@ -168,14 +168,14 @@
                                     :url url}))
       true)))
 
-(defn -main [url title email auth-type & [edn-file]]
+(defn -main [url title email & [auth-type edn-file]]
   (try
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
       (admin.system/ig-derives)
-      (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "prod.edn"))
+      (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "akvo/lumen/prod.edn"))
                                                   (admin.system/ig-select-keys [:akvo.lumen.admin/add-tenant]))
             administer (:akvo.lumen.admin/add-tenant admin-system)]
-        (exec administer {:url url :title title :email email :auth-type auth-type})))
+        (exec administer {:url url :title title :email email :auth-type (or auth-type "keycloak")})))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e
