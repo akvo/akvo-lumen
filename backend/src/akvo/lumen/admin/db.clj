@@ -42,30 +42,30 @@
 
 (defn- drop-tenant-db [root-db-uri tenant]
   (try
-    (util/exec-no-transact! root-db-uri "DROP DATABASE IF EXISTS \"%s\" " tenant)
+    (util/exec! root-db-uri {} "DROP DATABASE IF EXISTS \"%s\" " tenant)
     (catch Exception e (let [message (.getMessage e)]
                          (log/error e)
                          (if (str/includes? message "is being accessed by other users")
                            (throw (ex-info (format "Right now it's not possible to drop the database %s, there are still active connections to this db, don't hit the web application related, wait for a few minutes, then try again" tenant) {:tenant tenant} e))
                            (throw e)))))
-  (util/exec-no-transact! root-db-uri "DROP ROLE IF EXISTS \"%s\" " tenant))
+  (util/exec! root-db-uri {} "DROP ROLE IF EXISTS \"%s\" " tenant))
 
 (defn- create-tenant-db [root-db-uri root-tenant-db-uri tenant-db-uri  tenant tenant-password drop-if-exists?]
   (try
-    (util/exec-no-transact! root-db-uri "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
-    (util/exec-no-transact! root-db-uri (str "CREATE DATABASE %1$s "
+    (util/exec! root-db-uri {} "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+    (util/exec! root-db-uri {} (str "CREATE DATABASE %1$s "
                                              "WITH OWNER = %1$s "
                                              "TEMPLATE = template0 "
                                              "ENCODING = 'UTF8' "
                                              "LC_COLLATE = 'en_US.UTF-8' "
                                              "LC_CTYPE = 'en_US.UTF-8';") tenant)
-    (util/exec-no-transact! root-tenant-db-uri
+    (util/exec! root-tenant-db-uri {}
                             "CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;")
-    (util/exec-no-transact! root-tenant-db-uri
+    (util/exec! root-tenant-db-uri {}
                             "CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;")
-    (util/exec-no-transact! root-tenant-db-uri
+    (util/exec! root-tenant-db-uri {}
                             "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
-    (util/exec-no-transact! root-tenant-db-uri
+    (util/exec! root-tenant-db-uri {}
                             "CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;")
     (migrate/do-migrate (r.jdbc/sql-database tenant-db-uri)
                         (r.jdbc/load-resources "akvo/lumen/migrations/tenants"))
@@ -80,7 +80,7 @@
 
 (defn- drop-tenant-from-lumen-db [lumen-db-uri label]
   (try
-    (util/exec-no-transact! lumen-db-uri (format  "DELETE from tenants where label='%s'" label))
+    (util/exec! lumen-db-uri {} (format  "DELETE from tenants where label='%s'" label))
     (catch Exception e
       (do
         (log/error e)

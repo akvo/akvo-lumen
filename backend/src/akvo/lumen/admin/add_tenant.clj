@@ -134,11 +134,12 @@
   (let [{:keys [user-id email tmp-password]} user-creds
         text-part (if (some? tmp-password)
                     (let [invite-id
-                          (:id (util/exec-no-transact-return! tenant-db
-                                                              (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
-                                                                      email
-                                                                      (lib.user/expire-time)
-                                                                      (json/encode {:email "admin@akvo.org"}))))]
+                          (:id (util/exec! tenant-db
+                                           {:return-keys true}
+                                           (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
+                                                   email
+                                                   (lib.user/expire-time)
+                                                   (json/encode {:email "admin@akvo.org"}))))]
                       (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_non_existent_user.txt" (name auth-type))
                                           {:email email
                                            :invite-id invite-id

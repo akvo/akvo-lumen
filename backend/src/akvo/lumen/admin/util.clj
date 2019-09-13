@@ -7,20 +7,12 @@
 
 (def http-client-req-defaults (http.client/req-opts 200000))
 
-(defn exec-no-transact!
+(defn exec!
   "Execute SQL expression"
-  [db-uri format-str & args]
+  [db-uri opts format-str & args]
   (jdbc/execute! db-uri
                  [(apply format format-str args)]
-                 {:transaction? false}))
-
-(defn exec-no-transact-return!
-  "Execute SQL expression"
-  [db-uri format-str & args]
-  (jdbc/execute! db-uri
-                 [(apply format format-str args)]
-                 {:transaction? false
-                  :return-keys true}))
+                 (merge {:transaction? false} opts)))
 
 (defn db-uri
   "Build a db uri string using standard PG environment variables as fallback"
