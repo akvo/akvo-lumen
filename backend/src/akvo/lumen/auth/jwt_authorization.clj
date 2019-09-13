@@ -15,8 +15,8 @@
       (contains? auth-roles
                  (format "akvo:lumen:%s" tenant))))
 
-(defn ^:deprecated jwt-authorization
-  "
+(defn  jwt-authorization
+  " Deprecated!
   Only used with keycloak jwt!!
 
   should be removed once we test the performance of authorizer service and fully move to auth0
