@@ -19,24 +19,24 @@
     (set/rename-keys ks-mapping (select-keys env (keys ks-mapping)))))
 
 
-(defn db-uri*
-  ([] (db-uri* {}))
+(defn- envs-db-uri
+  ([] (envs-db-uri {}))
   ([data]
    (util/db-uri-db (merge env-vars data))))
 
 (defn db-uris [label tenant-password & [lumen-db-password]]
-  (let [tenant (str "tenant_" (str/replace label "-" "_"))
-        main-db-uri (db-uri*)
-        lumen-db-uri (db-uri* {:database "lumen" :user "lumen" :password lumen-db-password})
-        tenant-db-uri (db-uri* {:database tenant
-                                :user     tenant
-                                :password tenant-password})
-        tenant-db-uri-with-superuser (db-uri* {:database tenant})]
-    {:root-db main-db-uri
-     :lumen-db lumen-db-uri
-     :tenant-db tenant-db-uri
-     :root-tenant-db tenant-db-uri-with-superuser
-     :tenant tenant
+  (let [tenant                       (str "tenant_" (str/replace label "-" "_"))
+        main-db-uri                  (envs-db-uri)
+        lumen-db-uri                 (envs-db-uri {:database "lumen" :user "lumen" :password lumen-db-password})
+        tenant-db-uri                (envs-db-uri {:database tenant
+                                                   :user     tenant
+                                                   :password tenant-password})
+        tenant-db-uri-with-superuser (envs-db-uri {:database tenant})]
+    {:root-db         main-db-uri
+     :lumen-db        lumen-db-uri
+     :tenant-db       tenant-db-uri
+     :root-tenant-db  tenant-db-uri-with-superuser
+     :tenant          tenant
      :tenant-password tenant-password}))
 
 

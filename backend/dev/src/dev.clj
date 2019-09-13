@@ -1,13 +1,11 @@
 (ns dev
   (:refer-clojure :exclude [test])
   (:require [akvo.lumen.endpoint.commons]
-            [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs]
             [akvo.lumen.test-utils :as tu]
-            [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.jdbc :as jdbc]
