@@ -72,7 +72,7 @@
 (defn valid-type? [s]
   (#{"text" "number" "date" "geopoint"} s))
 
-(defn conform  
+(defn conform
   ([s d]
    (when-not (s/valid? s d)
      (log/info (str s " spec problem!")
@@ -85,3 +85,9 @@
   ([s d adapter]
    (conform s (adapter d))
    d))
+
+(defn as-middleware
+  [f opts]
+  (fn [handler]
+    (fn [request]
+      (f handler request opts))))

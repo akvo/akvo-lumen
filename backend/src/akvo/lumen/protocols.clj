@@ -43,7 +43,7 @@
     "Remove user from tenant")
 
   (user
-    [this email tenant]
+    [this tenant email]
     "get user details")
 
   (user?

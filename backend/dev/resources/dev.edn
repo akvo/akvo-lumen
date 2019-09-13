@@ -10,6 +10,8 @@
  :akvo.lumen.component.handler/handler {:endpoints [["/local-development" [#ig/ref :akvo.lumen.utils.local-server/endpoint]]
                                                     #ig/ref :dev.endpoints/spec-api]}
 
+ :akvo.lumen.auth/wrap-authorization {:api-authz-probability 0.5}
+
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants
                                          [{:db_uri "jdbc:postgresql://postgres/lumen_tenant_1?user=lumen&password=password&ssl=true"

@@ -1,7 +1,11 @@
-(ns akvo.lumen.auth-test
-  (:require [akvo.lumen.auth :as m]
+(ns akvo.lumen.auth.jwt-authorization-test
+  (:require [akvo.lumen.auth.jwt-authorization :as m]
+            [akvo.lumen.util :refer [as-middleware]]
             [clojure.test :refer [deftest testing is]]
+            [clojure.tools.logging :as log]
+            [akvo.lumen.component.keycloak :as keycloak]
             [ring.mock.request :as mock]))
+
 
 (defn- test-handler
   [request]
@@ -25,7 +29,13 @@
     401 (is (= "\"Not authenticated\"" (:body response)))
     403 (is (= "\"Not authorized\"" (:body response)))))
 
-(def wrap-auth (m/wrap-auth {:issuer "keycloak"} {:issuer "auth0"}))
+(def wrap-auth (as-middleware m/jwt-authorization
+                              {:auth0-public-client {:issuer "auth0"}
+                               :keycloak-public-client {:issuer "keycloak"}} ))
+
+
+(defn update-auth-roles [o]
+  (assoc o :auth-roles (keycloak/claimed-roles (:jwt-claims o))))
 
 (deftest wrap-auth-test
   (testing "GET / without claims"
@@ -42,17 +52,17 @@
     (check-response
      ((wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
-          (assoc-in [:jwt-claims "realm_access" "roles"]
-                    ["akvo:lumen:t0"])))
+          (assoc-in [:jwt-claims "realm_access" "roles"] ["akvo:lumen:t0"])
+          update-auth-roles))
      403))
 
   (testing "GET resource with claims and tenant"
     (check-response
      ((wrap-auth test-handler)
       (-> (immutant-request :get "/api/resource")
-          (assoc-in [:jwt-claims "realm_access" "roles"]
-                    ["akvo:lumen:t0"])
-          (assoc :tenant "t0")))
+          (assoc-in [:jwt-claims "realm_access" "roles"] ["akvo:lumen:t0"])
+          (assoc :tenant "t0")
+          update-auth-roles))
      200))
 
   (testing "GET resource as admin with claims and tenant"
@@ -62,7 +72,8 @@
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"
                      "akvo:lumen:t0:admin"])
-          (assoc :tenant "t0")))
+          (assoc :tenant "t0")
+          update-auth-roles))
      200))
 
   (testing "GET admin resource as admin with claims and tenant"
@@ -72,7 +83,8 @@
           (assoc-in [:jwt-claims "realm_access" "roles"]
                     ["akvo:lumen:t0"
                      "akvo:lumen:t0:admin"])
-          (assoc :tenant "t0")))
+          (assoc :tenant "t0")
+          update-auth-roles))
      200))
 
   (testing "GET admin resource as non admin with claims and tenant"
@@ -124,41 +136,3 @@
                               [:jwt-claims]
                               "realm_access"))]
       (check-response response 403))))
-
-
-(deftest api-tenant-admin?-test
-  (let [tf (fn [cxt tenant allowed-paths bool]
-             (testing cxt
-               (is (= bool (m/api-tenant-admin? tenant allowed-paths)))))]
-
-    (tf "Nil case"
-        "demo" nil false)
-    (tf "No allowed paths"
-        "demo" #{} false)
-    (tf "A user on the tenant"
-        "demo" #{"demo" "t1"} false)
-    (tf "A user on another tenant"
-        "demo" #{"t1"} false)
-    (tf "An admin on another tenant"
-        "demo" #{"t1/admin"} false)
-    (tf "An admin"
-        "demo" #{"demo/admin"} true)))
-
-
-(deftest api-tenant-member?-test
-  (let [tf (fn [cxt tenant allowed-paths bool]
-             (testing cxt
-               (is (= bool (m/api-tenant-member? tenant allowed-paths)))))]
-
-    (tf "Nil case"
-        "demo" nil false)
-    (tf "No allowed paths"
-        "demo" #{} false)
-    (tf "A user on the tenant"
-        "demo" #{"demo" "t1"} true)
-    (tf "A user on another tenant"
-        "demo" #{"t1"} false)
-    (tf "An admin on another tenant"
-        "demo" #{"t1/admin"} false)
-    (tf "An admin"
-        "demo" #{"demo/admin"} true)))

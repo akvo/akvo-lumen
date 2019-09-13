@@ -5,7 +5,6 @@ An open-source, easy to use data mashup, analysis and publishing platform.
 
 ## PM
 
-- [Board](https://github.com/orgs/akvo/projects/2)
 - [Issues](https://github.com/akvo/akvo-lumen/issues)
 
 ## Development
