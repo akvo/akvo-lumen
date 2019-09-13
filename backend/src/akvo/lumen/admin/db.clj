@@ -22,7 +22,7 @@
 (defn- envs-db-uri
   ([] (envs-db-uri {}))
   ([data]
-   (util/db-uri-db (merge env-vars data))))
+   (util/db-uri (merge env-vars data))))
 
 (defn db-uris [label tenant-password & [lumen-db-password]]
   (let [tenant                       (str "tenant_" (str/replace label "-" "_"))

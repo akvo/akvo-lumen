@@ -9,7 +9,7 @@
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.new-plan example-tenant standard"
-  (:require [akvo.lumen.admin.util :refer [db-uri-db]]
+  (:require [akvo.lumen.admin.util :refer [db-uri]]
             [akvo.lumen.config :refer [error-msg]]
             [clojure.java.jdbc :refer [print-sql-exception-chain
                                        with-db-transaction]]
@@ -32,7 +32,7 @@
   (let [tier "standard"]
    (try
      (check-env-vars)
-     (with-db-transaction [tx (db-uri-db {:database "lumen" :user "lumen"})]
+     (with-db-transaction [tx (db-uri {:database "lumen" :user "lumen"})]
        (end-tenant-plan tx {:label label})
        (add-new-plan tx {:label label
                          :tier (doto (PGobject.)

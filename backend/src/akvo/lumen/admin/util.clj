@@ -22,9 +22,9 @@
                  {:transaction? false
                   :return-keys true}))
 
-(defn db-uri-db
+(defn db-uri
   "Build a db uri string using standard PG environment variables as fallback"
-  ([] (db-uri-db {}))
+  ([] (db-uri {}))
   ([{:keys [host database user password]
      :or {host (env :pg-host)
           database (env :pg-database)
