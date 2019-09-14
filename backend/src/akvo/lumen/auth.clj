@@ -17,7 +17,7 @@
 (s/def ::auth0-public-client ::auth0/public-client)
 
 (s/def ::api-authz-probability
-  (s/and float? #(>= % 0) #(<= % 1)))
+  (s/and double? #(>= % 0) #(<= % 1)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
