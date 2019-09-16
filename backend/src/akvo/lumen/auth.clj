@@ -44,11 +44,12 @@
 
 (defmethod authorize :auth0
   [handler request opts]
-  (api-authorization handler request (select-keys opts [:authorizer])))
+  (api-authorization handler (assoc request :issuer-type :auth0) (select-keys opts [:authorizer])))
 
 (defmethod authorize :keycloak
   [handler {:keys [jwt-claims] :as request} {:keys [api-authz-probability] :as opts}]
-  (let [{:strs [email family_name]} jwt-claims
+  (let [request (assoc request :issuer-type :keycloak)
+        {:strs [email family_name]} jwt-claims
         api-authorization? (and
                             (and (some? family_name) (string/ends-with? family_name "$auth"))
                             (and (some? email) (string/ends-with? email "@akvo.org")))]
