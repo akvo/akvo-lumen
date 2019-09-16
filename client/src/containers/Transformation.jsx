@@ -43,7 +43,6 @@ class Transformation extends Component {
 
     dispatch(startTx(datasetId));
 
-    // TODO move this into an action instead of here
     api.post(`/api/transformations/${datasetId}/transform/${transformation.op}`, transformation)
       .then((response) => {
         if (!response.ok) {
