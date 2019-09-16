@@ -35,11 +35,11 @@
   empty?)
 
 (defn check-permissions
-  [flow-api token body]
+  [flow-api-url token body]
   (let [start (. System (nanoTime))
         res (try
               (http.client/post*
-               (str (:url flow-api) "/check_permissions")
+               (str flow-api-url "/check_permissions")
                (merge http-client-req-defaults
                       {:as :json
                        :headers (api-headers token)
@@ -47,7 +47,7 @@
                        :unexceptional-status #(<= 200 % 299) 
                        :form-params body
                        :content-type :json}))
-              (catch Exception e (log/error :fail :body body :response (ex-data e))))]
+              (catch Exception e (log/error :fail :url flow-api-url :body body :response (ex-data e))))]
     (log/debug ::check-permissions :body body :res res :elapsed-time (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start)) 1000000.0) " msecs"))
     res))
 
