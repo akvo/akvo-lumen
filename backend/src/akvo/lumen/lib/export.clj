@@ -3,7 +3,7 @@
             [clojure.tools.logging :as log]
             [akvo.lumen.http.client :as http.client]))
 
-(def http-client-req-defaults (http.client/req-opts 5000))
+(def http-client-req-defaults (http.client/req-opts 60000))
 
 (defmacro time*
   "Evaluates expr and prints the time it took.  Returns the value of
@@ -20,7 +20,7 @@
   [exporter-url access-token locale spec]
   (let [{:keys [body headers status] :as response}
         (time* (http.client/post* exporter-url
-                                  (merge http-client-req-defaults
+                                  (merge http-client-req-defaults 
                                          {:headers {"access_token" (str/replace-first access-token
                                                                                       #"Bearer "
                                                                                       "")
