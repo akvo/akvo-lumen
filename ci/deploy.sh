@@ -58,17 +58,19 @@ kubectl apply -f ci/k8s/redis-master-windshaft.yaml
 kubectl apply -f ci/k8s/blue-green-gateway.yaml
 kubectl apply -f ci/k8s/grafana/lumen-authz-allowed-paths.yml
 
-if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
-    exit 0
-fi
-
 log Waiting for k8s to finish
 ./ci/helpers/wait-for-k8s-deployment-to-be-ready.sh "$DARK_COLOR"
-log Waiting for k8s to be healthy
-./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh
 
-log Running end to end tests against the Kubernetes TEST environment
-./ci/e2e-test.sh akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"
+if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+    log Waiting for k8s to be healthy
+    ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh https://dark-demo.akvolumen.org/healthz
+else
+    log Waiting for k8s to be healthy
+    ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh https://dark-lumencitest.akvotest.org/healthz
 
-log Flipping TEST
-./ci/auto-flip-test-blue-green-deployment.sh
+    log Running end to end tests against the Kubernetes TEST environment
+    ./ci/e2e-test.sh akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"
+
+    log Flipping TEST
+    ./ci/auto-flip-test-blue-green-deployment.sh
+fi

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 starttime=$(date +%s)
+healthz_check_url=$1
 
 while [ $(( $(date +%s) - 60 )) -lt "${starttime}" ]; do
 
-    if wget https://dark-lumencitest.akvotest.org/healthz -O - -nv; then
+    if wget "$healthz_check_url" -O - -nv; then
         exit 0
     else
         echo "Waiting for the health check to pass"
@@ -12,6 +13,6 @@ while [ $(( $(date +%s) - 60 )) -lt "${starttime}" ]; do
     fi
 done
 
-wget https://dark-lumencitest.akvotest.org/healthz -O -
+wget "$healthz_check_url" -O -
 
 exit 1
