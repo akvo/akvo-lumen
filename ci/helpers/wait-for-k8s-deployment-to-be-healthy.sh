@@ -5,7 +5,7 @@ healthz_check_url=$1
 
 while [ $(( $(date +%s) - 60 )) -lt "${starttime}" ]; do
 
-    if wget "$healthz_check_url" -O - -nv; then
+    if wget "$healthz_check_url" -O - -nv 2>/dev/null; then
         exit 0
     else
         echo "Waiting for the health check to pass"
