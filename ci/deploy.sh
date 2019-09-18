@@ -8,7 +8,7 @@ function log {
 
 export PROJECT_NAME=akvo-lumen
 
-if [[ "${TRAVIS_BRANCH}" != "develop" ]] && [[ "${TRAVIS_BRANCH}" != "master" ]]; then
+if [[ "${TRAVIS_BRANCH}" != "develop" ]] && [[ ! "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
     exit 0
 fi
 
@@ -31,19 +31,19 @@ gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 gcloud config set container/use_client_certificate True
 
-if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
+if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
 else
     log Environement is test
     gcloud container clusters get-credentials test
-fi
 
-log Pushing images
-gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
-gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
-gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
-gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-exporter
+    log Pushing images
+    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
+    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
+    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
+    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-exporter
+fi
 
 log Finding blue/green state
 LIVE_COLOR=$(./ci/live-color.sh)
@@ -58,7 +58,7 @@ kubectl apply -f ci/k8s/redis-master-windshaft.yaml
 kubectl apply -f ci/k8s/blue-green-gateway.yaml
 kubectl apply -f ci/k8s/grafana/lumen-authz-allowed-paths.yml
 
-if [[ "${TRAVIS_BRANCH}" = "master" ]]; then
+if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
     exit 0
 fi
 
