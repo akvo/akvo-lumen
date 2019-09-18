@@ -1,8 +1,7 @@
 {:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
 
  :akvo.lumen.component.http/http {:port 3100}
-
- :akvo.lumen.component.tenant-manager/tenant-manager {:encryption-key "secret"}
+ :akvo.lumen.component.tenant-manager/data {:encryption-key "secret"}
 
  :akvo.lumen.component.caddisfly/local {:local-schema-uri "./caddisfly/caddisfly-tests-v2.json"}
 

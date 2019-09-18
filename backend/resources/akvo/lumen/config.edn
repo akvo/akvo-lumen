@@ -6,8 +6,11 @@
                                           :minimum-idle 2
                                           :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
+
+ :akvo.lumen.component.tenant-manager/data {:encryption-key #duct/env "LUMEN_ENCRYPTION_KEY"}
+
  :akvo.lumen.component.tenant-manager/tenant-manager {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry
-                                                      :encryption-key #duct/env "LUMEN_ENCRYPTION_KEY"
+                                                      :data #ig/ref :akvo.lumen.component.tenant-manager/data
                                                       :db #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
  :akvo.lumen.component.handler/wrap-hide-errors {:error-response "Internal Server Error"}

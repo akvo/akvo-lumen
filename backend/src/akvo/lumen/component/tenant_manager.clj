@@ -103,8 +103,8 @@
 (defn- tenant-manager [options]
   (map->TenantManager options))
 
-(defmethod ig/init-key :akvo.lumen.component.tenant-manager/tenant-manager [_ {:keys [db encryption-key dropwizard-registry] :as opts}]
-  (let [this (tenant-manager opts)]
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager/tenant-manager [_ {:keys [db encryption-key dropwizard-registry data] :as opts}]
+  (let [this (tenant-manager (merge opts (select-keys data [:encryption-key])))]
     (if (:tenants this)
       this
       (assoc this :tenants (atom {})))))
@@ -122,11 +122,18 @@
 (s/def ::encryption-key string?)
 (s/def ::dropwizard-registry ::monitoring/metric-registry)
 (s/def ::tenant-manager (partial instance? TenantManager))
+(s/def ::data (s/keys :req-un [::encryption-key]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.tenant-manager/tenant-manager [_]
   (s/keys :req-un [::db
-                   ::encryption-key
+                   ::data
                    ::dropwizard-registry]))
+
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager/data [_ {:keys [encryption-key] :as opts}]
+  opts)
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.tenant-manager/data [_]
+  ::data)
 
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
   wrap-label-tenant)

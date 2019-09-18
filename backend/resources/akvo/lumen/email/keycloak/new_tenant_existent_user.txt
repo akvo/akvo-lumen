@@ -1,0 +1,9 @@
+Hi!
+
+You have been invited to join Akvo Lumen. {{location}}
+
+Use your email: {{email}} and current password to "Log In".
+
+Thank you
+
+The Akvo Lumen Team

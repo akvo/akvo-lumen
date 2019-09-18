@@ -1,5 +1,6 @@
 (ns dev.commons
   (:require [akvo.lumen.test-utils :as tu]
+            [akvo.lumen.config :as config]
             [clojure.java.io :as io]
             [integrant.core :as ig]
             [integrant.repl :as ir]))
@@ -14,14 +15,18 @@
           :akvo.lumen.component.caddisfly/prod
           :akvo.lumen.component.error-tracker/prod))
 
-
-(defn config []
-  (let [config-files ["akvo/lumen/config.edn" "test.edn" "dev.edn"
-                      (when (io/resource "local.edn") "local.edn")]
-        c (dissoc-prod-components (apply tu/prep config-files))]
-    (ir/set-prep! (fn [] c))
-    (ig/load-namespaces c)
-    c))
+(defn config
+  ([]
+   (config false))
+  ([prod?]
+   (config ["akvo/lumen/config.edn" "test.edn" "dev.edn"
+            (when (io/resource "local.edn") "local.edn")] prod?))
+  ([config-files prod?]
+   (let [config-files* (config/prep config-files)
+         config-files* (if-not prod? (dissoc-prod-components config-files*) config-files*)]
+     (ir/set-prep! (fn [] config-files*))
+     (ig/load-namespaces config-files*)
+     config-files*)))
 
 
 (def tenants (-> (config) :akvo.lumen.migrate/migrate :seed :tenants))

@@ -1,0 +1,15 @@
+{:akvo.lumen.admin.db/config {:root {:password #duct/env [ "PG_PASSWORD" :or "akvo" ]
+                                     :database #duct/env [ "PG_DATABASE" :or "lumen" ]
+                                     :user #duct/env [ "PG_USER" :or "postgres" ]
+                                     :host #duct/env [ "PG_HOST" :or "postgres" ]}
+                              :lumen {:password #duct/env [ "PG_PASSWORD" :or "password"]}}
+ 
+ :akvo.lumen.admin/add-tenant {:emailer #ig/ref :akvo.lumen.component.emailer/emailer
+                               :auth-type "keycloak"
+                               :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                               :db-settings #ig/ref :akvo.lumen.component.tenant-manager/data
+                               :drop-if-exists? false
+                               :dbs #ig/ref :akvo.lumen.admin.db/config}
+
+ :akvo.lumen.admin/remove-tenant {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                                  :dbs #ig/ref :akvo.lumen.admin.db/config}}
