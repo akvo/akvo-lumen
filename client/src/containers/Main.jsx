@@ -17,8 +17,10 @@ class Main extends Component {
     const {
       dispatch,
       profile: { firstName, lastName },
+      location: { pathname },
     } = this.props;
-    if (!every([firstName, lastName], Boolean)) {
+    if ((pathname.split('/').pop() !== 'export')
+      && (!every([firstName, lastName], Boolean))) {
       dispatch(showModal('edit-user'));
     }
   }
@@ -62,6 +64,7 @@ Main.propTypes = {
   notification: PropTypes.object,
   loadStatus: PropTypes.string,
   env: PropTypes.object,
+  location: PropTypes.object,
   dispatch: PropTypes.func.isRequired,
   profile: PropTypes.shape({
     firstName: PropTypes.string,
