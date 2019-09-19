@@ -117,7 +117,7 @@ function dispatchOnMode() {
         // eslint-disable-next-line consistent-return
         auth0.parseHash({ hash: window.location.hash }, (err, authResult) => {
           if (err) {
-            if (err.errorDescription === 'Please verify your email before logging in.') {
+            if (err.errorDescription === 'EMAIL_VERIFIED_ERROR') {
               initNotAuthenticated(err.errorDescription);
             } else {
               throw err;
