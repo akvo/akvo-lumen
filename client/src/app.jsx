@@ -82,11 +82,6 @@ function initNotAuthenticated(msg) {
   document.querySelector('#root').innerHTML = `${msg} <a href='${loc.protocol}//${loc.host}'>${loc.protocol}//${loc.host}</a>`;
 }
 
-
-function currentLocale() {
-  return userLocale(window.localStorage.getItem('locale') || navigator.language || navigator.userLanguage);
-}
-
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
@@ -99,7 +94,7 @@ function dispatchOnMode() {
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        auth.init(body, auth.initService(body), currentLocale())
+        auth.init(body, auth.initService(body))
         .then(({ profile, env }) => initAuthenticated(profile, env))
         .catch(err => initNotAuthenticated(err.message));
       });
