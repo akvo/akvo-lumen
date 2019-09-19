@@ -77,7 +77,11 @@
                                :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
-                               :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"}
+                               :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"
+                               :lumen-deployment-color #duct/env "LUMEN_DEPLOYMENT_COLOR"
+                               :lumen-deployment-environment #duct/env "LUMEN_DEPLOYMENT_ENVIRONMENT"
+                               :lumen-deployment-version #duct/env "LUMEN_DEPLOYMENT_VERSION"
+                               }
 
  :akvo.lumen.endpoint.export/export {:exporter-api-url #duct/env [ "EXPORTER_API_URL" :or "http://localhost:3001" ]}
 

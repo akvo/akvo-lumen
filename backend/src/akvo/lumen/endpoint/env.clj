@@ -11,7 +11,9 @@
 (def auth-data (juxt :url :client-id))
 
 (defn handler [{:keys [keycloak-public-client flow-api auth0-public-client
-                       piwik-site-id sentry-client-dsn] :as opts}]
+                       piwik-site-id sentry-client-dsn lumen-deployment-color
+                       lumen-deployment-environment lumen-deployment-version]
+                :as opts}]
   (fn [{tenant :tenant
         query-params :query-params
         :as request}]
@@ -28,7 +30,10 @@
                                  "keycloak" (:url flow-api)
                                  "auth0"    (:auth0-url flow-api))
                   "piwikSiteId" piwik-site-id
-                  "tenant" (:tenant request)}
+                  "tenant" (:tenant request)
+                  "lumenDeploymentColor" lumen-deployment-color
+                  "lumenDeploymentEnvironment" lumen-deployment-environment
+                  "lumenDeploymentVersion" lumen-deployment-version}
            (string? sentry-client-dsn)
            (assoc "sentryDSN" sentry-client-dsn)))
         (-> (response/response (str "Auth-provided not implemented: " auth-type))
@@ -48,10 +53,16 @@
 (s/def ::flow-api :akvo.lumen.component.flow/config)
 (s/def ::sentry-client-dsn string?)
 (s/def ::piwik-site-id string?)
+(s/def ::lumen-deployment-color string?)
+(s/def ::lumen-deployment-environment string?)
+(s/def ::lumen-deployment-version string?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
   (s/keys :req-un [::keycloak-public-client
                    ::auth0-public-client
                    ::flow-api
                    ::sentry-client-dsn
-                   ::piwik-site-id]))
+                   ::piwik-site-id
+                   ::lumen-deployment-color
+                   ::lumen-deployment-environment
+                   ::lumen-deployment-version]))
