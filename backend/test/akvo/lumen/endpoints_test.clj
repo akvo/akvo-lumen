@@ -23,16 +23,23 @@
                  (body-kw r)))))
 
       (testing "/env"
-        (let [r (h (get*  "/env" {"auth" "keycloak"}))]
+        (let [r (h (get* "/env" {"auth" "keycloak"}))]
           (is (= 200 (:status r)))
-          (is (= {:authClientId "akvo-lumen",
-                  :authURL "http://auth.lumen.local:8080/auth",
-                  :authProvider "keycloak",
-                  :flowApiUrl "https://api.akvotest.org/flow",
-                  :piwikSiteId "165",
-                  :tenant "t1",
-                  :sentryDSN "dev-sentry-client-dsn"}
-                 (body-kw r))))))
+          (let [rb (body-kw r)
+                _ (clojure.pprint/pprint rb) ;; "Inspect" CI
+                ks [:authClientId :authProvider :authURL :flowApiUrl
+                    :lumenDeploymentColor :lumenDeploymentEnvironment
+                    :lumenDeploymentVersion :piwikSiteId :sentryDSN :tenant]
+                lookup-table {:authClientId "akvo-lumen",
+                              :authURL "http://auth.lumen.local:8080/auth",
+                              :authProvider "keycloak",
+                              :flowApiUrl "https://api.akvotest.org/flow",
+                              :piwikSiteId "165",
+                              :tenant "t1",
+                              :sentryDSN "dev-sentry-client-dsn"}]
+            (is (every? #(contains? rb %) ks))
+            (map #(is (= (% rb)
+                         (% lookup-table))) (keys rb))))))
 
     (testing "/api"
       (testing "/resources"
@@ -72,7 +79,7 @@
                           body-kw :id))))
 
           (is (= title* (-> (h (get* (api-url "/library")))
-                             body-kw :dashboards first :title)))
+                            body-kw :dashboards first :title)))
           ))
 
       (testing "/collections"
@@ -170,19 +177,19 @@
               (is (= {:all 4, :max 72.0, :min 22.0 :uniques 4} dataset-sort))))
 
           (is (= title (-> (h (get* (api-url "/library")))
-                          body-kw :datasets first :name)))
+                           body-kw :datasets first :name)))
           (let [bar-vis-name "hello-bar-vis!"]
             (is (= [bar-vis-name dataset-id]
                    (-> (h (post*  (api-url "/visualisations")
                                   (commons/visualisation-payload dataset-id "bar" bar-vis-name)))
                        body-kw
-                       
+
                        ((juxt :name :datasetId)))))
             (let [[name* id*] (-> (h (get* (api-url "/library")))
                                   body-kw :visualisations first
                                   ((juxt :name :id)))]
               (is (= bar-vis-name name*))
-              (testing "/api/shares && /share" 
+              (testing "/api/shares && /share"
                 (let [share-id (-> (h (post*  (api-url "/shares") {:visualisationId id*}))
                                    body-kw
                                    :id)]
@@ -209,7 +216,7 @@
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)
               dataset (-> (h (get* (api-url "/datasets" dataset-id)))
-                            body-kw)
+                          body-kw)
               update-dataset (-> (h (post* (api-url "/datasets" dataset-id "update") (:source dataset)))
                                  body-kw)
               dataset-id (job-execution-dataset-id h (:updateId update-dataset))]
@@ -242,7 +249,7 @@
               (is (= (:id res-raster) raster-id))))))
 
       ;; "/exports" endpoint can't be tested in backend isolation endpoints thus it needs a client side too
-      
+
       (testing "/visualisations & /aggregation/:dataset-id/:visualisation-type"
         (let [visualisations (body-kw (h (get* (api-url "/visualisations"))))
               [vis-id dataset-id keys*] ((juxt :id :datasetId keys) (first visualisations))
@@ -253,7 +260,7 @@
                                    (-> vis-detail
                                        (assoc-in  [:spec :axisLabelX] "Age")
                                        (assoc-in  [:spec :bucketColumn] "c2")))))))
-          
+
           (is (= []
                  (-> (h (get* (api-url "/aggregation" dataset-id (:visualisationType vis-detail))
                               {"query" (json/encode (:spec vis-detail))}))
@@ -270,7 +277,7 @@
           (is (= 200 (:status r)))
           (is (some? (re-find #"path=\"/api/aggregation/:dataset-id/:visualisation-type\",tenant=\"t1\""
                               (:body r))))))
-      
+
       (testing "/transformations/:id/transform/:op1/:op2 & /transformations/:id/undo"
         (let [title "GDP-dataset"
               file-name "GDP.csv"
@@ -308,7 +315,7 @@
               (let [dataset-job-id (job-execution-dataset-id h (:jobExecutionId (body-kw res)))
                     dataset-txed (body-kw (h (get* (api-url "/datasets" dataset-job-id))))]
                 (= " 17419000 " (->  dataset-txed :rows (get 4))))))))
-      
+
       (testing "/split-column/:dataset-id/pattern-analysis"
         (let [title "patter-analysis"
               file-name "split_column_1785.csv"
@@ -325,7 +332,7 @@
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)
               _ (is (some? dataset-id))]
-          
+
           (is (= {:analysis ["$" "-"]}
                  (-> (body-kw (h (get* (api-url  "/split-column" dataset-id "pattern-analysis")
                                        {"query" (json/encode {:columnName "c1"})})))
@@ -342,7 +349,7 @@
                   invitation (last store)]
               (is (= 1 (count store)))
               (is (= email (-> invitation :recipients first)))
-              (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))             
+              (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))
               (let [url (str/replace (re-find #"https.*+" (-> invitation :email (get "Text-part"))) "https://t1.lumen.local" "")
 
                     res-verify (h (get* url ))]

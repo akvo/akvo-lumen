@@ -17,6 +17,9 @@ services:
      - LUMEN_FLOW_API_URL=flow-url
      - LUMEN_FLOW_API_AUTH0_URL=flow-auth0-url
      - LUMEN_PIWIK_SITE_ID=165
+     - LUMEN_DEPLOYMENT_COLOR=${TRAVIS_BRANCH}
+     - LUMEN_DEPLOYMENT_ENVIRONMENT=${USER}
+     - LUMEN_DEPLOYMENT_VERSION=${TRAVIS_COMMIT}
  client:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT}"
    expose:
