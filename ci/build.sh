@@ -20,7 +20,7 @@ fi
 
 log Running Backend unit tests and building uberjar
 backend_image_version=$(awk -F':' '/backend-dev/ {print $3}' docker-compose.override.yml)
-docker run -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh lein do test, eastwood, uberjar
+docker run -e LUMEN_DEPLOYMENT_COLOR='${TRAVIS_BRANCH}' -e LUMEN_DEPLOYMENT_ENVIRONMENT='${USER}' -e LUMEN_DEPLOYMENT_VERSION='${TRAVIS_COMMIT}' -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh lein do test, eastwood, uberjar
 
 cp backend/target/uberjar/akvo-lumen.jar backend
 

@@ -80,8 +80,7 @@
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"
                                :lumen-deployment-color #duct/env "LUMEN_DEPLOYMENT_COLOR"
                                :lumen-deployment-environment #duct/env "LUMEN_DEPLOYMENT_ENVIRONMENT"
-                               :lumen-deployment-version #duct/env "LUMEN_DEPLOYMENT_VERSION"
-                               }
+                               :lumen-deployment-version #duct/env "LUMEN_DEPLOYMENT_VERSION"}
 
  :akvo.lumen.endpoint.export/export {:exporter-api-url #duct/env [ "EXPORTER_API_URL" :or "http://localhost:3001" ]}
 
