@@ -171,7 +171,8 @@ class DeriveCategoryTransformation extends Component {
 
   isValidTransformation() {
     const { source, target, derivation } = this.state.transformation.args;
-    if (source.column.columnName && target.column.title && derivation.mappings.length) {
+    // eslint-disable-next-line max-len
+    if (source.column.columnName && source.column.title && target.column.title && derivation.mappings.length) {
       return true;
     }
     return false;
@@ -214,7 +215,9 @@ class DeriveCategoryTransformation extends Component {
               dataset={dataset}
               selected={transformation.args.source.column.columnName}
               onChange={(columnName) => {
-                const ct = this.findColumn(dataset.columns, columnName).type;
+                const c = this.findColumn(dataset.columns, columnName);
+                const title = c.title;
+                const ct = c.type;
                 if (columnName !== transformation.args.source.column.columnName) {
                   onFetchSortedDataset(datasetId, columnName, ct);
                   this.setState({
@@ -229,6 +232,7 @@ class DeriveCategoryTransformation extends Component {
                           column: {
                             ...this.state.transformation.args.source.column,
                             columnName,
+                            title,
                           },
                         },
                         derivation: {

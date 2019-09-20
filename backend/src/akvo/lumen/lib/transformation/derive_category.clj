@@ -50,6 +50,7 @@
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [op-spec               (walk/keywordize-keys op-spec)
         source-column-name    (get-in op-spec [:args :source :column :columnName])
+        source-column-title    (get-in op-spec [:args :source :column :title])
         column-title          (get-in op-spec [:args :target :column :title])
         uncategorized-value   (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
         new-column-name       (engine/next-column-name columns)
@@ -58,7 +59,7 @@
         derivation-type       (get-in op-spec [:args :derivation :type] "text")
         execution-log-message (format "Derived category '%s' using column: '%s'(%s) and mappings: '%s'"
                                       column-title
-                                      (:title (dataset.utils/find-column (walk/keywordize-keys columns) source-column-name))
+                                      source-column-title
                                       derivation-type
                                       mappings)]
     (jdbc/with-db-transaction [tenant-conn tenant-conn]

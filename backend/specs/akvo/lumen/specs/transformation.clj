@@ -227,7 +227,8 @@
 
 
 (s/def ::transformation.derive-category.source/columnName ::i.values.s/id)
-(s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName]))
+(s/def ::transformation.derive-category.source/title ::i.values.s/title)
+(s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName ::transformation.derive-category.source/title]))
 
 (s/def ::transformation.derive-category/source (s/keys
                                                :req-un [::transformation.derive-category.source/column]))
