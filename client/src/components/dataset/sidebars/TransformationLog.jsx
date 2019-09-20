@@ -22,11 +22,10 @@ function deriveTransformationDescription(transformation) {
   );
 }
 
-function deriveCategoryTransformationDescription(transformation, columns) {
+function deriveCategoryTransformationDescription(transformation) {
   const newColumnTitle = transformation.getIn(['args', 'target', 'column', 'title']);
   const columnType = transformation.getIn(['args', 'derivation', 'type']);
-  const columnSource = columnTitle(transformation.getIn(['args', 'source', 'column', 'columnName']),
-    columns);
+  const columnSource = transformation.getIn(['args', 'source', 'column', 'title']) || transformation.getIn(['args', 'source', 'column', 'columnName']);
   return (
     <FormattedMessage
       id="derived_category_transform_description"
@@ -233,7 +232,7 @@ function transformationDescription(transformations, index, columns, dependentDat
     case 'core/derive':
       return deriveTransformationDescription(transformation);
     case 'core/derive-category':
-      return deriveCategoryTransformationDescription(transformation, columns);
+      return deriveCategoryTransformationDescription(transformation);
     case 'core/generate-geopoints':
       return geoTransformationDescription(transformations, index, columns);
     case 'core/merge-datasets':
