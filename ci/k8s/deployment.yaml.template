@@ -165,6 +165,19 @@ spec:
           valueFrom:
              fieldRef:
                fieldPath: metadata.name
+        - name: LUMEN_DEPLOYMENT_COLOR
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['color']
+        - name: LUMEN_DEPLOYMENT_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: environment
+        - name: LUMEN_DEPLOYMENT_VERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['lumen-version']                            
       - name: flow-maps-statsd-to-prometheus
       # If you change this version, probably you want to change the /windsahft/Dockerfile version
         image: akvo/akvo-maps-statsd-to-prometheus:f156d42c
