@@ -26,7 +26,6 @@
         (let [r (h (get* "/env" {"auth" "keycloak"}))]
           (is (= 200 (:status r)))
           (let [rb (body-kw r)
-                _ (clojure.pprint/pprint rb) ;; "Inspect" CI
                 ks [:authClientId :authProvider :authURL :flowApiUrl
                     :lumenDeploymentColor :lumenDeploymentEnvironment
                     :lumenDeploymentVersion :piwikSiteId :sentryDSN :tenant]
