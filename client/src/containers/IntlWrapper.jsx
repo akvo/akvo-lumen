@@ -52,11 +52,13 @@ class IntlWrapper extends Component {
   }
 
   componentDidMount() {
-    this.handleChangeLocale(this.props.locale);
+    const { locale } = this.props;
+    this.handleChangeLocale(locale);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.locale !== nextProps.locale) {
+    const { locale } = this.props;
+    if (locale !== nextProps.locale) {
       this.handleChangeLocale(nextProps.locale);
     }
   }
