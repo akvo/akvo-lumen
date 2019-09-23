@@ -90,6 +90,7 @@
   "derive_column_javascript": "Via JavaScript",
   "derived_column_title": "Título de columna derivada",
   "derived_transform_description": "Derivar {newColumnTitle} utilizando {code}",
+  "derived_category_transform_description": "Derivada \"{newColumnTitle}\" desde {columnSource} ({columnType})",
   "descending": "Descendente",
   "donut": "Rosquilla",
   "download": "Descargar",

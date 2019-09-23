@@ -91,6 +91,7 @@
   "derive_column_javascript": "Via JavaScript",
   "derived_column_title": "Titre de colonne dérivé",
   "derived_transform_description": "Dériver {newColumnTitle} utilisant {code}",
+  "derived_category_transform_description": "Derived \"{newColumnTitle}\" from {columnSource} ({columnType})",
   "descending": "Descendant",
   "donut": "Anneau",
   "download": "Telecharger",
