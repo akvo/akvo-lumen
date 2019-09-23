@@ -11,7 +11,7 @@ require('./Main.scss');
 
 function Error(props) {
   const { error, locale, store } = props;
-  
+
   return (
     <div>
       <Provider store={store}>

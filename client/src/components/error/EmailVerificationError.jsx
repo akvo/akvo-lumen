@@ -6,9 +6,7 @@ import IMAGES from '../../constants/images';
 
 require('./EmailVerificationError.scss');
 
-function EmailVerificationError(props) {
-  const { error } = props;
-
+function EmailVerificationError() {
   return (
     <div className="EmailVerificationError">
       <div className="logo">
