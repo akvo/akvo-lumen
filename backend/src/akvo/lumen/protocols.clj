@@ -56,7 +56,7 @@
 
 (defprotocol Authorizer
   (allowed-paths
-    [this email]
+    [this {:keys [email iat]}]
     "Allowed paths by email"))
 
 (defprotocol DatasetImporter
