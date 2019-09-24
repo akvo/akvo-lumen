@@ -8,7 +8,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation :as tf]
             [akvo.lumen.lib.aggregation :as aggregation]
-            [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
+            [akvo.lumen.test-utils :refer [import-file] :as tu]
             [clojure.tools.logging :as log]
             [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.test :refer :all]))
