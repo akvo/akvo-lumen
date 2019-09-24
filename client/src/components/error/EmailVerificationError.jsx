@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import IMAGES from '../../constants/images';
@@ -14,7 +13,7 @@ function EmailVerificationError() {
           <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
         </div>
         <h1>
-          <FormattedMessage id="sorry" />
+          <FormattedMessage id="yikes" />
         </h1>
         <p>
           <FormattedMessage id="email_verified_error" />
@@ -22,18 +21,12 @@ function EmailVerificationError() {
         <div className="footer">
           <hr />
           <p>
-            <span>
-              Having trouble signing up? contact <a href="mailto:support@akvo.org">support@akvo.org</a>.
-            </span>
+            <FormattedMessage id="having_trouble_signing_up" /> <FormattedMessage id="contact" /> <a href="mailto:support@akvo.org">support@akvo.org</a>.
           </p>
         </div>
       </div>
     </div>
   );
 }
-
-EmailVerificationError.propTypes = {
-  error: PropTypes.object.isRequired,
-};
 
 export default connect()(EmailVerificationError);
