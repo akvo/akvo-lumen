@@ -9,12 +9,25 @@ require('./EmailVerificationError.scss');
 function EmailVerificationError() {
   return (
     <div className="EmailVerificationError">
-      <div className="logo">
-        <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+      <div className="EmailVerificationErrorBox">
+        <div className="logo">
+          <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+        </div>
+        <h1>
+          <FormattedMessage id="sorry" />
+        </h1>
+        <p>
+          <FormattedMessage id="email_verified_error" />
+        </p>
+        <div className="footer">
+          <hr />
+          <p>
+            <span>
+              Having trouble signing up? contact <a href="mailto:support@akvo.org">support@akvo.org</a>.
+            </span>
+          </p>
+        </div>
       </div>
-      <h1>
-        <FormattedMessage id="email_verified_error" />
-      </h1>
     </div>
   );
 }

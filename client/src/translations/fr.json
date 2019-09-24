@@ -295,6 +295,7 @@
   "size": "Aire",
   "size_label": "Libellé de l’aire",
   "solid": "Solide",
+  "sorry": "pardon",
   "sort": "Arrangez",
   "sorted_column": "{title} arranger {direction, select, ASC {ascending} DESC {descending}}",
   "source": "Source",
