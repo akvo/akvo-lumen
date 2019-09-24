@@ -1,14 +1,13 @@
 (ns akvo.lumen.lib.dashboard
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.dashboard :as db.dashboard]
             [akvo.lumen.util :refer [squuid]]
             [clojure.walk :as w]
             [clojure.java.jdbc :as jdbc]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
-
 (defn all [tenant-conn]
-  (all-dashboards tenant-conn))
+  (db.dashboard/all-dashboards tenant-conn))
 
 (defn- dashboard-keys-match?
   "Make sure each key in entity have a matching key in layout."
@@ -55,9 +54,9 @@
   "Hand of packing to pure build-dashboard-by-id"
   [tenant-conn id]
   (build-dashboard-by-id
-   (-> (dashboard-by-id tenant-conn {:id id})
+   (-> (db.dashboard/dashboard-by-id tenant-conn {:id id})
        (update :spec w/keywordize-keys))
-   (->> (dashboard_visualisation-by-dashboard-id tenant-conn {:dashboard-id id})
+   (->> (db.dashboard/dashboard_visualisation-by-dashboard-id tenant-conn {:dashboard-id id})
         (map #(update % :layout w/keywordize-keys)))))
 
 (defn create
@@ -71,7 +70,7 @@
           parted-spec (part-by-entity-type spec)
           visualisation-layouts (get-in parted-spec [:visualisations :layout])]
       (jdbc/with-db-transaction [tx tenant-conn]
-        (insert-dashboard tx {:id dashboard-id
+        (db.dashboard/insert-dashboard tx {:id dashboard-id
                               :title (:title spec)
                               :spec (:texts parted-spec)
                               :author claims})
@@ -79,7 +78,7 @@
           (let [visualisation-id (:id visualisation)
                 layout (first (filter #(= visualisation-id (:i %))
                                       visualisation-layouts))]
-            (insert-dashboard_visualisation
+            (db.dashboard/insert-dashboard_visualisation
              tx {:dashboard-id dashboard-id
                  :visualisation-id visualisation-id
                  :layout layout}))))
@@ -87,7 +86,7 @@
     (lib/bad-request {:error "Entities and layout dashboard keys does not match."})))
 
 (defn fetch [tenant-conn id]
-  (when-let [d (dashboard-by-id tenant-conn {:id id})]
+  (when-let [d (db.dashboard/dashboard-by-id tenant-conn {:id id})]
     (handle-dashboard-by-id tenant-conn id)))
 
 (defn upsert
@@ -102,23 +101,23 @@
   (let [{:keys [texts visualisations]} (part-by-entity-type spec)
         visualisations-layouts (:layout visualisations)]
     (jdbc/with-db-transaction [tx tenant-conn]
-      (update-dashboard tx {:id id
+      (db.dashboard/update-dashboard tx {:id id
                             :title (:title spec)
                             :spec texts})
-      (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
+      (db.dashboard/delete-dashboard_visualisation tenant-conn {:dashboard-id id})
       (doseq [visualisation-entity (:entities visualisations)]
         (let [visualisation-id (:id visualisation-entity)
               visualisations-layout (first (filter #(= visualisation-id
                                                        (:i %))
                                                    visualisations-layouts))]
-          (insert-dashboard_visualisation
+          (db.dashboard/insert-dashboard_visualisation
            tx {:dashboard-id id
                :visualisation-id visualisation-id
                :layout visualisations-layout}))))
     (lib/ok (handle-dashboard-by-id tenant-conn id))))
 
 (defn delete [tenant-conn id]
-  (delete-dashboard_visualisation tenant-conn {:dashboard-id id})
-  (if (zero? (delete-dashboard-by-id tenant-conn {:id id}))
+  (db.dashboard/delete-dashboard_visualisation tenant-conn {:dashboard-id id})
+  (if (zero? (db.dashboard/delete-dashboard-by-id tenant-conn {:id id}))
     (lib/not-found {:error "Not round"})
     (lib/ok {:id id})))
