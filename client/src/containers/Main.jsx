@@ -6,6 +6,7 @@ import Modal from './Modal';
 import { showModal } from '../actions/activeModal';
 import Notification from './Notification';
 import IMAGES from '../constants/images';
+import * as auth from '../utilities/auth';
 
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
@@ -37,7 +38,9 @@ class Main extends Component {
               <div className="msgContainer">
                 <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
                 <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
-                <p>Request permission from your organisation admin</p>
+                <p>
+                  Request permission from your organisation admin or <button type="button" onClick={() => auth.logout()}>logout</button> and try with another account.
+                </p>
               </div>
             </div>
           </div>
