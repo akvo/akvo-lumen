@@ -235,7 +235,7 @@
   [op-spec older-columns new-columns]
   op-spec)
 
-(defn apply-transformation-log [conn table-name imported-table-name
+(defn apply-transformation-log [conn caddisfly table-name imported-table-name
                                 new-columns old-columns dataset-id job-execution-id
                                 {:keys [transformations version] :as dataset-version}]
   (update-dataset-version conn {:dataset-id      dataset-id
@@ -256,7 +256,7 @@
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
           (recur (rest transformations) columns version applied-txs)
-          (let [op (try-apply-operation {:tenant-conn conn} table-name columns transformation)]
+          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns transformation)]
             (when-not (:success? op)
               (throw
                (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))

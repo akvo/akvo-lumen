@@ -109,7 +109,7 @@
                                    columns))
       nil)))
 
-(defn- do-update [tenant-conn import-config dataset-id data-source-id job-execution-id data-source-spec]
+(defn- do-update [tenant-conn caddisfly import-config dataset-id data-source-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
       (let [initial-dataset-version  (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
@@ -153,6 +153,7 @@
                                        multipleId   (assoc "multipleId" multipleId)))
                   importer-columns (mapv coerce-column-fn importer-columns)]
               (engine/apply-transformation-log conn
+                                               caddisfly
                                                table-name
                                                imported-table-name
                                                importer-columns
@@ -167,7 +168,7 @@
                                  imported-table-name
                                  dataset-version))))))))
 
-(defn update-dataset [tenant-conn import-config error-tracker dataset-id data-source-id data-source-spec]
+(defn update-dataset [tenant-conn caddisfly import-config error-tracker dataset-id data-source-id data-source-spec]
   (if-let [current-tx-job (pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
     (lib/bad-request {:message "A running transformation still exists, please wait to update this dataset ..."})
     (let [job-execution-id (str (util/squuid))]
@@ -177,6 +178,7 @@
      (future
        (try
          (do-update tenant-conn
+                    caddisfly
                     import-config
                     dataset-id
                     data-source-id
