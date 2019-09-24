@@ -66,6 +66,7 @@
 
  :akvo.lumen.endpoint.dataset/dataset {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                        :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
+                                       :caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly
                                        :upload-config #ig/ref :akvo.lumen.upload/data
                                        :import-config {:flow-api #ig/ref :akvo.lumen.component.flow/api}}
 

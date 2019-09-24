@@ -75,11 +75,11 @@
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
-  [tenant-conn error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind with-job?]}]
+  [tenant-conn caddisfly error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind with-job?]}]
   (let [spec {"source" (with-meta {"kind" kind
                                    "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
-        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn {} error-tracker dataset-id data-source-id spec)]
+        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn caddisfly {} error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn updateId with-job?)))
 

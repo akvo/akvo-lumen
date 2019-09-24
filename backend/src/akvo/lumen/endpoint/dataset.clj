@@ -1,5 +1,6 @@
 (ns akvo.lumen.endpoint.dataset
-  (:require [akvo.lumen.component.error-tracker :as error-tracker]
+  (:require [akvo.lumen.component.caddisfly :as caddisfly]
+            [akvo.lumen.component.error-tracker :as error-tracker]
             [akvo.lumen.component.flow]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
@@ -21,7 +22,7 @@
         auth-res (filter #(contains? auth-datasets (:id %)) res)]
     (lib/ok auth-res)))
 
-(defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
+(defn routes [{:keys [upload-config import-config error-tracker tenant-manager caddisfly] :as opts}]
   ["/datasets"
    ["" {:get {:handler (fn [{tenant :tenant
                              auth-service :auth-service}]
@@ -86,7 +87,7 @@
                                        jwt-token :jwt-token
                                        body :body
                                        {:keys [id]} :path-params}]
-                                   (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
+                                   (dataset/update (p/connection tenant-manager tenant) caddisfly (merge import-config upload-config)
                                                    error-tracker id (assoc (w/stringify-keys body)
                                                                            "token" jwt-token
                                                                            "email" (get jwt-claims "email"))))}}]]]])
@@ -100,6 +101,7 @@
 (s/def ::import-config (s/keys :req-un [::flow-api]))
 (s/def ::config (s/keys :req-un [::tenant-manager/tenant-manager
                                  ::error-tracker/error-tracker
+                                 ::caddisfly/caddisfly
                                  ::upload-config
                                  ::import-config]))
 

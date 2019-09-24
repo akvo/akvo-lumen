@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.transformation-test
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         *system*
                                          tenant-conn-fixture
                                          system-fixture
                                          *error-tracker*
@@ -313,7 +314,8 @@
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))]
       (testing "Testing columns are removed without tx"
-        (let [updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+        (let [updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
                                         :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
@@ -321,7 +323,8 @@
 
       (testing "Removing column with change-datatype tx"
         (let [_ (apply-transformation (change-datatype-tx "c6" "text"))
-              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+              updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
                                         :data (import.s/sample-imported-dataset [:text :number :text :number :text] 2)})]
@@ -334,7 +337,8 @@
                                                       {::transformation.derive.s/newColumnTitle    "New Title"
                                                        ::transformation.rename-column.s/columnName "c5"
                                                        ::transformation.engine.s/onError           "fail"})})
-              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+              updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
                                         :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
@@ -346,7 +350,8 @@
                                        (gen-transformation "core/delete-column"
                                                            {::db.dataset-version.column.s/columnName "c5"
 })})
-              updated-res (update-file *tenant-conn* *error-tracker* (:dataset-id job) (:data-source-id job)
+              updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
                                         :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]

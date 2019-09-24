@@ -108,13 +108,13 @@
     (lib/not-found {:error "Not found"})))
 
 (defn update
-  [tenant-conn import-config error-tracker dataset-id {:strs [token email]}]
+  [tenant-conn caddisfly import-config error-tracker dataset-id {:strs [token email]}]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
       (lib/conflict error)
       (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
-        (update/update-dataset tenant-conn import-config error-tracker dataset-id data-source-id
+        (update/update-dataset tenant-conn caddisfly import-config error-tracker dataset-id data-source-id
                                (-> data-source-spec
                                    (assoc-in ["source" "token"] token)
                                    (assoc-in ["source" "email"] email)))
