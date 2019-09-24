@@ -3,6 +3,8 @@
   (:require
    [akvo.lumen.component.keycloak :as keycloak]
    [akvo.lumen.test-utils :as tu]
+   [clj-time.coerce :as tc]
+   [clj-time.core :as t]
    [akvo.lumen.protocols :as p]
    [clojure.test :refer :all]
    [integrant.core :as ig]))
@@ -22,11 +24,11 @@
 (deftest keycloak-test
   (testing "Jerome (admin) permissions to t1"
     (is (= #{"t1/admin"}
-           (p/allowed-paths *keycloak* "jerome@t1.lumen.localhost"))))
+           (p/allowed-paths *keycloak* {:email "jerome@t1.lumen.localhost" :iat (tc/to-date (t/now))}))))
 
   (testing "Salim (member) permissions to t1"
     (is (= #{"t1"}
-           (p/allowed-paths *keycloak* "salim@t1.lumen.localhost"))))
+           (p/allowed-paths *keycloak* {:email "salim@t1.lumen.localhost" :iat (tc/to-date (t/now))}))))
 
   (testing "Non existing user"
-    (is (= nil (p/allowed-paths *keycloak* "nobody@t1.lumen.localhost")))))
+    (is (= nil (p/allowed-paths *keycloak* {:email "nobody@t1.lumen.localhost" :iat (tc/to-date (t/now))} )))))
