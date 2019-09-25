@@ -9,8 +9,6 @@
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-
 (defn- coalesce
   "For pivot tables, `NULL` categories will always be empty because `crosstab` uses `=` and
    `NULL = NULL` is `NULL`. To work around this, we must use another value to represent the

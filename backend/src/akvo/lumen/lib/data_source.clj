@@ -1,13 +1,12 @@
 (ns akvo.lumen.lib.data-source
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.data-source :as db.data-source]
             [clojure.string :as str]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/data-source.sql")
-
 (defn delete [conn id status]
   {:pre [(#{:pending :failed :ok} (keyword status))]}
-  (delete-datasource-by-job-execution-id-and-status conn {:id id :status (str/upper-case status)})
+  (db.data-source/delete-datasource-by-job-execution-id-and-status conn {:id id :status (str/upper-case status)})
   (lib/ok {}))
 
 

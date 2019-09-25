@@ -1,11 +1,10 @@
 (ns akvo.lumen.lib.job-execution
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.job-execution :as db.job-execution]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-
 (defn job-execution [conn id]
-  (if-let [{:keys [status error-message kind dataset-id]} (job-execution-by-id conn {:id id} {:identifiers identity})]
+  (if-let [{:keys [status error-message kind dataset-id]} (db.job-execution/job-execution-by-id conn {:id id} {:identifiers identity})]
     (lib/ok
      {"jobExecutionId" id
       "status" status
@@ -22,13 +21,13 @@
   [conn kind id]
   {:pre [(#{:raster :dataset :transformation} kind)]}
   (condp = kind
-    :raster (if-let [{:keys [raster_id]} (raster-id-by-job-execution-id conn {:id id})]
+    :raster (if-let [{:keys [raster_id]} (db.job-execution/raster-id-by-job-execution-id conn {:id id})]
               (lib/ok
                {"jobExecutionId" id
                 "status" "OK"
                 "rasterId" raster_id})
               (job-execution conn id))
-    (if-let [{:keys [dataset_id]} (dataset-id-by-job-execution-id conn {:id id})]
+    (if-let [{:keys [dataset_id]} (db.job-execution/dataset-id-by-job-execution-id conn {:id id})]
       (lib/ok
        {"jobExecutionId" id
         "status" "OK"

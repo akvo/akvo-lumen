@@ -1,13 +1,12 @@
 (ns akvo.lumen.lib.transformation.change-datatype
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.transformation.change-datatype :as db.tx.change-datatype]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/change_datatype.sql")
 
 (defmethod engine/valid? "core/change-datatype"
   [op-spec]
@@ -30,7 +29,7 @@
   (jdbc/execute! tenant-conn alter-table-sql)
   (jdbc/execute! tenant-conn "DEALLOCATE ALL")
   (when (= on-error "delete-row")
-    (drop-null-rows tenant-conn
+    (db.tx.change-datatype/drop-null-rows tenant-conn
                     {:table-name table-name
                      :column-name column-name})))
 

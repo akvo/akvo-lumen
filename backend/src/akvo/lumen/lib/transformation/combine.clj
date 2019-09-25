@@ -1,11 +1,10 @@
 (ns akvo.lumen.lib.transformation.combine
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.transformation.combine :as db.tx.combine]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
             [akvo.lumen.util :as util]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/combine.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defmethod engine/valid? "core/combine"
   [op-spec]
@@ -23,10 +22,10 @@
         {[first-column-name second-column-name] "columnNames"
          separator "separator"
          column-title "newColumnTitle"} (engine/args op-spec)]
-    (add-column tenant-conn {:table-name table-name
+    (db.tx.engine/add-column tenant-conn {:table-name table-name
                              :column-type "text"
                              :new-column-name new-column-name})
-    (combine-columns tenant-conn
+    (db.tx.combine/combine-columns tenant-conn
                      {:table-name table-name
                       :new-column-name new-column-name
                       :first-column first-column-name

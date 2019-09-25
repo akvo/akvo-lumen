@@ -6,14 +6,13 @@
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.monitoring :as monitoring]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.db.tenant-manager :as db.tenant-manager]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]
             [integrant.core :as ig])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
-
-(hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Middleware
@@ -69,7 +68,7 @@
     (assoc m k v)))
 
 (defn load-tenant [db encryption-key dropwizard-registry tenants label]
-  (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
+  (if-let [{:keys [db_uri label]} (db.tenant-manager/tenant-by-id (:spec db)
                                                 {:label label})]
     (let [decrypted-db-uri (hikaricp/ssl-url (aes/decrypt encryption-key db_uri))]
       (swap! tenants
@@ -98,7 +97,7 @@
 
   p/TenantAdmin
   (current-plan [{:keys [db]} label]
-    (:tier (select-current-plan (:spec db) {:label label}))))
+    (:tier (db.tenant-manager/select-current-plan (:spec db) {:label label}))))
 
 (defn- tenant-manager [options]
   (map->TenantManager options))
