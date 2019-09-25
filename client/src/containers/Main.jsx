@@ -30,25 +30,47 @@ class Main extends Component {
       content, sidebar, notification, loadStatus, env,
     } = this.props;
     if (loadStatus === 'failed') {
-      const { tenant } = env;
-      return (
-        <div className="Main">
-          <div className="failedToLoadMessage">
-            <div className="message">
-              <div className="msgContainer">
-                <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-                <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
-                <p>
-                  Request permission from your organisation admin or <button type="button" onClick={() => auth.logout()}>logout</button> and try with another account.
-                </p>
+      const { authURL, tenant } = env;
+      const isAuth0 = (authURL && authURL.includes('auth0'));
+      if (isAuth0) {
+        return (
+          <div className="Main">
+            <div className="failedToLoadMessage">
+              <div className="message">
+                <div className="msgContainer">
+                  <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+                  <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
+                  <p>
+                    Request permission from your organisation admin or <button type="button" onClick={() => auth.logout()}>logout</button> and try with another account.
+                  </p>
+                </div>
               </div>
             </div>
+            <div className="Main blur">
+              {sidebar}
+            </div>
           </div>
-          <div className="Main blur">
-            {sidebar}
+        );
+      } else {
+        return (
+          <div className="Main">
+            <div className="failedToLoadMessage">
+              <div className="message">
+                <div className="msgContainer">
+                  <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+                  <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
+                  <p>
+                    Request permission from your organisation admin.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="Main blur">
+              {sidebar}
+            </div>
           </div>
-        </div>
-      );
+        );
+      } 
     }
     return (
       <div className="Main">
