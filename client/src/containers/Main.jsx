@@ -51,26 +51,25 @@ class Main extends Component {
             </div>
           </div>
         );
-      } else {
-        return (
-          <div className="Main">
-            <div className="failedToLoadMessage">
-              <div className="message">
-                <div className="msgContainer">
-                  <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-                  <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
-                  <p>
-                    Request permission from your organisation admin.
-                  </p>
-                </div>
+      }
+      return (
+        <div className="Main">
+          <div className="failedToLoadMessage">
+            <div className="message">
+              <div className="msgContainer">
+                <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
+                <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
+                <p>
+                  Request permission from your organisation admin.
+                </p>
               </div>
             </div>
-            <div className="Main blur">
-              {sidebar}
-            </div>
           </div>
-        );
-      } 
+          <div className="Main blur">
+            {sidebar}
+          </div>
+        </div>
+      );
     }
     return (
       <div className="Main">
