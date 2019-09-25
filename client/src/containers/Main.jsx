@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { every } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 import Modal from './Modal';
 import { showModal } from '../actions/activeModal';
 import Notification from './Notification';
@@ -39,9 +40,11 @@ class Main extends Component {
               <div className="message">
                 <div className="msgContainer">
                   <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-                  <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
+                  <h1>
+                    <FormattedMessage id="you_need_permission_to_access" />: <span id="urlLoc">{ tenant }</span>
+                  </h1>
                   <p>
-                    Request permission from your organisation admin or <button type="button" onClick={() => auth.logout()}>logout</button> and try with another account.
+                    <FormattedMessage id="request_permission_from_your_organisation_admin" /> <button type="button" onClick={() => auth.logout()}><FormattedMessage id="logout" /></button> <FormattedMessage id="to_try_with_another_account" />.
                   </p>
                 </div>
               </div>
@@ -58,9 +61,11 @@ class Main extends Component {
             <div className="message">
               <div className="msgContainer">
                 <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-                <h1>You need permission to access: <span id="urlLoc">{ tenant }</span></h1>
+                <h1>
+                  <FormattedMessage id="you_need_permission_to_access" />: <span id="urlLoc">{ tenant }</span>
+                </h1>
                 <p>
-                  Request permission from your organisation admin.
+                  <FormattedMessage id="request_permission_from_your_organisation_admin" />
                 </p>
               </div>
             </div>
