@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.aggregation
-  (:require [akvo.lumen.lib :as lib]
+  (:require [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.pie :as pie]
             [akvo.lumen.lib.aggregation.line :as line]
             [akvo.lumen.lib.aggregation.bar :as bar]
@@ -10,8 +11,6 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.walk :as walk]
             [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]
@@ -25,7 +24,7 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
+    (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
       (try
         (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
         (catch clojure.lang.ExceptionInfo e

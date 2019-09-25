@@ -19,8 +19,8 @@
 (defn api-authorization
   [handler {:keys [jwt-claims tenant] :as request} {:keys [authorizer]}]
   (try
-    (let [email (get jwt-claims "email")
-          allowed-paths (delay (p/allowed-paths authorizer email))]
+    (let [allowed-paths (delay (p/allowed-paths authorizer {:email (get jwt-claims "email")
+                                                            :iat   (get jwt-claims "iat")}))]
       (cond
         (nil? jwt-claims) u/not-authorized
         (u/admin-path? request) (if (api-tenant-admin? tenant @allowed-paths)

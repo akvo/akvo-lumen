@@ -8,6 +8,8 @@
    [akvo.lumen.monitoring :as monitoring]
    [akvo.lumen.protocols :as p]
    [cheshire.core :as json]
+   [clj-time.coerce :as tc]
+   [clj-time.core :as t]
    [clojure.core.cache :as cache]
    [clojure.set :as set]
    [clojure.spec.alpha :as s]
@@ -396,6 +398,30 @@
     (swap! user-id-cache cache/hit email)
     user-id))
 
+(defn- get-paths [jwt-paths-cache user-id iat]
+  (when-let [paths (get @jwt-paths-cache user-id)]
+    (let [paths-exp (:exp (meta paths))
+          iat (tc/from-date iat)]
+      (if (t/before? iat paths-exp)
+        (do
+          (swap! jwt-paths-cache cache/hit user-id)
+          paths)
+        (do
+          (swap! jwt-paths-cache dissoc user-id)
+          nil)))))
+
+(defn- lookup-paths [req-opts api-root user-id jwt-paths-cache paths-cache-seconds iat]
+  (if-let [paths (get-paths jwt-paths-cache user-id iat)]
+    paths
+    (when-let [paths (->>
+                      (user-groups (merge http-client-req-defaults req-opts) api-root user-id)
+                      (reduce (fn [paths {:strs [path]}]
+                                (conj paths (subs path 12)))
+                              #{}))]
+      (-> jwt-paths-cache
+          (swap! assoc user-id (with-meta paths {:exp (t/plus (tc/from-date iat) (t/seconds paths-cache-seconds))}))
+          (get user-id)))))
+
 (defn- lookup-user-id
   "Lookup email -> Keycloak user-id, via cached Keycloak API."
   [req-opts api-root user-id-cache email]
@@ -421,16 +447,12 @@
 
   The Keycloak groups are on the form /akvo/lumen/demo/admin, to simplify  we
   remove the leading /akvo/lumen and return paths as demo/admin."
-  [{:keys [api-root user-id-cache connection-manager monitoring] :as keycloak} email]
+  [{:keys [api-root user-id-cache jwt-paths-cache paths-cache-seconds connection-manager monitoring] :as keycloak} {:keys [email iat]}]
   (prometheus/with-duration (registry/get (:collector monitoring) :app/auth-allowed-paths {})
     (when-let [headers (request-headers keycloak)]
       (let [req-opts {:headers headers :connection-manager connection-manager}]
         (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-          (->>
-           (user-groups (merge http-client-req-defaults req-opts) api-root user-id)
-           (reduce (fn [paths {:strs [path]}]
-                         (conj paths (subs path 12)))
-                       #{})))))))
+          (lookup-paths req-opts api-root user-id jwt-paths-cache paths-cache-seconds iat))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -498,12 +520,14 @@
     (tenant-members this tenant-label))
 
   p/Authorizer
-  (allowed-paths [this email]
-    (allowed-paths this email)))
+  (allowed-paths [this {:keys [email iat] :as data}]
+    (allowed-paths this data)))
 
-(defn- init-keycloak [{:keys [credentials url realm max-user-ids-cache]}]
+(defn- init-keycloak [{:keys [credentials url realm max-user-ids-cache paths-cache-seconds]}]
   (map->KeycloakAgent {:api-root      (format "%s/admin/realms/%s" url realm)
                        :credentials   credentials
+                       :jwt-paths-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))
+                       :paths-cache-seconds paths-cache-seconds
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/public-client  [_ {:keys [url realm] :as opts}]
@@ -531,9 +555,13 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/public-client [_]
   ::public-client)
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring paths-cache-seconds] :as opts}]
   (log/info "Starting keycloak")
-  (assoc (init-keycloak (assoc public-client :credentials credentials :max-user-ids-cache max-user-ids-cache))
+  (assoc (init-keycloak (assoc public-client
+                               :credentials credentials
+                               :max-user-ids-cache max-user-ids-cache
+                               :paths-cache-seconds paths-cache-seconds
+                               ))
          :connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
          :openid-config (fetch-openid-configuration (:issuer public-client) {})
          :monitoring monitoring))
@@ -558,8 +586,9 @@
                                       ::client_secret]))
 
 (s/def ::max-user-ids-cache pos-int?)
+(s/def ::paths-cache-seconds pos-int?)
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
-(s/def ::config (s/keys :req-un [::public-client ::credentials ::max-user-ids-cache ::monitoring]))
+(s/def ::config (s/keys :req-un [::public-client ::credentials ::max-user-ids-cache ::paths-cache-seconds ::monitoring]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)

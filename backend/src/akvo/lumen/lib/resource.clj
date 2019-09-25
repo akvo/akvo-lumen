@@ -1,15 +1,12 @@
 (ns akvo.lumen.lib.resource
-  (:require [hugsql.core :as hugsql]
+  (:require [akvo.lumen.db.resource :as db.resource]
             [ring.util.response :refer [response]]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/resource.sql")
-
 
 (defn resource-usage
   [tenant-conn]
-  (merge (count-visualisations tenant-conn {} {} {:identifiers identity})
-         (count-external-datasets tenant-conn {} {} {:identifiers identity})
-         (count-dashboards tenant-conn {} {} {:identifiers identity})))
+  (merge (db.resource/count-visualisations tenant-conn {} {} {:identifiers identity})
+         (db.resource/count-external-datasets tenant-conn {} {} {:identifiers identity})
+         (db.resource/count-dashboards tenant-conn {} {} {:identifiers identity})))
 
 (defn all [tenant-conn current-plan]
   (response {"plan" {:tier current-plan}

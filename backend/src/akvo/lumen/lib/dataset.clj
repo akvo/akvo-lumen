@@ -2,6 +2,10 @@
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib.import :as import]
+            [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.job-execution :as db.job-execution]
+            [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.visualisation :as db.visualisation]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.transformation.merge-datasets :as transformation.merge-datasets]
@@ -12,13 +16,9 @@
             [clojure.set :refer (rename-keys)]
             [hugsql.core :as hugsql]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-
 (defn all*
   [tenant-conn]
-  (all-datasets tenant-conn))
+  (db.dataset/all-datasets tenant-conn))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]
@@ -52,7 +52,7 @@
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
   [tenant-conn id]
-  (if-let [dataset (dataset-by-id tenant-conn {:id id})]
+  (if-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))]
       (lib/ok
        {:id id
@@ -67,11 +67,13 @@
 
 (defn fetch
   [tenant-conn id]
-  (when-let [dataset (dataset-by-id tenant-conn {:id id})]
+  (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
     (let [columns (remove #(get % "hidden") (:columns dataset))
           data (rest (jdbc/query tenant-conn
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
+
+      
       (-> dataset
           (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
           (rename-keys {:title :name})
@@ -79,42 +81,42 @@
 
 (defn sort-text
   [tenant-conn id column-name limit]
-  (when-let [dataset (table-name-by-dataset-id tenant-conn {:id id})]
+  (when-let [dataset (db.dataset/table-name-by-dataset-id tenant-conn {:id id})]
     (->> (merge {:column-name column-name :table-name (:table-name dataset)}
                 (when limit {:limit limit}))
-         (count-vals-by-column-name tenant-conn)
+         (db.dataset/count-vals-by-column-name tenant-conn)
          (map (juxt :counter :coincidence)))))
 
 (defn sort-number
   [tenant-conn id column-name]
-  (when-let [dataset (table-name-by-dataset-id tenant-conn {:id id})]
+  (when-let [dataset (db.dataset/table-name-by-dataset-id tenant-conn {:id id})]
     (merge (->> {:column-name column-name :table-name (:table-name dataset)}
-                (count-num-vals-by-column-name tenant-conn))
+                (db.dataset/count-num-vals-by-column-name tenant-conn))
            (->> {:column-name column-name :table-name (:table-name dataset)}
-                (count-unique-vals-by-colum-name tenant-conn)))))
+                (db.dataset/count-unique-vals-by-colum-name tenant-conn)))))
 
 (defn delete
   [tenant-conn id]
-  (if-let [dataset (dataset-by-id tenant-conn {:id id})]
+  (if-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
     (if-let [datasets-merged-with (transformation.merge-datasets/datasets-related tenant-conn id)]
       (lib/conflict {:error (format "Cannot delete dataset. It is used in merge transformations of dataset: %s"
                                     (str/join ", " (map :title datasets-merged-with)))})
-      (let [c (delete-dataset-by-id tenant-conn {:id id})]
+      (let [c (db.dataset/delete-dataset-by-id tenant-conn {:id id})]
         (if (zero? c)
           (do
-            (delete-failed-job-execution-by-id tenant-conn {:id id})
+            (db.job-execution/delete-failed-job-execution-by-id tenant-conn {:id id})
             (lib/not-found {:error "Not found"}))
-          (let [v (delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
+          (let [v (db.visualisation/delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
     (lib/not-found {:error "Not found"})))
 
 (defn update
-  [tenant-conn import-config error-tracker dataset-id {:strs [token email]}]
+  [tenant-conn caddisfly import-config error-tracker dataset-id {:strs [token email]}]
   (if-let [{data-source-spec :spec
-            data-source-id   :id} (data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+            data-source-id   :id} (db.dataset/data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (if-let [error (transformation.merge-datasets/consistency-error? tenant-conn dataset-id)]
       (lib/conflict error)
       (if-not (= (get-in data-source-spec ["source" "kind"]) "DATA_FILE")
-        (update/update-dataset tenant-conn import-config error-tracker dataset-id data-source-id
+        (update/update-dataset tenant-conn caddisfly import-config error-tracker dataset-id data-source-id
                                (-> data-source-spec
                                    (assoc-in ["source" "token"] token)
                                    (assoc-in ["source" "email"] email)))
@@ -123,5 +125,5 @@
 
 (defn update-meta
   [tenant-conn id {:strs [name]}]
-  (update-dataset-meta tenant-conn {:id id :title name})
+  (db.dataset/update-dataset-meta tenant-conn {:id id :title name})
   (lib/ok {}))

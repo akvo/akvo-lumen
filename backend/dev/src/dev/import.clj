@@ -20,7 +20,9 @@
 
 (defn clj-data>dataset [{:keys [dataset-name data with-job? job]}]
   (if job
-    (tu/update-file (t1-conn) error-tracker
+    (tu/update-file (t1-conn)
+                    (:akvo.lumen.component.caddisfly/caddisfly system)
+                    error-tracker
                       (:dataset_id job)
                       (:data_source_id job)
                       {:kind         "clj"

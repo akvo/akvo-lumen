@@ -3,6 +3,11 @@
    [akvo.commons.jwt :as jwt]
    [akvo.lumen.component.flow :as c.flow]
    [akvo.lumen.component.tenant-manager :as tenant-manager]
+   [akvo.lumen.db.collection :as db.collection]
+   [akvo.lumen.db.dashboard :as db.dashboard]
+   [akvo.lumen.db.dataset :as db.dataset]
+   [akvo.lumen.db.raster :as db.raster]
+   [akvo.lumen.db.visualisation :as db.visualisation]
    [akvo.lumen.monitoring :as monitoring]
    [akvo.lumen.protocols :as p]
    [akvo.lumen.specs :as lumen.s]
@@ -19,12 +24,6 @@
    [iapetos.core :as prometheus]
    [iapetos.registry :as registry]
    [integrant.core :as ig]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
 (declare ids)
 
@@ -111,7 +110,7 @@
 
 (defn- auth-visualisations [tenant-conn auth-datasets-set]
   (let [[maps nomaps] (split-with #(= "map" (:visualisationType %))
-                                  (w/keywordize-keys (all-visualisations tenant-conn {} {} {:identifiers identity})))
+                                  (w/keywordize-keys (db.visualisation/all-visualisations tenant-conn {} {} {:identifiers identity})))
         maps*         (->> maps
                            (reduce (fn [c m]
                                      (let [datasets (reduce (fn [c l]
@@ -132,7 +131,7 @@
     (apply conj nomaps* maps*)))
 
 (defn- auth-dashboards [tenant-conn auth-visualisations-set]
-  (->> (all-dashboards-with-visualisations tenant-conn {} {} {:identifiers identity})
+  (->> (db.dashboard/all-dashboards-with-visualisations tenant-conn {} {} {:identifiers identity})
                (group-by :id)
                (reduce (fn [c [i col*]]
                    (conj c (-> (first col*)
@@ -144,7 +143,7 @@
                (mapv :id)))
 
 (defn- auth-collections [tenant-conn auth-datasets auth-visualisations auth-dashboards]
-  (mapv :id (auth-collection-ids tenant-conn
+  (mapv :id (db.collection/auth-collection-ids tenant-conn
                                  {:dataset-ids auth-datasets
                                   :visualisation-ids auth-visualisations
                                   :dashboard-ids auth-dashboards})))
@@ -181,8 +180,8 @@
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
       (let [tenant-conn    (p/connection tenant-manager tenant)
-            dss            (all-datasets tenant-conn)
-            rasters        (mapv :id (all-rasters tenant-conn))
+            dss            (db.dataset/all-datasets tenant-conn)
+            rasters        (mapv :id (db.raster/all-rasters tenant-conn))
             auth-uuid-tree (if (and (match-by-jwt-family-name? request)
                                     (match-by-template-and-method? auth-calls request))
                              (load-auth-data dss rasters tenant-conn flow-api request collector tenant)
@@ -191,9 +190,9 @@
                                  (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
                                {:rasters             rasters
                                 :auth-datasets       (mapv :id dss)
-                                :auth-visualisations (mapv :id (all-visualisations tenant-conn))
-                                :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
-                                :auth-collections    (mapv :id (all-collections tenant-conn))}))]
+                                :auth-visualisations (mapv :id (db.visualisation/all-visualisations tenant-conn))
+                                :auth-dashboards     (mapv :id (db.dashboard/all-dashboards tenant-conn))
+                                :auth-collections    (mapv :id (db.collection/all-collections tenant-conn))}))]
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 

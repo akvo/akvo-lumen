@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.collection
   (:refer-clojure :exclude [update])
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.collection :as db.collection]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [hugsql.core :as hugsql])
@@ -8,18 +9,16 @@
 
 (alias 'core 'clojure.core)
 
-(hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
-
 (defn all
   ([tenant-conn]
    (all tenant-conn nil))
   ([tenant-conn ids]
    (mapv (fn [collection]
            (core/update collection :entities #(vec (.getArray %))))
-         (all-collections tenant-conn (if ids {:ids ids} {})))))
+         (db.collection/all-collections tenant-conn (if ids {:ids ids} {})))))
 
 (defn fetch [tenant-conn id]
-  (if-let [collection (fetch-collection tenant-conn {:id id})]
+  (if-let [collection (db.collection/fetch-collection tenant-conn {:id id})]
     (lib/ok (core/update collection :entities #(vec (.getArray %))))
     (lib/not-found {:id id})))
 
@@ -41,10 +40,10 @@
   [conn entities]
   (let [entity-array (text-array conn entities)]
     (->> (concat
-           (fetch-dataset-ids conn {:ids entity-array})
-           (fetch-visualisation-ids conn {:ids entity-array})
-           (fetch-dashboard-ids conn {:ids entity-array})
-           (fetch-raster-dataset-ids conn {:ids entity-array}))
+           (db.collection/fetch-dataset-ids conn {:ids entity-array})
+           (db.collection/fetch-visualisation-ids conn {:ids entity-array})
+           (db.collection/fetch-dashboard-ids conn {:ids entity-array})
+           (db.collection/fetch-raster-dataset-ids conn {:ids entity-array}))
       (map #(merge {:dataset-id nil :visualisation-id nil :dashboard-id nil
                     :raster-dataset-id nil} %)))))
 
@@ -59,10 +58,10 @@
     :else
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (try
-        (let [{:keys [id]} (create-collection tenant-conn {:title title})]
+        (let [{:keys [id]} (db.collection/create-collection tenant-conn {:title title})]
           (when entities
             (doseq [entity (categorize-entities tx-conn entities)]
-              (insert-collection-entity tx-conn (assoc entity :collection-id id))))
+              (db.collection/insert-collection-entity tx-conn (assoc entity :collection-id id))))
           (lib/created (second (fetch tx-conn id))))
         (catch SQLException e
           (if (unique-violation? e)
@@ -76,18 +75,18 @@
   (let [{:keys [entities title]} collection]
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (when title
-        (update-collection-title tx-conn {:id id :title title}))
+        (db.collection/update-collection-title tx-conn {:id id :title title}))
 
       ;; Replace entity ids
       (when entities
-        (delete-collection-entities tx-conn {:id id})
+        (db.collection/delete-collection-entities tx-conn {:id id})
         (doseq [entity (categorize-entities tx-conn entities)]
-          (insert-collection-entity tx-conn (assoc entity :collection-id id))))
+          (db.collection/insert-collection-entity tx-conn (assoc entity :collection-id id))))
 
       (fetch tx-conn id))))
 
 (defn delete
   "Delete a collection by id"
   [tenant-conn id]
-  (delete-collection tenant-conn {:id id})
+  (db.collection/delete-collection tenant-conn {:id id})
   (lib/no-content))

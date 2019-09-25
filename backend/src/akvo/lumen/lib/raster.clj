@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.raster
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
+            [akvo.lumen.db.raster :as db.raster]
+            [akvo.lumen.db.job-execution :as db.job-execution]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
@@ -12,9 +14,6 @@
             [hugsql.core :as hugsql])
   (:import [java.util UUID]
            [org.postgresql.util PGobject]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (defn get-raster-info
   "Returns a JSON representation of gdalinfo output or nil if
@@ -74,7 +73,7 @@
       (int (Math/pow 2 i)))))
 
 (defn all [conn]
-  (lib/ok (all-rasters conn)))
+  (lib/ok (db.raster/all-rasters conn)))
 
 (defn do-import [conn file-upload-path claims data-source job-execution-id]
   (let [table-name (util/gen-table-name "raster")]
@@ -85,21 +84,21 @@
             filename    (.getName file)
             raster-info (get-raster-info path filename)
             prj-file    (project-and-compress path filename)]
-        (create-raster-table conn {:table-name table-name})
-        (create-raster-index conn {:table-name table-name})
+        (db.raster/create-raster-table conn {:table-name table-name})
+        (db.raster/create-raster-index conn {:table-name table-name})
         (with-open [rdr (io/reader (get-raster-data-as-sql path prj-file table-name))]
           (jdbc/with-db-transaction [tx conn]
             (doseq [line (line-seq rdr)]
               (jdbc/execute! tx [line] {:transaction? false}))))
-        (add-raster-constraints conn {:table-name table-name})
-        (vacuum-raster-table conn
+        (db.raster/add-raster-constraints conn {:table-name table-name})
+        (db.raster/vacuum-raster-table conn
                              {:table-name table-name}
                              {}
                              {:transaction? false})
-        (let [stats    (raster-stats conn {:table-name table-name})
+        (let [stats    (db.raster/raster-stats conn {:table-name table-name})
               metadata (merge {:bbox (bbox raster-info)}
                               stats)]
-          (insert-raster conn {:id               (util/squuid)
+          (db.raster/insert-raster conn {:id               (util/squuid)
                                :title            (data-source "name")
                                :description      (get-in data-source ["source" "fileName"])
                                :job-execution-id job-execution-id
@@ -109,12 +108,12 @@
                                :raster-table     table-name
                                :author           claims
                                :source           source})
-          (update-successful-job-execution conn {:id job-execution-id})))
+          (db.job-execution/update-successful-job-execution conn {:id job-execution-id})))
       (catch Throwable e
         (log/errorf e "Error importing raster: %s" (.getMessage e))
-        (update-failed-job-execution conn {:id     job-execution-id
+        (db.job-execution/update-failed-job-execution conn {:id     job-execution-id
                                            :reason (.getMessage e)})
-        (drop-raster-table conn {:table-name table-name})
+        (db.raster/drop-raster-table conn {:table-name table-name})
         (throw e)))))
 
 (defn create [conn file-upload-path claims data-source]
@@ -122,16 +121,16 @@
         job-execution-id (str (util/squuid))
         table-name (util/gen-table-name "ds")
         kind (get-in data-source ["source" "kind"])]
-    (insert-data-source conn {:id data-source-id
+    (db.job-execution/insert-data-source conn {:id data-source-id
                               :spec (json/generate-string data-source)})
-    (insert-job-execution conn {:id job-execution-id
+    (db.job-execution/insert-job-execution conn {:id job-execution-id
                                 :data-source-id data-source-id})
     (future (do-import conn file-upload-path claims data-source job-execution-id))
     (lib/ok {"importId" job-execution-id
              "kind" kind})))
 
 (defn fetch [conn id]
-  (if-let [raster (raster-by-id conn {:id id})]
+  (if-let [raster (db.raster/raster-by-id conn {:id id})]
     (lib/ok
      (-> raster
          (select-keys [:author :created :id :modified :raster_table :source :title])
@@ -141,9 +140,9 @@
 
 
 (defn delete [conn id]
-  (let [c (delete-raster-by-id conn {:id id})]
+  (let [c (db.raster/delete-raster-by-id conn {:id id})]
     (if (zero? c)
       (do
-        (delete-failed-job-execution-by-id conn {:id id})
+        (db.job-execution/delete-failed-job-execution-by-id conn {:id id})
         (lib/not-found {:error "Not found"}))
       (lib/ok {:id id}))))

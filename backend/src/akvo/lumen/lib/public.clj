@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.public
-  (:require [akvo.lumen.lib :as lib]
+  (:require [akvo.lumen.db.public :as db.public]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.lib.dashboard :as dashboard]
@@ -10,13 +11,10 @@
             [clojure.tools.logging :as log]
             [clojurewerkz.scrypt.core :as scrypt]
             [clojure.walk :as walk]
-            [clojure.set :as set]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/public.sql")
+            [clojure.set :as set]))
 
 (defn get-share [tenant-conn id]
-  (public-by-id tenant-conn {:id id}))
+  (db.public/public-by-id tenant-conn {:id id}))
 
 (def vis-aggregation-mapper {"pivot table" "pivot"
                              "line"      "line"

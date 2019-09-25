@@ -4,6 +4,7 @@ import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
 import { AppContainer } from 'react-hot-loader';
 import { syncHistoryWithStore } from 'react-router-redux';
+import Error from './containers/Error';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './utilities/auth';
@@ -77,9 +78,17 @@ function initWithAuthToken(locale) {
   );
 }
 
-function initNotAuthenticated(msg) {
-  const loc = url.parse(location.href);
-  document.querySelector('#root').innerHTML = `${msg} <a href='${loc.protocol}//${loc.host}'>${loc.protocol}//${loc.host}</a>`;
+function initNotAuthenticated(error) {
+  const locale = userLocale(navigator.language);
+  const initialState =
+    { profile: { admin: false, attributes: { locale: [locale] } } };
+  const rootElement = document.querySelector('#root');
+  const store = configureStore(initialState);
+
+  render(
+    <Error store={store} error={error} locale={locale} />,
+    rootElement
+  );
 }
 
 function dispatchOnMode() {
@@ -113,7 +122,7 @@ function dispatchOnMode() {
         auth0.parseHash({ hash: window.location.hash }, (err, authResult) => {
           if (err) {
             if (err.errorDescription === 'EMAIL_VERIFIED_ERROR') {
-              initNotAuthenticated(err.errorDescription);
+              initNotAuthenticated(err);
             } else {
               throw err;
             }
