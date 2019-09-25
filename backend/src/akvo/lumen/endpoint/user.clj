@@ -28,7 +28,7 @@
                                    :as request}]
                                (user/change-names authorizer tenant jwt-claims id
                                                   firstName lastName))}}]
-    ["/admin" {:get {:handler (fn [{tenant :tenant
+    ["/profile" {:get {:handler (fn [{tenant :tenant
                                     query-params :query-params}]
                                 (let [u (user/user authorizer tenant (get query-params "email"))]
                                   (lib/ok (select-keys u [:admin :email :firstName :id :lastName]))))}}]]

@@ -133,7 +133,7 @@ function dispatchOnMode() {
               }
               // Now you have the user's infomation
               const userProfile = user;
-              get('/api/user/admin', {
+              get('/api/user/profile', {
                 email: user.email,
               }).then((response) => {
                 try {
