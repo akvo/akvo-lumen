@@ -79,11 +79,6 @@ function initWithAuthToken(locale) {
 }
 
 function initNotAuthenticated(error) {
-  // EmailVerificationError
-  // const loc = url.parse(location.href);
-  // document.querySelector('#root').innerHTML =
-  // `${msg} <a href='${loc.protocol}//${loc.host}'>${loc.protocol}//${loc.host}</a>`;
-
   const locale = userLocale(navigator.language);
   const initialState =
     { profile: { admin: false, attributes: { locale: [locale] } } };
