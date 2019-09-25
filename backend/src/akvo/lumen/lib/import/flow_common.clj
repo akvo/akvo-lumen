@@ -6,7 +6,7 @@
             [clojure.string :as str])
   (:import [java.time Instant]))
 
-(def http-client-req-defaults (http.client/req-opts 5000))
+(def http-client-req-defaults (http.client/req-opts 10000))
 
 (defn survey-definition
   [api-root headers-fn instance survey-id]
