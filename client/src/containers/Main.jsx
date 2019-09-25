@@ -6,6 +6,7 @@ import Modal from './Modal';
 import { showModal } from '../actions/activeModal';
 import Notification from './Notification';
 import IMAGES from '../constants/images';
+import { isAuth0 } from '../utilities/utils';
 
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
@@ -15,11 +16,12 @@ require('fixed-data-table-2/dist/fixed-data-table.css');
 class Main extends Component {
   componentDidMount() {
     const {
+      env,
       dispatch,
       profile: { firstName, lastName },
       location: { pathname },
     } = this.props;
-    if ((pathname.split('/').pop() !== 'export')
+    if (isAuth0(env) && (pathname.split('/').pop() !== 'export')
       && (!every([firstName, lastName], Boolean))) {
       dispatch(showModal('edit-user'));
     }
