@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import UserMenu from './user-menu/UserMenu';
+import { isAuth0 } from '../../utilities/utils';
 
 function KeycloakUserMenu({ profile, authURL }) {
   const url = `${authURL}/realms/akvo/account`;
@@ -24,11 +25,11 @@ KeycloakUserMenu.propTypes = {
   }).isRequired,
 };
 
-function OrganizationMenu({ profile, authURL }) {
-  const isAuth0 = (authURL && authURL.includes('auth0'));
+function OrganizationMenu({ profile, env }) {
+  const { authURL } = env;
   return (
     <div className="OrganizationMenu">
-      {isAuth0 ? (
+      {isAuth0(env) ? (
         <UserMenu profile={profile} />
       ) : (
         <KeycloakUserMenu authURL={authURL} profile={profile} />
@@ -38,7 +39,9 @@ function OrganizationMenu({ profile, authURL }) {
 }
 
 OrganizationMenu.propTypes = {
-  authURL: PropTypes.string,
+  env: PropTypes.shape({
+    authURL: PropTypes.string.isRequired,
+  }).isRequired,
   profile: PropTypes.shape({
     username: PropTypes.string,
   }).isRequired,
@@ -47,6 +50,7 @@ OrganizationMenu.propTypes = {
 function mapStateToProps(state) {
   return {
     authURL: state.env.authURL,
+    env: state.env,
   };
 }
 
