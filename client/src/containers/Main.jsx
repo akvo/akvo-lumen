@@ -33,9 +33,8 @@ class Main extends Component {
       content, sidebar, notification, loadStatus, env,
     } = this.props;
     if (loadStatus === 'failed') {
-      const { authURL, tenant } = env;
-      const isAuth0 = (authURL && authURL.includes('auth0'));
-      if (isAuth0) {
+      const { tenant } = env;
+      if (isAuth0(env)) {
         return (
           <div className="Main">
             <div className="failedToLoadMessage">
