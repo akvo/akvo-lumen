@@ -23,7 +23,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 20,
+      "id": 13,
       "links": [],
       "panels": [
         {
@@ -31,6 +31,7 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "description": "",
           "fill": 1,
           "gridPos": {
             "h": 8,
@@ -63,17 +64,25 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_allowed_paths_bucket[10m])))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_allowed_paths_bucket[10m])) by (le))\n",
               "format": "time_series",
               "intervalFactor": 1,
+              "legendFormat": "0.99",
               "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_allowed_paths_bucket[10m])) by (le))\n",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "0.95",
+              "refId": "B"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "99% latency",
+          "title": "latency percentiles",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -117,20 +126,17 @@ data:
           "dashes": false,
           "fill": 1,
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
             "x": 12,
             "y": 0
           },
-          "id": 2,
+          "id": 8,
           "legend": {
-            "alignAsTable": true,
             "avg": false,
             "current": false,
-            "hideEmpty": true,
             "max": true,
             "min": false,
-            "rightSide": true,
             "show": true,
             "total": false,
             "values": true
@@ -149,7 +155,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_allowed_paths_bucket[10m])))",
+              "expr": "sum(app_auth_allowed_paths_count)",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -159,7 +165,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "95% latency",
+          "title": "Total calls",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -290,90 +296,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 9
-          },
-          "id": 8,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": true,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum(app_auth_allowed_paths_count)",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Total calls",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "fill": 1,
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 16
+            "y": 8
           },
           "id": 10,
           "legend": {
@@ -399,9 +322,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "(sum(rate(app_auth_allowed_paths_bucket{le=\"2.5\"}[10m])) + sum(rate(app_auth_allowed_paths_bucket{le=\"7.5\"}[10m])) by (tenant)) / 2 / sum(rate(app_flow_check_permissions_count[10m]))",
+              "expr": "(sum(rate(app_auth_allowed_paths_bucket{le=\"2.5\"}[10m])) + sum(rate(app_auth_allowed_paths_bucket{le=\"7.5\"}[10m])) ) / 2 / sum(rate(app_auth_allowed_paths_bucket[10m])) * 10",
               "format": "time_series",
               "intervalFactor": 1,
+              "legendFormat": "value",
               "refId": "A"
             }
           ],
@@ -409,7 +333,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Apdex score (2.5 secs)",
+          "title": "Apdex score (250 ms)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -425,7 +349,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "percentunit",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -447,6 +371,7 @@ data:
           }
         }
       ],
+      "refresh": "1m",
       "schemaVersion": 18,
       "style": "dark",
       "tags": [],
@@ -454,7 +379,7 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-6h",
+        "from": "now-30m",
         "to": "now"
       },
       "timepicker": {
@@ -484,6 +409,6 @@ data:
       },
       "timezone": "",
       "title": "Calls to auth-allowed-paths",
-      "uid": "4z-8F0cWz",
-      "version": 3
+      "uid": "JjWR7wpZz",
+      "version": 13
     }
