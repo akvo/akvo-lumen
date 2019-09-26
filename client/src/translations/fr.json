@@ -178,6 +178,7 @@
   "library": "Librairie",
   "line": "ligne",
   "link": "Lien",
+  "logout": "logout",
   "longitude_column": "Colonne de longitude",
   "lower_quartile": "Quartile inférieur",
   "map": "Carte",
@@ -241,6 +242,7 @@
   "renamed_column": "Renommer {from} à {to}",
   "reselect_source_column": "Choisissez une autre colonne",
   "resources": "Resources",
+  "request_permission_from_your_organisation_admin": "Request permission from your organisation admin.",
   "reverse_geocode": "Géocodage inversé",
   "right": "Droite",
   "role": "Role",
@@ -322,6 +324,7 @@
   "to_lowercase_label": "en miniscule",
   "to_titlecase": "{title} to titlecase",
   "to_titlecase_label": "To titlecase",
+  "to_try_with_another_account": "to try with another account",
   "to_uppercase": "{title} en majuscule",
   "to_uppercase_label": "en majuscule",
   "too_many_visualisation_elements": "Cette visualisation ne peut être afficher parce qu'elle contient {count} éléments. Le nombre maximum d'éléments est {max}",
@@ -359,5 +362,6 @@
   "x_axis_label": "Étiquette de l'axe des X",
   "yikes": "Beurk",
   "y_axis": "Axe Y",
-  "y_axis_label": "Etiquette de l'axe des Y"
+  "y_axis_label": "Etiquette de l'axe des Y",
+  "you_need_permission_to_access": "You need permission to access"
 }
