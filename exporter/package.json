@@ -14,7 +14,7 @@
     "@sentry/node": "^4.6.4",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
-    "express": "^4.16.3",
+    "express": "^4.17.1",
     "express-validation": "^1.0.2",
     "joi": "^13.4.0",
     "lodash": "^4.17.13",
