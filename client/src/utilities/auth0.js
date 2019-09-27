@@ -1,15 +1,19 @@
 /* eslint-disable no-underscore-dangle */
 
+export function logout(auth0) {
+  auth0.logout({ returnTo: `${location.protocol}//${location.host}` });
+}
+
 export function token(auth0) {
   return new Promise((resolve) => {
     auth0.checkSession({}, (err, authResult) => {
-      resolve(authResult.idToken);
+      if (authResult) {
+        resolve(authResult.idToken);
+      } else if (err !== null) {
+        logout(auth0);
+      }
     });
   });
-}
-
-export function logout(auth0) {
-  auth0.logout({ returnTo: `${location.protocol}//${location.host}` });
 }
 
 export function login(auth0) {
