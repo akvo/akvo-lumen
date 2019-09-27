@@ -177,7 +177,7 @@
   "library": "Catálogo",
   "line": "Línea",
   "link": "Enlace",
-  "logout": "logout",
+  "logout": "cerrar sesión",
   "longitude_column": "Columna de longitud",
   "lower_quartile": "Cuartil inferior",
   "map": "Mapa",
@@ -241,7 +241,7 @@
   "renamed_column": "Renombrado {from} a {to}",
   "reselect_source_column": "Seleccione otra columna",
   "resources": "Recursos",
-  "request_permission_from_your_organisation_admin": "Request permission from your organisation admin.",
+  "request_permission_from_your_organisation_admin": "Solicite permisos al administrador de su organización.",
   "reverse_geocode": "Geocodificación inversa",
   "right": "Derecha",
   "role": "Rol",
@@ -324,7 +324,7 @@
   "to_lowercase_label": "A minúsculas",
   "to_titlecase": "{title} a titulizar",
   "to_titlecase_label": "A titulizar",
-  "to_try_with_another_account": "to try with another account",
+  "to_try_with_another_account": "para probar con otra cuenta",
   "to_uppercase": "{title} a mayúsculas",
   "to_uppercase_label": "A mayúsculas",
   "too_many_visualisation_elements": "Esta visualización no puede mostrarse porque tiene {count} elementos. El número máximo de elementos es {max}.",
@@ -363,5 +363,5 @@
   "yikes": "Caramba!",
   "y_axis": "Eje y",
   "y_axis_label": "Etiqueta del eje y",
-  "you_need_permission_to_access": "You need permission to access"
+  "you_need_permission_to_access": "Necesita permisos para acceder"
 }
