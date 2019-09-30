@@ -157,7 +157,9 @@
 (defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
   (let [permissions         (let [flow-data (->> (map :source dss)
                                                  (filter #(= "AKVO_FLOW" (get % "kind")))
-                                                 (map c.flow/>api-model))]
+                                                 (map c.flow/>api-model)
+                                                 (into #{})
+                                                 vec)]
                               (if (seq flow-data)
                                 (->> flow-data
                                      (flow-check-permissions flow-api request collector tenant)

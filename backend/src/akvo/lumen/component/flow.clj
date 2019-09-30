@@ -48,7 +48,7 @@
                        :unexceptional-status #(<= 200 % 299) 
                        :form-params body
                        :content-type :json}))
-              (catch Exception e (log/error :fail :url flow-api-url :token token :body body :response (ex-data e))))]
+              (catch Exception e (log/error e :fail :url flow-api-url :token token :body body :response (ex-data e))))]
     (log/debug ::check-permissions :body body :res res :elapsed-time (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start)) 1000000.0) " msecs"))
     res))
 
