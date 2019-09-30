@@ -5,7 +5,7 @@ metadata:
   labels:
      grafana_dashboard: "1"
 data:
-  k8s-dashboard.json: |-
+  lumen-authz-allowed-paths-dashboard.json: |-
     {
       "annotations": {
         "list": [
