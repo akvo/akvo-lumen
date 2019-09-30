@@ -190,7 +190,7 @@
                                  (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
                                {:rasters             rasters
                                 :auth-datasets       (mapv :id dss)
-                                :auth-visualisations (mapv :id (db.visualisation/all-visualisations tenant-conn))
+                                :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
                                 :auth-dashboards     (mapv :id (db.dashboard/all-dashboards tenant-conn))
                                 :auth-collections    (mapv :id (db.collection/all-collections tenant-conn))}))]
         (handler (assoc request

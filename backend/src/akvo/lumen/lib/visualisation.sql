@@ -3,6 +3,11 @@
 SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified, author
 FROM visualisation;
 
+-- :name all-visualisations-ids :? :*
+-- :doc All visualisations ids.
+SELECT id FROM visualisation;
+
+
 -- :name visualisation-by-id :? :1
 -- :doc grab visualisation by id
 SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified
