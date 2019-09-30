@@ -23,29 +23,120 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 13,
+      "id": 17,
+      "iteration": 1569863855221,
       "links": [],
       "panels": [
+        {
+          "aliasColors": {},
+          "bars": true,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": false,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": false,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"/healthz\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[5m])) by (path, method)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{method}} {{path}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Request per second (2XX)",
+          "tooltip": {
+            "shared": false,
+            "sort": 1,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
         {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "description": "",
           "fill": 1,
           "gridPos": {
-            "h": 8,
+            "h": 9,
             "w": 12,
-            "x": 0,
+            "x": 12,
             "y": 0
           },
-          "id": 4,
+          "id": 5,
           "legend": {
-            "avg": false,
-            "current": false,
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
             "hideEmpty": true,
+            "hideZero": true,
             "max": true,
             "min": false,
+            "rightSide": true,
             "show": true,
             "total": false,
             "values": true
@@ -64,17 +155,208 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_allowed_paths_bucket[10m])) by (le))\n",
+              "expr": "histogram_quantile(0.95, sum(rate(http_request_latency_seconds_bucket{run=\"lumen-blue-green\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[5m])) by (le,path,method))",
               "format": "time_series",
+              "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "0.99",
+              "legendFormat": "{{method}} - {{path}}",
               "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "95% latency",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
             },
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_allowed_paths_bucket[10m])) by (le))\n",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": true,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "id": 3,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": false,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": false,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"\", statusClass!=\"2XX\"}[5m])) by (path, method)",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "0.95",
+              "legendFormat": "{{method}} {{path}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Request per second (errors)",
+          "tooltip": {
+            "shared": false,
+            "sort": 1,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "content": "\n# DB stats\n\n\n\n\n",
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 18
+          },
+          "id": 17,
+          "links": [],
+          "mode": "markdown",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 21
+          },
+          "id": 9,
+          "interval": "",
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "{__name__=~\"[[tenant]].*PendingConnections\", run=\"lumen-blue-green\", color=~\"$color\"}  ",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{__name__}}",
               "refId": "B"
             }
           ],
@@ -82,10 +364,10 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "latency percentiles",
+          "title": "Threads waiting for a connection",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
@@ -124,19 +406,24 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "description": "Time that a DB connection has been in use, from the point of acquiring it from the pool, to the point returning it back.",
           "fill": 1,
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 0
+            "y": 21
           },
-          "id": 8,
+          "id": 12,
           "legend": {
-            "avg": false,
-            "current": false,
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": true,
             "min": false,
+            "rightSide": true,
             "show": true,
             "total": false,
             "values": true
@@ -155,17 +442,19 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(app_auth_allowed_paths_count)",
+              "expr": "{__name__=~\"[[tenant]].*Usage\", run=\"lumen-blue-green\", color=~\"$color\", quantile=\"0.95\"}",
               "format": "time_series",
+              "hide": false,
               "intervalFactor": 1,
-              "refId": "A"
+              "legendFormat": "{{__name__}}",
+              "refId": "B"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Total calls",
+          "title": "For how long a DB connection is used (95% percentile)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -181,7 +470,108 @@ data:
           },
           "yaxes": [
             {
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
               "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "description": "Time to acquire a connection from the connection pool",
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 29
+          },
+          "id": 11,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "{__name__=~\"[[tenant]].*Wait\", run=\"lumen-blue-green\", color=~\"$color\", quantile=\"0.95\"}",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{__name__}}",
+              "refId": "B"
+            },
+            {
+              "expr": "rate({__name__=~\"[[tenant]].*ConnectionTimeoutRate_total\", run=\"lumen-blue-green\", color=~\"$color\"}[5m])",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "How long it takes to adquire a DB connection (95% percentile)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -212,16 +602,22 @@ data:
           "gridPos": {
             "h": 8,
             "w": 12,
-            "x": 0,
-            "y": 8
+            "x": 12,
+            "y": 29
           },
-          "id": 6,
+          "id": 13,
           "legend": {
-            "avg": false,
-            "current": false,
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": true,
             "min": false,
+            "rightSide": true,
             "show": true,
+            "sort": "max",
+            "sortDesc": true,
             "total": false,
             "values": true
           },
@@ -239,17 +635,19 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(app_auth_allowed_paths_count[10m]))",
+              "expr": "{__name__=~\"[[tenant]].*ConnectionCreation\", run=\"lumen-blue-green\", color=~\"$color\", quantile=\"0.95\"}",
               "format": "time_series",
+              "hide": false,
               "intervalFactor": 1,
-              "refId": "A"
+              "legendFormat": "{{__name__}}",
+              "refId": "B"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Requests per second",
+          "title": "How long to create a new DB connection(95% percentile)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -265,7 +663,125 @@ data:
           },
           "yaxes": [
             {
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
               "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "content": "\n# Memory stats\n\n\n\n\n",
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 37
+          },
+          "id": 19,
+          "links": [],
+          "mode": "markdown",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "description": "See https://www.robustperception.io/irate-graphs-are-better-graphs and https://medium.com/@valyala/why-irate-from-prometheus-doesnt-capture-spikes-45f9896d7832 to understand the difference between rate and irate",
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 40
+          },
+          "id": 15,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[5m]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "rate",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(irate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[5m]))",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "irate",
+              "refId": "C"
+            },
+            {
+              "expr": "\nmax_over_time( sum(( irate( jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[3m] ) ))[$__interval:45s] )",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "irate2",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "GC time spend per second",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -293,17 +809,20 @@ data:
           "dashes": false,
           "fill": 1,
           "gridPos": {
-            "h": 8,
+            "h": 9,
             "w": 12,
             "x": 12,
-            "y": 8
+            "y": 40
           },
-          "id": 10,
+          "id": 7,
+          "interval": "",
           "legend": {
-            "avg": false,
-            "current": false,
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
             "max": true,
-            "min": true,
+            "min": false,
+            "rightSide": true,
             "show": true,
             "total": false,
             "values": true
@@ -322,18 +841,27 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "(sum(rate(app_auth_allowed_paths_bucket{le=\"2.5\"}[10m])) + sum(rate(app_auth_allowed_paths_bucket{le=\"7.5\"}[10m])) ) / 2 / sum(rate(app_auth_allowed_paths_bucket[10m])) * 10",
+              "expr": "jvm_memory_bytes_used{run=\"lumen-blue-green\", color=~\"${color}\"}",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "value",
-              "refId": "A"
+              "legendFormat": "{{area}} memory [{{kubernetes_pod_name}}]",
+              "refId": "B"
+            },
+            {
+              "expr": "jvm_memory_bytes_max{run=\"lumen-blue-green\", color=~\"${color}\"}",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "max {{area}} memory [{{kubernetes_pod_name}}]",
+              "refId": "C"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Apdex score (250 ms)",
+          "title": "JVM Memory",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -349,7 +877,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "percentunit",
+              "format": "decbytes",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -371,16 +899,71 @@ data:
           }
         }
       ],
-      "refresh": "1m",
+      "refresh": false,
       "schemaVersion": 18,
       "style": "dark",
       "tags": [],
       "templating": {
-        "list": []
+        "list": [
+          {
+            "allValue": ".*",
+            "current": {
+              "selected": true,
+              "text": "green",
+              "value": "green"
+            },
+            "datasource": "prom",
+            "definition": "label_values(color)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "color",
+            "multi": false,
+            "name": "color",
+            "options": [],
+            "query": "label_values(color)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "pacificwash + watershedsouthasia",
+              "value": [
+                "pacificwash",
+                "watershedsouthasia"
+              ]
+            },
+            "datasource": "prom",
+            "definition": "label_values(http_request_latency_seconds_bucket , tenant)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "tenant",
+            "multi": true,
+            "name": "tenant",
+            "options": [],
+            "query": "label_values(http_request_latency_seconds_bucket , tenant)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
       },
       "time": {
-        "from": "now-30m",
-        "to": "now"
+        "from": "2019-09-30T06:35:43.340Z",
+        "to": "2019-09-30T07:46:16.024Z"
       },
       "timepicker": {
         "refresh_intervals": [
@@ -408,7 +991,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Calls to auth-allowed-paths",
-      "uid": "JjWR7wpZz",
-      "version": 13
+      "title": "lumen",
+      "uid": "u2IbaZhZz",
+      "version": 10
     }
