@@ -191,8 +191,8 @@
                                {:rasters             rasters
                                 :auth-datasets       (mapv :id dss)
                                 :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
-                                :auth-dashboards     (mapv :id (db.dashboard/all-dashboards tenant-conn))
-                                :auth-collections    (mapv :id (db.collection/all-collections tenant-conn))}))]
+                                :auth-dashboards     (mapv :id (db.dashboard/all-dashboards-ids tenant-conn))
+                                :auth-collections    (mapv :id (db.collection/all-collections-ids tenant-conn))}))]
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 

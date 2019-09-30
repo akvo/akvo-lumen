@@ -1,3 +1,9 @@
+-- :name all-collections-ids
+-- :doc List all collections ids. Collection entities are not included.
+SELECT collection.id FROM collection
+LEFT JOIN collection_entity ON collection_entity.collection_id = collection.id
+GROUP BY collection.id;
+
 -- :name all-collections
 -- :doc List all collections. Collection entities are not included.
 SELECT collection.id,
