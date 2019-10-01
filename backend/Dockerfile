@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-stretch
+FROM openjdk:11-jre-stretch
 
 RUN set -ex; apt-get update && \
     apt-get -qq install -y --no-install-recommends --no-install-suggests \
