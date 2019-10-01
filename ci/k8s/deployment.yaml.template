@@ -80,7 +80,7 @@ spec:
           requests:
             cpu: "50m"
           limits:
-            cpu: "1000m"
+            cpu: "4000m"
         env:
         - name: LUMEN_API_AUTHZ_PROBABILITY
           valueFrom:
