@@ -6,7 +6,8 @@
             [clojure.string :as str])
   (:import [java.time Instant]))
 
-(def ^:private http-client-req-defaults (http.client/req-opts 30000))
+;; only use this value from a different thread/future
+(def ^:private http-client-req-defaults (http.client/req-opts 60000))
 
 (defn survey-definition
   [api-root headers-fn instance survey-id]
