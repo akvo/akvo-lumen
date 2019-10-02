@@ -64,11 +64,13 @@
   ([]
    (js-engine (js-factory)))
   ([factory]
-   (let [engine (.getScriptEngine factory class-filter)]
+   (let [engine (.getScriptEngine factory (into-array String ["--no-deprecation-warning"]) nil class-filter)]
      (remove-bindings (.getBindings engine ScriptContext/ENGINE_SCOPE))
      engine)))
 
-(defn- eval*
+(defn eval*
+  ([^String code]
+   (eval* (js-engine) code))
   ([^ScriptEngine engine ^String code]
    (.eval ^ScriptEngine engine ^String code)))
 
