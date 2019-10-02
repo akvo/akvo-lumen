@@ -2,7 +2,7 @@
   "wrap flow and flow api logic and data related"
   (:require [akvo.lumen.http.client :as http.client]
             [integrant.core :as ig]
-            [akvo.lumen.component.keycloak :as c.keycloak]            
+            [akvo.lumen.component.keycloak :as c.keycloak]
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]))
 
@@ -45,11 +45,15 @@
                       {:as :json
                        :headers headers
                        :throw-entire-message? true
-                       :unexceptional-status #(<= 200 % 299) 
+                       :unexceptional-status #(<= 200 % 299)
                        :form-params body
                        :content-type :json}))
-              (catch Exception e (log/error e :fail :url flow-api-url :token token :body body :response (ex-data e))))]
-    (log/debug ::check-permissions :body body :res res :elapsed-time (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start)) 1000000.0) " msecs"))
+              (catch Exception e
+                (log/error e :fail :url flow-api-url :body body
+                           :response (ex-data e))))]
+    (let [elapsed (/ (double (- (. System (nanoTime)) start)) 1000000.0)]
+      (log/debug ::check-permissions :body body :res res
+                 :elapsed-time (str "Elapsed time: " elapsed " msecs")))
     res))
 
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]
@@ -60,7 +64,8 @@
 (s/def ::internal-url string?)
 (s/def ::api-headers fn?)
 (s/def ::internal-api-headers fn?)
-(s/def ::config (s/keys :req-un [::url ::auth0-url ::internal-url ::api-headers ::internal-api-headers]))
+(s/def ::config (s/keys :req-un [::url ::auth0-url ::internal-url ::api-headers
+                                 ::internal-api-headers]))
 
 (defmethod ig/pre-init-spec ::api [_]
   ::config)
