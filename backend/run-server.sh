@@ -7,4 +7,4 @@ if [[ "${WAIT_FOR_DEPS:=false}" = "true" ]]; then
   /app/wait-for-dependencies.sh
 fi
 
-java -jar /app/akvo-lumen.jar
+java -Xlog:gc* -jar /app/akvo-lumen.jar
