@@ -157,7 +157,9 @@
 (defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
   (let [permissions         (let [flow-data (->> (map :source dss)
                                                  (filter #(= "AKVO_FLOW" (get % "kind")))
-                                                 (map c.flow/>api-model))]
+                                                 (map c.flow/>api-model)
+                                                 (into #{})
+                                                 vec)]
                               (if (seq flow-data)
                                 (->> flow-data
                                      (flow-check-permissions flow-api request collector tenant)
@@ -190,9 +192,9 @@
                                  (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
                                {:rasters             rasters
                                 :auth-datasets       (mapv :id dss)
-                                :auth-visualisations (mapv :id (db.visualisation/all-visualisations tenant-conn))
-                                :auth-dashboards     (mapv :id (db.dashboard/all-dashboards tenant-conn))
-                                :auth-collections    (mapv :id (db.collection/all-collections tenant-conn))}))]
+                                :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
+                                :auth-dashboards     (mapv :id (db.dashboard/all-dashboards-ids tenant-conn))
+                                :auth-collections    (mapv :id (db.collection/all-collections-ids tenant-conn))}))]
         (handler (assoc request
                         :auth-service (new-auth-service auth-uuid-tree)))))))
 

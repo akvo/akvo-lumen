@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: lumen-authz-allowed-paths
+  name: lumen-dashboard
   labels:
      grafana_dashboard: "1"
 data:
-  lumen-authz-allowed-paths-dashboard.json: |-
+  lumen-dashboard.json: |-
     {
       "annotations": {
         "list": [
@@ -23,8 +23,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 17,
-      "iteration": 1569863855221,
+      "iteration": 1569948185087,
       "links": [],
       "panels": [
         {
@@ -212,7 +211,7 @@ data:
           "fill": 1,
           "gridPos": {
             "h": 9,
-            "w": 12,
+            "w": 8,
             "x": 0,
             "y": 9
           },
@@ -271,6 +270,201 @@ data:
           "yaxes": [
             {
               "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "gridPos": {
+            "h": 9,
+            "w": 4,
+            "x": 8,
+            "y": 9
+          },
+          "id": 21,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{pod=~\"lumen-[[color]].*\"}[30m])) by (pod, container)",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "{{pod}} - {{container}} ",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Restarts ",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "decimals": 3,
+          "fill": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 9
+          },
+          "id": 23,
+          "interval": "",
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$interval])) by (container_name, pod_name)\n",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{pod_name}} - {{container_name}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$interval])) by (instance, pod_name)\n",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{instance}} - {{pod_name}}",
+              "refId": "B"
+            },
+            {
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",container_name!=\"POD\"}[$interval])) by (instance)\n",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{instance}}",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Containers CPU usage ($interval avg)",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -908,9 +1102,9 @@ data:
           {
             "allValue": ".*",
             "current": {
-              "selected": true,
-              "text": "green",
-              "value": "green"
+              "tags": [],
+              "text": "All",
+              "value": "$__all"
             },
             "datasource": "prom",
             "definition": "label_values(color)",
@@ -934,10 +1128,9 @@ data:
           {
             "allValue": ".*",
             "current": {
-              "text": "pacificwash + watershedsouthasia",
+              "text": "All",
               "value": [
-                "pacificwash",
-                "watershedsouthasia"
+                "$__all"
               ]
             },
             "datasource": "prom",
@@ -958,12 +1151,85 @@ data:
             "tagsQuery": "",
             "type": "query",
             "useTags": false
+          },
+          {
+            "auto": true,
+            "auto_count": 20,
+            "auto_min": "2m",
+            "current": {
+              "text": "auto",
+              "value": "$__auto_interval_interval"
+            },
+            "hide": 2,
+            "label": null,
+            "name": "interval",
+            "options": [
+              {
+                "selected": true,
+                "text": "auto",
+                "value": "$__auto_interval_interval"
+              },
+              {
+                "selected": false,
+                "text": "1m",
+                "value": "1m"
+              },
+              {
+                "selected": false,
+                "text": "10m",
+                "value": "10m"
+              },
+              {
+                "selected": false,
+                "text": "30m",
+                "value": "30m"
+              },
+              {
+                "selected": false,
+                "text": "1h",
+                "value": "1h"
+              },
+              {
+                "selected": false,
+                "text": "6h",
+                "value": "6h"
+              },
+              {
+                "selected": false,
+                "text": "12h",
+                "value": "12h"
+              },
+              {
+                "selected": false,
+                "text": "1d",
+                "value": "1d"
+              },
+              {
+                "selected": false,
+                "text": "7d",
+                "value": "7d"
+              },
+              {
+                "selected": false,
+                "text": "14d",
+                "value": "14d"
+              },
+              {
+                "selected": false,
+                "text": "30d",
+                "value": "30d"
+              }
+            ],
+            "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+            "refresh": 2,
+            "skipUrlSync": false,
+            "type": "interval"
           }
         ]
       },
       "time": {
-        "from": "2019-09-30T06:35:43.340Z",
-        "to": "2019-09-30T07:46:16.024Z"
+        "from": "2019-10-01T02:19:33.300Z",
+        "to": "2019-10-01T05:38:20.452Z"
       },
       "timepicker": {
         "refresh_intervals": [
@@ -993,5 +1259,5 @@ data:
       "timezone": "",
       "title": "lumen",
       "uid": "u2IbaZhZz",
-      "version": 10
+      "version": 11
     }
