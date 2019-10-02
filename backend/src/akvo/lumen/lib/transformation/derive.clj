@@ -3,15 +3,14 @@
             [akvo.lumen.lib.transformation.derive.js-engine :as js-engine]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
+            [akvo.lumen.db.transformation.derive :as db.tx.derive]
             [clj-time.coerce :as tc]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [clojure.walk :as walk]
-            [hugsql.core :as hugsql]))
+            [clojure.walk :as walk]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/derive.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defn row-template-format [s]
   (let [double-quote-template "row[\"%s\"]"
@@ -104,12 +103,12 @@
 
 (defn set-cells-values! [conn opts data]
   (->> data
-       (map (fn [[i v]] (set-cell-value conn (merge {:value v :rnum i} opts))))
+       (map (fn [[i v]] (db.tx.derive/set-cell-value conn (merge {:value v :rnum i} opts))))
        doall))
 
 (defn delete-rows! [conn opts data]
   (->> data
-       (map (fn [[i]] (delete-row conn (merge {:rnum i} opts))))
+       (map (fn [[i]] (db.tx.derive/delete-row conn (merge {:rnum i} opts))))
        doall))
 
 (defmethod engine/apply-operation "core/derive"
@@ -122,7 +121,7 @@
           row-fn                  (js-engine/row-transform-fn {:columns     columns
                                                                :code        code
                                                                :column-type column-type})
-          js-execution-seq        (->> (all-data conn {:table-name table-name})
+          js-execution-seq        (->> (db.tx.derive/all-data conn {:table-name table-name})
                                        (map (fn [i]
                                               (try
                                                 [(:rnum i) :set-value! (row-fn i)]
@@ -134,7 +133,7 @@
                                                     ))))))
           base-opts               {:table-name  table-name
                                    :column-name new-column-name}]
-      (add-column conn {:table-name      table-name
+      (db.tx.engine/add-column conn {:table-name      table-name
                         :column-type     (lumen->pg-type column-type)
                         :new-column-name new-column-name})
       (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))

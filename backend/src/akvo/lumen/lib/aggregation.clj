@@ -9,8 +9,7 @@
             [akvo.lumen.lib.aggregation.bubble :as bubble]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
-            [clojure.walk :as walk]
-            [hugsql.core :as hugsql]))
+            [clojure.walk :as walk]))
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]

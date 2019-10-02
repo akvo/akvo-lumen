@@ -2,13 +2,12 @@
   "Geometry data transformations"
   (:require [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.util :as util]
+            [akvo.lumen.db.transformation.geo :as db.tx.geo]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
+            [clojure.tools.logging :as log]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/geo.sql")
 
 (defn- valid?
   "Predicate to determine if given op-spec is valid for geo transformation"
@@ -34,9 +33,9 @@
         (let [column-name-geo (engine/next-column-name columns)
               opts {:table-name table-name :column-name-geo column-name-geo}]
           (jdbc/with-db-transaction [conn tenant-conn]
-            (add-geometry-column conn opts)
+            (db.tx.geo/add-geometry-column conn opts)
             (add-index conn table-name column-name-geo)
-            (generate-geopoints conn (conj opts {:column-name-lat columnNameLat
+            (db.tx.geo/generate-geopoints conn (conj opts {:column-name-lat columnNameLat
                                                  :column-name-long columnNameLong})))
           (jdbc/execute! tenant-conn "DEALLOCATE ALL")
           {:success? true

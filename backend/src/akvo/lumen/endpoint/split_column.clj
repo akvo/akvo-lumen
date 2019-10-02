@@ -7,7 +7,6 @@
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]
             [integrant.core :as ig]))
 
 (defn sort-pattern-analysis-by [pattern-analysis sort-by*]

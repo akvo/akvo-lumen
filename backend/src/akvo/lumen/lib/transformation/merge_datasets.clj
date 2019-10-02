@@ -1,19 +1,17 @@
 (ns akvo.lumen.lib.transformation.merge-datasets
   (:require [akvo.lumen.util :as util]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [clojure.set :as set]
             [clojure.set :refer (rename-keys) :as set]
             [clojure.string :as s]
-            [clojure.walk :as walk]
-            [hugsql.core :as hugsql])
+            [clojure.walk :as walk])
   (:import [java.sql Timestamp]
            [org.postgis PGgeometry]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defmethod engine/valid? "core/merge-datasets"
   [op-spec]
@@ -95,7 +93,7 @@
   "Add the new columns to the target dataset"
   [conn table-name columns]
   (doseq [column columns]
-    (add-column conn {:table-name table-name
+    (db.tx.engine/add-column conn {:table-name table-name
                       :new-column-name (get column "columnName")
                       :column-type (condp = (get column "type")
                                      "date" "timestamptz"
@@ -117,7 +115,7 @@
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
-    (if-let [source-dataset (latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
+    (if-let [source-dataset (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
       source-dataset
       (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
                       {:source source})))))
@@ -170,7 +168,7 @@
 (defn- merged-datasets-diff [tenant-conn merged-dataset-sources]
   (let [dataset-ids (mapv :datasetId merged-dataset-sources)
         diff        (set/difference (set dataset-ids)
-                                    (set (map :id (select-datasets-by-id tenant-conn {:ids dataset-ids}))))]
+                                    (set (map :id (db.dataset/select-datasets-by-id tenant-conn {:ids dataset-ids}))))]
     (when (not-empty (filter some? diff))
       {:diff diff})))
 
@@ -193,7 +191,7 @@
        :dataset-id (:datasetId merge-source-op)})))
 
 (defn consistency-error? [tenant-conn dataset-id]
-  (let [merged-sources (->> (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+  (let [merged-sources (->> (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
                             :transformations
                             walk/keywordize-keys
                             (filter #(= "core/merge-datasets" (:op %)))
@@ -204,14 +202,14 @@
        :dataset-diff ds-diff}
       (when-let [column-diff (when (not-empty merged-sources)
                                (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
-                                                           (latest-dataset-versions-by-dataset-ids tenant-conn)
+                                                           (db.transformation/latest-dataset-versions-by-dataset-ids tenant-conn)
                                                            (map #(rename-keys % {:dataset_id :dataset-id})))
                                      column-diff-coll (->> merged-sources
                                                            (map (partial merged-columns-diff dss))
                                                            (filter some?))]
                                  (when (not-empty column-diff-coll)
                                    column-diff-coll)))]
-        {:error(format "Update failed. This dataset has merged columns that no longer exist in their dataset, %s" (mapv :title (select-datasets-by-id tenant-conn {:ids (mapv :dataset-id column-diff)})))
+        {:error(format "Update failed. This dataset has merged columns that no longer exist in their dataset, %s" (mapv :title (db.dataset/select-datasets-by-id tenant-conn {:ids (mapv :dataset-id column-diff)})))
          :column-diff column-diff}))))
 
 (defn sources-related
@@ -227,7 +225,7 @@
    :origin {:id 'uuid-str
             :title 'str}}"
   [tenant-conn target-dataset-id]
-  (->> (latest-dataset-versions tenant-conn) ;; all dataset_versions
+  (->> (db.transformation/latest-dataset-versions tenant-conn) ;; all dataset_versions
        (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
        (map (fn [dataset-version]
               ;; get source datasets of merge transformations with appended dataset-version as origin

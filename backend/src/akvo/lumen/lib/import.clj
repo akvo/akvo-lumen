@@ -16,8 +16,7 @@
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
+            [clojure.tools.logging :as log]))
 
 (defn- successful-execution [conn job-execution-id data-source-id table-name columns spec claims]
   (let [dataset-id (util/squuid)

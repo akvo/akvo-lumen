@@ -3,8 +3,7 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.db.collection :as db.collection]
             [clojure.java.jdbc :as jdbc]
-            [clojure.set :as set]
-            [hugsql.core :as hugsql])
+            [clojure.set :as set])
   (:import [java.sql SQLException Connection]))
 
 (alias 'core 'clojure.core)

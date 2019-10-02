@@ -20,7 +20,6 @@
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [clojure.walk :as w]
-   [hugsql.core :as hugsql]
    [iapetos.core :as prometheus]
    [iapetos.registry :as registry]
    [integrant.core :as ig]))

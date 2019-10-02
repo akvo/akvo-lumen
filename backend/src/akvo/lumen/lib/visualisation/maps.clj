@@ -10,12 +10,10 @@
             [cheshire.core :as json]
             [clojure.core.match :refer [match]]
             [clojure.walk :as walk]
-            [hugsql.core :as hugsql])
+            [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.raster :as db.raster])
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (def http-client-req-defaults (http.client/req-opts 5000))
 
@@ -87,7 +85,7 @@
       :else [(if (not dataset-id) raster-id dataset-id)])))
 
 (defn create-raster [tenant-conn windshaft-url raster-id]
-  (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id raster-id})
+  (let [{:keys [raster_table metadata]} (db.raster/raster-by-id tenant-conn {:id raster-id})
         headers* (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
@@ -108,8 +106,8 @@
                                     (:rasterId current-layer)
                                     (:datasetId current-layer))
                {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
-                                                           (raster-by-id tenant-conn {:id current-dataset-id})
-                                                           (dataset-by-id tenant-conn {:id current-dataset-id}))
+                                                           (db.raster/raster-by-id tenant-conn {:id current-dataset-id})
+                                                           (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id}))
                current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
            (map-metadata/build tenant-conn
                                (or raster_table

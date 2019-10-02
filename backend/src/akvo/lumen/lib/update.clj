@@ -10,12 +10,9 @@
             [clojure.string :as string]
             [clojure.data :as d]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]
+            [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.job-execution :as db.job-execution]
             [clojure.walk :as walk]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn- undif-columns [tx columns]
   (let [columns (reduce #(assoc % (:columnName %2) %2) {} columns)
@@ -47,13 +44,13 @@
   also delete the previous table-name and imported-table-name so we
   don't accumulate unused datasets on each update."
   [conn job-execution-id dataset-id table-name imported-table-name dataset-version]
-  (touch-dataset conn {:id dataset-id})
-  (drop-table conn {:table-name (:imported-table-name dataset-version)})
-  (drop-table conn {:table-name (:table-name dataset-version)})
-  (update-successful-job-execution conn {:id job-execution-id}))
+  (db.transformation/touch-dataset conn {:id dataset-id})
+  (db.transformation/drop-table conn {:table-name (:imported-table-name dataset-version)})
+  (db.transformation/drop-table conn {:table-name (:table-name dataset-version)})
+  (db.job-execution/update-successful-job-execution conn {:id job-execution-id}))
 
 (defn- failed-update [conn job-execution-id reason]
-  (update-failed-job-execution conn {:id job-execution-id
+  (db.job-execution/update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]}))
 
 (defn compatible-columns-errors [dict imported-columns columns]
@@ -112,14 +109,14 @@
 (defn- do-update [tenant-conn caddisfly import-config dataset-id data-source-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
-      (let [initial-dataset-version  (initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
+      (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)
 
             columns-used (columns-used-in-txs
                           (import/importer-type (get data-source-spec "source"))
                           initial-dataset-version
-                          (latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+                          (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
             imported-dataset-columns-checked (reduce (fn [c co]
                                                        (if (contains? columns-used (get co "columnName"))
                                                          (conj c co)
@@ -136,11 +133,11 @@
             (postgres/create-dataset-table conn table-name importer-columns)
             (doseq [record (map postgres/coerce-to-sql (p/records importer))]
               (jdbc/insert! conn table-name record))
-            (clone-data-table conn {:from-table table-name
+            (db.job-execution/clone-data-table conn {:from-table table-name
                                     :to-table   imported-table-name}
                               {}
                               {:transaction? false})
-            (let [dataset-version  (latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
+            (let [dataset-version  (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
                   coerce-column-fn (fn [{:keys [title id type key multipleId multipleType] :as column}]
                                      (cond-> {"type" type
                                               "title" title
@@ -169,10 +166,10 @@
                                  dataset-version))))))))
 
 (defn update-dataset [tenant-conn caddisfly import-config error-tracker dataset-id data-source-id data-source-spec]
-  (if-let [current-tx-job (pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
+  (if-let [current-tx-job (db.transformation/pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
     (lib/bad-request {:message "A running transformation still exists, please wait to update this dataset ..."})
     (let [job-execution-id (str (util/squuid))]
-     (insert-dataset-update-job-execution tenant-conn {:id job-execution-id
+     (db.job-execution/insert-dataset-update-job-execution tenant-conn {:id job-execution-id
                                                        :data-source-id data-source-id
                                                        :dataset-id dataset-id})
      (future
