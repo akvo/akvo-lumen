@@ -36,9 +36,9 @@
     (is (thrown? clojure.lang.ExceptionInfo
                  (at/conform-label "ABC"))))
 
-  (testing "Start with a letter"
+  (testing "Start with a letter or number"
     (is (thrown? clojure.lang.ExceptionInfo
-                 (at/conform-label "0ao")))))
+                 (at/conform-label "-ao")))))
 
 
 (deftest label

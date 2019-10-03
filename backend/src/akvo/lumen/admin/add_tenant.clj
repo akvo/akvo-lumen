@@ -77,7 +77,8 @@
                       (str/join ", "  blacklist))
               {:label label}))
 
-    (not (Character/isLetter (get label 0)))
+    (let [first-char (get label 0)]
+      (and (not (Character/isDigit first-char)) (not (Character/isLetter first-char))))
     (throw
      (ex-info "First letter should be a character"
               {:label label}))
