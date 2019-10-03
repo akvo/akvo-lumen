@@ -112,8 +112,8 @@
         args (if (and kvs (not-empty kvs) (even? (count kvs)))
                (reduce #((if (vector? (first %2))  assoc-in assoc) % (first %2) (last %2)) args (partition 2 kvs))
                args)
-        
-]
+
+        ]
     (conform ::transformation.engine.s/op-spec (assoc s :op op-name :args args))
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
@@ -259,28 +259,28 @@
                                :transformation
                                (gen-transformation
                                 "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
-                                                       :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                       :akvo.lumen.specs.transformation.change-datatype/newType "date"
-                                                       ::transformation.engine.s/onError "fail"}
+                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
+                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
+                                                        ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/sample-imported-dataset [:text
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [[y _ _ :as date]]
-                                                                                           (str y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [[y m d :as date]]
-                                                                                           (str d "/" m "/" y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [date]
-                                                                                           (string/join "-" date))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]]
-                                                         10)
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y _ _ :as date]]
+                                                                                                              (str y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y m d :as date]]
+                                                                                                              (str d "/" m "/" y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [date]
+                                                                                                              (string/join "-" date))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]]
+                                                              10)
         years               (map (comp :value second) (:rows data))
         years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
         years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
-        dataset-id          (import-file *tenant-conn* *error-tracker* 
+        dataset-id          (import-file *tenant-conn* *error-tracker*
                                          {:dataset-name "date-parsing-test-bis"
                                           :kind         "clj"
                                           :data         data})
@@ -378,7 +378,10 @@
                                                   ::transformation.derive.s/code "row['foo'].toUpperCase()"
                                                   ::transformation.derive.s/newColumnType "text"
                                                   ::transformation.engine.s/onError "leave-empty"})})
-      (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
+      (let [d (latest-data dataset-id)]
+        (println "@Basic text transform")
+        (clojure.pprint/pprint d)
+        (is (= ["A" "B" nil] (map :d1 d)))))
 
     (testing "Basic text transform with drop row on error"
       (apply-transformation {:type :transformation
@@ -629,7 +632,7 @@
                                 (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-        
+
         (is (= (apply conj ["c1" "c2"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (inc (count new-columns))))))
                (map #(get % "columnName") columns)))
         (is (= ["https://akvoflow-uat1.s3.amazonaws.com/images/b1961e99-bc1c-477c-9309-ae5e8d2374e8.png"
@@ -756,7 +759,7 @@
 
 (deftest ^:functional merge-datasets-test
   (let [origin-data          (import.s/sample-imported-dataset [:text :date] 2)
-        target-data          (replace-column origin-data (import.s/sample-imported-dataset [:text :number :number :text] 2) 0) 
+        target-data          (replace-column origin-data (import.s/sample-imported-dataset [:text :number :number :text] 2) 0)
         origin-dataset-id    (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
                                            :kind         "clj"
@@ -871,5 +874,3 @@
       (is (= 4 (count columns)))
       (is (= "geopoint" (get (last columns) "type")))
       (is (= "d1" (get (last columns) "columnName"))))))
-
-
