@@ -23,9 +23,26 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "iteration": 1569948185087,
+      "iteration": 1570089083425,
       "links": [],
       "panels": [
+        {
+          "content": "## All graphs have an $interval average\n",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 25,
+          "links": [],
+          "mode": "markdown",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
         {
           "aliasColors": {},
           "bars": true,
@@ -36,9 +53,10 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 0
+            "y": 2
           },
           "id": 2,
+          "interval": "",
           "legend": {
             "alignAsTable": true,
             "avg": true,
@@ -66,7 +84,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"/healthz\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[5m])) by (path, method)",
+              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"/healthz\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[$interval])) by (path, method)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{method}} {{path}}",
@@ -77,7 +95,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Request per second (2XX)",
+          "title": "Request per second (2XX) ",
           "tooltip": {
             "shared": false,
             "sort": 1,
@@ -124,9 +142,10 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 0
+            "y": 2
           },
           "id": 5,
+          "interval": "",
           "legend": {
             "alignAsTable": true,
             "avg": true,
@@ -154,7 +173,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(http_request_latency_seconds_bucket{run=\"lumen-blue-green\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[5m])) by (le,path,method))",
+              "expr": "histogram_quantile(0.95, sum(rate(http_request_latency_seconds_bucket{run=\"lumen-blue-green\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[$interval])) by (le,path,method))",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -213,7 +232,7 @@ data:
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 9
+            "y": 11
           },
           "id": 3,
           "legend": {
@@ -241,7 +260,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"\", statusClass!=\"2XX\"}[5m])) by (path, method)",
+              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"\", statusClass!=\"2XX\"}[$interval])) by (path, method)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -300,7 +319,7 @@ data:
             "h": 9,
             "w": 4,
             "x": 8,
-            "y": 9
+            "y": 11
           },
           "id": 21,
           "legend": {
@@ -330,7 +349,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(kube_pod_container_status_restarts_total{pod=~\"lumen-[[color]].*\"}[30m])) by (pod, container)",
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{pod=~\"lumen-[[color]].*\"}[$interval])) by (pod, container)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{pod}} - {{container}} ",
@@ -389,7 +408,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 9
+            "y": 11
           },
           "id": 23,
           "interval": "",
@@ -447,7 +466,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Containers CPU usage ($interval avg)",
+          "title": "Containers CPU usage",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -491,7 +510,7 @@ data:
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 18
+            "y": 20
           },
           "id": 17,
           "links": [],
@@ -512,7 +531,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 21
+            "y": 23
           },
           "id": 9,
           "interval": "",
@@ -606,7 +625,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 21
+            "y": 23
           },
           "id": 12,
           "legend": {
@@ -696,7 +715,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 29
+            "y": 31
           },
           "id": 11,
           "legend": {
@@ -797,7 +816,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 29
+            "y": 31
           },
           "id": 13,
           "legend": {
@@ -884,7 +903,7 @@ data:
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 39
           },
           "id": 19,
           "links": [],
@@ -906,7 +925,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 40
+            "y": 42
           },
           "id": 15,
           "legend": {
@@ -932,7 +951,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[5m]))",
+              "expr": "sum(rate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$interval]))",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -940,14 +959,14 @@ data:
               "refId": "A"
             },
             {
-              "expr": "sum(irate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[5m]))",
+              "expr": "sum(irate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$interval]))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "irate",
               "refId": "C"
             },
             {
-              "expr": "\nmax_over_time( sum(( irate( jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[3m] ) ))[$__interval:45s] )",
+              "expr": "\nmax_over_time( sum(( irate( jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$interval] ) ))[$__interval:45s] )",
               "format": "time_series",
               "hide": true,
               "intervalFactor": 1,
@@ -1006,7 +1025,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 40
+            "y": 42
           },
           "id": 7,
           "interval": "",
@@ -1102,6 +1121,7 @@ data:
           {
             "allValue": ".*",
             "current": {
+              "selected": false,
               "tags": [],
               "text": "All",
               "value": "$__all"
@@ -1228,8 +1248,8 @@ data:
         ]
       },
       "time": {
-        "from": "2019-10-01T02:19:33.300Z",
-        "to": "2019-10-01T05:38:20.452Z"
+        "from": "now-3h",
+        "to": "now"
       },
       "timepicker": {
         "refresh_intervals": [
@@ -1259,5 +1279,5 @@ data:
       "timezone": "",
       "title": "lumen",
       "uid": "u2IbaZhZz",
-      "version": 11
+      "version": 14
     }
