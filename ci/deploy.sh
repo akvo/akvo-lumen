@@ -57,6 +57,7 @@ kubectl apply -f deployment.yaml
 kubectl apply -f ci/k8s/redis-master-windshaft.yaml
 kubectl apply -f ci/k8s/blue-green-gateway.yaml
 kubectl apply -f ci/k8s/grafana/lumen-authz-allowed-paths.yml
+kubectl apply -f ci/k8s/grafana/lumen.yml
 
 log Waiting for k8s to finish
 ./ci/helpers/wait-for-k8s-deployment-to-be-ready.sh "$DARK_COLOR"
