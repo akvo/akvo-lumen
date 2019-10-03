@@ -60,23 +60,21 @@
 
 (defn- js-factory [] (NashornScriptEngineFactory.))
 
-;; (defn- js-engine
-;;   ([]
-;;    (js-engine (js-factory)))
-;;   ([factory]
-;;    (let [engine (.getScriptEngine factory (into-array String ["--no-deprecation-warning"]) nil class-filter)]
-;;      (remove-bindings (.getBindings engine ScriptContext/ENGINE_SCOPE))
-;;      engine)))
-
 (defn- js-engine
   ([]
    (js-engine (js-factory)))
   ([factory]
-   (let [engine (.getScriptEngine factory class-filter)]
+   (let [engine (.getScriptEngine factory (into-array String ["--no-deprecation-warning"]) nil class-filter)]
      (remove-bindings (.getBindings engine ScriptContext/ENGINE_SCOPE))
      engine)))
 
-
+;; (defn- js-engine
+;;   ([]
+;;    (js-engine (js-factory)))
+;;   ([factory]
+;;    (let [engine (.getScriptEngine factory class-filter)]
+;;      (remove-bindings (.getBindings engine ScriptContext/ENGINE_SCOPE))
+;;      engine)))
 
 (defn eval*
   ([^String code]
