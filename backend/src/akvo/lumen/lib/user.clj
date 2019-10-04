@@ -1,22 +1,20 @@
 (ns akvo.lumen.lib.user
   (:require [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.user :as db.user]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.protocols :as p]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [clojure.string :as str]
-            [hugsql.core :as hugsql]
+            [clojure.string :as str]            
             [selmer.parser :as selmer]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/user.sql")
 
 (defn expire-time []
   (c/to-sql-time (t/plus (t/now)
                          (t/weeks 2))))
 
 (defn- invite-id* [tenant-conn author email]
-  (-> (insert-invite tenant-conn
+  (-> (db.user/insert-invite tenant-conn
                      {:author author
                       :email email
                       :expire (expire-time)})
@@ -79,7 +77,7 @@
   (lib/ok {}))
 
 (defn active-invites [tenant-conn]
-  (lib/ok {:invites (select-active-invites tenant-conn)}))
+  (lib/ok {:invites (db.user/select-active-invites tenant-conn)}))
 
 (defn delete-invite
   "Deletes non consumed invites, returns 210 if invite was consumed and
@@ -88,14 +86,14 @@
   created the invite in the \"author\" db field, and this provides
   traceability. Hence we don't allow deletion of consumed invite."
   [tenant-conn id]
-  (if (zero? (first (delete-invite-by-id tenant-conn {:id id})))
+  (if (zero? (first (db.user/delete-invite-by-id tenant-conn {:id id})))
     (lib/gone {})
     (lib/ok {})))
 
 (defn verify-invite
   "Try and consume invite; Add user to keycloak; redirect to app."
   [keycloak tenant-conn tenant id location]
-  (if-let [{:keys [email]} (first (consume-invite tenant-conn {:id id}))]
+  (if-let [{:keys [email]} (first (db.user/consume-invite tenant-conn {:id id}))]
     (if-let [accepted (p/add-user-with-email keycloak tenant email)]
       (lib/redirect location)
       (lib/unprocessable-entity (format "<html><body>%s</body></html>"

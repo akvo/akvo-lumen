@@ -1,12 +1,10 @@
 (ns akvo.lumen.lib.transformation.reverse-geocode
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
+            [akvo.lumen.db.transformation.reverse-geocode :as db.tx.reverse-geocode]
             [akvo.lumen.util :as util]
-            [clojure.java.jdbc :as jdbc]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/reverse_geocode.sql")
+            [clojure.java.jdbc :as jdbc]))
 
 (defmethod engine/valid? "core/reverse-geocode"
   [op-spec]
@@ -21,7 +19,7 @@
   (str table-name "." column-name))
 
 (defn source-table-name [conn {:strs [datasetId]}]
-  (-> (latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
+  (-> (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
       :table-name))
 
 (defmethod engine/apply-operation "core/reverse-geocode"
@@ -31,10 +29,10 @@
         geopointColumn (get target "geopointColumn")
         {:strs [mergeColumn geoshapeColumn]} source
         source-table-name (source-table-name tenant-conn source)]
-    (add-column tenant-conn {:column-type "text"
+    (db.tx.engine/add-column tenant-conn {:column-type "text"
                       :new-column-name column-name
                       :table-name table-name})
-    (reverse-geocode tenant-conn {:point-column (table-qualify table-name geopointColumn)
+    (db.tx.reverse-geocode/reverse-geocode tenant-conn {:point-column (table-qualify table-name geopointColumn)
                            :shape-column (table-qualify source-table-name geoshapeColumn)
                            :source-column-name (table-qualify source-table-name mergeColumn)
                            :source-table-name source-table-name

@@ -3,8 +3,7 @@
             [akvo.lumen.db.public :as db.public]
             [akvo.lumen.lib :as lib]
             [clojure.string :as string]
-            [clojurewerkz.scrypt.core :as scrypt]
-            [hugsql.core :as hugsql])
+            [clojurewerkz.scrypt.core :as scrypt])
   (:import (java.security SecureRandom)
            (java.util Base64)))
 

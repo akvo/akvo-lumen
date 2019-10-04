@@ -3,15 +3,12 @@
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.lib.multiple-column :as multiple-column]
+            [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
             [clojure.walk :as walk]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
+            [clojure.tools.logging :as log]))
 
 (defn columns-to-extract [columns selected-column extractImage]
   (let [columns   (filter :extract columns)
@@ -41,10 +38,10 @@
           _ (log/debug :new-columns new-columns :selected-column selected-column :extractImage (:extractImage args))
 
           add-db-columns (doseq [c new-columns]
-                           (add-column conn {:table-name      table-name
+                           (db.tx.engine/add-column conn {:table-name      table-name
                                              :column-type     (postgres/colum-type-fn* (:type c))
                                              :new-column-name (:id c)}))
-          update-db-columns (->> (select-rnum-and-column conn {:table-name table-name :column-name (:columnName selected-column)})
+          update-db-columns (->> (db.transformation/select-rnum-and-column conn {:table-name table-name :column-name (:columnName selected-column)})
                                  (map
                                   (fn [m] 
                                     (let [cell-value (multiple-column/multiple-cell-value m (:columnName selected-column))

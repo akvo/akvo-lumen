@@ -8,12 +8,13 @@
             [clojure.set :refer (rename-keys) :as set]
             [clojure.string :as string]
             [clojure.walk :as walk]
-            [hugsql.core :as hugsql]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
+            [akvo.lumen.db.transformation.derive :as db.tx.derive]
             [clojure.spec.alpha :as s]
             [akvo.lumen.specs.transformation :as transformation.s]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/derive.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
+
+
 
 (defmethod engine/valid? "core/derive-category"
   [op-spec]
@@ -54,7 +55,7 @@
         column-title          (get-in op-spec [:args :target :column :title])
         uncategorized-value   (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
         new-column-name       (engine/next-column-name columns)
-        all-data              (all-data tenant-conn {:table-name table-name})
+        all-data              (db.tx.derive/all-data tenant-conn {:table-name table-name})
         mappings              (get-in op-spec [:args :derivation :mappings])
         derivation-type       (get-in op-spec [:args :derivation :type] "text")
         execution-log-message (format "Derived category '%s' using column: '%s'(%s) and mappings: '%s'"
@@ -63,12 +64,12 @@
                                       derivation-type
                                       mappings)]
     (jdbc/with-db-transaction [tenant-conn tenant-conn]
-      (add-column tenant-conn {:table-name      table-name
+      (db.tx.engine/add-column tenant-conn {:table-name      table-name
                                :column-type     "text"
                                :new-column-name new-column-name})
       (doseq [i all-data]
         (let [v (get i (keyword source-column-name))]
-          (set-cell-value tenant-conn
+          (db.tx.derive/set-cell-value tenant-conn
                           {:rnum        (:rnum i)
                            :value       (condp = derivation-type
                                           "text"   (find-text-cat (mappings-dict mappings) v uncategorized-value)

@@ -3,8 +3,7 @@
             [akvo.lumen.db.transformation.combine :as db.tx.combine]
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
             [akvo.lumen.util :as util]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
+            [clojure.tools.logging :as log]))
 
 (defmethod engine/valid? "core/combine"
   [op-spec]

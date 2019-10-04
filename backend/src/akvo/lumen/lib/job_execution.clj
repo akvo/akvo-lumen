@@ -1,7 +1,6 @@
 (ns akvo.lumen.lib.job-execution
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.db.job-execution :as db.job-execution]
-            [hugsql.core :as hugsql]))
+            [akvo.lumen.db.job-execution :as db.job-execution]))
 
 (defn job-execution [conn id]
   (if-let [{:keys [status error-message kind dataset-id]} (db.job-execution/job-execution-by-id conn {:id id} {:identifiers identity})]

@@ -6,8 +6,7 @@
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
+            [clojure.tools.logging :as log]))
 
 (defn- coalesce
   "For pivot tables, `NULL` categories will always be empty because `crosstab` uses `=` and

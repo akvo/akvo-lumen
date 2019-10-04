@@ -10,8 +10,7 @@
             [clojure.java.shell :as shell]
             [clojure.set :refer (rename-keys)]
             [clojure.string :as str]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql])
+            [clojure.tools.logging :as log])
   (:import [java.util UUID]
            [org.postgresql.util PGobject]))
 

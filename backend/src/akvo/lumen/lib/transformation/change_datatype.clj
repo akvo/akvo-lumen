@@ -5,8 +5,7 @@
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
+            [clojure.tools.logging :as log]))
 
 (defmethod engine/valid? "core/change-datatype"
   [op-spec]

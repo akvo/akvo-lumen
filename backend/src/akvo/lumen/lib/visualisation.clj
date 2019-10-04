@@ -1,21 +1,18 @@
 (ns akvo.lumen.lib.visualisation
-  (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.util :refer [squuid]]
-            [hugsql.core :as hugsql])
+  (:require [akvo.lumen.db.visualisation :as db.visualisation]
+            [akvo.lumen.lib :as lib]
+            [akvo.lumen.util :refer [squuid]])
   (:import [java.sql SQLException]))
 
-
-(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
-
 (defn all [tenant-conn]
-  (all-visualisations tenant-conn
+  (db.visualisation/all-visualisations tenant-conn
                       {}
                       {}
                       {:identifiers identity}))
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)
-        v (first (upsert-visualisation tenant-conn
+        v (first (db.visualisation/upsert-visualisation tenant-conn
                                        {:id id
                                         :dataset-id (:datasetId body)
                                         :type (:visualisationType body)
@@ -29,14 +26,14 @@
            :modified (:modified v))))
 
 (defn fetch [tenant-conn id]
-  (when-let [v (visualisation-by-id tenant-conn
+  (when-let [v (db.visualisation/visualisation-by-id tenant-conn
                                     {:id id}
                                     {}
                                     {:identifiers identity})]
     (dissoc v :author)))
 
 (defn upsert [tenant-conn body jwt-claims]
-  (let [v (upsert-visualisation tenant-conn
+  (let [v (db.visualisation/upsert-visualisation tenant-conn
                                 {:id (:id body)
                                  :dataset-id (:datasetId body)
                                  :type (:visualisationType body)
@@ -46,6 +43,6 @@
     {:id (-> v first :id)}))
 
 (defn delete [tenant-conn id]
-  (if (zero? (delete-visualisation-by-id tenant-conn {:id id}))
+  (if (zero? (db.visualisation/delete-visualisation-by-id tenant-conn {:id id}))
     (lib/not-found {:error "Not found"})
     (lib/ok {:id id})))

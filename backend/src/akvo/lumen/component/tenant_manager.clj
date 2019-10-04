@@ -10,7 +10,6 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]
             [integrant.core :as ig])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
 

@@ -1,9 +1,7 @@
 (ns akvo.lumen.lib.transformation.sort-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.util :as util]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/sort_column.sql")
+            [akvo.lumen.db.transformation.sort-column :as db.tx.sort-column]
+            [akvo.lumen.util :as util]))
 
 (defmethod engine/valid? "core/sort-column"
   [op-spec]
@@ -30,7 +28,7 @@
                                        assoc
                                        "sort" sort-idx
                                        "direction" sort-direction)]
-    (db-create-index tenant-conn {:index-name idx-name
+    (db.tx.sort-column/db-create-index tenant-conn {:index-name idx-name
                                   :column-name column-name
                                   :table-name table-name})
     {:success? true
@@ -53,7 +51,7 @@
                                        assoc
                                        "sort" nil
                                        "direction" nil)]
-    (db-drop-index tenant-conn {:index-name idx-name})
+    (db.tx.sort-column/db-drop-index tenant-conn {:index-name idx-name})
     {:success? true
      :columns new-cols}))
 

@@ -14,13 +14,10 @@
             [clojure.java.jdbc :refer [print-sql-exception-chain
                                        with-db-transaction]]
             [environ.core :refer [env]]
-            [hugsql.core :as hugsql]
+            [akvo.lumen.db.tenant-manager :as db.tenant-manager]
             [ring.util.response :refer [response]])
   (:import [java.sql SQLException]
            [org.postgresql.util PGobject]))
-
-(hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")
-
 
 (defn check-env-vars []
   (assert (:pg-database env) (error-msg "Specify PG_DATABASE env var"))
@@ -33,8 +30,8 @@
    (try
      (check-env-vars)
      (with-db-transaction [tx (db-uri {:database "lumen" :user "lumen"})]
-       (end-tenant-plan tx {:label label})
-       (add-new-plan tx {:label label
+       (db.tenant-manager/end-tenant-plan tx {:label label})
+       (db.tenant-manager/add-new-plan tx {:label label
                          :tier (doto (PGobject.)
                                  (.setType "tier")
                                  (.setValue tier))}))

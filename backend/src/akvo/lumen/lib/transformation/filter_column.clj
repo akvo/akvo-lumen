@@ -1,9 +1,7 @@
 (ns akvo.lumen.lib.transformation.filter-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/filter_column.sql")
+            [akvo.lumen.db.transformation.filter-column :as db.tx.filter-column]
+            [clojure.tools.logging :as log]))
 
 (defmethod engine/valid? "core/filter-column"
   [op-spec]
@@ -21,7 +19,7 @@
         filter-val (if (= "contains" expr-fn)
                      (str "%" expr-val "%")
                      expr-val)
-        result (db-filter-column tenant-conn {:table-name table-name
+        result (db.tx.filter-column/db-filter-column tenant-conn {:table-name table-name
                                               :column-name column-name
                                               :filter-fn filter-fn
                                               :filter-val filter-val})]

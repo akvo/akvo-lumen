@@ -3,8 +3,7 @@
             [akvo.lumen.db.dashboard :as db.dashboard]
             [akvo.lumen.util :refer [squuid]]
             [clojure.walk :as w]
-            [clojure.java.jdbc :as jdbc]
-            [hugsql.core :as hugsql]))
+            [clojure.java.jdbc :as jdbc]))
 
 (defn all [tenant-conn]
   (db.dashboard/all-dashboards tenant-conn))

@@ -2,13 +2,11 @@
   (:refer-clojure :exclude [apply])
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.job-execution :as db.job-execution]
             [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
-            [clojure.java.jdbc :as jdbc]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
+            [clojure.java.jdbc :as jdbc]))
 
 (def transformation-namespaces
   '[akvo.lumen.lib.transformation.change-datatype
@@ -52,23 +50,23 @@
           (condp = (:type command)
             :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
-        (update-successful-job-execution tx-conn {:id job-execution-id}))
+        (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
       (catch Exception e
         (let [msg (.getMessage e)]
           (engine/log-ex e)
-          (update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
+          (db.job-execution/update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
           (lib/conflict {:jobExecutionId job-execution-id :datasetId dataset-id :message msg}))))))
 
 (defn apply
   [{:keys [tenant-conn] :as deps} dataset-id command]
-  (if-let [current-tx-job (pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
+  (if-let [current-tx-job (db.transformation/pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
     (lib/bad-request {:message "A running transformation still exists, please wait to apply more ..."})
-    (if-let [dataset (dataset-by-id tenant-conn {:id dataset-id})]
+    (if-let [dataset (db.transformation/dataset-by-id tenant-conn {:id dataset-id})]
       (let [v (validate command)]
         (if-not (:valid? v)
           (lib/bad-request {:message (:message v)})
           (let [job-execution-id (str (squuid))]
-            (new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
+            (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
             (execute-tx deps job-execution-id dataset-id command)
             (lib/ok {:jobExecutionId job-execution-id
                      :datasetId dataset-id}))))

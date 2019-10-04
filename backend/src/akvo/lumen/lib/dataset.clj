@@ -13,8 +13,7 @@
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [clojure.set :refer (rename-keys)]
-            [hugsql.core :as hugsql]))
+            [clojure.set :refer (rename-keys)]))
 
 (defn all*
   [tenant-conn]

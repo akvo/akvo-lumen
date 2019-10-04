@@ -1,16 +1,14 @@
 (ns akvo.lumen.lib.transformation.text
   "Simple text transforms"
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.transformation.text :as db.tx.text]
             [akvo.lumen.util :as util]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/text.sql")
+            [clojure.tools.logging :as log]))
 
 (defn- transform
   [tenant-conn table-name columns op-spec fn]
   (let [{column-name "columnName"} (engine/args op-spec)]
-    (text-transform tenant-conn {:table-name table-name
+    (db.tx.text/text-transform tenant-conn {:table-name table-name
                                  :column-name column-name
                                  :fn fn})
     {:success? true
@@ -86,7 +84,7 @@
 (defmethod engine/apply-operation "core/trim-doublespace"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)]
-    (trim-doublespace tenant-conn {:table-name table-name
+    (db.tx.text/trim-doublespace tenant-conn {:table-name table-name
                                    :column-name column-name})
     {:success? true
      :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
