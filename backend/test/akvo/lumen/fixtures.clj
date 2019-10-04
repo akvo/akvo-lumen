@@ -10,6 +10,7 @@
              [import-file]]
             [clojure.tools.logging :as log]
             [ragtime.jdbc :as jdbc]
+            [ragtime.reporter :as reporter]
             [ragtime.repl :as repl]))
 
 (defn- ragtime-spec
@@ -37,13 +38,14 @@
    (system-fixture config-edn nil f))
   ([config-edn more-ks f]
    (let [c (tu/start-config config-edn more-ks)]
-     (lumen-migrate/migrate c)
-     (binding [*system* (tu/start-system c)]
-       (try
-         (f)
-         (finally (do
-                    (tu/halt-system *system*)
-                    (lumen-migrate/rollback c :tenant-manager))))))))
+     (binding [lumen-migrate/*reporter* reporter/silent]
+       (lumen-migrate/migrate c)
+       (binding [*system* (tu/start-system c)]
+         (try
+           (f)
+           (finally (do
+                      (tu/halt-system *system*)
+                      (lumen-migrate/rollback c :tenant-manager)))))))))
 
 
 (defn tenant-conn-fixture
