@@ -11,10 +11,10 @@
    [environ.core :refer [env]]
    [integrant.core :as ig]
    [meta-merge.core :refer [meta-merge]]
-   [ragtime
-    strategy
-    [jdbc :as ragtime-jdbc]
-    [repl :as ragtime-repl]]))
+   [ragtime.jdbc :as ragtime-jdbc]
+   [ragtime.repl :as ragtime-repl]
+   [ragtime.reporter :as reporter]
+   [ragtime.strategy]))
 
 (def source-files ["akvo/lumen/system.edn" "dev.edn" "local.edn"])
 
@@ -31,8 +31,11 @@
                     " but " (first conflicts) " was applied.")))
       (for [m unapplied] [:migrate m]))))
 
+(def ^:dynamic *reporter* reporter/print)
+
 (defn do-migrate [datastore migrations]
   (ragtime-repl/migrate {:datastore datastore
+                         :reporter *reporter*
                          :migrations migrations
                          :strategy ignore-future-migrations}))
 
@@ -68,6 +71,7 @@
 
 (defn do-rollback [datastore migrations amount-or-id]
   (ragtime-repl/rollback {:datastore  datastore
+                          :reporter *reporter*
                           :migrations migrations}
                          amount-or-id))
 
