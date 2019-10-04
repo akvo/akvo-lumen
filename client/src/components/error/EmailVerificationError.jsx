@@ -12,9 +12,6 @@ function EmailVerificationError() {
         <div className="logo">
           <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
         </div>
-        <h1>
-          <FormattedMessage id="yikes" />
-        </h1>
         <p>
           <FormattedMessage id="email_verified_error" />
         </p>
