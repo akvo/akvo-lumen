@@ -32,7 +32,7 @@
   [issuer req-opts]
   (let [url (format "%s/.well-known/openid-configuration" issuer)
         res (-> (http.client/get* url (merge http-client-req-defaults req-opts)) :body json/decode)]
-    (log/info "Successfully got openid-config from provider.")
+    (log/debug "Successfully got openid-config from provider.")
     res))
 
 (defn get-roles [{:keys [api-root]} headers]
@@ -556,7 +556,7 @@
   ::public-client)
 
 (defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring paths-cache-seconds] :as opts}]
-  (log/info "Starting keycloak")
+  (log/debug "Starting keycloak")
   (assoc (init-keycloak (assoc public-client
                                :credentials credentials
                                :max-user-ids-cache max-user-ids-cache
@@ -575,7 +575,7 @@
 
 
 (defmethod ig/halt-key! :akvo.lumen.component.keycloak/authorization-service  [_ opts]
-  (log/info :keycloak "closing connection manager" (:connection-manager opts))
+  (log/debug :keycloak "closing connection manager" (:connection-manager opts))
   (http.client/shutdown-manager (:connection-manager opts)))
 
 
