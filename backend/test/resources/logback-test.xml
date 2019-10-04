@@ -11,8 +11,15 @@
   <logger name="com.zaxxer.hikari.HikariDataSource">
     <level value="warn"/>
   </logger>
-
-
+  <logger name="akvo.lumen.component.caddisfly">
+    <level value="warn"/>
+  </logger>
+  <logger name="akvo.lumen.component.emailer">
+    <level value="warn"/>
+  </logger>
+  <logger name="org.projectodd.wunderboss.web.Web">
+    <level value="warn"/>
+  </logger>
   <root level="info">
     <appender-ref ref="STDOUT" />
   </root>
