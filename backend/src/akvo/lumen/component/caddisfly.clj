@@ -45,7 +45,7 @@
                v0-tests
                (-> local-schema-uri io/resource slurp (json/parse-string keyword) extract-tests-v2))]
     (when-not (= v2-count (count tests))(log/error :failed-caddisfly-expectations :v2-count v2-count :tests-count (count tests)))
-    (log/warn ::start "Using caddisfly LOCAL schema-uri:" local-schema-uri)
+    (log/info ::start "Using caddisfly LOCAL schema-uri:" local-schema-uri)
     (map->Caddisfly (assoc opts :schema tests))))
 
 (defmethod ig/init-key :akvo.lumen.component.caddisfly/prod  [_ {:keys [schema-uri] :as opts}]
