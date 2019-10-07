@@ -1,5 +1,5 @@
 /* global cy, before, context, Cypress, after, it */
-const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/';
+const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/?auth=keycloak';
 const username = Cypress.env('LUMEN_USER') || 'jerome';
 const password = Cypress.env('LUMEN_PASSWORD') || 'password';
 const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';

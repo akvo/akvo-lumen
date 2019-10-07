@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 
 DOCKER_COMPOSE_PROJECT="${1:-akvolumen}"
-LUMEN_URL="${2:-http://t1.lumen.local:3030/}"
+LUMEN_URL="${2:-http://t1.lumen.local:3030/?auth=keycloak}"
 LUMEN_USER="${3:-jerome}"
 LUMEN_PASSWORD="${4:-password}"
 CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY:-}"
