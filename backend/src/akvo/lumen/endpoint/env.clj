@@ -17,7 +17,7 @@
   (fn [{tenant :tenant
         query-params :query-params
         :as request}]
-    (let [auth-type (get query-params "auth" "auth0")
+    (let [auth-type (get query-params "auth" "keycloak")
           [auth-url auth-client-id] (condp = auth-type
                                       "keycloak" (auth-data keycloak-public-client)
                                       "auth0" (auth-data auth0-public-client))]
