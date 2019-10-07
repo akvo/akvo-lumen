@@ -1,7 +1,9 @@
 import { omit } from 'lodash';
 import Raven from 'raven-js';
-
 import * as auth from './auth';
+
+require('isomorphic-fetch');
+
 
 const CONTENT_TYPE = {
   JSON: 'json',
