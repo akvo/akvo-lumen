@@ -125,8 +125,6 @@
     (let [metadata-array (metadata-layers tenant-conn layers)
           map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
           headers* (headers tenant-conn)
-          _ (log/warn :map-config map-config)
-          _ (log/warn :headers headers)
           layer-group-id (-> (http.client/post* (format "%s/layergroup" windshaft-url)
                                                 (merge http-client-req-defaults
                                                        {:body (json/encode map-config)
