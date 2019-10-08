@@ -46,7 +46,7 @@
 ;;;
 
 (def author-claims {"name" "Jerome Eginla"})
-(def ruth-email  "ruth@t2.lumen.localhost")
+(def ruth-email  "ruth@t2.akvolumen.org")
 (def server-name "t1.lumen.localhost")
 (def tenant "t1")
 

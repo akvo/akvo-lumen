@@ -24,11 +24,11 @@
 (deftest keycloak-test
   (testing "Jerome (admin) permissions to t1"
     (is (= #{"t1/admin"}
-           (p/allowed-paths *keycloak* {:email "jerome@t1.lumen.localhost" :iat (tc/to-date (t/now))}))))
+           (p/allowed-paths *keycloak* {:email "jerome@t1.akvolumen.org" :iat (tc/to-date (t/now))}))))
 
   (testing "Salim (member) permissions to t1"
     (is (= #{"t1"}
-           (p/allowed-paths *keycloak* {:email "salim@t1.lumen.localhost" :iat (tc/to-date (t/now))}))))
+           (p/allowed-paths *keycloak* {:email "salim@t1.akvolumen.org" :iat (tc/to-date (t/now))}))))
 
   (testing "Non existing user"
-    (is (= nil (p/allowed-paths *keycloak* {:email "nobody@t1.lumen.localhost" :iat (tc/to-date (t/now))} )))))
+    (is (= nil (p/allowed-paths *keycloak* {:email "nobody@t1.akvolumen.org" :iat (tc/to-date (t/now))} )))))
