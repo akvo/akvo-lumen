@@ -141,7 +141,7 @@
      (is (s/valid? ::visualisation.maps.s/layers data)))))
 
 (def author {:given_name "Jerome$auth$",
-             :email "jerome@t1.lumen.localhost",
+             :email "jerome@t1.akvolumen.org",
              :aud ["akvo-lumen"],
              :allowed-origins
              ["http://t1.lumen.local:8081"

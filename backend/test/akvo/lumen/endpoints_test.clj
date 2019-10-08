@@ -52,7 +52,7 @@
 
       (testing "/admin/users"
         (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
-          (is (clojure.set/subset? #{"jerome@t1.lumen.localhost" "salim@t1.lumen.localhost"}
+          (is (clojure.set/subset? #{"jerome@t1.akvolumen.org" "salim@t1.akvolumen.org"}
                                    (set (map :email users))))))
 
       (testing "/library"
