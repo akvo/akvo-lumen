@@ -1,7 +1,7 @@
 /* global cy, before, context, Cypress, after, it */
-const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/?auth=keycloak';
-const username = Cypress.env('LUMEN_USER') || 'jerome';
-const password = Cypress.env('LUMEN_PASSWORD') || 'password';
+const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/';
+const username = Cypress.env('LUMEN_USER') || 'jerome@t1.akvolumen.org';
+const password = Cypress.env('LUMEN_PASSWORD') || 'Hol@1234';
 const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';
 const datasetName = `Dataset ${Date.now().toString()}`;
 const COLUMNS = {
@@ -33,7 +33,7 @@ context('Akvo Lumen', ()  => {
     cy.get('#password')
       .type(password)
       .should('have.value', password);
-    cy.get('#kc-login').click();
+    cy.get('.ulp-button').click();
   });
 
   // delete entities created during test

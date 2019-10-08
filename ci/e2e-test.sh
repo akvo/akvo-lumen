@@ -4,9 +4,9 @@ set -o errexit
 set -o nounset
 
 DOCKER_COMPOSE_PROJECT="${1:-akvolumen}"
-LUMEN_URL="${2:-http://t1.lumen.local:3030/?auth=keycloak}"
-LUMEN_USER="${3:-jerome}"
-LUMEN_PASSWORD="${4:-password}"
+LUMEN_URL="${2:-http://t1.lumen.local:3030/}"
+LUMEN_USER="${3:-jerome@t1.akvolumen.org}"
+LUMEN_PASSWORD="${4:-Hol@1234}"
 CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY:-}"
 
 if [[ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]]; then
