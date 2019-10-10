@@ -19,7 +19,7 @@
 
 (defn form-instances* [headers-fn url]
   (let [response (-> url
-                     (http.client/get* (merge (http.client/req-opts 20000)
+                     (http.client/get* (merge http-client-req-defaults
                                               {:headers (headers-fn)
                                                :as :json-string-keys}))
                      :body)]
@@ -30,7 +30,7 @@
 (defn form-instances
   "Returns a lazy sequence of form instances"
   [headers-fn form]
-  (let [initial-url (str (:formInstancesUrl form) "&page_size=30")]
+  (let [initial-url (str (:formInstancesUrl form) "&page_size=300")]
     (form-instances* headers-fn initial-url)))
 
 (defn data-points*
