@@ -30,7 +30,7 @@
 (defn form-instances
   "Returns a lazy sequence of form instances"
   [headers-fn form]
-  (let [initial-url (str (:formInstancesUrl form) "&page_size=300")]
+  (let [initial-url (str (:formInstancesUrl form) "&page_size=30")]
     (form-instances* headers-fn initial-url)))
 
 (defn data-points*
