@@ -1,31 +1,49 @@
 (ns akvo.lumen.lib.import.flow-common
-  (:require [akvo.commons.psql-util :as pg]
-            [cheshire.core :as json]
-            [akvo.lumen.http.client :as http.client]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str])
+  (:require
+   [akvo.commons.psql-util :as pg]
+   [akvo.lumen.http.client :as http.client]
+   [cheshire.core :as json]
+   [clojure.java.jdbc :as jdbc]
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [diehard.core :as dh])
   (:import [java.time Instant]))
 
 ;; only use this value from a different thread/future
 (def ^:private http-client-req-defaults (http.client/req-opts 60000))
 
+(def retry-policy
+  {:retry-on Exception
+   :delay-ms 5000
+   :max-retries 6})
+
 (defn survey-definition
   [api-root headers-fn instance survey-id]
-  (-> (format "%s/orgs/%s/surveys/%s"
-              api-root instance survey-id)
-      (http.client/get* (merge http-client-req-defaults {:headers (headers-fn)
-                                                         :as :json}))
-      :body))
+  (dh/with-retry
+    {:policy
+     (assoc retry-policy
+            :on-retry (fn [_ e]
+                        (log/info ::survey-definition*-retry e))
+            :on-success (fn [{:keys [body]}]
+                          body))}
+    (-> (format "%s/orgs/%s/surveys/%s" api-root instance survey-id)
+        (http.client/get* (merge http-client-req-defaults
+                                 {:headers (headers-fn)
+                                  :as :json})))))
 
 (defn form-instances* [headers-fn url]
-  (let [response (-> url
-                     (http.client/get* (merge http-client-req-defaults
-                                              {:headers (headers-fn)
-                                               :as :json-string-keys}))
-                     :body)]
-    (lazy-cat (get response "formInstances")
-              (when-let [url (get response "nextPageUrl")]
-                (form-instances* headers-fn url)))))
+  (dh/with-retry
+    {:policy
+     (assoc retry-policy
+            :on-retry (fn [_ e]
+                        (log/info ::form-instances*-retry e))
+            :on-success (fn [{{:strs [formInstances nextPageUrl]} :body}]
+                          (lazy-cat formInstances
+                                    (when-let [url nextPageUrl]
+                                      (form-instances* headers-fn url)))))}
+    (http.client/get* url (merge http-client-req-defaults
+                                 {:headers (headers-fn)
+                                  :as :json-string-keys}))))
 
 (defn form-instances
   "Returns a lazy sequence of form instances"
@@ -35,11 +53,16 @@
 
 (defn data-points*
   [headers-fn url]
-  (-> url
-      (http.client/get* (merge http-client-req-defaults
-                               {:headers (headers-fn)
-                                :as :json-string-keys}))
-      :body))
+  (dh/with-retry
+    {:policy
+     (assoc retry-policy
+            :on-retry (fn [_ e]
+                        (log/info ::data-points*-retry e))
+            :on-success (fn [{:keys [body]}]
+                          body))}
+    (http.client/get* url (merge http-client-req-defaults
+                                 {:headers (headers-fn)
+                                  :as :json-string-keys}))))
 
 (defn data-points
   "Returns all survey data points"
