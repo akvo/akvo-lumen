@@ -180,22 +180,23 @@
   [tenant-manager flow-api collector]
   (fn [handler]
     (fn [{:keys [jwt-claims tenant] :as request}]
-      (let [tenant-conn    (p/connection tenant-manager tenant)
-            dss            (db.dataset/all-datasets tenant-conn)
-            rasters        (mapv :id (db.raster/all-rasters tenant-conn))
-            auth-uuid-tree (if (and (match-by-jwt-family-name? request)
-                                    (match-by-template-and-method? auth-calls request))
-                             (load-auth-data dss rasters tenant-conn flow-api request collector tenant)
-                             (do
-                               (future
-                                 (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
-                               {:rasters             rasters
-                                :auth-datasets       (mapv :id dss)
-                                :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
-                                :auth-dashboards     (mapv :id (db.dashboard/all-dashboards-ids tenant-conn))
-                                :auth-collections    (mapv :id (db.collection/all-collections-ids tenant-conn))}))]
-        (handler (assoc request
-                        :auth-service (new-auth-service auth-uuid-tree)))))))
+      (if-not (match-by-template-and-method? auth-calls request)
+        (handler request)
+        (let [tenant-conn    (p/connection tenant-manager tenant)
+              dss            (db.dataset/all-datasets tenant-conn)
+              rasters        (mapv :id (db.raster/all-rasters tenant-conn))
+              auth-uuid-tree (if (match-by-jwt-family-name? request)
+                               (load-auth-data dss rasters tenant-conn flow-api request collector tenant)
+                               (do
+                                 (future
+                                   (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
+                                 {:rasters             rasters
+                                  :auth-datasets       (mapv :id dss)
+                                  :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
+                                  :auth-dashboards     (mapv :id (db.dashboard/all-dashboards-ids tenant-conn))
+                                  :auth-collections    (mapv :id (db.collection/all-collections-ids tenant-conn))}))]
+          (handler (assoc request
+                          :auth-service (new-auth-service auth-uuid-tree))))))))
 
 (defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api monitoring] :as opts}]
   (wrap-auth-datasets tenant-manager flow-api (:collector monitoring)))
