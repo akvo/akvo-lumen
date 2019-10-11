@@ -45,8 +45,7 @@
 (defn form-instances
   "Returns a lazy sequence of form instances"
   [headers-fn form]
-  (let [initial-url (str (:formInstancesUrl form) "&page_size=300")]
-    (form-instances* headers-fn initial-url)))
+  (form-instances* headers-fn (:formInstancesUrl form)))
 
 (defn data-points*
   [headers-fn url]
@@ -61,9 +60,7 @@
   "Returns all survey data points"
   [headers-fn survey]
   (loop [all-data-points []
-         response (data-points* headers-fn
-                                (str (:dataPointsUrl survey)
-                                     "&page_size=300"))]
+         response (data-points* headers-fn (:dataPointsUrl survey))]
     (if-let [url (get response "nextPageUrl")]
       (recur (into all-data-points (get response "dataPoints"))
              (data-points* headers-fn url))
