@@ -16,6 +16,7 @@
                  [com.layerware/hugsql "0.4.9"]
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
+                 [diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]
                  [duct/core "0.7.0" :exclusions [org.clojure/clojure]]
                  [duct/module.logging "0.4.0" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha com.stuartsierra/dependency]]
                  [duct/database.sql.hikaricp "0.4.0" :exclusions [org.clojure/spec.alpha org.slf4j/slf4j-nop org.clojure/clojure integrant org.clojure/core.specs.alpha]]
@@ -78,8 +79,7 @@
    :uberjar       {:aot :all}
    :profiles/dev  {}
    :profiles/test  {}
-   :project/dev   {:dependencies   [[diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]
-                                    [duct/generate "0.8.2"]
+   :project/dev   {:dependencies   [[duct/generate "0.8.2"]
                                     [integrant/repl "0.3.1" :exclusions [com.stuartsierra/dependency]]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]
