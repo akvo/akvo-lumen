@@ -12,38 +12,35 @@
 ;; only use this value from a different thread/future
 (def ^:private http-client-req-defaults (http.client/req-opts 60000))
 
-(def retry-policy
+
+(dh/defretrypolicy retry-policy
   {:retry-on Exception
-   :delay-ms 5000
-   :max-retries 6})
+   :backoff-ms [1500 30000 4.0]
+   :max-retries 3
+   :on-retry (fn [_ ex]
+               (log/info ::retry (.getMessage ex)))})
 
 (defn survey-definition
   [api-root headers-fn instance survey-id]
-  (dh/with-retry
-    {:policy
-     (assoc retry-policy
-            :on-retry (fn [_ e]
-                        (log/info ::survey-definition*-retry e))
-            :on-success (fn [{:keys [body]}]
-                          body))}
-    (-> (format "%s/orgs/%s/surveys/%s" api-root instance survey-id)
-        (http.client/get* (merge http-client-req-defaults
-                                 {:headers (headers-fn)
-                                  :as :json})))))
+  (-> (dh/with-retry
+        {:policy retry-policy}
+        (-> (format "%s/orgs/%s/surveys/%s" api-root instance survey-id)
+            (http.client/get* (merge http-client-req-defaults
+                                     {:headers (headers-fn)
+                                      :as :json}))))
+      :body))
 
 (defn form-instances* [headers-fn url]
-  (dh/with-retry
-    {:policy
-     (assoc retry-policy
-            :on-retry (fn [_ e]
-                        (log/info ::form-instances*-retry e))
-            :on-success (fn [{{:strs [formInstances nextPageUrl]} :body}]
-                          (lazy-cat formInstances
-                                    (when-let [url nextPageUrl]
-                                      (form-instances* headers-fn url)))))}
-    (http.client/get* url (merge http-client-req-defaults
-                                 {:headers (headers-fn)
-                                  :as :json-string-keys}))))
+  (let [http-opts (merge http-client-req-defaults
+                         {:headers (headers-fn)
+                          :as :json-string-keys})
+        response (dh/with-retry
+                   {:policy retry-policy}
+                   (http.client/get* url http-opts))
+        {{:strs [formInstances nextPageUrl]} :body} response]
+    (lazy-cat formInstances
+              (when-let [url nextPageUrl]
+                (form-instances* headers-fn url)))))
 
 (defn form-instances
   "Returns a lazy sequence of form instances"
@@ -53,16 +50,12 @@
 
 (defn data-points*
   [headers-fn url]
-  (dh/with-retry
-    {:policy
-     (assoc retry-policy
-            :on-retry (fn [_ e]
-                        (log/info ::data-points*-retry e))
-            :on-success (fn [{:keys [body]}]
-                          body))}
-    (http.client/get* url (merge http-client-req-defaults
-                                 {:headers (headers-fn)
-                                  :as :json-string-keys}))))
+  (-> (dh/with-retry
+        {:policy retry-policy}
+        (http.client/get* url (merge http-client-req-defaults
+                                     {:headers (headers-fn)
+                                      :as :json-string-keys})))
+      :body))
 
 (defn data-points
   "Returns all survey data points"
