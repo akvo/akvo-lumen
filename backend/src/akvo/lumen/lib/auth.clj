@@ -89,6 +89,8 @@
                  "/api/datasets/:id" {:methods #{:get :put :delete}}
                  "/api/datasets/:id/meta" {:methods #{:get}}
                  "/api/datasets/:id/update" {:methods #{:post}}
+                 "/api/datasets/:id/sort/:column-name/text" {:methods #{:get}}
+                 "/api/datasets/:id/sort/:column-name/number" {:methods #{:get}}
                  "/api/datasets" {:methods #{:get}}
                  "/api/visualisations" {:methods #{:get :post}}
                  "/api/visualisations/:id" {:methods #{:get :put :delete}}
