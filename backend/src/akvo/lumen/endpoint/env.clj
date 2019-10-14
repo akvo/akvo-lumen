@@ -39,7 +39,6 @@
         (-> (response/response (str "Auth-provided not implemented: " auth-type))
             (response/status 400))))))
 
-
 (defn routes [{:keys [routes-opts] :as opts}]
   ["/env" (merge {:get {:parameters {:query-params {:auth ::auth-type}}
                         :handler (handler opts)}}
@@ -50,7 +49,7 @@
 
 (s/def ::auth0-public-client :akvo.lumen.component.authentication/public-client)
 (s/def ::flow-api :akvo.lumen.component.flow/config)
-(s/def ::keycloak-public-client :akvo.lumen.component.keycloak/public-client)
+(s/def ::keycloak-public-client :akvo.lumen.component.authentication/public-client)
 (s/def ::lumen-deployment-color string?)
 (s/def ::lumen-deployment-environment string?)
 (s/def ::lumen-deployment-version string?)

@@ -32,7 +32,7 @@
         keycloak-public-client (ig/init-key :akvo.lumen.component.keycloak/public-client
                                             (:akvo.lumen.component.keycloak/public-client c))
         keycloak-config        (select-keys (:akvo.lumen.component.keycloak/authorization-service c)
-                                            [:credentials :max-user-ids-cache])]
+                                            [:credentials :max-user-ids-cache :realm])]
     (binding [*emailer*  (ig/init-key :akvo.lumen.component.emailer/dev-emailer {:config {:from-email "" :from-name ""}})         
               *keycloak* (ig/init-key :akvo.lumen.component.keycloak/authorization-service
                                       (merge keycloak-config {:public-client keycloak-public-client}))]

@@ -5,15 +5,13 @@
    [akvo.lumen.auth.jwt-authorization :refer [jwt-authorization]]
    [akvo.lumen.auth.utils :refer [issuer-type]]
    [akvo.lumen.component.authentication :as authentication]
-   [akvo.lumen.component.keycloak :as keycloak]
    [akvo.lumen.protocols :as p]
    [akvo.lumen.util :refer [as-middleware]]
    [clojure.spec.alpha :as s]
    [clojure.string :as string]
    [integrant.core :as ig]))
 
-
-(s/def ::keycloak-public-client ::keycloak/public-client)
+(s/def ::keycloak-public-client ::authentication/public-client)
 (s/def ::auth0-public-client ::authentication/public-client)
 
 (s/def ::api-authz-probability

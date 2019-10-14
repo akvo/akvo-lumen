@@ -4,6 +4,7 @@
   (:require
    [akvo.commons.jwt :as jwt]
    [akvo.lumen.http.client :as http.client]
+   [akvo.lumen.component.authentication :as authentication]
    [akvo.lumen.lib :as lib]
    [akvo.lumen.monitoring :as monitoring]
    [akvo.lumen.protocols :as p]
@@ -530,38 +531,13 @@
                        :paths-cache-seconds paths-cache-seconds
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/public-client  [_ {:keys [url realm] :as opts}]
-  (try
-    (let [issuer (str url "/realms/" realm)
-          rsa-key (-> (str issuer "/protocol/openid-connect/certs")
-                      (http.client/get* http-client-req-defaults)
-                      :body
-                      (jwt/rsa-key 0))]
-      (assoc opts
-             :issuer issuer
-             :rsa-key rsa-key))
-    (catch Exception e
-      (log/error e "Could not get cert from Keycloak")
-      (throw e))))
-
-(s/def ::url string?)
-(s/def ::client-id string?)
-(s/def ::realm string?)
-
-(s/def ::public-client (s/keys :req-un [::url
-                                        ::realm
-                                        ::client-id]))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/public-client [_]
-  ::public-client)
-
-(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring paths-cache-seconds] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring paths-cache-seconds realm] :as opts}]
   (log/debug "Starting keycloak")
   (assoc (init-keycloak (assoc public-client
                                :credentials credentials
                                :max-user-ids-cache max-user-ids-cache
                                :paths-cache-seconds paths-cache-seconds
-                               ))
+                               :realm realm))
          :connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
          :openid-config (fetch-openid-configuration (:issuer public-client) {})
          :monitoring monitoring))
@@ -578,17 +554,15 @@
   (log/debug :keycloak "closing connection manager" (:connection-manager opts))
   (http.client/shutdown-manager (:connection-manager opts)))
 
-
+(s/def ::realm string?)
 (s/def ::client_id string?)
 (s/def ::client_secret string?)
-
 (s/def ::credentials (s/keys :req-un [::client_id
                                       ::client_secret]))
-
 (s/def ::max-user-ids-cache pos-int?)
 (s/def ::paths-cache-seconds pos-int?)
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
-(s/def ::config (s/keys :req-un [::public-client ::credentials ::max-user-ids-cache ::paths-cache-seconds ::monitoring]))
+(s/def ::config (s/keys :req-un [::public-client ::realm ::credentials ::max-user-ids-cache ::paths-cache-seconds ::monitoring]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)
@@ -599,3 +573,9 @@
 
 (defn claimed-roles [jwt-claims]
   (set (get-in jwt-claims ["realm_access" "roles"])))
+
+(defmethod ig/init-key :akvo.lumen.component.keycloak/public-client [_ opts]
+  (ig/init-key :akvo.lumen.component.authentication/public-client opts))
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/public-client [_]
+  ::authentication/public-client)

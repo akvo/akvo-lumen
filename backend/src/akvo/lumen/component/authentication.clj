@@ -14,24 +14,26 @@
 
 (def http-client-req-defaults (http.client/req-opts 5000))
 
-(defmethod ig/init-key :akvo.lumen.component.authentication/public-client  [_ {:keys [url] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.authentication/public-client  [_ {:keys [url issuer-suffix-url rsa-suffix-url] :as opts}]
   (try
-    (let [issuer (format "%s/" url)
-          rsa-key  (-> (format  "%s.well-known/jwks.json" issuer)
-                             (http.client/get* http-client-req-defaults)
-                             :body
-                             (jwt/rsa-key 0))]
+    (let [issuer (format "%s%s" url issuer-suffix-url)
+          rsa-key  (-> (format  "%s%s" issuer rsa-suffix-url)
+                       (http.client/get* http-client-req-defaults)
+                       :body
+                       (jwt/rsa-key 0))]
       (assoc opts
              :issuer issuer
              :rsa-key rsa-key))
     (catch Exception e
-      (log/error e "Could not get cert from auth0")
+      (log/error e (str "Could not get cert from " url))
       (throw e))))
 
 (s/def ::url string?)
+(s/def ::issuer-suffix-url string?)
+(s/def ::rsa-suffix-url string?)
 (s/def ::client-id string?)
 
-(s/def ::public-client (s/keys :req-un [::url ::client-id]))
+(s/def ::public-client (s/keys :req-un [::url ::client-id ::issuer-suffix-url ::rsa-suffix-url]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.authentication/public-client [_]
   ::public-client)
