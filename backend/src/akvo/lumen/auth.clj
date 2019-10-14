@@ -4,7 +4,7 @@
    [akvo.lumen.auth.jwt-authentication :refer [jwt-authentication]]
    [akvo.lumen.auth.jwt-authorization :refer [jwt-authorization]]
    [akvo.lumen.auth.utils :refer [issuer-type]]
-   [akvo.lumen.component.auth0 :as auth0]
+   [akvo.lumen.component.authentication :as authentication]
    [akvo.lumen.component.keycloak :as keycloak]
    [akvo.lumen.protocols :as p]
    [akvo.lumen.util :refer [as-middleware]]
@@ -14,7 +14,7 @@
 
 
 (s/def ::keycloak-public-client ::keycloak/public-client)
-(s/def ::auth0-public-client ::auth0/public-client)
+(s/def ::auth0-public-client ::authentication/public-client)
 
 (s/def ::api-authz-probability
   (s/and double? #(>= % 0) #(<= % 1)))

@@ -1,4 +1,4 @@
-(ns akvo.lumen.component.auth0
+(ns akvo.lumen.component.authentication
   "moving to auth0"
   (:require [akvo.commons.jwt :as jwt]
             [akvo.lumen.http.client :as http.client]
@@ -14,7 +14,7 @@
 
 (def http-client-req-defaults (http.client/req-opts 5000))
 
-(defmethod ig/init-key :akvo.lumen.component.auth0/public-client  [_ {:keys [url] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.authentication/public-client  [_ {:keys [url] :as opts}]
   (try
     (let [issuer (format "%s/" url)
           rsa-key  (-> (format  "%s.well-known/jwks.json" issuer)
@@ -33,5 +33,5 @@
 
 (s/def ::public-client (s/keys :req-un [::url ::client-id]))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.auth0/public-client [_]
+(defmethod ig/pre-init-spec :akvo.lumen.component.authentication/public-client [_]
   ::public-client)

@@ -2,7 +2,7 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.user :as user]
             [clojure.spec.alpha :as s]
-            [akvo.lumen.component.auth0 :as auth0]
+            [akvo.lumen.component.authentication :as authentication]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
@@ -51,7 +51,7 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
   (verify-routes opts))
 
-(s/def ::auth0-public-client ::auth0/public-client)
+(s/def ::auth0-public-client ::authentication/public-client)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/invite [_]
   (s/keys :req-un [::tenant-manager/tenant-manager

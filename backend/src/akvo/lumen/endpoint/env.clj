@@ -1,5 +1,5 @@
 (ns akvo.lumen.endpoint.env
-  (:require [akvo.lumen.component.auth0]
+  (:require [akvo.lumen.component.authentication]
             [akvo.lumen.component.keycloak]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
@@ -48,7 +48,7 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.env/env  [_ opts]
   (routes opts))
 
-(s/def ::auth0-public-client :akvo.lumen.component.auth0/public-client)
+(s/def ::auth0-public-client :akvo.lumen.component.authentication/public-client)
 (s/def ::flow-api :akvo.lumen.component.flow/config)
 (s/def ::keycloak-public-client :akvo.lumen.component.keycloak/public-client)
 (s/def ::lumen-deployment-color string?)

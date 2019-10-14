@@ -1,7 +1,6 @@
 (ns akvo.lumen.auth.jwt-authentication
   (:require
    [akvo.commons.jwt :as jwt]
-   [akvo.lumen.component.auth0 :as auth0]
    [akvo.lumen.auth.utils :refer [issuer-type]]
    [akvo.lumen.protocols :as p]
    [akvo.lumen.component.keycloak :as keycloak])
