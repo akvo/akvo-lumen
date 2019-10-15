@@ -82,7 +82,7 @@
   metricColumnY: 'c2', // required
   metricColumnX: 'c6', // requijred
   bucketColumn: 'c9', // required
-  subBucketColumn: null, // optional
+  subBucketColumn: null, // optional, type text
   subBucketMethod: 'split', // optional, can be "split" or "stack"
   metricAggregation: 'mean', // default to mean,
   axisLabelX: null, // optional string. Automatically generated if not defined by user
