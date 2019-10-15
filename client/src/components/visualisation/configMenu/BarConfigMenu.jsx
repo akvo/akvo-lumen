@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import { get } from 'lodash';
+import { filter, get } from 'lodash';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
@@ -83,6 +83,11 @@ function BarConfigMenu(props) {
   } = props;
   const spec = visualisation.spec;
 
+  if (filter(columnOptions, ['value', spec.subBucketColumn]).type !== 'text') {
+    visualisation.spec.subBucketColumn = null;
+    visualisation.spec.subBucketMethod = 'split';
+  }
+
   return (
     <div>
 
@@ -155,7 +160,7 @@ function BarConfigMenu(props) {
                   value={spec.subBucketColumn !== null ?
                     spec.subBucketColumn.toString() : null}
                   name="subGroupColumnMenu"
-                  options={filterColumns(columnOptions, ['number', 'text'])}
+                  options={filterColumns(columnOptions, ['text'])}
                   clearable
                   disabled={spec.bucketColumn === null}
                   onChange={value => handleChangeSpec({
