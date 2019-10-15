@@ -4,11 +4,12 @@
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
+            [akvo.lumen.specs :as lumen.s]
             [ring.util.response :as response]))
 
 (def auth-data (juxt :url :client-id))
 
-(s/def ::auth-type #{"keycloak" "auth0"})
+(s/def ::auth-type ::lumen.s/non-empty-string)
 
 (defn handler
   [{:keys [public-client flow-api lumen-deployment-color lumen-deployment-environment
