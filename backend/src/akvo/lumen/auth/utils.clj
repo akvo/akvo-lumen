@@ -3,13 +3,6 @@
             [cheshire.core :as json]
             [ring.util.response :as response]))
 
-(defn issuer-type
-  [jwt-claims keycloak-public-client auth0-public-client]
-  (condp = (get jwt-claims "iss")
-    (:issuer keycloak-public-client) :keycloak
-    (:issuer auth0-public-client) :auth0
-    :other))
-
 (defn admin-path? [{:keys [path-info]}]
   (string/starts-with? path-info "/api/admin/"))
 

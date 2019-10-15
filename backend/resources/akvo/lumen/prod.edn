@@ -1,6 +1,6 @@
 {:akvo.lumen.component.tenant-manager/data {:encryption-key #duct/env "LUMEN_ENCRYPTION_KEY"}
- :akvo.lumen.component.keycloak/public-client {:url #duct/env "LUMEN_KEYCLOAK_URL"}
- :akvo.lumen.component.keycloak/authorization-service {:credentials
+ :akvo.lumen.component.keycloak/authorization-service {:url #duct/env "LUMEN_KEYCLOAK_URL"
+                                                       :credentials
                                                        {:client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
                                                    :email-user #duct/env "LUMEN_EMAIL_USER"}

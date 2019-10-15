@@ -575,9 +575,3 @@
 
 (defn claimed-roles [jwt-claims]
   (set (get-in jwt-claims ["realm_access" "roles"])))
-
-(defmethod ig/init-key :akvo.lumen.component.keycloak/public-client [_ opts]
-  (ig/init-key :akvo.lumen.component.authentication/public-client opts))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/public-client [_]
-  ::authentication/public-client)

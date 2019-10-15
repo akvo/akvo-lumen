@@ -29,13 +29,10 @@
 
 (defn fixture [f]
   (let [c                      (tu/start-config)
-        keycloak-public-client (ig/init-key :akvo.lumen.component.keycloak/public-client
-                                            (:akvo.lumen.component.keycloak/public-client c))
         keycloak-config        (select-keys (:akvo.lumen.component.keycloak/authorization-service c)
-                                            [:credentials :max-user-ids-cache :realm])]
+                                            [:credentials :max-user-ids-cache :realm :url :issuer-suffix-url])]
     (binding [*emailer*  (ig/init-key :akvo.lumen.component.emailer/dev-emailer {:config {:from-email "" :from-name ""}})         
-              *keycloak* (ig/init-key :akvo.lumen.component.keycloak/authorization-service
-                                      (merge keycloak-config {:public-client keycloak-public-client}))]
+              *keycloak* (ig/init-key :akvo.lumen.component.keycloak/authorization-service keycloak-config )]
       (f))))
 
 (use-fixtures :once system-fixture tenant-conn-fixture fixture tu/spec-instrument)
@@ -71,7 +68,7 @@
   (testing "Create invite"
     (let [number-of-initial-invites (-> (user/active-invites  *tenant-conn*)
                                         variant/value :invites count)
-          resp (user/create-invite *emailer* *keycloak* *tenant-conn* :keycloak "t1"
+          resp (user/create-invite *emailer* *keycloak* *tenant-conn* "t1"
                                    server-name ruth-email author-claims)]
       (is (= ::lib/ok (variant/tag resp)))
       (is (= (inc number-of-initial-invites)
@@ -94,7 +91,7 @@
 
   (testing "Invite user"
 
-    (let [invite-resp (user/create-invite *emailer* *keycloak* *tenant-conn* :keycloak "t1"
+    (let [invite-resp (user/create-invite *emailer* *keycloak* *tenant-conn* "t1"
                                    server-name ruth-email author-claims)
           number-of-original-users (-> (user/users *keycloak* "t1")
                                        variant/value :users count)

@@ -14,11 +14,10 @@
 
  :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 
- :akvo.lumen.component.keycloak/public-client {:url "http://auth.lumen.local:8080/auth"
-                                               :client-id "akvo-lumen"}
-
- :akvo.lumen.component.authentication/public-client {:url "https://akvotest.eu.auth0.com"
-                                                     :client-id "D5LayiXP1pzq-6g2B_QVvzCw_eycZxQK"}
+ :akvo.lumen.component.authentication/public-client {:url "http://auth.lumen.local:8080/auth"
+                                                     :client-id "akvo-lumen"
+                                                     :issuer-suffix-url "/realms/akvo"
+                                                     :rsa-suffix-url "/protocol/openid-connect/certs"}
 
  :akvo.lumen.component.keycloak/authorization-service {:url "http://auth.lumen.local:8080/auth"
                                                        :credentials
@@ -44,7 +43,6 @@
  :akvo.lumen.upload/data {:file-upload-path "/tmp/akvo/lumen"}
 
  :akvo.lumen.component.flow/api {:url "https://api.akvotest.org/flow"
-                                 :auth0-url "https://api-auth0.akvotest.org/flow"
                                  :internal-url "https://api.akvotest.org/flow"
                                  :internal-api-headers #ig/ref :akvo.lumen.component.flow/api-headers}
 

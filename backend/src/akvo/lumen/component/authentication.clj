@@ -1,5 +1,4 @@
 (ns akvo.lumen.component.authentication
-  "moving to auth0"
   (:require [akvo.commons.jwt :as jwt]
             [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib :as lib]

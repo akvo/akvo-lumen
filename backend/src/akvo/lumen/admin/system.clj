@@ -24,7 +24,6 @@
                                                :akvo.lumen.monitoring/collector
                                                :akvo.lumen.component.emailer/emailer
                                                :akvo.lumen.component.keycloak/authorization-service
-                                               :akvo.lumen.component.keycloak/public-client
                                                :akvo.lumen.component.tenant-manager/data])))]
      (ig/load-namespaces conf)
      (ig/init conf))))

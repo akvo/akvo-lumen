@@ -15,7 +15,7 @@
     (format "https://%s" server-name)
     (format "%s://%s:%s" (name scheme) server-name client-port)))
 
-(defn admin-routes [{:keys [config emailer authorizer auth0-public-client tenant-manager] :as opts}]
+(defn admin-routes [{:keys [config emailer authorizer public-client tenant-manager] :as opts}]
   ["/admin/invites"
    ["" {:get {:handler (fn [{tenant :tenant}]
                          (user/active-invites (p/connection tenant-manager tenant)))}
@@ -23,12 +23,9 @@
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
                               body :body :as request}]
-                          (let [auth-type            (if (= (get jwt-claims "iss") (:issuer auth0-public-client))
-                                                       :auth0
-                                                       :keycloak)]
-                            (user/create-invite emailer authorizer (p/connection tenant-manager tenant) auth-type
-                                                tenant (location (:invite-redirect config) request)
-                                                (get body "email") jwt-claims)))}}]
+                          (user/create-invite emailer authorizer (p/connection tenant-manager tenant)
+                                              tenant (location (:invite-redirect config) request)
+                                              (get body "email") jwt-claims))}}]
    ["/:id" {:delete {:parameters {:path-params {:id string?}}
                      :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
