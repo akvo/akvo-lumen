@@ -117,16 +117,16 @@ spec:
             configMapKeyRef:
               name: akvo
               key: keycloak.url
-        - name: LUMEN_AUTH0_URL
+        - name: LUMEN_AUTH_URL
           valueFrom:
             configMapKeyRef:
               name: akvo
-              key: auth0.url
-        - name: LUMEN_AUTH0_PUBLIC_CLIENT_ID
+              key: auth.url
+        - name: LUMEN_AUTH_PUBLIC_CLIENT_ID
           valueFrom:
             configMapKeyRef:
               name: akvo
-              key: auth0.public.client.id
+              key: auth.public.client.id
         - name: LUMEN_FILE_UPLOAD_PATH
           value: /tmp/akvo/lumen
         - name: LUMEN_FLOW_API_URL
@@ -134,11 +134,6 @@ spec:
             configMapKeyRef:
               name: akvo
               key: flow.api.root
-        - name: LUMEN_FLOW_API_AUTH0_URL
-          valueFrom:
-            configMapKeyRef:
-              name: akvo
-              key: flow.api.auth0.root
         - name: LUMEN_SENTRY_BACKEND_DSN
           valueFrom:
             secretKeyRef:
