@@ -34,7 +34,7 @@
             title (or title (str "title-" label ))]
         (if remove?
           (remove-tenant/exec admin-remove-tenant label)
-          (add-tenant/exec admin-add-tenant {:url url :title title :email email :auth-type "keycloak"})))))
+          (add-tenant/exec admin-add-tenant {:url url :title title :email email})))))
 
 (comment
   "running with other settings file"
