@@ -88,7 +88,7 @@
 
  :akvo.lumen.endpoint.invite/invite {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                      :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
-                                     :auth0-public-client #ig/ref :akvo.lumen.component.authentication/public-client
+                                     :public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                      :emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.endpoint.invite/verify {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager

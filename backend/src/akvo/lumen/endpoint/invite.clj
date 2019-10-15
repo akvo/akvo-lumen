@@ -48,12 +48,10 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/verify  [_ opts]
   (verify-routes opts))
 
-(s/def ::auth0-public-client ::authentication/public-client)
-
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/invite [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
                    ::p/authorizer
-                   ::auth0-public-client
+                   ::authentication/public-client
                    ::emailer/emailer]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.invite/verify [_]
