@@ -12,19 +12,25 @@
   [{:keys [public-client flow-api lumen-deployment-color lumen-deployment-environment
            lumen-deployment-version piwik-site-id sentry-client-dsn]}]
   (fn [{tenant :tenant
+        query-params :query-params
         :as request}]
-    (let [[auth-url auth-client-id] (auth-data public-client)]
-      (response/response
-       (cond-> {"authClientId" auth-client-id
-                "authURL" auth-url
-                "flowApiUrl" (:url flow-api)
-                "lumenDeploymentColor" lumen-deployment-color
-                "lumenDeploymentEnvironment" lumen-deployment-environment
-                "lumenDeploymentVersion" lumen-deployment-version
-                "piwikSiteId" piwik-site-id
-                "tenant" (:tenant request)}
-         (string? sentry-client-dsn)
-         (assoc "sentryDSN" sentry-client-dsn))))))
+    (let [auth-type (get query-params "auth" "auth0")
+          [auth-url auth-client-id] (auth-data public-client)]
+      (if (s/valid? ::auth-type auth-type)
+        (response/response
+         (cond-> {"authClientId" auth-client-id
+                  "authURL" auth-url
+                  "authProvider" auth-type
+                  "flowApiUrl" (:url flow-api)
+                  "lumenDeploymentColor" lumen-deployment-color
+                  "lumenDeploymentEnvironment" lumen-deployment-environment
+                  "lumenDeploymentVersion" lumen-deployment-version
+                  "piwikSiteId" piwik-site-id
+                  "tenant" (:tenant request)}
+           (string? sentry-client-dsn)
+           (assoc "sentryDSN" sentry-client-dsn)))
+         (-> (response/response (str "Auth-provided not implemented: " auth-type))
+            (response/status 400))))))
 
 (defn routes [{:keys [routes-opts] :as opts}]
   ["/env" (merge {:get {:handler (handler opts)}}
