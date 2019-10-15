@@ -8,6 +8,8 @@
 
 (def auth-data (juxt :url :client-id))
 
+(s/def ::auth-type #{"keycloak" "auth0"})
+
 (defn handler
   [{:keys [public-client flow-api lumen-deployment-color lumen-deployment-environment
            lumen-deployment-version piwik-site-id sentry-client-dsn]}]
@@ -30,7 +32,7 @@
            (string? sentry-client-dsn)
            (assoc "sentryDSN" sentry-client-dsn)))
          (-> (response/response (str "Auth-provided not implemented: " auth-type))
-            (response/status 400))))))
+             (response/status 400))))))
 
 (defn routes [{:keys [routes-opts] :as opts}]
   ["/env" (merge {:get {:handler (handler opts)}}

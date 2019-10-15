@@ -23,14 +23,15 @@
                  (body-kw r)))))
 
       (testing "/env"
-        (let [r (h (get* "/env"))]
+        (let [r (h (get* "/env" {"auth" "keycloak"}))]
           (is (= 200 (:status r)))
           (let [rb (body-kw r)
-                ks [:authClientId :authURL :flowApiUrl
+                ks [:authClientId :authURL :flowApiUrl :authProvider
                     :lumenDeploymentColor :lumenDeploymentEnvironment
                     :lumenDeploymentVersion :piwikSiteId :sentryDSN :tenant]
                 lookup-table {:authClientId "akvo-lumen",
                               :authURL "http://auth.lumen.local:8080/auth",
+                              :authProvider "keycloak",
                               :flowApiUrl "https://api.akvotest.org/flow",
                               :piwikSiteId "165",
                               :tenant "t1",
