@@ -531,15 +531,15 @@
                        :paths-cache-seconds paths-cache-seconds
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials public-client max-user-ids-cache monitoring paths-cache-seconds realm] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials max-user-ids-cache monitoring paths-cache-seconds realm url issuer-suffix-url] :as opts}]
   (log/debug "Starting keycloak")
-  (assoc (init-keycloak (assoc public-client
-                               :credentials credentials
-                               :max-user-ids-cache max-user-ids-cache
-                               :paths-cache-seconds paths-cache-seconds
-                               :realm realm))
+  (assoc (init-keycloak {:url url
+                         :credentials credentials
+                         :max-user-ids-cache max-user-ids-cache
+                         :paths-cache-seconds paths-cache-seconds
+                         :realm realm})
          :connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
-         :openid-config (fetch-openid-configuration (:issuer public-client) {})
+         :openid-config (fetch-openid-configuration (format "%s%s" url issuer-suffix-url) {})
          :monitoring monitoring))
 
 (def map-print-method
@@ -562,7 +562,9 @@
 (s/def ::max-user-ids-cache pos-int?)
 (s/def ::paths-cache-seconds pos-int?)
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
-(s/def ::config (s/keys :req-un [::public-client ::realm ::credentials ::max-user-ids-cache ::paths-cache-seconds ::monitoring]))
+(s/def ::config (s/keys :req-un [::authentication/url
+                                 ::authentication/issuer-suffix-url
+                                 ::realm ::credentials ::max-user-ids-cache ::paths-cache-seconds ::monitoring]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
   ::config)

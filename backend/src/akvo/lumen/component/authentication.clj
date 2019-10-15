@@ -14,7 +14,7 @@
 
 (def http-client-req-defaults (http.client/req-opts 5000))
 
-(defmethod ig/init-key :akvo.lumen.component.authentication/public-client  [_ {:keys [url issuer-suffix-url rsa-suffix-url] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.authentication/public-client  [_ {:keys [url issuer-suffix-url rsa-suffix-url client-id] :as opts}]
   (try
     (let [issuer (format "%s%s" url issuer-suffix-url)
           rsa-key  (-> (format  "%s%s" issuer rsa-suffix-url)

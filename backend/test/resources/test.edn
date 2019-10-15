@@ -20,7 +20,8 @@
  :akvo.lumen.component.authentication/public-client {:url "https://akvotest.eu.auth0.com"
                                                      :client-id "D5LayiXP1pzq-6g2B_QVvzCw_eycZxQK"}
 
- :akvo.lumen.component.keycloak/authorization-service {:credentials
+ :akvo.lumen.component.keycloak/authorization-service {:url "http://auth.lumen.local:8080/auth"
+                                                       :credentials
                                                        {:client_id "akvo-lumen-confidential"
                                                         :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
 
