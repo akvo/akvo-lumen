@@ -23,7 +23,12 @@
       (jvm/initialize)
       (prometheus/register (DropwizardExports. dropwizard-registry)
                            (prometheus/histogram :app/flow-check-permissions {:labels [:tenant]})
-                           (prometheus/histogram :app/auth-allowed-paths))
+                           (prometheus/histogram :app/auth-allowed-paths)
+                           (prometheus/histogram :app/load-auth-data {:labels [:tenant]})
+                           (prometheus/histogram :app/auth-datasets {:labels [:tenant]})
+                           (prometheus/histogram :app/auth-visualisations {:labels [:tenant]})
+                           (prometheus/histogram :app/auth-dashboards {:labels [:tenant]})
+                           (prometheus/histogram :app/auth-collections {:labels [:tenant]}))
       (ring/initialize {:labels [:tenant]})))
 
 (s/def ::dropwizard-registry ::metric-registry)
