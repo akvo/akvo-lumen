@@ -2,34 +2,33 @@
 import Raven from 'raven-js';
 import Auth0 from 'auth0-js';
 import url from 'url';
-import * as a0 from './auth0';
 import { get } from './api';
 
 let auth0 = null;
 let accessToken = null;
-
-function service() {
-  return auth0;
-}
 
 
 export function setAuth0(A) {
   auth0 = A;
 }
 
-function lib() {
-  return a0;
-}
-
 export function logout() {
-  lib().logout(service());
+  auth0.logout({ returnTo: `${location.protocol}//${location.host}` });
 }
 
 export function token() {
-  if (!service()) {
+  if (!auth0) {
     return Promise.resolve(accessToken);
   }
-  return lib().token(service());
+  return new Promise((resolve) => {
+    auth0.checkSession({}, (err, authResult) => {
+      if (authResult) {
+        resolve(authResult.idToken);
+      } else if (err !== null) {
+        logout(auth0);
+      }
+    });
+  });
 }
 
 export function initService(env) {
@@ -58,6 +57,14 @@ export function init(env, s) {
   auth0.authorize();
   return new Promise(() => null);
 }
+/*
+export function login(auth0) {
+  if (auth0 == null) {
+    throw new Error('auth0 not initialized');
+  }
+  return auth0.authorize();
+  }
+ */
 
 export function initPublic() {
   return get('/env')
