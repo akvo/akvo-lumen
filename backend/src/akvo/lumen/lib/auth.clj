@@ -110,8 +110,10 @@
        (mapv :id)))
 
 (defn- auth-visualisations [tenant-conn auth-datasets-set]
-  (let [[maps nomaps] (split-with #(= "map" (:visualisationType %))
-                                  (w/keywordize-keys (db.visualisation/all-visualisations tenant-conn {} {} {:identifiers identity})))
+  (let [all-visualisations (w/keywordize-keys (db.visualisation/all-visualisations
+                                               tenant-conn {} {} {:identifiers identity}))
+        maps (filter #(= "map" (:visualisationType %)) all-visualisations)
+        nomaps (filter #(not= "map" (:visualisationType %)) all-visualisations)
         maps*         (->> maps
                            (reduce (fn [c m]
                                      (let [datasets (reduce (fn [c l]
