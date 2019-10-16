@@ -8,7 +8,6 @@ import { showModal } from '../actions/activeModal';
 import Notification from './Notification';
 import IMAGES from '../constants/images';
 import * as auth from '../utilities/auth';
-import { isAuth0 } from '../utilities/utils';
 
 require('../styles/reset.global.scss');
 require('../styles/style.global.scss');
@@ -18,12 +17,11 @@ require('fixed-data-table-2/dist/fixed-data-table.css');
 class Main extends Component {
   componentDidMount() {
     const {
-      env,
       dispatch,
       profile: { firstName, lastName },
       location: { pathname },
     } = this.props;
-    if (isAuth0(env) && (pathname.split('/').pop() !== 'export')
+    if ((pathname.split('/').pop() !== 'export')
       && (!every([firstName, lastName], Boolean))) {
       dispatch(showModal('edit-user'));
     }
@@ -34,28 +32,6 @@ class Main extends Component {
     } = this.props;
     if (loadStatus === 'failed') {
       const { tenant } = env;
-      if (isAuth0(env)) {
-        return (
-          <div className="Main">
-            <div className="failedToLoadMessage">
-              <div className="message">
-                <div className="msgContainer">
-                  <img src={IMAGES.BRAND.logo} title="Welcome to Akvo Lumen" alt="Welcome to Akvo Lumen" />
-                  <h1>
-                    <FormattedMessage id="you_need_permission_to_access" />: <span id="urlLoc">{ tenant }</span>
-                  </h1>
-                  <p>
-                    <FormattedMessage id="request_permission_from_your_organisation_admin" /> <button type="button" onClick={() => auth.logout()}><FormattedMessage id="logout" /></button> <FormattedMessage id="to_try_with_another_account" />.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="Main blur">
-              {sidebar}
-            </div>
-          </div>
-        );
-      }
       return (
         <div className="Main">
           <div className="failedToLoadMessage">
@@ -66,7 +42,7 @@ class Main extends Component {
                   <FormattedMessage id="you_need_permission_to_access" />: <span id="urlLoc">{ tenant }</span>
                 </h1>
                 <p>
-                  <FormattedMessage id="request_permission_from_your_organisation_admin" />
+                  <FormattedMessage id="request_permission_from_your_organisation_admin" /> <button type="button" onClick={() => auth.logout()}><FormattedMessage id="logout" /></button> <FormattedMessage id="to_try_with_another_account" />.
                 </p>
               </div>
             </div>
