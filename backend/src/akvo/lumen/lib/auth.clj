@@ -180,11 +180,11 @@
 
           auth-dashboards (->> (auth-dashboards tenant-conn (set auth-visualisations))
                                (prometheus/with-duration
-                                 (registry/get collector :app/auth-datasets {"tenant" tenant})))
+                                 (registry/get collector :app/auth-dashboards {"tenant" tenant})))
 
           auth-collections (->> (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)
                                 (prometheus/with-duration
-                                  (registry/get collector :app/auth-datasets {"tenant" tenant})))]
+                                  (registry/get collector :app/auth-collections {"tenant" tenant})))]
       {:rasters             rasters
        :auth-datasets       auth-datasets
        :auth-visualisations auth-visualisations
