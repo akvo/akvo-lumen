@@ -83,7 +83,7 @@ function BarConfigMenu(props) {
   } = props;
   const spec = visualisation.spec;
 
-  if (filter(columnOptions, ['value', spec.subBucketColumn]).type !== 'text') {
+  if (spec.subBucketColumn && filter(columnOptions, ['value', spec.subBucketColumn])[0].type !== 'text') {
     visualisation.spec.subBucketColumn = null;
     visualisation.spec.subBucketMethod = 'split';
   }
