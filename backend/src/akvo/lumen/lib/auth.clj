@@ -110,8 +110,10 @@
        (mapv :id)))
 
 (defn- auth-visualisations [tenant-conn auth-datasets-set]
-  (let [[maps nomaps] (split-with #(= "map" (:visualisationType %))
-                                  (w/keywordize-keys (db.visualisation/all-visualisations tenant-conn {} {} {:identifiers identity})))
+  (let [all-visualisations (w/keywordize-keys (db.visualisation/all-visualisations
+                                               tenant-conn {} {} {:identifiers identity}))
+        maps (filter #(= "map" (:visualisationType %)) all-visualisations)
+        nomaps (filter #(not= "map" (:visualisationType %)) all-visualisations)
         maps*         (->> maps
                            (reduce (fn [c m]
                                      (let [datasets (reduce (fn [c l]
@@ -156,26 +158,38 @@
                                 (:auth0-url flow-api)) (jwt/jwt-token request) data)))
 
 (defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
-  (let [permissions         (let [flow-data (->> (map :source dss)
-                                                 (filter #(= "AKVO_FLOW" (get % "kind")))
-                                                 (map c.flow/>api-model)
-                                                 (into #{})
-                                                 vec)]
-                              (if (seq flow-data)
-                                (->> flow-data
-                                     (flow-check-permissions flow-api request collector tenant)
-                                     :body
-                                     set)
-                                #{}))
-        auth-datasets       (auth-datasets dss permissions)
-        auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))
-        auth-dashboards     (auth-dashboards tenant-conn (set auth-visualisations))
-        auth-collections    (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)]
-    {:rasters             rasters
-     :auth-datasets       auth-datasets
-     :auth-visualisations auth-visualisations
-     :auth-dashboards     auth-dashboards
-     :auth-collections    auth-collections}))
+  (prometheus/with-duration (registry/get collector :app/load-auth-data {"tenant" tenant})
+    (let [permissions         (let [flow-data (->> (map :source dss)
+                                                   (filter #(= "AKVO_FLOW" (get % "kind")))
+                                                   (map c.flow/>api-model)
+                                                   (into #{})
+                                                   vec)]
+                                (if (seq flow-data)
+                                  (->> flow-data
+                                       (flow-check-permissions flow-api request collector tenant)
+                                       :body
+                                       set)
+                                  #{}))
+          auth-datasets (->> (auth-datasets dss permissions)
+                             (prometheus/with-duration
+                               (registry/get collector :app/auth-datasets {"tenant" tenant})))
+
+          auth-visualisations (->> (auth-visualisations tenant-conn (set auth-datasets))
+                                   (prometheus/with-duration
+                                     (registry/get collector :app/auth-visualisations {"tenant" tenant})))
+
+          auth-dashboards (->> (auth-dashboards tenant-conn (set auth-visualisations))
+                               (prometheus/with-duration
+                                 (registry/get collector :app/auth-datasets {"tenant" tenant})))
+
+          auth-collections (->> (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)
+                                (prometheus/with-duration
+                                  (registry/get collector :app/auth-datasets {"tenant" tenant})))]
+      {:rasters             rasters
+       :auth-datasets       auth-datasets
+       :auth-visualisations auth-visualisations
+       :auth-dashboards     auth-dashboards
+       :auth-collections    auth-collections})))
 
 (defn wrap-auth-datasets
   "Add to the request an auth-service protocol impl using flow-api check_permissions"
@@ -213,7 +227,7 @@
                    ::monitoring]))
 
 (defn ids
-  "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec` 
+  "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec`
    Based on dynamic thread binding."
   [spec data]
   (let [ids    (atom {:collection-ids    #{}
