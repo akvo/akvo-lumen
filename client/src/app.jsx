@@ -9,6 +9,7 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
+import { UserManager, WebStorageStateStore } from 'oidc-client';
 import queryString from 'querystringify';
 import url from 'url';
 import { get } from './utilities/api';
@@ -104,6 +105,16 @@ function dispatchOnMode() {
       // eslint-disable-next-line consistent-return
       }) => {
         auth.init(body, auth.initService(body))
+        // eslint-disable-next-line consistent-return
+        .then((user) => {
+          // auth0.authorize();
+          console.log('user kkkk', user);
+          if (user == null) {
+            auth.getUserManager().signinRedirect();
+          } else {
+            return { profile: user, env: body };
+          }
+        })
         .then(({ profile, env }) => initAuthenticated(profile, env))
         .catch(err => initNotAuthenticated(err.message));
       });
@@ -116,50 +127,13 @@ function dispatchOnMode() {
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        const auth0 = auth.initService(body);
-        auth.setAuth0(auth0);
-        // eslint-disable-next-line consistent-return
-        auth0.parseHash({ hash: window.location.hash }, (err, authResult) => {
-          if (err) {
-            if (err.errorDescription === 'EMAIL_VERIFIED_ERROR') {
-              initNotAuthenticated(err);
-            } else {
-              throw err;
-            }
-          } else {
-            auth0.client.userInfo(authResult.accessToken, (err2, user) => {
-              if (err2) {
-                throw err2;
-              }
-              // Now you have the user's infomation
-              const userProfile = user;
-              get('/api/user/profile', {
-                email: user.email,
-              }).then((response) => {
-                try {
-                  const {
-                    admin, firstName, id, lastName,
-                  } = response.body;
-                  userProfile.admin = admin;
-                  userProfile.firstName = firstName;
-                  userProfile.keycloakId = id;
-                  userProfile.lastName = lastName;
-                } catch (e) {
-                  userProfile.admin = false;
-                  Raven.captureException(e, {
-                    extra: {
-                      user,
-                    },
-                  });
-                }
-                userProfile.lastName = user.lastName || user.family_name;
-                userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
-                userProfile.username = user.username || user.nickname;
-                initAuthenticated(userProfile, body);
-              });
-            });
-          }
-          // eslint-disable-next-line consistent-return
+        const authManager = auth.initService(body);
+        auth.setAuth0(authManager);
+        const mgr = new UserManager({ userStore: new WebStorageStateStore() });
+        mgr.signinRedirectCallback().then(() => {
+          window.location.href = '../';
+        }).catch((err) => {
+          console.log(err);
         });
       });
   }

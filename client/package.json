@@ -36,7 +36,6 @@
     "@vx/grid": "0.0.160",
     "@vx/legend": "0.0.154",
     "@vx/scale": "0.0.153",
-    "auth0-js": "9.10.4",
     "autoprefixer": "^7.1.1",
     "babel-cli": "6.24.1",
     "babel-core": "6.25.0",
