@@ -127,8 +127,7 @@ function dispatchOnMode() {
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        const authManager = auth.initService(body);
-        auth.setAuth0(authManager);
+        auth.initService(body);
         const mgr = new UserManager({ userStore: new WebStorageStateStore() });
         mgr.signinRedirectCallback().then(() => {
           window.location.href = '../';
