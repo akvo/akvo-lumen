@@ -111,7 +111,7 @@
        (mapv :id)))
 
 (defn- auth-visualisations [tenant-conn auth-datasets-set]
-  (let [all-visualisations (w/keywordize-keys (db.visualisation/all-visualisations
+  (let [all-visualisations (w/keywordize-keys (db.visualisation/all-visualisations-slim
                                                tenant-conn {} {} {:identifiers identity}))
         maps (filter #(= "map" (:visualisationType %)) all-visualisations)
         nomaps (filter #(not= "map" (:visualisationType %)) all-visualisations)
