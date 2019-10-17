@@ -24,6 +24,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 23,
+      "iteration": 1571292674104,
       "links": [],
       "panels": [
         {
@@ -1079,7 +1080,58 @@ data:
       "style": "dark",
       "tags": [],
       "templating": {
-        "list": []
+        "list": [
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "blue",
+              "value": "blue"
+            },
+            "datasource": "prom",
+            "definition": "label_values(color)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "color",
+            "multi": false,
+            "name": "color",
+            "options": [],
+            "query": "label_values(color)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": "prom",
+            "definition": "label_values(app_load_auth_data_bucket, tenant)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "tenant",
+            "multi": true,
+            "name": "tenant",
+            "options": [],
+            "query": "label_values(app_load_auth_data_bucket, tenant)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
       },
       "time": {
         "from": "now-6h",
@@ -1113,5 +1165,5 @@ data:
       "timezone": "",
       "title": "Lumen Flow API Authz",
       "uid": "1vKoX5oWk",
-      "version": 7
+      "version": 8
     }
