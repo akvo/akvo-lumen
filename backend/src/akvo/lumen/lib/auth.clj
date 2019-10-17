@@ -97,7 +97,8 @@
                  "/api/visualisations/maps" {:methods #{:post}}
                  "/api/dashboards" {:methods #{:get :post}}
                  "/api/dashboards/:id" {:methods #{:get :put :delete}}
-                 "/api/collections" {:methods #{:get}}})
+                 "/api/collections" {:methods #{:get :post}}
+                 "/api/collections/:id" {:methods #{:get :put :delete}}})
 
 (defn- auth-datasets [all-datasets permissions]
   (->> all-datasets
