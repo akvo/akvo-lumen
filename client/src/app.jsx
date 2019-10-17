@@ -16,6 +16,7 @@ import { get } from './utilities/api';
 import Raven from 'raven-js';
 
 function initAuthenticated(profile, env) {
+  console.log('initAuthenticated', profile, env);
   if (process.env.NODE_ENV === 'production') {
     Raven.setUserContext(profile);
   }
@@ -95,7 +96,7 @@ function initNotAuthenticated(error) {
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
-  if (url.parse(location.href).pathname !== '/auth0_callback' && accessToken == null) {
+  if (url.parse(location.href).pathname !== '/auth_callback' && accessToken == null) {
     let authz = queryString.parse(location.search).auth;
     authz = authz ? { auth: authz } : null;
     get('/env', authz)
@@ -108,15 +109,42 @@ function dispatchOnMode() {
         // eslint-disable-next-line consistent-return
         .then((user) => {
           // auth0.authorize();
-          console.log('user kkkk', user);
           if (user == null) {
-            auth.getUserManager().signinRedirect();
+            auth.signinRedirect();
           } else {
-            return { profile: user, env: body };
+            const userProfile = user.profile;
+            return Promise.resolve(get('/api/user/profile', {
+              email: user.profile.email,
+            }).then((response) => {
+              try {
+                const {
+                  admin, firstName, id, lastName,
+                } = response.body;
+                userProfile.admin = admin;
+                userProfile.firstName = firstName;
+                userProfile.keycloakId = id;
+                userProfile.lastName = lastName;
+              } catch (e) {
+                userProfile.admin = false;
+                Raven.captureException(e, {
+                  extra: {
+                    user,
+                  },
+                });
+              }
+              userProfile.lastName = user.lastName || user.family_name;
+              userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+              userProfile.username = user.username || user.nickname;
+              console.log(userProfile, body);
+              return { profile: userProfile, env: body };
+            }));
           }
         })
         .then(({ profile, env }) => initAuthenticated(profile, env))
-        .catch(err => initNotAuthenticated(err.message));
+        .catch((err) => {
+          console.log('ERR', err);
+          initNotAuthenticated(err.message);
+        });
       });
   } else if (accessToken != null) {
     auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));

@@ -7,17 +7,12 @@ import { get } from './api';
 let userManager = null;
 let accessToken = null;
 
-
-export function setUserManager(A) {
-  userManager = A;
-}
-export function getUserManager() {
-  return userManager;
-}
-
-
 export function logout() {
-  userManager.logout();
+  userManager.signoutRedirect();
+}
+
+export function signinRedirect() {
+  userManager.signinRedirect();
 }
 
 export function token() {
@@ -48,16 +43,16 @@ export function initService(env) {
     userStore: new WebStorageStateStore({ store: window.localStorage }),
     authority: DOMAIN,
     client_id: authClientId,
-    redirect_uri: `${location.protocol}//${location.host}/userManager_callback`,
+    redirect_uri: `${location.protocol}//${location.host}/auth_callback`,
     response_type: 'id_token token',
     scope: 'openid profile email',
-    post_logout_redirect_uri: 'http://localhost:8080/',
+    post_logout_redirect_uri: `${location.protocol}//${location.host}`,
     filterProtocolClaims: true,
     metadata: {
       issuer: `${DOMAIN}/`,
       authorization_endpoint: `${DOMAIN}/authorize`,
       userinfo_endpoint: `${DOMAIN}/userinfo`,
-      end_session_endpoint: `${DOMAIN}/v2/logout`,
+      end_session_endpoint: `${DOMAIN}/v2/logout?returnTo=${location.protocol}//${location.host}`,
       jwks_uri: `${DOMAIN}/.well-known/jwks.json`,
     },
   };
@@ -71,18 +66,9 @@ export function init(env, s) {
     Raven.setExtraContext({ tenant });
   }
   userManager = s;
-  setUserManager(s);
   return userManager.getUser();
 }
 
-/*
-export function login(a) {
-  if (a == null) {
-    throw new Error('userManager not initialized');
-  }
-  return a.authorize();
-}
-*/
 export function initPublic() {
   return get('/env')
     .then(({ body }) => ({ env: body }));
