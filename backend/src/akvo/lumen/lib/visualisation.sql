@@ -5,8 +5,13 @@ FROM visualisation;
 
 -- :name all-visualisations-ids :? :*
 -- :doc All visualisations ids.
-SELECT id FROM visualisation;
+SELECT id
+FROM visualisation;
 
+-- :name all-visualisations-slim :? :*
+-- :doc All visualisations.
+SELECT id, dataset_id as "datasetId", "type" as "visualisationType", spec
+FROM visualisation;
 
 -- :name visualisation-by-id :? :1
 -- :doc grab visualisation by id
