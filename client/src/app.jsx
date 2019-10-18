@@ -16,7 +16,6 @@ import { get } from './utilities/api';
 import Raven from 'raven-js';
 
 function initAuthenticated(profile, env) {
-  console.log('initAuthenticated', profile, env);
   if (process.env.NODE_ENV === 'production') {
     Raven.setUserContext(profile);
   }
@@ -135,16 +134,11 @@ function dispatchOnMode() {
               userProfile.lastName = user.lastName || user.family_name;
               userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
               userProfile.username = user.username || user.nickname;
-              console.log(userProfile, body);
               return { profile: userProfile, env: body };
             }));
           }
         })
-        .then(({ profile, env }) => initAuthenticated(profile, env))
-        .catch((err) => {
-          console.log('ERR', err);
-          initNotAuthenticated(err.message);
-        });
+        .then(({ profile, env }) => initAuthenticated(profile, env));
       });
   } else if (accessToken != null) {
     auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
@@ -160,7 +154,7 @@ function dispatchOnMode() {
         mgr.signinRedirectCallback().then(() => {
           window.location.href = '../';
         }).catch((err) => {
-          console.log(err);
+          initNotAuthenticated(err.error_description);
         });
       });
   }

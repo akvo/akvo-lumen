@@ -22,7 +22,6 @@ export function token() {
   return new Promise((resolve) => {
     userManager.getUser().then((user) => {
       // userManager.authorize();
-      console.log('yuhu user', user);
       if (user == null) {
         userManager.signinRedirect();
       } else {
@@ -38,7 +37,6 @@ export function initService(env) {
     authURL,
   } = env;
   const DOMAIN = `https://${url.parse(authURL).host}`;
-  console.log('DOMAIN', DOMAIN);
   const settings = {
     userStore: new WebStorageStateStore({ store: window.localStorage }),
     authority: DOMAIN,
