@@ -152,11 +152,9 @@
                                   :visualisation-ids auth-visualisations
                                   :dashboard-ids auth-dashboards})))
 
-(defn- flow-check-permissions [flow-api {:keys [issuer-type] :as request} collector tenant data]
+(defn- flow-check-permissions [flow-api request collector tenant data]
   (prometheus/with-duration (registry/get collector :app/flow-check-permissions {"tenant" tenant})
-    (c.flow/check-permissions (if (= :keycloak issuer-type)
-                                (:url flow-api)
-                                (:auth0-url flow-api)) (jwt/jwt-token request) data)))
+    (c.flow/check-permissions (:url flow-api) (jwt/jwt-token request) data)))
 
 (defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
   (prometheus/with-duration (registry/get collector :app/load-auth-data {"tenant" tenant})

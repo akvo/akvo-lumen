@@ -3,7 +3,7 @@ Hi!
 You have been invited to join Akvo Lumen. 
 
 To complete the invitation process please visit:
-{{location}}/verify/{{invite-id}}?auth=auth0
+{{location}}/verify/{{invite-id}}
 
 
 Then, using your email: {{email}} you need to click on "Sign up" or, in case that your email is managed by Google, you could also use the "Log in with Google" button

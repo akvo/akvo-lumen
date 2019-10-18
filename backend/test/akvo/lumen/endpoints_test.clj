@@ -26,7 +26,7 @@
         (let [r (h (get* "/env" {"auth" "keycloak"}))]
           (is (= 200 (:status r)))
           (let [rb (body-kw r)
-                ks [:authClientId :authProvider :authURL :flowApiUrl
+                ks [:authClientId :authURL :flowApiUrl :authProvider
                     :lumenDeploymentColor :lumenDeploymentEnvironment
                     :lumenDeploymentVersion :piwikSiteId :sentryDSN :tenant]
                 lookup-table {:authClientId "akvo-lumen",

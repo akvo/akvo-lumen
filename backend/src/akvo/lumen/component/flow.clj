@@ -2,7 +2,6 @@
   "wrap flow and flow api logic and data related"
   (:require [akvo.lumen.http.client :as http.client]
             [integrant.core :as ig]
-            [akvo.lumen.component.keycloak :as c.keycloak]
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]))
 
@@ -60,11 +59,10 @@
   opts)
 
 (s/def ::url string?)
-(s/def ::auth0-url string?)
 (s/def ::internal-url string?)
 (s/def ::api-headers fn?)
 (s/def ::internal-api-headers fn?)
-(s/def ::config (s/keys :req-un [::url ::auth0-url ::internal-url ::api-headers
+(s/def ::config (s/keys :req-un [::url ::internal-url ::api-headers
                                  ::internal-api-headers]))
 
 (defmethod ig/pre-init-spec ::api [_]

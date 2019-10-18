@@ -5,7 +5,6 @@
                               :lumen {:password #duct/env [ "PG_PASSWORD" :or "password"]}}
  
  :akvo.lumen.admin/add-tenant {:emailer #ig/ref :akvo.lumen.component.emailer/emailer
-                               :auth-type "keycloak"
                                :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
                                :db-settings #ig/ref :akvo.lumen.component.tenant-manager/data
                                :drop-if-exists? false

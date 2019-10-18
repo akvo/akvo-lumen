@@ -29,9 +29,7 @@
     401 (is (= "\"Not authenticated\"" (:body response)))
     403 (is (= "\"Not authorized\"" (:body response)))))
 
-(def wrap-auth (as-middleware m/jwt-authorization
-                              {:auth0-public-client {:issuer "auth0"}
-                               :keycloak-public-client {:issuer "keycloak"}} ))
+(def wrap-auth (as-middleware m/jwt-authorization {}))
 
 
 (defn update-auth-roles [o]

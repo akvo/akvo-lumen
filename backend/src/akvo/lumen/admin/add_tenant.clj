@@ -22,7 +22,7 @@
         LUMEN_EMAIL_USER=https://*** LUMEN_EMAIL_PASSWORD=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
-        lein run -m akvo.lumen.admin.add-tenant <url> <title> <email> <auth-type>
+        lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
   "
   (:require [akvo.lumen.admin.db :as admin.db]
             [akvo.lumen.admin.keycloak :as admin.keycloak]
@@ -115,23 +115,14 @@
         (throw (ex-info "Url should use https" {:url v}))))
     (format "%s://%s" (.getProtocol url) (.getHost url))))
 
-(defn conform-auth-type
-  "Returns valid kw auth-type or throws."
-  [v]
-  (condp = v
-    "keycloak" :keycloak
-    "auth0" :auth0
-    (throw (ex-info "auth-type not valid." {:auth-type v}))))
-
-(defn conform-input [url title email auth-type]
+(defn conform-input [url title email]
   (let [url (conform-url url)]
     {:email (conform-email email)
      :label (label url)
      :title title
-     :auth-type (conform-auth-type auth-type)
      :url url}))
 
-(defn exec-mail [{:keys [emailer user-creds tenant-db auth-type url]}]
+(defn exec-mail [{:keys [emailer user-creds tenant-db url]}]
   (let [{:keys [user-id email tmp-password]} user-creds
         text-part (if (some? tmp-password)
                     (let [invite-id
@@ -141,12 +132,12 @@
                                                    email
                                                    (lib.user/expire-time)
                                                    (json/encode {:email "admin@akvo.org"}))))]
-                      (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_non_existent_user.txt" (name auth-type))
+                      (selmer/render-file (format "akvo/lumen/email/new_tenant_non_existent_user.txt")
                                           {:email email
                                            :invite-id invite-id
                                            :tmp-password tmp-password
                                            :location url}))
-                    (selmer/render-file (format "akvo/lumen/email/%s/new_tenant_existent_user.txt" (name auth-type))
+                    (selmer/render-file (format "akvo/lumen/email/new_tenant_existent_user.txt")
                                         {:email email
                                          :location url}))]
     (log/info :sending email text-part)
@@ -156,27 +147,26 @@
 (defn new-tenant-db-pass []
   (str/replace (squuid) "-" ""))
 
-(defn exec [{:keys [emailer authorizer dbs] :as administer} {:keys [url title email auth-type] :as data}]
+(defn exec [{:keys [emailer authorizer dbs] :as administer} {:keys [url title email] :as data}]
   (binding [admin.db/env-vars (:root dbs)]
     (let [drop-if-exists? (boolean (:drop-if-exists? administer))
-          {:keys [email label title url auth-type]} (conform-input url title email auth-type)
+          {:keys [email label title url]} (conform-input url title email)
           {:keys [tenant-db] :as db-uris} (admin.db/db-uris label (new-tenant-db-pass) (-> dbs :lumen :password))
           _ (admin.db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
           {:keys [user-id email tmp-password] :as user-creds} (admin.keycloak/setup-tenant authorizer label email url  drop-if-exists?)]
       (exec-mail (merge administer {:user-creds user-creds
                                     :tenant-db tenant-db
-                                    :auth-type auth-type
                                     :url url}))
       true)))
 
-(defn -main [url title email & [auth-type edn-file]]
+(defn -main [url title email & [edn-file]]
   (try
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
       (admin.system/ig-derives)
       (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "akvo/lumen/prod.edn"))
                                                   (admin.system/ig-select-keys [:akvo.lumen.admin/add-tenant]))
             administer (:akvo.lumen.admin/add-tenant admin-system)]
-        (exec administer {:url url :title title :email email :auth-type (or auth-type "keycloak")})))
+        (exec administer {:url url :title title :email email})))
     (catch java.lang.AssertionError e
       (prn (.getMessage e)))
     (catch Exception e
@@ -185,5 +175,5 @@
       (when (= (type e) clojure.lang.ExceptionInfo)
         (prn (ex-data e))))))
 
-(defmethod ig/init-key :akvo.lumen.admin/add-tenant [_ {:keys [emailer auth-type] :as opts}]
+(defmethod ig/init-key :akvo.lumen.admin/add-tenant [_ {:keys [emailer] :as opts}]
   opts)

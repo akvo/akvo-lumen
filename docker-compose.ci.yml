@@ -7,6 +7,10 @@ services:
      - LUMEN_DB_URL=jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true
      - CI_BUILD=yes
      - LUMEN_FILE_UPLOAD_PATH=/tmp/akvo/lumen
+     - LUMEN_AUTH_URL=http://auth.lumen.local:8080/auth
+     - LUMEN_AUTH_ISSUER_SUFFIX_URL=/realms/akvo
+     - LUMEN_AUTH_PUBLIC_CLIENT_ID=akvo-lumen
+     - LUMEN_AUTH_RSA_SUFFIX_URL=/protocol/openid-connect/certs
      - LUMEN_KEYCLOAK_URL=http://auth.lumen.local:8080/auth
      - LUMEN_KEYCLOAK_CLIENT_SECRET=caed3964-09dd-4752-b0bb-22c8e8ffd631
      - LUMEN_ENCRYPTION_KEY=secret
@@ -15,7 +19,6 @@ services:
      - LUMEN_EMAIL_USER=admin@akvo.org
      - LUMEN_EMAIL_PASSWORD=password
      - LUMEN_FLOW_API_URL=flow-url
-     - LUMEN_FLOW_API_AUTH0_URL=flow-auth0-url
      - LUMEN_PIWIK_SITE_ID=165
      - LUMEN_DEPLOYMENT_COLOR=${TRAVIS_BRANCH}
      - LUMEN_DEPLOYMENT_ENVIRONMENT=${USER}

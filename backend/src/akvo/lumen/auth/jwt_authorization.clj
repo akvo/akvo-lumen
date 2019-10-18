@@ -15,16 +15,14 @@
       (contains? auth-roles
                  (format "akvo:lumen:%s" tenant))))
 
-(defn  jwt-authorization
+(defn jwt-authorization
   " Deprecated!
   Only used with keycloak jwt!!
 
   should be removed once we test the performance of authorizer service and fully move to auth0
   "
-  [handler {:keys [jwt-claims tenant] :as request}
-   {:keys [keycloak-public-client auth0-public-client]}]
-  (let [issuer (u/issuer-type jwt-claims keycloak-public-client auth0-public-client)
-        auth-roles (keycloak/claimed-roles jwt-claims)]
+  [handler {:keys [jwt-claims tenant] :as request} opts]
+  (let [auth-roles (keycloak/claimed-roles jwt-claims)]
     (cond
       (nil? jwt-claims) u/not-authenticated
       (u/admin-path? request) (if (tenant-admin? tenant auth-roles)

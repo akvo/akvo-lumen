@@ -31,16 +31,13 @@
                                                           :default-charset "utf-8"}}
 
  :akvo.lumen.auth/wrap-authorization {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
-                                      :keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
-                                      :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
-                                      :api-authz-probability #duct/env ["LUMEN_API_AUTHZ_PROBABILITY" Double :or 0.0]}
+                                      :public-client #ig/ref :akvo.lumen.component.authentication/public-client}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                           :flow-api #ig/ref :akvo.lumen.component.flow/api
                                           :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
 
- :akvo.lumen.auth/wrap-jwt-authentication {:keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
-                                           :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
+ :akvo.lumen.auth/wrap-jwt-authentication {:public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                            :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
@@ -59,7 +56,6 @@
  :akvo.lumen.component.flow/internal-api-headers {}
 
  :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
-                                 :auth0-url #duct/env "LUMEN_FLOW_API_AUTH0_URL"
                                  :internal-url "http://flow-api-internal"
                                  :api-headers #ig/ref :akvo.lumen.component.flow/api-headers
                                  :internal-api-headers #ig/ref :akvo.lumen.component.flow/internal-api-headers}
@@ -74,8 +70,7 @@
 
  :akvo.lumen.endpoint.env/env {:routes-opts
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
-                               :keycloak-public-client #ig/ref :akvo.lumen.component.keycloak/public-client
-                               :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
+                               :public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"
@@ -93,7 +88,7 @@
 
  :akvo.lumen.endpoint.invite/invite {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                      :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
-                                     :auth0-public-client #ig/ref :akvo.lumen.component.auth0/public-client
+                                     :public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                      :emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.endpoint.invite/verify {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
@@ -187,14 +182,14 @@
 
  :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://s3-eu-west-1.amazonaws.com/akvoflow-public/caddisfly-tests-v2.json"]}
 
- :akvo.lumen.component.keycloak/public-client {:url #duct/env "LUMEN_KEYCLOAK_URL"
-                                               :realm "akvo"
-                                               :client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]}
+ :akvo.lumen.component.authentication/public-client {:url #duct/env ["LUMEN_AUTH_URL" :or "https://akvofoundation.eu.auth0.com"]
+                                                     :issuer-suffix-url #duct/env ["LUMEN_AUTH_ISSUER_SUFFIX_URL" :or "/"]
+                                                     :rsa-suffix-url  #duct/env ["LUMEN_AUTH_RSA_SUFFIX_URL" :or ".well-known/jwks.json"] 
+                                                     :client-id #duct/env [ "LUMEN_AUTH_PUBLIC_CLIENT_ID" :or "7Ze0JP6Jjf7zItGy3ekyuTvwGyik4Lay"]}
 
- :akvo.lumen.component.auth0/public-client {:url #duct/env ["LUMEN_AUTH0_URL" :or "https://akvofoundation.eu.auth0.com"]
-                                            :client-id #duct/env [ "LUMEN_AUTH0_PUBLIC_CLIENT_ID" :or "7Ze0JP6Jjf7zItGy3ekyuTvwGyik4Lay"]}
-
- :akvo.lumen.component.keycloak/authorization-service {:public-client #ig/ref :akvo.lumen.component.keycloak/public-client
+ :akvo.lumen.component.keycloak/authorization-service {:url #duct/env "LUMEN_KEYCLOAK_URL"
+                                                       :issuer-suffix-url "/realms/akvo"
+                                                       :realm "akvo"
                                                        :max-user-ids-cache 1000
                                                        :paths-cache-seconds #duct/env [ "LUMEN_PATHS_CACHE_SECONDS" :or 60]
                                                        :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}
