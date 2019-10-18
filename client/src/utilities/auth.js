@@ -36,7 +36,7 @@ export function initService(env) {
     authClientId,
     authURL,
   } = env;
-  const DOMAIN = `https://${url.parse(authURL).host}`;
+  const DOMAIN = `${url.parse(authURL).protocol}//${url.parse(authURL).host}/auth/realms/akvo`;
   const settings = {
     userStore: new WebStorageStateStore({ store: window.localStorage }),
     authority: DOMAIN,
@@ -48,10 +48,10 @@ export function initService(env) {
     filterProtocolClaims: true,
     metadata: {
       issuer: `${DOMAIN}/`,
-      authorization_endpoint: `${DOMAIN}/authorize`,
-      userinfo_endpoint: `${DOMAIN}/userinfo`,
-      end_session_endpoint: `${DOMAIN}/v2/logout?returnTo=${location.protocol}//${location.host}`,
-      jwks_uri: `${DOMAIN}/.well-known/jwks.json`,
+      authorization_endpoint: `${DOMAIN}/protocol/openid-connect/auth`,
+      userinfo_endpoint: `${DOMAIN}/protocol/openid-connect/userinfo`,
+      end_session_endpoint: `${DOMAIN}/protocol/openid-connect/logout?returnTo=${location.protocol}//${location.host}`,
+      jwks_uri: `${DOMAIN}/.well-known/openid-configuration`,
     },
   };
   return new UserManager(settings);

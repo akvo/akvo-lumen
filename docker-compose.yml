@@ -7,7 +7,7 @@ services:
    volumes:
      - pg-data:/var/lib/postgresql/data
  keycloak:
-   image: akvo/akvo-keycloak-dev:20191008.073926.eee689e
+   image: akvo/akvo-keycloak-dev:20191018.105315.b2d1c7d
  backend:
    volumes:
       - pg-data:/pg-certs:ro

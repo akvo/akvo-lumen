@@ -131,7 +131,6 @@ function dispatchOnMode() {
                   },
                 });
               }
-              userProfile.lastName = user.lastName || user.family_name;
               userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
               userProfile.username = user.username || user.nickname;
               return { profile: userProfile, env: body };
