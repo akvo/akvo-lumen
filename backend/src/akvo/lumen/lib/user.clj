@@ -65,16 +65,16 @@
   [emailer keycloak tenant-conn auth-type tenant location email author-claims]
   (cond
     (keycloak/tenant-member?
-     keycloak tenant email) (lib/bad-request
-                             {"reason" "Already tenant member"})
-    (p/user? keycloak email) (invite-to-tenant emailer tenant-conn auth-type location email
-                                       author-claims)
+     keycloak tenant email)  (lib/bad-request {"reason" "Already tenant member"})
+    (p/user? keycloak email) (do (invite-to-tenant emailer tenant-conn auth-type location email
+                                                   author-claims)
+                                 (lib/ok {}))
     :else
-    (let [tmp-password (:tmp-password (create-new-account keycloak tenant-conn email))
+    (let [tmp-password  (:tmp-password (create-new-account keycloak tenant-conn email))
           invitation-id (new-invitation-id tenant-conn author-claims email)
-          sender-email (get author-claims "email")]
-      (send-invitation-account-email emailer sender-email email location invitation-id tmp-password auth-type)))
-  (lib/ok {}))
+          sender-email  (get author-claims "email")]
+      (send-invitation-account-email emailer sender-email email location invitation-id tmp-password auth-type)
+      (lib/ok {}))))
 
 (defn active-invites [tenant-conn]
   (lib/ok {:invites (db.user/select-active-invites tenant-conn)}))
