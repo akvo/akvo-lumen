@@ -137,7 +137,11 @@ function dispatchOnMode() {
             }));
           }
         })
-        .then(({ profile, env }) => initAuthenticated(profile, env));
+        .then((res) => {
+          if (res) {
+            initAuthenticated(res.profile, res.env);
+          }
+        });
       });
   } else if (accessToken != null) {
     auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
