@@ -1,6 +1,12 @@
 -- :name all-visualisations :? :*
 -- :doc All visualisations.
-SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified, author
+SELECT id,
+       dataset_id as "datasetId",
+       "name", "type" as "visualisationType",
+       spec,
+       created,
+       modified,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author"
 FROM visualisation;
 
 -- :name all-visualisations-ids :? :*

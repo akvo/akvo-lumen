@@ -32,10 +32,11 @@ SELECT id, name, error_log as reason, status, modified, created, '{}'::jsonb AS 
 SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created, author, source_data.source::jsonb
+SELECT id, title, NULL, 'OK', modified, created,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author",
+       source_data.source::jsonb
   FROM dataset, source_data
   WHERE source_data.dataset_id = dataset.id;
-
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset

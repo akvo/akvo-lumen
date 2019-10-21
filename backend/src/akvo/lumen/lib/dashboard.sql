@@ -1,6 +1,12 @@
 -- :name all-dashboards :? :*
 -- :doc Return all dashboards
-SELECT id, title, 'ok' AS status, 'dashboard' AS type, created, modified, author
+SELECT id,
+       title,
+       'ok' AS status,
+       'dashboard' AS type,
+       created,
+       modified,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author"
 FROM dashboard;
 
 -- :name all-dashboards-ids :? :*
