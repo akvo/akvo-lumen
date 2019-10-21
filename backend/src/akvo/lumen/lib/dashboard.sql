@@ -23,13 +23,23 @@ SELECT id FROM dashboard;
 -- :name insert-dashboard :<!
 -- :doc Insert dashboard.
 INSERT INTO dashboard (id, title, spec, author)
-VALUES (:id, :title, :spec::jsonb, :author)
+VALUES (
+       :id,
+       :title,
+       :spec::jsonb,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
+)
 RETURNING *;
 
 -- :name upsert-dashboard :<!
 -- :doc Insert or update dashboard.
 INSERT INTO dashboard (id, title, spec, author)
-VALUES (:id, :title, :spec::jsonb, :author)
+VALUES (
+       :id,
+       :title,
+       :spec::jsonb,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
+)
 ON CONFLICT (id)
 DO UPDATE SET id=:id, title=:title, spec=:spec::jsonb
 RETURNING *;

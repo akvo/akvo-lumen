@@ -41,7 +41,12 @@ SELECT id, title, NULL, 'OK', modified, created,
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
 INSERT INTO dataset(id, title, description, author)
-VALUES (:id, :title, :description, :author);
+VALUES (
+       :id,
+       :title,
+       :description,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
+);
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset

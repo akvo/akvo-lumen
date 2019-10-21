@@ -36,7 +36,8 @@ DELETE FROM visualisation WHERE spec::varchar LIKE concat('%', :id, '%');
 -- :name upsert-visualisation :<!
 -- :doc Upsert a single visualisation
 INSERT INTO visualisation (id, dataset_id, "name", "type", spec, author)
-VALUES (:id, :dataset-id, :name, :type, :spec, :author)
+VALUES (:id, :dataset-id, :name, :type, :spec,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email')))
 ON CONFLICT (id)
 DO UPDATE SET dataset_id = :dataset-id,
               "name" = :name,
