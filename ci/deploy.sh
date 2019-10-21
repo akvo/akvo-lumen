@@ -54,6 +54,7 @@ log "Deploying to dark ($DARK_COLOR)"
 sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" -e "s/\${COLOR}/${DARK_COLOR}/" ci/k8s/deployment.yaml.template > deployment.yaml
 
 kubectl apply -f deployment.yaml
+kubectl apply -f ci/k8s/service.yaml
 kubectl apply -f ci/k8s/redis-master-windshaft.yaml
 kubectl apply -f ci/k8s/blue-green-gateway.yaml
 kubectl apply -f ci/k8s/grafana/lumen-authz-allowed-paths.yml
