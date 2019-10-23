@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
+import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
@@ -70,9 +71,15 @@ class Library extends Component {
   }
 
   componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch(fetchLibrary());
-    trackPageView('Library');
+    const { dispatch, router } = this.props;
+    const redirect = window.localStorage.getItem('redirect');
+    if (redirect) {
+      window.localStorage.removeItem('redirect');
+      router.push(redirect);
+    } else {
+      dispatch(fetchLibrary());
+      trackPageView('Library');
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -333,6 +340,7 @@ Library.propTypes = {
   dashboards: PropTypes.object.isRequired,
   rasters: PropTypes.object.isRequired,
   collections: PropTypes.object,
+  router: PropTypes.object.isRequired,
 };
 
-export default connect(state => state.library)(Library);
+export default connect(state => state.library)(withRouter(Library));

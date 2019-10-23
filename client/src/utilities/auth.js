@@ -7,6 +7,8 @@ import * as k from './keycloak';
 import * as a0 from './auth0';
 import { get } from './api';
 
+const uuidv1 = require('uuid/v1');
+
 let keycloak = null;
 let auth0 = null;
 let accessToken = null;
@@ -58,6 +60,8 @@ export function initService(env) {
       clientId: authClientId,
     });
   } else {
+    const state = uuidv1();
+    window.localStorage.setItem(state, location.href);
     s = new Auth0.WebAuth({
       domain: url.parse(authURL).host,
       clientID: authClientId,
@@ -66,6 +70,7 @@ export function initService(env) {
       scope: 'openid email profile',
       audience: `${authURL}/userinfo`,
       connection: 'google-oauth2',
+      state,
     });
   }
   return s;
