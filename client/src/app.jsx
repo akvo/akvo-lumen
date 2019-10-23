@@ -127,6 +127,10 @@ function dispatchOnMode() {
               throw err;
             }
           } else {
+            const redirect = url.parse(window.localStorage.getItem(authResult.state)).pathname;
+            if (redirect !== '/library' && redirect !== '/') {
+              window.localStorage.setItem('redirect', redirect);
+            }
             auth0.client.userInfo(authResult.accessToken, (err2, user) => {
               if (err2) {
                 throw err2;
