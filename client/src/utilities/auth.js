@@ -60,8 +60,9 @@ export function initService(env) {
       clientId: authClientId,
     });
   } else {
-    const state = uuidv1();
-    window.localStorage.setItem(state, location.href);
+    const nonce = uuidv1();
+    const state = nonce;
+    window.localStorage.setItem(nonce, location.href);
     s = new Auth0.WebAuth({
       domain: url.parse(authURL).host,
       clientID: authClientId,
@@ -71,6 +72,7 @@ export function initService(env) {
       audience: `${authURL}/userinfo`,
       connection: 'google-oauth2',
       state,
+      nonce,
     });
   }
   return s;
