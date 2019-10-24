@@ -26,7 +26,6 @@
         (let [r (h (get* "/env"))]
           (is (= 200 (:status r)))
           (let [rb (body-kw r)
-                _ (clojure.pprint/pprint rb)
                 ks [:auth :flowApiUrl
                     :lumenDeploymentColor :lumenDeploymentEnvironment
                     :lumenDeploymentVersion :piwikSiteId :sentryDSN :tenant]
