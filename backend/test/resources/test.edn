@@ -17,7 +17,13 @@
  :akvo.lumen.component.authentication/public-client {:url "http://auth.lumen.local:8080/auth"
                                                      :client-id "akvo-lumen"
                                                      :issuer-suffix-url "/realms/akvo"
-                                                     :rsa-suffix-url "/protocol/openid-connect/certs"}
+                                                     :rsa-suffix-url "/protocol/openid-connect/certs"
+                                                     :domain-suffix "/realms/akvo"
+                                                     :endpoint-issuer-suffix "/"
+                                                     :endpoint-authorization-suffix "/protocol/openid-connect/auth"
+                                                     :endpoint-userinfo-suffix "/protocol/openid-connect/userinfo"
+                                                     :endpoint-endsession-suffix "/protocol/openid-connect/logout"
+                                                     :endpoint-jwksuri-suffix "/.well-known/openid-configuration"}
 
  :akvo.lumen.component.keycloak/authorization-service {:url "http://auth.lumen.local:8080/auth"
                                                        :credentials

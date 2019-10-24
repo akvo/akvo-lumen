@@ -32,7 +32,16 @@
 (s/def ::rsa-suffix-url string?)
 (s/def ::client-id string?)
 
-(s/def ::public-client (s/keys :req-un [::url ::client-id ::issuer-suffix-url ::rsa-suffix-url]))
+(s/def ::domain-suffix string?)
+(s/def ::endpoint-issuer-suffix string?)
+(s/def ::endpoint-authorization-suffix string?)
+(s/def ::endpoint-userinfo-suffix string?)
+(s/def ::endpoint-endsession-suffix string?)
+(s/def ::endpoint-jwksuri-suffix string?)
+
+(s/def ::public-client (s/keys :req-un [::url ::client-id ::issuer-suffix-url ::rsa-suffix-url
+                                        ::domain-suffix ::endpoint-issuer-suffix ::endpoint-authorization-suffix
+                                        ::endpoint-userinfo-suffix ::endpoint-endsession-suffix ::endpoint-jwksuri-suffix]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.authentication/public-client [_]
   ::public-client)

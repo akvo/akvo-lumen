@@ -185,7 +185,14 @@
  :akvo.lumen.component.authentication/public-client {:url #duct/env ["LUMEN_AUTH_URL" :or "https://akvofoundation.eu.auth0.com"]
                                                      :issuer-suffix-url #duct/env ["LUMEN_AUTH_ISSUER_SUFFIX_URL" :or "/"]
                                                      :rsa-suffix-url  #duct/env ["LUMEN_AUTH_RSA_SUFFIX_URL" :or ".well-known/jwks.json"] 
-                                                     :client-id #duct/env [ "LUMEN_AUTH_PUBLIC_CLIENT_ID" :or "7Ze0JP6Jjf7zItGy3ekyuTvwGyik4Lay"]}
+                                                     :client-id #duct/env [ "LUMEN_AUTH_PUBLIC_CLIENT_ID" :or "7Ze0JP6Jjf7zItGy3ekyuTvwGyik4Lay"]
+                                                     :domain-suffix #duct/env [ "LUMEN_AUTH_DOMAIN_SUFFIX" :or ""]
+                                                     :endpoint-issuer-suffix #duct/env [ "LUMEN_AUTH_ENDPOINT_ISSUER_SUFFIX" :or "/"]
+                                                     :endpoint-authorization-suffix #duct/env [ "LUMEN_AUTH_ENDPOINT_AUTHORIZATION_SUFFIX" :or "/authorize"]
+                                                     :endpoint-userinfo-suffix #duct/env [ "LUMEN_AUTH_ENDPOINT_AUTHORIZATION_SUFFIX" :or "/userinfo"] 
+                                                     :endpoint-endsession-suffix #duct/env [ "LUMEN_AUTH_ENDPOINT_AUTHORIZATION_SUFFIX" :or "/v2/logout"]  
+                                                     :endpoint-jwksuri-suffix #duct/env [ "LUMEN_AUTH_ENDPOINT_AUTHORIZATION_SUFFIX" :or "/.well-known/jwks.json"]  
+}
 
  :akvo.lumen.component.keycloak/authorization-service {:url #duct/env "LUMEN_KEYCLOAK_URL"
                                                        :issuer-suffix-url "/realms/akvo"
