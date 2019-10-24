@@ -47,11 +47,11 @@ export function initService(env) {
     post_logout_redirect_uri: `${location.protocol}//${location.host}`,
     filterProtocolClaims: true,
     metadata: {
-      issuer: `${domain}${issuer}`,
-      authorization_endpoint: `${domain}${authorization}`,
-      userinfo_endpoint: `${domain}${userinfo}`,
-      end_session_endpoint: `${domain}${endSession}?returnTo=${location.protocol}//${location.host}`,
-      jwks_uri: `${domain}${jwksUri}`,
+      issuer,
+      authorization_endpoint: authorization,
+      userinfo_endpoint: userinfo,
+      end_session_endpoint: `${endSession}?returnTo=${location.protocol}//${location.host}`,
+      jwks_uri: jwksUri,
     },
   };
   return new UserManager(settings);

@@ -16,19 +16,16 @@
            lumen-deployment-version piwik-site-id sentry-client-dsn]}]
   (fn [{tenant :tenant
         :as request}]
-    (let [{:keys [url client-id
-                  domain-suffix endpoint-issuer-suffix
-                  endpoint-authorization-suffix endpoint-userinfo-suffix
-                  endpoint-endsession-suffix endpoint-jwksuri-suffix]} public-client]
+    (let [{:keys [url client-id end-session-endpoint-suffix open-id-config]} public-client]
       (response/response
        (cond-> {"auth" {"clientId" client-id
                         "url" url
-                        "domain" (str url domain-suffix)
-                        "endpoints" {"issuer" endpoint-issuer-suffix
-                                     "authorization" endpoint-authorization-suffix
-                                     "userinfo" endpoint-userinfo-suffix
-                                     "endSession" endpoint-endsession-suffix
-                                     "jwksUri" endpoint-jwksuri-suffix}}
+                        "domain" (:issuer open-id-config)
+                        "endpoints" {"issuer" (:issuer open-id-config)
+                                     "authorization" (:authorization_endpoint open-id-config)
+                                     "userinfo" (:userinfo_endpoint open-id-config)
+                                     "endSession" (:end_session_endpoint open-id-config (str (:issuer open-id-config) end-session-endpoint-suffix))
+                                     "jwksUri" (:jwks_uri open-id-config)}}
                 "flowApiUrl" (:url flow-api)
                 "lumenDeploymentColor" lumen-deployment-color
                 "lumenDeploymentEnvironment" lumen-deployment-environment
