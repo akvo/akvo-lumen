@@ -21,7 +21,7 @@
        (cond-> {"auth" {"clientId" auth-client-id
                         "url" auth-url
                         "domain" (str auth-url "/realms/akvo")
-                        "endpoints" {"issuer" issuer-suffix-url
+                        "endpoints" {"issuer" "/"
                                      "authorization" "/protocol/openid-connect/auth"
                                      "userinfo" "/protocol/openid-connect/userinfo"
                                      "endSession" "/protocol/openid-connect/logout"
