@@ -129,7 +129,8 @@
     "webpack-bundle-analyzer": "^3.0.3",
     "webpack-dev-middleware": "1.11.0",
     "webpack-hot-middleware": "2.18.2",
-    "webpack-md5-hash": "0.0.5"
+    "webpack-md5-hash": "0.0.5",
+    "uuid": "3.3.3"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^3.3.15",
