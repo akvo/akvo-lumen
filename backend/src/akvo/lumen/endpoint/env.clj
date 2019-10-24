@@ -7,7 +7,7 @@
             [akvo.lumen.specs :as lumen.s]
             [ring.util.response :as response]))
 
-(def auth-data (juxt :url :client-id))
+(def auth-data (juxt :url :client-id :issuer-suffix-url))
 
 (s/def ::auth-type ::lumen.s/non-empty-string)
 
@@ -16,10 +16,16 @@
            lumen-deployment-version piwik-site-id sentry-client-dsn]}]
   (fn [{tenant :tenant
         :as request}]
-    (let [[auth-url auth-client-id] (auth-data public-client)]
+    (let [[auth-url auth-client-id issuer-suffix-url] (auth-data public-client)]
       (response/response
-       (cond-> {"authClientId" auth-client-id
-                "authURL" auth-url
+       (cond-> {"auth" {"clientId" auth-client-id
+                        "url" auth-url
+                        "domain" (str auth-url "/realms/akvo")
+                        "endpoints" {"issuer" issuer-suffix-url
+                                     "authorization" "/protocol/openid-connect/auth"
+                                     "userinfo" "/protocol/openid-connect/userinfo"
+                                     "endSession" "/protocol/openid-connect/logout"
+                                     "jwksUri" "/.well-known/openid-configuration"}}
                 "flowApiUrl" (:url flow-api)
                 "lumenDeploymentColor" lumen-deployment-color
                 "lumenDeploymentEnvironment" lumen-deployment-environment

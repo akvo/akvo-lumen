@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import Raven from 'raven-js';
 import { UserManager, WebStorageStateStore } from 'oidc-client';
-import url from 'url';
 import { get } from './api';
 
 let userManager = null;
@@ -33,25 +32,26 @@ export function token() {
 
 export function initService(env) {
   const {
-    authClientId,
-    authURL,
+    clientId,
+    domain,
+    endpoints,
   } = env;
-  const DOMAIN = `${url.parse(authURL).protocol}//${url.parse(authURL).host}/auth/realms/akvo`;
+  const { issuer, authorization, userinfo, endSession, jwksUri } = endpoints;
   const settings = {
     userStore: new WebStorageStateStore({ store: window.localStorage }),
-    authority: DOMAIN,
-    client_id: authClientId,
+    authority: domain,
+    client_id: clientId,
     redirect_uri: `${location.protocol}//${location.host}/auth_callback`,
     response_type: 'id_token token',
     scope: 'openid profile email',
     post_logout_redirect_uri: `${location.protocol}//${location.host}`,
     filterProtocolClaims: true,
     metadata: {
-      issuer: `${DOMAIN}/`,
-      authorization_endpoint: `${DOMAIN}/protocol/openid-connect/auth`,
-      userinfo_endpoint: `${DOMAIN}/protocol/openid-connect/userinfo`,
-      end_session_endpoint: `${DOMAIN}/protocol/openid-connect/logout?returnTo=${location.protocol}//${location.host}`,
-      jwks_uri: `${DOMAIN}/.well-known/openid-configuration`,
+      issuer: `${domain}${issuer}`,
+      authorization_endpoint: `${domain}${authorization}`,
+      userinfo_endpoint: `${domain}${userinfo}`,
+      end_session_endpoint: `${domain}${endSession}?returnTo=${location.protocol}//${location.host}`,
+      jwks_uri: `${domain}${jwksUri}`,
     },
   };
   return new UserManager(settings);

@@ -96,15 +96,13 @@ function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
   if (url.parse(location.href).pathname !== '/auth_callback' && accessToken == null) {
-    let authz = queryString.parse(location.search).auth;
-    authz = authz ? { auth: authz } : null;
-    get('/env', authz)
+    get('/env')
     .then(
       ({
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        auth.init(body, auth.initService(body))
+        auth.init(body, auth.initService(body.auth))
         // eslint-disable-next-line consistent-return
         .then((user) => {
           // auth0.authorize();
@@ -146,13 +144,13 @@ function dispatchOnMode() {
   } else if (accessToken != null) {
     auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
   } else {
-    get('/env', { auth: 'auth0' })
+    get('/env')
     .then(
       ({
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        auth.initService(body);
+        auth.initService(body.auth);
         const mgr = new UserManager({ userStore: new WebStorageStateStore() });
         mgr.signinRedirectCallback().then(() => {
           window.location.href = '../';
