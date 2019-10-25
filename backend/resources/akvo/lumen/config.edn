@@ -182,8 +182,7 @@
 
  :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://s3-eu-west-1.amazonaws.com/akvoflow-public/caddisfly-tests-v2.json"]}
 
- :akvo.lumen.component.authentication/public-client {:url #duct/env ["LUMEN_AUTH_URL" :or "https://akvofoundation.eu.auth0.com"]
-                                                     :issuer-suffix-url #duct/env ["LUMEN_AUTH_ISSUER_SUFFIX_URL" :or "/"]
+ :akvo.lumen.component.authentication/public-client {:url #duct/env ["LUMEN_AUTH_URL" :or "https://akvofoundation.eu.auth0.com/"]
                                                      :rsa-suffix-url  #duct/env ["LUMEN_AUTH_RSA_SUFFIX_URL" :or ".well-known/jwks.json"] 
                                                      :client-id #duct/env [ "LUMEN_AUTH_PUBLIC_CLIENT_ID" :or "7Ze0JP6Jjf7zItGy3ekyuTvwGyik4Lay"]
                                                      :end-session-endpoint-suffix #duct/env [ "LUMEN_AUTH_END_SESSION_ENDPOINT_SUFFIX" :or "v2/logout"]}
