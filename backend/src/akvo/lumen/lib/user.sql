@@ -1,7 +1,11 @@
 -- :name insert-invite :<!
 -- :doc Insert an invite.
 INSERT INTO invite (email, expire, author)
-VALUES (:email, :expire, :author)
+VALUES (
+       :email,
+       :expire,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
+)
 RETURNING *;
 
 -- :name select-active-invites :? :*

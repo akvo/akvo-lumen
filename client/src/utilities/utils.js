@@ -64,7 +64,3 @@ export const filterNullData = (dataArray = []) =>
 
 export const abbr = (text, maxLength) =>
   (text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text);
-
-export function isAuth0({ authURL }) {
-  return (authURL && authURL.includes('auth0'));
-}

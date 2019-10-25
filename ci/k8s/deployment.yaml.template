@@ -127,6 +127,16 @@ spec:
             configMapKeyRef:
               name: akvo
               key: auth.public.client.id
+        - name: LUMEN_AUTH_END_SESSION_ENDPOINT_SUFFIX
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: auth.end.session.endpoint.suffix
+        - name: LUMEN_AUTH_RSA_SUFFIX_URL
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: auth.rsa.suffix.url
         - name: LUMEN_FILE_UPLOAD_PATH
           value: /tmp/akvo/lumen
         - name: LUMEN_FLOW_API_URL

@@ -14,9 +14,8 @@
 
  :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 
- :akvo.lumen.component.authentication/public-client {:url "http://auth.lumen.local:8080/auth"
+ :akvo.lumen.component.authentication/public-client {:url "http://auth.lumen.local:8080/auth/realms/akvo"
                                                      :client-id "akvo-lumen"
-                                                     :issuer-suffix-url "/realms/akvo"
                                                      :rsa-suffix-url "/protocol/openid-connect/certs"}
 
  :akvo.lumen.component.keycloak/authorization-service {:url "http://auth.lumen.local:8080/auth"

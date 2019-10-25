@@ -1,5 +1,5 @@
 /* global cy, before, context, Cypress, after, it */
-const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/?auth=keycloak';
+const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/';
 const username = Cypress.env('LUMEN_USER') || 'jerome';
 const password = Cypress.env('LUMEN_PASSWORD') || 'password';
 const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';
@@ -26,7 +26,7 @@ Cypress.on('fail', (error) => {
 context('Akvo Lumen', ()  => {
   // login
   before(() => {
-    cy.visit(baseUrl);
+      cy.visit(baseUrl);
     cy.get('#username')
       .type(username)
       .should('have.value', username);
@@ -47,16 +47,19 @@ context('Akvo Lumen', ()  => {
         cy.wrap(el)
           .find('[data-test-id="delete"]')
           .click({ force: true });
-        cy.get('.DeleteConfirmationModal button.delete')
-          .click();
+        cy.get('.DeleteConfirmationModal button.delete').click();
         setTimeout(5000, tryDelete);
       });
     };
     tryDelete();
   });
+  
+  it('e2e tests', () => {
+  context('create dataset: link', ()  => {
+	
+	        cy.get('button[data-test-id="dataset"]').click();
 
-  it('create dataset: link', () => {
-    cy.get('button[data-test-id="dataset"]').click();
+
     // Select link option
     cy.get('input[data-test-id="source-option"][value="LINK"]').click();
     cy.get('button[data-test-id="next"]').click();
@@ -74,10 +77,9 @@ context('Akvo Lumen', ()  => {
     // see if table cells exist
     cy.get('.fixedDataTableCellLayout_main').should('have.length.of.at.least', 4);
     // back to library
-    cy.get('[data-test-id="back-button"]').click();
+      cy.get('[data-test-id="back-button"]').click();
   });
-
-  it('create visualisation (pivot table)', () => {
+  context('create visualisation (pivot table)', () => {
     cy.get('button[data-test-id="visualisation"]').click();
     cy.get('[data-test-id="visualisation-type-pivot-table"]')
       .click({ force: true });
@@ -123,8 +125,7 @@ context('Akvo Lumen', ()  => {
         cy.get('[data-test-id="back-button"]').click();
       });
   });
-
-  it('create visualisation from dataset page', () => {
+  context('create visualisation from dataset page', () => {
     cy.get('.dataset').contains(datasetName).click({ force: true });
     cy.get('button[data-test-id="visualise"]').click({ force: true });
     cy.get('[data-test-id="visualisation-type-pivot-table"]')
@@ -171,8 +172,7 @@ context('Akvo Lumen', ()  => {
         cy.get('[data-test-id="back-button"]').click();
       });
   });
-
-  it('create dashboard', () => {
+  context('create dashboard', () => {
     cy.get('button[data-test-id="dashboard"]')
       .click({ force: true });
     // Selecting visualisation
@@ -190,8 +190,7 @@ context('Akvo Lumen', ()  => {
     // back to library
     cy.get('[data-test-id="back-button"]').click();
   });
-
-  it('change visualization types', () => {
+  context('change visualization types', () => {
     cy.get('button[data-test-id="visualisation"]').click();
 
     // Area
@@ -332,5 +331,6 @@ context('Akvo Lumen', ()  => {
         // back to library
         cy.get('[data-test-id="back-button"]').click();
       });
+  });
   });
 });

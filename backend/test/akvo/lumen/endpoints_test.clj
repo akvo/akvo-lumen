@@ -23,16 +23,26 @@
                  (body-kw r)))))
 
       (testing "/env"
-        (let [r (h (get* "/env" {"auth" "keycloak"}))]
+        (let [r (h (get* "/env"))]
           (is (= 200 (:status r)))
           (let [rb (body-kw r)
-                ks [:authClientId :authURL :flowApiUrl :authProvider
+                ks [:auth :flowApiUrl
                     :lumenDeploymentColor :lumenDeploymentEnvironment
                     :lumenDeploymentVersion :piwikSiteId :sentryDSN :tenant]
-                lookup-table {:authClientId "akvo-lumen",
-                              :authURL "http://auth.lumen.local:8080/auth",
-                              :authProvider "keycloak",
+                lookup-table {:auth
+                              {:clientId "akvo-lumen",
+                               :url "http://auth.lumen.local:8080/auth",
+                               :domain "http://auth.lumen.local:8080/auth/realms/akvo",
+                               :endpoints
+                               {:issuer "/",
+                                :authorization "/protocol/openid-connect/auth",
+                                :userinfo "/protocol/openid-connect/userinfo",
+                                :endSession "/protocol/openid-connect/logout",
+                                :jwksUri "/.well-known/openid-configuration"}},
                               :flowApiUrl "https://api.akvotest.org/flow",
+                              :lumenDeploymentColor "Pink",
+                              :lumenDeploymentEnvironment "Local test",
+                              :lumenDeploymentVersion "Local version",
                               :piwikSiteId "165",
                               :tenant "t1",
                               :sentryDSN "dev-sentry-client-dsn"}]
