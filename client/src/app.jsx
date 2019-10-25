@@ -9,6 +9,7 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
+import { UserManager, WebStorageStateStore } from 'oidc-client';
 import queryString from 'querystringify';
 import url from 'url';
 import { get } from './utilities/api';
@@ -94,76 +95,67 @@ function initNotAuthenticated(error) {
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
-  if (url.parse(location.href).pathname !== '/auth0_callback' && accessToken == null) {
-    let authz = queryString.parse(location.search).auth;
-    authz = authz ? { auth: authz } : null;
-    get('/env', authz)
+  if (url.parse(location.href).pathname !== '/auth_callback' && accessToken == null) {
+    get('/env')
     .then(
       ({
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        auth.init(body, auth.initService(body))
-        .then(({ profile, env }) => initAuthenticated(profile, env))
-        .catch(err => initNotAuthenticated(err.message));
+        auth.init(body, auth.initService(body.auth))
+        // eslint-disable-next-line consistent-return
+        .then((user) => {
+          // auth0.authorize();
+          if (user == null) {
+            auth.signinRedirect();
+          } else {
+            const userProfile = user.profile;
+            return Promise.resolve(get('/api/user/profile', {
+              email: user.profile.email,
+            }).then((response) => {
+              try {
+                const {
+                  admin, firstName, id, lastName,
+                } = response.body;
+                userProfile.admin = admin;
+                userProfile.firstName = firstName;
+                userProfile.keycloakId = id;
+                userProfile.lastName = lastName;
+              } catch (e) {
+                userProfile.admin = false;
+                Raven.captureException(e, {
+                  extra: {
+                    user,
+                  },
+                });
+              }
+              userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+              userProfile.username = user.username || user.nickname;
+              return { profile: userProfile, env: body };
+            }));
+          }
+        })
+        .then((res) => {
+          if (res) {
+            initAuthenticated(res.profile, res.env);
+          }
+        });
       });
   } else if (accessToken != null) {
     auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
   } else {
-    get('/env', { auth: 'auth0' })
+    get('/env')
     .then(
       ({
         body,
       // eslint-disable-next-line consistent-return
       }) => {
-        const auth0 = auth.initService(body);
-        auth.setAuth0(auth0);
-        // eslint-disable-next-line consistent-return
-        auth0.parseHash({ hash: window.location.hash }, (err, authResult) => {
-          if (err) {
-            if (err.errorDescription === 'EMAIL_VERIFIED_ERROR') {
-              initNotAuthenticated(err);
-            } else {
-              throw err;
-            }
-          } else {
-            auth0.client.userInfo(authResult.accessToken, (err2, user) => {
-              if (err2) {
-                throw err2;
-              }
-              // Now you have the user's infomation
-              const userProfile = user;
-              get('/api/user/profile', {
-                email: user.email,
-              }).then((response) => {
-                try {
-                  const {
-                    admin, firstName, id, lastName,
-                  } = response.body;
-                  userProfile.admin = admin;
-                  userProfile.firstName = firstName;
-                  userProfile.keycloakId = id;
-                  userProfile.lastName = lastName;
-                } catch (e) {
-                  userProfile.admin = false;
-                  Raven.captureException(e, {
-                    extra: {
-                      user,
-                    },
-                  });
-                }
-                userProfile.lastName = user.lastName || user.family_name;
-                userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
-                userProfile.username = user.username || user.nickname;
-                const redirect = url.parse(window.localStorage.getItem(authResult.state)).pathname;
-                if (redirect !== '/library' && redirect !== '/') {
-                  window.localStorage.setItem('redirect', redirect);
-                }
-                initAuthenticated(userProfile, body);
-              });
-            });
-          }
-          // eslint-disable-next-line consistent-return
+        auth.initService(body.auth);
+        const mgr = new UserManager({ userStore: new WebStorageStateStore() });
+        mgr.signinRedirectCallback().then(() => {
+          window.location.href = '../';
+        }).catch((err) => {
+          initNotAuthenticated(err.error_description);
         });
       });
   }

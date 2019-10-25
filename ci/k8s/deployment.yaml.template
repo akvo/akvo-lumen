@@ -127,11 +127,11 @@ spec:
             configMapKeyRef:
               name: akvo
               key: auth.public.client.id
-        - name: LUMEN_AUTH_ISSUER_SUFFIX_URL
+        - name: LUMEN_AUTH_END_SESSION_ENDPOINT_SUFFIX
           valueFrom:
             configMapKeyRef:
               name: akvo
-              key: auth.issuer.suffix.url
+              key: auth.end.session.endpoint.suffix
         - name: LUMEN_AUTH_RSA_SUFFIX_URL
           valueFrom:
             configMapKeyRef:
