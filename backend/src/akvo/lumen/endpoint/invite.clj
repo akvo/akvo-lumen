@@ -39,8 +39,7 @@
                             (let [auth-system (get query-params "auth")]
                               (user/verify-invite authorizer
                                                   (p/connection tenant-manager tenant)
-                                                  tenant id (str (location (:invite-redirect config) request)
-                                                                 "?auth=" auth-system))))}}])
+                                                  tenant id (location (:invite-redirect config) request))))}}])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.invite/invite  [_ opts]
   (admin-routes opts))
