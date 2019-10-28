@@ -52,6 +52,7 @@
                  [io.prometheus/simpleclient_hotspot "0.6.0"]
                  [io.prometheus/simpleclient_dropwizard "0.6.0"]
                  [org.clojure/test.check "0.10.0-alpha3"]]
+  :jvm-opts ["-Dnashorn.args=--no-deprecation-warning"]
   :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}

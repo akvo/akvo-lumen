@@ -7,4 +7,4 @@ if [[ "${WAIT_FOR_DEPS:=false}" = "true" ]]; then
   /app/wait-for-dependencies.sh
 fi
 
-java -Xlog:gc=info -jar /app/akvo-lumen.jar
+java -Xlog:gc=info -Dnashorn.args="--no-deprecation-warning" -jar /app/akvo-lumen.jar
