@@ -71,8 +71,7 @@ else
     ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh https://dark-lumencitest.akvotest.org/healthz
 
     log Running end to end tests against the Kubernetes TEST environment
-
-#    ./ci/e2e-test.sh akvolumenci https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD"
+    ./ci/e2e-test.sh akvolumenci auth0 https://dark-lumencitest.akvotest.org/ "$USERNAME" "$PASSWORD" "$AUTH_CLIENT" "$AUTH_PASSWORD"
 
     log Flipping TEST
     ./ci/auto-flip-test-blue-green-deployment.sh
