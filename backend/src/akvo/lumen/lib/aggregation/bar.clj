@@ -125,17 +125,16 @@
 
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
-  (if-let [bucket-column    (find-column columns (:bucketColumn query))]
+  (if-let [bucket-column (find-column columns (:bucketColumn query))]
     (let [subbucket-column (find-column columns (:subBucketColumn query))
-        metric-y-column  (or (find-column columns (:metricColumnY query)) subbucket-column)
-        aggregation  (aggregation* (:metricAggregation query) metric-y-column bucket-column)        
+          metric-y-column  (or (find-column columns (:metricColumnY query)) subbucket-column)
+          aggregation      (aggregation* (:metricAggregation query) metric-y-column bucket-column)
+          sql-response     (->> (sql table-name bucket-column subbucket-column aggregation
+                                     (sql-str columns (:filters query))
+                                     (:sort query) (or (:truncateSize query) "ALL"))
+                                (run-query tenant-conn))
 
-        sql-response (->> (sql table-name bucket-column subbucket-column aggregation
-                               (sql-str columns (:filters query))
-                               (:sort query) (or (:truncateSize query) "ALL"))
-                          (run-query tenant-conn))
-
-          max-elements     200]
+          max-elements 200]
       (if (> (count sql-response) max-elements)
         (lib/bad-request {"error"  true
                           "reason" "too-many"
