@@ -12,6 +12,7 @@ CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY:-}"
 if [[ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]]; then
     docker-compose \
 	run --no-deps \
+        -e CYPRESS_LUMEN_AUTH="keycloak" \
         -e CYPRESS_LUMEN_URL="${LUMEN_URL}" \
 	-e CYPRESS_LUMEN_USER="${LUMEN_USER}" \
 	-e CYPRESS_LUMEN_PASSWORD="${LUMEN_PASSWORD}" \
