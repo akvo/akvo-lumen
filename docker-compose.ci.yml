@@ -51,4 +51,4 @@ services:
    command: "true"
  fe-e2e-tests:
    environment:
-      - LUMEN_URL=http://t1.lumen.local/?auth=keycloak
+      - LUMEN_URL=http://t1.lumen.local/
