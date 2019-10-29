@@ -16,7 +16,7 @@
     "lint:watch": "npm run lint -- --watch",
     "clean": "rimraf ./dist && mkdir dist",
     "prebuild": "npm run lint && npm run test && npm run clean",
-    "build": "babel-node tools/buildProd.js",
+    "build": "babel-node tools/buildProd.js --silent",
     "build:dev": "babel-node tools/buildDev.js",
     "test": "NODE_ENV=test mocha test/.setup.js \"test/**/*.@(js|jsx)\"",
     "test:watch": "npm test -- --watch",
