@@ -94,7 +94,7 @@
 (defn evaluable? [code]
   (and (not (str/includes? code "function"))
        (not (str/includes? code "=>"))
-       (let [try-code (column-function "try_js_sintax" code)]
+       (let [try-code (column-function "try_js_syntax" code)]
          (try
            (eval* (js-engine) try-code)
            true
