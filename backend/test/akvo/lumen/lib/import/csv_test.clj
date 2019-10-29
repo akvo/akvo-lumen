@@ -53,8 +53,10 @@
 
 (deftest ^:functional test-varying-column-count
   (testing "Should fail to import csv file with varying number of columns"
-    (let [job-execution-id (import-file *tenant-conn* *error-tracker* {:dataset-name "Mixed Column Counts"
-                                                                       :file "mixed-column-counts.csv"})]
+    (let [job-execution-id (with-no-logs (import-file *tenant-conn*
+                                                      *error-tracker*
+                                                      {:dataset-name "Mixed Column Counts"
+                                                       :file "mixed-column-counts.csv"}))]
       (is (= "Invalid csv file. Varying number of columns"
              (:error-message (datasource-job-execution-by-id *tenant-conn* {:id job-execution-id})))))))
 
@@ -67,4 +69,3 @@
           titles (map :title (:rows dataset))
           trimmable? #(or (string/starts-with? " " %) (string/ends-with? " " %))]
       (is (every? trimmable? titles)))))
-
