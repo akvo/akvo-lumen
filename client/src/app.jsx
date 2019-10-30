@@ -107,6 +107,10 @@ function dispatchOnMode() {
         .then((user) => {
           // auth0.authorize();
           if (user == null) {
+            const redirect = url.parse(location.href).pathname;
+            if (redirect !== '/library' && redirect !== '/') {
+              window.localStorage.setItem('redirect', redirect);
+            }
             auth.signinRedirect();
           } else {
             const userProfile = user.profile;
