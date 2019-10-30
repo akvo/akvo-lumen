@@ -17,14 +17,14 @@
 (defn- column-function [fun code]
   (format "var %s = function(row) {  return %s; }" fun code))
 
-(defn- valid-type? [value type]
+(defn- valid-type? [value t]
   (when-not (nil? value)
-    (condp = type
+    (condp = t
       "number" (if (and (number? value)
                         (if (float? value)
                           (Double/isFinite value)
                           true))
-                 (Double/parseDouble (format "%.3f" value))
+                 (Double/parseDouble (format "%.3f" (double value)))
                  (throw-invalid-return-type value))
       "text" (if (string? value)
                value
