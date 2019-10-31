@@ -25,12 +25,13 @@
       [(apply format (str format-str using) args)])))
 
 (defn- change-datatype [tenant-conn table-name column-name on-error alter-table-sql]
+  (prn alter-table-sql)
   (jdbc/execute! tenant-conn alter-table-sql)
   (jdbc/execute! tenant-conn "DEALLOCATE ALL")
   (when (= on-error "delete-row")
     (db.tx.change-datatype/drop-null-rows tenant-conn
-                    {:table-name table-name
-                     :column-name column-name})))
+                                          {:table-name table-name
+                                           :column-name column-name})))
 
 (defn from-type [columns op-spec]
   (engine/column-type columns (get-in op-spec ["args" "columnName"])))
@@ -48,15 +49,22 @@
 
 (defn change-datatype-to-number
   [tenant-conn table-name columns op-spec]
+  (prn "@change-datatype-to-number")
   (let [type-conversion (type-conversion-sql-function columns op-spec)
         on-error (engine/error-strategy op-spec)
         {column-name "columnName"
          default-value "defaultValue"} (engine/args op-spec)
+        _ (prn (str "on-error: " on-error))
+        _ (prn (str "default-value: " default-value))
+        _ (when (and (= on-error "default-value")
+                     (nil? default-value))
+            (prn "Yikes - default value is nil - not a valid value for a number col"))
         alter-table (format-sql table-name column-name "double precision")
         alter-table-sql (condp = on-error
                           "fail" (alter-table "%s(%s)" type-conversion column-name)
                           "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
                           "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
+    (prn alter-table-sql)
     (engine/ensure-number default-value)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
