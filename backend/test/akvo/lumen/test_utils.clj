@@ -37,9 +37,6 @@
 
 (defn retry-job-execution [tenant-conn job-execution-id with-job?]
   (dh/with-retry {:retry-if (fn [v e]
-                              (prn "@retry-job-execution")
-                              (clojure.pprint/pprint v)
-                              (clojure.pprint/pprint e)
                               (not v))
                   :max-retries 20
                   :delay-ms 100}
@@ -49,13 +46,11 @@
           res (when (and status (not= "PENDING" status))
                 (if (= "OK" status)
                   (:dataset_id ds-job)
-                  job-execution-id))
-          r (when res
-              (if with-job?
-                [job ds-job]
-                res))]
-      (clojure.pprint/pprint r)
-      r)))
+                  job-execution-id))]
+      (when res
+        (if with-job?
+          [job ds-job]
+          res)))))
 
 
 (defn spec-instrument
