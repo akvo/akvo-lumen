@@ -7,60 +7,57 @@
             [clojure.pprint :refer (pprint)]
             [clojure.tools.logging :as log]))
 
-(defn- sql [table-name bucket-column subbucket-column aggregation filter-sql sort-query truncate-size]
-  (if subbucket-column
-    (format "
+(defn- sort* [v]
+  (case v
+    nil   "x ASC"
+    "asc" "sort_value ASC NULLS FIRST"
+    "dsc" "sort_value DESC NULLS LAST"))
+
+(defn- subbucket-sql [table-name bucket-column subbucket-column aggregation filter-sql sort-sql truncate-size]
+  (format "
           WITH
             sort_table
           AS
-            (SELECT %1$s AS x, %2$s AS sort_value, TRUE as include_value 
+            (SELECT %1$s AS x, %2$s AS sort_value
              FROM %3$s 
              WHERE %4$s 
              GROUP BY %1$s 
              ORDER BY %5$s 
-             LIMIT %6$s) , 
+             LIMIT %6$s), 
             data_table
           AS
-            ( SELECT %1$s as x, %2$s as y,
-              %7$s as s
-              FROM %3$s
-              WHERE %4$s
-              GROUP BY %1$s, %7$s ) 
+            (SELECT %1$s as x, %2$s as y, %7$s as s
+             FROM %3$s
+             WHERE %4$s
+             GROUP BY %1$s, %7$s) 
           SELECT
             data_table.x AS x,
             data_table.y,
             data_table.s,
-            sort_table.sort_value,
-            sort_table.include_value
+            sort_table.sort_value
           FROM
             data_table
-          LEFT JOIN
+          JOIN
             sort_table
           ON
-            COALESCE(sort_table.x::text, '@@@MISSINGDATA@@@') = COALESCE(data_table.x::text, '@@@MISSINGDATA@@@')
-          WHERE
-            sort_table.include_value IS NOT NULL 
+            sort_table.x = data_table.x
           ORDER BY %5$s"
-            (:columnName bucket-column) 
-            aggregation 
-            table-name
-            filter-sql
-            (case sort-query
-              nil   "x ASC"
-              "asc" "sort_value ASC NULLS FIRST"
-              "dsc" "sort_value DESC NULLS LAST")
-            truncate-size
-            (:columnName subbucket-column))
-    (format "SELECT * FROM (SELECT %1$s as x, %2$s as y FROM %3$s WHERE %4$s GROUP BY %1$s)z ORDER BY %5$s LIMIT %6$s"
-            (:columnName bucket-column)
-            aggregation
-            table-name
-            filter-sql
-            (case sort-query
-              nil   "x ASC"
-              "asc" "z.y ASC NULLS FIRST"
-              "dsc" "z.y DESC NULLS LAST")
-            truncate-size)))
+          (:columnName bucket-column)
+          aggregation
+          table-name
+          filter-sql
+          sort-sql
+          truncate-size
+          (:columnName subbucket-column)))
+
+(defn- bucket-sql [table-name bucket-column aggregation filter-sql sort-sql truncate-size]
+  (format "SELECT * FROM (SELECT %1$s as x, %2$s as y FROM %3$s WHERE %4$s GROUP BY %1$s)z ORDER BY %5$s LIMIT %6$s"
+          (:columnName bucket-column)
+          aggregation
+          table-name
+          filter-sql
+          sort-sql
+          truncate-size))
 
 (defn- aggregation* [aggregation-method metric-column bucket-column]
   (let [aggregation-method (if-not metric-column "count" (or aggregation-method "count"))]
@@ -129,12 +126,16 @@
     (let [subbucket-column (find-column columns (:subBucketColumn query))
           metric-y-column  (or (find-column columns (:metricColumnY query)) subbucket-column)
           aggregation      (aggregation* (:metricAggregation query) metric-y-column bucket-column)
-          sql-response     (->> (sql table-name bucket-column subbucket-column aggregation
-                                     (sql-str columns (:filters query))
-                                     (:sort query) (or (:truncateSize query) "ALL"))
-                                (run-query tenant-conn))
+          sql*             (if subbucket-column
+                             (subbucket-sql table-name bucket-column subbucket-column aggregation
+                                            (sql-str columns (:filters query))
+                                            (sort* (:sort query)) (or (:truncateSize query) "ALL"))
+                             (bucket-sql table-name bucket-column aggregation
+                                            (sql-str columns (:filters query))
+                                            (sort* (:sort query)) (or (:truncateSize query) "ALL")))
+          sql-response     (run-query tenant-conn sql*)
 
-          max-elements 200]
+          max-elements     200]
       (if (> (count sql-response) max-elements)
         (lib/bad-request {"error"  true
                           "reason" "too-many"

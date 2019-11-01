@@ -235,8 +235,8 @@
                {:series
                 [{:key 1.0, :label 1.0, :data '({:value 1.0} {:value 0} {:value 0})}
                  {:key 2.0, :label 2.0, :data '({:value 0} {:value 2.0} {:value 0})}
-                 {:key 3.0, :label 3.0, :data '({:value 0} {:value 0} {:value 3.0})}
-                 {:key 4.0, :label 4.0, :data '({:value 0} {:value 0} {:value 4.0})}],
+                 {:key 4.0, :label 4.0, :data '({:value 0} {:value 0} {:value 4.0})}
+                 {:key 3.0, :label 3.0, :data '({:value 0} {:value 0} {:value 3.0})}],
                 :common
                 {:metadata {:type "text"},
                  :data
