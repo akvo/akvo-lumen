@@ -17,9 +17,11 @@
 
 (defn query* [t dataset-id & [expected-tag]]
   (fn [q]
-    (let [[tag _ :as res] (aggregation/query *tenant-conn* dataset-id t (if (:filters q)
-                                                                          q
-                                                                          (assoc q :filters [])))]
+    (let [[tag _ :as res] (aggregation/query *tenant-conn* dataset-id t (assoc (if (:filters q)
+                                                                                 q
+                                                                                 (assoc q :filters []))
+                                                                               :version 1
+                                                                               ))]
       (is (= tag (or expected-tag ::lib/ok)))
       res)))
 
