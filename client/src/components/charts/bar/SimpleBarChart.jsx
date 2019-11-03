@@ -10,7 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 import itsSet from 'its-set';
-import commonPropTypes from './CommonBarChart';
+import barPropTypes from './CommonBarChart';
 
 import { isLight } from '../../../utilities/color';
 import {
@@ -54,7 +54,7 @@ const getPaddingBottom = (data, type) => {
 
 export default class SimpleBarChart extends Component {
 
-  static propTypes = commonPropTypes;
+  static propTypes = barPropTypes;
 
   static defaultProps = {
     interactive: true,

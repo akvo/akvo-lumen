@@ -11,6 +11,7 @@ import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
 import { GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
+import { stackedBarPropTypes, stackedBarDefaultsProps } from './CommonBarChart';
 
 import { abbr } from '../../../utilities/utils';
 import {
@@ -46,54 +47,12 @@ const getPaddingBottom = (data) => {
 
 export default class StackedBarChart extends Component {
 
-  static propTypes = {
-    data: PropTypes.shape({
-      series: PropTypes.array,
-      common: PropTypes.object,
-      metadata: PropTypes.object,
-    }),
-    colors: PropTypes.array.isRequired,
-    colorMapping: PropTypes.object,
-    onChangeVisualisationSpec: PropTypes.func,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
-    print: PropTypes.bool,
-    interactive: PropTypes.bool,
-    edit: PropTypes.bool,
-    padding: PropTypes.number,
-    marginLeft: PropTypes.number,
-    marginRight: PropTypes.number,
-    marginTop: PropTypes.number,
-    marginBottom: PropTypes.number,
-    style: PropTypes.object,
-    legendVisible: PropTypes.bool,
-    labelsVisible: PropTypes.bool,
-    valueLabelsVisible: PropTypes.bool,
-    legendTitle: PropTypes.string,
-    yAxisLabel: PropTypes.string,
-    xAxisLabel: PropTypes.string,
-    subBucketMethod: PropTypes.string,
-    grid: PropTypes.bool,
-    yAxisTicks: PropTypes.number,
-    visualisation: PropTypes.object,
-  }
+  static propTypes = stackedBarPropTypes;
 
-  static defaultProps = {
-    interactive: true,
-    marginLeft: 70,
-    marginRight: 70,
-    marginTop: 20,
-    marginBottom: 60,
-    legendVisible: true,
-    labelsVisible: true,
-    edit: false,
-    padding: 0.1,
-    colorMapping: {},
-    grouped: false,
-    grid: true,
+  static defaultProps =
+  { ...stackedBarDefaultsProps,
     xAxisLabel: '',
-  }
+  };
 
   static contextTypes = {
     abbrNumber: PropTypes.func,
