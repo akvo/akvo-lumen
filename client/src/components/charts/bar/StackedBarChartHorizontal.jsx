@@ -12,7 +12,7 @@ import { stack } from 'd3-shape';
 import { GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
 
-import { abbr } from '../../utilities/utils';
+import { abbr } from '../../../utilities/utils';
 import {
   heuristicRound,
   replaceLabelIfValueEmpty,
@@ -20,15 +20,15 @@ import {
   getLabelFontSize,
   labelFitsWidth,
   labelFitsHeight,
-} from '../../utilities/chart';
-import Legend from './Legend';
-import ResponsiveWrapper from '../common/ResponsiveWrapper';
-import ColorPicker from '../common/ColorPicker';
-import ChartLayout from './ChartLayout';
-import Tooltip from './Tooltip';
-import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE, LABEL_CHAR_WIDTH } from '../../constants/chart';
-import RenderComplete from './RenderComplete';
-import { isLight } from '../../utilities/color';
+} from '../../../utilities/chart';
+import Legend from '../Legend';
+import ResponsiveWrapper from '../../common/ResponsiveWrapper';
+import ColorPicker from '../../common/ColorPicker';
+import ChartLayout from '../ChartLayout';
+import Tooltip from '../Tooltip';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE, LABEL_CHAR_WIDTH } from '../../../constants/chart';
+import RenderComplete from '../RenderComplete';
+import { isLight } from '../../../utilities/color';
 
 const getPaddingBottom = (data) => {
   const labelCutoffLength = 16;

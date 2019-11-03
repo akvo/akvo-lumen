@@ -19,15 +19,15 @@ import {
   getLabelFontSize,
   labelFitsWidth,
   labelFitsHeight,
-} from '../../utilities/chart';
-import Legend from './Legend';
-import ResponsiveWrapper from '../common/ResponsiveWrapper';
-import ColorPicker from '../common/ColorPicker';
-import ChartLayout from './ChartLayout';
-import Tooltip from './Tooltip';
-import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
-import { isLight } from '../../utilities/color';
-import RenderComplete from './RenderComplete';
+} from '../../../utilities/chart';
+import Legend from '../Legend';
+import ResponsiveWrapper from '../../common/ResponsiveWrapper';
+import ColorPicker from '../../common/ColorPicker';
+import ChartLayout from '../ChartLayout';
+import Tooltip from '../Tooltip';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../constants/chart';
+import { isLight } from '../../../utilities/color';
+import RenderComplete from '../RenderComplete';
 
 const getPaddingBottom = (data) => {
   const labelCutoffLength = 16;

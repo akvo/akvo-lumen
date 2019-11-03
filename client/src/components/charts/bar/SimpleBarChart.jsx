@@ -10,22 +10,23 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridRows } from '@vx/grid';
 import itsSet from 'its-set';
+import commonPropTypes from './CommonBarChart';
 
-import { isLight } from '../../utilities/color';
+import { isLight } from '../../../utilities/color';
 import {
   heuristicRound,
   replaceLabelIfValueEmpty,
   calculateMargins,
   getLabelFontSize,
   labelFitsWidth,
-} from '../../utilities/chart';
-import Legend from './Legend';
-import ResponsiveWrapper from '../common/ResponsiveWrapper';
-import ColorPicker from '../common/ColorPicker';
-import ChartLayout from './ChartLayout';
-import Tooltip from './Tooltip';
-import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
-import RenderComplete from './RenderComplete';
+} from '../../../utilities/chart';
+import Legend from '../Legend';
+import ResponsiveWrapper from '../../common/ResponsiveWrapper';
+import ColorPicker from '../../common/ColorPicker';
+import ChartLayout from '../ChartLayout';
+import Tooltip from '../Tooltip';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../constants/chart';
+import RenderComplete from '../RenderComplete';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -53,50 +54,7 @@ const getPaddingBottom = (data, type) => {
 
 export default class SimpleBarChart extends Component {
 
-  static propTypes = {
-    data: PropTypes.shape({
-      data: PropTypes.oneOfType([
-        PropTypes.arrayOf(
-          PropTypes.shape({
-            key: PropTypes.string,
-            value: PropTypes.number,
-          })
-        ),
-        PropTypes.arrayOf(
-          PropTypes.shape({
-            key: PropTypes.string,
-            values: PropTypes.arrayOf(
-              PropTypes.number
-            ),
-          })
-        ),
-      ]),
-      metadata: PropTypes.object,
-    }),
-    colors: PropTypes.array.isRequired,
-    colorMapping: PropTypes.object,
-    defaultColor: PropTypes.string.isRequired,
-    onChangeVisualisationSpec: PropTypes.func,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
-    print: PropTypes.bool,
-    interactive: PropTypes.bool,
-    edit: PropTypes.bool,
-    padding: PropTypes.number,
-    marginLeft: PropTypes.number,
-    marginRight: PropTypes.number,
-    marginTop: PropTypes.number,
-    marginBottom: PropTypes.number,
-    style: PropTypes.object,
-    legendVisible: PropTypes.bool,
-    valueLabelsVisible: PropTypes.bool,
-    yAxisLabel: PropTypes.string,
-    yAxisTicks: PropTypes.number,
-    xAxisLabel: PropTypes.string,
-    grid: PropTypes.bool,
-    visualisation: PropTypes.object,
-  }
+  static propTypes = commonPropTypes;
 
   static defaultProps = {
     interactive: true,
