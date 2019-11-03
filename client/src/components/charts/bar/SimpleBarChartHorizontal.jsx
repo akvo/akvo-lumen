@@ -10,7 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
-import barPropTypes from './CommonBarChart';
+import { barPropTypes, barDefaultProps } from './CommonBarChart';
 
 import { isLight } from '../../../utilities/color';
 import { abbr } from '../../../utilities/utils';
@@ -54,20 +54,12 @@ export default class SimpleBarChart extends Component {
 
   static propTypes = barPropTypes;
 
-  static defaultProps = {
-    interactive: true,
+  static defaultProps =
+  { ...barDefaultProps,
     marginLeft: 180,
-    marginRight: 70,
-    marginTop: 70,
     marginBottom: 70,
-    legendVisible: false,
-    valueLabelsVisible: false,
-    edit: false,
-    padding: 0.1,
-    colorMapping: {},
-    grid: true,
     xAxisLabel: '',
-  }
+  };
 
   static contextTypes = {
     abbrNumber: PropTypes.func,

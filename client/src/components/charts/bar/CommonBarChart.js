@@ -94,3 +94,17 @@ export const stackedBarDefaultsProps = {
   grouped: false,
   grid: true,
 };
+
+export const barDefaultProps = {
+  interactive: true,
+  marginLeft: 80,
+  marginRight: 70,
+  marginTop: 70,
+  marginBottom: 60,
+  legendVisible: false,
+  valueLabelsVisible: false,
+  edit: false,
+  padding: 0.1,
+  colorMapping: {},
+  grid: true,
+};
