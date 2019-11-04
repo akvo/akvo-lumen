@@ -7,11 +7,11 @@
             [clojure.pprint :refer (pprint)]
             [clojure.tools.logging :as log]))
 
-(defn- sort* [v]
+(defn- sort* [v column]
   (case v
     nil   "x ASC"
-    "asc" "sort_value ASC NULLS FIRST"
-    "dsc" "sort_value DESC NULLS LAST"))
+    "asc" (format "%s ASC NULLS FIRST" column)
+    "dsc" (format "%s DESC NULLS LAST" column)))
 
 (defn- subbucket-sql [table-name bucket-column subbucket-column aggregation filter-sql sort-sql truncate-size]
   (format "
@@ -129,10 +129,11 @@
           sql*             (if subbucket-column
                              (subbucket-sql table-name bucket-column subbucket-column aggregation
                                             (sql-str columns (:filters query))
-                                            (sort* (:sort query)) (or (:truncateSize query) "ALL"))
+                                            (sort* (:sort query) "sort_value") (or (:truncateSize query) "ALL"))
                              (bucket-sql table-name bucket-column aggregation
                                             (sql-str columns (:filters query))
-                                            (sort* (:sort query)) (or (:truncateSize query) "ALL")))
+                                            (sort* (:sort query) "z.y") (or (:truncateSize query) "ALL")))
+          _ (log/error :sql* sql*)
           sql-response     (run-query tenant-conn sql*)
 
           max-elements     200]
