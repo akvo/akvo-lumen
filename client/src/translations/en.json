@@ -310,6 +310,7 @@
   "source_column": "Source column",
   "source_dataset": "Source dataset",
   "split_bars": "Split bars",
+  "split_bucket": "Split bucket",
   "split_column": "Split column values",
   "split_column_log": "Split column '{extractedColumnTitle}', with prefix '{newColumnNamePrefix}' with separator '{pattern}'",
   "square": "Square",
