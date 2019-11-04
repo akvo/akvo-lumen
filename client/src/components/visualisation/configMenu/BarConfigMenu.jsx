@@ -143,17 +143,16 @@ function BarConfigMenu(props) {
                 }, spec, onChangeSpec, columnOptions)}
               />
             )}
+            <SortInput
+              spec={spec}
+              onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
+            />
           </div>
         )}
         advancedOptions={(
           <div>
             {spec.bucketColumn !== null && (
               <div>
-                <SortInput
-                  spec={spec}
-                  columnOptions={filterColumns(columnOptions, ['number', 'date', 'text'])}
-                  onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
-                />
                 <ConfigMenuSectionOptionSelect
                   placeholderId="select_a_sub_bucket_column"
                   labelTextId="sub_bucket_column"
