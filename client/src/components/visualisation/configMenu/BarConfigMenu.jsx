@@ -294,17 +294,6 @@ class BarConfigMenu extends Component {
           options={(
             <div>
               <ConfigMenuSectionOptionSelect
-                id="metric_column"
-                placeholderId="select_a_metric_column"
-                labelTextId="metric_column"
-                value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
-                name="metricColumnYInput"
-                options={filterColumns(columnOptions, ['number'])}
-                onChange={value => handleChangeSpec({
-                  metricColumnY: value,
-                }, spec, onChangeSpec, columnOptions)}
-              />
-              <ConfigMenuSectionOptionSelect
                 placeholderId={spec.bucketColumn !== null ?
                   'choose_aggregation_type' : 'must_choose_bucket_column_first'}
                 labelTextId="aggregation_type"
@@ -315,6 +304,17 @@ class BarConfigMenu extends Component {
                 disabled={spec.bucketColumn === null}
                 onChange={value => handleChangeSpec({
                   metricAggregation: value,
+                }, spec, onChangeSpec, columnOptions)}
+              />
+              <ConfigMenuSectionOptionSelect
+                id="metric_column"
+                placeholderId="select_a_metric_column"
+                labelTextId="metric_column"
+                value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+                name="metricColumnYInput"
+                options={filterColumns(columnOptions, ['number'])}
+                onChange={value => handleChangeSpec({
+                  metricColumnY: value,
                 }, spec, onChangeSpec, columnOptions)}
               />
             </div>
@@ -330,7 +330,16 @@ class BarConfigMenu extends Component {
               }, spec, onChangeSpec, columnOptions)}
             />
           )}
-        />
+        >
+          <div className="inputGroup ButtonRowInput inputGroup">
+            <button
+              className="button clickable"
+              data-test-id="generate"
+            >
+           Select a column
+            </button>
+          </div>
+        </ConfigMenuSection>
         <ConfigMenuSection
           title="misc"
           options={(
