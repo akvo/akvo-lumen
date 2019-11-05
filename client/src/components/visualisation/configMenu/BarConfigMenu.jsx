@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { filter, get } from 'lodash';
 import { compose, mapProps } from 'recompose';
+import SeriesMenu from './SeriesMenu';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
@@ -331,14 +332,12 @@ class BarConfigMenu extends Component {
             />
           )}
         >
-          <div className="inputGroup ButtonRowInput inputGroup">
-            <button
-              className="button clickable"
-              data-test-id="generate"
-            >
-           Select a column
-            </button>
-          </div>
+          <SeriesMenu
+            hasDataset={Boolean(visualisation.datasetId !== null)}
+            onChangeSpec={onChangeSpec}
+            metricColumnsY={spec.metricColumnsY}
+            columnOptions={columnOptions}
+          />
         </ConfigMenuSection>
         <ConfigMenuSection
           title="misc"
