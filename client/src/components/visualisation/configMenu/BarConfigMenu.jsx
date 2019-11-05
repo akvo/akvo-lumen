@@ -113,6 +113,8 @@ class BarConfigMenu extends Component {
       aggregationOptions,
     } = this.props;
     const spec = visualisation.spec;
+    const seriesColumnOptions = columnOptions.filter(c => c.value !== spec.metricColumnY);
+
     const subBucketMethodView = splitColumn && spec.bucketColumn && spec.subBucketColumn ? (
       <ConfigMenuSectionOption
         labelTextId="sub_bucket_method"
@@ -216,6 +218,7 @@ class BarConfigMenu extends Component {
                 name="splitBucket"
                 type="checkbox"
                 labelId="split_bucket"
+                disabled={spec.metricColumnsY.length > 0}
                 className="InputGroup"
                 checked={splitColumn}
                 onChange={this.splitColumnHandler}
@@ -310,7 +313,7 @@ class BarConfigMenu extends Component {
               <ConfigMenuSectionOptionSelect
                 id="metric_column"
                 placeholderId="select_a_metric_column"
-                labelTextId="metric_column"
+                labelTextId={spec.metricColumnsY.length === 0 ? 'metric_column' : 'metric_columns'}
                 value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
                 name="metricColumnYInput"
                 options={filterColumns(columnOptions, ['number'])}
@@ -318,6 +321,12 @@ class BarConfigMenu extends Component {
                   metricColumnY: value,
                 }, spec, onChangeSpec, columnOptions)}
               />
+              {splitColumn === false ? <SeriesMenu
+                hasDataset={Boolean(visualisation.datasetId !== null)}
+                onChangeSpec={onChangeSpec}
+                metricColumnsY={spec.metricColumnsY}
+                columnOptions={filterColumns(seriesColumnOptions, ['number'])}
+              /> : ''}
             </div>
           )}
           advancedOptions={(
@@ -331,14 +340,7 @@ class BarConfigMenu extends Component {
               }, spec, onChangeSpec, columnOptions)}
             />
           )}
-        >
-          <SeriesMenu
-            hasDataset={Boolean(visualisation.datasetId !== null)}
-            onChangeSpec={onChangeSpec}
-            metricColumnsY={spec.metricColumnsY}
-            columnOptions={columnOptions}
-          />
-        </ConfigMenuSection>
+        />
         <ConfigMenuSection
           title="misc"
           options={(
