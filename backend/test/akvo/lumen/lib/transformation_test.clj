@@ -98,8 +98,7 @@
 (defn gen-transformation
   "due some specs issues we need to generate merge specs step by step
   issues related to s/merge or generating false/nil values"
-  [t-type  gens & kvs]
-  (prn "@gen-transformation")
+  [t-type gens & kvs]
   (let [t-type (keyword t-type)
         op-name (str (namespace t-type) "/" (name t-type))
         gens (when gens
@@ -113,10 +112,12 @@
         args (if (and kvs (not-empty kvs) (even? (count kvs)))
                (reduce #((if (vector? (first %2))  assoc-in assoc) % (first %2) (last %2)) args (partition 2 kvs))
                args)]
-    (prn s)
-    (prn args)
+    #_(when (= t-type "core/change-datatype")
+        (prn "s:")
+        (prn s)
+        (prn "args:")
+        (prn args))
     (conform ::transformation.engine.s/op-spec (assoc s :op op-name :args args))
-
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
 (def change-datatype-tx (fn [column-name & [new-type]]
@@ -125,7 +126,8 @@
                                                 "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
                                                                         ::transformation.change-datatype.s/newType (or new-type "number")
                                                                         ::transformation.engine.s/onError "default-value"})
-                                               (assoc-in ["args" "defaultValue"] nil))}))
+                                               (assoc-in ["args" "defaultValue"] (if (= new-type "number")
+                                                                                   0 nil)))}))
 
 #_(deftest ^:functional test-transformations
     (testing "Transformation application"
@@ -368,8 +370,8 @@
       (is (= (latest-data dataset-id)
              [{:rnum 1 :c1 "a" :c2 1.0 :c3 2.0}
               {:rnum 2 :c1 "b" :c2 3.0 :c3 nil}
-              {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
-
+              {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}]))
+      )
     (testing "Basic text transform"
       (apply-transformation {:type :transformation
                              :transformation
