@@ -51,7 +51,6 @@
           [job ds-job]
           res)))))
 
-
 (defn spec-instrument
   "Fixture to instrument all functions"
   [f]

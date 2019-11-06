@@ -46,30 +46,19 @@
         to-type (lumen-type->pg-type (get-in op-spec ["args" "newType"]))]
     (format "%s_to_%s" from-type to-type)))
 
-(defn same-column-type?
-  [columns op-spec]
-  (= (get-in op-spec ["args" "newType"])
-     (-> (filter (fn [col]
-                   (= (get col "columnName")
-                      (get-in op-spec ["args" "columnName"])))
-                 columns)
-         first
-         (get "type"))))
-
 (defn change-datatype-to-number
   [tenant-conn table-name columns op-spec]
-  (when (not (same-column-type? columns op-spec))
-    (let [type-conversion (type-conversion-sql-function columns op-spec)
-          on-error (engine/error-strategy op-spec)
-          {column-name "columnName"
-           default-value "defaultValue"} (engine/args op-spec)
-          alter-table (format-sql table-name column-name "double precision")
-          alter-table-sql (condp = on-error
-                            "fail" (alter-table "%s(%s)" type-conversion column-name)
-                            "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
-                            "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
-      (engine/ensure-number default-value)
-      (change-datatype tenant-conn table-name column-name on-error alter-table-sql))))
+  (let [type-conversion (type-conversion-sql-function columns op-spec)
+        on-error (engine/error-strategy op-spec)
+        {column-name "columnName"
+         default-value "defaultValue"} (engine/args op-spec)
+        alter-table (format-sql table-name column-name "double precision")
+        alter-table-sql (condp = on-error
+                          "fail" (alter-table "%s(%s)" type-conversion column-name)
+                          "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
+                          "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
+    (engine/ensure-number default-value)
+    (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defn change-datatype-to-text
   [tenant-conn table-name columns op-spec]
@@ -108,18 +97,33 @@
     (engine/ensure-number default-value)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
+(defn same-column-type?
+  [columns op-spec]
+  (= (get-in op-spec ["args" "newType"])
+     (-> (filter (fn [col]
+                   (= (get col "columnName")
+                      (get-in op-spec ["args" "columnName"])))
+                 columns)
+         first
+         (get "type"))))
+
 (defmethod engine/apply-operation "core/change-datatype"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [{column-name "columnName"
          new-type "newType"} (engine/args op-spec)]
-    (condp = new-type
-      "text" (change-datatype-to-text tenant-conn table-name columns op-spec)
-      "number" (change-datatype-to-number tenant-conn table-name columns op-spec)
-      "date" (change-datatype-to-date tenant-conn table-name columns op-spec))
-    {:success? true
-     :execution-log [(format "Changed column %s datatype from %s to %s"
-                             column-name (engine/column-type columns column-name) new-type)]
-     :columns (engine/update-column columns column-name assoc "type" new-type)}))
+    (if (same-column-type? columns op-spec)
+      {:success? true
+       :execution-log [(format "Tried to change column %s datatype to same type, nothing changed" column-name)]
+       :columns columns})
+    (do
+      (condp = new-type
+        "text" (change-datatype-to-text tenant-conn table-name columns op-spec)
+        "number" (change-datatype-to-number tenant-conn table-name columns op-spec)
+        "date" (change-datatype-to-date tenant-conn table-name columns op-spec))
+      {:success? true
+       :execution-log [(format "Changed column %s datatype from %s to %s"
+                               column-name (engine/column-type columns column-name) new-type)]
+       :columns (engine/update-column columns column-name assoc "type" new-type)})))
 
 (defmethod engine/columns-used "core/change-datatype"
   [applied-transformation columns]
