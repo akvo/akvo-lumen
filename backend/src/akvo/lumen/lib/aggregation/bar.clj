@@ -110,7 +110,6 @@
              bucket-values)}}))
 
 (defn metrics-column-response [sql-response bucket-column metric-columns-y]
-  (log/error :sql-response sql-response)
   (let [bucket-values (map first sql-response)
         subbucket-values (map :title metric-columns-y)]
     {:series

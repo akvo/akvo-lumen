@@ -180,9 +180,9 @@
                               [{:value "c"} {:value 1} {:value 3} {:value 30} {:value 300}]
                               [{:value "c"} {:value 1} {:value 4} {:value 40} {:value 400}]]}
         dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "bar"
-                                                               :kind "clj"
-                                                               :data data})
-        query (query* "bar" dataset-id)]
+                                                               :kind         "clj"
+                                                               :data         data})
+        query      (query* "bar" dataset-id)]
     (testing "Simple queries"
       (let [[tag query-result] (query {:bucketColumn "c1"})]
         (is (= query-result
@@ -201,28 +201,28 @@
                 :common
                 {:metadata {:type "number"}, :data [{:label 1.0, :key 1.0}]}}))))
     (testing "aggregation types with metric column"
-      (let [[tag query-result] (query {:bucketColumn "c1"
+      (let [[tag query-result] (query {:bucketColumn      "c1"
                                        :metricAggregation "min"
-                                       :metricColumnY "c3"})]
+                                       :metricColumnY     "c3"})]
         (is (= query-result
                {:series
-                [{:key "C",
+                [{:key   "C",
                   :label "C",
-                  :data [{:value 1.0} {:value 2.0} {:value 3.0}]}],
+                  :data  [{:value 1.0} {:value 2.0} {:value 3.0}]}],
                 :common
                 {:metadata {:type "text"},
                  :data
                  [{:label "a", :key "a"}
                   {:label "b", :key "b"}
                   {:label "c", :key "c"}]}})))
-      (let [[tag query-result] (query {:bucketColumn "c1"
+      (let [[tag query-result] (query {:bucketColumn      "c1"
                                        :metricAggregation "max"
-                                       :metricColumnY "c3"})]
+                                       :metricColumnY     "c3"})]
         (is (= query-result
                {:series
-                [{:key "C",
+                [{:key   "C",
                   :label "C",
-                  :data [{:value 1.0} {:value 2.0} {:value 4.0}]}],
+                  :data  [{:value 1.0} {:value 2.0} {:value 4.0}]}],
                 :common
                 {:metadata {:type "text"},
                  :data
@@ -252,16 +252,16 @@
 	          {:key "b", :label "b"}
 	          {:key "c", :label "c"}]}}))))
     (testing "aggregation types with metric column and subbucket-column"
-      (let [[tag query-result] (query {:bucketColumn "c1"
+      (let [[tag query-result] (query {:bucketColumn      "c1"
                                        :metricAggregation "max"
-                                       :metricColumnY "c3"
-                                       :subBucketColumn "c3"})]
+                                       :metricColumnY     "c3"
+                                       :subBucketColumn   "c3"})]
         (is (= query-result
                {:series
                 [{:key 1.0, :label 1.0, :data '({:value 1.0} {:value 0} {:value 0})}
                  {:key 2.0, :label 2.0, :data '({:value 0} {:value 2.0} {:value 0})}
-                 {:key 3.0, :label 3.0, :data '({:value 0} {:value 0} {:value 3.0})}
-                 {:key 4.0, :label 4.0, :data '({:value 0} {:value 0} {:value 4.0})}],
+                 {:key 4.0, :label 4.0, :data '({:value 0} {:value 0} {:value 4.0})}
+                 {:key 3.0, :label 3.0, :data '({:value 0} {:value 0} {:value 3.0})}],
                 :common
                 {:metadata {:type "text"},
                  :data
