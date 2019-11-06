@@ -79,7 +79,7 @@ class BarConfigMenu extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      splitColumn: false,
+      splitColumn: props.visualisation.spec.subBucketColumn !== null,
     };
     this.splitColumnHandler = this.splitColumnHandler.bind(this);
   }
