@@ -325,11 +325,12 @@ class BarConfigMenu extends Component {
                 hasDataset={Boolean(visualisation.datasetId !== null)}
                 onChangeSpec={onChangeSpec}
                 metricColumnsY={spec.metricColumnsY}
+                metricAggregation={spec.metricAggregation}
                 columnOptions={filterColumns(seriesColumnOptions, ['number'])}
               /> : ''}
             </div>
           )}
-          advancedOptions={(
+          advancedOptions={spec.metricColumnsY.length === 0 ? (
             <ConfigMenuSectionOptionText
               value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
               placeholderId="y_axis_label"
@@ -339,7 +340,7 @@ class BarConfigMenu extends Component {
                 axisLabelYFromUser: true,
               }, spec, onChangeSpec, columnOptions)}
             />
-          )}
+          ) : ''}
         />
         <ConfigMenuSection
           title="misc"

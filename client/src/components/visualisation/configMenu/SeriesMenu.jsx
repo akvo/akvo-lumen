@@ -59,6 +59,8 @@ class SeriesMenu extends Component {
 
     this.props.onChangeSpec({
       metricColumnsY,
+      axisLabelY: this.props.metricAggregation,
+      axisLabelYFromUser: false,
     });
 
     this.setState({
@@ -77,9 +79,17 @@ class SeriesMenu extends Component {
       throw new Error(`Cannot delete serie ${delSerie} as it does not appear in spec.metricColumnsY`);
     } else {
       rawSeries.splice(index, 1);
-      this.props.onChangeSpec({
-        metricColumnsY: rawSeries,
-      });
+      if (series.length === 1) {
+        this.props.onChangeSpec({
+          metricColumnsY: rawSeries,
+        });
+      } else {
+        this.props.onChangeSpec({
+          metricColumnsY: rawSeries,
+          axisLabelY: this.props.metricAggregation,
+          axisLabelYFromUser: false,
+        });
+      }
     }
   }
 
@@ -177,6 +187,7 @@ SeriesMenu.propTypes = {
   hasDataset: PropTypes.bool.isRequired,
   columnOptions: PropTypes.array.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
+  metricAggregation: PropTypes.string.isRequired,
 };
 
 export default injectIntl(SeriesMenu);
