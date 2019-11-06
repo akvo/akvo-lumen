@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { filter, get } from 'lodash';
+import { compose, mapProps } from 'recompose';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
@@ -327,4 +328,19 @@ BarConfigMenu.propTypes = {
   intl: intlShape,
 };
 
-export default injectIntl(BarConfigMenu);
+export default compose(
+  mapProps((props) => {
+    const {
+      visualisation,
+      columnOptions,
+    } = props;
+    const spec = visualisation.spec;
+    const subBucketColumn = filter(columnOptions, ['value', spec.subBucketColumn])[0];
+    const subBucketColumnTypeCondition = subBucketColumn ? subBucketColumn.type !== 'text' : true;
+    if (spec.subBucketColumn && subBucketColumnTypeCondition) {
+      spec.subBucketColumn = null;
+      spec.subBucketMethod = 'split';
+    }
+    return { ...props, visualisation: { ...visualisation, spec } };
+  })
+)(injectIntl(BarConfigMenu));
