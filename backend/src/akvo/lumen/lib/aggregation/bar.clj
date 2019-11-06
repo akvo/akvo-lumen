@@ -17,16 +17,14 @@
 (defn- subbucket-sql [table-name bucket-column subbucket-column aggregation filter-sql sort-sql truncate-size]
   (format "
           WITH
-            sort_table
-          AS
+          sort_table AS
             (SELECT %1$s AS x, %2$s AS sort_value
              FROM %3$s 
              WHERE %4$s 
              GROUP BY %1$s 
              ORDER BY %5$s 
              LIMIT %6$s), 
-            data_table
-          AS
+          data_table AS
             (SELECT %1$s as x, %2$s as y, %7$s as s
              FROM %3$s
              WHERE %4$s
@@ -52,25 +50,16 @@
           (:columnName subbucket-column)))
 
 (defn- bucket-sql [table-name bucket-column aggregation filter-sql sort-sql truncate-size]
-  (format "SELECT * FROM (SELECT %1$s as x, %2$s as y FROM %3$s WHERE %4$s GROUP BY %1$s)z ORDER BY %5$s LIMIT %6$s"
+  (format "SELECT * 
+           FROM (SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY %1$s)z 
+           ORDER BY %5$s 
+           LIMIT %6$s"
           (:columnName bucket-column)
           aggregation
           table-name
           filter-sql
           sort-sql
           truncate-size))
-
-(defn- series-bucket-sql [table-name bucket-column aggregations filter-sql sort-sql truncate-size metricColumnsY]
-  (format "SELECT * FROM 
-(SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY %1$s)z 
-ORDER BY %5$s LIMIT %6$s"
-          (:columnName bucket-column)
-          (str/join ", " aggregations )
-          table-name
-          filter-sql
-          sort-sql
-          truncate-size
-          metricColumnsY))
 
 (defn- aggregation* [aggregation-method metric-column bucket-column]
   (let [aggregation-method (if-not metric-column "count" (or aggregation-method "count"))]
@@ -86,64 +75,65 @@ ORDER BY %5$s LIMIT %6$s"
      (or (:columnName metric-column)
          (:columnName bucket-column)))))
 
-(defn- subbucket-column-response [sql-response bucket-column metric-columns-y]
+(defn subbucket-column-response [sql-response bucket-column]
   (let [bucket-values    (distinct
-                          (mapv
+                          (map
                            (fn [[x-value _ _]] x-value)
                            sql-response))
-        subbucket-values (if metric-columns-y
-                           (mapv :title metric-columns-y)
-                           (distinct
-                           (mapv
-                            (fn [[_ _ s-value]] s-value)
-                            sql-response)))]
-    {:series
-     (if metric-columns-y
-       ;; men women
-       ;;([Agriculture  30.5 31.5][Education  24.5 24.5] [Other  24.5 18.5] [WASH  32.0 31.0])
-       (mapv
-        (fn [metric-column i]
-          {:key metric-column
-           :label metric-column
-           :data  (mapv #(assoc {} :value (nth % i)) sql-response)} 
-          )
-        (mapv :title metric-columns-y)
-        (map inc (range))
-        )
-       
-       (mapv
-        (fn [s-value]
-          {:key   s-value
-           :label s-value
-           :data
-           (map
-            (fn
-              [bucket-value]
-              {:value (or (nth
-                           (first
-                            (filter
-                             (fn [row] (and (= (nth row 0) bucket-value) (= (nth row 2) s-value)))
-                             sql-response))
-                           1
-                           0) 0)})
-            bucket-values)})
-        subbucket-values))
+        subbucket-values (distinct
+                          (map
+                           (fn [[_ _ s-value]] s-value)
+                           sql-response))]
+    {:series (map
+              (fn [s-value]
+                {:key   s-value
+                 :label s-value
+                 :data
+                 (map
+                  (fn
+                    [bucket-value]
+                    {:value (or (nth
+                                 (first
+                                  (filter
+                                   (fn [row] (and (= (nth row 0) bucket-value) (= (nth row 2) s-value)))
+                                   sql-response))
+                                 1
+                                 0) 0)})
+                  bucket-values)})
+              subbucket-values)
      :common
      {:metadata
       {:type (:type bucket-column)}
-      :data (mapv
+      :data (map
              (fn [bucket] {:label bucket
                            :key   bucket})
              bucket-values)}}))
 
+(defn metrics-column-response [sql-response bucket-column metric-columns-y]
+  (log/error :sql-response sql-response)
+  (let [bucket-values (map first sql-response)
+        subbucket-values (map :title metric-columns-y)]
+    {:series
+     (map
+      (fn [metric-column i]
+        {:key metric-column
+         :label metric-column
+         :data  (map #(hash-map :value (nth % i)) sql-response)})
+      subbucket-values
+      (map inc (range)))
+     :common
+     {:metadata
+      {:type (:type bucket-column)}
+      :data (map #(hash-map :label % :key %) bucket-values)}}))
+
 (defn- bucket-column-response [sql-response bucket-column metric-y-column]
   {:series [{:key   (:title metric-y-column)
              :label (:title metric-y-column)
-             :data  (mapv (fn [[x-value y-value]]
+             :data  (mapv (fn [[_ y-value]]
                             {:value y-value})
                           sql-response)}]
    :common {:metadata {:type (:type bucket-column)}
-            :data     (mapv (fn [[x-value y-value]]
+            :data     (mapv (fn [[x-value _]]
                               {:label x-value
                                :key   x-value})
                             sql-response)}})
@@ -156,23 +146,25 @@ ORDER BY %5$s LIMIT %6$s"
           metric-aggregation (:metricAggregation query)
           aggregation      (aggregation* metric-aggregation metric-y-column bucket-column)
           metric-columns-y (when (not (empty? (:metricColumnsY query)))
-                             (let [metric-columns-y (map #(find-column columns %) (:metricColumnsY query))]
+                             (let [metric-columns-y (map #(find-column columns %) (:metricColumnsY query) )]
                                (conj metric-columns-y metric-y-column)))
-          sql*             (if metric-columns-y
-                             (series-bucket-sql table-name
-                                                bucket-column
-                                                (map #(aggregation* metric-aggregation %  bucket-column) metric-columns-y)
-                                                (sql-str columns (:filters query))
-                                                (sort* (:sort query) "z.y")
-                                                (or (:truncateSize query) "ALL")
-                                                metric-columns-y)
-                               (if subbucket-column
-                                 (subbucket-sql table-name bucket-column subbucket-column aggregation
-                                                (sql-str columns (:filters query))
-                                                (sort* (:sort query) "sort_value") (or (:truncateSize query) "ALL"))
-                                 (bucket-sql table-name bucket-column aggregation
-                                             (sql-str columns (:filters query))
-                                             (sort* (:sort query) "z.y") (or (:truncateSize query) "ALL"))))
+          sql*  (if subbucket-column
+                  (subbucket-sql table-name bucket-column subbucket-column aggregation
+                                 (sql-str columns (:filters query))
+                                 (sort* (:sort query) "sort_value") (or (:truncateSize query) "ALL"))
+                  (bucket-sql table-name
+                              bucket-column 
+                              (if metric-columns-y
+                                (->> metric-columns-y
+                                     (map #(aggregation* metric-aggregation %  bucket-column))
+                                     (map-indexed
+                                      (fn [index x]
+                                        (if (= index 0) (str x " as y") x)) )
+                                     (str/join ", " ))
+                                (str aggregation " as y"))
+                              (sql-str columns (:filters query))
+                              (sort* (:sort query) "z.y")
+                              (or (:truncateSize query) "ALL")))
           _ (log/debug :sql* sql*)
           sql-response     (run-query tenant-conn sql*)
           _ (log/debug :sql-response* sql-response)
@@ -183,7 +175,9 @@ ORDER BY %5$s LIMIT %6$s"
                           "max"    max-elements
                           "count"  (count sql-response)})
         (lib/ok
-         (if (or subbucket-column metric-columns-y)
-           (subbucket-column-response sql-response bucket-column metric-columns-y)
-           (bucket-column-response sql-response bucket-column metric-y-column)))))
+         (if metric-columns-y
+           (metrics-column-response sql-response bucket-column metric-columns-y)
+           (if subbucket-column
+             (subbucket-column-response sql-response bucket-column)
+             (bucket-column-response sql-response bucket-column metric-y-column))))))
     (lib/ok (bucket-column-response nil nil nil))))
