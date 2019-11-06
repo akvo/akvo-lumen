@@ -121,13 +121,18 @@
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
 (def change-datatype-tx (fn [column-name & [new-type]]
-                          {:type :transformation
-                           :transformation (-> (gen-transformation
-                                                "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
-                                                                        ::transformation.change-datatype.s/newType (or new-type "number")
-                                                                        ::transformation.engine.s/onError "default-value"})
-                                               (assoc-in ["args" "defaultValue"] (if (= new-type "number")
-                                                                                   0 nil)))}))
+                          (prn "-----------------")
+                          (prn "@change-datatype-tx")
+                          (prn new-type)
+                          (let [default-value (if (= new-type "string")
+                                                nil
+                                                0)]
+                            {:type :transformation
+                             :transformation (-> (gen-transformation
+                                                  "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
+                                                                          ::transformation.change-datatype.s/newType (or new-type "number")
+                                                                          ::transformation.engine.s/onError "default-value"})
+                                                 (assoc-in ["args" "defaultValue"] default-value))})))
 
 #_(deftest ^:functional test-transformations
     (testing "Transformation application"
@@ -372,15 +377,15 @@
               {:rnum 2 :c1 "b" :c2 3.0 :c3 nil}
               {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}]))
       )
-    (testing "Basic text transform"
-      (apply-transformation {:type :transformation
-                             :transformation
-                             (gen-transformation "core/derive"
-                                                 {::transformation.derive.s/newColumnTitle "Derived 1"
-                                                  ::transformation.derive.s/code "row['foo'].toUpperCase()"
-                                                  ::transformation.derive.s/newColumnType "text"
-                                                  ::transformation.engine.s/onError "leave-empty"})})
-      (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
+    #_(testing "Basic text transform"
+        (apply-transformation {:type :transformation
+                               :transformation
+                               (gen-transformation "core/derive"
+                                                   {::transformation.derive.s/newColumnTitle "Derived 1"
+                                                    ::transformation.derive.s/code "row['foo'].toUpperCase()"
+                                                    ::transformation.derive.s/newColumnType "text"
+                                                    ::transformation.engine.s/onError "leave-empty"})})
+        (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
 
     #_(testing "Basic text transform with drop row on error"
         (apply-transformation {:type :transformation
