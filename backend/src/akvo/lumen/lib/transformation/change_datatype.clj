@@ -58,23 +58,16 @@
 
 (defn change-datatype-to-number
   [tenant-conn table-name columns op-spec]
-  (prn "@change-datatype-to-number")
   (when (not (same-column-type? columns op-spec))
     (let [type-conversion (type-conversion-sql-function columns op-spec)
           on-error (engine/error-strategy op-spec)
           {column-name "columnName"
            default-value "defaultValue"} (engine/args op-spec)
-          _ (when (and (= on-error "default-value")
-                       (nil? default-value))
-              (prn "Yikes - default value is nil - not a valid value for a number col"))
           alter-table (format-sql table-name column-name "double precision")
-          ;; _ (prn alter-table)
           alter-table-sql (condp = on-error
                             "fail" (alter-table "%s(%s)" type-conversion column-name)
                             "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
-                            "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))
-          ;; _ (prn alter-table-sql)
-          ]
+                            "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
       (engine/ensure-number default-value)
       (change-datatype tenant-conn table-name column-name on-error alter-table-sql))))
 

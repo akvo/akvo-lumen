@@ -36,8 +36,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
 (defn retry-job-execution [tenant-conn job-execution-id with-job?]
-  (dh/with-retry {:retry-if (fn [v e]
-                              (not v))
+  (dh/with-retry {:retry-if (fn [v e] (not v))
                   :max-retries 20
                   :delay-ms 100}
     (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
