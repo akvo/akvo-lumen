@@ -5,14 +5,14 @@ import { Rect, Svg, Group, Text } from '@potion/element';
 import get from 'lodash/get';
 import { scaleLinear } from 'd3-scale';
 import { extent } from 'd3-array';
-import { AxisBottom } from '@vx/axis';
+import { AxisLeft } from '@vx/axis';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { stack } from 'd3-shape';
-import { GridColumns } from '@vx/grid';
+import { GridRows } from '@vx/grid';
 import itsSet from 'its-set';
+import { stackedBarPropTypes, stackedBarDefaultsProps } from './CommonBarChart';
 
-import { abbr } from '../../utilities/utils';
 import {
   heuristicRound,
   replaceLabelIfValueEmpty,
@@ -20,15 +20,15 @@ import {
   getLabelFontSize,
   labelFitsWidth,
   labelFitsHeight,
-} from '../../utilities/chart';
-import Legend from './Legend';
-import ResponsiveWrapper from '../common/ResponsiveWrapper';
-import ColorPicker from '../common/ColorPicker';
-import ChartLayout from './ChartLayout';
-import Tooltip from './Tooltip';
-import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE, LABEL_CHAR_WIDTH } from '../../constants/chart';
-import RenderComplete from './RenderComplete';
-import { isLight } from '../../utilities/color';
+} from '../../../utilities/chart';
+import Legend from '../Legend';
+import ResponsiveWrapper from '../../common/ResponsiveWrapper';
+import ColorPicker from '../../common/ColorPicker';
+import ChartLayout from '../ChartLayout';
+import Tooltip from '../Tooltip';
+import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../constants/chart';
+import { isLight } from '../../../utilities/color';
+import RenderComplete from '../RenderComplete';
 
 const getPaddingBottom = (data) => {
   const labelCutoffLength = 16;
@@ -46,54 +46,9 @@ const getPaddingBottom = (data) => {
 
 export default class StackedBarChart extends Component {
 
-  static propTypes = {
-    data: PropTypes.shape({
-      series: PropTypes.array,
-      common: PropTypes.object,
-      metadata: PropTypes.object,
-    }),
-    colors: PropTypes.array.isRequired,
-    colorMapping: PropTypes.object,
-    onChangeVisualisationSpec: PropTypes.func,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    legendPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left', undefined]),
-    print: PropTypes.bool,
-    interactive: PropTypes.bool,
-    edit: PropTypes.bool,
-    padding: PropTypes.number,
-    marginLeft: PropTypes.number,
-    marginRight: PropTypes.number,
-    marginTop: PropTypes.number,
-    marginBottom: PropTypes.number,
-    style: PropTypes.object,
-    legendVisible: PropTypes.bool,
-    labelsVisible: PropTypes.bool,
-    valueLabelsVisible: PropTypes.bool,
-    legendTitle: PropTypes.string,
-    yAxisLabel: PropTypes.string,
-    xAxisLabel: PropTypes.string,
-    subBucketMethod: PropTypes.string,
-    grid: PropTypes.bool,
-    yAxisTicks: PropTypes.number,
-    visualisation: PropTypes.object,
-  }
+  static propTypes = stackedBarPropTypes;
 
-  static defaultProps = {
-    interactive: true,
-    marginLeft: 70,
-    marginRight: 70,
-    marginTop: 20,
-    marginBottom: 60,
-    legendVisible: true,
-    labelsVisible: true,
-    edit: false,
-    padding: 0.1,
-    colorMapping: {},
-    grouped: false,
-    grid: true,
-    xAxisLabel: '',
-  }
+  static defaultProps = stackedBarDefaultsProps;
 
   static contextTypes = {
     abbrNumber: PropTypes.func,
@@ -106,6 +61,7 @@ export default class StackedBarChart extends Component {
       data: this.getData(props),
       hasRendered: false,
     };
+    this.handleMouseLeaveNode = this.handleMouseLeaveNode.bind(this);
   }
 
   componentDidMount() {
@@ -122,7 +78,7 @@ export default class StackedBarChart extends Component {
     if (!get(data, 'series[0]')) return false;
     const values = data.series[0].data
       .filter(itsSet)
-      .reduce((acc, { value }, i) =>
+      .reduce((acc, datum, i) =>
         [
           ...acc,
           data.series.reduce((acc2, series) => (itsSet(series) ? {
@@ -150,14 +106,6 @@ export default class StackedBarChart extends Component {
   getColor(key, index) {
     const { colorMapping, colors } = this.props;
     return colorMapping[key] || colors[index];
-  }
-
-  getMarginLeft(series) {
-    const { xAxisLabel, marginLeft, width } = this.props;
-    const longestLabel = series.data.concat(xAxisLabel).reduce((acc, { label }) =>
-      Math.max(acc, `${label}`.length)
-    , 0);
-    return Math.min(Math.min(marginLeft, longestLabel * LABEL_CHAR_WIDTH), width / 2);
   }
 
   handleShowTooltip(event, content) {
@@ -190,7 +138,7 @@ export default class StackedBarChart extends Component {
     const percentage = Math.round((node.values[seriesKey] / nodeTotal) * 10000) / 100;
     this.handleShowTooltip(event, [
       { key: seriesKey, color: this.getColor(seriesKey, seriesIndex), value: valueKey },
-      { key: yAxisLabel || 'x', value: `${heuristicRound(node.values[seriesKey])} (${percentage}%)` },
+      { key: yAxisLabel || 'y', value: `${heuristicRound(node.values[seriesKey])} (${percentage}%)` },
     ]);
     this.setState({ hoveredNode: { seriesKey, valueKey } });
   }
@@ -222,19 +170,22 @@ export default class StackedBarChart extends Component {
     });
   }
 
-  renderLabel({ nodeHeight, x, y, node, index, nodeCount, maxChars }) {
+  renderLabel({ nodeWidth, x, y, node, index, nodeCount }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
       (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
-    const labelText = abbr(String(replaceLabelIfValueEmpty(node.key)), maxChars);
+    let labelText = String(replaceLabelIfValueEmpty(node.key));
+    labelText = labelText.length <= 16 ?
+      labelText : `${labelText.substring(0, 13)}…`;
 
-    const labelX = x - 10;
-    const labelY = y + (nodeHeight / 2);
+    const labelX = x + (nodeWidth / 2);
+    const labelY = y + 10;
     return (
       <Text
-        textAnchor="end"
+        textAnchor="start"
         transform={[
+          { type: 'rotate', value: [45, labelX, labelY] },
           { type: 'translate', value: [labelX, labelY] },
         ]}
         {...labelFont}
@@ -269,17 +220,17 @@ export default class StackedBarChart extends Component {
       labelText = heuristicRound(node.values[seriesKey]);
     }
 
-    const labelX = x;
-    const labelY = y + (barHeight / 2);
+    const labelX = x + (barWidth / 2);
+    const labelY = y;
 
-    if (!labelFitsWidth(labelText, barWidth) || !labelFitsHeight(barHeight)) return null;
+    if (!labelFitsWidth(labelText, barHeight) || !labelFitsHeight(barWidth)) return null;
 
     return (
       <Text
         textAnchor="middle"
         alignmentBaseline="center"
         transform={[
-          // { type: 'rotate', value: [90, labelX, labelY] },
+          { type: 'rotate', value: [90, labelX, labelY] },
           { type: 'translate', value: [labelX, labelY] },
         ]}
         {...labelFont}
@@ -315,9 +266,9 @@ export default class StackedBarChart extends Component {
       marginTop,
       marginRight,
       marginBottom,
+      marginLeft,
       style,
       legendVisible,
-      legendPosition,
       labelsVisible,
       legendTitle,
       edit,
@@ -327,6 +278,7 @@ export default class StackedBarChart extends Component {
       xAxisLabel,
       grid,
       visualisation,
+      legendPosition,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
@@ -335,21 +287,12 @@ export default class StackedBarChart extends Component {
 
     if (!series) return null;
 
-    const marginLeft = this.getMarginLeft(series);
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const seriesCount = this.props.data.series.length;
     const paddingBottom = getPaddingBottom(series.data);
-    const axisLabelFontSize = getLabelFontSize(
-      yAxisLabel,
-      xAxisLabel,
-      MAX_FONT_SIZE,
-      MIN_FONT_SIZE,
-      height,
-      width
-    );
-    const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
-    const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
     return (
       <ChartLayout
@@ -372,7 +315,6 @@ export default class StackedBarChart extends Component {
                 [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
               }), {})
             }
-            // activeItem={get(this.state, 'hoveredNode.seriesKey')}
             onClick={({ datum }) => (event) => {
               this.handleClickNode(datum, event);
             }}
@@ -393,7 +335,6 @@ export default class StackedBarChart extends Component {
               bottom: marginBottom,
               left: marginLeft,
             }, dimensions);
-
             const availableHeight =
               dimensions.height - margins.bottom - margins.top - paddingBottom;
             const availableWidth = dimensions.width - margins.left - margins.right;
@@ -404,15 +345,15 @@ export default class StackedBarChart extends Component {
 
             if (domain[0] > 0) domain[0] = 0;
 
-            const widthScale = scaleLinear()
+            const heightScale = scaleLinear()
               .domain([0, domain[1]])
-              .range([0, availableWidth]);
+              .range([availableHeight, 0]);
 
-            const origin = widthScale(0);
+            const origin = heightScale(Math.abs(0));
 
             const axisScale = scaleLinear()
               .domain([0, domain[1]])
-              .range([0, availableWidth].reverse());
+              .range([0, availableHeight].reverse());
 
             const tickFormat = (value) => {
               const cutoff = 10000;
@@ -440,7 +381,7 @@ export default class StackedBarChart extends Component {
                 <Svg width={dimensions.width} height={dimensions.height}>
 
                   {grid && (
-                    <GridColumns
+                    <GridRows
                       scale={axisScale}
                       width={availableWidth}
                       height={availableHeight}
@@ -457,7 +398,7 @@ export default class StackedBarChart extends Component {
                       dimensions.width - margins.left - margins.right,
                       dimensions.height - margins.top - margins.bottom - paddingBottom,
                     ]}
-                    cols={1}
+                    rows={1}
                   >{nodes => (
                     <Group
                       transform={{
@@ -475,13 +416,15 @@ export default class StackedBarChart extends Component {
                           <Group key={seriesKey}>
                             {stackSeries.map(([y0, y1], valueIndex) => {
                               const node = nodes[valueIndex];
-                              const { nodeHeight, x, y, key } = nodes[valueIndex];
+                              const { nodeWidth, x, key } = node;
                               const color = this.getColor(seriesKey, seriesIndex);
-                              const normalizedX = widthScale(y0);
-                              const normalizedWidth = widthScale(y1) - normalizedX;
+                              const normalizedY = heightScale(y0);
+                              const normalizedHeight = availableHeight - heightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
-                              const barHeight = (nodeHeight - (nodeHeight * padding * 2)) /
+                              const barWidth = (nodeWidth - (nodeWidth * padding * 2)) /
                                 seriesCount;
+                              const normalizedX = x + (nodeWidth * padding) +
+                                (seriesIndex * barWidth);
 
                               return (
                                 <Group key={key}>
@@ -496,10 +439,10 @@ export default class StackedBarChart extends Component {
                                         color={color}
                                         left={
                                           colorpickerPlacement === 'right' ?
-                                            margins.left + x + nodeHeight :
+                                            margins.left + x + nodeWidth :
                                             margins.left + x
                                         }
-                                        top={normalizedX}
+                                        top={normalizedY}
                                         placement={colorpickerPlacement}
                                         onChange={({ hex }) => {
                                           onChangeVisualisationSpec({
@@ -515,17 +458,12 @@ export default class StackedBarChart extends Component {
                                   )}
                                   <Rect
                                     key={key}
-                                    y={
-                                      y +
-                                      (nodeHeight * padding) +
-                                      (seriesIndex * barHeight)
-                                    }
-                                    x={origin}
-                                    height={barHeight}
-                                    width={normalizedWidth}
+                                    x={normalizedX}
+                                    y={origin - normalizedHeight}
+                                    width={barWidth}
+                                    height={normalizedHeight}
                                     fill={color}
-                                    stroke="white"
-                                    strokeWidth={0.1}
+                                    stroke={color}
                                     opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
@@ -549,18 +487,16 @@ export default class StackedBarChart extends Component {
                                         event
                                       );
                                     }}
-                                    onMouseLeave={() => {
-                                      this.handleMouseLeaveNode();
-                                    }}
+                                    onMouseLeave={this.handleMouseLeaveNode}
                                   />
                                   {this.renderValueLabel({
                                     key,
-                                    barWidth: normalizedWidth,
-                                    x: origin + (normalizedWidth / 2),
-                                    y: y + (nodeHeight * padding) + (seriesIndex * barHeight),
+                                    barWidth,
+                                    x: normalizedX,
+                                    y: (origin - normalizedHeight) + (normalizedHeight / 2),
                                     value: nodes[valueIndex],
                                     color,
-                                    barHeight,
+                                    barHeight: normalizedHeight,
                                     node,
                                     seriesKey,
                                     seriesIndex,
@@ -573,33 +509,31 @@ export default class StackedBarChart extends Component {
                       })}
 
                       {nodes.map((node, index) => {
-                        const { nodeHeight, key } = node;
+                        const { nodeWidth, x, key } = node;
 
                         return (
                           <Group key={key}>
                             {this.renderLabel({
                               nodeCount: series.data.length,
                               index,
-                              nodeHeight,
-                              x: origin,
-                              y: nodeHeight * index,
+                              nodeWidth,
+                              x,
+                              y: origin,
                               domain,
                               height: 100,
                               node,
                               labelsVisible,
-                              maxChars: maxLabelChars,
                             })}
                           </Group>
                         );
                       })}
-
                     </Group>
                   )}</Grid>
 
-                  <AxisBottom
+                  <AxisLeft
                     scale={axisScale}
                     left={margins.left}
-                    top={availableHeight + margins.top}
+                    top={margins.top}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
@@ -608,24 +542,19 @@ export default class StackedBarChart extends Component {
                       fontSize: axisLabelFontSize,
                       textAnchor: 'middle',
                     }}
+                    labelOffset={44}
                     tickFormat={tickFormat}
                   />
 
                   <Text
                     transform={[
-                      {
-                        type: 'translate',
-                        value: [
-                          margins.left,
-                          margins.top - 10,
-                        ],
-                      },
+                      { type: 'translate', value: [Math.floor(this.props.width / 2) - 125, this.props.height - 10] },
                     ]}
-                    {...labelFont}
                     fontSize={axisLabelFontSize}
-                    fontWeight={400}
+                    textAnchor="middle"
+                    fontFamily="Arial"
                   >
-                    {abbr(xAxisLabel, maxLabelChars * labelSizeToAxisLabelSize)}
+                    {xAxisLabel || ''}
                   </Text>
 
                 </Svg>
@@ -646,6 +575,7 @@ export default class StackedBarChart extends Component {
       marginTop,
       marginRight,
       marginBottom,
+      marginLeft,
       style,
       legendVisible,
       legendPosition,
@@ -666,20 +596,11 @@ export default class StackedBarChart extends Component {
 
     if (!series) return null;
 
-    const marginLeft = this.getMarginLeft(series);
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const paddingBottom = getPaddingBottom(series.data);
-    const axisLabelFontSize = getLabelFontSize(
-      yAxisLabel,
-      xAxisLabel,
-      MAX_FONT_SIZE,
-      MIN_FONT_SIZE,
-      height,
-      width
-    );
-    const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
-    const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
     return (
       <ChartLayout
@@ -702,7 +623,6 @@ export default class StackedBarChart extends Component {
                 [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
               }), {})
             }
-            // activeItem={get(this.state, 'hoveredNode.seriesKey')}
             onClick={({ datum }) => (event) => {
               this.handleClickNode(datum, event);
             }}
@@ -723,7 +643,6 @@ export default class StackedBarChart extends Component {
               bottom: marginBottom,
               left: marginLeft,
             }, dimensions);
-
             const availableHeight =
               dimensions.height - margins.bottom - margins.top - paddingBottom;
             const availableWidth = dimensions.width - margins.left - margins.right;
@@ -734,15 +653,15 @@ export default class StackedBarChart extends Component {
 
             if (domain[0] > 0) domain[0] = 0;
 
-            const widthScale = scaleLinear()
+            const heightScale = scaleLinear()
               .domain([0, domain[1]])
-              .range([0, availableWidth]);
+              .range([availableHeight, 0]);
 
-            const origin = widthScale(0);
+            const origin = heightScale(Math.abs(0));
 
             const axisScale = scaleLinear()
               .domain([0, domain[1]])
-              .range([0, availableWidth]);
+              .range([0, availableHeight].reverse());
 
             const tickFormat = (value) => {
               const cutoff = 10000;
@@ -770,7 +689,7 @@ export default class StackedBarChart extends Component {
                 <Svg width={dimensions.width} height={dimensions.height}>
 
                   {grid && (
-                    <GridColumns
+                    <GridRows
                       scale={axisScale}
                       width={availableWidth}
                       height={availableHeight}
@@ -787,7 +706,7 @@ export default class StackedBarChart extends Component {
                       dimensions.width - margins.left - margins.right,
                       dimensions.height - margins.top - margins.bottom - paddingBottom,
                     ]}
-                    cols={1}
+                    rows={1}
                   >{nodes => (
                     <Group
                       transform={{
@@ -805,12 +724,13 @@ export default class StackedBarChart extends Component {
                           <Group key={seriesKey}>
                             {stackSeries.map(([y0, y1], valueIndex) => {
                               const node = nodes[valueIndex];
-                              const { nodeHeight, x, y, key } = nodes[valueIndex];
+                              const { nodeWidth, x, key } = node;
                               const color = this.getColor(seriesKey, seriesIndex);
-                              const normalizedX = widthScale(y0);
-                              const normalizedWidth = widthScale(y1) - normalizedX;
+                              const normalizedY = heightScale(y0);
+                              const normalizedHeight = availableHeight - heightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
-                              const barHeight = (nodeHeight - (nodeHeight * padding * 2));
+                              const barWidth = nodeWidth - (nodeWidth * padding * 2);
+                              const normalizedX = x + (nodeWidth * padding);
 
                               return (
                                 <Group key={key}>
@@ -825,10 +745,10 @@ export default class StackedBarChart extends Component {
                                         color={color}
                                         left={
                                           colorpickerPlacement === 'right' ?
-                                            margins.left + x + nodeHeight :
+                                            margins.left + x + nodeWidth :
                                             margins.left + x
                                         }
-                                        top={normalizedX}
+                                        top={normalizedY}
                                         placement={colorpickerPlacement}
                                         onChange={({ hex }) => {
                                           onChangeVisualisationSpec({
@@ -844,13 +764,12 @@ export default class StackedBarChart extends Component {
                                   )}
                                   <Rect
                                     key={key}
-                                    y={y + (nodeHeight * padding)}
                                     x={normalizedX}
-                                    height={barHeight}
-                                    width={normalizedWidth}
+                                    y={normalizedY - normalizedHeight}
+                                    width={barWidth}
+                                    height={normalizedHeight}
                                     fill={color}
-                                    stroke="white"
-                                    strokeWidth={0.1}
+                                    stroke={color}
                                     opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
@@ -874,18 +793,16 @@ export default class StackedBarChart extends Component {
                                         event
                                       );
                                     }}
-                                    onMouseLeave={() => {
-                                      this.handleMouseLeaveNode();
-                                    }}
+                                    onMouseLeave={this.handleMouseLeaveNode}
                                   />
                                   {this.renderValueLabel({
                                     key,
-                                    barWidth: normalizedWidth,
-                                    x: normalizedX + (normalizedWidth / 2),
-                                    y: y + (nodeHeight * padding),
+                                    barWidth,
+                                    x: normalizedX,
+                                    y: normalizedY - (normalizedHeight / 2),
                                     value: nodes[valueIndex],
                                     color,
-                                    barHeight,
+                                    barHeight: normalizedHeight,
                                     node,
                                     seriesKey,
                                     seriesIndex,
@@ -898,33 +815,31 @@ export default class StackedBarChart extends Component {
                       })}
 
                       {nodes.map((node, index) => {
-                        const { nodeHeight, key } = node;
+                        const { nodeWidth, x, key } = node;
 
                         return (
                           <Group key={key}>
                             {this.renderLabel({
                               nodeCount: series.data.length,
                               index,
-                              nodeHeight,
-                              x: origin,
-                              y: nodeHeight * index,
+                              nodeWidth,
+                              x,
+                              y: origin,
                               domain,
                               height: 100,
                               node,
                               labelsVisible,
-                              maxChars: maxLabelChars,
                             })}
                           </Group>
                         );
                       })}
-
                     </Group>
                   )}</Grid>
 
-                  <AxisBottom
+                  <AxisLeft
                     scale={axisScale}
                     left={margins.left}
-                    top={availableHeight + margins.top}
+                    top={margins.top}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
@@ -933,24 +848,19 @@ export default class StackedBarChart extends Component {
                       fontSize: axisLabelFontSize,
                       textAnchor: 'middle',
                     }}
+                    labelOffset={44}
                     tickFormat={tickFormat}
                   />
 
                   <Text
                     transform={[
-                      {
-                        type: 'translate',
-                        value: [
-                          margins.left,
-                          margins.top - 10,
-                        ],
-                      },
+                      { type: 'translate', value: [Math.floor(this.props.width / 2) - 125, this.props.height - 10] },
                     ]}
-                    {...labelFont}
                     fontSize={axisLabelFontSize}
-                    fontWeight={400}
+                    textAnchor="middle"
+                    fontFamily="Arial"
                   >
-                    {abbr(xAxisLabel, maxLabelChars * labelSizeToAxisLabelSize)}
+                    {xAxisLabel || ''}
                   </Text>
 
                 </Svg>
@@ -971,6 +881,7 @@ export default class StackedBarChart extends Component {
       marginTop,
       marginRight,
       marginBottom,
+      marginLeft,
       style,
       legendVisible,
       legendPosition,
@@ -991,20 +902,11 @@ export default class StackedBarChart extends Component {
 
     if (!series) return null;
 
-    const marginLeft = this.getMarginLeft(series);
     const stackNodes = series.stack;
     const dataCount = series.data.length;
     const paddingBottom = getPaddingBottom(series.data);
-    const axisLabelFontSize = getLabelFontSize(
-      yAxisLabel,
-      xAxisLabel,
-      MAX_FONT_SIZE,
-      MIN_FONT_SIZE,
-      height,
-      width
-    );
-    const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
-    const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
+    const axisLabelFontSize =
+      getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
 
     return (
       <ChartLayout
@@ -1020,14 +922,13 @@ export default class StackedBarChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={legendTitle}
-            data={stackNodes.map(({ key }) => replaceLabelIfValueEmpty(key))}
+            data={stackNodes.map(({ key }) => key)}
             colorMapping={
               stackNodes.reduce((acc, { key }, i) => ({
                 ...acc,
-                [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
+                [key]: this.getColor(key, i),
               }), {})
             }
-            // activeItem={get(this.state, 'hoveredNode.seriesKey')}
             onClick={({ datum }) => (event) => {
               this.handleClickNode(datum, event);
             }}
@@ -1048,26 +949,24 @@ export default class StackedBarChart extends Component {
               bottom: marginBottom,
               left: marginLeft,
             }, dimensions);
-
             const availableHeight =
               dimensions.height - margins.bottom - margins.top - paddingBottom;
             const availableWidth = dimensions.width - margins.left - margins.right;
-
             const domain = extent(series.data, ({ values }) =>
               Object.keys(values).reduce((acc, key) => acc + Math.abs(values[key]), 0)
             );
 
             if (domain[0] > 0) domain[0] = 0;
 
-            const widthScale = scaleLinear()
+            const heightScale = scaleLinear()
               .domain([0, domain[1]])
-              .range([0, availableWidth]);
+              .range([availableHeight, 0]);
 
-            const origin = widthScale(0);
+            const origin = heightScale(Math.abs(0));
 
             const axisScale = scaleLinear()
               .domain([0, 100])
-              .range([0, availableWidth]);
+              .range([0, availableHeight].reverse());
 
             const tickFormat = value => `${value}%`;
 
@@ -1089,7 +988,7 @@ export default class StackedBarChart extends Component {
                 <Svg width={dimensions.width} height={dimensions.height}>
 
                   {grid && (
-                    <GridColumns
+                    <GridRows
                       scale={axisScale}
                       width={availableWidth}
                       height={availableHeight}
@@ -1106,7 +1005,7 @@ export default class StackedBarChart extends Component {
                       dimensions.width - margins.left - margins.right,
                       dimensions.height - margins.top - margins.bottom - paddingBottom,
                     ]}
-                    cols={1}
+                    rows={1}
                   >{nodes => (
                     <Group
                       transform={{
@@ -1124,20 +1023,23 @@ export default class StackedBarChart extends Component {
                           <Group key={seriesKey}>
                             {stackSeries.map(([y0, y1], valueIndex) => {
                               const node = nodes[valueIndex];
-                              const { nodeHeight, x, y, key } = node;
-                              const color = this.getColor(seriesKey, seriesIndex);
-                              const individualWidthScale = scaleLinear()
-                                .range([0, availableWidth])
+                              const { nodeWidth, x, key } = node;
+                              const individualHeightScale = scaleLinear()
+                                .range([availableHeight, 0])
                                 .domain([
                                   0,
                                   Object.keys(node.values).reduce((acc, subkey) =>
                                     acc + node.values[subkey]
                                   , 0),
                                 ]);
-                              const normalizedX = individualWidthScale(y0);
-                              const normalizedWidth = individualWidthScale(y1) - normalizedX;
+
+                              const color = this.getColor(seriesKey, seriesIndex);
+                              const normalizedY = individualHeightScale(y0);
+                              const normalizedHeight = availableHeight -
+                                individualHeightScale(y1 - y0);
                               const colorpickerPlacement = valueIndex < dataCount / 2 ? 'right' : 'left';
-                              const barHeight = (nodeHeight - (nodeHeight * padding * 2));
+                              const barWidth = (nodeWidth - (nodeWidth * padding * 2));
+                              const normalizedX = x + (nodeWidth * padding);
 
                               return (
                                 <Group key={key}>
@@ -1152,10 +1054,10 @@ export default class StackedBarChart extends Component {
                                         color={color}
                                         left={
                                           colorpickerPlacement === 'right' ?
-                                            margins.left + x + nodeHeight :
+                                            margins.left + x + nodeWidth :
                                             margins.left + x
                                         }
-                                        top={normalizedX}
+                                        top={normalizedY}
                                         placement={colorpickerPlacement}
                                         onChange={({ hex }) => {
                                           onChangeVisualisationSpec({
@@ -1171,13 +1073,12 @@ export default class StackedBarChart extends Component {
                                   )}
                                   <Rect
                                     key={key}
-                                    y={y + (nodeHeight * padding)}
                                     x={normalizedX}
-                                    height={barHeight}
-                                    width={normalizedWidth}
+                                    y={normalizedY - normalizedHeight}
+                                    width={barWidth}
+                                    height={normalizedHeight}
                                     fill={color}
-                                    stroke="white"
-                                    strokeWidth={0.1}
+                                    stroke={color}
                                     opacity={seriesIsNotHovered ? 0.1 : 1}
                                     cursor={edit ? 'pointer' : 'default'}
                                     onClick={(event) => {
@@ -1201,18 +1102,17 @@ export default class StackedBarChart extends Component {
                                         event
                                       );
                                     }}
-                                    onMouseLeave={() => {
-                                      this.handleMouseLeaveNode();
-                                    }}
+                                    onMouseLeave={this.handleMouseLeaveNode}
                                   />
                                   {this.renderValueLabel({
                                     key,
-                                    barWidth: normalizedWidth,
-                                    x: normalizedX + (normalizedWidth / 2),
-                                    y: y + (nodeHeight * padding),
+                                    barWidth,
+                                    x: normalizedX,
+                                    y: (normalizedY - normalizedHeight) +
+                                      (normalizedHeight / 2),
                                     value: nodes[valueIndex],
                                     color,
-                                    barHeight,
+                                    barHeight: normalizedHeight,
                                     node,
                                     seriesKey,
                                     seriesIndex,
@@ -1225,33 +1125,31 @@ export default class StackedBarChart extends Component {
                       })}
 
                       {nodes.map((node, index) => {
-                        const { nodeHeight, key } = node;
+                        const { nodeWidth, x, key } = node;
 
                         return (
                           <Group key={key}>
                             {this.renderLabel({
                               nodeCount: series.data.length,
                               index,
-                              nodeHeight,
-                              x: origin,
-                              y: nodeHeight * index,
+                              nodeWidth,
+                              x,
+                              y: origin,
                               domain,
                               height: 100,
                               node,
                               labelsVisible,
-                              maxChars: maxLabelChars,
                             })}
                           </Group>
                         );
                       })}
-
                     </Group>
                   )}</Grid>
 
-                  <AxisBottom
+                  <AxisLeft
                     scale={axisScale}
                     left={margins.left}
-                    top={availableHeight + margins.top}
+                    top={margins.top}
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
@@ -1260,24 +1158,19 @@ export default class StackedBarChart extends Component {
                       fontSize: axisLabelFontSize,
                       textAnchor: 'middle',
                     }}
+                    labelOffset={44}
                     tickFormat={tickFormat}
                   />
 
                   <Text
                     transform={[
-                      {
-                        type: 'translate',
-                        value: [
-                          margins.left,
-                          margins.top - 10,
-                        ],
-                      },
+                      { type: 'translate', value: [Math.floor(this.props.width / 2) - 125, this.props.height - 10] },
                     ]}
-                    {...labelFont}
                     fontSize={axisLabelFontSize}
-                    fontWeight={400}
+                    textAnchor="middle"
+                    fontFamily="Arial"
                   >
-                    {abbr(xAxisLabel, maxLabelChars * labelSizeToAxisLabelSize)}
+                    {xAxisLabel || ''}
                   </Text>
 
                 </Svg>
