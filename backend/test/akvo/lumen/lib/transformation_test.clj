@@ -117,12 +117,15 @@
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
 (def change-datatype-tx (fn [column-name & [new-type]]
-                          {:type :transformation
-                           :transformation (-> (gen-transformation
-                                                "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
-                                                                        ::transformation.change-datatype.s/newType (or new-type "number")
-                                                                        ::transformation.engine.s/onError "default-value"})
-                                               (assoc-in ["args" "defaultValue"] nil))}))
+                          (let [default-value (if (= new-type "number"
+                                                     0
+                                                     nil))]
+                            {:type :transformation
+                             :transformation (-> (gen-transformation
+                                                  "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
+                                                                          ::transformation.change-datatype.s/newType (or new-type "number")
+                                                                          ::transformation.engine.s/onError "default-value"})
+                                                 (assoc-in ["args" "defaultValue"] default-value))})))
 
 (deftest ^:functional test-transformations
   (testing "Transformation application"
