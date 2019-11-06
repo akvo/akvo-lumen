@@ -170,13 +170,15 @@
                  :metadata {:type "text"}}}))))))
 
 (deftest bar-tests
-  (let [data {:columns [{:id "c1", :title "A", :type "text"}
-                            {:id "c2", :title "B", :type "number"}
-                            {:id "c3", :title "C", :type "number"}]
-                  :rows    [[{:value "a"} {:value 1} {:value 1}]
-                            [{:value "b"} {:value 1} {:value 2}]
-                            [{:value "c"} {:value 1} {:value 3}]
-                            [{:value "c"} {:value 1} {:value 4}]]}
+  (let [data       {:columns [{:id "c1", :title "A", :type "text"}
+                              {:id "c2", :title "B", :type "number"}
+                              {:id "c3", :title "C", :type "number"}
+                              {:id "c4", :title "D", :type "number"}
+                              {:id "c5", :title "E", :type "number"}]
+                    :rows    [[{:value "a"} {:value 1} {:value 1} {:value 10} {:value 100}]
+                              [{:value "b"} {:value 1} {:value 2} {:value 20} {:value 200}]
+                              [{:value "c"} {:value 1} {:value 3} {:value 30} {:value 300}]
+                              [{:value "c"} {:value 1} {:value 4} {:value 40} {:value 400}]]}
         dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "bar"
                                                                :kind "clj"
                                                                :data data})
@@ -227,6 +229,28 @@
                  [{:label "a", :key "a"}
                   {:label "b", :key "b"}
                   {:label "c", :key "c"}]}}))))
+    (testing "queries with several metrics column (series)"
+      (let [[tag query-result] (query {:bucketColumn      "c1"
+                                       :metricAggregation "sum"
+                                       :metricColumnY     "c3"
+                                       :metricColumnsY    ["c4" "c5"]})]
+        (is (= query-result
+               {:series
+	        [{:key "C",
+	          :label "C",
+	          :data [{:value 1.0} {:value 2.0} {:value 7.0}]}
+	         {:key "D",
+	          :label "D",
+	          :data [{:value 10.0} {:value 20.0} {:value 70.0}]}
+	         {:key "E",
+	          :label "E",
+	          :data [{:value 100.0} {:value 200.0} {:value 700.0}]}],
+	        :common
+	        {:metadata {:type "text"},
+	         :data
+	         [{:key "a", :label "a"}
+	          {:key "b", :label "b"}
+	          {:key "c", :label "c"}]}}))))
     (testing "aggregation types with metric column and subbucket-column"
       (let [[tag query-result] (query {:bucketColumn "c1"
                                        :metricAggregation "max"
