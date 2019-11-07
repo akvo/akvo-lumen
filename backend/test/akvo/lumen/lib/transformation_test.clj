@@ -212,87 +212,87 @@
                                          :column-name "c1"
                                          :table-name table-name}))))))))
 
-#_(deftest ^:functional combine-transformation-test
-    (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
-                                                                 :file "name.csv"})
-          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-          [tag _] (apply-transformation {:type :transformation
-                                         :transformation (gen-transformation "core/combine"
-                                                                             {::transformation.combine.s/columnNames ["c1" "c2"]
-                                                                              ::transformation.engine.s/onError "fail"
-                                                                              ::transformation.combine.s/newColumnTitle "full name"
-                                                                              ::transformation.combine.s/separator " "})})]
-      (is (= ::lib/ok tag))
-      (let [table-name (:table-name
-                        (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                              {:dataset-id dataset-id}))]
-        (is (= "bob hope"
-               (:d1 (get-val-from-table *tenant-conn*
-                                        {:rnum 1
-                                         :column-name "d1"
-                                         :table-name table-name})))))
+(deftest ^:functional combine-transformation-test
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
+                                                               :file "name.csv"})
+        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+        [tag _] (apply-transformation {:type :transformation
+                                       :transformation (gen-transformation "core/combine"
+                                                                           {::transformation.combine.s/columnNames ["c1" "c2"]
+                                                                            ::transformation.engine.s/onError "fail"
+                                                                            ::transformation.combine.s/newColumnTitle "full name"
+                                                                            ::transformation.combine.s/separator " "})})]
+    (is (= ::lib/ok tag))
+    (let [table-name (:table-name
+                      (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                            {:dataset-id dataset-id}))]
+      (is (= "bob hope"
+             (:d1 (get-val-from-table *tenant-conn*
+                                      {:rnum 1
+                                       :column-name "d1"
+                                       :table-name table-name})))))
 
-      ;;https://github.com/akvo/akvo-lumen/issues/1517
-      (testing "Combining columns where one of the columns has empty values"
-        (let [[tag _] (apply-transformation {:type :transformation
-                                             :transformation
-                                             (gen-transformation "core/combine"
-                                                                 {:akvo.lumen.specs.transformation.combine/columnNames ["c2" "c3"]                                                                          ::transformation.engine.s/onError "fail"
-                                                                  :akvo.lumen.specs.transformation.combine/newColumnTitle "issue1517"
-                                                                  :akvo.lumen.specs.transformation.combine/separator " "})})]
-          (is (= ::lib/ok tag))
-          (let [table-name (:table-name
-                            (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                  {:dataset-id dataset-id}))]
-            (is (= "hope "
-                   (:d2 (get-val-from-table *tenant-conn*
-                                            {:rnum 1
-                                             :column-name "d2"
-                                             :table-name table-name})))))))))
-
-#_(deftest ^:functional date-parsing-test
-    (let [date-transformation (fn[column-name format*]
-                                {:type           :transformation
-                                 :transformation
-                                 (gen-transformation
-                                  "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
-                                                          :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                          :akvo.lumen.specs.transformation.change-datatype/newType "date"
-                                                          ::transformation.engine.s/onError "fail"}
-                                  :parseFormat format*)})
-          data                (import.s/sample-imported-dataset [:text
-                                                                 [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                                              (fn [[y _ _ :as date]]
-                                                                                                                (str y))))
-                                                                         ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                                 [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                                              (fn [[y m d :as date]]
-                                                                                                                (str d "/" m "/" y))))
-                                                                         ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                                 [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                                              (fn [date]
-                                                                                                                (string/join "-" date))))
-                                                                         ::import.values.s/key (fn [] import.column.s/false-gen)}]]
-                                                                10)
-          years               (map (comp :value second) (:rows data))
-          years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
-          years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
-          dataset-id          (import-file *tenant-conn* *error-tracker*
-                                           {:dataset-name "date-parsing-test-bis"
-                                            :kind         "clj"
-                                            :data         data})
-
-          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
-      (let [[tag {:keys [datasetId]}] (do (apply-transformation (date-transformation "c2" "YYYY"))
-                                          (apply-transformation (date-transformation "c3" "DD/MM/YYYY"))
-                                          (apply-transformation (date-transformation "c4" "YYYY-MM-DD")))]
+    ;;https://github.com/akvo/akvo-lumen/issues/1517
+    (testing "Combining columns where one of the columns has empty values"
+      (let [[tag _] (apply-transformation {:type :transformation
+                                           :transformation
+                                           (gen-transformation "core/combine"
+                                                               {:akvo.lumen.specs.transformation.combine/columnNames ["c2" "c3"]                                                                          ::transformation.engine.s/onError "fail"
+                                                                :akvo.lumen.specs.transformation.combine/newColumnTitle "issue1517"
+                                                                :akvo.lumen.specs.transformation.combine/separator " "})})]
         (is (= ::lib/ok tag))
-        (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                            {:dataset-id datasetId}))
-              table-data (get-data *tenant-conn* {:table-name table-name})]
-          (is (= years (map (comp str tc/year tcc/from-long :c2) table-data)))
-          (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
-          (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
+        (let [table-name (:table-name
+                          (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                {:dataset-id dataset-id}))]
+          (is (= "hope "
+                 (:d2 (get-val-from-table *tenant-conn*
+                                          {:rnum 1
+                                           :column-name "d2"
+                                           :table-name table-name})))))))))
+
+(deftest ^:functional date-parsing-test
+  (let [date-transformation (fn[column-name format*]
+                              {:type           :transformation
+                               :transformation
+                               (gen-transformation
+                                "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
+                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
+                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
+                                                        ::transformation.engine.s/onError "fail"}
+                                :parseFormat format*)})
+        data                (import.s/sample-imported-dataset [:text
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y _ _ :as date]]
+                                                                                                              (str y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y m d :as date]]
+                                                                                                              (str d "/" m "/" y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [date]
+                                                                                                              (string/join "-" date))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]]
+                                                              10)
+        years               (map (comp :value second) (:rows data))
+        years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
+        years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
+        dataset-id          (import-file *tenant-conn* *error-tracker*
+                                         {:dataset-name "date-parsing-test-bis"
+                                          :kind         "clj"
+                                          :data         data})
+
+        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
+    (let [[tag {:keys [datasetId]}] (do (apply-transformation (date-transformation "c2" "YYYY"))
+                                        (apply-transformation (date-transformation "c3" "DD/MM/YYYY"))
+                                        (apply-transformation (date-transformation "c4" "YYYY-MM-DD")))]
+      (is (= ::lib/ok tag))
+      (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                          {:dataset-id datasetId}))
+            table-data (get-data *tenant-conn* {:table-name table-name})]
+        (is (= years (map (comp str tc/year tcc/from-long :c2) table-data)))
+        (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
+        (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
 
 
 
