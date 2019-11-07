@@ -1,9 +1,7 @@
-/* eslint-disable arrow-body-style */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
-
 import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
 import './SeriesMenu.scss';
@@ -16,7 +14,6 @@ class SeriesMenu extends Component {
       inputInProgress: false,
       newSeriesColumn: null,
     };
-
     this.toggleInput = this.toggleInput.bind(this);
     this.updateSeries = this.updateSeries.bind(this);
   }
@@ -48,11 +45,9 @@ class SeriesMenu extends Component {
 
   saveSerie(newSeriesColumn) {
     const metricColumnsY = this.props.metricColumnsY.slice(0);
-
     metricColumnsY.push(
       newSeriesColumn
     );
-
     this.props.onChangeSpec({
       metricColumnsY,
       axisLabelY: this.props.metricAggregation,
@@ -113,9 +108,7 @@ class SeriesMenu extends Component {
             ) : (
               <div className="filterListContainer">
                 <ol className="filterList">
-                  {metricColumnsY.map((metricColumnY, index) => {
-                    // console.log('....', metricColumnY);
-                    return (
+                  {metricColumnsY.map((metricColumnY, index) =>
                     (<div key={index}>
                       <ConfigMenuSectionOptionSelect
                         id="metric_column"
@@ -127,10 +120,7 @@ class SeriesMenu extends Component {
                         // eslint-disable-next-line max-len
                         options={columnOptions.filter(c => !columnsSet.has(c.value) || c.value === metricColumnY)}
                       />
-                    </div>
-                    )
-                  );
-                  }
+                    </div>)
                   )}
                 </ol>
               </div>
