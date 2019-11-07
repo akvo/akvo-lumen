@@ -354,171 +354,171 @@
                                         :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
           (is (some? updated-res)))))))
 
-(deftest ^:functional derived-column-test
-  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
-                                                               :file "derived-column.csv"})
-        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (do (apply-transformation (change-datatype-tx "c2"))
-        (apply-transformation (change-datatype-tx "c3")))
+#_(deftest ^:functional derived-column-test
+    (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
+                                                                 :file "derived-column.csv"})
+          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
+      (do (apply-transformation (change-datatype-tx "c2"))
+          (apply-transformation (change-datatype-tx "c3")))
 
-    (testing "Import and initial transforms"
-      (is (= (latest-data dataset-id)
-             [{:rnum 1 :c1 "a" :c2 1.0 :c3 2.0}
-              {:rnum 2 :c1 "b" :c2 3.0 :c3 nil}
-              {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
+      (testing "Import and initial transforms"
+        (is (= (latest-data dataset-id)
+               [{:rnum 1 :c1 "a" :c2 1.0 :c3 2.0}
+                {:rnum 2 :c1 "b" :c2 3.0 :c3 nil}
+                {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
 
-    (testing "Basic text transform"
-      (apply-transformation {:type :transformation
-                             :transformation
-                             (gen-transformation "core/derive"
-                                                 {::transformation.derive.s/newColumnTitle "Derived 1"
-                                                  ::transformation.derive.s/code "row['foo'].toUpperCase()"
-                                                  ::transformation.derive.s/newColumnType "text"
-                                                  ::transformation.engine.s/onError "leave-empty"})})
-      (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
+      (testing "Basic text transform"
+        (apply-transformation {:type :transformation
+                               :transformation
+                               (gen-transformation "core/derive"
+                                                   {::transformation.derive.s/newColumnTitle "Derived 1"
+                                                    ::transformation.derive.s/code "row['foo'].toUpperCase()"
+                                                    ::transformation.derive.s/newColumnType "text"
+                                                    ::transformation.engine.s/onError "leave-empty"})})
+        (is (= ["A" "B" nil] (map :d1 (latest-data dataset-id)))))
 
-    (testing "Basic text transform with drop row on error"
-      (apply-transformation {:type :transformation
-                             :transformation
-                             (gen-transformation "core/derive"
-                                                 {::transformation.derive.s/newColumnTitle "Derived 3"
-                                                  ::transformation.derive.s/code "row['foo'].replace('a', 'b')"
-                                                  ::transformation.derive.s/newColumnType "text"
-                                                  ::transformation.engine.s/onError "delete-row"})})
-      (is (= ["b" "b"] (map :d2 (latest-data dataset-id))))
-      ;; Undo this so we have all the rows in the remaining tests
-      (apply-transformation {:type :undo}))
+      (testing "Basic text transform with drop row on error"
+        (apply-transformation {:type :transformation
+                               :transformation
+                               (gen-transformation "core/derive"
+                                                   {::transformation.derive.s/newColumnTitle "Derived 3"
+                                                    ::transformation.derive.s/code "row['foo'].replace('a', 'b')"
+                                                    ::transformation.derive.s/newColumnType "text"
+                                                    ::transformation.engine.s/onError "delete-row"})})
+        (is (= ["b" "b"] (map :d2 (latest-data dataset-id))))
+        ;; Undo this so we have all the rows in the remaining tests
+        (apply-transformation {:type :undo}))
 
-    (testing "Basic text transform with abort"
-      (apply-transformation {:type :transformation
-                             :transformation
-                             (gen-transformation "core/derive"
-                                                 {::transformation.derive.s/newColumnTitle "Derived 2"
-                                                  ::transformation.derive.s/code "row['foo'].length"
-                                                  ::transformation.derive.s/newColumnType "number"
-                                                  ::transformation.engine.s/onError "fail"})})
-      (is (-> (latest-data dataset-id)
-              first
-              keys
-              set
-              (contains? :d2)
-              not)))
+      (testing "Basic text transform with abort"
+        (apply-transformation {:type :transformation
+                               :transformation
+                               (gen-transformation "core/derive"
+                                                   {::transformation.derive.s/newColumnTitle "Derived 2"
+                                                    ::transformation.derive.s/code "row['foo'].length"
+                                                    ::transformation.derive.s/newColumnType "number"
+                                                    ::transformation.engine.s/onError "fail"})})
+        (is (-> (latest-data dataset-id)
+                first
+                keys
+                set
+                (contains? :d2)
+                not)))
 
-    (testing "Nested string transform"
-      (apply-transformation {:type :transformation
-                             :transformation
-                             (gen-transformation "core/derive"
-                                                 {::transformation.derive.s/newColumnTitle "Derived 4"
-                                                  ::transformation.derive.s/code "row['foo'].toUpperCase()"
-                                                  ::transformation.derive.s/newColumnType "text"
-                                                  ::transformation.engine.s/onError "leave-empty"})})
-      (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
+      (testing "Nested string transform"
+        (apply-transformation {:type :transformation
+                               :transformation
+                               (gen-transformation "core/derive"
+                                                   {::transformation.derive.s/newColumnTitle "Derived 4"
+                                                    ::transformation.derive.s/code "row['foo'].toUpperCase()"
+                                                    ::transformation.derive.s/newColumnType "text"
+                                                    ::transformation.engine.s/onError "leave-empty"})})
+        (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
-      (let [[tag _] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 5"
-                                                                ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
-                                                                ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "leave-empty"})})]
-        (is (= tag ::lib/ok))
-        (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id))))))
-
-    (testing "Date transform"
-      (let [[tag res] (apply-transformation {:type :transformation
+        (let [[tag _] (apply-transformation {:type :transformation
                                              :transformation
                                              (gen-transformation "core/derive"
-                                                                 {::transformation.derive.s/newColumnTitle "Derived 6"
-                                                                  ::transformation.derive.s/code "new Date()"
-                                                                  ::transformation.derive.s/newColumnType "date"
-                                                                  ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/ok))
-        (is (every? number? (map :d4 (latest-data dataset-id))))))
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 5"
+                                                                  ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
+                                                                  ::transformation.derive.s/newColumnType "text"
+                                                                  ::transformation.engine.s/onError "leave-empty"})})]
+          (is (= tag ::lib/ok))
+          (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id))))))
+
+      (testing "Date transform"
+        (let [[tag res] (apply-transformation {:type :transformation
+                                               :transformation
+                                               (gen-transformation "core/derive"
+                                                                   {::transformation.derive.s/newColumnTitle "Derived 6"
+                                                                    ::transformation.derive.s/code "new Date()"
+                                                                    ::transformation.derive.s/newColumnType "date"
+                                                                    ::transformation.engine.s/onError "fail"})})]
+          (is (= tag ::lib/ok))
+          (is (every? number? (map :d4 (latest-data dataset-id))))))
 
 
-    (testing "derive to number column"
-      (let [[tag res] (apply-transformation {:type :transformation
+      (testing "derive to number column"
+        (let [[tag res] (apply-transformation {:type :transformation
+                                               :transformation
+                                               (gen-transformation "core/derive"
+                                                                   {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                    ::transformation.derive.s/code "row.bar"
+                                                                    ::transformation.derive.s/newColumnType "number"
+                                                                    ::transformation.engine.s/onError "fail"})})]
+          (is (= tag ::lib/ok))
+          (is (every? number? (map :d5 (latest-data dataset-id))))))
+
+
+
+
+      (testing "Valid type check"
+        (let [[tag _ status] (apply-transformation {:type :transformation
+                                                    :transformation
+                                                    (gen-transformation "core/derive"
+                                                                        {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                         ::transformation.derive.s/code "new Date()"
+                                                                         ::transformation.derive.s/newColumnType "number"
+                                                                         ::transformation.engine.s/onError "fail"})})]
+          (is (= status "FAILED"))))
+
+      (testing "Sandboxing java interop"
+        (let [[tag _ status] (apply-transformation {:type :transformation
+                                                    :transformation
+                                                    (gen-transformation "core/derive"
+                                                                        {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                         ::transformation.derive.s/code "new java.util.Date()"
+                                                                         ::transformation.derive.s/newColumnType "number"
+                                                                         ::transformation.engine.s/onError "fail"})})]
+          (is (= status "FAILED"))))
+
+      (testing "Sandboxing dangerous js functions"
+        (let [[tag _ status] (apply-transformation {:type :transformation
+                                                    :transformation
+                                                    (gen-transformation "core/derive"
+                                                                        {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                         ::transformation.derive.s/code "quit()"
+                                                                         ::transformation.derive.s/newColumnType "number"
+                                                                         ::transformation.engine.s/onError "fail"})})]
+          (is (= status "FAILED"))))
+
+      (testing "Fail early on syntax error"
+        (let [[tag _] (apply-transformation {:type :transformation
                                              :transformation
                                              (gen-transformation "core/derive"
-                                                                 {::transformation.derive.s/newColumnTitle "Derived 7"
-                                                                  ::transformation.derive.s/code "row.bar"
-                                                                  ::transformation.derive.s/newColumnType "number"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                  ::transformation.derive.s/code ")"
+                                                                  ::transformation.derive.s/newColumnType "text"
                                                                   ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/ok))
-        (is (every? number? (map :d5 (latest-data dataset-id))))))
+          (is (= tag ::lib/bad-request))))
+
+      (testing "Fail infinite loop"
+        (let [[tag _] (apply-transformation {:type :transformation
+                                             :transformation
+                                             (gen-transformation "core/derive"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                  ::transformation.derive.s/code "while(true) {}"
+                                                                  ::transformation.derive.s/newColumnType "text"
+                                                                  ::transformation.engine.s/onError "fail"})})]
+          (is (= tag ::lib/bad-request))))
 
 
+      (testing "Disallow anonymous functions"
+        (let [[tag _] (apply-transformation {:type :transformation
+                                             :transformation
+                                             (gen-transformation "core/derive"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                  ::transformation.derive.s/code "(function() {})()"
+                                                                  ::transformation.derive.s/newColumnType "text"
+                                                                  ::transformation.engine.s/onError "fail"})})]
+          (is (= tag ::lib/bad-request)))
 
-
-    (testing "Valid type check"
-      (let [[tag _ status] (apply-transformation {:type :transformation
-                                                  :transformation
-                                                  (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                       ::transformation.derive.s/code "new Date()"
-                                                                       ::transformation.derive.s/newColumnType "number"
-                                                                       ::transformation.engine.s/onError "fail"})})]
-        (is (= status "FAILED"))))
-
-    (testing "Sandboxing java interop"
-      (let [[tag _ status] (apply-transformation {:type :transformation
-                                                  :transformation
-                                                  (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                       ::transformation.derive.s/code "new java.util.Date()"
-                                                                       ::transformation.derive.s/newColumnType "number"
-                                                                       ::transformation.engine.s/onError "fail"})})]
-        (is (= status "FAILED"))))
-
-    (testing "Sandboxing dangerous js functions"
-      (let [[tag _ status] (apply-transformation {:type :transformation
-                                                  :transformation
-                                                  (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                       ::transformation.derive.s/code "quit()"
-                                                                       ::transformation.derive.s/newColumnType "number"
-                                                                       ::transformation.engine.s/onError "fail"})})]
-        (is (= status "FAILED"))))
-
-    (testing "Fail early on syntax error"
-      (let [[tag _] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                ::transformation.derive.s/code ")"
-                                                                ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/bad-request))))
-
-    (testing "Fail infinite loop"
-      (let [[tag _] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                ::transformation.derive.s/code "while(true) {}"
-                                                                ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/bad-request))))
-
-
-    (testing "Disallow anonymous functions"
-      (let [[tag _] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                ::transformation.derive.s/code "(function() {})()"
-                                                                ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/bad-request)))
-
-      (let [[tag _] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                ::transformation.derive.s/code "(() => 'foo')()"
-                                                                ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/bad-request))))))
+        (let [[tag _] (apply-transformation {:type :transformation
+                                             :transformation
+                                             (gen-transformation "core/derive"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                  ::transformation.derive.s/code "(() => 'foo')()"
+                                                                  ::transformation.derive.s/newColumnType "text"
+                                                                  ::transformation.engine.s/onError "fail"})})]
+          (is (= tag ::lib/bad-request))))))
 
 #_(deftest ^:functional split-column-test
     (let [dataset-id           (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
