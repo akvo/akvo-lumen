@@ -49,6 +49,8 @@
 (s/def ::aggregation.bar/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.bar/subBucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::aggregation.bar/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::aggregation.bar/metricColumnsY (s/coll-of ::db.dsv.column.s/columnName :distinct true))
+
 (s/def ::metricAggregation #{"mean"
                              "sum"
                              "min"
@@ -62,12 +64,30 @@
 (s/def ::aggregation.bar/sort (s/nilable #{"asc" "dsc"}))
 (s/def ::aggregation.bar/truncateSize (s/nilable string?))
 
-(s/def ::aggregation.bar/query (s/keys :req-un [::postgres.filter/filters
-                                                ::aggregation.bar/bucketColumn]
-                                       :opt-un [::aggregation.bar/subBucketColumn
-                                                ::aggregation.bar/metricColumnY
-                                                ::aggregation.bar/sort
-                                                ::aggregation.bar/truncateSize]))
+(s/def ::aggregation.bar/version #{1 2})
+
+(defmulti bar-version :version)
+
+(s/def ::aggregation.bar/query
+  (s/multi-spec bar-version :version))
+
+(defmethod bar-version 1  [_]
+  (s/keys :req-un [::postgres.filter/filters
+                   ::aggregation.bar/bucketColumn
+                   ::aggregation.bar/version]
+          :opt-un [::aggregation.bar/metricColumnY
+                   ::aggregation.bar/subBucketColumn
+                   ::aggregation.bar/sort
+                   ::aggregation.bar/truncateSize]))
+
+(defmethod bar-version 2  [_]
+  (s/keys :req-un [::postgres.filter/filters
+                   ::aggregation.bar/bucketColumn
+                   ::aggregation.bar/version]
+          :opt-un [::aggregation.bar/metricColumnsY
+                   ::aggregation.bar/subBucketColumn
+                   ::aggregation.bar/sort
+                   ::aggregation.bar/truncateSize]))
 
 (s/fdef aggregation.bar/query
   :args (s/cat

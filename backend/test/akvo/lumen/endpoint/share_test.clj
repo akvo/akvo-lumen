@@ -94,12 +94,12 @@
   {:vis-1 {:id         (str (squuid))
            :name       "Visualisation"
            :type       "pie"
-           :spec       {:bucketColumn "c1" :filters []}
+           :spec       {:bucketColumn "c1" :filters [] :version 1}
            :author     {}}
    :vis-2 {:id         (str (squuid))
            :name       "Visualisation"
            :type       "bar"
-           :spec       {:bucketColumn "c1" :filters []}
+           :spec       {:bucketColumn "c1" :filters [] :version 2}
            :author     {}}
    })
 
