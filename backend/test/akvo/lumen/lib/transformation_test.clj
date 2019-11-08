@@ -417,31 +417,47 @@
                                                   ::transformation.engine.s/onError "leave-empty"})})
       (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
-      (apply-transformation {:type :transformation
-                             :transformation
-                             (gen-transformation "core/derive"
-                                                 {::transformation.derive.s/newColumnTitle "Derived 5"
-                                                  ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
-                                                  ::transformation.derive.s/newColumnType "text"
-                                                  ::transformation.engine.s/onError "leave-empty"})})
-      (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
-
-    (testing "Date transform"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 5"
+                                                                ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
+                                                                ::transformation.derive.s/newColumnType "text"
+                                                                ::transformation.engine.s/onError "leave-empty"})})]
+        (is (= tag ::lib/ok))
+        (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id))))))
+
+    (testing "Date transform"
+      (let [[tag res] (apply-transformation {:type :transformation
+                                           :transformation
+                                           (gen-transformation "core/derive"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 6"
                                                                 ::transformation.derive.s/code "new Date()"
                                                                 ::transformation.derive.s/newColumnType "date"
                                                                 ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
+
+    (testing "derive to number column"
+      (let [[tag res] (apply-transformation {:type :transformation
+                                             :transformation
+                                             (gen-transformation "core/derive"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                  ::transformation.derive.s/code "row.bar"
+                                                                  ::transformation.derive.s/newColumnType "number"
+                                                                  ::transformation.engine.s/onError "fail"})})]
+        (is (= tag ::lib/ok))
+        (is (every? number? (map :d5 (latest-data dataset-id))))))
+
+
+ 
+ 
     (testing "Valid type check"
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
                                                   (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 6"
+                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                        ::transformation.derive.s/code "new Date()"
                                                                        ::transformation.derive.s/newColumnType "number"
                                                                        ::transformation.engine.s/onError "fail"})})]
@@ -451,7 +467,7 @@
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
                                                   (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                        ::transformation.derive.s/code "new java.util.Date()"
                                                                        ::transformation.derive.s/newColumnType "number"
                                                                        ::transformation.engine.s/onError "fail"})})]
@@ -461,7 +477,7 @@
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
                                                   (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                        ::transformation.derive.s/code "quit()"
                                                                        ::transformation.derive.s/newColumnType "number"
                                                                        ::transformation.engine.s/onError "fail"})})]
@@ -481,7 +497,7 @@
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 9"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code "while(true) {}"
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]
@@ -492,7 +508,7 @@
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 10"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code "(function() {})()"
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]
@@ -501,7 +517,7 @@
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 11"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code "(() => 'foo')()"
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]

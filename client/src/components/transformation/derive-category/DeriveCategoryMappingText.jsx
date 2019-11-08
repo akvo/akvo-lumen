@@ -139,7 +139,7 @@ class DeriveCategoryMapping extends Component {
                   <li key={value}>
                     <input
                       type="checkbox"
-                      checked
+                      defaultChecked
                       onChange={() => {
                         onSourceValuesUpdate(
                           sourceValues,

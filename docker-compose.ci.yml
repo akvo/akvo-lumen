@@ -7,8 +7,7 @@ services:
      - LUMEN_DB_URL=jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true
      - CI_BUILD=yes
      - LUMEN_FILE_UPLOAD_PATH=/tmp/akvo/lumen
-     - LUMEN_AUTH_URL=http://auth.lumen.local:8080/auth
-     - LUMEN_AUTH_ISSUER_SUFFIX_URL=/realms/akvo
+     - LUMEN_AUTH_URL=http://auth.lumen.local:8080/auth/realms/akvo
      - LUMEN_AUTH_PUBLIC_CLIENT_ID=akvo-lumen
      - LUMEN_AUTH_RSA_SUFFIX_URL=/protocol/openid-connect/certs
      - LUMEN_KEYCLOAK_URL=http://auth.lumen.local:8080/auth
@@ -52,6 +51,6 @@ services:
    command: "true"
  fe-e2e-tests:
    environment:
-      - LUMEN_URL=http://t1.lumen.local/?auth=keycloak
+      - LUMEN_URL=http://t1.lumen.local/
  exporter:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT}"
