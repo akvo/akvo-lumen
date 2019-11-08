@@ -48,7 +48,6 @@ services:
       - client:t1.lumen.local
    command: "true"
  exporter:
-   build: exporter
    expose:
       - 3001
 volumes:

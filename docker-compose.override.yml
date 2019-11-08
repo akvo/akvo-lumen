@@ -30,6 +30,7 @@ services:
    volumes:
       - ./windshaft/config/dev:/config
  exporter:
+   build: exporter
    ports:
       - "3001:3001"
    links:
