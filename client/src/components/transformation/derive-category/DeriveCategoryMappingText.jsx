@@ -55,14 +55,14 @@ class DeriveCategoryMapping extends Component {
     const {
       sourceValues,
       onSourceValuesUpdate,
+      unassignedValues,
     } = this.props;
 
     if (checked) {
-      const searchResults = this.getSearchResults();
       onSourceValuesUpdate(
         sourceValues,
         uniqBy(
-          [...sourceValues, ...searchResults],
+          [...sourceValues, ...unassignedValues],
           // eslint-disable-next-line no-unused-vars
           ([count, value]) => value
         )
@@ -79,6 +79,7 @@ class DeriveCategoryMapping extends Component {
       targetCategoryName,
       onChangeCategoryName,
       onSourceValuesUpdate,
+      unassignedValues,
       onToggleGrouping,
       isGrouping,
       isInvalid,
@@ -108,7 +109,7 @@ class DeriveCategoryMapping extends Component {
                   />
                 </div>
               )}
-              footer={(
+              footer={!search.length ? (
                 <Row>
                   <Col xs={12}>
                     <input
@@ -117,11 +118,11 @@ class DeriveCategoryMapping extends Component {
                       onChange={this.handleSelectAll}
                     />
                     <label htmlFor="select-all-checkbox">
-                      <FormattedMessage id="select_all" />
+                      <FormattedMessage id="select_all" /> {unassignedValues.length > 1 ? `(${unassignedValues.length - 1} values)` : ''}
                     </label>
                   </Col>
                 </Row>
-              )}
+              ) : ''}
               placement="bottom-right"
               left={30}
               top={50}
