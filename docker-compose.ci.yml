@@ -53,3 +53,5 @@ services:
  fe-e2e-tests:
    environment:
       - LUMEN_URL=http://t1.lumen.local/?auth=keycloak
+ exporter:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT}"
