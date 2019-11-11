@@ -6,6 +6,7 @@ npm-debug.log
 .DS_Store
 client/dist
 client/yarn.lock
+notify.slack.sh
 
 # docker-compose
 .env
