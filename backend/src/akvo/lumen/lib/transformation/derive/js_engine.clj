@@ -91,10 +91,6 @@
   ([^ScriptEngine engine ^String code]
    (.eval ^ScriptEngine engine ^String code)))
 
-(defn- eval*
-  ([^ScriptEngine engine ^String code]
-   (.eval ^ScriptEngine engine ^String code)))
-
 (defn- invoke* [^Invocable engine ^String fun & args]
   (.invokeFunction engine fun (object-array args)))
 
