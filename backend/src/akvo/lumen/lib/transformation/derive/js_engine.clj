@@ -1,10 +1,13 @@
 (ns akvo.lumen.lib.transformation.derive.js-engine
-  (:require [akvo.lumen.lib.transformation.engine :as engine]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.set :as set]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str]
-            [clojure.tools.logging :as log])
+  (:require
+   [akvo.lumen.lib.transformation.engine :as engine]
+   [clojure.edn :as edn]
+   [clojure.java.jdbc :as jdbc]
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [clojure.string :as string]
+   [clojure.tools.logging :as log])
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
            [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]
            [java.lang Double]))
@@ -60,13 +63,33 @@
 
 (defn- js-factory [] (NashornScriptEngineFactory.))
 
+(defn nashorn-depreciated? []
+  (>= (-> (System/getProperty "java.version")
+          (string/split #"\.")
+          first
+          edn/read-string)
+      11))
+
+(defn script-engine [factory]
+  (if (nashorn-depreciated?)
+    (.getScriptEngine factory
+                      (into-array String ["--no-deprecation-warning"])
+                      nil class-filter)
+    (.getScriptEngine factory class-filter)))
+
 (defn- js-engine
   ([]
    (js-engine (js-factory)))
   ([factory]
-   (let [engine (.getScriptEngine factory class-filter)]
+   (let [engine (script-engine factory)]
      (remove-bindings (.getBindings engine ScriptContext/ENGINE_SCOPE))
      engine)))
+
+(defn eval*
+  ([^String code]
+   (eval* (js-engine) code))
+  ([^ScriptEngine engine ^String code]
+   (.eval ^ScriptEngine engine ^String code)))
 
 (defn- eval*
   ([^ScriptEngine engine ^String code]
