@@ -36,7 +36,7 @@ services:
    image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT}"
 
  backend-functional-tests:
-   image: akvo/akvo-lumen-backend-dev:20181029.3606771
+   image: akvo/akvo-lumen-backend-dev:20191001.144150.7c1e95e
    environment:
      - PGSSLMODE=require
      - PGSSLROOTCERT=/pg-certs/server.crt
