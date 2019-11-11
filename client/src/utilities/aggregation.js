@@ -89,11 +89,11 @@ export const getNeedNewAggregation = (
         newV.datasetId !== oldV.datasetId ||
         newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
         newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+        newV.spec.metricColumnsY !== oldV.spec.metricColumnsY ||
         newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
         newV.spec.subBucketMethod !== oldV.spec.subBucketMethod ||
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
         newV.spec.subBucketColumn !== oldV.spec.subBucketColumn ||
-        newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
         newV.spec.sort !== oldV.spec.sort ||
         newV.spec.truncateSize !== oldV.spec.truncateSize ||
         !isEqual(newV.spec.filters, oldV.spec.filters)

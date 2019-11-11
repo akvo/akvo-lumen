@@ -115,6 +115,7 @@
     "react-scroll": "^1.7.10",
     "react-select": "^1.0.0-rc.2",
     "react-window-size": "^1.2.2",
+    "recompose": "^0.30.0",
     "redux": "^3.6.0",
     "redux-actions": "^1.1.0",
     "redux-thunk": "^2.1.0",
