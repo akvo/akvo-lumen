@@ -71,10 +71,24 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 
+#_(defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
+    (prn "@async-tx-apply")
+    (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
+          _ (prn "@res")
+          _ (clojure.pprint/pprint res)
+          job-execution (retry-job-execution tenant-conn jobExecutionId true)
+          _ (clojure.pprint/pprint job-execution)
+          [job _] job-execution]
+      (conj res (:status job))))
+
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
-        [job _] (retry-job-execution tenant-conn jobExecutionId true)]
-    (conj res (:status job))))
+        base (select-keys res [datasetId jobExecutionId])
+        [{:keys [error-mesage status] :as job} _] (retry-job-execution tenant-conn jobExecutionId true)]
+    (cond
+      (= tag ::lib/bad-request) (conj res nil)
+      (= status "FAILED") [::lib/bad-request base error-mesage]
+      :else [::lib/ok base nil])))
 
 (defn latest-data [dataset-id]
   (let [table-name (:table-name
@@ -132,9 +146,11 @@
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
                                                                  :has-column-headers? true
                                                                  :file "transformation_test.csv"})
-          [tag _] (last (for [transformation ops]
-                          (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
-                                                                             :transformation transformation})))]
+          tlog (for [transformation ops] ;; bail using reduce/reduced if failure?
+                 (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
+                                                                          :transformation transformation}))
+          _ (clojure.pprint/pprint tlog)
+          [tag _] (last tlog)]
       (is (= ::lib/ok tag)))))
 
 (deftest ^:functional test-import-and-transform
@@ -256,24 +272,24 @@
                                :transformation
                                (gen-transformation
                                 "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
-                                                       :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                       :akvo.lumen.specs.transformation.change-datatype/newType "date"
-                                                       ::transformation.engine.s/onError "fail"}
+                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
+                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
+                                                        ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/sample-imported-dataset [:text
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [[y _ _ :as date]]
-                                                                                           (str y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [[y m d :as date]]
-                                                                                           (str d "/" m "/" y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [date]
-                                                                                           (string/join "-" date))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]]
-                                                         10)
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y _ _ :as date]]
+                                                                                                              (str y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y m d :as date]]
+                                                                                                              (str d "/" m "/" y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [date]
+                                                                                                              (string/join "-" date))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]]
+                                                              10)
         years               (map (comp :value second) (:rows data))
         years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
         years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
@@ -426,12 +442,12 @@
 
     (testing "Date transform"
       (let [[tag res] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 6"
-                                                                ::transformation.derive.s/code "new Date()"
-                                                                ::transformation.derive.s/newColumnType "date"
-                                                                ::transformation.engine.s/onError "fail"})})]
+                                             :transformation
+                                             (gen-transformation "core/derive"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 6"
+                                                                  ::transformation.derive.s/code "new Date()"
+                                                                  ::transformation.derive.s/newColumnType "date"
+                                                                  ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
