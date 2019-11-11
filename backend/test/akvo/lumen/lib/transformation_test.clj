@@ -112,8 +112,8 @@
         args (if (and kvs (not-empty kvs) (even? (count kvs)))
                (reduce #((if (vector? (first %2))  assoc-in assoc) % (first %2) (last %2)) args (partition 2 kvs))
                args)
-        
-]
+
+        ]
     (conform ::transformation.engine.s/op-spec (assoc s :op op-name :args args))
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
@@ -135,30 +135,38 @@
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
                                                                  :has-column-headers? true
                                                                  :file "transformation_test.csv"})
-          [tag _] (last (for [transformation ops]
-                          (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
-                                                                             :transformation transformation})))]
-      (is (= ::lib/ok tag)))))
+          [tag _ status] (last (reduce (fn [log transformation]
+                                         (let [res (async-tx-apply {:tenant-conn *tenant-conn*}
+                                                                   dataset-id
+                                                                   {:type :transformation
+                                                                    :transformation transformation})
+                                               [tag job failed?] res]
+                                           (if (nil? (nth res 2)) ;; if failing transform stop
+                                             (conj log res)
+                                             (reduced (conj log res))))) [] ops))]
+      (is (= ::lib/ok tag))
+      (is (not (= status "FAILED"))))))
+
 
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
     (let [t-log      [(gen-transformation "core/trim" {::db.dataset-version.column.s/columnName "c5"
-                                                      ::transformation.engine.s/onError        "fail"})
+                                                       ::transformation.engine.s/onError        "fail"})
                       (gen-transformation "core/change-datatype" {::db.dataset-version.column.s/columnName        "c5"
-                                                                 ::transformation.change-datatype.s/defaultValue 0
-                                                                 ::transformation.change-datatype.s/newType      "number"
-                                                                 ::transformation.engine.s/onError               "default-value"})
+                                                                  ::transformation.change-datatype.s/defaultValue 0
+                                                                  ::transformation.change-datatype.s/newType      "number"
+                                                                  ::transformation.engine.s/onError               "default-value"})
                       (gen-transformation "core/filter-column" {::db.dataset-version.column.s/columnName    "c4"
-                                                               ::transformation.filter-column.s/expression {"contains" "broken"}
-                                                               ::transformation.engine.s/onError           "fail"})]
+                                                                ::transformation.filter-column.s/expression {"contains" "broken"}
+                                                                ::transformation.engine.s/onError           "fail"})]
           dataset-id (import-file *tenant-conn* *error-tracker* {:name                "GDP Test"
                                                                  :has-column-headers? false
                                                                  :file                "GDP.csv"})]
       (let [[tag {:keys [datasetId]}] (last (for [transformation t-log]
                                               (async-tx-apply {:tenant-conn *tenant-conn*}
-                                                                    dataset-id
-                                                                    {:type           :transformation
-                                                                     :transformation transformation})))]
+                                                              dataset-id
+                                                              {:type           :transformation
+                                                               :transformation transformation})))]
 
         (is (= ::lib/ok tag))
 
@@ -259,28 +267,28 @@
                                :transformation
                                (gen-transformation
                                 "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
-                                                       :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                       :akvo.lumen.specs.transformation.change-datatype/newType "date"
-                                                       ::transformation.engine.s/onError "fail"}
+                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
+                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
+                                                        ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/sample-imported-dataset [:text
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [[y _ _ :as date]]
-                                                                                           (str y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [[y m d :as date]]
-                                                                                           (str d "/" m "/" y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
-                                                                                         (fn [date]
-                                                                                           (string/join "-" date))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]]
-                                                         10)
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y _ _ :as date]]
+                                                                                                              (str y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [[y m d :as date]]
+                                                                                                              (str d "/" m "/" y))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]
+                                                               [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                                                            (fn [date]
+                                                                                                              (string/join "-" date))))
+                                                                       ::import.values.s/key (fn [] import.column.s/false-gen)}]]
+                                                              10)
         years               (map (comp :value second) (:rows data))
         years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
         years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
-        dataset-id          (import-file *tenant-conn* *error-tracker* 
+        dataset-id          (import-file *tenant-conn* *error-tracker*
                                          {:dataset-name "date-parsing-test-bis"
                                           :kind         "clj"
                                           :data         data})
@@ -429,12 +437,12 @@
 
     (testing "Date transform"
       (let [[tag res] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 6"
-                                                                ::transformation.derive.s/code "new Date()"
-                                                                ::transformation.derive.s/newColumnType "date"
-                                                                ::transformation.engine.s/onError "fail"})})]
+                                             :transformation
+                                             (gen-transformation "core/derive"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 6"
+                                                                  ::transformation.derive.s/code "new Date()"
+                                                                  ::transformation.derive.s/newColumnType "date"
+                                                                  ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
@@ -451,8 +459,8 @@
         (is (every? number? (map :d5 (latest-data dataset-id))))))
 
 
- 
- 
+
+
     (testing "Valid type check"
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
@@ -645,7 +653,7 @@
                                 (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-        
+
         (is (= (apply conj ["c1" "c2"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (inc (count new-columns))))))
                (map #(get % "columnName") columns)))
         (is (= ["https://akvoflow-uat1.s3.amazonaws.com/images/b1961e99-bc1c-477c-9309-ae5e8d2374e8.png"
@@ -772,7 +780,7 @@
 
 (deftest ^:functional merge-datasets-test
   (let [origin-data          (import.s/sample-imported-dataset [:text :date] 2)
-        target-data          (replace-column origin-data (import.s/sample-imported-dataset [:text :number :number :text] 2) 0) 
+        target-data          (replace-column origin-data (import.s/sample-imported-dataset [:text :number :number :text] 2) 0)
         origin-dataset-id    (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
                                            :kind         "clj"
@@ -887,5 +895,3 @@
       (is (= 4 (count columns)))
       (is (= "geopoint" (get (last columns) "type")))
       (is (= "d1" (get (last columns) "columnName"))))))
-
-
