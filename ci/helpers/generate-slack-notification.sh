@@ -15,7 +15,7 @@ if [ -z "\${SLACK_CLI_TOKEN}" ]; then
   exit 1
 fi
 
-slack_txt=\$(git log --oneline $OLDER_GIT_VERSION..$NEWEST_GIT_VERSION | grep -v "Merge pull request" | grep -v "Merge branch" | cut -f 2- -d\  | sed 's/\[#\([0-9]*\)\]/<https:\/\/github.com\/akvo\/akvo-lumen\/issues\/\1|[#\1]>/')
+slack_txt=\$(git log --oneline $OLDER_GIT_VERSION..$NEWEST_GIT_VERSION | grep -v "Merge pull request" | grep -v "Merge branch" | cut -f 2- -d\  | sed 's/\[#\([0-9]*\)\]/<https:\/\/github.com\/akvo\/akvo-lumen\/issues\/\1|[#\1]>/' | tr \" \')
 docker run --rm -e SLACK_CLI_TOKEN 512k/slack-cli \
     chat send \
     --channel='#lumen-dev' \
