@@ -384,7 +384,7 @@ export default compose(
     const subBucketColumn = filter(columnOptions, ['value', spec.subBucketColumn])[0];
     const subBucketColumnTypeCondition = subBucketColumn ? subBucketColumn.type !== 'text' : true;
     if (spec.subBucketColumn && subBucketColumnTypeCondition) {
-      spec.subBucketColumn = null;
+      spec.subBucketColumn = spec.subBucketColumn;
       spec.subBucketMethod = 'split';
     }
     return { ...props, visualisation: { ...visualisation, spec } };
