@@ -116,7 +116,7 @@ class BarConfigMenu extends Component {
     } = this.props;
     const spec = visualisation.spec;
     const seriesColumnOptions = columnOptions.filter(c => c.value !== spec.metricColumnY);
-
+    const metricColumnsY = spec.metricColumnsY || [];
     const subBucketMethodView = splitColumn && spec.bucketColumn && spec.subBucketColumn ? (
       <ConfigMenuSectionOption
         labelTextId="sub_bucket_method"
@@ -220,7 +220,7 @@ class BarConfigMenu extends Component {
                 name="splitBucket"
                 type="checkbox"
                 labelId="split_bucket"
-                disabled={spec.metricColumnsY.length > 0}
+                disabled={metricColumnsY.length > 0}
                 className="InputGroup"
                 checked={splitColumn}
                 onChange={this.splitColumnHandler}
@@ -315,7 +315,7 @@ class BarConfigMenu extends Component {
               <ConfigMenuSectionOptionSelect
                 id="metric_column"
                 placeholderId="select_a_metric_column"
-                labelTextId={spec.metricColumnsY.length === 0 ? 'metric_column' : 'metric_columns'}
+                labelTextId={metricColumnsY.length === 0 ? 'metric_column' : 'metric_columns'}
                 value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
                 name="metricColumnYInput"
                 options={filterColumns(columnOptions, ['number'])}
@@ -326,14 +326,14 @@ class BarConfigMenu extends Component {
               {splitColumn === false && seriesBarCondition() ? <SeriesMenu
                 hasDataset={Boolean(visualisation.datasetId !== null)}
                 onChangeSpec={onChangeSpec}
-                metricColumnsY={spec.metricColumnsY}
+                metricColumnsY={metricColumnsY}
                 metricColumnYTitle={getColumnTitle(spec.metricColumnY, columnOptions)}
                 metricAggregation={spec.metricAggregation}
                 columnOptions={filterColumns(seriesColumnOptions, ['number'])}
               /> : ''}
             </div>
           )}
-          advancedOptions={spec.metricColumnsY.length === 0 ? (
+          advancedOptions={metricColumnsY.length === 0 ? (
             <ConfigMenuSectionOptionText
               value={spec.axisLabelY !== null ? spec.axisLabelY.toString() : null}
               placeholderId="y_axis_label"
