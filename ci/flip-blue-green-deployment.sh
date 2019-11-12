@@ -52,6 +52,8 @@ log "Commits to be deployed:"
 git log --oneline $PROD_LIVE_VERSION..$PROD_DARK_VERSION | grep -v "Merge pull request" | grep -v "Merge branch"
 
 if [ "${CLUSTER}" == "production" ]; then
+ "${DIR}"/helpers/generate-slack-notification.sh "${PROD_LIVE_VERSION}" "${PROD_DARK_VERSION}" "I am thinking about flipping **prod** to make this changes live. Should I?" "warning"
+ ./notify.slack.sh
  read -r -e -p "Are you sure you want to flip production? [yn] " CONFIRM
  if [ "${CONFIRM}" != "y" ]; then
     log "Nothing done"
