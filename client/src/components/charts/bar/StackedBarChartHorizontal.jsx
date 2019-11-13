@@ -371,7 +371,7 @@ export default class StackedBarChart extends Component {
 
             const axisScale = scaleLinear()
               .domain([0, domain[1]])
-              .range([0, availableWidth].reverse());
+              .range([0, availableWidth]);
 
             const tickFormat = (value) => {
               const cutoff = 10000;
