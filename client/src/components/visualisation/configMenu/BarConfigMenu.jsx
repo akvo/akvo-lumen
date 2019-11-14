@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { filter, get } from 'lodash';
 import { compose, mapProps } from 'recompose';
-import queryString from 'querystringify';
 
 import SeriesMenu from './SeriesMenu';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
@@ -15,7 +14,6 @@ import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 
-const seriesBarCondition = () => queryString.parse(location.search)['series-bar'] === '1';
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
 
@@ -323,7 +321,7 @@ class BarConfigMenu extends Component {
                   metricColumnY: value,
                 }, spec, onChangeSpec, columnOptions)}
               />
-              {splitColumn === false && seriesBarCondition() ? <SeriesMenu
+              {splitColumn === false ? <SeriesMenu
                 hasDataset={Boolean(visualisation.datasetId !== null)}
                 onChangeSpec={onChangeSpec}
                 metricColumnsY={metricColumnsY}
