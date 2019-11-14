@@ -104,7 +104,7 @@ class SeriesMenu extends Component {
         <div>
           <div className="container">
             {(!metricColumnsY || metricColumnsY.length === 0) ? (
-              <div className="noFilters">No series</div>
+              <div className="noFilters" />
             ) : (
               <div className="filterListContainer">
                 <ol className="filterList">
