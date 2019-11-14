@@ -325,7 +325,7 @@ class BarConfigMenu extends Component {
                   metricColumnY: value,
                 }, spec, onChangeSpec, columnOptions)}
               />
-              {splitColumn === false ? <SeriesMenu
+              {splitColumn === false && spec.metricColumnY ? <SeriesMenu
                 hasDataset={Boolean(visualisation.datasetId !== null)}
                 onChangeSpec={onChangeSpec}
                 metricColumnsY={metricColumnsY}
