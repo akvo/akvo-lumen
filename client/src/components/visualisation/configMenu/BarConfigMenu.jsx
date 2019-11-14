@@ -38,6 +38,10 @@ const getAxisAutoLabels = (spec, columnOptions) => {
       autoAxisLabelX += ` - ${truncateOrderIndicator} ${spec.truncateSize}`;
     }
   }
+  if (spec.metricColumnsY.length > 0) {
+    autoAxisLabelY = spec.metricAggregation;
+  }
+
   return { x: autoAxisLabelX, y: autoAxisLabelY };
 };
 
