@@ -29,12 +29,19 @@
     (set (-> initial-dataset-version :columns))
     (loop [columns (-> initial-dataset-version :columns walk/keywordize-keys)
            txs (-> latest-dataset-version :transformations walk/keywordize-keys)
+           counter 1
            cols0 #{}]
       (let [tx (first txs)
-            cols1 (apply conj cols0 (when-not (engine/avoidable-if-missing? tx)
-                                      (engine/columns-used tx columns)))]
+            cols1 (apply conj cols0 (try
+                                      (when-not (engine/avoidable-if-missing? tx)
+                                        (engine/columns-used tx columns))
+                                      (catch Throwable e
+                                        (if-let [ex-d (ex-data e)]
+                                          (throw (ex-info (format "Transformation '%s' failed. %s" counter (.getMessage e)) 
+                                                          ex-d))
+                                          (throw e)))))]
         (if-let [txs (seq (next txs))]
-          (recur (undif-columns tx columns) txs cols1)
+          (recur (undif-columns tx columns) txs (inc counter) cols1)
           cols1)))))
 
 (defn- successful-update

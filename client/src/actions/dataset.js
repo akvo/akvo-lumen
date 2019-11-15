@@ -468,7 +468,7 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
           );
         } else if (status === 'FAILED') {
           dispatch(updateDatasetTogglePending(datasetId));
-          dispatch(showNotification('error', `Failed to update dataset "${title}": ${reason}`));
+          dispatch(showNotification('error', `Failed to update "${title}". ${reason}`));
         } else if (status === 'OK') {
           dispatch(fetchDataset(datasetId)).then(() =>
             dispatch(showNotification('info', `Successfully updated dataset "${title}"`, true))

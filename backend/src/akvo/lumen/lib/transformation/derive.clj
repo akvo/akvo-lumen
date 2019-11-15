@@ -154,8 +154,9 @@
     (reduce (fn [c r]
               (conj c (if-let [column-name (:column-name r)]
                         column-name
-                        (throw (ex-info "ups, no column name here!" {:transformation applied-transformation
-                                                                     :columns columns
-                                                                     :computed computed
-                                                                     :reference r}))))
+                        (throw (ex-info (format "Column '%s' doesn't exist." (last (last (parse-row-object-references(:pattern r)))))
+                                        {:transformation applied-transformation
+                                         :columns columns
+                                         :computed computed
+                                         :reference r}))))
               ) [] (walk/keywordize-keys (get computed "references")))))
