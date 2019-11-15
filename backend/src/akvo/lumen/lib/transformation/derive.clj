@@ -113,6 +113,7 @@
 
 (defmethod engine/apply-operation "core/derive"
   [{:keys [tenant-conn]} table-name columns op-spec]
+  (engine/columns-used (walk/keywordize-keys op-spec) columns)
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [{:keys [::code
                   ::column-title
