@@ -16,8 +16,8 @@
                              (admin.system/ig-select-keys
                               [:akvo.lumen.admin/remove-tenant
                                :akvo.lumen.admin/add-tenant])) prod-edn]
-                        [(do (derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
-                             [:akvo.lumen.component.emailer/dev-emailer
+                        [(do (derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
+                             [:akvo.lumen.utils.dev-emailer/emailer
                               :akvo.lumen.admin.db/config
                               :akvo.lumen.admin/remove-tenant
                               :akvo.lumen.admin/add-tenant

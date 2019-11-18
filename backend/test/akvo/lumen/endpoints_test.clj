@@ -354,7 +354,7 @@
           (let [res (h (post*  (api-url "/admin/invites") {:email email}))]
             (is (= 200 (:status res)) )
             (is (= {} (body-kw res)))
-            (let [store @(:store (:akvo.lumen.component.emailer/dev-emailer *system*))
+            (let [store @(:store (:akvo.lumen.utils.dev-emailer/emailer *system*))
                   invitation (last store)]
               (is (= 1 (count store)))
               (is (= email (-> invitation :recipients first)))

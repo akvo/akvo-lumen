@@ -7,8 +7,8 @@
 
  :akvo.lumen.component.error-tracker/local {}
 
- :akvo.lumen.component.emailer/dev-emailer {:from-email "devops@akvo.localhost"
-                                            :from-name "Akvo Lumen"}
+ :akvo.lumen.utils.dev-emailer/emailer {:from-email "devops@akvo.localhost"
+                                        :from-name "Akvo Lumen"}
 
  :akvo.lumen.component.error-tracker/wrap-sentry {:dsn "dev-dsn"}
 
