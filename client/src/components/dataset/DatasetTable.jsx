@@ -249,6 +249,8 @@ class DatasetTable extends Component {
         onApply: (transformation) => {
           this.props.onTransform(transformation).then(() => {
             this.hideSidebar();
+          }).catch((error) => {
+            console.log(error);
           });
         },
         columns: this.props.columns,
