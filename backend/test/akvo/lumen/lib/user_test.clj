@@ -31,7 +31,7 @@
   (let [c                      (tu/start-config)
         keycloak-config        (select-keys (:akvo.lumen.component.keycloak/authorization-service c)
                                             [:credentials :max-user-ids-cache :realm :url :issuer-suffix-url])]
-    (binding [*emailer*  (ig/init-key :akvo.lumen.component.emailer/dev-emailer {:config {:from-email "" :from-name ""}})         
+    (binding [*emailer*  (ig/init-key :akvo.lumen.utils.dev-emailer/emailer {:config {:from-email "" :from-name ""}})         
               *keycloak* (ig/init-key :akvo.lumen.component.keycloak/authorization-service keycloak-config )]
       (f))))
 

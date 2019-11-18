@@ -5,7 +5,7 @@
             [integrant.core :as ig]
             [integrant.repl :as ir]))
 
-(derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 (derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 
