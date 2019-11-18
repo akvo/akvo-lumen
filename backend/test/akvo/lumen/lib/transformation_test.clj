@@ -74,7 +74,7 @@
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
-    (conj res (:status job))))
+    (conj res (:status job) job)))
 
 (defn latest-data [dataset-id]
   (let [table-name (:table-name
@@ -129,7 +129,7 @@
 
 (deftest ^:functional test-transformations
   (testing "Transformation application"
-    (is (= [::lib/bad-request {:message "Dataset not found"} nil]
+    (is (= [::lib/bad-request {:message "Dataset not found"} nil nil]
            (async-tx-apply {:tenant-conn *tenant-conn*} "Not-valid-id" []))))
   (testing "Valid log"
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
@@ -370,6 +370,17 @@
               {:rnum 2 :c1 "b" :c2 3.0 :c3 nil}
               {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
 
+    (testing "js references a non existent row"
+      (let [[_ _ status job] (apply-transformation {:type :transformation
+                                       :transformation
+                                       (gen-transformation "core/derive"
+                                                           {::transformation.derive.s/newColumnTitle "Derived 1"
+                                                            ::transformation.derive.s/code "row['oops'].toUpperCase()"
+                                                            ::transformation.derive.s/newColumnType "text"
+                                                            ::transformation.engine.s/onError "leave-empty"})})]
+        (is (= status "FAILED"))
+        (is (= (:error-message job) "Failed to transform: Column 'oops' doesn't exist."))))
+
     (testing "Basic text transform"
       (apply-transformation {:type :transformation
                              :transformation
@@ -432,7 +443,7 @@
                                            :transformation
                                            (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 6"
-                                                                ::transformation.derive.s/code "new Date()"
+                                                                ::transformation.derive.s/code "new Date().getTime()+row.bar"
                                                                 ::transformation.derive.s/newColumnType "date"
                                                                 ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
