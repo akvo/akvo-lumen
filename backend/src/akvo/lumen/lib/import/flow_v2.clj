@@ -17,12 +17,12 @@
     "text"))
 
 (defn dataset-columns
-  [form]
+  [form questions]
   (into (flow-common/commons-columns form)
         (into
          [{:title "Latitude" :type "number" :id "latitude"}
           {:title "Longitude" :type "number" :id "longitude"}]
-         (common/coerce question-type->lumen-type (flow-common/questions form)))))
+         (common/coerce question-type->lumen-type questions))))
 
 (defmulti render-response
   (fn [type response]
@@ -86,7 +86,7 @@
   nil)
 
 (defn response-data
-  [form responses]
+  [questions responses]
   (let [responses (flow-common/question-responses responses)]
     (reduce (fn [response-data {:keys [type id]}]
               (if-let [response (get responses id)]
@@ -95,17 +95,16 @@
                        (render-response type response))
                 response-data))
             {}
-            (flow-common/questions form))))
+            questions)))
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
-  [headers-fn survey form-id]
-  (let [form (flow-common/form survey form-id)
-        data-points (util/index-by "id" (flow-common/data-points headers-fn survey))]
+  [headers-fn survey form questions form-id]
+  (let [data-points (util/index-by "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")
                  data-point (get data-points data-point-id)]
-             (merge (response-data form (get form-instance "responses"))
+             (merge (response-data questions (get form-instance "responses"))
                     (flow-common/common-records form-instance data-point)
                     {:latitude (get-in data-points [data-point-id "latitude"])
                      :longitude (get-in data-points [data-point-id "longitude"])})))

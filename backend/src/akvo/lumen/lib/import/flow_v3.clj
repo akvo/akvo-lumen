@@ -39,11 +39,10 @@
 (defn dataset-columns
   "returns a vector of [{:title :type :id :key}]
   `:key` is optional"
-  [form]
-  (let [questions (flow-questions form)]
-    (into (flow-common/commons-columns form)
-          (into [{:title "Device Id" :type "text" :id "device_id"}]
-                (common/coerce question-type->lumen-type questions)))))
+  [form questions]
+  (into (flow-common/commons-columns form)
+        (into [{:title "Device Id" :type "text" :id "device_id"}]
+              (common/coerce question-type->lumen-type questions))))
 
 (defn render-response
   [type response]
@@ -77,7 +76,7 @@
     (v2/render-response type response)))
 
 (defn response-data
-  [form responses]
+  [questions responses]
   (let [responses (flow-common/question-responses responses)]
     (reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
               (if-let [response ((or derived-fn identity) (get responses (or derived-id id)))]
@@ -86,19 +85,18 @@
                        (render-response type response))
                 response-data))
             {}
-            (flow-questions form))))
+            questions)))
 
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
   instances and pulls additional data-point data using the forms data-point-id."
-  [headers-fn instance survey form-id]
-  (let [form (flow-common/form survey form-id)
-        data-points (util/index-by
+  [headers-fn instance survey form questions form-id]
+  (let [data-points (util/index-by
                      "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (if-let [data-point (get data-points data-point-id)]
-               (merge (response-data form (get form-instance "responses"))
+               (merge (response-data questions (get form-instance "responses"))
                       (flow-common/common-records form-instance data-point)
                       {:device_id (get form-instance "deviceIdentifier")})
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
