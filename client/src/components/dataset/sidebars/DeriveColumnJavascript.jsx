@@ -49,6 +49,9 @@ function isValidCode(code) {
     if (expressionStatement.type !== 'ExpressionStatement') {
       return false;
     }
+    if (code.indexOf('function') !== -1 || code.indexOf('=>') !== -1) {
+      return false;
+    }
     return true;
   } catch (e) {
     return false;
@@ -73,6 +76,8 @@ function HelpText() {
       <FormattedMessage
         id="js_helptext"
         values={{
+          arrowFunct: <Code>{'=>'}</Code>,
+          funct: <Code>function</Code>,
           columnSyntax: <Code>{'row["Column Title"]'}</Code>,
           title: <Code>row.title</Code>,
         }}
