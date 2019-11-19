@@ -32,7 +32,7 @@
                                              (assoc :multipleId (:id i))
                                              (assoc :derived-id (:id i))
                                              (assoc :derived-fn (fn [x] (-> x (w/keywordize-keys) :features first :properties)))
-                                             (update :name (fn [o] (str o " Features" )))
+                                             (update :name (fn [o] (format "%s Features" o)))
                                              (assoc :id id)))) [i] (range 1)))
        (conj c i))) [] (flow-common/questions form)))
 

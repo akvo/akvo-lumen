@@ -69,7 +69,18 @@
 (defn questions
   "Get the list of questions from a form"
   [form]
-  (mapcat :questions (:questionGroups form)))
+  (let [duplicates (->> (:questionGroups form)
+                        (map :questions)
+                        (reduce #(into % (map :name %2)) [])
+                        frequencies
+                        (filter (fn [[m v]] (> v 1)))
+                        (map first)
+                        set)]
+    (->> (:questionGroups form)
+         (reduce #(into % (map (fn [q group-name]
+                                 (if (contains? duplicates (:name q))
+                                   (update q :name (fn [x] (format "%s (%s)" x group-name)))
+                                   q)) (:questions %2) (repeat (str/trim (:name %2))))) []))))
 
 (defn form
   "Get a form by id from a survey"
