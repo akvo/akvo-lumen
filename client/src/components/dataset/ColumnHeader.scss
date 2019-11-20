@@ -2,20 +2,17 @@
 
 .ColumnHeader {
     vertical-align: top;
-
+    white-space: normal;
+    margin:10px;
+    margin-top:20px;
+    height: 73%;
     * {
         vertical-align: top;
     }
-
     &.clickable:after {
-        content: '';
         display: block;
-        width: 0;
-        height: 0;
-        border-right: 10px solid transparent;
-        border-left: 10px solid transparent;
-        border-top: 10px solid $black;
-        border-bottom: none;
+        content: "\f107";  /* fa-angle-down this is your text. You can also use UTF-8 character codes as I do here */
+        font-family: FontAwesome;    
         position: absolute;
         right: 0.5rem;
         top: 25px;
@@ -31,7 +28,7 @@
     }
 
     * {
-        line-height: 60px;
+        // line-height: 60px;
     }
 
     .columnKey {
@@ -41,7 +38,7 @@
     }
 
     .columnType {
-        margin: 0 0.5rem;
+    //    margin: 0 0.5rem;
         color: $black;
         font-weight: 400;
     }
@@ -51,25 +48,29 @@
     }
 
     .columnTitleText {
-        max-width: calc(100% - 30px);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        display: inline-block;
+       // max-width: calc(100% - 30px);
+       // overflow: hidden;
+       // text-overflow: ellipsis;
+       // white-space: nowrap;
+       // display: inline-block;
     }
-
+    .columnTypeDiv {
+        position: absolute;
+        bottom: 0;
+    }
     .sortLabel {
         display: block;
-        position: absolute;
+       // position: absolute;
         left: 0;
         right: 0;
         top: 0rem;
-        line-height: 0.7rem;
-        padding: 0.125rem 0.5rem 0.18rem 0.5rem;
+       // line-height: 0.7rem;
+        padding: 5px;
         background-color: rgba(0, 0, 0, 0.25);
         color: $black;
         text-align: left;
-
+        margin-top:-12px;
+        cursor: pointer;
         * {
             line-height: 0.7rem;
         }

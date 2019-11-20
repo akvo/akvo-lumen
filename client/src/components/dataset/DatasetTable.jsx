@@ -448,6 +448,17 @@ class DatasetTable extends Component {
         />
       );
     });
+    const maxLength = columns.reduce(
+      (x, c) => {
+        let l = c.get('title').length;
+        const sort = c.get('sort') === 1;
+        l = sort ? l + 30 : l;
+        return (l > x) ? l : x;
+      }, 0);
+    const maxLine = 25;
+    const lines = Math.floor((maxLength / maxLine)) + ((maxLength % maxLine) > 0 ? 1 : 0);
+    const headerHeight = (lines * 20) + 20 + 25;
+//    console.log('maxLength', maxLength, 'lines', lines, 'headerHeight', headerHeight);
     return (
       <div className="DatasetTable">
         <DatasetControls
@@ -497,7 +508,7 @@ class DatasetTable extends Component {
               />
             )}
             <Table
-              headerHeight={60}
+              headerHeight={headerHeight}
               rowHeight={30}
               rowsCount={rows.size}
               width={width}

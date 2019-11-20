@@ -65,10 +65,11 @@ export default class ColumnHeader extends Component {
 
     return (
       <div
-        className={`ColumnHeader ${disabled ? '' : 'clickable'}
-          ${this.props.columnMenuActive ? 'columnMenuActive' : ''}`}
+        className={`ColumnHeader ${this.props.columnMenuActive ? 'columnMenuActive' : ''}`}
         ref={(ref) => { this.columnHeaderContainer = ref; }}
         onClick={this.handleColumnMenuClick}
+        title={column.get('title')}
+        data-test-id={column.get('title')}
       >
         {column.get('sort') != null ?
           <div
@@ -84,11 +85,13 @@ export default class ColumnHeader extends Component {
           </div>
           : null
         }
-        <span
-          className="columnTitleText"
-          title={column.get('title')}
-          data-test-id={column.get('title')}
-        >
+        <div>
+          {column.get('title')}
+        </div>
+        <div className={`${disabled ? '' : 'clickable'}`} style={{ textAlign: 'right' }}>
+          <i className="fa fa-angle-down" aria-hidden />
+        </div>
+       <div className="columnTypeDiv">
           {column.get('key') ?
             <span className="columnKey">
               <i className="fa fa-key" aria-hidden />
@@ -105,8 +108,7 @@ export default class ColumnHeader extends Component {
               </span>
             </span>
           }
-          {column.get('title')}
-        </span>
+        </div>
       </div>
     );
   }
