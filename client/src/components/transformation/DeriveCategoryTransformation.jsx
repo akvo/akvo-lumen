@@ -11,6 +11,11 @@ import './DeriveCategoryTransformation.scss';
 import TransformationHeader from './TransformationHeader';
 import { showNotification } from '../../actions/notification';
 
+function findColumn(columns, columnName) {
+  return columns
+  .filter(column => column.columnName === columnName)[0];
+}
+
 class DeriveCategoryTransformation extends Component {
 
   constructor(props) {
@@ -178,11 +183,6 @@ class DeriveCategoryTransformation extends Component {
     return false;
   }
 
-  findColumn(columns, columnName) {
-    return columns
-    .filter(column => column.columnName === columnName)[0];
-  }
-
   render() {
     const {
       datasetId,
@@ -215,7 +215,7 @@ class DeriveCategoryTransformation extends Component {
               dataset={dataset}
               selected={transformation.args.source.column.columnName}
               onChange={(columnName) => {
-                const c = this.findColumn(dataset.columns, columnName);
+                const c = findColumn(dataset.columns, columnName);
                 const title = c.title;
                 const ct = c.type;
                 if (columnName !== transformation.args.source.column.columnName) {

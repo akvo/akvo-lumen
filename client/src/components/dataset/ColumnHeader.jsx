@@ -91,7 +91,7 @@ export default class ColumnHeader extends Component {
         <div className={`${disabled ? '' : 'clickable'}`} style={{ textAlign: 'right' }}>
           <i className="fa fa-angle-down" aria-hidden />
         </div>
-       <div className="columnTypeDiv">
+        <div className="columnTypeDiv">
           {column.get('key') ?
             <span className="columnKey">
               <i className="fa fa-key" aria-hidden />

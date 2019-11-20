@@ -10,7 +10,20 @@ import './DeriveCategoryMappingsText.scss';
 import ContextMenu from '../../common/ContextMenu';
 import ClickAway from '../../common/ClickAway';
 
+function newRule() {
+  return [{
+    op: null,
+    opValue: 0,
+  }, {
+    op: null,
+    opValue: 0,
+  }];
+}
 
+function range(start, count) {
+  return Array.apply(0, Array(count))
+    .map((element, index) => index + start);
+}
 class DeriveCategoryMappings extends Component {
 
   static defaultProps = {
@@ -54,7 +67,7 @@ class DeriveCategoryMappings extends Component {
     }
   }
   onAddRule() {
-    const rules = this.state.rules.push(immutable.fromJS(this.newRule()));
+    const rules = this.state.rules.push(immutable.fromJS(newRule()));
     this.setState({ rules });
     this.onChange(rules);
   }
@@ -85,21 +98,6 @@ class DeriveCategoryMappings extends Component {
       return [[r1.get('op'), Number(r1.get('opValue'))], a2, a.get(2)];
     });
     this.props.onChange(mappings.toJS());
-  }
-
-  newRule() {
-    return [{
-      op: null,
-      opValue: 0,
-    }, {
-      op: null,
-      opValue: 0,
-    }];
-  }
-
-  range(start, count) {
-    return Array.apply(0, Array(count))
-      .map((element, index) => index + start);
   }
 
   render() {
@@ -201,7 +199,7 @@ class DeriveCategoryMappings extends Component {
             />
           </Col>
         </Row>
-        {rules.size > 0 ? this.range(0, rules.size).map(x =>
+        {rules.size > 0 ? range(0, rules.size).map(x =>
           (
             <RowLogicRule
               key={x}
