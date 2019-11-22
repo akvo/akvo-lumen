@@ -1,35 +1,8 @@
 @import "../../styles/modules/importAll";
 
-/*
-fixedDataTableRowLayout_main public_fixedDataTableRow_main public_fixedDataTableRow_even fixedDataTableLayout_header public_fixedDataTable_header
-
-fixedDataTableRowLayout_main public_fixedDataTableRow_main fixedDataTableLayout_header public_fixedDataTable_header
-
-*/
-.fixedDataTableRowLayout_main {
-    border-width: 0px;
-    border-style: none;
-
-}
-
-
-.HOLA {
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-color: #d3d3d3;
-}
-
-// fixedDataTableRowLayout_main public_fixedDataTableRow_main public_fixedDataTableRow_highlighted public_fixedDataTableRow_odd HOLA public_fixedDataTable_bodyRow fixedDataTableLayout_hasBottomBorder 
-
-.public_fixedDataTable_hasBottomBorder{
-   // border-top-width: 1px;
-   //  border-top-style: solid;    
-}
-
-
-.ColumnHeader {
+.ColumnGroupHeader {
     vertical-align: top;
-    margin-top: 3px;
+
     * {
         vertical-align: top;
     }
@@ -58,7 +31,7 @@ fixedDataTableRowLayout_main public_fixedDataTableRow_main fixedDataTableLayout_
     }
 
     * {
-    //    line-height: 60px;
+        line-height: 60px;
     }
 
     .columnKey {
@@ -83,5 +56,27 @@ fixedDataTableRowLayout_main public_fixedDataTableRow_main fixedDataTableLayout_
         text-overflow: ellipsis;
         white-space: nowrap;
         display: inline-block;
+    }
+
+    .sortLabel {
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0rem;
+        line-height: 0.7rem;
+        padding: 0.125rem 0.5rem 0.18rem 0.5rem;
+        background-color: rgba(0, 0, 0, 0.25);
+        color: $black;
+        text-align: left;
+
+        * {
+            line-height: 0.7rem;
+        }
+
+        .cancelSort {
+            float: right;
+            margin-right: -0.25rem;
+        }
     }
 }

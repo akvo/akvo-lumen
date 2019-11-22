@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, Column, Cell } from 'fixed-data-table-2';
+import { Table, Column, Cell, ColumnGroup } from 'fixed-data-table-2';
 import moment from 'moment';
 import { withRouter } from 'react-router';
 import ColumnHeader from './ColumnHeader';
+import ColumnGroupHeader from './ColumnGroupHeader';
 import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
@@ -411,9 +412,21 @@ class DatasetTable extends Component {
     } = this.state;
 
     const cols = columns.map((column, index) => {
+      const columnGroupHeader = (
+          <ColumnGroupHeader
+            key={`group-header${index}`}
+            column={column}
+            onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
+            onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
+            disabled={isLockedFromTransformations}
+            columnMenuActive={activeColumnContextMenu != null && !isLockedFromTransformations &&
+              activeColumnContextMenu.column.get('title') === column.get('title')}
+            onRemoveSort={transformation => this.props.onTransform(transformation)}
+          />
+      );
       const columnHeader = (
         <ColumnHeader
-          key={index}
+          key={`header${index}`}
           column={column}
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
@@ -422,7 +435,8 @@ class DatasetTable extends Component {
             activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
-      );
+    );
+
       const formatCell = (props) => {
         const formattedCellValue =
           formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
@@ -439,13 +453,19 @@ class DatasetTable extends Component {
       };
 
       return (
-        <Column
-          cellClassName={this.getCellClassName(column.get('title'))}
+        <ColumnGroup
+          header={columnGroupHeader}
           key={index}
-          header={columnHeader}
-          cell={formatCell}
-          width={200}
-        />
+        >
+          <Column
+            cellClassName={this.getCellClassName(column.get('title'))}
+            key={index}
+            header={columnHeader}
+            cell={formatCell}
+            width={200}
+          />
+        </ColumnGroup>
+
       );
     });
     return (
@@ -496,9 +516,12 @@ class DatasetTable extends Component {
                 left={columns.last().get('title') === activeColumnContextMenu.column.get('title')}
               />
             )}
+            
             <Table
-              headerHeight={60}
+              groupHeaderHeight={60}
+              headerHeight={30}
               rowHeight={30}
+              rowClassNameGetter={() => 'HOLA'}
               rowsCount={rows.size}
               width={width}
               height={height}
