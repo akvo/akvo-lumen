@@ -77,10 +77,11 @@
                         (map first)
                         set)]
     (->> (:questionGroups form)
-         (reduce #(into % (map (fn [q group-name]
-                                 (if (contains? duplicates (:name q))
-                                   (update q :name (fn [x] (format "%s (%s)" x group-name)))
-                                   q)) (:questions %2) (repeat (str/trim (:name %2))))) []))))
+         (reduce #(into % (map (fn [q* [group-id group-name]]
+                                 (let [q (assoc q* :groupId group-id :groupName group-name)]
+                                   (if (contains? duplicates (:name q))
+                                     (update q :name (fn [x] (format "%s (%s)" x group-name)))
+                                     q))) (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) []))))
 
 (defn form
   "Get a form by id from a survey"
