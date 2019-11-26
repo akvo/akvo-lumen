@@ -411,11 +411,10 @@ class DatasetTable extends Component {
       height,
     } = this.state;
 
-    const o = (column) => {
-      const index = column.get('idx');
+    const o = (column, index) => {
       const columnHeader = (
         <ColumnHeader
-          key={`header${column.get('idx')}`}
+          key={index}
           column={column}
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
