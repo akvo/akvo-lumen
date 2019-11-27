@@ -79,7 +79,8 @@
     (->> (:questionGroups form)
          (reduce #(into % (map (fn [q* [group-id group-name]]
                                  (let [q (assoc q* :groupId group-id :groupName group-name)]
-                                   (if (contains? duplicates (:name q))
+                                   q
+                                   #_(if (contains? duplicates (:name q))
                                      (update q :name (fn [x] (format "%s (%s)" x group-name)))
                                      q))) (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) []))))
 
