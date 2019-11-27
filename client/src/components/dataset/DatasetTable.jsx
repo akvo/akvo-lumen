@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, Column, Cell } from 'fixed-data-table-2';
+import { Table, Column, Cell, ColumnGroup } from 'fixed-data-table-2';
 import moment from 'moment';
 import { withRouter } from 'react-router';
 import ColumnHeader from './ColumnHeader';
+import ColumnGroupHeader from './ColumnGroupHeader';
 import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
@@ -410,7 +411,7 @@ class DatasetTable extends Component {
       height,
     } = this.state;
 
-    const cols = columns.map((column, index) => {
+    const createColumn = (column, index) => {
       const columnHeader = (
         <ColumnHeader
           key={index}
@@ -422,10 +423,11 @@ class DatasetTable extends Component {
             activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
-      );
-      const formatCell = (props) => {
+    );
+
+      const formatCell = idx => (props) => {
         const formattedCellValue =
-          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
+          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, idx]));
         const cellStyle = column.get('type') === 'number' ? { textAlign: 'right', width: '100%' } : { textAlign: 'left' };
         return (
           <Cell style={cellStyle} className={column.get('type')}>
@@ -437,17 +439,49 @@ class DatasetTable extends Component {
           </Cell>
         );
       };
+      return (<Column
+        cellClassName={this.getCellClassName(column.get('title'))}
+        key={column.get('idx')}
+        header={columnHeader}
+        cell={formatCell(column.get('idx'))}
+        width={200}
+      />);
+    };
 
-      return (
-        <Column
-          cellClassName={this.getCellClassName(column.get('title'))}
-          key={index}
-          header={columnHeader}
-          cell={formatCell}
-          width={200}
-        />
-      );
-    });
+    const reducerGroup = (accumulator, c, idx) => {
+      const groupName = c.get('groupName');
+      const column = c.set('idx', idx);
+      if (groupName === null || groupName === undefined) {
+        accumulator[' '].push(column);
+        return accumulator;
+      } else if (accumulator[groupName] !== undefined) {
+        accumulator[groupName].push(column);
+        return accumulator;
+      }
+      // eslint-disable-next-line no-param-reassign
+      accumulator[groupName] = [column];
+      return accumulator;
+    };
+
+    const groups = columns.reduce(reducerGroup, { ' ': [] });
+    let cols;
+    if (Object.keys(groups).length > 1) {
+      const reducer2 = (accumulator, k, idx) => {
+        const columnsGroup = groups[k];
+        accumulator.push(
+          <ColumnGroup
+            header={<ColumnGroupHeader groupName={k} />}
+            key={`gr-${idx}`}
+          >
+            {columnsGroup.map(createColumn)}
+          </ColumnGroup>
+        );
+        return accumulator;
+      };
+      cols = Object.keys(groups).reduce(reducer2, []);
+    } else {
+      cols = columns.map(createColumn);
+    }
     return (
       <div className="DatasetTable">
         <DatasetControls
@@ -497,6 +531,7 @@ class DatasetTable extends Component {
               />
             )}
             <Table
+              groupHeaderHeight={30}
               headerHeight={60}
               rowHeight={30}
               rowsCount={rows.size}
