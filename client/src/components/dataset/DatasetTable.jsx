@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Table, Column, Cell, ColumnGroup } from 'fixed-data-table-2';
 import moment from 'moment';
 import { withRouter } from 'react-router';
+import { injectIntl, intlShape } from 'react-intl';
 import ColumnHeader from './ColumnHeader';
 import ColumnGroupHeader from './ColumnGroupHeader';
 import DataTableSidebar from './DataTableSidebar';
@@ -411,6 +412,7 @@ class DatasetTable extends Component {
       height,
     } = this.state;
 
+    const intTxs = this.props.intl.formatMessage({ id: 'transformations' });
     const createColumn = (column, index) => {
       const columnHeader = (
         <ColumnHeader
@@ -447,12 +449,29 @@ class DatasetTable extends Component {
         width={200}
       />);
     };
-
+    function isTransformation(v) {
+      if (v.charAt(0) === 'd') {
+        const x = parseInt(v.substring(1), 10);
+        if (x > 0) {
+          return true;
+        }
+      }
+      return false;
+    }
     const reducerGroup = (accumulator, c, idx) => {
       const groupName = c.get('groupName');
       const column = c.set('idx', idx);
       if (groupName === null || groupName === undefined) {
-        accumulator[' '].push(column);
+        if (isTransformation(c.get('columnName'))) {
+          if (accumulator[intTxs] === undefined) {
+            // eslint-disable-next-line no-param-reassign
+            accumulator[intTxs] = [column];
+          } else {
+            accumulator[intTxs].push(column);
+          }
+        } else {
+          accumulator[' '].push(column);
+        }
         return accumulator;
       } else if (accumulator[groupName] !== undefined) {
         accumulator[groupName].push(column);
@@ -560,6 +579,7 @@ DatasetTable.propTypes = {
   router: PropTypes.object.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
   isLockedFromTransformations: PropTypes.bool,
+  intl: intlShape,
 };
 
-export default withRouter(DatasetTable);
+export default withRouter(injectIntl(DatasetTable));
