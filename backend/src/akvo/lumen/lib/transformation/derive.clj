@@ -119,7 +119,8 @@
                   ::column-title
                   ::column-type]} (args op-spec)
           new-column-name         (engine/next-column-name columns)
-          row-fn                  (js-engine/row-transform-fn {:columns     columns
+          adapter (js-engine/column-name->column-title columns)
+          row-fn                  (js-engine/row-transform-fn {:adapter     adapter
                                                                :code        code
                                                                :column-type column-type})
           js-execution-seq        (->> (db.tx.derive/all-data conn {:table-name table-name})

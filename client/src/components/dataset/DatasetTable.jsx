@@ -411,10 +411,10 @@ class DatasetTable extends Component {
       height,
     } = this.state;
 
-    const o = (column, index) => {
+    const createColumn = (column, index) => {
       const columnHeader = (
         <ColumnHeader
-          key={index}
+          key={`header-${index}`}
           column={column}
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
@@ -425,9 +425,9 @@ class DatasetTable extends Component {
         />
     );
 
-      const formatCell = (props) => {
+      const formatCell = idx => (props) => {
         const formattedCellValue =
-          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
+          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, idx]));
         const cellStyle = column.get('type') === 'number' ? { textAlign: 'right', width: '100%' } : { textAlign: 'left' };
         return (
           <Cell style={cellStyle} className={column.get('type')}>
@@ -441,14 +441,14 @@ class DatasetTable extends Component {
       };
       return (<Column
         cellClassName={this.getCellClassName(column.get('title'))}
-        key={index}
+        key={column.get('idx')}
         header={columnHeader}
-        cell={formatCell}
+        cell={formatCell(column.get('idx'))}
         width={200}
       />);
     };
 
-    const reducer = (accumulator, c, idx) => {
+    const reducerGroup = (accumulator, c, idx) => {
       const groupName = c.get('groupName');
       const column = c.set('idx', idx);
       if (groupName === null || groupName === undefined) {
@@ -463,26 +463,25 @@ class DatasetTable extends Component {
       return accumulator;
     };
 
-    const x = columns.reduce(reducer, { ' ': [] });
+    const groups = columns.reduce(reducerGroup, { ' ': [] });
     let cols;
-    if (Object.keys(x).length > 1) {
+    if (Object.keys(groups).length > 1) {
       const reducer2 = (accumulator, k, idx) => {
-        const els = x[k];
+        const columnsGroup = groups[k];
         accumulator.push(
           <ColumnGroup
             header={<ColumnGroupHeader groupName={k} />}
             key={`gr-${idx}`}
           >
-            {els.map(o)}
+            {columnsGroup.map(createColumn)}
           </ColumnGroup>
         );
         return accumulator;
       };
-      cols = Object.keys(x).reduce(reducer2, []);
+      cols = Object.keys(groups).reduce(reducer2, []);
     } else {
-      cols = columns.map(o);
+      cols = columns.map(createColumn);
     }
-
     return (
       <div className="DatasetTable">
         <DatasetControls
