@@ -391,6 +391,8 @@
 	                       :hidden false,
 	                       :multipleType nil,
 	                       :columnName "c1",
+                               :groupId nil
+                               :groupName nil
 	                       :direction nil,
 	                       :sort nil}
 	                      {:key false,
@@ -398,6 +400,8 @@
 	                       :title "two",
 	                       :multipleId nil,
 	                       :hidden false,
+                               :groupId nil
+                               :groupName nil
 	                       :multipleType nil,
 	                       :columnName "c2",
 	                       :direction nil,

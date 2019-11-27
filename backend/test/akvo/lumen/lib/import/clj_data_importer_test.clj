@@ -33,7 +33,9 @@
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))]
-      (is (= (map keys (:columns dataset)) '(("key"
+      (is (= (map keys (:columns dataset)) '(("groupId"
+                                              "key"
+                                              "groupName"
 	                                      "sort"
 	                                      "direction"
 	                                      "title"
@@ -42,7 +44,9 @@
 	                                      "hidden"
 	                                      "multipleId"
 	                                      "columnName")
-                                             ("key"
+                                             ("groupId"
+                                              "key"
+                                              "groupName"
 	                                      "sort"
 	                                      "direction"
 	                                      "title"
