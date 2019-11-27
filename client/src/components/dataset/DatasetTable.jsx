@@ -413,6 +413,7 @@ class DatasetTable extends Component {
     } = this.state;
 
     const intTxs = this.props.intl.formatMessage({ id: 'transformations' });
+    const intSurveyDetails = this.props.intl.formatMessage({ id: 'survey_details' });
     const createColumn = (column, index) => {
       const columnHeader = (
         <ColumnHeader
@@ -458,6 +459,9 @@ class DatasetTable extends Component {
       }
       return false;
     }
+
+    const formSurveyColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
+
     const reducerGroup = (accumulator, c, idx) => {
       const groupName = c.get('groupName');
       const column = c.set('idx', idx);
@@ -469,6 +473,8 @@ class DatasetTable extends Component {
           } else {
             accumulator[intTxs].push(column);
           }
+        } else if (formSurveyColumnNames.has(c.get('columnName'))) {
+          accumulator[intSurveyDetails].push(column);
         } else {
           accumulator[' '].push(column);
         }
@@ -481,8 +487,9 @@ class DatasetTable extends Component {
       accumulator[groupName] = [column];
       return accumulator;
     };
-
-    const groups = columns.reduce(reducerGroup, { ' ': [] });
+    const initialGroups = { ' ': [] };
+    initialGroups[intSurveyDetails] = [];
+    const groups = columns.reduce(reducerGroup, initialGroups);
     let cols;
     if (Object.keys(groups).length > 1) {
       const reducer2 = (accumulator, k, idx) => {
