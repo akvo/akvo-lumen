@@ -3,6 +3,23 @@ export function isValidEmail(email = '') {
   return regex.test(email);
 }
 
+export function isTransformationColumn(c) {
+  const n = c.get('columnName');
+  return n.charAt(0) === 'd' && parseInt(n.substring(1), 10) > 0;
+}
+
+export function ensurePushIntoArray(a, k, v) {
+  const x = a;
+  if (x[k] === undefined) {
+    x[k] = [v];
+  } else {
+    x[k].push(v);
+  }
+  return x;
+}
+
+export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
+
 // Returns undefined if the object or any given nested key doesn't exist
 export function checkUndefined(object = {}, ...keys) {
   if (!object || typeof object !== 'object') {

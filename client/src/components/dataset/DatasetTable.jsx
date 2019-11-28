@@ -10,6 +10,7 @@ import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
+import { flowCommonColumnNames, isTransformationColumn, ensurePushIntoArray } from './../../utilities/utils';
 
 require('./DatasetTable.scss');
 
@@ -450,45 +451,22 @@ class DatasetTable extends Component {
         width={200}
       />);
     };
-    function isTransformation(v) {
-      if (v.charAt(0) === 'd') {
-        const x = parseInt(v.substring(1), 10);
-        if (x > 0) {
-          return true;
-        }
-      }
-      return false;
-    }
 
-    const formSurveyColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
 
     const reducerGroup = (accumulator, c, idx) => {
       const groupName = c.get('groupName');
       const column = c.set('idx', idx);
       if (groupName === null || groupName === undefined) {
-        if (isTransformation(c.get('columnName'))) {
-          if (accumulator[intTxs] === undefined) {
-            // eslint-disable-next-line no-param-reassign
-            accumulator[intTxs] = [column];
-          } else {
-            accumulator[intTxs].push(column);
-          }
-        } else if (formSurveyColumnNames.has(c.get('columnName'))) {
-          accumulator[intFormMetadata].push(column);
-        } else {
-          accumulator[' '].push(column);
+        if (isTransformationColumn(c)) {
+          return ensurePushIntoArray(accumulator, intTxs, column);
+        } else if (flowCommonColumnNames.has(c.get('columnName'))) {
+          return ensurePushIntoArray(accumulator, intFormMetadata, column);
         }
-        return accumulator;
-      } else if (accumulator[groupName] !== undefined) {
-        accumulator[groupName].push(column);
-        return accumulator;
+        return ensurePushIntoArray(accumulator, ' ', column);
       }
-      // eslint-disable-next-line no-param-reassign
-      accumulator[groupName] = [column];
-      return accumulator;
+      return ensurePushIntoArray(accumulator, groupName, column);
     };
-    const initialGroups = { ' ': [] };
-    initialGroups[intFormMetadata] = [];
+    const initialGroups = {};
     const groups = columns.reduce(reducerGroup, initialGroups);
     let cols;
     if (Object.keys(groups).length > 1) {
