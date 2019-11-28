@@ -5,7 +5,7 @@ export function isValidEmail(email = '') {
 
 export function isTransformationColumn(c) {
   const n = c.get('columnName');
-  return n.charAt(0) === 'd' && parseInt(n.substring(1), 10) > 0;
+  return n && n.charAt(0) === 'd' && parseInt(n.substring(1), 10) > 0;
 }
 
 export function datasetHasQuestionGroups(columns) {
@@ -28,7 +28,7 @@ export const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator,
   const column = c.set('idx', idx);
   const groupName = column.get('groupName');
   const columnName = column.get('columnName');
-  if (groupName === null || groupName === undefined) {
+  if (groupName === 'null' || groupName === 'undefined' || groupName === null || groupName === undefined) {
     if (isTransformationColumn(column)) {
       return ensurePushIntoArray(accumulator, transformationsI18n, column);
     } else if (flowCommonColumnNames.has(columnName)) {
