@@ -8,6 +8,10 @@ export function isTransformationColumn(c) {
   return n.charAt(0) === 'd' && parseInt(n.substring(1), 10) > 0;
 }
 
+export function datasetHasQuestionGroups(columns) {
+  return columns.filter(c => c.get('groupName') !== null && c.get('groupName') !== undefined).size > 0;
+}
+
 export function ensurePushIntoArray(a, k, v) {
   const x = a;
   if (x[k] === undefined) {

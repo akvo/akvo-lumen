@@ -10,7 +10,7 @@ import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
-import { flowCommonColumnNames, isTransformationColumn, ensurePushIntoArray } from './../../utilities/utils';
+import { flowCommonColumnNames, isTransformationColumn, ensurePushIntoArray, datasetHasQuestionGroups } from './../../utilities/utils';
 
 require('./DatasetTable.scss');
 
@@ -445,31 +445,32 @@ class DatasetTable extends Component {
       };
       return (<Column
         cellClassName={this.getCellClassName(column.get('title'))}
-        key={column.get('idx')}
+        key={column.get('idx') || index}
         header={columnHeader}
-        cell={formatCell(column.get('idx'))}
+        cell={formatCell(column.get('idx') || index)}
         width={200}
       />);
     };
 
 
     const reducerGroup = (accumulator, c, idx) => {
-      const groupName = c.get('groupName');
       const column = c.set('idx', idx);
+      const groupName = column.get('groupName');
+      const columnName = column.get('columnName');
       if (groupName === null || groupName === undefined) {
-        if (isTransformationColumn(c)) {
+        if (isTransformationColumn(column)) {
           return ensurePushIntoArray(accumulator, intTxs, column);
-        } else if (flowCommonColumnNames.has(c.get('columnName'))) {
+        } else if (flowCommonColumnNames.has(columnName)) {
           return ensurePushIntoArray(accumulator, intFormMetadata, column);
         }
         return ensurePushIntoArray(accumulator, ' ', column);
       }
       return ensurePushIntoArray(accumulator, groupName, column);
     };
-    const initialGroups = {};
-    const groups = columns.reduce(reducerGroup, initialGroups);
+
+    const groups = columns.reduce(reducerGroup, {});
     let cols;
-    if (Object.keys(groups).length > 1) {
+    if (datasetHasQuestionGroups(columns)) {
       const reducer2 = (accumulator, k, idx) => {
         const columnsGroup = groups[k];
         accumulator.push(
