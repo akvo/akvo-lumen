@@ -24,6 +24,22 @@ export function ensurePushIntoArray(a, k, v) {
 
 export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
 
+export const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator, c, idx) => {
+  const column = c.set('idx', idx);
+  const groupName = column.get('groupName');
+  const columnName = column.get('columnName');
+  if (groupName === null || groupName === undefined) {
+    if (isTransformationColumn(column)) {
+      return ensurePushIntoArray(accumulator, transformationsI18n, column);
+    } else if (flowCommonColumnNames.has(columnName)) {
+      return ensurePushIntoArray(accumulator, metadataI18n, column);
+    }
+    return ensurePushIntoArray(accumulator, ' ', column);
+  }
+  return ensurePushIntoArray(accumulator, groupName, column);
+};
+
+
 // Returns undefined if the object or any given nested key doesn't exist
 export function checkUndefined(object = {}, ...keys) {
   if (!object || typeof object !== 'object') {
