@@ -413,7 +413,7 @@ class DatasetTable extends Component {
     } = this.state;
 
     const intTxs = this.props.intl.formatMessage({ id: 'transformations' });
-    const intSurveyDetails = this.props.intl.formatMessage({ id: 'survey_details' });
+    const intFormMetadata = this.props.intl.formatMessage({ id: 'form_metadata' });
     const createColumn = (column, index) => {
       const columnHeader = (
         <ColumnHeader
@@ -474,7 +474,7 @@ class DatasetTable extends Component {
             accumulator[intTxs].push(column);
           }
         } else if (formSurveyColumnNames.has(c.get('columnName'))) {
-          accumulator[intSurveyDetails].push(column);
+          accumulator[intFormMetadata].push(column);
         } else {
           accumulator[' '].push(column);
         }
@@ -488,7 +488,7 @@ class DatasetTable extends Component {
       return accumulator;
     };
     const initialGroups = { ' ': [] };
-    initialGroups[intSurveyDetails] = [];
+    initialGroups[intFormMetadata] = [];
     const groups = columns.reduce(reducerGroup, initialGroups);
     let cols;
     if (Object.keys(groups).length > 1) {
