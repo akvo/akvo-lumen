@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, Column, Cell } from 'fixed-data-table-2';
+import { Table, Column, Cell, ColumnGroup } from 'fixed-data-table-2';
 import moment from 'moment';
 import { withRouter } from 'react-router';
+import { injectIntl, intlShape } from 'react-intl';
 import ColumnHeader from './ColumnHeader';
+import ColumnGroupHeader from './ColumnGroupHeader';
 import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
@@ -410,7 +412,9 @@ class DatasetTable extends Component {
       height,
     } = this.state;
 
-    const cols = columns.map((column, index) => {
+    const intTxs = this.props.intl.formatMessage({ id: 'transformations' });
+    const intFormMetadata = this.props.intl.formatMessage({ id: 'form_metadata' });
+    const createColumn = (column, index) => {
       const columnHeader = (
         <ColumnHeader
           key={index}
@@ -422,10 +426,11 @@ class DatasetTable extends Component {
             activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
-      );
-      const formatCell = (props) => {
+    );
+
+      const formatCell = idx => (props) => {
         const formattedCellValue =
-          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
+          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, idx]));
         const cellStyle = column.get('type') === 'number' ? { textAlign: 'right', width: '100%' } : { textAlign: 'left' };
         return (
           <Cell style={cellStyle} className={column.get('type')}>
@@ -437,17 +442,72 @@ class DatasetTable extends Component {
           </Cell>
         );
       };
+      return (<Column
+        cellClassName={this.getCellClassName(column.get('title'))}
+        key={column.get('idx')}
+        header={columnHeader}
+        cell={formatCell(column.get('idx'))}
+        width={200}
+      />);
+    };
+    function isTransformation(v) {
+      if (v.charAt(0) === 'd') {
+        const x = parseInt(v.substring(1), 10);
+        if (x > 0) {
+          return true;
+        }
+      }
+      return false;
+    }
 
-      return (
-        <Column
-          cellClassName={this.getCellClassName(column.get('title'))}
-          key={index}
-          header={columnHeader}
-          cell={formatCell}
-          width={200}
-        />
-      );
-    });
+    const formSurveyColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
+
+    const reducerGroup = (accumulator, c, idx) => {
+      const groupName = c.get('groupName');
+      const column = c.set('idx', idx);
+      if (groupName === null || groupName === undefined) {
+        if (isTransformation(c.get('columnName'))) {
+          if (accumulator[intTxs] === undefined) {
+            // eslint-disable-next-line no-param-reassign
+            accumulator[intTxs] = [column];
+          } else {
+            accumulator[intTxs].push(column);
+          }
+        } else if (formSurveyColumnNames.has(c.get('columnName'))) {
+          accumulator[intFormMetadata].push(column);
+        } else {
+          accumulator[' '].push(column);
+        }
+        return accumulator;
+      } else if (accumulator[groupName] !== undefined) {
+        accumulator[groupName].push(column);
+        return accumulator;
+      }
+      // eslint-disable-next-line no-param-reassign
+      accumulator[groupName] = [column];
+      return accumulator;
+    };
+    const initialGroups = { ' ': [] };
+    initialGroups[intFormMetadata] = [];
+    const groups = columns.reduce(reducerGroup, initialGroups);
+    let cols;
+    if (Object.keys(groups).length > 1) {
+      const reducer2 = (accumulator, k, idx) => {
+        const columnsGroup = groups[k];
+        accumulator.push(
+          <ColumnGroup
+            header={<ColumnGroupHeader groupName={k} />}
+            key={`gr-${idx}`}
+          >
+            {columnsGroup.map(createColumn)}
+          </ColumnGroup>
+        );
+        return accumulator;
+      };
+      cols = Object.keys(groups).reduce(reducer2, []);
+    } else {
+      cols = columns.map(createColumn);
+    }
     return (
       <div className="DatasetTable">
         <DatasetControls
@@ -497,6 +557,7 @@ class DatasetTable extends Component {
               />
             )}
             <Table
+              groupHeaderHeight={30}
               headerHeight={60}
               rowHeight={30}
               rowsCount={rows.size}
@@ -525,6 +586,7 @@ DatasetTable.propTypes = {
   router: PropTypes.object.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
   isLockedFromTransformations: PropTypes.bool,
+  intl: intlShape,
 };
 
-export default withRouter(DatasetTable);
+export default withRouter(injectIntl(DatasetTable));

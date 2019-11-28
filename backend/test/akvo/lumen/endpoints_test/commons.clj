@@ -13,6 +13,8 @@
                             :hidden false,
                             :multipleType nil,
                             :columnName "c1",
+                            :groupId nil
+                            :groupName nil
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -21,6 +23,8 @@
                             :multipleId nil,
                             :hidden false,
                             :multipleType nil,
+                            :groupId nil
+                            :groupName nil
                             :columnName "c2",
                             :direction nil,
                             :sort nil}
@@ -30,6 +34,8 @@
                             :multipleId nil,
                             :hidden false,
                             :multipleType nil,
+                            :groupId nil
+                            :groupName nil
                             :columnName "c3",
                             :direction nil,
                             :sort nil}
@@ -38,6 +44,8 @@
                             :title "Temperature",
                             :multipleId nil,
                             :hidden false,
+                            :groupId nil
+                            :groupName nil
                             :multipleType nil,
                             :columnName "c4",
                             :direction nil,
@@ -49,6 +57,8 @@
                             :hidden false,
                             :multipleType nil,
                             :columnName "c5",
+                            :groupId nil
+                            :groupName nil
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -56,6 +66,8 @@
                             :title "Cat",
                             :multipleId nil,
                             :hidden false,
+                            :groupId nil
+                            :groupName nil
                             :multipleType nil,
                             :columnName "c6",
                             :direction nil,

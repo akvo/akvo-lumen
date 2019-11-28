@@ -69,7 +69,10 @@
 (defn questions
   "Get the list of questions from a form"
   [form]
-  (mapcat :questions (:questionGroups form)))
+  (->> (:questionGroups form)
+       (reduce #(into % (map (fn [q* [group-id group-name]]
+                               (assoc q* :groupId group-id :groupName group-name))
+                             (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) [])))
 
 (defn form
   "Get a form by id from a survey"
