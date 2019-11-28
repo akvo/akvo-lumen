@@ -7,7 +7,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import * as api from '../../../utilities/api';
 import { showNotification } from '../../../actions/notification';
 
-require('../../../../node_modules/react-select/dist/react-select.css');
+// require('../../../../node_modules/react-select/dist/react-select.css');
 // TODO: we should use the "SelectMenu" wrapper component in the "common" folder in this component
 
 const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };

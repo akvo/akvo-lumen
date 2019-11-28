@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { intlShape, injectIntl } from 'react-intl';
 import Select from 'react-select';
 
-require('../../../node_modules/react-select/dist/react-select.css');
+// require('../../../node_modules/react-select/dist/react-select.css');
 require('./SelectMenu.scss');
 
 function SelectMenu(props) {
