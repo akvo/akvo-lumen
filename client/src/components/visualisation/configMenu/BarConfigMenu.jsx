@@ -162,6 +162,7 @@ class BarConfigMenu extends Component {
       }, spec, onChangeSpec, columnOptions)}
     />) : '';
     const columnsBucketColumn = Immutable.fromJS(filterColumns(columnOptions, ['number', 'text']));
+    const columnsMetricColumn = Immutable.fromJS(filterColumns(columnOptions, ['number']));
     return (
       <div>
         <ConfigMenuSection
@@ -320,9 +321,10 @@ class BarConfigMenu extends Component {
                 id="metric_column"
                 placeholderId="select_a_metric_column"
                 labelTextId={metricColumnsY.length === 0 ? 'metric_column' : 'metric_columns'}
-                value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+                // eslint-disable-next-line max-len
+                value={columnSelectSelectedOption(spec.metricColumnY !== null ? spec.metricColumnY.toString() : null, columnsMetricColumn)}
                 name="metricColumnYInput"
-                options={filterColumns(columnOptions, ['number'])}
+                options={columnSelectOptions(this.props.intl, columnsMetricColumn)}
                 onChange={value => handleChangeSpec({
                   metricColumnY: value,
                 }, spec, onChangeSpec, columnOptions)}

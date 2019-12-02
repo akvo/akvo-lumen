@@ -34,7 +34,7 @@ function SelectMenu(props) {
             props.onChange(null);
           }
         }}
-        clearable={props.clearable || false}
+        clearable={props.isClearable || false}
         searchable={props.searchable || false}
         placeholder={placeholder}
         inputProps={props.inputProps}
@@ -54,7 +54,7 @@ SelectMenu.propTypes = {
   placeholderId: PropTypes.string,
   name: PropTypes.string,
   onChange: PropTypes.func,
-  clearable: PropTypes.bool,
+  isClearable: PropTypes.bool,
   searchable: PropTypes.bool,
   multi: PropTypes.bool,
   disabled: PropTypes.bool,

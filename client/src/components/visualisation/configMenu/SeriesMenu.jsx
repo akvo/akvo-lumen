@@ -1,9 +1,13 @@
+/* eslint-disable max-len */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import Immutable from 'immutable';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
+import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+
 import './SeriesMenu.scss';
 
 class SeriesMenu extends Component {
@@ -99,6 +103,41 @@ class SeriesMenu extends Component {
       newSeriesColumn,
       inputInProgress,
     } = this.state;
+
+    let metricColumn = null;
+
+    if (inputInProgress) {
+      const columnsMetricColumn = Immutable.fromJS(columnOptions.filter(c => !columnsSet.has(c.value)));
+      metricColumn = (
+        <div>
+          <div className="inputGroup">
+            <div className="filterBodyContainer">
+              <SelectMenu
+                className="filterColumnInput"
+                name="filterColumnInput"
+                placeholder={`${formatMessage({ id: 'select_a_column' })}...`}
+                value={columnSelectSelectedOption(newSeriesColumn || null, columnsMetricColumn)}
+                clearable
+                options={columnSelectOptions(this.props.intl, columnsMetricColumn)}
+                onChange={choice => this.updateSeries(choice)}
+              />
+            </div>
+          </div>
+          {/* <div className="inputGroup">
+          <div className="buttonContainer">
+            <Button
+              className="saveFilter clickable"
+              onClick={() => this.toggleInput()}
+              primary
+            >
+              <FormattedMessage id="remove_column" />
+            </Button>
+            </div>
+      </div> */}
+        </div>
+      );
+    }
+
     return (
       <div className={`SerieMenu inputGroup ${hasDataset ? 'enabled' : 'disabled'}`}>
         <div>
@@ -108,51 +147,25 @@ class SeriesMenu extends Component {
             ) : (
               <div className="filterListContainer">
                 <ol className="filterList">
-                  {metricColumnsY.map((metricColumnY, index) =>
-                    (<div key={index}>
+                  {metricColumnsY.map((metricColumnY, index) => {
+                    const columns = Immutable.fromJS(columnOptions.filter(c => !columnsSet.has(c.value) || c.value === metricColumnY));
+                    return (<div key={index}>
                       <ConfigMenuSectionOptionSelect
                         id="metric_column"
                         placeholderId="select_a_metric_column"
-                        value={metricColumnY !== null ? metricColumnY : null}
+                        value={columnSelectSelectedOption(metricColumnY !== null ? metricColumnY : null, columns)}
                         name="metricColumnYInput"
-                        clearable
+                        isClearable
                         onChange={choice => this.updateSeries(choice, index)}
-                        // eslint-disable-next-line max-len
-                        options={columnOptions.filter(c => !columnsSet.has(c.value) || c.value === metricColumnY)}
+                        options={columnSelectOptions(this.props.intl, columns)}
                       />
-                    </div>)
+                    </div>);
+                  }
                   )}
                 </ol>
               </div>
             )}
-            {inputInProgress && (
-              <div>
-                <div className="inputGroup">
-                  <div className="filterBodyContainer">
-                    <SelectMenu
-                      className="filterColumnInput"
-                      name="filterColumnInput"
-                      placeholder={`${formatMessage({ id: 'select_a_column' })}...`}
-                      value={newSeriesColumn || null}
-                      clearable
-                      options={columnOptions.filter(c => !columnsSet.has(c.value))}
-                      onChange={choice => this.updateSeries(choice)}
-                    />
-                  </div>
-                </div>
-                {/* <div className="inputGroup">
-                <div className="buttonContainer">
-                  <Button
-                    className="saveFilter clickable"
-                    onClick={() => this.toggleInput()}
-                    primary
-                  >
-                    <FormattedMessage id="remove_column" />
-                  </Button>
-                  </div>
-            </div> */}
-              </div>
-            )}
+            {metricColumn}
             {!inputInProgress && (
               <Button onClick={this.toggleInput} primary>
                 <i className="fa fa-plus" aria-hidden="true" />
