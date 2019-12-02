@@ -63,6 +63,6 @@ export const columnSelectOptions = (intl, columns) => {
       return accumulator;
     };
     return Object.keys(groups).reduce(reducer2, []);
-  }  
+  }
   return extractColumnOptions(columns);
 };

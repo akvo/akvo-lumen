@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { filter, get } from 'lodash';
 import { compose, mapProps } from 'recompose';
+import Immutable from 'immutable';
 
 import SeriesMenu from './SeriesMenu';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
@@ -10,7 +11,6 @@ import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSecti
 import SortInput from './SortInput';
 import ToggleInput from '../../common/ToggleInput';
 import ButtonRowInput from './ButtonRowInput';
-import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
@@ -161,6 +161,7 @@ class BarConfigMenu extends Component {
           columnOptions.find(item => item.value === value).title : null,
       }, spec, onChangeSpec, columnOptions)}
     />) : '';
+    const columnsBucketColumn = Immutable.fromJS(filterColumns(columnOptions, ['number', 'text']));
     return (
       <div>
         <ConfigMenuSection
@@ -171,10 +172,10 @@ class BarConfigMenu extends Component {
                 <ConfigMenuSectionOptionSelect
                   placeholderId="select_a_data_column_to_group_by"
                   labelTextId="bucket_column"
-                  value={spec.bucketColumn !== null ?
-                  spec.bucketColumn.toString() : null}
+                  // eslint-disable-next-line max-len
+                  value={columnSelectSelectedOption(spec.bucketColumn !== null ? spec.bucketColumn.toString() : null, columnsBucketColumn)}
                   name="xGroupColumnMenu"
-                  options={filterColumns(columnOptions, ['number', 'text'])}
+                  options={columnSelectOptions(this.props.intl, columnsBucketColumn)}
                   clearable
                   onChange={value => handleChangeSpec({
                     bucketColumn: value,
