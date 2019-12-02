@@ -16,7 +16,7 @@ export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'disp
 export const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator, c, idx) => {
   const column = c.set('idx', idx);
   const groupName = column.get('groupName');
-  const columnName = column.get('columnName');
+  const columnName = column.get('columnName') || column.get('value');
   if (groupName === 'null' || groupName === 'undefined' || groupName === null || groupName === undefined) {
     if (isTransformationColumn(column)) {
       return ensurePushIntoArray(accumulator, transformationsI18n, column);

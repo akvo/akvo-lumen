@@ -1,7 +1,7 @@
 import { merge, cloneDeep } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Immutable from 'immutable';
+import Immutable, { fromJS } from 'immutable';
 import { FormattedMessage, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 
@@ -25,12 +25,11 @@ function multipleTypeCondition(column) {
 function textColumnOptions(columns) {
   return columns
     .filter(column => column.get('type') === 'multiple' && multipleTypeCondition(column))
-    .map(column => ({
+    .map(column => (fromJS({
       label: column.get('title'),
       groupName: column.get('groupName'),
       value: column.get('columnName'),
-    }))
-    .toJS();
+    })));
 }
 
 function filterByMultipleAndColumnName(columns, columnName) {

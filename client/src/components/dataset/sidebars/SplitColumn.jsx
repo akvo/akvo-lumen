@@ -1,7 +1,7 @@
 import { merge, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Immutable from 'immutable';
+import Immutable, { fromJS } from 'immutable';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 
@@ -12,15 +12,17 @@ import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import './SplitColumn.scss';
 import { showNotification } from '../../../actions/notification';
+import { ensureImmutable } from '../../../utilities/utils';
+import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 function textColumnOptions(columns) {
   return columns
     .filter(column => (column.get('type') === 'text'))
-    .map(column => ({
+    .map(column => (fromJS({
       label: column.get('title'),
       value: column.get('columnName'),
-    }))
-    .toJS();
+      groupName: column.get('groupName'),
+    })));
 }
 
 function filterByColumnName(columns, columnName) {
@@ -29,7 +31,9 @@ function filterByColumnName(columns, columnName) {
     .toJS()[0];
 }
 
-function SelectColumn({ columns, onChange, value }) {
+function SelectColumn({ columns, onChange, value, intl }) {
+  const columnsSelect = ensureImmutable(textColumnOptions(columns));
+
   return (
     <div className="inputGroup">
       <label htmlFor="columnName">
@@ -37,9 +41,9 @@ function SelectColumn({ columns, onChange, value }) {
       </label>
       <SelectMenu
         name="columnName"
-        value={value}
+        value={columnSelectSelectedOption(value, columnsSelect)}
         onChange={onChange}
-        options={textColumnOptions(columns)}
+        options={columnSelectOptions(intl, columnsSelect)}
       />
     </div>
   );
@@ -50,6 +54,7 @@ SelectColumn.propTypes = {
   idx: PropTypes.number.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
+  intl: intlShape,
 };
 
 const SplitColumnOptions = ({
@@ -249,7 +254,7 @@ class SplitColumn extends Component {
   }
 
   render() {
-    const { onClose, columns, datasetId } = this.props;
+    const { onClose, columns, datasetId, intl } = this.props;
     const { splitColumn: { ui: { selectedColumn } } } = this.state;
     const error = this.state.error;
     return (
@@ -265,6 +270,7 @@ class SplitColumn extends Component {
               idx={1}
               onChange={columnName => this.handleSelectColumn(columns, columnName, datasetId)}
               value={selectedColumn.columnName}
+              intl={intl}
             />
             {error ? (
               <div className="alert alert-danger">
