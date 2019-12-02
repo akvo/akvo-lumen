@@ -71,7 +71,7 @@
     "history": "^4.7.2",
     "html-webpack-plugin": "2.29.0",
     "http-proxy-middleware": "^0.17.4",
-    "immutable": "^3.8.1",
+    "immutable": "^4.0.0-rc.12",
     "intl": "^1.2.5",
     "invariant": "^2.2.2",
     "isomorphic-fetch": "^2.2.1",
