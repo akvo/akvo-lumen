@@ -3,15 +3,6 @@ export function isValidEmail(email = '') {
   return regex.test(email);
 }
 
-export function isTransformationColumn(c) {
-  const n = c.get('columnName');
-  return n && n.charAt(0) === 'd' && parseInt(n.substring(1), 10) > 0;
-}
-
-export function datasetHasQuestionGroups(columns) {
-  return columns.filter(c => c.get('groupName') !== null && c.get('groupName') !== undefined).size > 0;
-}
-
 export function ensurePushIntoArray(a, k, v) {
   const x = a;
   if (x[k] === undefined) {
@@ -21,24 +12,6 @@ export function ensurePushIntoArray(a, k, v) {
   }
   return x;
 }
-
-export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
-
-export const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator, c, idx) => {
-  const column = c.set('idx', idx);
-  const groupName = column.get('groupName');
-  const columnName = column.get('columnName');
-  if (groupName === 'null' || groupName === 'undefined' || groupName === null || groupName === undefined) {
-    if (isTransformationColumn(column)) {
-      return ensurePushIntoArray(accumulator, transformationsI18n, column);
-    } else if (flowCommonColumnNames.has(columnName)) {
-      return ensurePushIntoArray(accumulator, metadataI18n, column);
-    }
-    return ensurePushIntoArray(accumulator, ' ', column);
-  }
-  return ensurePushIntoArray(accumulator, groupName, column);
-};
-
 
 // Returns undefined if the object or any given nested key doesn't exist
 export function checkUndefined(object = {}, ...keys) {
