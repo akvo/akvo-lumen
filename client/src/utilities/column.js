@@ -11,7 +11,7 @@ export function datasetHasQuestionGroups(columns) {
 
 export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
 
-const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator, c, idx) => {
+export const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator, c, idx) => {
   const column = c.set('idx', idx);
   const groupName = column.get('groupName');
   const columnName = column.get('columnName');

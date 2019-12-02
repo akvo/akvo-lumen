@@ -10,7 +10,7 @@ import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
-import { reducerGroup, datasetHasQuestionGroups } from './../../utilities/utils';
+import { reducerGroup, datasetHasQuestionGroups } from './../../utilities/column';
 
 require('./DatasetTable.scss');
 
