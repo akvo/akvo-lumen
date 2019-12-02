@@ -26,6 +26,18 @@ const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator, c, idx
   return ensurePushIntoArray(accumulator, groupName, column);
 };
 
+/*
+# arguments
+columns: an array of objects, each of which has a "type" property
+acceptableTypes: a single string or an array of strings
+
+This could be extended in the future to support filtering on props other than type
+*/
+export function filterColumns(columns = [], acceptableTypes = []) {
+  const types = Array.isArray(acceptableTypes) ? acceptableTypes : [acceptableTypes];
+  return columns.filter(column => types.some(type => type === column.type));
+}
+
 export const columnSelectSelectedOption = (columnValue, columns) => {
   const l = columns.find(c => c.get('value') === columnValue);
   return l ? { value: l.get('value'), label: l.get('label') } : {};
