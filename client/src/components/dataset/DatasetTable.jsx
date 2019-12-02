@@ -490,6 +490,7 @@ class DatasetTable extends Component {
             {sidebarProps &&
               <DataTableSidebar
                 {...sidebarProps}
+                intl={this.props.intl}
                 transformations={transformations}
                 isLockedFromTransformations={isLockedFromTransformations}
                 datasetId={datasetId}

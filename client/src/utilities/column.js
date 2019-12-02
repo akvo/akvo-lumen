@@ -1,3 +1,5 @@
+import { isImmutable } from 'immutable';
+
 import { ensurePushIntoArray } from './utils';
 
 export function isTransformationColumn(c) {
@@ -35,19 +37,19 @@ This could be extended in the future to support filtering on props other than ty
 */
 export function filterColumns(columns = [], acceptableTypes = []) {
   const types = Array.isArray(acceptableTypes) ? acceptableTypes : [acceptableTypes];
-  return columns.filter(column => types.some(type => type === column.type));
+  return columns.filter(column => types.some(type => type === (isImmutable(columns) ? column.get('type') : column.type)));
 }
 
 export const columnSelectSelectedOption = (columnValue, columns) => {
-  const l = columns.find(c => c.get('value') === columnValue);
-  return l ? { value: l.get('value'), label: l.get('label') } : {};
+  const l = columns.find(c => (c.get('value') || c.get('columnName')) === columnValue);
+  return l ? { value: l.get('value') || l.get('columnName'), label: l.get('label') || l.get('title') } : {};
 };
 
 export const columnSelectOptions = (intl, columns) => {
   function extractColumnOptions(cc) {
     return cc.map((c) => {
-      const value = c.get('value');
-      const label = c.get('label');
+      const value = c.get('value') || c.get('columnName');
+      const label = c.get('label') || c.get('title');
       const labelId = c.get('labelId');
       return {
         label: labelId ? intl.formatMessage({ id: labelId }) : label,
