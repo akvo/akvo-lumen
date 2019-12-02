@@ -41,7 +41,7 @@ export default injectIntl(SelectColumn);
 
 SelectColumn.propTypes = {
   intl: intlShape,
-  columns: PropTypes.object.isRequired,
+  columns: PropTypes.oneOfType([PropTypes.object, PropTypes.array]).isRequired,
   showColumnType: PropTypes.bool,
   value: PropTypes.object,
   onChange: PropTypes.func.isRequired,

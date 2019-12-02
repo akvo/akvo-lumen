@@ -40,6 +40,10 @@ export function filterColumns(columns = [], acceptableTypes = []) {
   return columns.filter(column => types.some(type => type === (isImmutable(columns) ? column.get('type') : column.type)));
 }
 
+// eslint-disable-next-line max-len
+export const findColumn = (columns, columnName) => columns.filter(column => column.columnName === columnName)[0];
+export const findColumnI = (columns, columnName) => columns.find(column => column.get('columnName') === columnName);
+
 export const columnSelectSelectedOption = (columnValue, columns) => {
   const l = columns.find(c => (c.get('value') || c.get('columnName')) === columnValue);
   return l ? { value: l.get('value') || l.get('columnName'), label: l.get('label') || l.get('title') } : {};
