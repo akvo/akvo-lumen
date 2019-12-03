@@ -56,6 +56,7 @@ SelectMenu.propTypes = {
   onChange: PropTypes.func,
   isClearable: PropTypes.bool,
   searchable: PropTypes.bool,
+  isLoading: PropTypes.bool,
   multi: PropTypes.bool,
   disabled: PropTypes.bool,
   inputProps: PropTypes.object,
