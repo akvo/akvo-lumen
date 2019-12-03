@@ -70,5 +70,6 @@ export const columnSelectOptions = (intl, columns) => {
     };
     return Object.keys(groups).reduce(reducer2, []);
   }
-  return extractColumnOptions(columns);
+  const res = extractColumnOptions(columns);
+  return isImmutable(res) ? res.toArray() : res;
 };

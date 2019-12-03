@@ -2,23 +2,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import _ from 'lodash';
-import { FormattedMessage } from 'react-intl';
+import { intlShape, FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
-function numberColumnOptions(columns) {
-  return columns.filter(column =>
-    column.get('type') === 'number'
-  ).map(column => ({
-    label: column.get('title'),
-    value: column.get('columnName'),
-  })).toJS();
-}
-
-function SelectColumn({ columns, latOrLong, onChange, value }) {
+function SelectColumn({ columns, latOrLong, onChange, value, intl }) {
   const columnName = 'columnName'.concat(_.capitalize(latOrLong));
   const translationId = `select_column_${latOrLong}`;
+  const cols = filterColumns(columns, ['number']);
   return (
     <div className="inputGroup">
       <label htmlFor={columnName}>
@@ -26,9 +19,9 @@ function SelectColumn({ columns, latOrLong, onChange, value }) {
       </label>
       <SelectMenu
         name={columnName}
-        value={value}
+        value={columnSelectSelectedOption(value, cols)}
         onChange={onChange}
-        options={numberColumnOptions(columns)}
+        options={columnSelectOptions(intl, cols)}
       />
     </div>
   );
@@ -39,6 +32,7 @@ SelectColumn.propTypes = {
   latOrLong: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
+  intl: intlShape,
 };
 
 export default class GenerateGeopoints extends Component {
@@ -83,7 +77,7 @@ export default class GenerateGeopoints extends Component {
   }
 
   render() {
-    const { onClose, onApply, columns } = this.props;
+    const { onClose, onApply, columns, intl } = this.props;
     const args = this.state.transformation.get('args');
     return (
       <div
@@ -96,12 +90,14 @@ export default class GenerateGeopoints extends Component {
           <SelectColumn
             columns={columns}
             latOrLong="lat"
+            intl={intl}
             onChange={value => this.handleSelectColumn(value, 'lat')}
             value={args.get('columnNameLat')}
           />
           <SelectColumn
             columns={columns}
             latOrLong="long"
+            intl={intl}
             onChange={value => this.handleSelectColumn(value, 'long')}
             value={args.get('columnNameLong')}
           />
@@ -134,4 +130,5 @@ GenerateGeopoints.propTypes = {
   columns: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
+  intl: intlShape,
 };
