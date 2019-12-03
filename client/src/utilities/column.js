@@ -3,7 +3,7 @@ import { isImmutable } from 'immutable';
 import { ensurePushIntoArray } from './utils';
 
 export function isTransformationColumn(c) {
-  const n = c.get('columnName');
+  const n = c.get('columnName') || c.get('value');
   return n && n.charAt(0) === 'd' && parseInt(n.substring(1), 10) > 0;
 }
 
