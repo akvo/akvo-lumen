@@ -8,7 +8,7 @@ export function isTransformationColumn(c) {
 }
 
 export function datasetHasQuestionGroups(columns) {
-  return columns.filter(c => c.get('groupName') !== null && c.get('groupName') !== undefined).size > 0;
+  return columns.filter(c => (c.get('groupName') !== null && c.get('groupName') !== undefined) || isTransformationColumn(c)).size > 0;
 }
 
 export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
