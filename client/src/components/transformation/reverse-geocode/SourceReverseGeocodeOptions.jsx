@@ -2,9 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
+import { intlShape } from 'react-intl';
 import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SelectDataset from '../merge/SelectDataset';
-import SelectColumn from '../SelectColumn';
+import SelectMenu from '../../common/SelectMenu';
+import { findColumnI, filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+
 
 import './SourceReverseGeocodeOptions.scss';
 
@@ -47,10 +50,14 @@ class WrappedCustomDatasetOptions extends Component {
       datasets,
       spec,
       onChangeSpec,
+      intl,
     } = this.props;
 
     const datasetId = spec.getIn(['source', 'datasetId']);
+    const columns = datasets[datasetId] && datasets[datasetId].get('columns');
+    const geoshapeColumns = columns ? filterColumns(datasets[datasetId].get('columns'), ['geoshape']) : [];
 
+    const textColumns = columns ? filterColumns(datasets[datasetId].get('columns'), ['text']) : [];
     return (
       <div>
         <h1>Shape dataset</h1>
@@ -62,16 +69,16 @@ class WrappedCustomDatasetOptions extends Component {
         {datasetId != null && !this.state.isLoadingDataset &&
           <div>
             <h1>Shape column</h1>
-            <SelectColumn
-              columns={datasets[datasetId].get('columns').filter(column => column.get('type') === 'geoshape')}
+            <SelectMenu
+              options={columnSelectOptions(intl, geoshapeColumns)}
               onChange={column => onChangeSpec(spec.setIn(['source', 'geoshapeColumn'], column))}
-              value={spec.getIn(['source', 'geoshapeColumn'])}
+              value={columnSelectSelectedOption(spec.getIn(['source', 'geoshapeColumn']), geoshapeColumns)}
             />
             <h1>Text column</h1>
-            <SelectColumn
-              columns={datasets[datasetId].get('columns').filter(column => column.get('type') === 'text')}
-              onChange={column => this.handleSelectMergeColumn(column)}
-              value={spec.getIn(['source', 'mergeColumn'])}
+            <SelectMenu
+              options={columnSelectOptions(intl, textColumns)}
+              onChange={column => this.handleSelectMergeColumn(findColumnI(textColumns, column))}
+              value={columnSelectSelectedOption(spec.getIn(['source', 'mergeColumn', 'columnName']), textColumns)}
             />
             <h1>New column title</h1>
             <input
@@ -91,6 +98,7 @@ WrappedCustomDatasetOptions.propTypes = {
   spec: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   dispatch: PropTypes.func.isRequired,
+  intl: intlShape,
 };
 
 const CustomDatasetOptions = connect()(WrappedCustomDatasetOptions);
@@ -115,6 +123,7 @@ export default class SourceReverseGeocodeOptions extends Component {
       datasets,
       spec,
       onChangeSpec,
+      intl,
     } = this.props;
 
     return (
@@ -122,6 +131,7 @@ export default class SourceReverseGeocodeOptions extends Component {
         <CustomDatasetOptions
           datasets={datasets}
           spec={spec}
+          intl={intl}
           onChangeSpec={onChangeSpec}
         />
       </div>
@@ -133,4 +143,5 @@ SourceReverseGeocodeOptions.propTypes = {
   datasets: PropTypes.object.isRequired,
   spec: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
+  intl: intlShape,
 };
