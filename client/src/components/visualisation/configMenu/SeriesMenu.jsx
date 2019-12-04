@@ -167,7 +167,7 @@ class SeriesMenu extends Component {
             )}
             {metricColumn}
             {!inputInProgress && (
-              <Button onClick={this.toggleInput} primary>
+              <Button onClick={this.toggleInput} primary className="another-metric-column-button">
                 <i className="fa fa-plus" aria-hidden="true" />
                 &nbsp;
                 <FormattedMessage id="select_another_metric_column" />
