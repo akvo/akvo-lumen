@@ -2,11 +2,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import Immutable from 'immutable';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
 import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+import { ensureImmutable } from '../../../utilities/utils';
 
 import './SeriesMenu.scss';
 
@@ -107,7 +107,7 @@ class SeriesMenu extends Component {
     let metricColumn = null;
 
     if (inputInProgress) {
-      const columnsMetricColumn = Immutable.fromJS(columnOptions.filter(c => !columnsSet.has(c.value)));
+      const columnsMetricColumn = ensureImmutable(columnOptions.filter(c => !columnsSet.has(c.value)));
       metricColumn = (
         <div>
           <div className="inputGroup">
@@ -116,7 +116,7 @@ class SeriesMenu extends Component {
                 className="filterColumnInput"
                 name="filterColumnInput"
                 placeholder={`${formatMessage({ id: 'select_a_column' })}...`}
-                value={columnSelectSelectedOption(newSeriesColumn || null, columnsMetricColumn)}
+                value={columnSelectSelectedOption(newSeriesColumn, columnsMetricColumn)}
                 clearable
                 options={columnSelectOptions(this.props.intl, columnsMetricColumn)}
                 onChange={choice => this.updateSeries(choice)}
@@ -148,12 +148,12 @@ class SeriesMenu extends Component {
               <div className="filterListContainer">
                 <ol className="filterList">
                   {metricColumnsY.map((metricColumnY, index) => {
-                    const columns = Immutable.fromJS(columnOptions.filter(c => !columnsSet.has(c.value) || c.value === metricColumnY));
+                    const columns = ensureImmutable(columnOptions.filter(c => !columnsSet.has(c.value) || c.value === metricColumnY));
                     return (<div key={index}>
                       <ConfigMenuSectionOptionSelect
                         id="metric_column"
                         placeholderId="select_a_metric_column"
-                        value={columnSelectSelectedOption(metricColumnY !== null ? metricColumnY : null, columns)}
+                        value={columnSelectSelectedOption(metricColumnY, columns)}
                         name="metricColumnYInput"
                         isClearable
                         onChange={choice => this.updateSeries(choice, index)}
