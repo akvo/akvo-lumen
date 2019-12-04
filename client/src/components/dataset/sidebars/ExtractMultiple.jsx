@@ -11,7 +11,6 @@ import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import { showNotification } from '../../../actions/notification';
-import { ensureImmutable } from '../../../utilities/utils';
 import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 require('./ExtractMultiple.scss');
