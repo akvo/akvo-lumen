@@ -5,7 +5,7 @@ import { ensurePushIntoArray } from './utils';
 const collectionSize = o => (isImmutable(o) ? o.size : o.length);
 
 const columnGroupName = column => (isImmutable(column) ? column.get('groupName') : column.groupName);
-const columnName = column => (isImmutable(column) ? column.get('columnName') : column.columnName);
+export const columnName = column => (isImmutable(column) ? column.get('columnName') : column.columnName);
 const columnValue = column => (isImmutable(column) ? column.get('value') : column.value);
 const columnLabel = column => (isImmutable(column) ? column.get('label') : column.label);
 const columnLabelId = column => (isImmutable(column) ? column.get('labelId') : column.labelId);

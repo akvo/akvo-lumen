@@ -8,7 +8,7 @@ import SelectDataset from './SelectDataset';
 import SelectMenu from '../../common/SelectMenu';
 import { guessMergeColumn, getColumnName, directionLabels } from './utils';
 import './SourceMergeOptions.scss';
-import { findColumnI, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+import { columnName, findColumnI, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 function SelectMergeColumn({ onChange, columns, mergeColumn, intl }) {
 //  console.log('columns', columns, columnSelectOptions(intl, columns));
@@ -17,7 +17,7 @@ function SelectMergeColumn({ onChange, columns, mergeColumn, intl }) {
       <h1>Merge column</h1>
       <SelectMenu
         placeholder="Select key column"
-        value={columnSelectSelectedOption(mergeColumn && Immutable.isImmutable(mergeColumn) ? mergeColumn.get('columnName') : null, columns)}
+        value={columnSelectSelectedOption(columnName(mergeColumn), columns)}
         intl={intl}
         options={columnSelectOptions(intl, columns)}
         onChange={onChange}
@@ -51,7 +51,7 @@ function SelectAggregation({
             placeholder="Select aggregation column"
             showColumnType
             options={columnSelectOptions(intl, dataset.get('columns'))}
-            value={columnSelectSelectedOption(aggregationColumn && Immutable.isImmutable(aggregationColumn) ? aggregationColumn.get('columnName') : null, dataset.get('columns'))}
+            value={columnSelectSelectedOption(columnName(aggregationColumn), dataset.get('columns'))}
             intl={intl}
             onChange={onChangeColumn}
           />
@@ -100,18 +100,18 @@ function SelectMergeColumns({ onChange, onChangeAll, columns, selected }) {
         </fieldset>
       </legend>
       {columns.map((column) => {
-        const columnName = column.get('columnName');
+        const cName = columnName(column);
 
-        const id = `merge_column_${columnName}`;
+        const id = `merge_column_${cName}`;
         return (
-          <div key={columnName}>
+          <div key={cName}>
             <input
               type="checkbox"
               id={id}
               name="merge_column"
-              value={columnName}
-              selected={selectedNames.includes(columnName)}
-              checked={selectedNames.includes(columnName)}
+              value={cName}
+              selected={selectedNames.includes(cName)}
+              checked={selectedNames.includes(cName)}
               onChange={() => onChange(column)}
             />
             <label htmlFor={id}>{column.get('title')}</label>
