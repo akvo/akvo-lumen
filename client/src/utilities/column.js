@@ -37,7 +37,7 @@ This could be extended in the future to support filtering on props other than ty
 */
 export function filterColumns(columns = [], acceptableTypes = []) {
   const types = Array.isArray(acceptableTypes) ? acceptableTypes : [acceptableTypes];
-  return columns.filter(column => types.some(type => type === (isImmutable(columns) ? column.get('type') : column.type)));
+  return columns.filter(column => types.some(type => type === (isImmutable(column) ? column.get('type') : column.type)));
 }
 
 // eslint-disable-next-line max-len
@@ -46,7 +46,7 @@ export const findColumnI = (columns, columnName) => columns.find(column => colum
 
 export const columnSelectSelectedOption = (columnValue, columns) => {
   const l = columns.find(c => (c.get('value') || c.get('columnName')) === columnValue);
-  return l ? { value: l.get('value') || l.get('columnName'), label: l.get('label') || l.get('title') } : {};
+  return l ? { value: l.get('value') || l.get('columnName'), label: l.get('label') || l.get('title') } : { value: '', label: '' };
 };
 
 export const columnSelectOptions = (intl, columns) => {

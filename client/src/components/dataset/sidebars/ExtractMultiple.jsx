@@ -21,7 +21,7 @@ function multipleTypeCondition(column) {
   return multipleTypes.has(column.get('multipleType'));
 }
 
-function textColumnOptions(columns) {
+function multipleColumnOptions(columns) {
   return columns
     .filter(column => column.get('type') === 'multiple' && multipleTypeCondition(column))
     .map(column => (fromJS({
@@ -38,7 +38,7 @@ function filterByMultipleAndColumnName(columns, columnName) {
 }
 
 function SelectColumn({ columns, onChange, value, intl }) {
-  const columnsSelect = textColumnOptions(columns);
+  const columnsSelect = multipleColumnOptions(columns);
 
   return (
     <div className="inputGroup">
@@ -100,6 +100,7 @@ class Column extends Component {
   }
   render() {
     const { api, ui } = this.props;
+    const checked = ui.extract || false;
     return (
       <div className="inputGroup">
         <hr />
@@ -108,7 +109,7 @@ class Column extends Component {
             name="extractColumn"
             type="checkbox"
             className={`valueToExtract ${ui.extract ? 'checked' : ''}`}
-            checked={ui.extract}
+            checked={checked}
             label={api.name}
             onChange={this.props.onExtractColumn}
           />
