@@ -6,7 +6,6 @@ import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSec
 import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
 import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
-import { ensureImmutable } from '../../../utilities/utils';
 
 import './SeriesMenu.scss';
 
@@ -107,7 +106,7 @@ class SeriesMenu extends Component {
     let metricColumn = null;
 
     if (inputInProgress) {
-      const columnsMetricColumn = ensureImmutable(columnOptions.filter(c => !columnsSet.has(c.value)));
+      const columnsMetricColumn = columnOptions.filter(c => !columnsSet.has(c.value));
       metricColumn = (
         <div>
           <div className="inputGroup">
@@ -148,7 +147,7 @@ class SeriesMenu extends Component {
               <div className="filterListContainer">
                 <ol className="filterList">
                   {metricColumnsY.map((metricColumnY, index) => {
-                    const columns = ensureImmutable(columnOptions.filter(c => !columnsSet.has(c.value) || c.value === metricColumnY));
+                    const columns = columnOptions.filter(c => !columnsSet.has(c.value) || c.value === metricColumnY);
                     return (<div key={index}>
                       <ConfigMenuSectionOptionSelect
                         id="metric_column"

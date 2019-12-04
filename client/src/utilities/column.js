@@ -2,30 +2,51 @@ import { isImmutable } from 'immutable';
 
 import { ensurePushIntoArray } from './utils';
 
-export function isTransformationColumn(c) {
-  const n = c.get('columnName') || c.get('value');
+const collectionSize = o => (isImmutable(o) ? o.size : o.length);
+
+const columnGroupName = column => (isImmutable(column) ? column.get('groupName') : column.groupName);
+const columnName = column => (isImmutable(column) ? column.get('columnName') : column.columnName);
+const columnValue = column => (isImmutable(column) ? column.get('value') : column.value);
+const columnLabel = column => (isImmutable(column) ? column.get('label') : column.label);
+const columnLabelId = column => (isImmutable(column) ? column.get('labelId') : column.labelId);
+const columnTitle = column => (isImmutable(column) ? column.get('title') : column.title);
+
+
+export function isTransformationColumn(cName, cValue) {
+  const n = cName || cValue;
   return n && n.charAt(0) === 'd' && parseInt(n.substring(1), 10) > 0;
 }
 
 export function datasetHasQuestionGroups(columns) {
-  return columns.filter(c => (c.get('groupName') !== null && c.get('groupName') !== undefined) || isTransformationColumn(c)).size > 0;
+  // eslint-disable-next-line max-len
+  return collectionSize(columns.filter(c => (columnGroupName(c) !== null && columnGroupName(c) !== undefined) || isTransformationColumn(columnName(c), columnValue(c)))) > 0;
 }
 
 export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
 
+function assignProp(c, k, v) {
+  const x = c;
+  if (isImmutable(c)) {
+    x.set(k, v);
+  } else {
+    x[k] = v;
+  }
+  return x;
+}
+
 export const reducerGroup = (metadataI18n, transformationsI18n) => (accumulator, c, idx) => {
-  const column = c.set('idx', idx);
-  const groupName = column.get('groupName');
-  const columnName = column.get('columnName') || column.get('value');
-  if (groupName === 'null' || groupName === 'undefined' || groupName === null || groupName === undefined) {
-    if (isTransformationColumn(column)) {
+  const column = assignProp(c, 'idx', idx);
+  const gName = columnGroupName(column);
+  const cName = columnName(column) || columnValue(column);
+  if (gName === 'null' || gName === 'undefined' || gName === null || gName === undefined) {
+    if (isTransformationColumn(columnName(column), columnValue(column))) {
       return ensurePushIntoArray(accumulator, transformationsI18n, column);
-    } else if (flowCommonColumnNames.has(columnName)) {
+    } else if (flowCommonColumnNames.has(cName)) {
       return ensurePushIntoArray(accumulator, metadataI18n, column);
     }
     return ensurePushIntoArray(accumulator, ' ', column);
   }
-  return ensurePushIntoArray(accumulator, groupName, column);
+  return ensurePushIntoArray(accumulator, gName, column);
 };
 
 /*
@@ -41,27 +62,27 @@ export function filterColumns(columns = [], acceptableTypes = []) {
 }
 
 // eslint-disable-next-line max-len
-export const findColumn = (columns, columnName) => columns.filter(column => column.columnName === columnName)[0];
-export const findColumnI = (columns, columnName) => columns.find(column => column.get('columnName') === columnName);
+export const findColumn = (columns, cName) => columns.filter(column => column.columnName === cName)[0];
+export const findColumnI = (columns, cName) => columns.find(column => column.get('columnName') === cName);
 
-export const columnSelectSelectedOption = (columnValue, columns) => {
-  const l = columns.find(c => (c.get('value') || c.get('columnName')) === columnValue);
-  return l ? { value: l.get('value') || l.get('columnName'), label: l.get('label') || l.get('title') } : { value: '', label: '' };
+export const columnSelectSelectedOption = (cValue, columns) => {
+  const l = columns.find(c => (columnValue(c) || columnName(c)) === cValue);
+  return l ? { value: columnValue(l) || columnName(l), label: columnLabel(l) || columnTitle(l) } : { value: '', label: '' };
 };
 
 export const columnSelectOptions = (intl, columns) => {
   function extractColumnOptions(cc) {
     return cc.map((c) => {
-      const value = c.get('value') || c.get('columnName');
-      const label = c.get('label') || c.get('title');
-      const labelId = c.get('labelId');
+      const value = columnValue(c) || columnName(c);
+      const label = columnLabel(c) || columnTitle(c);
+      const labelId = columnLabelId(c);
       return {
         label: labelId ? intl.formatMessage({ id: labelId }) : label,
         value,
       };
     });
   }
-  if (columns.size > 0 && datasetHasQuestionGroups(columns)) {
+  if (collectionSize(columns) > 0 && datasetHasQuestionGroups(columns)) {
     const groups = columns.reduce(reducerGroup(intl.formatMessage({ id: 'form_metadata' }), intl.formatMessage({ id: 'transformations' })), {});
     const reducer2 = (accumulator, k) => {
       const columnsGroup = groups[k];

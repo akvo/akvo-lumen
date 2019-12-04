@@ -6,10 +6,9 @@ import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
-import { ensureImmutable } from '../../../utilities/utils';
 
 function SelectColumn({ columns, idx, onChange, value, intl }) {
-  const columnsSelect = ensureImmutable(filterColumns(columns, ['text']));
+  const columnsSelect = filterColumns(columns, ['text']);
   return (
     <div className="inputGroup">
       <label

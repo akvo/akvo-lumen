@@ -4,14 +4,13 @@ import { Container, Row, Col } from 'react-grid-system';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
 import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
-import { ensureImmutable } from '../../../utilities/utils';
 
 import SelectMenu from '../../common/SelectMenu';
 
 import './SourceDeriveCategoryOptions.scss';
 
 const SourceDeriveCategoryOptions = ({ dataset, onChange, selected, intl }) => {
-  const columnsSelect = ensureImmutable(filterColumns(dataset.columns, ['text', 'number']));
+  const columnsSelect = filterColumns(dataset.columns, ['text', 'number']);
   return (
     <Container className="SourceDeriveCategoryOptions">
       <Row>

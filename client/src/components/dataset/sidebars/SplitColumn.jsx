@@ -12,7 +12,6 @@ import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import './SplitColumn.scss';
 import { showNotification } from '../../../actions/notification';
-import { ensureImmutable } from '../../../utilities/utils';
 import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 function textColumnOptions(columns) {
@@ -32,7 +31,7 @@ function filterByColumnName(columns, columnName) {
 }
 
 function SelectColumn({ columns, onChange, value, intl }) {
-  const columnsSelect = ensureImmutable(textColumnOptions(columns));
+  const columnsSelect = textColumnOptions(columns);
 
   return (
     <div className="inputGroup">

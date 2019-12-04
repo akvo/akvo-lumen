@@ -13,7 +13,6 @@ import ButtonRowInput from './ButtonRowInput';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
-import { ensureImmutable } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -161,8 +160,8 @@ class BarConfigMenu extends Component {
           columnOptions.find(item => item.value === value).title : null,
       }, spec, onChangeSpec, columnOptions)}
     />) : '';
-    const columnsBucketColumn = ensureImmutable(filterColumns(columnOptions, ['number', 'text']));
-    const columnsMetricColumn = ensureImmutable(filterColumns(columnOptions, ['number']));
+    const columnsBucketColumn = filterColumns(columnOptions, ['number', 'text']);
+    const columnsMetricColumn = filterColumns(columnOptions, ['number']);
     return (
       <div>
         <ConfigMenuSection
