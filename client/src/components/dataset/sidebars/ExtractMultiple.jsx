@@ -39,7 +39,7 @@ function filterByMultipleAndColumnName(columns, columnName) {
 }
 
 function SelectColumn({ columns, onChange, value, intl }) {
-  const columnsSelect = ensureImmutable(textColumnOptions(columns));
+  const columnsSelect = textColumnOptions(columns);
 
   return (
     <div className="inputGroup">
