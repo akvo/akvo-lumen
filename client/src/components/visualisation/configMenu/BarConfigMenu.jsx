@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { filter, get } from 'lodash';
 import { compose, mapProps } from 'recompose';
-import Immutable from 'immutable';
 
 import SeriesMenu from './SeriesMenu';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
@@ -14,6 +13,7 @@ import ButtonRowInput from './ButtonRowInput';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+import { ensureImmutable } from '../../../utilities/utils';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -161,8 +161,8 @@ class BarConfigMenu extends Component {
           columnOptions.find(item => item.value === value).title : null,
       }, spec, onChangeSpec, columnOptions)}
     />) : '';
-    const columnsBucketColumn = Immutable.fromJS(filterColumns(columnOptions, ['number', 'text']));
-    const columnsMetricColumn = Immutable.fromJS(filterColumns(columnOptions, ['number']));
+    const columnsBucketColumn = ensureImmutable(filterColumns(columnOptions, ['number', 'text']));
+    const columnsMetricColumn = ensureImmutable(filterColumns(columnOptions, ['number']));
     return (
       <div>
         <ConfigMenuSection
@@ -173,8 +173,7 @@ class BarConfigMenu extends Component {
                 <ConfigMenuSectionOptionSelect
                   placeholderId="select_a_data_column_to_group_by"
                   labelTextId="bucket_column"
-                  // eslint-disable-next-line max-len
-                  value={columnSelectSelectedOption(spec.bucketColumn !== null ? spec.bucketColumn.toString() : null, columnsBucketColumn)}
+                  value={columnSelectSelectedOption(spec.bucketColumn, columnsBucketColumn)}
                   name="xGroupColumnMenu"
                   options={columnSelectOptions(this.props.intl, columnsBucketColumn)}
                   clearable
@@ -322,7 +321,7 @@ class BarConfigMenu extends Component {
                 placeholderId="select_a_metric_column"
                 labelTextId={metricColumnsY.length === 0 ? 'metric_column' : 'metric_columns'}
                 // eslint-disable-next-line max-len
-                value={columnSelectSelectedOption(spec.metricColumnY !== null ? spec.metricColumnY.toString() : null, columnsMetricColumn)}
+                value={columnSelectSelectedOption(spec.metricColumnY, columnsMetricColumn)}
                 name="metricColumnYInput"
                 options={columnSelectOptions(this.props.intl, columnsMetricColumn)}
                 onChange={value => handleChangeSpec({
