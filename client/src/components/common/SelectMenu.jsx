@@ -21,11 +21,8 @@ function SelectMenu(props) {
     options,
   }));
   const value = props.value && typeof props.value === 'string' ? options.filter(o => o.value === props.value)[0] : props.value;
-  
-  /**  WIP **/
-  const open = true;
+
   const colorStyles = {
-    // option: styles => ({ ...styles, backgroundColor: 'yellow' }),
     menu: styles => ({
       ...styles,
       border: '1px solid #e5e6ed',
@@ -36,19 +33,24 @@ function SelectMenu(props) {
       if (state.isSelected) {
         bgc = '#ccc';
       } else if (state.isFocused) {
-        bgc = '#e5e6ed';
+        bgc = '#F1F3F4';
       }
       return {
         ...provided,
-        // backgroundColor: if (state.isSelected ) {'#888'} else {} state.isFocused ? '#e5e6ed' : null,
         backgroundColor: bgc,
       };
     },
     group: styles => ({
       ...styles,
-      backgroundColor: '#fff',
       fontSize: '1em',
-      padding: '1opx',
+      fontWeight: 'normal',
+    }),
+
+    groupHeading: styles => ({
+      ...styles,
+      backgroundColor: '#E6E9ED',
+      fontSize: '1em',
+      padding: '10px',
       fontWeight: 'normal',
     }),
   };
@@ -57,7 +59,6 @@ function SelectMenu(props) {
       <Select
         {...props}
         value={value}
-        menuIsOpen={open} // WIP
         options={options}
         onChange={(option) => {
           if (option) {
@@ -71,7 +72,7 @@ function SelectMenu(props) {
         placeholder={placeholder}
         inputProps={props.inputProps}
         className="TheSelect"
-        styles={colorStyles} // Styles added
+        styles={colorStyles}
       />
     </div>
   );
