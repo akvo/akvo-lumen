@@ -26,7 +26,7 @@ cp backend/target/uberjar/akvo-lumen.jar backend
 
 log Creating Production Backend image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} ./backend
-docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-backend:develop
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-backend:master
 
 log Running Client linting, unit tests and creating production assets
 client_image_version=$(awk -F':' '/client-dev/ {print $3}' docker-compose.yml)
@@ -34,15 +34,15 @@ docker run -v "$(pwd)/client:/lumen" --rm=false -t "akvo/akvo-lumen-client-dev:$
 
 log Creating Production Client image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} ./client
-docker tag eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-client:develop
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-client:master
 
 log Creating Production Windshaft image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} ./windshaft
-docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-maps:develop
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-maps:master
 
 log Creating Production Exporter image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT} ./exporter
-docker tag eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-exporter:develop
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${TRAVIS_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-exporter:master
 
 log Starting Docker Compose environment
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml up --no-color -d --build

@@ -1,7 +1,7 @@
 # Release instructions
 
-## 1 Merge PR to develop
-This will cause Travis to run tests, build containers and if successful deploy
+## 1 Merge PR to master
+This will cause CI to run tests, build containers and if successful deploy
 to dark-test.
 develop.
 
