@@ -12,15 +12,15 @@ blocks:
           commands:
             - checkout
             - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
-            - export TRAVIS_BRANCH=${SEMAPHORE_GIT_BRANCH}
-            - export TRAVIS_TAG=${SEMAPHORE_GIT_TAG_NAME}
-            - export TRAVIS_COMMIT=${SEMAPHORE_GIT_SHA}
+            - export CI_BRANCH=${SEMAPHORE_GIT_BRANCH}
+            - export CI_TAG=${SEMAPHORE_GIT_TAG_NAME}
+            - export CI_COMMIT=${SEMAPHORE_GIT_SHA}
             - |-
               if [ "$SEMAPHORE_GIT_REF_TYPE" = "pull-request" ]; then
-                export TRAVIS_PULL_REQUEST="true"
+                export CI_PULL_REQUEST="true"
               else
-                export TRAVIS_PULL_REQUEST="false"
-              fi  
+                export CI_PULL_REQUEST="false"
+              fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
             - echo "HOST_UID=$(id -u)" >> .env
@@ -39,4 +39,3 @@ blocks:
               checkout
               PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f
               docker-compose.yml -f docker-compose.ci.yml logs --no-color
-

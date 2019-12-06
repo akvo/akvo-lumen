@@ -27,6 +27,9 @@ env:
   global:
   - PATH=${HOME}/google-cloud-sdk/bin:$PATH
   - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+  - CI_BRANCH=${TRAVIS_BRANCH}
+  - CI_TAG=${TRAVIS_TAG}
+  - CI_COMMIT=${TRAVIS_COMMIT}
 notifications:
   slack:
     rooms:
