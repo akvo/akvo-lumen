@@ -7,6 +7,14 @@ agent:
 blocks:
   - name: 'Build&Test'
     task:
+      prologue:
+        commands:
+          - checkout
+          - cd backend
+          - cache restore lein-deps-$(checksum project.clj)
+          - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
+          - cache restore lein-$(checksum `which lein`)
+          - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
       jobs:
         - name: 'Build&Test'
           commands:
@@ -29,6 +37,9 @@ blocks:
               if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
               curl https://sdk.cloud.google.com | bash > /dev/null; fi
             - ./ci/build.sh
+            - cd backend
+            - cache store lein-deps-$(checksum project.clj) ~/.m2
+            - cache store lein-$(checksum `which lein`) ~/.lein
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
