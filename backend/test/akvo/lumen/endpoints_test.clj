@@ -12,6 +12,9 @@
 (use-fixtures :once (partial system-fixture "endpoints-test.edn")
   tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
+(deftest dummy-test
+  (is (= 1 1)))
+
 (deftest handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
 
