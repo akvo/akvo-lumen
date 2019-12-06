@@ -7,6 +7,14 @@ agent:
 blocks:
   - name: 'Build&Test'
     task:
+      prologue:
+        commands:
+          - checkout
+          - cd backend
+          - cache restore lein-deps-$(checksum project.clj)
+          - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
+          - cache restore lein-$(checksum `which lein`)
+          - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
       jobs:
         - name: 'Build&Test'
           commands:
