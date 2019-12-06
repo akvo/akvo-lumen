@@ -15,6 +15,9 @@ blocks:
           - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
           - cache restore lein-$(checksum `which lein`)
           - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
+          - cd ../client
+          - cache restore client-npm-deps-$(checksum package.json)
+          - mv ./node_modules .node_modules 2>/dev/null || true
       jobs:
         - name: 'Build&Test'
           commands:
@@ -40,6 +43,8 @@ blocks:
             - cd backend
             - cache store lein-deps-$(checksum project.clj) ~/.m2
             - cache store lein-$(checksum `which lein`) ~/.lein
+            - cd ../client/
+            - cache store client-npm-deps-$(checksum package.json) ./node_modules
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
