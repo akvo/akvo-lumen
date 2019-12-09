@@ -1,8 +1,8 @@
 import { merge, cloneDeep } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Immutable from 'immutable';
-import { FormattedMessage } from 'react-intl';
+import Immutable, { fromJS } from 'immutable';
+import { FormattedMessage, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 
 import SelectMenu from '../../common/SelectMenu';
@@ -11,6 +11,7 @@ import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import { showNotification } from '../../../actions/notification';
+import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 require('./ExtractMultiple.scss');
 
@@ -20,14 +21,14 @@ function multipleTypeCondition(column) {
   return multipleTypes.has(column.get('multipleType'));
 }
 
-function textColumnOptions(columns) {
+function multipleColumnOptions(columns) {
   return columns
     .filter(column => column.get('type') === 'multiple' && multipleTypeCondition(column))
-    .map(column => ({
+    .map(column => (fromJS({
       label: column.get('title'),
+      groupName: column.get('groupName'),
       value: column.get('columnName'),
-    }))
-    .toJS();
+    })));
 }
 
 function filterByMultipleAndColumnName(columns, columnName) {
@@ -36,7 +37,9 @@ function filterByMultipleAndColumnName(columns, columnName) {
     .toJS()[0];
 }
 
-function SelectColumn({ columns, onChange, value }) {
+function SelectColumn({ columns, onChange, value, intl }) {
+  const columnsSelect = multipleColumnOptions(columns);
+
   return (
     <div className="inputGroup">
       <h4 htmlFor="columnName" className="bolder">
@@ -44,9 +47,9 @@ function SelectColumn({ columns, onChange, value }) {
       </h4>
       <SelectMenu
         name="columnName"
-        value={value}
+        value={columnSelectSelectedOption(value, columnsSelect)}
         onChange={onChange}
-        options={textColumnOptions(columns)}
+        options={columnSelectOptions(intl, columnsSelect)}
       />
     </div>
   );
@@ -57,6 +60,7 @@ SelectColumn.propTypes = {
   idx: PropTypes.number.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
+  intl: intlShape,
 };
 
 function MultipleColumnImage(props) {
@@ -96,6 +100,7 @@ class Column extends Component {
   }
   render() {
     const { api, ui } = this.props;
+    const checked = ui.extract || false;
     return (
       <div className="inputGroup">
         <hr />
@@ -104,7 +109,7 @@ class Column extends Component {
             name="extractColumn"
             type="checkbox"
             className={`valueToExtract ${ui.extract ? 'checked' : ''}`}
-            checked={ui.extract}
+            checked={checked}
             label={api.name}
             onChange={this.props.onExtractColumn}
           />
@@ -339,7 +344,7 @@ class ExtractMultiple extends Component {
   }
 
   render() {
-    const { onClose, onApply, columns } = this.props;
+    const { onClose, onApply, columns, intl } = this.props;
     const { extractMultiple: { ui: { selectedColumn } } } = this.state;
     const error = this.state.error;
     return (
@@ -353,6 +358,7 @@ class ExtractMultiple extends Component {
             idx={1}
             onChange={columnName => this.onSelectColumn(columns, columnName)}
             value={selectedColumn.columnName}
+            intl={intl}
           />
           { error ? <div className="feedbackMessage"><FormattedMessage id={error} /></div> : (
             <MultipleColumn
@@ -385,6 +391,7 @@ ExtractMultiple.propTypes = {
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
+  intl: intlShape,
 };
 
 export default connect()(ExtractMultiple);

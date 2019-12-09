@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { intlShape } from 'react-intl';
 import ChangeDataType from './sidebars/ChangeDataType';
 import Filter from './sidebars/Filter';
 import TransformationLog from './sidebars/TransformationLog';
@@ -52,4 +53,5 @@ DataTableSidebar.propTypes = {
     ]
   ).isRequired,
   onClose: PropTypes.func.isRequired,
+  intl: intlShape,
 };

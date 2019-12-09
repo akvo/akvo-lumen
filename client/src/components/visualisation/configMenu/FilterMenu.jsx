@@ -6,7 +6,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 
 import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
-import { filterColumns } from '../../../utilities/utils';
+import { filterColumns } from '../../../utilities/column';
 import './FilterMenu.scss';
 
 const getMenuFilters = filterArray =>

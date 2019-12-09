@@ -10,9 +10,9 @@ import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSecti
 import SortInput from './SortInput';
 import ToggleInput from '../../common/ToggleInput';
 import ButtonRowInput from './ButtonRowInput';
-import { filterColumns } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -160,6 +160,8 @@ class BarConfigMenu extends Component {
           columnOptions.find(item => item.value === value).title : null,
       }, spec, onChangeSpec, columnOptions)}
     />) : '';
+    const columnsBucketColumn = filterColumns(columnOptions, ['number', 'text']);
+    const columnsMetricColumn = filterColumns(columnOptions, ['number']);
     return (
       <div>
         <ConfigMenuSection
@@ -170,10 +172,9 @@ class BarConfigMenu extends Component {
                 <ConfigMenuSectionOptionSelect
                   placeholderId="select_a_data_column_to_group_by"
                   labelTextId="bucket_column"
-                  value={spec.bucketColumn !== null ?
-                  spec.bucketColumn.toString() : null}
+                  value={columnSelectSelectedOption(spec.bucketColumn, columnsBucketColumn)}
                   name="xGroupColumnMenu"
-                  options={filterColumns(columnOptions, ['number', 'text'])}
+                  options={columnSelectOptions(this.props.intl, columnsBucketColumn)}
                   clearable
                   onChange={value => handleChangeSpec({
                     bucketColumn: value,
@@ -318,9 +319,10 @@ class BarConfigMenu extends Component {
                 id="metric_column"
                 placeholderId="select_a_metric_column"
                 labelTextId={metricColumnsY.length === 0 ? 'metric_column' : 'metric_columns'}
-                value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+                // eslint-disable-next-line max-len
+                value={columnSelectSelectedOption(spec.metricColumnY, columnsMetricColumn)}
                 name="metricColumnYInput"
-                options={filterColumns(columnOptions, ['number'])}
+                options={columnSelectOptions(this.props.intl, columnsMetricColumn)}
                 onChange={value => handleChangeSpec({
                   metricColumnY: value,
                 }, spec, onChangeSpec, columnOptions)}
