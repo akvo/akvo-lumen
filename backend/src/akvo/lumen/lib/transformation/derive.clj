@@ -43,7 +43,7 @@
   or row[\"foo\"]. For every reference return a tuple with matched pattern and
   the row column as in [\"row.foo\" \"foo\"]."
   [code]
-  (let [re #"(?U)row.([\w\d]+)|row(?:\[')([^']*)(?:'\])|row(?:\[\")([^\"]*)(?:\"\])"
+  (let [re #"(?U)row.([\w\d]+)|row(?:\[')([^']*)(?:'\])|row(?:\[\")([^\"]*)(?:\"\])|(?:\[')([^']*)(?:'\])|(?:\[\")([^\"]*)(?:\"\])"
         refs (map #(remove nil? %) (re-seq re code))]
     (if (empty? refs)
       `([~code ~code])
@@ -119,7 +119,8 @@
                   ::column-title
                   ::column-type]} (args op-spec)
           new-column-name         (engine/next-column-name columns)
-          row-fn                  (js-engine/row-transform-fn {:columns     columns
+          adapter (js-engine/column-name->column-title columns)
+          row-fn                  (js-engine/row-transform-fn {:adapter     adapter
                                                                :code        code
                                                                :column-type column-type})
           js-execution-seq        (->> (db.tx.derive/all-data conn {:table-name table-name})
