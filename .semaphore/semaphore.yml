@@ -10,15 +10,15 @@ blocks:
       prologue:
         commands:
           - checkout
-          - cd backend
-          - cache restore lein-deps-$(checksum project.clj)
-          - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
-          - cache restore lein-$(checksum `which lein`)
-          - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
-          - cd ../client
-          - cache restore client-npm-deps-$(checksum package.json)
-          - mv ./node_modules .node_modules 2>/dev/null || true
-          - cd ..
+          # - cd backend
+          # - cache restore lein-deps-$(checksum project.clj)
+          # - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
+          # - cache restore lein-$(checksum `which lein`)
+          # - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
+          # - cd ../client
+          # - cache restore client-npm-deps-$(checksum package.json)
+          # - mv ./node_modules .node_modules 2>/dev/null || true
+          # - cd ..
       jobs:
         - name: 'Build&Test'
           commands:
@@ -41,11 +41,11 @@ blocks:
               if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
               curl https://sdk.cloud.google.com | bash > /dev/null; fi
             - ./ci/build.sh
-            - cd backend
-            - cache store lein-deps-$(checksum project.clj) ~/.m2
-            - cache store lein-$(checksum `which lein`) ~/.lein
-            - cd ../client/
-            - cache store client-npm-deps-$(checksum package.json) ./node_modules
+            # - cd backend
+            # - cache store lein-deps-$(checksum project.clj) ~/.m2
+            # - cache store lein-$(checksum `which lein`) ~/.lein
+            # - cd ../client/
+            # - cache store client-npm-deps-$(checksum package.json) ./node_modules
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
