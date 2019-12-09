@@ -7,20 +7,31 @@ agent:
 blocks:
   - name: 'Build&Test'
     task:
+      prologue:
+        commands:
+          - checkout
+          - cd backend
+          - cache restore lein-deps-$(checksum project.clj)
+          - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
+          - cache restore lein-$(checksum `which lein`)
+          - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
+          - cd ../client
+          - cache restore client-npm-deps-$(checksum package.json)
+          - mv ./node_modules .node_modules 2>/dev/null || true
       jobs:
         - name: 'Build&Test'
           commands:
             - echo $SEMAPHORE_CACHE_DIR
             - checkout
             - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
-            - export TRAVIS_BRANCH=${SEMAPHORE_GIT_BRANCH}
-            - export TRAVIS_TAG=${SEMAPHORE_GIT_TAG_NAME}
-            - export TRAVIS_COMMIT=${SEMAPHORE_GIT_SHA}
+            - export CI_BRANCH=${SEMAPHORE_GIT_BRANCH}
+            - export CI_TAG=${SEMAPHORE_GIT_TAG_NAME}
+            - export CI_COMMIT=${SEMAPHORE_GIT_SHA}
             - |-
               if [ "$SEMAPHORE_GIT_REF_TYPE" = "pull-request" ]; then
-                export TRAVIS_PULL_REQUEST="true"
+                export CI_PULL_REQUEST="true"
               else
-                export TRAVIS_PULL_REQUEST="false"
+                export CI_PULL_REQUEST="false"
               fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
@@ -30,6 +41,11 @@ blocks:
               if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
               curl https://sdk.cloud.google.com | bash > /dev/null; fi
             - ./ci/build.sh
+            - cd backend
+            - cache store lein-deps-$(checksum project.clj) ~/.m2
+            - cache store lein-$(checksum `which lein`) ~/.lein
+            - cd ../client/
+            - cache store client-npm-deps-$(checksum package.json) ./node_modules
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
