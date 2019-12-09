@@ -18,6 +18,7 @@ blocks:
           - cd ../client
           - cache restore client-npm-deps-$(checksum package.json)
           - mv ./node_modules .node_modules 2>/dev/null || true
+          - cd ..
       jobs:
         - name: 'Build&Test'
           commands:
