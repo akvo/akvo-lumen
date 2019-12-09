@@ -51,7 +51,8 @@
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
                  [io.prometheus/simpleclient_hotspot "0.6.0"]
                  [io.prometheus/simpleclient_dropwizard "0.6.0"]
-                 [org.clojure/test.check "0.10.0-alpha3"]]
+                 [org.clojure/test.check "0.10.0-alpha3"]
+                 [org.clojars.kardan/taxa "0.0.2"]]
   :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}

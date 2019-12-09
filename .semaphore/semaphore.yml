@@ -21,7 +21,7 @@ blocks:
       jobs:
         - name: 'Build&Test'
           commands:
-            - checkout
+            # - checkout
             - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
             - export CI_BRANCH=${SEMAPHORE_GIT_BRANCH}
             - export CI_TAG=${SEMAPHORE_GIT_TAG_NAME}
