@@ -28,6 +28,24 @@
                   (when-not res (log/error v expression res))
                   res)))
 
+(deftest parse-row-nested-object-references
+  (is (= '(("row[\"g1\"][\"q2\"]" "g1" "q2"))
+         (derive/parse-row-object-references  "row[\"g1\"][\"q2\"]")))
+  (is (= '(("row['g1']['q2']" "g1" "q2"))
+         (derive/parse-row-object-references  "row['g1']['q2']")))
+  (testing "unconsistency second prop reference"
+    (is (= '(("row.group1" "group1"))
+           (derive/parse-row-object-references  "row.group1['q2']")))
+    (is (= '(("row[\"g1\"]" "g1"))
+           (derive/parse-row-object-references  "row[\"g1\"]['q2']"))))
+  (testing "second property if using '.' is not parsed thus could be confused with a function like .toUpperCase or a property"
+    (is (= '(("row[\"g1\"]" "g1"))
+           (derive/parse-row-object-references  "row[\"g1\"].q2")))
+    (is (= '(("row['g1']" "g1"))
+           (derive/parse-row-object-references  "row['g1'].q2")))
+    (is (= '(("row.g1" "g1"))
+           (derive/parse-row-object-references  "row.g1.g2")))))
+
 (deftest parse-row-object-references
   (is (= '(["row.a" "a"])
          (derive/parse-row-object-references "row.a")))
@@ -148,5 +166,4 @@
          (derive/row-template-format "row[\"hi\"]")))
   (is (= "row['%s']"
        (derive/row-template-format "row['hi']"))))
-
 
