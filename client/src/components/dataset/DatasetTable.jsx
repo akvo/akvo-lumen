@@ -412,8 +412,9 @@ class DatasetTable extends Component {
       width,
       height,
     } = this.state;
-
-    const createColumn = (column, index) => {
+    let columnIndex = 0;
+    const createColumn = (column) => {
+      const index = columnIndex;
       const columnHeader = (
         <ColumnHeader
           key={index}
@@ -441,6 +442,7 @@ class DatasetTable extends Component {
           </Cell>
         );
       };
+      columnIndex += 1;
       return (<Column
         cellClassName={this.getCellClassName(column.get('title'))}
         key={column.get('idx') || index}
