@@ -13,7 +13,7 @@
 
 (defn columns-to-extract [columns selected-column caddisfly-schema extractImage]
   (let [columns   (filter :extract columns)
-        base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title)]
+        base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title :groupId :groupName)]
     (cond->>
         (map #(assoc base-column :title (:name %) :type (:type %) :caddisfly-test-id (:id %)) columns)
       (and (:hasImage caddisfly-schema) extractImage)

@@ -5,7 +5,7 @@ import { FormattedMessage } from 'react-intl';
 import UniqueValueMenu from './UniqueValueMenu';
 import ToggleInput from '../../common/ToggleInput';
 import { canShowPivotTotals } from '../../../utilities/chart';
-import { filterColumns } from '../../../utilities/utils';
+import { filterColumns } from '../../../utilities/column';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';

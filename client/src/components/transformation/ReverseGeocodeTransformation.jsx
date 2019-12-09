@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
+import { intlShape } from 'react-intl';
 import TransformationHeader from './TransformationHeader';
 import TargetReverseGeocodeOptions from './reverse-geocode/TargetReverseGeocodeOptions';
 import SourceReverseGeocodeOptions from './reverse-geocode/SourceReverseGeocodeOptions';
@@ -83,7 +84,7 @@ class ReverseGeocodeTransformation extends Component {
   }
 
   render() {
-    const { datasetId, datasets, onApplyTransformation, transforming } = this.props;
+    const { datasetId, datasets, onApplyTransformation, transforming, intl } = this.props;
     const { loading, spec } = this.state;
     if (loading) return null;
 
@@ -98,6 +99,7 @@ class ReverseGeocodeTransformation extends Component {
         />
         <div className="container">
           <TargetReverseGeocodeOptions
+            intl={intl}
             dataset={datasets[datasetId]}
             spec={spec}
             onChangeSpec={s => this.handleChangeSpec(s)}
@@ -105,6 +107,7 @@ class ReverseGeocodeTransformation extends Component {
           <div className="separator" />
           <SourceReverseGeocodeOptions
             datasets={datasets}
+            intl={intl}
             spec={spec}
             onChangeSpec={s => this.handleChangeSpec(s)}
           />
@@ -120,6 +123,7 @@ ReverseGeocodeTransformation.propTypes = {
   onApplyTransformation: PropTypes.func.isRequired,
   transforming: PropTypes.bool.isRequired,
   dispatch: PropTypes.func.isRequired,
+  intl: intlShape,
 };
 
 export default connect()(ReverseGeocodeTransformation);

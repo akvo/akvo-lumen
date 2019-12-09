@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Select from 'react-select';
 import { connect } from 'react-redux';
 import { injectIntl, intlShape } from 'react-intl';
 
+import SelectMenu from '../../common/SelectMenu';
+
 import * as api from '../../../utilities/api';
 import { showNotification } from '../../../actions/notification';
-
-require('../../../../node_modules/react-select/dist/react-select.css');
-// TODO: we should use the "SelectMenu" wrapper component in the "common" folder in this component
 
 const acceptHeader = { Accept: 'application/vnd.akvo.flow.v2+json' };
 
@@ -191,7 +189,7 @@ class AkvoFlowDataSourceSettings extends Component {
   }
 
   handleSelection(evt) {
-    const selectedId = evt.value;
+    const selectedId = evt;
     const { folders } = this.state;
 
     if (folders[selectedId] != null) {
@@ -238,9 +236,9 @@ class AkvoFlowDataSourceSettings extends Component {
       const parentId = selectedFolder.parentId;
       const options = this.foldersAndSurveysSelectionOptions(parentId);
       return (
-        <Select
+        <SelectMenu
           key={idx}
-          clearable={false}
+          isClearable={false}
           options={options}
           value={id}
           onChange={evt => this.changeFolderSelection(evt, idx)}
@@ -253,10 +251,10 @@ class AkvoFlowDataSourceSettings extends Component {
 
     // Either a survey or a folder can be selected
     const nextSelection = instance != null && errorMessage == null && (
-      <Select
+      <SelectMenu
         placeholder={formatMessage({ id: 'select_survey_or_folder' })}
         isLoading={this.state.isLoadingNext}
-        clearable={false}
+        isClearable={false}
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
         value={selectedSurveyId}
         onChange={evt => this.handleSelection(evt)}
@@ -265,13 +263,13 @@ class AkvoFlowDataSourceSettings extends Component {
     );
 
     const formSelection = selectedSurveyId != null && (
-      <Select
+      <SelectMenu
         placeholder={formatMessage({ id: 'select_form' })}
         isLoading={this.state.isLoadingForms}
-        clearable={false}
+        isClearable={false}
         options={this.formSelectionOptions(selectedSurveyId)}
         value={selectedFormId}
-        onChange={evt => this.handleFormSelection(evt.value)}
+        onChange={evt => this.handleFormSelection(evt)}
         data-test-id="survey-folder"
       />
     );

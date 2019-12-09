@@ -21,6 +21,7 @@ blocks:
       jobs:
         - name: 'Build&Test'
           commands:
+            - echo $SEMAPHORE_CACHE_DIR
             - checkout
             - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
             - export CI_BRANCH=${SEMAPHORE_GIT_BRANCH}
