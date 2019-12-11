@@ -5,7 +5,7 @@ const auth_client_id = Cypress.env('LUMEN_AUTH_CLIENT_ID');
 const auth_client_password = Cypress.env('LUMEN_AUTH_CLIENT_PASSWORD');
 const username = Cypress.env('LUMEN_USER') || 'jerome@t1.akvolumen.org';
 const password = Cypress.env('LUMEN_PASSWORD') || 'password';
-const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';
+const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/master/client/e2e-test/sample-data-1.csv';
 const datasetName = `Dataset ${Date.now().toString()}`;
 const COLUMNS = {
   TEXT_1: 'Name',
@@ -84,10 +84,10 @@ context('Akvo Lumen', ()  => {
     };
     tryDelete();
   });
-  
+
   it('e2e tests', () => {
   context('create dataset: link', ()  => {
-	
+
     cy.get('button[data-test-id="dataset"]').click();
     // Select link option
     cy.get('input[data-test-id="source-option"][value="LINK"]').click();
@@ -234,9 +234,9 @@ context('Akvo Lumen', ()  => {
         cy.get('.Chart circle').should('exist');
 
           // open bucket menu
- 	  cy.get('[data-test-id="category-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.TEXT_1}{enter}`, { force: true});	  
+ 	  cy.get('[data-test-id="category-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.TEXT_1}{enter}`, { force: true});
         // open size menu
- 	  cy.get('[data-test-id="size-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.NUMBER_3}{enter}`, { force: true});	  
+ 	  cy.get('[data-test-id="size-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.NUMBER_3}{enter}`, { force: true});
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
