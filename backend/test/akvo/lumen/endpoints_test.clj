@@ -215,7 +215,7 @@
       (testing "/datasets update"
         (let [title "github-sample-data-1"
               file-name "sample-data-1.csv"
-              dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
+              dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/master/client/e2e-test/sample-data-1.csv"
 
               import-id (-> (h (post*  (api-url "/datasets") {:source
                                                               {:kind "LINK"
