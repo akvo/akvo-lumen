@@ -8,11 +8,12 @@ function log {
 
 export PROJECT_NAME=akvo-lumen
 
-if [[ "${TRAVIS_BRANCH}" != "develop" ]] && [[ ! "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+
+if [[ "${TRAVIS_BRANCH}" != "master" ]] && [[ ! "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
     exit 0
 fi
 
-if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
+if [[ "${CI_PULL_REQUEST}" != "false" ]]; then
     exit 0
 fi
 
@@ -31,7 +32,7 @@ gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 gcloud config set container/use_client_certificate True
 
-if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
 else
@@ -51,7 +52,7 @@ log LIVE is "${LIVE_COLOR}"
 DARK_COLOR=$(./ci/helpers/dark-color.sh "$LIVE_COLOR")
 
 log "Deploying to dark ($DARK_COLOR)"
-sed -e "s/\${BUILD_HASH}/$TRAVIS_COMMIT/" -e "s/\${COLOR}/${DARK_COLOR}/" ci/k8s/deployment.yaml.template > deployment.yaml
+sed -e "s/\${BUILD_HASH}/$CI_COMMIT/" -e "s/\${COLOR}/${DARK_COLOR}/" ci/k8s/deployment.yaml.template > deployment.yaml
 
 kubectl apply -f deployment.yaml
 kubectl apply -f ci/k8s/redis-master-windshaft.yaml
@@ -63,7 +64,7 @@ kubectl apply -f ci/k8s/grafana/lumen-flow-api-authz.yml
 log Waiting for k8s to finish
 ./ci/helpers/wait-for-k8s-deployment-to-be-ready.sh "$DARK_COLOR"
 
-if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Waiting for k8s to be healthy
     ./ci/helpers/wait-for-k8s-deployment-to-be-healthy.sh https://dark-demo.akvolumen.org/healthz
 else

@@ -1,5 +1,5 @@
 version: v1.0
-name: Initial Pipeline
+name: Build and test
 agent:
   machine:
     type: e1-standard-2
@@ -7,20 +7,31 @@ agent:
 blocks:
   - name: 'Build&Test'
     task:
+      prologue:
+        commands:
+          - checkout
+          - cd backend
+          - cache restore lein-deps-$(checksum project.clj)
+          - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
+          - cache restore lein-$(checksum `which lein`)
+          - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
+          - cd ../client
+          - cache restore client-npm-deps-$(checksum package-lock.json)
+          - mv ./node_modules .node_modules 2>/dev/null || true
+          - cd ..
       jobs:
         - name: 'Build&Test'
           commands:
-            - checkout
             - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
-            - export TRAVIS_BRANCH=${SEMAPHORE_GIT_BRANCH}
-            - export TRAVIS_TAG=${SEMAPHORE_GIT_TAG_NAME}
-            - export TRAVIS_COMMIT=${SEMAPHORE_GIT_SHA}
+            - export CI_BRANCH=${SEMAPHORE_GIT_BRANCH}
+            - export CI_TAG=${SEMAPHORE_GIT_TAG_NAME}
+            - export CI_COMMIT=${SEMAPHORE_GIT_SHA}
             - |-
               if [ "$SEMAPHORE_GIT_REF_TYPE" = "pull-request" ]; then
-                export TRAVIS_PULL_REQUEST="true"
+                export CI_PULL_REQUEST="true"
               else
-                export TRAVIS_PULL_REQUEST="false"
-              fi  
+                export CI_PULL_REQUEST="false"
+              fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
             - echo "HOST_UID=$(id -u)" >> .env
@@ -29,6 +40,11 @@ blocks:
               if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
               curl https://sdk.cloud.google.com | bash > /dev/null; fi
             - ./ci/build.sh
+            - cd backend
+            - cache store lein-deps-$(checksum project.clj) ~/.m2
+            - cache store lein-$(checksum `which lein`) ~/.lein
+            - cd ../client/
+            - cache store client-npm-deps-$(checksum package.json) ./node_modules
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
@@ -39,4 +55,3 @@ blocks:
               checkout
               PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f
               docker-compose.yml -f docker-compose.ci.yml logs --no-color
-

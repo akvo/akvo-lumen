@@ -6,7 +6,7 @@ import { intlShape, injectIntl } from 'react-intl';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ToggleInput from '../../common/ToggleInput';
-import { filterColumns } from '../../../utilities/utils';
+import { filterColumns } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 
 const getColumnTitle = (columnName, columnOptions) =>
