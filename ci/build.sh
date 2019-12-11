@@ -18,6 +18,9 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     exit 0
 fi
 
+log Temporary init Gcloud auth
+gcloud auth activate-service-account --key-file=.secrets/gcp.json
+
 log Running Backend unit tests and building uberjar
 backend_image_version=$(awk -F':' '/backend-dev/ {print $3}' docker-compose.override.yml)
 docker run -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh lein do test, eastwood, uberjar

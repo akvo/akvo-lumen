@@ -7,6 +7,8 @@ agent:
 blocks:
   - name: 'Build&Test'
     task:
+      secrets:
+        - name: GCP
       prologue:
         commands:
           - checkout
