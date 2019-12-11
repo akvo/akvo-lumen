@@ -16,13 +16,12 @@ blocks:
           - cache restore lein-$(checksum `which lein`)
           - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
           - cd ../client
-          - cache restore client-npm-deps-$(checksum package.json)
+          - cache restore client-npm-deps-$(checksum package-lock.json)
           - mv ./node_modules .node_modules 2>/dev/null || true
+          - cd ..
       jobs:
         - name: 'Build&Test'
           commands:
-            - echo $SEMAPHORE_CACHE_DIR
-            - checkout
             - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
             - export CI_BRANCH=${SEMAPHORE_GIT_BRANCH}
             - export CI_TAG=${SEMAPHORE_GIT_TAG_NAME}
