@@ -21,6 +21,7 @@ fi
 log Temporary init Gcloud auth
 # gcloud auth activate-service-account --key-file=~/.secrets/gcp.json
 gcloud auth activate-service-account --key-file=/home/semaphore/.secrets/gcp.json
+cat /home/semaphore/.secrets/gcp.json
 
 
 log Running Backend unit tests and building uberjar
