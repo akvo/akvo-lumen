@@ -19,7 +19,7 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
 fi
 
 log Temporary init Gcloud auth
-gcloud auth activate-service-account --key-file=.secrets/gcp.json
+gcloud auth activate-service-account --key-file=~/.secrets/gcp.json
 
 log Running Backend unit tests and building uberjar
 backend_image_version=$(awk -F':' '/backend-dev/ {print $3}' docker-compose.override.yml)
