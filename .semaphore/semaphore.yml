@@ -1,11 +1,11 @@
 version: v1.0
-name: Build and test
+name: Build, test & deploy
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
 blocks:
-  - name: 'Build&Test'
+  - name: 'Build, test & deploy'
     task:
       prologue:
         commands:
@@ -34,8 +34,6 @@ blocks:
               fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
-            # - echo "HOST_UID=$(id -u)" >> .env
-            # - echo "HOST_GID=$(id -g)" >> .env
             - |-
               if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
               curl https://sdk.cloud.google.com | bash > /dev/null; fi
@@ -59,8 +57,3 @@ blocks:
               checkout
               PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f
               docker-compose.yml -f docker-compose.ci.yml logs --no-color
-# promotions:
-#   - name: Production deploy
-#     pipeline_file: deploy.yml
-#     auto_promote:
-#       when: "result = 'passed' and branch = 'issue/2439-sem-deploy2'"
