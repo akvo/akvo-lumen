@@ -59,4 +59,4 @@ promotions:
   - name: Production deploy
     pipeline_file: deploy.yml
     auto_promote:
-      when: "results = 'passed' and branch 'issue/2439-sem-deploy2'"
+      when: "results = 'passed' and branch = 'issue/2439-sem-deploy2'"
