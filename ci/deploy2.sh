@@ -14,9 +14,9 @@ fi
 
 log Making sure gcloud and kubectl are installed and up to date
 # gcloud components install kubectl
-# gcloud components update
+gcloud components update
 # gcloud version
-# which gcloud kubectl
+which gcloud kubectl
 
 log Authentication with gcloud and kubectl
 gcloud auth activate-service-account --key-file=/home/semaphore/.secrets/gcp.json
