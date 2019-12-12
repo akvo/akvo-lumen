@@ -7,7 +7,12 @@ agent:
 blocks:
   - name: 'Deploy'
     task:
+      prologue:
+        commands:
+          - checkout
       jobs:
         - name: 'Deploy'
           commands:
+            - pwd
+            - docker images
             - ./ci/deploy2.sh
