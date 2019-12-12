@@ -24,7 +24,7 @@ blocks:
       jobs:
         - name: 'Build&Test'
           commands:
-            - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
+            # - export PATH=${HOME}/google-cloud-sdk/bin:$PATH
             - export CI_BRANCH=${SEMAPHORE_GIT_BRANCH}
             - export CI_TAG=${SEMAPHORE_GIT_TAG_NAME}
             - export CI_COMMIT=${SEMAPHORE_GIT_SHA}
@@ -36,9 +36,9 @@ blocks:
               fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
-            - |-
-              if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
-              curl https://sdk.cloud.google.com | bash > /dev/null; fi
+            # - |-
+            #   if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
+            #   curl https://sdk.cloud.google.com | bash > /dev/null; fi
             - ./ci/build.sh
             - ./ci/deploy2.sh
       env_vars:

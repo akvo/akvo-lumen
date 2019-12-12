@@ -13,10 +13,10 @@ if [[ "${CI_BRANCH}" != "issue/2439-sem-deploy2" ]]; then
 fi
 
 log Making sure gcloud and kubectl are installed and up to date
-gcloud components install kubectl
-gcloud components update
-gcloud version
-which gcloud kubectl
+# gcloud components install kubectl
+# gcloud components update
+# gcloud version
+# which gcloud kubectl
 
 log Authentication with gcloud and kubectl
 gcloud auth activate-service-account --key-file=/home/semaphore/.secrets/gcp.json
