@@ -7,5 +7,3 @@ function log {
 }
 
 export PROJECT_NAME=akvo-lumen
-
-docker images
