@@ -17,6 +17,7 @@ import { deleteRaster, deletePendingRaster } from '../actions/raster';
 import { editCollection, addEntitiesToCollection } from '../actions/collection';
 import * as entity from '../domain/entity';
 import { trackPageView } from '../utilities/analytics';
+import { example } from '../utilities/cljs';
 
 require('./Library.scss');
 
@@ -212,6 +213,10 @@ class Library extends Component {
 
   render() {
     const { dispatch, location, datasets, visualisations, dashboards, rasters } = this.props;
+    const viz = visualisations['5ddf8263-b7c2-4cf3-9f42-23e318b829d9'];
+    console.log('js-raw', viz);
+    const cljsOutput = example(viz);
+    console.log('from-cljs', cljsOutput);
 
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
