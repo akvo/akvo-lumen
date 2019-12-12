@@ -19,7 +19,6 @@ spec:
             mem: ${GW_POD_MEM_REQUESTS}
           limits:
             cpu: ${GW_POD_CPU_LIMITS}
-            mem: ${GW_POD_MEM_LIMITS}
         ports:
         - containerPort: 80
           protocol: TCP

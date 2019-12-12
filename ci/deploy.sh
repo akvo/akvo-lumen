@@ -55,7 +55,6 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     GW_POD_CPU_REQUESTS="100m"
     GW_POD_CPU_LIMITS="200m"
     GW_POD_MEM_REQUESTS="32Mi"
-    GW_POD_MEM_LIMITS="32Mi"
 else
     log Environment is test
     gcloud container clusters get-credentials test
@@ -77,7 +76,6 @@ else
     GW_POD_CPU_REQUESTS="50m"
     GW_POD_CPU_LIMITS="100m"
     GW_POD_MEM_REQUESTS="32Mi"
-    GW_POD_MEM_LIMITS="32Mi"
 
     log Pushing images
     gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
@@ -123,7 +121,6 @@ sed -e "s/\${ENVIRONMENT}/${ENVIRONMENT}/" \
   -e "s/\${GW_POD_CPU_REQUESTS}/${GW_POD_CPU_REQUESTS}/" \
   -e "s/\${GW_POD_MEM_REQUESTS}/${GW_POD_MEM_REQUESTS}/" \
   -e "s/\${GW_POD_CPU_LIMITS}/${GW_POD_CPU_LIMITS}/" \
-  -e "s/\${GW_POD_MEM_LIMITS}/${GW_POD_MEM_LIMITS}/" \
   ci/k8s/blue-green-gateway.yaml.template > blue-green-gateway.yaml
 
 kubectl apply -f ci/k8s/blue-green-gateway.yaml
