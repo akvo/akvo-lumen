@@ -58,5 +58,5 @@ blocks:
 promotions:
   - name: Production deploy
     pipeline_file: deploy.yml
-    auth_promote:
+    auto_promote:
       when: "results = 'passed' and branch 'issue/2439-sem-deploy2'"
