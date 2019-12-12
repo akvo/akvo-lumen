@@ -8,7 +8,7 @@ function log {
 
 export PROJECT_NAME=akvo-lumen
 
-if [[ "${TRAVIS_BRANCH}" != "issue/2439-sem-deploy2" ]]; then
+if [[ "${CI_BRANCH}" != "issue/2439-sem-deploy2" ]]; then
     exit 0
 fi
 
