@@ -55,3 +55,8 @@ blocks:
               checkout
               PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f
               docker-compose.yml -f docker-compose.ci.yml logs --no-color
+promotions:
+  - name: Production deploy
+    pipeline_file: deploy.yml
+    auth_promote:
+      when: "results = 'passed' and branch 'issue/2439-sem-deploy2'"
