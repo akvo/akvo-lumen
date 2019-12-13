@@ -36,9 +36,9 @@ blocks:
               fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
-            - |-
-              if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
-              curl https://sdk.cloud.google.com | bash > /dev/null; fi
+            # - |-
+            #   if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
+            #   curl https://sdk.cloud.google.com | bash > /dev/null; fi
             - ./ci/build.sh
             - ./ci/deploy2.sh
       env_vars:
