@@ -449,7 +449,6 @@
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
-
     (testing "derive to number column"
       (let [[tag res] (apply-transformation {:type :transformation
                                              :transformation
@@ -460,10 +459,7 @@
                                                                   ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d5 (latest-data dataset-id))))))
-
-
- 
- 
+  
     (testing "Valid type check"
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
@@ -513,7 +509,6 @@
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/bad-request))))
-
 
     (testing "Disallow anonymous functions"
       (let [[tag _] (apply-transformation {:type :transformation
