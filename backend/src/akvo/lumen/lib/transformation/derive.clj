@@ -11,6 +11,7 @@
             [clojure.tools.logging :as log]
             [clojure.walk :as walk]))
 
+(def flow-metadata-questions #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
 
 (defn row-template-format [s]
   (let [double-quote-template "row[\"%s\"]"
@@ -62,9 +63,16 @@
                                #(conj % {"id" id
                                          "pattern" pattern
                                          "column-name" (if column-ref2
-                                                         (:columnName (first (filter (fn [c]
-                                                                           (and (= column-ref1 (:groupName c))
-                                                                                (= column-ref2 (:title c)))) columns)))
+                                                         (:columnName
+                                                          (first
+                                                           (filter
+                                                            (fn [c]
+                                                              (and (or (= column-ref1 (:groupName c))
+                                                                       (and (engine/is-derivated? (:columnName c))
+                                                                            (= column-ref1 "Transformations"))
+                                                                       (and (contains? flow-metadata-questions (:columnName c))
+                                                                            (= column-ref1 "Metadata")))
+                                                                   (= column-ref2 (:title c)))) columns)))
                                                          (let [results (filter (fn [c] (= column-ref1 (:title c))) columns)]
                                                            (if (> (count results) 1)
                                                              (throw (ex-info (format "There is more than one column with this name: '%s', Js code needs to reference the column with the group. Eg: row['Transformations']['%s']" column-ref1 column-ref1)
@@ -124,15 +132,13 @@
        (map (fn [[i]] (db.tx.derive/delete-row conn (merge {:rnum i} opts))))
        doall))
 
-
 (defn columns-groups [columns]
   (let [groups (group-by :groupName columns)
         flow-groups (not-empty (dissoc groups nil))
         no-flow-qg (get groups  nil)
         tx-group (when-let [txs (not-empty (filter #(engine/is-derivated? (:columnName %)) no-flow-qg))]
                    {"Transformations" txs })
-        mt-questions #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"}
-        mt-group (when-let [mts (not-empty (filter #(contains? mt-questions (:columnName %)) no-flow-qg))]
+        mt-group (when-let [mts (not-empty (filter #(contains? flow-metadata-questions (:columnName %)) no-flow-qg))]
                    {"Metadata" mts})]
     (when (or flow-groups tx-group mt-group)
       (->> (merge flow-groups
