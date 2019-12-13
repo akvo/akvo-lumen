@@ -27,8 +27,10 @@ gcloud config set container/use_client_certificate True
 
 if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
+    gcloud container clusters get-credentials production
 else
     log Environement is test
+    gcloud container clusters get-credentials test
 fi
 
 log Finding blue/green state
