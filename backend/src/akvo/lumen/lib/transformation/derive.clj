@@ -183,7 +183,6 @@
   [applied-transformation columns]
   (let [code (-> applied-transformation :args :code)
         computed (compute-transformation-code code columns)]
-    (log/error :computed computed)
     (reduce (fn [c r]
               (conj c (if-let [column-name (:column-name r)]
                         column-name
