@@ -65,10 +65,18 @@
                                                          (:columnName (first (filter (fn [c]
                                                                            (and (= column-ref1 (:groupName c))
                                                                                 (= column-ref2 (:title c)))) columns)))
-                                                         (try
-                                                          (:columnName
-                                                           (dataset.utils/find-column columns column-ref1 :title))
-                                                          (catch Exception e nil)))})))))
+                                                         (let [results (filter (fn [c] (= column-ref1 (:title c))) columns)]
+                                                           (if (> (count results) 1)
+                                                             (throw (ex-info (format "There is more than one column with this name: '%s', Js code needs to reference the column with the group. Eg: row['Transformations']['%s']" column-ref1 column-ref1)
+                                                                             {:code code
+                                                                              :columns columns
+                                                                              :reference m}
+                                                                             ))
+
+                                                             (try
+                                                               (:columnName
+                                                                (dataset.utils/find-column columns column-ref1 :title))
+                                                               (catch Exception e nil)))))})))))
             {"template" code
              "references" []}
             (parse-row-object-references code))))
