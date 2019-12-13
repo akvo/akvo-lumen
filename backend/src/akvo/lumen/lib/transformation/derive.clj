@@ -116,13 +116,17 @@
        (map (fn [[i]] (db.tx.derive/delete-row conn (merge {:rnum i} opts))))
        doall))
 
-(defn extend-row [row row-adapter columns]
-  (let [group-with-columns (->> (dissoc (group-by :groupName columns) nil)
-                                (reduce (fn [c [k v]] (assoc c k (map (comp keyword :columnName) v))) {}))]
-    (if-not (empty? group-with-columns)
-      (reduce (fn [c [group-name column-names]]
-                (assoc c group-name (row-adapter (select-keys c column-names)))) row group-with-columns)
-      row)))
+(defn columns-groups [columns]
+  (let [groups (group-by :groupName columns)]
+    (->> (dissoc groups nil)
+         (reduce (fn [c [k v]]
+                   (assoc c k (map (comp keyword :columnName) v))) {}))))
+
+(defn extend-row [row row-adapter columns-groups]
+  (if-not (empty? columns-groups)
+    (reduce (fn [c [group-name column-names]]
+              (assoc c group-name (row-adapter (select-keys c column-names)))) row columns-groups)
+    row))
 
 (defmethod engine/apply-operation "core/derive"
   [{:keys [tenant-conn]} table-name columns op-spec]
@@ -132,20 +136,16 @@
                   ::column-title
                   ::column-type]} (args op-spec)
           new-column-name         (engine/next-column-name columns)
-          ks-columns (walk/keywordize-keys columns)
-          adapter (js-engine/column-name->column-title columns)
+          columns-groups*         (columns-groups (walk/keywordize-keys columns))
+          adapter                 (js-engine/column-name->column-title columns)
           row-fn                  (js-engine/row-transform-fn {:adapter     adapter
                                                                :code        code
                                                                :column-type column-type})
-;;          _ (log/error ks-columns)
           js-execution-seq        (->> (db.tx.derive/all-data conn {:table-name table-name})
-                                       (map (fn [row] (let [res (extend-row row adapter ks-columns)]
-;;                                                        (log/error (keys res) res)
-                                                        res)))
                                        (map (fn [i]
                                               (try
-                                                (let [row (extend-row i adapter ks-columns)]
-                                                 [(:rnum row) :set-value! (row-fn row)])
+                                                (let [row (extend-row i adapter columns-groups*)]
+                                                  [(:rnum row) :set-value! (row-fn row)])
                                                 (catch Exception e
                                                   (condp = (engine/error-strategy op-spec)
                                                     "leave-empty" [(:rnum i) :set-value! nil]
@@ -154,9 +154,9 @@
                                                     ))))))
           base-opts               {:table-name  table-name
                                    :column-name new-column-name}]
-      (db.tx.engine/add-column conn {:table-name      table-name
-                        :column-type     (lumen->pg-type column-type)
-                        :new-column-name new-column-name})
+      (db.tx.engine/add-column conn {:table-name table-name
+                                     :column-type             (lumen->pg-type column-type)
+                                     :new-column-name         new-column-name})
       (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
       (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))      
       {:success?      true
@@ -172,6 +172,7 @@
   [applied-transformation columns]
   (let [code (-> applied-transformation :args :code)
         computed (compute-transformation-code code columns)]
+    (log/error :computed computed)
     (reduce (fn [c r]
               (conj c (if-let [column-name (:column-name r)]
                         column-name
