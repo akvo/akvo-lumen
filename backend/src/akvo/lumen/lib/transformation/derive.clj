@@ -117,10 +117,14 @@
        doall))
 
 (defn columns-groups [columns]
-  (let [groups (group-by :groupName columns)]
-    (->> (dissoc groups nil)
-         (reduce (fn [c [k v]]
-                   (assoc c k (map (comp keyword :columnName) v))) {}))))
+  (let [groups (group-by :groupName columns)
+        flow-qg (dissoc groups nil)
+        no-flow-qg (get groups  nil)
+        tx-questions (filter #(engine/is-derivated? (:columnName %)) no-flow-qg)]
+    (->> (assoc flow-qg
+                "Transformations" tx-questions)
+        (reduce (fn [c [k v]]
+                  (assoc c k (map (comp keyword :columnName) v))) {}))))
 
 (defn extend-row [row row-adapter columns-groups]
   (if-not (empty? columns-groups)
