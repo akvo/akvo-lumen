@@ -25,3 +25,14 @@ gcloud config set project akvo-lumen
 gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 gcloud config set container/use_client_certificate True
+
+if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
+    log Environment is production
+else
+    log Environement is test
+fi
+
+log Finding blue/green state
+LIVE_COLOR=$(./ci/live-color.sh)
+log LIVE is "${LIVE_COLOR}"
+DARK_COLOR=$(./ci/helpers/dark-color.sh "$LIVE_COLOR")
