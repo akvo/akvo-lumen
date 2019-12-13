@@ -43,7 +43,7 @@
   or row[\"foo\"]. For every reference return a tuple with matched pattern and
   the row column as in [\"row.foo\" \"foo\"]."
   [code]
-  (let [re #"(?U)row.([\w\d]+)|row(?:\[')([^']*)(?:'\])|row(?:\[\")([^\"]*)(?:\"\])"
+  (let [re #"(?U)row.([\w\d]+)|row(?:\[')([^']*)(?:'\])(?:\[')([^']*)(?:'\])|row(?:\[')([^']*)(?:'\])|row(?:\[\")([^\"]*)(?:\"\])(?:\[\")([^\"]*)(?:\"\])|row(?:\[\")([^\"]*)(?:\"\])"
         refs (map #(remove nil? %) (re-seq re code))]
     (if (empty? refs)
       `([~code ~code])
@@ -51,19 +51,24 @@
 
 (defn compute-transformation-code
   "analyses code to find columns relations between column-title and column-name when using js code"
-  [code columns]
-  (let [columns (walk/keywordize-keys columns)]
-    (reduce (fn [m [pattern column-title]]
+  [code columns & [kw?]]
+  (let [columns (if kw? columns
+                    (walk/keywordize-keys columns))]
+    (reduce (fn [m [pattern column-ref1 column-ref2]]
               (let [id (str (util/squuid))]
                 (-> m
                     (update-in ["template"] #(str/replace % pattern id))
                     (update-in ["references"]
                                #(conj % {"id" id
                                          "pattern" pattern
-                                         "column-name" (try
-                                                         (:columnName
-                                                          (dataset.utils/find-column columns column-title :title))
-                                                         (catch Exception e nil))})))))
+                                         "column-name" (if column-ref2
+                                                         (:columnName (first (filter (fn [c]
+                                                                           (and (= column-ref1 (:groupName c))
+                                                                                (= column-ref2 (:title c)))) columns)))
+                                                         (try
+                                                          (:columnName
+                                                           (dataset.utils/find-column columns column-ref1 :title))
+                                                          (catch Exception e nil)))})))))
             {"template" code
              "references" []}
             (parse-row-object-references code))))
@@ -111,6 +116,29 @@
        (map (fn [[i]] (db.tx.derive/delete-row conn (merge {:rnum i} opts))))
        doall))
 
+
+(defn columns-groups [columns]
+  (let [groups (group-by :groupName columns)
+        flow-groups (not-empty (dissoc groups nil))
+        no-flow-qg (get groups  nil)
+        tx-group (when-let [txs (not-empty (filter #(engine/is-derivated? (:columnName %)) no-flow-qg))]
+                   {"Transformations" txs })
+        mt-questions #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"}
+        mt-group (when-let [mts (not-empty (filter #(contains? mt-questions (:columnName %)) no-flow-qg))]
+                   {"Metadata" mts})]
+    (when (or flow-groups tx-group mt-group)
+      (->> (merge flow-groups
+                  tx-group
+                  mt-group)
+           (reduce (fn [c [k v]]
+                     (assoc c k (map (comp keyword :columnName) v))) {})))))
+
+(defn extend-row [row row-adapter columns-groups]
+  (if-not (empty? columns-groups)
+    (reduce (fn [c [group-name column-names]]
+              (assoc c group-name (row-adapter (select-keys c column-names)))) row columns-groups)
+    row))
+
 (defmethod engine/apply-operation "core/derive"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (engine/columns-used (walk/keywordize-keys op-spec) columns)
@@ -119,13 +147,16 @@
                   ::column-title
                   ::column-type]} (args op-spec)
           new-column-name         (engine/next-column-name columns)
-          row-fn                  (js-engine/row-transform-fn {:columns     columns
+          columns-groups*         (columns-groups (walk/keywordize-keys columns))
+          adapter                 (js-engine/column-name->column-title columns)
+          row-fn                  (js-engine/row-transform-fn {:adapter     adapter
                                                                :code        code
                                                                :column-type column-type})
           js-execution-seq        (->> (db.tx.derive/all-data conn {:table-name table-name})
                                        (map (fn [i]
                                               (try
-                                                [(:rnum i) :set-value! (row-fn i)]
+                                                (let [row (extend-row i adapter columns-groups*)]
+                                                  [(:rnum row) :set-value! (row-fn row)])
                                                 (catch Exception e
                                                   (condp = (engine/error-strategy op-spec)
                                                     "leave-empty" [(:rnum i) :set-value! nil]
@@ -134,9 +165,9 @@
                                                     ))))))
           base-opts               {:table-name  table-name
                                    :column-name new-column-name}]
-      (db.tx.engine/add-column conn {:table-name      table-name
-                        :column-type     (lumen->pg-type column-type)
-                        :new-column-name new-column-name})
+      (db.tx.engine/add-column conn {:table-name table-name
+                                     :column-type             (lumen->pg-type column-type)
+                                     :new-column-name         new-column-name})
       (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
       (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))      
       {:success?      true
@@ -152,6 +183,7 @@
   [applied-transformation columns]
   (let [code (-> applied-transformation :args :code)
         computed (compute-transformation-code code columns)]
+    (log/error :computed computed)
     (reduce (fn [c r]
               (conj c (if-let [column-name (:column-name r)]
                         column-name
