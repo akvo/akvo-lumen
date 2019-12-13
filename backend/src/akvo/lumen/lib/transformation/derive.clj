@@ -119,15 +119,19 @@
 
 (defn columns-groups [columns]
   (let [groups (group-by :groupName columns)
+        flow-groups (not-empty (dissoc groups nil))
         no-flow-qg (get groups  nil)
-        tx-group (filter #(engine/is-derivated? (:columnName %)) no-flow-qg)
+        tx-group (when-let [txs (not-empty (filter #(engine/is-derivated? (:columnName %)) no-flow-qg))]
+                   {"Transformations" txs })
         mt-questions #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"}
-        mt-group (filter #(contains? mt-questions (:columnName %)) no-flow-qg)]
-    (->> (assoc (dissoc groups nil)
-                "Transformations" tx-group
-                "Metadata" mt-group)
-         (reduce (fn [c [k v]]
-                   (assoc c k (map (comp keyword :columnName) v))) {}))))
+        mt-group (when-let [mts (not-empty (filter #(contains? mt-questions (:columnName %)) no-flow-qg))]
+                   {"Metadata" mts})]
+    (when (or flow-groups tx-group mt-group)
+      (->> (merge flow-groups
+                  tx-group
+                  mt-group)
+           (reduce (fn [c [k v]]
+                     (assoc c k (map (comp keyword :columnName) v))) {})))))
 
 (defn extend-row [row row-adapter columns-groups]
   (if-not (empty? columns-groups)
