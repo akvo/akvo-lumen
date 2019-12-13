@@ -52,7 +52,7 @@
   (doseq [function ["print" "load" "loadWithNewGlobal" "exit" "quit" "eval"]]
     (.remove bindings function)))
 
-(defn- column-name->column-title
+(defn column-name->column-title
   "replace column-name by column-title"
   [columns]
   (let [key-translation (->> columns
@@ -95,9 +95,8 @@
   (.invokeFunction engine fun (object-array args)))
 
 (defn row-transform-fn
-  [{:keys [columns code column-type]}]
-  (let [adapter (column-name->column-title columns)
-        engine (js-engine)
+  [{:keys [adapter code column-type]}]
+  (let [engine (js-engine)
         fun-name "deriveColumn"]
     (eval* engine (column-function fun-name code))
     (fn [row]
