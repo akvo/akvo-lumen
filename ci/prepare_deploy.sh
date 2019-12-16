@@ -10,7 +10,7 @@ export PROJECT_NAME=akvo-lumen
 
 export CI_DO_DEPLOYMENT=true
 
-if [[ "${CI_BRANCH}" != "issue/2439-sem-deploy2" ]] [[ ! "${CI_TAG:-}" =~ promote-.* ]]; then
+if [[ "${CI_BRANCH}" != "issue/2439-sem-deploy2" ]] && [[ ! "${CI_TAG:-}" =~ promote-.* ]]; then
     EXPORT CI_DO_DEPLOYMENT=false
 fi
 
