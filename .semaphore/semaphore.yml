@@ -1,12 +1,14 @@
 version: v1.0
-name: Build and test
+name: Build, test & deploy
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
 blocks:
-  - name: 'Build&Test'
+  - name: 'Build, test & deploy'
     task:
+      secrets:
+        - name: GCP
       prologue:
         commands:
           - checkout
@@ -34,21 +36,21 @@ blocks:
               fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
-            - echo "HOST_UID=$(id -u)" >> .env
-            - echo "HOST_GID=$(id -g)" >> .env
-            - |-
-              if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
-              curl https://sdk.cloud.google.com | bash > /dev/null; fi
             - ./ci/build.sh
-            - cd backend
-            - cache store lein-deps-$(checksum project.clj) ~/.m2
-            - cache store lein-$(checksum `which lein`) ~/.lein
-            - cd ../client/
-            - cache store client-npm-deps-$(checksum package.json) ./node_modules
+            - ./ci/prepare_deploy.sh
+            - ./ci/deploy2.sh
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
       epilogue:
+        on_pass:
+          commands:
+            - cd backend
+            - cache store lein-deps-$(checksum project.clj) ~/.m2
+            - cache store lein-$(checksum `which lein`) ~/.lein
+            - cd ../client/
+            - cache store client-npm-deps-$(checksum package-lock.json) ./node_modules
+            - cd ..
         on_fail:
           commands:
             - >-
