@@ -83,7 +83,7 @@ export const columnSelectOptions = (intl, columns) => {
     });
   }
   if (collectionSize(columns) > 0 && datasetHasQuestionGroups(columns)) {
-    const groups = columns.reduce(reducerGroup(intl.formatMessage({ id: 'form_metadata' }), intl.formatMessage({ id: 'transformations' })), {});
+    const groups = columns.reduce(reducerGroup('Metadata', 'Transformations'), {});
     const reducer2 = (accumulator, k) => {
       const columnsGroup = groups[k];
       accumulator.push({ label: k, options: extractColumnOptions(columnsGroup) });

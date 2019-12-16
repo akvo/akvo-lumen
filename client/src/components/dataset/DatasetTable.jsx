@@ -454,7 +454,7 @@ class DatasetTable extends Component {
 
     let cols;
     if (datasetHasQuestionGroups(columns)) {
-      const groups = columns.reduce(reducerGroup(this.props.intl.formatMessage({ id: 'form_metadata' }), this.props.intl.formatMessage({ id: 'transformations' })), {});
+      const groups = columns.reduce(reducerGroup('Metadata', 'Transformations'), {});
       const reducer2 = (accumulator, k, idx) => {
         const columnsGroup = groups[k];
         accumulator.push(
