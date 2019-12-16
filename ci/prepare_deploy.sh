@@ -18,7 +18,7 @@ if [[ "${CI_PULL_REQUEST}" != "false" ]]; then
     EXPORT CI_DO_DEPLOYMENT=false
 fi
 
-echo CI_DO_DEPLOYMENT
+echo $CI_DO_DEPLOYMENT
 
 if [ "$CI_DO_DEPLOYMENT" = true ]; then
     exit 0
