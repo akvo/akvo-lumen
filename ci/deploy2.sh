@@ -6,24 +6,9 @@ function log {
     echo "$(date +"%T") - INFO - $*"
 }
 
-export PROJECT_NAME=akvo-lumen
-
-if [[ "${CI_BRANCH}" != "issue/2439-sem-deploy2" ]]; then
+if [ "$CI_DO_DEPLOYMENT" = true ]; then
     exit 0
 fi
-
-log Making sure gcloud and kubectl are installed and up to date
-# gcloud components install kubectl
-# gcloud components update
-# gcloud version
-# which gcloud kubectl
-
-log Authentication with gcloud and kubectl
-gcloud auth activate-service-account --key-file=/home/semaphore/.secrets/gcp.json
-gcloud config set project akvo-lumen
-gcloud config set container/cluster europe-west1-d
-gcloud config set compute/zone europe-west1-d
-gcloud config set container/use_client_certificate False
 
 if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
@@ -31,9 +16,15 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
 else
     log Environement is test
     gcloud container clusters get-credentials test
+
+    log Pushing images
+    # gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
+    # gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
+    # gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
+    # gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-exporter
 fi
 
 log Finding blue/green state
 LIVE_COLOR=$(./ci/live-color.sh)
-log LIVE is "${LIVE_COLOR}"
+log LIVE is "${LIVE_COLOR}"1
 DARK_COLOR=$(./ci/helpers/dark-color.sh "$LIVE_COLOR")
