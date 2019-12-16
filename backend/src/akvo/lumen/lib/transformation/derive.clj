@@ -68,7 +68,7 @@
                                                            (filter
                                                             (fn [c]
                                                               (and (or (= column-ref1 (:groupName c))
-                                                                       (and (engine/is-derivated? (:columnName c))
+                                                                       (and (engine/is-derived? (:columnName c))
                                                                             (= column-ref1 "Transformations"))
                                                                        (and (contains? flow-metadata-questions (:columnName c))
                                                                             (= column-ref1 "Metadata")))
@@ -136,7 +136,7 @@
   (let [groups (group-by :groupName columns)
         flow-groups (not-empty (dissoc groups nil))
         no-flow-qg (get groups  nil)
-        tx-group (when-let [txs (not-empty (filter #(engine/is-derivated? (:columnName %)) no-flow-qg))]
+        tx-group (when-let [txs (not-empty (filter #(engine/is-derived? (:columnName %)) no-flow-qg))]
                    {"Transformations" txs })
         mt-group (when-let [mts (not-empty (filter #(contains? flow-metadata-questions (:columnName %)) no-flow-qg))]
                    {"Metadata" mts})]

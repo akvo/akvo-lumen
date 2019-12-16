@@ -108,13 +108,13 @@
   {:pre [(int? i)]}
   (format "d%s" i))
 
-(defn is-derivated? [column-name]
+(defn is-derived? [column-name]
   (boolean (re-find #"^d\d+$" column-name)))
 
 (defn next-column-index [columns]
   (let [nums (->> columns
                   (map #(get % "columnName"))
-                  (filter is-derivated?)
+                  (filter is-derived?)
                   (map #(subs % 1))
                   (map #(Long/parseLong %)))]
     (if (empty? nums)
