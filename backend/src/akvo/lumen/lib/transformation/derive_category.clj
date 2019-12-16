@@ -62,31 +62,30 @@
                                       source-column-title
                                       derivation-type
                                       mappings)]
-  (if (not-empty (filter #(= column-title (get % "title")) columns))
-    {:success? false
-     :message  (format "In this dataset there's already a column with this name: %s. Please choose another non existing name" column-title)}
-    (let [all-data (db.tx.derive/all-data tenant-conn {:table-name table-name})]
-      (jdbc/with-db-transaction [tenant-conn tenant-conn]
-        (db.tx.engine/add-column tenant-conn {:table-name      table-name
-                                              :column-type     "text"
-                                              :new-column-name new-column-name})
-        (doseq [i all-data]
-          (let [v (get i (keyword source-column-name))]
-            (db.tx.derive/set-cell-value tenant-conn
-                                         {:rnum        (:rnum i)
-                                          :value       (condp = derivation-type
-                                                         "text"   (find-text-cat (mappings-dict mappings) v uncategorized-value)
-                                                         "number" (find-number-cat mappings v uncategorized-value))
-                                          :column-name new-column-name
-                                          :table-name  table-name})))
-        {:success?      true
-         :execution-log [execution-log-message]
-         :columns       (conj columns {"title"      column-title
-                                       "type"       "text"
-                                       "sort"       nil
-                                       "hidden"     false
-                                       "direction"  nil
-                                       "columnName" new-column-name})})))))
+    (if-let [response-error (engine/column-title-error? column-title columns)]
+      response-error
+      (let [all-data (db.tx.derive/all-data tenant-conn {:table-name table-name})]
+        (jdbc/with-db-transaction [tenant-conn tenant-conn]
+          (db.tx.engine/add-column tenant-conn {:table-name      table-name
+                                                :column-type     "text"
+                                                :new-column-name new-column-name})
+          (doseq [i all-data]
+            (let [v (get i (keyword source-column-name))]
+              (db.tx.derive/set-cell-value tenant-conn
+                                           {:rnum        (:rnum i)
+                                            :value       (condp = derivation-type
+                                                           "text"   (find-text-cat (mappings-dict mappings) v uncategorized-value)
+                                                           "number" (find-number-cat mappings v uncategorized-value))
+                                            :column-name new-column-name
+                                            :table-name  table-name})))
+          {:success?      true
+           :execution-log [execution-log-message]
+           :columns       (conj columns {"title"      column-title
+                                         "type"       "text"
+                                         "sort"       nil
+                                         "hidden"     false
+                                         "direction"  nil
+                                         "columnName" new-column-name})})))))
 
 (defmethod engine/columns-used "core/derive-category"
   [applied-transformation columns]

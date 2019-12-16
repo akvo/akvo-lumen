@@ -15,9 +15,8 @@
 
 (defmethod engine/apply-operation "core/rename-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
-  (if (not-empty (filter #(= (new-col-title op-spec) (get % "title")) columns))
-    {:success? false
-     :message  (format "In this dataset there's already a column with this name: %s. Please choose another non existing name" (new-col-title op-spec))}
+  (if-let [response-error (engine/column-title-error? (new-col-title op-spec) columns)]
+    response-error
     (let [column-name      (col-name op-spec)
           column-idx       (engine/column-index columns column-name)
           new-column-title (new-col-title op-spec)]
