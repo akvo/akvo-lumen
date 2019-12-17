@@ -138,28 +138,33 @@
 
 (defn apply-merge-operation
   [conn table-name columns op-spec]
-  (let [source (get-in op-spec ["args" "source"])
-        target (get-in op-spec ["args" "target"])
-        source-dataset (get-source-dataset conn source)
-        source-table-name (:table-name source-dataset)
-        source-merge-columns (get-source-merge-columns source
-                                                       source-dataset)
+  (let [source                   (get-in op-spec ["args" "source"])
+        target                   (get-in op-spec ["args" "target"])
+        source-dataset           (get-source-dataset conn source)
+        source-table-name        (:table-name source-dataset)
+        source-merge-columns     (get-source-merge-columns source
+                                                           source-dataset)
         column-names-translation (merge-column-names-map columns
                                                          source-merge-columns)
-        target-merge-columns (get-target-merge-columns source-merge-columns
-                                                       column-names-translation)
-        data (fetch-data conn
-                         source-table-name
-                         target-merge-columns
-                         column-names-translation
-                         source)]
-    (add-columns conn table-name target-merge-columns)
-    (insert-merged-data conn table-name target data)
-    {:success? true
-     :execution-log [(format "Merged columns from %s into %s"
+        target-merge-columns     (get-target-merge-columns source-merge-columns
+                                                           column-names-translation)]
+    (if-let [errors (->> (map :title target-merge-columns)
+                         (filter #(engine/column-title-error? % columns))
+                         not-empty)]
+      {:success? false
+       :message  (map :message errors)}
+      (let [data (fetch-data conn
                              source-table-name
-                             table-name)]
-     :columns (into columns target-merge-columns)}))
+                             target-merge-columns
+                             column-names-translation
+                             source)]
+        (add-columns conn table-name target-merge-columns)
+        (insert-merged-data conn table-name target data)
+        {:success?      true
+         :execution-log [(format "Merged columns from %s into %s"
+                                 source-table-name
+                                 table-name)]
+         :columns       (into columns target-merge-columns)}))))
 
 (defmethod engine/apply-operation "core/merge-datasets"
   [{:keys [tenant-conn]} table-name columns op-spec]
