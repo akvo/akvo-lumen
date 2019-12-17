@@ -23,10 +23,26 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 23,
-      "iteration": 1571292674104,
+      "iteration": 1576584279017,
       "links": [],
       "panels": [
+        {
+          "content": "## All graphs have an $interval average\n\n\n\n",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 18,
+          "links": [],
+          "mode": "markdown",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
         {
           "aliasColors": {},
           "bars": false,
@@ -37,7 +53,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 0
+            "y": 2
           },
           "id": 2,
           "legend": {
@@ -66,7 +82,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_load_auth_data_bucket[10m])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_load_auth_data_bucket[$interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -124,7 +140,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 0
+            "y": 2
           },
           "id": 3,
           "legend": {
@@ -153,7 +169,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.999, sum(rate(app_load_auth_data_bucket[10m])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_load_auth_data_bucket[$interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -211,7 +227,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 9
+            "y": 11
           },
           "id": 5,
           "legend": {
@@ -241,7 +257,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate(app_load_auth_data_count[10m])) by (tenant)",
+              "expr": "sum (rate(app_load_auth_data_count[$interval])) by (tenant)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -299,7 +315,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 9
+            "y": 11
           },
           "id": 7,
           "legend": {
@@ -388,7 +404,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 17
+            "y": 19
           },
           "id": 10,
           "legend": {
@@ -417,7 +433,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_datasets_bucket[10m])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_datasets_bucket[$interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -475,7 +491,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 17
+            "y": 19
           },
           "id": 11,
           "legend": {
@@ -504,7 +520,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_datasets_bucket[10m])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_datasets_bucket[$interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -562,7 +578,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 26
+            "y": 28
           },
           "id": 12,
           "legend": {
@@ -591,7 +607,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_visualisations_bucket[10m])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_visualisations_bucket[$interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -649,7 +665,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 26
+            "y": 28
           },
           "id": 13,
           "legend": {
@@ -736,7 +752,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 35
+            "y": 37
           },
           "id": 14,
           "legend": {
@@ -823,7 +839,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 35
+            "y": 37
           },
           "id": 15,
           "legend": {
@@ -852,7 +868,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_dashboards_bucket[10m])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_dashboards_bucket[$interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -910,7 +926,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 44
+            "y": 46
           },
           "id": 16,
           "legend": {
@@ -939,7 +955,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_collections[10m])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_collections[$interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -997,7 +1013,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 44
+            "y": 46
           },
           "id": 9,
           "legend": {
@@ -1026,7 +1042,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "(sum(rate(app_load_auth_data_bucket{le=\"2.5\"}[10m])) by (tenant) + sum(rate(app_load_auth_data_bucket {le=\"7.5\"}[10m])) by (tenant)) / 2 / sum(rate(app_flow_check_permissions_count[10m])) by (tenant)",
+              "expr": "(sum(rate(app_load_auth_data_bucket{le=\"2.5\"}[$interval])) by (tenant) + sum(rate(app_load_auth_data_bucket {le=\"7.5\"}[$interval])) by (tenant)) / 2 / sum(rate(app_flow_check_permissions_count[$interval])) by (tenant)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{tenant}}",
@@ -1075,7 +1091,7 @@ data:
           }
         }
       ],
-      "refresh": "1m",
+      "refresh": false,
       "schemaVersion": 18,
       "style": "dark",
       "tags": [],
@@ -1084,8 +1100,9 @@ data:
           {
             "allValue": ".*",
             "current": {
-              "text": "blue",
-              "value": "blue"
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
             },
             "datasource": "prom",
             "definition": "label_values(color)",
@@ -1109,6 +1126,7 @@ data:
           {
             "allValue": ".*",
             "current": {
+              "selected": true,
               "text": "All",
               "value": "$__all"
             },
@@ -1130,12 +1148,85 @@ data:
             "tagsQuery": "",
             "type": "query",
             "useTags": false
+          },
+          {
+            "auto": true,
+            "auto_count": 20,
+            "auto_min": "2m",
+            "current": {
+              "text": "auto",
+              "value": "$__auto_interval_interval"
+            },
+            "hide": 2,
+            "label": null,
+            "name": "interval",
+            "options": [
+              {
+                "selected": true,
+                "text": "auto",
+                "value": "$__auto_interval_interval"
+              },
+              {
+                "selected": false,
+                "text": "1m",
+                "value": "1m"
+              },
+              {
+                "selected": false,
+                "text": "10m",
+                "value": "10m"
+              },
+              {
+                "selected": false,
+                "text": "30m",
+                "value": "30m"
+              },
+              {
+                "selected": false,
+                "text": "1h",
+                "value": "1h"
+              },
+              {
+                "selected": false,
+                "text": "6h",
+                "value": "6h"
+              },
+              {
+                "selected": false,
+                "text": "12h",
+                "value": "12h"
+              },
+              {
+                "selected": false,
+                "text": "1d",
+                "value": "1d"
+              },
+              {
+                "selected": false,
+                "text": "7d",
+                "value": "7d"
+              },
+              {
+                "selected": false,
+                "text": "14d",
+                "value": "14d"
+              },
+              {
+                "selected": false,
+                "text": "30d",
+                "value": "30d"
+              }
+            ],
+            "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+            "refresh": 2,
+            "skipUrlSync": false,
+            "type": "interval"
           }
         ]
       },
       "time": {
-        "from": "now-6h",
-        "to": "now"
+        "from": "2019-12-17T03:02:59.764Z",
+        "to": "2019-12-17T15:02:59.764Z"
       },
       "timepicker": {
         "refresh_intervals": [
@@ -1165,5 +1256,5 @@ data:
       "timezone": "",
       "title": "Lumen Flow API Authz",
       "uid": "1vKoX5oWk",
-      "version": 8
+      "version": 9
     }
