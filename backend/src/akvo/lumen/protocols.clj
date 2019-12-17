@@ -117,6 +117,9 @@
     [_ type* uuid])
   (allow? [_ d]))
 
+(defprotocol AuthServiceClient
+  (check-permissions [_ user-identity data]))
+
 (defprotocol AuthService2080
   (optimistic-allow? [_ d]
     "Provisional workaround for
