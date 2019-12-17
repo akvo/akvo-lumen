@@ -158,7 +158,7 @@
 
 (defn- flow-check-permissions [authz-service-client request collector tenant data]
   (prometheus/with-duration (registry/get collector :app/flow-check-permissions {"tenant" tenant})
-    (c.authz/check-permissions authz-service-client (user-identity request) data)))
+    (p/check-permissions authz-service-client (user-identity request) data)))
 
 (defn- load-auth-data [dss rasters tenant-conn authz-service-client request collector tenant]
   (prometheus/with-duration (registry/get collector :app/load-auth-data {"tenant" tenant})
@@ -220,13 +220,11 @@
 (defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager authz-service-client monitoring] :as opts}]
   (wrap-auth-datasets tenant-manager authz-service-client (:collector monitoring)))
 
-(s/def ::authz-service-client any?)
-
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.lib.auth/wrap-auth-datasets [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
-                   ::authz-service-client
+                   ::c.authz/authz-service-client
                    ::monitoring]))
 
 (defn ids
