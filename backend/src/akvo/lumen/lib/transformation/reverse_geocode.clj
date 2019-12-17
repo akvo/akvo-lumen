@@ -29,24 +29,27 @@
         geopointColumn (get target "geopointColumn")
         {:strs [mergeColumn geoshapeColumn]} source
         source-table-name (source-table-name tenant-conn source)]
-    (db.tx.engine/add-column tenant-conn {:column-type "text"
-                      :new-column-name column-name
-                      :table-name table-name})
-    (db.tx.reverse-geocode/reverse-geocode tenant-conn {:point-column (table-qualify table-name geopointColumn)
-                           :shape-column (table-qualify source-table-name geoshapeColumn)
-                           :source-column-name (table-qualify source-table-name mergeColumn)
-                           :source-table-name source-table-name
-                           :target-column-name column-name
-                           :target-table-name table-name})
-    {:success? true
-     :execution-log ["Geocoded"]
-     :columns (conj columns
-                    {"title" (get target "title")
-                     "type" "text"
-                     "sort" nil
-                     "hidden" false
-                     "direction" nil
-                     "columnName" column-name})}))
+    (if-let [response-error (engine/column-title-error? (get target "title") columns)]
+      response-error
+      (do
+        (db.tx.engine/add-column tenant-conn {:column-type "text"
+                                              :new-column-name column-name
+                                              :table-name table-name})
+        (db.tx.reverse-geocode/reverse-geocode tenant-conn {:point-column (table-qualify table-name geopointColumn)
+                                                            :shape-column (table-qualify source-table-name geoshapeColumn)
+                                                            :source-column-name (table-qualify source-table-name mergeColumn)
+                                                            :source-table-name source-table-name
+                                                            :target-column-name column-name
+                                                            :target-table-name table-name})
+        {:success? true
+         :execution-log ["Geocoded"]
+         :columns (conj columns
+                        {"title" (get target "title")
+                         "type" "text"
+                         "sort" nil
+                         "hidden" false
+                         "direction" nil
+                         "columnName" column-name})}))))
 
 (defmethod engine/columns-used "core/reverse-geocode"
   [applied-transformation columns]
