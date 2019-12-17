@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.auth
   (:require
    [akvo.commons.jwt :as jwt]
-   [akvo.lumen.component.flow :as c.flow]
+   [akvo.lumen.component.authz-service :as c.authz]
    [akvo.lumen.component.tenant-manager :as tenant-manager]
    [akvo.lumen.db.collection :as db.collection]
    [akvo.lumen.db.dashboard :as db.dashboard]
@@ -106,7 +106,7 @@
         (fn [ds]
           (let [source (:source ds)]
             (if (= "AKVO_FLOW" (get source "kind"))
-              (contains? permissions (c.flow/>api-model source))
+              (contains? permissions (c.authz/>api-model source))
               true))))
        (mapv :id)))
 
@@ -152,20 +152,24 @@
                                   :visualisation-ids auth-visualisations
                                   :dashboard-ids auth-dashboards})))
 
-(defn- flow-check-permissions [flow-api request collector tenant data]
-  (prometheus/with-duration (registry/get collector :app/flow-check-permissions {"tenant" tenant})
-    (c.flow/check-permissions (:url flow-api) (jwt/jwt-token request) data)))
+(defn- user-identity [request]
+  {:email (get-in request [:jwt-claims "email"])
+   :token (jwt/jwt-token request)})
 
-(defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
+(defn- flow-check-permissions [authz-service-client request collector tenant data]
+  (prometheus/with-duration (registry/get collector :app/flow-check-permissions {"tenant" tenant})
+    (c.authz/check-permissions authz-service-client (user-identity request) data)))
+
+(defn- load-auth-data [dss rasters tenant-conn authz-service-client request collector tenant]
   (prometheus/with-duration (registry/get collector :app/load-auth-data {"tenant" tenant})
     (let [permissions         (let [flow-data (->> (map :source dss)
                                                    (filter #(= "AKVO_FLOW" (get % "kind")))
-                                                   (map c.flow/>api-model)
+                                                   (map c.authz/>api-model)
                                                    (into #{})
                                                    vec)]
                                 (if (seq flow-data)
                                   (->> flow-data
-                                       (flow-check-permissions flow-api request collector tenant)
+                                       (flow-check-permissions authz-service-client request collector tenant)
                                        :body
                                        set)
                                   #{}))
@@ -192,19 +196,19 @@
 
 (defn wrap-auth-datasets
   "Add to the request an auth-service protocol impl using flow-api check_permissions"
-  [tenant-manager flow-api collector]
+  [tenant-manager authz-service-client collector]
   (fn [handler]
-    (fn [{:keys [jwt-claims tenant] :as request}]
+    (fn [{:keys [tenant] :as request}]
       (if-not (match-by-template-and-method? auth-calls request)
         (handler request)
         (let [tenant-conn    (p/connection tenant-manager tenant)
               dss            (db.dataset/all-datasets tenant-conn)
               rasters        (mapv :id (db.raster/all-rasters tenant-conn))
               auth-uuid-tree (if (match-by-jwt-family-name? request)
-                               (load-auth-data dss rasters tenant-conn flow-api request collector tenant)
+                               (load-auth-data dss rasters tenant-conn authz-service-client request collector tenant)
                                (do
                                  (future
-                                   (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
+                                   (load-auth-data dss rasters tenant-conn authz-service-client request collector tenant))
                                  {:rasters             rasters
                                   :auth-datasets       (mapv :id dss)
                                   :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
@@ -213,16 +217,16 @@
           (handler (assoc request
                           :auth-service (new-auth-service auth-uuid-tree))))))))
 
-(defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api monitoring] :as opts}]
-  (wrap-auth-datasets tenant-manager flow-api (:collector monitoring)))
+(defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager authz-service-client monitoring] :as opts}]
+  (wrap-auth-datasets tenant-manager authz-service-client (:collector monitoring)))
 
-(s/def ::flow-api ::c.flow/config)
+(s/def ::authz-service-client any?)
 
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.lib.auth/wrap-auth-datasets [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
-                   ::flow-api
+                   ::authz-service-client
                    ::monitoring]))
 
 (defn ids

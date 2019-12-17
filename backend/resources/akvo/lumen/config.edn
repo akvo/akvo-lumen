@@ -34,7 +34,7 @@
                                       :public-client #ig/ref :akvo.lumen.component.authentication/public-client}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                          :flow-api #ig/ref :akvo.lumen.component.flow/api
+                                          :authz-service-client #ig/ref :akvo.lumen.component.authz-service/http-service-client
                                           :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
 
  :akvo.lumen.auth/wrap-jwt-authentication {:public-client #ig/ref :akvo.lumen.component.authentication/public-client
@@ -59,6 +59,9 @@
                                  :internal-url "http://flow-api-internal"
                                  :api-headers #ig/ref :akvo.lumen.component.flow/api-headers
                                  :internal-api-headers #ig/ref :akvo.lumen.component.flow/internal-api-headers}
+
+ :akvo.lumen.component.authz-service/http-service-client {:url "http://akvo-authz-api-internal"
+                                                          :api-headers-fn #ig/ref :akvo.lumen.component.flow/internal-api-headers}
 
  :akvo.lumen.endpoint.dataset/dataset {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                        :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
