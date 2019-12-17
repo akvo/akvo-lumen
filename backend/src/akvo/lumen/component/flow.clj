@@ -33,28 +33,6 @@
 (defmethod ig/pre-init-spec ::internal-api-headers [_]
   empty?)
 
-(defn check-permissions
-  [flow-api-url token body]
-  (let [start (. System (nanoTime))
-        headers (api-headers {:token token})
-        res (try
-              (http.client/post*
-               (str flow-api-url "/check_permissions")
-               (merge http-client-req-defaults
-                      {:as :json
-                       :headers headers
-                       :throw-entire-message? true
-                       :unexceptional-status #(<= 200 % 299)
-                       :form-params body
-                       :content-type :json}))
-              (catch Exception e
-                (log/error e :fail :url flow-api-url :body body
-                           :response (ex-data e))))]
-    (let [elapsed (/ (double (- (. System (nanoTime)) start)) 1000000.0)]
-      (log/debug ::check-permissions :body body :res res
-                 :elapsed-time (str "Elapsed time: " elapsed " msecs")))
-    res))
-
 (defmethod ig/init-key ::api  [_ {:keys [url] :as opts}]
   opts)
 
@@ -67,9 +45,3 @@
 
 (defmethod ig/pre-init-spec ::api [_]
   ::config)
-
-(defn >api-model [ds-source]
-  (let [instance (get ds-source "instance")
-        survey (get ds-source "surveyId")]
-    {:instance_id instance
-     :survey_id survey}))
