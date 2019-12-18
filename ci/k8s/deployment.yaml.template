@@ -16,7 +16,6 @@ spec:
         lumen-version: ${BUILD_HASH}
         app: lumen
         color: ${COLOR}
-        environment: ${ENVIRONMENT}
       annotations:
         prometheus.io/scrape: 'true'
     spec:
@@ -27,22 +26,18 @@ spec:
         - containerPort: 80
         resources:
           requests:
-            cpu: ${CLIENT_POD_CPU_REQUESTS}
-            memory: ${CLIENT_POD_MEM_REQUESTS}
+            cpu: "50m"
           limits:
-            cpu: ${CLIENT_POD_CPU_LIMITS}
-            memory: ${CLIENT_POD_MEM_LIMITS}
+            cpu: "1000m"
       - name: lumen-maps
         image: eu.gcr.io/akvo-lumen/lumen-maps:${BUILD_HASH}
         ports:
         - containerPort: 4000
         resources:
           requests:
-            cpu: ${MAPS_POD_CPU_REQUESTS}
-            memory: ${MAPS_POD_MEM_REQUESTS}
+            cpu: "50m"
           limits:
-            cpu: ${MAPS_POD_CPU_LIMITS}
-            memory: ${MAPS_POD_MEM_LIMITS}
+            cpu: "2000m"
         env:
         - name: LUMEN_ENCRYPTION_KEY
           valueFrom:
@@ -55,11 +50,9 @@ spec:
         - containerPort: 3001
         resources:
           requests:
-            cpu: ${EXPORTER_POD_CPU_REQUESTS}
-            memory: ${EXPORTER_POD_MEM_REQUESTS}
+            cpu: "50m"
           limits:
-            cpu: ${EXPORTER_POD_CPU_LIMITS}
-            memory: ${EXPORTER_POD_MEM_LIMITS}
+            cpu: "1000m"
         env:
         - name: SENTRY_DSN
           valueFrom:
@@ -85,11 +78,9 @@ spec:
         - containerPort: 3000
         resources:
           requests:
-            cpu: ${BACKEND_POD_CPU_REQUESTS}
-            memory: ${BACKEND_POD_MEM_REQUESTS}
+            cpu: "50m"
           limits:
-            cpu: ${BACKEND_POD_CPU_LIMITS}
-            memory: ${BACKEND_POD_MEM_LIMITS}
+            cpu: "4000m"
         env:
         - name: LUMEN_CONFORM_SPECS
           valueFrom:
