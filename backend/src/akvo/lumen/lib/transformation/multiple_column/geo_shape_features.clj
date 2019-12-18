@@ -12,7 +12,7 @@
 
 (defn columns-to-extract [columns selected-column extractImage]
   (let [columns   (filter :extract columns)
-        base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title)]
+        base-column (dissoc selected-column :multipleId :type :multipleType :columnName :title :groupName :groupId)]
     (map #(assoc base-column :title (:name %) :type (:type %) :internal-id (:id %)) columns)))
 
 (defn- extract-values
