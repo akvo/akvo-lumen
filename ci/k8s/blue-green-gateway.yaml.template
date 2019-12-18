@@ -7,6 +7,7 @@ spec:
     metadata:
       labels:
         run: lumen-blue-green-gateway
+        environment: ${ENVIRONMENT}
     spec:
       containers:
       - image: rosskukulinski/nginx-kubernetes-reload:v2.0.1
@@ -14,9 +15,10 @@ spec:
         name: gateway
         resources:
           requests:
-            cpu: "50m"
+            cpu: ${GW_POD_CPU_REQUESTS}
+            mem: ${GW_POD_MEM_REQUESTS}
           limits:
-            cpu: "1000m"
+            cpu: ${GW_POD_CPU_LIMITS}
         ports:
         - containerPort: 80
           protocol: TCP
