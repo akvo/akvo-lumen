@@ -12,6 +12,7 @@ function log {
 
 export PROJECT_NAME=akvo-lumen
 
+ENVIRONMENT=test
 if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
@@ -41,7 +42,6 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
 else
     log Environement is test
     gcloud container clusters get-credentials test
-    ENVIRONMENT=test
     BACKEND_POD_CPU_REQUESTS="100m"
     BACKEND_POD_CPU_LIMITS="200m"
     BACKEND_POD_MEM_REQUESTS="768Mi"
