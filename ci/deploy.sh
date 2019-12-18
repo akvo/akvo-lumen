@@ -62,6 +62,7 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
 else
     log Environment is test
     gcloud container clusters get-credentials test
+    ENVIRONMENT=test
     BACKEND_POD_CPU_REQUESTS="100m"
     BACKEND_POD_CPU_LIMITS="200m"
     BACKEND_POD_MEM_REQUESTS="768Mi"
