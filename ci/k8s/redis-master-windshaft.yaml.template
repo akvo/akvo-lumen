@@ -10,16 +10,17 @@ spec:
         run: redis
         role: master
         client: windshaft
+        environment: ${ENVIRONMENT}
     spec:
       containers:
       - name: master
         image: redis:3.2.9
         resources:
           requests:
-            cpu: "50m"
-            memory: 100Mi
+            cpu: ${REDIS_POD_CPU_REQUESTS}
+            memory: ${REDIS_POD_MEM_REQUESTS}
           limits:
-            cpu: "1000m"
+            cpu: ${REDIS_POD_CPU_LIMITS}
         ports:
         - containerPort: 6379
 ---
