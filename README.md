@@ -1,7 +1,7 @@
 # Akvo Lumen
 An open-source, easy to use data mashup, analysis and publishing platform.
 
-[![Build Status](https://travis-ci.org/akvo/akvo-lumen.svg?branch=develop)](https://travis-ci.org/akvo/akvo-lumen)
+[![Build Status](https://akvo.semaphoreci.com/badges/akvo-lumen.svg)](https://akvo.semaphoreci.com/projects/akvo-lumen)
 
 ## PM
 
