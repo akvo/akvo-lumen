@@ -23,7 +23,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "iteration": 1576589280035,
+      "iteration": 1576779127410,
       "links": [],
       "panels": [
         {
@@ -37,7 +37,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 2
+            "y": 0
           },
           "id": 2,
           "legend": {
@@ -58,6 +58,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -68,7 +69,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_load_auth_data_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_load_auth_data_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -128,7 +129,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 2
+            "y": 0
           },
           "id": 3,
           "legend": {
@@ -147,6 +148,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -157,7 +159,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_load_auth_data_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_load_auth_data_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -216,7 +218,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 11
+            "y": 9
           },
           "id": 5,
           "legend": {
@@ -236,6 +238,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -246,7 +249,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate(app_load_auth_data_count{color=~\"$color\"}[$__interval])) by (tenant)",
+              "expr": "sum (rate(app_load_auth_data_count{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (tenant)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -304,7 +307,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 11
+            "y": 9
           },
           "id": 7,
           "legend": {
@@ -324,6 +327,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -334,7 +338,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(app_load_auth_data_count{color=~\"$color\"}) by (tenant)",
+              "expr": "sum(app_load_auth_data_count{color=~\"$color\", tenant=~\"$tenant\"}) by (tenant)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -393,7 +397,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 19
+            "y": 17
           },
           "id": 19,
           "legend": {
@@ -412,6 +416,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -422,7 +427,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -481,7 +486,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 19
+            "y": 17
           },
           "id": 11,
           "legend": {
@@ -500,6 +505,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -510,7 +516,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -569,7 +575,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 28
+            "y": 26
           },
           "id": 10,
           "legend": {
@@ -588,6 +594,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -598,7 +605,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_datasets_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_datasets_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -657,7 +664,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 28
+            "y": 26
           },
           "id": 20,
           "legend": {
@@ -676,6 +683,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -686,7 +694,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_datasets_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_datasets_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -745,7 +753,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 37
+            "y": 35
           },
           "id": 12,
           "legend": {
@@ -765,6 +773,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -775,7 +784,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_visualisations_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_visualisations_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -834,7 +843,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 37
+            "y": 35
           },
           "id": 13,
           "legend": {
@@ -853,6 +862,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -863,7 +873,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_visualisations_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_visualisations_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -922,7 +932,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 46
+            "y": 44
           },
           "id": 14,
           "legend": {
@@ -941,6 +951,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -951,7 +962,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_dashboards_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_dashboards_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -1010,7 +1021,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 46
+            "y": 44
           },
           "id": 15,
           "legend": {
@@ -1029,6 +1040,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -1039,7 +1051,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_dashboards_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_dashboards_bucket{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -1098,7 +1110,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 55
+            "y": 53
           },
           "id": 16,
           "legend": {
@@ -1117,6 +1129,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -1127,7 +1140,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_collections{color=~\"$color\"}[$__interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_collections{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -1186,7 +1199,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 55
+            "y": 53
           },
           "id": 9,
           "legend": {
@@ -1205,6 +1218,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {},
           "percentage": false,
           "pointradius": 2,
           "points": false,
@@ -1215,7 +1229,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "(sum(rate(app_load_auth_data_bucket{le=\"2.5\",color=~\"$color\"}[$__interval])) by (tenant) + sum(rate(app_load_auth_data_bucket {le=\"7.5\",color=~\"$color\"}[$__interval])) by (tenant)) / 2 / sum(rate(app_flow_check_permissions_count{color=~\"$color\"}[$__interval])) by (tenant)",
+              "expr": "(sum(rate(app_load_auth_data_bucket{le=\"2.5\",color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (tenant) + sum(rate(app_load_auth_data_bucket {le=\"7.5\",color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (tenant)) / 2 / sum(rate(app_flow_check_permissions_count{color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (tenant)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
@@ -1264,7 +1278,7 @@ data:
           }
         }
       ],
-      "refresh": "1m",
+      "refresh": false,
       "schemaVersion": 18,
       "style": "dark",
       "tags": [],
@@ -1273,8 +1287,6 @@ data:
           {
             "allValue": ".*",
             "current": {
-              "selected": true,
-              "tags": [],
               "text": "All",
               "value": "$__all"
             },
@@ -1301,7 +1313,9 @@ data:
             "allValue": ".*",
             "current": {
               "text": "All",
-              "value": "$__all"
+              "value": [
+                "$__all"
+              ]
             },
             "datasource": "prom",
             "definition": "label_values(app_load_auth_data_bucket, tenant)",
@@ -1398,7 +1412,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
