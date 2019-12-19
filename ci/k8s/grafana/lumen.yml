@@ -27,23 +27,6 @@ data:
       "links": [],
       "panels": [
         {
-          "content": "## All graphs have an $interval average\n",
-          "gridPos": {
-            "h": 2,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "id": 25,
-          "links": [],
-          "mode": "markdown",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "",
-          "transparent": true,
-          "type": "text"
-        },
-        {
           "aliasColors": {},
           "bars": true,
           "dashLength": 10,
@@ -84,9 +67,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"/healthz\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[$interval])) by (path, method)",
+              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"/healthz\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (path, method)",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{method}} {{path}}",
               "refId": "A"
             }
@@ -173,10 +156,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(http_request_latency_seconds_bucket{run=\"lumen-blue-green\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[$interval])) by (le,path,method))",
+              "expr": "histogram_quantile(0.95, sum(rate(http_request_latency_seconds_bucket{run=\"lumen-blue-green\", statusClass=\"2XX\", color=~\"$color\", tenant=~\"$tenant\"}[$__interval])) by (le,path,method))",
               "format": "time_series",
               "hide": false,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{method}} - {{path}}",
               "refId": "A"
             }
@@ -260,10 +243,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"\", statusClass!=\"2XX\"}[$interval])) by (path, method)",
+              "expr": "sum(rate(http_requests_total{run=\"lumen-blue-green\", path!=\"\", statusClass!=\"2XX\"}[$__interval])) by (path, method)",
               "format": "time_series",
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{method}} {{path}}",
               "refId": "A"
             }
@@ -349,9 +332,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(kube_pod_container_status_restarts_total{pod=~\"lumen-[[color]].*\"}[$interval])) by (pod, container)",
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{pod=~\"lumen-[[color]].*\"}[$__interval])) by (pod, container)",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{pod}} - {{container}} ",
               "refId": "A"
             }
@@ -437,27 +420,27 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$interval])) by (container_name, pod_name)\n",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$__interval])) by (container_name, pod_name)\n",
               "format": "time_series",
               "hide": false,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{pod_name}} - {{container_name}}",
               "refId": "A"
             },
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$interval])) by (instance, pod_name)\n",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$__interval])) by (instance, pod_name)\n",
               "format": "time_series",
               "hide": true,
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{instance}} - {{pod_name}}",
               "refId": "B"
             },
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",container_name!=\"POD\"}[$interval])) by (instance)\n",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",container_name!=\"POD\"}[$__interval])) by (instance)\n",
               "format": "time_series",
               "hide": true,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{instance}}",
               "refId": "C"
             }
@@ -568,7 +551,7 @@ data:
               "format": "time_series",
               "hide": false,
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{__name__}}",
               "refId": "B"
             }
@@ -658,7 +641,7 @@ data:
               "expr": "{__name__=~\"[[tenant]].*Usage\", run=\"lumen-blue-green\", color=~\"$color\", quantile=\"0.95\"}",
               "format": "time_series",
               "hide": false,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{__name__}}",
               "refId": "B"
             }
@@ -750,7 +733,7 @@ data:
               "expr": "{__name__=~\"[[tenant]].*Wait\", run=\"lumen-blue-green\", color=~\"$color\", quantile=\"0.95\"}",
               "format": "time_series",
               "hide": false,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{__name__}}",
               "refId": "B"
             },
@@ -759,7 +742,7 @@ data:
               "format": "time_series",
               "hide": true,
               "instant": false,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "",
               "refId": "C"
             }
@@ -851,7 +834,7 @@ data:
               "expr": "{__name__=~\"[[tenant]].*ConnectionCreation\", run=\"lumen-blue-green\", color=~\"$color\", quantile=\"0.95\"}",
               "format": "time_series",
               "hide": false,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{__name__}}",
               "refId": "B"
             }
@@ -951,25 +934,25 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$interval]))",
+              "expr": "sum(rate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$__interval]))",
               "format": "time_series",
               "hide": false,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "rate",
               "refId": "A"
             },
             {
-              "expr": "sum(irate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$interval]))",
+              "expr": "sum(irate(jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$__interval]))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "irate",
               "refId": "C"
             },
             {
-              "expr": "\nmax_over_time( sum(( irate( jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$interval] ) ))[$__interval:45s] )",
+              "expr": "\nmax_over_time( sum(( irate( jvm_gc_collection_seconds_sum{run=\"lumen-blue-green\", color=~\"${color}\"}[$__interval] ) ))[$__interval:45s] )",
               "format": "time_series",
               "hide": true,
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "irate2",
               "refId": "B"
             }
@@ -1057,7 +1040,7 @@ data:
               "expr": "jvm_memory_bytes_used{run=\"lumen-blue-green\", color=~\"${color}\"}",
               "format": "time_series",
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{area}} memory [{{kubernetes_pod_name}}]",
               "refId": "B"
             },
@@ -1065,7 +1048,7 @@ data:
               "expr": "jvm_memory_bytes_max{run=\"lumen-blue-green\", color=~\"${color}\"}",
               "format": "time_series",
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "max {{area}} memory [{{kubernetes_pod_name}}]",
               "refId": "C"
             }

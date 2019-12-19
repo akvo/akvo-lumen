@@ -27,23 +27,6 @@ data:
       "links": [],
       "panels": [
         {
-          "content": "## All graphs have an $interval average\n\n\n\n",
-          "gridPos": {
-            "h": 2,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "id": 18,
-          "links": [],
-          "mode": "markdown",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "",
-          "transparent": true,
-          "type": "text"
-        },
-        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -85,9 +68,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_load_auth_data_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_load_auth_data_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -174,9 +157,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_load_auth_data_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_load_auth_data_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -263,9 +246,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate(app_load_auth_data_count{color=~\"$color\"}[$interval])) by (tenant)",
+              "expr": "sum (rate(app_load_auth_data_count{color=~\"$color\"}[$__interval])) by (tenant)",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -354,7 +337,7 @@ data:
               "expr": "sum(app_load_auth_data_count{color=~\"$color\"}) by (tenant)",
               "format": "time_series",
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -439,9 +422,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -527,9 +510,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_flow_check_permissions_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -615,9 +598,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_datasets_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_datasets_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -703,9 +686,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_datasets_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_datasets_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -792,9 +775,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_visualisations_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_visualisations_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -880,9 +863,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_visualisations_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_visualisations_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -968,9 +951,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_dashboards_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_dashboards_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -1056,9 +1039,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(app_auth_dashboards_bucket{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.99, sum(rate(app_auth_dashboards_bucket{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -1144,9 +1127,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(app_auth_collections{color=~\"$color\"}[$interval])) by (le,tenant))",
+              "expr": "histogram_quantile(0.95, sum(rate(app_auth_collections{color=~\"$color\"}[$__interval])) by (le,tenant))",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
@@ -1232,9 +1215,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "(sum(rate(app_load_auth_data_bucket{le=\"2.5\",color=~\"$color\"}[$interval])) by (tenant) + sum(rate(app_load_auth_data_bucket {le=\"7.5\",color=~\"$color\"}[$interval])) by (tenant)) / 2 / sum(rate(app_flow_check_permissions_count{color=~\"$color\"}[$interval])) by (tenant)",
+              "expr": "(sum(rate(app_load_auth_data_bucket{le=\"2.5\",color=~\"$color\"}[$__interval])) by (tenant) + sum(rate(app_load_auth_data_bucket {le=\"7.5\",color=~\"$color\"}[$__interval])) by (tenant)) / 2 / sum(rate(app_flow_check_permissions_count{color=~\"$color\"}[$__interval])) by (tenant)",
               "format": "time_series",
-              "intervalFactor": 1,
+              "intervalFactor": 2,
               "legendFormat": "{{tenant}}",
               "refId": "A"
             }
