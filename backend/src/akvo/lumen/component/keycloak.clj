@@ -415,7 +415,7 @@
   (if-let [paths (get-paths jwt-paths-cache user-id iat)]
     paths
     (when-let [paths (->>
-                      (user-groups (merge http-client-req-defaults req-opts) api-root user-id)
+                      (user-groups (merge http-client-req-defaults @req-opts) api-root user-id)
                       (reduce (fn [paths {:strs [path]}]
                                 (conj paths (subs path 12)))
                               #{}))]
@@ -429,7 +429,7 @@
   (if-let [user-id (get-user-id user-id-cache email)]
     user-id
     (when-let [user-id (-> (http.client/get* (format "%s/users/?email=%s" api-root email) (merge http-client-req-defaults
-                                                                                                 req-opts))
+                                                                                                 @req-opts))
                            :body
                            json/decode
                            (active-user email))]
@@ -450,10 +450,9 @@
   remove the leading /akvo/lumen and return paths as demo/admin."
   [{:keys [api-root user-id-cache jwt-paths-cache paths-cache-seconds connection-manager monitoring] :as keycloak} {:keys [email iat]}]
   (prometheus/with-duration (registry/get (:collector monitoring) :app/auth-allowed-paths {})
-    (when-let [headers (request-headers keycloak)]
-      (let [req-opts {:headers headers :connection-manager connection-manager}]
-        (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
-          (lookup-paths req-opts api-root user-id jwt-paths-cache paths-cache-seconds iat))))))
+    (let [req-opts (delay {:headers (request-headers keycloak) :connection-manager connection-manager})]
+      (when-let [user-id (lookup-user-id req-opts api-root user-id-cache email)]
+        (lookup-paths req-opts api-root user-id jwt-paths-cache paths-cache-seconds iat)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
