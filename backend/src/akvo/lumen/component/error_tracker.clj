@@ -12,13 +12,13 @@
 (defn sentry-error-tracker [dsn]
   (SentryErrorTracker. dsn))
 
-(defrecord LocalErrorTracker [])
+(defrecord LocalErrorTracker [store])
 
-(defn local-error-tracker [_]
-  (->LocalErrorTracker))
+(defn local-error-tracker []
+  (->LocalErrorTracker (atom [])))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
-  (local-error-tracker nil))
+  (local-error-tracker))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod [_]
   empty?)
@@ -48,6 +48,7 @@
 
   LocalErrorTracker
   (track [this error]
+    (swap! (:store this) conj (event-map error))
     (println "LocalErrorTracker:" (.getMessage error))))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry  [_ {:keys [dsn opts]}]

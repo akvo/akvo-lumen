@@ -27,7 +27,7 @@
 
 (defn authorize
   [handler request opts]
-  (api-authorization handler request (select-keys opts [:authorizer])))
+  (api-authorization handler request (:authorizer opts)))
 
 (defmethod ig/init-key :akvo.lumen.auth/wrap-authorization
   [_ opts]
