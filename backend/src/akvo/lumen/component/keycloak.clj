@@ -3,8 +3,9 @@
    More info can be found in the Keycloak integration doc spec."
   (:require
    [akvo.commons.jwt :as jwt]
-   [akvo.lumen.http.client :as http.client]
    [akvo.lumen.component.authentication :as authentication]
+   [akvo.lumen.component.error-tracker :as error-tracker]
+   [akvo.lumen.http.client :as http.client]
    [akvo.lumen.lib :as lib]
    [akvo.lumen.monitoring :as monitoring]
    [akvo.lumen.protocols :as p]
@@ -534,13 +535,14 @@
                        :paths-cache-seconds paths-cache-seconds
                        :user-id-cache (atom (cache/lru-cache-factory {} :threshold max-user-ids-cache))}))
 
-(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials max-user-ids-cache monitoring paths-cache-seconds realm url issuer-suffix-url] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.keycloak/authorization-service  [_ {:keys [credentials max-user-ids-cache monitoring paths-cache-seconds realm url issuer-suffix-url error-tracker] :as opts}]
   (log/debug "Starting keycloak")
   (assoc (init-keycloak {:url url
                          :credentials credentials
                          :max-user-ids-cache max-user-ids-cache
                          :paths-cache-seconds paths-cache-seconds
                          :realm realm})
+         :error-tracker error-tracker
          :connection-manager (http.client/new-connection-manager {:timeout 10 :threads 10 :default-per-route 10})
          :openid-config (fetch-openid-configuration (format "%s%s" url issuer-suffix-url) {})
          :monitoring monitoring))
@@ -567,6 +569,7 @@
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
 (s/def ::config (s/keys :req-un [::authentication/url
                                  ::authentication/issuer-suffix-url
+                                 ::error-tracker/error-tracker
                                  ::realm ::credentials ::max-user-ids-cache ::paths-cache-seconds ::monitoring]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.keycloak/authorization-service [_]
