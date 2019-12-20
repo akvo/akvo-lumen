@@ -11,7 +11,7 @@
             [dev :as dev]
             [integrant.repl.state :as state :refer (system)]))
 
-(def error-tracker (et/local-error-tracker nil))
+(def error-tracker (et/local-error-tracker))
 
 (defn t1-conn []
   (when-not system
