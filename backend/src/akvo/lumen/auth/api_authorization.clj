@@ -17,7 +17,7 @@
 
 
 (defn api-authorization
-  [handler {:keys [jwt-claims tenant] :as request} {:keys [authorizer]}]
+  [handler {:keys [jwt-claims tenant] :as request} {:keys [error-tracker] :as authorizer}]
   (try
     (let [allowed-paths (delay (p/allowed-paths authorizer {:email (get jwt-claims "email")
                                                             :iat   (get jwt-claims "iat")}))]
@@ -38,7 +38,7 @@
           (wrap-info e u/internal-server-error))))))
 
 (defn wrap-api-authorization
-  [authorizer]
+  [deps]
   (fn [handler]
     (fn [request]
-      (api-authorization handler request {:authorizer authorizer}))))
+      (api-authorization handler request {:authorizer deps}))))
