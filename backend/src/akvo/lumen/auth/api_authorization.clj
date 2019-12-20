@@ -31,11 +31,13 @@
                                 u/not-authorized)
         :else u/not-authorized))
     (catch Exception e
-      (let [wrap-info (fn [e v] (log/info (.getMessage e)) v)]
+      (let [wrap-error (fn [ex v]
+                        (log/error ex)
+                        (p/track error-tracker ex))]
         (case (-> e ex-data :response-code)
-          503 (wrap-info e u/service-unavailable)
+          503 (wrap-error e u/service-unavailable)
           401 u/not-authorized
-          (wrap-info e u/internal-server-error))))))
+          (wrap-error e u/internal-server-error))))))
 
 (defn wrap-api-authorization
   [deps]
