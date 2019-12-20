@@ -196,6 +196,7 @@
                                                        :max-user-ids-cache 1000
                                                        :paths-cache-seconds #duct/env [ "LUMEN_PATHS_CACHE_SECONDS" :or 60]
                                                        :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}
+                                                       :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
                                                        :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
                                                                      :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
 
