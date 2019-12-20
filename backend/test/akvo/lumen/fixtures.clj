@@ -67,7 +67,7 @@
 (defn error-tracker-fixture
   "Returns a fixture that binds a local error tracker to *error-tracker*"
   [f]
-  (binding [*error-tracker* (local-error-tracker {})]
+  (binding [*error-tracker* (local-error-tracker)]
     (f)))
 
 (def ^:dynamic *caddisfly*)
