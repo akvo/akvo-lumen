@@ -1,100 +1,70 @@
 /* eslint-disable no-underscore-dangle */
-import Keycloak from 'keycloak-js';
 import Raven from 'raven-js';
-import queryString from 'querystringify';
-
+import { UserManager, WebStorageStateStore } from 'oidc-client';
 import { get } from './api';
 
-let keycloak = null;
+let userManager = null;
 let accessToken = null;
 
+export function logout() {
+  userManager.signoutRedirect();
+}
+
+export function signinRedirect() {
+  userManager.signinRedirect();
+}
+
 export function token() {
-  if (!keycloak) {
+  if (!userManager) {
     return Promise.resolve(accessToken);
   }
-
-  return new Promise(resolve =>
-    keycloak
-      .updateToken()
-      .success(() => resolve(keycloak.token))
-      .error(() => {
-        // Redirect to login page
-        keycloak.login();
-      })
-  );
+  return new Promise((resolve) => {
+    userManager.getUser().then((user) => {
+      // userManager.authorize();
+      if (user == null) {
+        userManager.signinRedirect();
+      } else {
+        resolve(user.id_token);
+      }
+    });
+  });
 }
 
-export function refreshToken() {
-  if (keycloak == null) {
-    throw new Error('Keycloak not initialized');
-  }
-  return keycloak.refreshToken;
+export function initService(env) {
+  const {
+    clientId,
+    domain,
+    endpoints,
+  } = env;
+  const { issuer, authorization, userinfo, endSession, jwksUri } = endpoints;
+  const settings = {
+    userStore: new WebStorageStateStore({ store: window.localStorage }),
+    authority: domain,
+    client_id: clientId,
+    redirect_uri: `${location.protocol}//${location.host}/auth_callback`,
+    response_type: 'id_token token',
+    scope: 'openid profile email',
+    post_logout_redirect_uri: `${location.protocol}//${location.host}`,
+    filterProtocolClaims: true,
+    metadata: {
+      issuer,
+      authorization_endpoint: authorization,
+      userinfo_endpoint: userinfo,
+      end_session_endpoint: `${endSession}?returnTo=${location.protocol}//${location.host}`,
+      jwks_uri: jwksUri,
+    },
+  };
+  return new UserManager(settings);
 }
 
-export function init() {
-  if (keycloak != null) {
-    throw new Error('Keycloak already initialized');
+export function init(env, s) {
+  const { tenant, sentryDSN } = env;
+  if (process.env.NODE_ENV === 'production') {
+    Raven.config(sentryDSN).install();
+    Raven.setExtraContext({ tenant });
   }
-  return get('/env')
-    .then(
-      ({
-        body: {
-          keycloakClient,
-          keycloakURL,
-          tenant,
-          sentryDSN,
-          flowApiUrl,
-          piwikSiteId,
-          exporterUrl,
-        },
-      }) =>
-        new Promise((resolve, reject) => {
-          if (process.env.NODE_ENV === 'production') {
-            Raven.config(sentryDSN).install();
-            Raven.setExtraContext({ tenant });
-          }
-          keycloak = new Keycloak({
-            url: keycloakURL,
-            realm: 'akvo',
-            clientId: keycloakClient,
-          });
-
-          const queryParams = queryString.parse(location.search);
-
-          keycloak
-            .init({
-              onLoad: 'login-required',
-              checkLoginIframe: false,
-              token: queryParams.token,
-              refreshToken: queryParams.refresh_token,
-            })
-            .success((authenticated) => {
-              if (authenticated) {
-                keycloak
-                  .loadUserProfile()
-                  .success((profile) => {
-                    if (process.env.NODE_ENV === 'production') {
-                      Raven.setUserContext(profile);
-                    }
-                    resolve({
-                      profile: Object.assign({}, profile, {
-                        admin: keycloak.hasRealmRole(`akvo:lumen:${tenant}:admin`),
-                      }),
-                      env: { flowApiUrl, keycloakURL, piwikSiteId, exporterUrl },
-                    });
-                  })
-                  .error(() => {
-                    reject(new Error('Could not load user profile'));
-                  });
-              } else {
-                reject(new Error('Could not authenticate'));
-              }
-            })
-            .error(() => {
-              reject(new Error('Login attempt failed'));
-            });
-        })
-    );
+  userManager = s;
+  return userManager.getUser();
 }
 
 export function initPublic() {

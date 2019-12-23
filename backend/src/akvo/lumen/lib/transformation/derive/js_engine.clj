@@ -1,10 +1,13 @@
 (ns akvo.lumen.lib.transformation.derive.js-engine
-  (:require [akvo.lumen.lib.transformation.engine :as engine]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.set :as set]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str]
-            [clojure.tools.logging :as log])
+  (:require
+   [akvo.lumen.lib.transformation.engine :as engine]
+   [clojure.edn :as edn]
+   [clojure.java.jdbc :as jdbc]
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [clojure.string :as string]
+   [clojure.tools.logging :as log])
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
            [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]
            [java.lang Double]))
@@ -17,14 +20,14 @@
 (defn- column-function [fun code]
   (format "var %s = function(row) {  return %s; }" fun code))
 
-(defn- valid-type? [value type]
+(defn- valid-type? [value t]
   (when-not (nil? value)
-    (condp = type
+    (condp = t
       "number" (if (and (number? value)
                         (if (float? value)
                           (Double/isFinite value)
                           true))
-                 (Double/parseDouble (format "%.3f" value))
+                 (Double/parseDouble (format "%.3f" (double value)))
                  (throw-invalid-return-type value))
       "text" (if (string? value)
                value
@@ -49,7 +52,7 @@
   (doseq [function ["print" "load" "loadWithNewGlobal" "exit" "quit" "eval"]]
     (.remove bindings function)))
 
-(defn- column-name->column-title
+(defn column-name->column-title
   "replace column-name by column-title"
   [columns]
   (let [key-translation (->> columns
@@ -60,15 +63,31 @@
 
 (defn- js-factory [] (NashornScriptEngineFactory.))
 
+(defn nashorn-depreciated? []
+  (>= (-> (System/getProperty "java.version")
+          (string/split #"\.")
+          first
+          edn/read-string)
+      11))
+
+(defn script-engine [factory]
+  (if (nashorn-depreciated?)
+    (.getScriptEngine factory
+                      (into-array String ["--no-deprecation-warning"])
+                      nil class-filter)
+    (.getScriptEngine factory class-filter)))
+
 (defn- js-engine
   ([]
    (js-engine (js-factory)))
   ([factory]
-   (let [engine (.getScriptEngine factory class-filter)]
+   (let [engine (script-engine factory)]
      (remove-bindings (.getBindings engine ScriptContext/ENGINE_SCOPE))
      engine)))
 
-(defn- eval*
+(defn eval*
+  ([^String code]
+   (eval* (js-engine) code))
   ([^ScriptEngine engine ^String code]
    (.eval ^ScriptEngine engine ^String code)))
 
@@ -76,9 +95,8 @@
   (.invokeFunction engine fun (object-array args)))
 
 (defn row-transform-fn
-  [{:keys [columns code column-type]}]
-  (let [adapter (column-name->column-title columns)
-        engine (js-engine)
+  [{:keys [adapter code column-type]}]
+  (let [engine (js-engine)
         fun-name "deriveColumn"]
     (eval* engine (column-function fun-name code))
     (fn [row]

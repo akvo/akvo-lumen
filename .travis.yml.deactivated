@@ -19,7 +19,7 @@ before_install:
 - if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then rm -rf "${HOME}/google-cloud-sdk";
   curl https://sdk.cloud.google.com | bash > /dev/null; fi
 script:
-- "./ci/build.sh && ./ci/deploy.sh"
+- "./ci/build.sh && ./ci/prepare_deploy_legacy.sh"
 after_failure:
 - PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f docker-compose.yml -f
   docker-compose.ci.yml logs --no-color
@@ -27,6 +27,10 @@ env:
   global:
   - PATH=${HOME}/google-cloud-sdk/bin:$PATH
   - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+  - CI_BRANCH=${TRAVIS_BRANCH}
+  - CI_COMMIT=${TRAVIS_COMMIT}
+  - CI_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+  - CI_TAG=${TRAVIS_TAG}
 notifications:
   slack:
     rooms:

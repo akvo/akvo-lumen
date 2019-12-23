@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 
-import SimpleBarChart from './SimpleBarChart';
-import StackedBarChart from './StackedBarChart';
-import SimpleBarChartHorizontal from './SimpleBarChartHorizontal';
-import StackedBarChartHorizontal from './StackedBarChartHorizontal';
+import SimpleBarChart from './bar/SimpleBarChart';
+import StackedBarChart from './bar/StackedBarChart';
+import SimpleBarChartHorizontal from './bar/SimpleBarChartHorizontal';
+import StackedBarChartHorizontal from './bar/StackedBarChartHorizontal';
 
 export default class BarChart extends Component {
 

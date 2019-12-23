@@ -4,6 +4,7 @@
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
+            [akvo.lumen.config :as config]
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.postgres]
@@ -74,21 +75,13 @@
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
-  [tenant-conn error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind]}]
-  (let [spec {"source" {"kind" kind
-                        "hasColumnHeaders" (boolean has-column-headers?)
-                        "data" data}}
-        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn {} error-tracker dataset-id data-source-id spec)]
+  [tenant-conn caddisfly error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind with-job?]}]
+  (let [spec {"source" (with-meta {"kind" kind
+                                   "hasColumnHeaders" (boolean has-column-headers?)}
+                         {:data data})}
+        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn caddisfly {} error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (dh/with-retry {:retry-if (fn [v e] (not v))
-                    :max-retries 20
-                    :delay-ms 100}
-      (let [job (datasource-job-execution-by-id tenant-conn {:id updateId})
-            status (:status job)]
-        (when (not= "PENDING" status)
-          (if (= "OK" status)
-            (:dataset_id (dataset-id-by-job-execution-id tenant-conn {:id updateId}))
-            updateId))))))
+    (retry-job-execution tenant-conn updateId with-job?)))
 
 (defn rand-bol []
   (if (= 0 (rand-int 2)) false true))
@@ -121,22 +114,13 @@
 
 ;; system utils
 
-(defn read-config
-  [resource-path]
-  (duct/read-config (io/resource resource-path)))
+(derive :akvo.lumen.component.error-tracker/config-test :akvo.lumen.component.error-tracker/config)
 
-(derive :akvo.lumen.component.emailer/dev-emailer
-        :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.component.error-tracker/void :akvo.lumen.component.error-tracker/client)
 
-(derive :akvo.lumen.component.caddisfly/local
-        :akvo.lumen.component.caddisfly/caddisfly)
-
-(derive :akvo.lumen.component.error-tracker/config-test
-        :akvo.lumen.component.error-tracker/config)
-
-(derive :akvo.lumen.component.error-tracker/void
-        :akvo.lumen.component.error-tracker/client)
-
+(derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
+(derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 
 
 (defn dissoc-prod-components [c more-ks]
@@ -149,10 +133,6 @@
         ks (if more-ks (apply conj ks more-ks) ks)]
     (apply dissoc c ks)))
 
-
-(defn prep [& paths]
-  (ig/prep (apply duct/merge-configs (map read-config (filter some? paths)))))
-
 (defn halt-system [system]
   (when system (ig/halt! system)))
 
@@ -160,7 +140,7 @@
   ([]
    (start-config nil nil))
   ([edn-config more-ks]
-   (let [c (dissoc-prod-components (prep "akvo/lumen/config.edn" "test.edn" edn-config)
+   (let [c (dissoc-prod-components (config/prep ["akvo/lumen/config.edn" "test.edn" edn-config])
                                    more-ks)]
      (ig/load-namespaces c)
      c)))
@@ -192,7 +172,7 @@
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
 
-(defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [keycloak]}]
+(defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [public-client]}]
   (fn [handler]
     (fn [req]
       (handler (assoc req :jwt-claims {"typ" "Bearer"

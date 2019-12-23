@@ -6,14 +6,12 @@
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.monitoring :as monitoring]
             [akvo.lumen.protocols :as p]
+            [akvo.lumen.db.tenant-manager :as db.tenant-manager]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]
             [integrant.core :as ig])
   (:import [com.zaxxer.hikari HikariConfig HikariDataSource]))
-
-(hugsql/def-db-fns "akvo/lumen/component/tenant_manager.sql")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Middleware
@@ -69,7 +67,7 @@
     (assoc m k v)))
 
 (defn load-tenant [db encryption-key dropwizard-registry tenants label]
-  (if-let [{:keys [db_uri label]} (tenant-by-id (:spec db)
+  (if-let [{:keys [db_uri label]} (db.tenant-manager/tenant-by-id (:spec db)
                                                 {:label label})]
     (let [decrypted-db-uri (hikaricp/ssl-url (aes/decrypt encryption-key db_uri))]
       (swap! tenants
@@ -98,13 +96,13 @@
 
   p/TenantAdmin
   (current-plan [{:keys [db]} label]
-    (:tier (select-current-plan (:spec db) {:label label}))))
+    (:tier (db.tenant-manager/select-current-plan (:spec db) {:label label}))))
 
 (defn- tenant-manager [options]
   (map->TenantManager options))
 
-(defmethod ig/init-key :akvo.lumen.component.tenant-manager/tenant-manager [_ {:keys [db encryption-key dropwizard-registry] :as opts}]
-  (let [this (tenant-manager opts)]
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager/tenant-manager [_ {:keys [db encryption-key dropwizard-registry data] :as opts}]
+  (let [this (tenant-manager (merge opts (select-keys data [:encryption-key])))]
     (if (:tenants this)
       this
       (assoc this :tenants (atom {})))))
@@ -122,11 +120,18 @@
 (s/def ::encryption-key string?)
 (s/def ::dropwizard-registry ::monitoring/metric-registry)
 (s/def ::tenant-manager (partial instance? TenantManager))
+(s/def ::data (s/keys :req-un [::encryption-key]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.tenant-manager/tenant-manager [_]
   (s/keys :req-un [::db
-                   ::encryption-key
+                   ::data
                    ::dropwizard-registry]))
+
+(defmethod ig/init-key :akvo.lumen.component.tenant-manager/data [_ {:keys [encryption-key] :as opts}]
+  opts)
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.tenant-manager/data [_]
+  ::data)
 
 (defmethod ig/init-key :akvo.lumen.component.tenant-manager/wrap-label-tenant  [_ opts]
   wrap-label-tenant)

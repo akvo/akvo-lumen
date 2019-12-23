@@ -1,4 +1,4 @@
-(defproject org.akvo/lumen "0.25.0-SNAPSHOT"
+(defproject org.akvo/lumen "0.27.0-SNAPSHOT"
   :description "Akvo Lumen backend"
   :url "https://github.com/akvo/akvo-lumen"
   :license {:name "GNU Affero General Public License 3.0"
@@ -11,11 +11,12 @@
                  [org.slf4j/jcl-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [org.slf4j/jul-to-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [cheshire "5.8.1" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [clj-http "3.10.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
+                 [clj-http "3.10.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime commons-io/commons-io]]
                  [clj-time "0.15.1"]
                  [com.layerware/hugsql "0.4.9"]
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
+                 [diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]
                  [duct/core "0.7.0" :exclusions [org.clojure/clojure]]
                  [duct/module.logging "0.4.0" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha com.stuartsierra/dependency]]
                  [duct/database.sql.hikaricp "0.4.0" :exclusions [org.clojure/spec.alpha org.slf4j/slf4j-nop org.clojure/clojure integrant org.clojure/core.specs.alpha]]
@@ -27,7 +28,7 @@
                  [org.akvo/commons "0.4.6" :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]]
                  [org.akvo/resumed "1.46.266acfa5bb52c9b484af19f0bcfbfacb60b97319"]
                  [org.apache.tika/tika-core "1.21"]
-                 [org.apache.tika/tika-parsers "1.21" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime]]
+                 [org.apache.tika/tika-parsers "1.21" :exclusions [org.slf4j/slf4j-api com.fasterxml.jackson.core/jackson-core org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime commons-io/commons-io]]
                  ;; explicit versions of commons deps used by tika-parsers and clj-http
                  [com.fasterxml.jackson.core/jackson-core "2.9.9"]
                  [org.apache.httpcomponents/httpcore "4.4.11"]
@@ -39,7 +40,7 @@
                  [org.clojure/java.jdbc "0.7.9"]
                  [org.immutant/web "2.1.10" :exclusions [ch.qos.logback/logback-classic]]
                  [org.postgresql/postgresql "42.2.5"]
-                 [ragtime/ragtime.jdbc "0.6.4"]
+                 [ragtime "0.7.2"]
                  [raven-clj "1.6.0-alpha3"]
                  [ring "1.7.1" :exclusions [ring/ring-core]]
                  [ring/ring-core "1.7.1" :exclusions [ring/ring-codec]]
@@ -78,8 +79,7 @@
    :uberjar       {:aot :all}
    :profiles/dev  {}
    :profiles/test  {}
-   :project/dev   {:dependencies   [[diehard "0.8.3" :exclusions [org.clojure/spec.alpha org.clojure/clojure org.clojure/core.specs.alpha]]
-                                    [duct/generate "0.8.2"]
+   :project/dev   {:dependencies   [[duct/generate "0.8.2"]
                                     [integrant/repl "0.3.1" :exclusions [com.stuartsierra/dependency]]
                                     [reloaded.repl "0.2.4"]
                                     [org.clojure/tools.namespace "0.2.11"]

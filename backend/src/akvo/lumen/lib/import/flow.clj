@@ -8,13 +8,16 @@
             [akvo.lumen.lib.import.flow-v3 :as v3]
             [clojure.tools.logging :as log]))
 
+(defn- read-flow-urls [flow-api]
+  {:internal (:internal-url flow-api)
+   :url (:url flow-api)})
 
 (defmethod import/dataset-importer "AKVO_FLOW"
-  [{:strs [instance surveyId formId refreshToken version] :as spec}
+  [{:strs [instance surveyId formId token email version] :as spec}
    {:keys [flow-api] :as config}]
   (let [version (if version version 1)
-        headers-fn #(c.flow/api-headers (c.flow/access-token flow-api refreshToken))
-        survey (delay (flow-common/survey-definition (:url flow-api)
+        headers-fn #((:internal-api-headers flow-api) {:email email :token token})
+        survey (delay (flow-common/survey-definition (:internal-url flow-api)
                                                      headers-fn
                                                      instance
                                                      surveyId))]
@@ -32,15 +35,19 @@
               (do
                 (log/error e)
                 (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
-                                (assoc ex-d :instance instance))))
+                                (assoc ex-d
+                                       :instance instance
+                                       :flow-urls (read-flow-urls flow-api)))))
               (throw e)))))
       (records [this]
         (try
           (cond
             (<= version 2) (v2/form-data headers-fn @survey formId)
-            (<= version 3) (v3/form-data headers-fn @survey formId))
+            (<= version 3) (v3/form-data headers-fn instance @survey formId))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
-                              (assoc ex-d :instance instance)))
+                              (assoc ex-d
+                                     :instance instance
+                                     :flow-urls (read-flow-urls flow-api))))
               (throw e))))))))

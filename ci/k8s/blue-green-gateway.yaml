@@ -6,7 +6,7 @@ spec:
   template:
     metadata:
       labels:
-        run: lumen-blue-green-gateway
+        run: lumen-blue-green-gateway        
     spec:
       containers:
       - image: rosskukulinski/nginx-kubernetes-reload:v2.0.1
@@ -14,7 +14,7 @@ spec:
         name: gateway
         resources:
           requests:
-            cpu: "50m"
+            cpu: "50m"            
           limits:
             cpu: "1000m"
         ports:

@@ -4,7 +4,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import itsSet from 'its-set';
 import { get } from 'lodash';
 
-import { filterColumns } from '../../../utilities/utils';
+import { filterColumns } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ToggleInput from '../../common/ToggleInput';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';

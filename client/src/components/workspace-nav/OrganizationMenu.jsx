@@ -1,22 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import UserMenu from './user-menu/UserMenu';
 
-function OrganizationMenu({ profile, keycloakURL }) {
+function OrganizationMenu({ profile }) {
   return (
     <div className="OrganizationMenu">
-      <div className="name">
-        <a href={`${keycloakURL}/realms/akvo/account`}>
-          <i className="fa fa-user-o" aria-hidden="true" /> {profile.username}
-        </a>
-      </div>
-      <div className="organization">Akvo Lumen</div>
+      <UserMenu profile={profile} />
     </div>
   );
 }
 
 OrganizationMenu.propTypes = {
-  keycloakURL: PropTypes.string.isRequired,
   profile: PropTypes.shape({
     username: PropTypes.string,
   }).isRequired,
@@ -24,7 +19,8 @@ OrganizationMenu.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    keycloakURL: state.env.keycloakURL,
+    authURL: state.env.authURL,
+    env: state.env,
   };
 }
 

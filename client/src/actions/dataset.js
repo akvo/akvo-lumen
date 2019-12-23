@@ -10,7 +10,6 @@ import {
   removeTemporaryEntitiesFromCollection,
 } from './collection';
 import * as api from '../utilities/api';
-import * as auth from '../utilities/auth';
 
 /*
  * Fetch a dataset by id
@@ -79,10 +78,29 @@ function fetchSortedDatasetFailure(error, id) {
   };
 }
 
-export function fetchSortedDataset(id, columnName) {
+export function fetchTextSortedDataset(id, columnName) {
   return (dispatch) => {
     dispatch(fetchSortedDatasetRequest(id));
-    return api.get(`/api/datasets/${id}/sort/${columnName}`)
+    return api.get(`/api/datasets/${id}/sort/${columnName}/text`)
+      .then(({ body }) => {
+        dispatch(fetchSortedDatasetSuccess({
+          id,
+          columnName,
+          sortedValues: body,
+        }));
+        return body;
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch dataset.'));
+        dispatch(fetchSortedDatasetFailure(error, id));
+      });
+  };
+}
+
+export function fetchNumberSortedDataset(id, columnName) {
+  return (dispatch) => {
+    dispatch(fetchSortedDatasetRequest(id));
+    return api.get(`/api/datasets/${id}/sort/${columnName}/number`)
       .then(({ body }) => {
         dispatch(fetchSortedDatasetSuccess({
           id,
@@ -450,7 +468,7 @@ function pollDatasetUpdateStatus(updateId, datasetId, title) {
           );
         } else if (status === 'FAILED') {
           dispatch(updateDatasetTogglePending(datasetId));
-          dispatch(showNotification('error', `Failed to update dataset "${title}": ${reason}`));
+          dispatch(showNotification('error', `Failed to update "${title}". ${reason}`));
         } else if (status === 'OK') {
           dispatch(fetchDataset(datasetId)).then(() =>
             dispatch(showNotification('info', `Successfully updated dataset "${title}"`, true))
@@ -470,11 +488,7 @@ export function updateDataset(id) {
     dispatch(showNotification('info', `Updating "${title}"`));
     api
       .post(
-        `/api/datasets/${id}/update`,
-        // Send the refreshToken as part of the update request as a workaround
-        // for not being able to get an offline token to the backend. It's TBD
-        // how we want to do that.
-        { refreshToken: auth.refreshToken() }
+        `/api/datasets/${id}/update`
       )
       .then(({ body: { updateId, error } }) => {
         if (updateId != null) {

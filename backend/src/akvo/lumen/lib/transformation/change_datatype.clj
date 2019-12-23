@@ -1,13 +1,11 @@
 (ns akvo.lumen.lib.transformation.change-datatype
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.transformation.change-datatype :as db.tx.change-datatype]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            [clojure.tools.logging :as log]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/change_datatype.sql")
+            [clojure.tools.logging :as log]))
 
 (defmethod engine/valid? "core/change-datatype"
   [op-spec]
@@ -30,7 +28,7 @@
   (jdbc/execute! tenant-conn alter-table-sql)
   (jdbc/execute! tenant-conn "DEALLOCATE ALL")
   (when (= on-error "delete-row")
-    (drop-null-rows tenant-conn
+    (db.tx.change-datatype/drop-null-rows tenant-conn
                     {:table-name table-name
                      :column-name column-name})))
 
@@ -111,3 +109,11 @@
      :execution-log [(format "Changed column %s datatype from %s to %s"
                              column-name (engine/column-type columns column-name) new-type)]
      :columns (engine/update-column columns column-name assoc "type" new-type)}))
+
+(defmethod engine/columns-used "core/change-datatype"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])
+
+(defmethod engine/avoidable-if-missing? "core/change-datatype"
+  [applied-transformation]
+  true)

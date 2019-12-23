@@ -1,12 +1,10 @@
 (ns akvo.lumen.lib.transformation.delete-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
-            [clojure.tools.logging :as log]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
+            [clojure.tools.logging :as log]            
             [clojure.string :as str]
-            [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]
-            [hugsql.core :as hugsql]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
+            [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]))
 
 (defn col-name [op-spec]
   (get (engine/args op-spec) "columnName"))
@@ -29,7 +27,7 @@
         merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]
     (if (empty? merged-sources)
       (let [column-idx  (engine/column-index columns column-name)]
-        (delete-column tenant-conn {:table-name table-name :column-name column-name})
+        (db.tx.engine/delete-column tenant-conn {:table-name table-name :column-name column-name})
         {:success?      true
          :execution-log [(format "Deleted column %s" column-name)]
          :columns       (into (vec (take column-idx columns))
@@ -37,3 +35,11 @@
       {:success? false
        :message  (format "Cannot delete column. It is used in merge transformations of dataset: %s"
                          (str/join "," (map (comp :title second) merged-sources)))})))
+
+(defmethod engine/columns-used "core/delete-column"
+  [applied-transformation columns]
+  [(:columnName (:args applied-transformation))])
+
+(defmethod engine/avoidable-if-missing? "core/delete-column"
+  [applied-transformation]
+  true)

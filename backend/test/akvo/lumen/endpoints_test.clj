@@ -23,15 +23,32 @@
                  (body-kw r)))))
 
       (testing "/env"
-        (let [r (h (get*  "/env"))]
+        (let [r (h (get* "/env"))]
           (is (= 200 (:status r)))
-          (is (= {:keycloakClient "akvo-lumen",
-                  :keycloakURL "http://auth.lumen.local:8080/auth",
-                  :flowApiUrl "https://api.akvotest.org/flow",
-                  :piwikSiteId "165",
-                  :tenant "t1",
-                  :sentryDSN "dev-sentry-client-dsn"}
-                 (body-kw r))))))
+          (let [rb (body-kw r)
+                ks [:auth :flowApiUrl
+                    :lumenDeploymentColor :lumenDeploymentEnvironment
+                    :lumenDeploymentVersion :piwikSiteId :sentryDSN :tenant]
+                lookup-table {:auth
+                              {:clientId "akvo-lumen",
+                               :url "http://auth.lumen.local:8080/auth",
+                               :domain "http://auth.lumen.local:8080/auth/realms/akvo",
+                               :endpoints
+                               {:issuer "/",
+                                :authorization "/protocol/openid-connect/auth",
+                                :userinfo "/protocol/openid-connect/userinfo",
+                                :endSession "/protocol/openid-connect/logout",
+                                :jwksUri "/.well-known/openid-configuration"}},
+                              :flowApiUrl "https://api.akvotest.org/flow",
+                              :lumenDeploymentColor "Pink",
+                              :lumenDeploymentEnvironment "Local test",
+                              :lumenDeploymentVersion "Local version",
+                              :piwikSiteId "165",
+                              :tenant "t1",
+                              :sentryDSN "dev-sentry-client-dsn"}]
+            (is (every? #(contains? rb %) ks))
+            (map #(is (= (% rb)
+                         (% lookup-table))) (keys rb))))))
 
     (testing "/api"
       (testing "/resources"
@@ -45,7 +62,7 @@
 
       (testing "/admin/users"
         (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
-          (is (clojure.set/subset? #{"jerome@t1.lumen.localhost" "salim@t1.lumen.localhost"}
+          (is (clojure.set/subset? #{"jerome@t1.akvolumen.org" "salim@t1.akvolumen.org"}
                                    (set (map :email users))))))
 
       (testing "/library"
@@ -71,7 +88,7 @@
                           body-kw :id))))
 
           (is (= title* (-> (h (get* (api-url "/library")))
-                             body-kw :dashboards first :title)))
+                            body-kw :dashboards first :title)))
           ))
 
       (testing "/collections"
@@ -158,24 +175,30 @@
                      (select-keys meta-dataset [:id :name :status :transformations :columns])))))
 
           (testing "sort"
-            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" ) {"offset" 2}))
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"limit" "1"}))
                                    body-kw)]
-              (is (= '([2 "B"] [2 "A"]) dataset-sort))))
+              (is (= '([2 "B"]) dataset-sort)))
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text")))
+                                   body-kw)]
+              (is (= '([2 "B"] [2 "A"]) dataset-sort)))
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c2" "number")))
+                                   body-kw)]
+              (is (= {:all 4, :max 72.0, :min 22.0 :uniques 4} dataset-sort))))
 
           (is (= title (-> (h (get* (api-url "/library")))
-                          body-kw :datasets first :name)))
+                           body-kw :datasets first :name)))
           (let [bar-vis-name "hello-bar-vis!"]
             (is (= [bar-vis-name dataset-id]
                    (-> (h (post*  (api-url "/visualisations")
                                   (commons/visualisation-payload dataset-id "bar" bar-vis-name)))
                        body-kw
-                       
+
                        ((juxt :name :datasetId)))))
             (let [[name* id*] (-> (h (get* (api-url "/library")))
                                   body-kw :visualisations first
                                   ((juxt :name :id)))]
               (is (= bar-vis-name name*))
-              (testing "/api/shares && /share" 
+              (testing "/api/shares && /share"
                 (let [share-id (-> (h (post*  (api-url "/shares") {:visualisationId id*}))
                                    body-kw
                                    :id)]
@@ -189,7 +212,7 @@
       (testing "/datasets update"
         (let [title "github-sample-data-1"
               file-name "sample-data-1.csv"
-              dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv"
+              dataset-url "https://raw.githubusercontent.com/akvo/akvo-lumen/master/client/e2e-test/sample-data-1.csv"
 
               import-id (-> (h (post*  (api-url "/datasets") {:source
                                                               {:kind "LINK"
@@ -202,7 +225,7 @@
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)
               dataset (-> (h (get* (api-url "/datasets" dataset-id)))
-                            body-kw)
+                          body-kw)
               update-dataset (-> (h (post* (api-url "/datasets" dataset-id "update") (:source dataset)))
                                  body-kw)
               dataset-id (job-execution-dataset-id h (:updateId update-dataset))]
@@ -235,7 +258,7 @@
               (is (= (:id res-raster) raster-id))))))
 
       ;; "/exports" endpoint can't be tested in backend isolation endpoints thus it needs a client side too
-      
+
       (testing "/visualisations & /aggregation/:dataset-id/:visualisation-type"
         (let [visualisations (body-kw (h (get* (api-url "/visualisations"))))
               [vis-id dataset-id keys*] ((juxt :id :datasetId keys) (first visualisations))
@@ -246,7 +269,7 @@
                                    (-> vis-detail
                                        (assoc-in  [:spec :axisLabelX] "Age")
                                        (assoc-in  [:spec :bucketColumn] "c2")))))))
-          
+
           (is (= []
                  (-> (h (get* (api-url "/aggregation" dataset-id (:visualisationType vis-detail))
                               {"query" (json/encode (:spec vis-detail))}))
@@ -263,7 +286,7 @@
           (is (= 200 (:status r)))
           (is (some? (re-find #"path=\"/api/aggregation/:dataset-id/:visualisation-type\",tenant=\"t1\""
                               (:body r))))))
-      
+
       (testing "/transformations/:id/transform/:op1/:op2 & /transformations/:id/undo"
         (let [title "GDP-dataset"
               file-name "GDP.csv"
@@ -301,7 +324,7 @@
               (let [dataset-job-id (job-execution-dataset-id h (:jobExecutionId (body-kw res)))
                     dataset-txed (body-kw (h (get* (api-url "/datasets" dataset-job-id))))]
                 (= " 17419000 " (->  dataset-txed :rows (get 4))))))))
-      
+
       (testing "/split-column/:dataset-id/pattern-analysis"
         (let [title "patter-analysis"
               file-name "split_column_1785.csv"
@@ -318,7 +341,7 @@
               _           (is (some? import-id))
               dataset-id (job-execution-dataset-id h import-id)
               _ (is (some? dataset-id))]
-          
+
           (is (= {:analysis ["$" "-"]}
                  (-> (body-kw (h (get* (api-url  "/split-column" dataset-id "pattern-analysis")
                                        {"query" (json/encode {:columnName "c1"})})))
@@ -331,13 +354,14 @@
           (let [res (h (post*  (api-url "/admin/invites") {:email email}))]
             (is (= 200 (:status res)) )
             (is (= {} (body-kw res)))
-            (let [store @(:store (:akvo.lumen.component.emailer/dev-emailer *system*))
+            (let [store @(:store (:akvo.lumen.utils.dev-emailer/emailer *system*))
                   invitation (last store)]
               (is (= 1 (count store)))
               (is (= email (-> invitation :recipients first)))
-              (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))             
+              (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))
               (let [url (str/replace (re-find #"https.*+" (-> invitation :email (get "Text-part"))) "https://t1.lumen.local" "")
-                    res-verify (h (get* url))]
+
+                    res-verify (h (get* url ))]
                 (is (= 302 (:status res-verify))))
               (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
                 (is (= 200 (:status (h (del* (api-url "/admin/users" (:id (first (filter #(= email (:email %)) users))))))))))))))
@@ -367,6 +391,8 @@
 	                       :hidden false,
 	                       :multipleType nil,
 	                       :columnName "c1",
+                               :groupId nil
+                               :groupName nil
 	                       :direction nil,
 	                       :sort nil}
 	                      {:key false,
@@ -374,6 +400,8 @@
 	                       :title "two",
 	                       :multipleId nil,
 	                       :hidden false,
+                               :groupId nil
+                               :groupName nil
 	                       :multipleType nil,
 	                       :columnName "c2",
 	                       :direction nil,

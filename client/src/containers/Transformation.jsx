@@ -3,9 +3,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
+import { injectIntl, intlShape } from 'react-intl';
 import * as api from '../utilities/api';
 import { ensureLibraryLoaded } from '../actions/library';
-import { pollTxImportStatus, startTx, endTx, fetchDataset, fetchSortedDataset } from '../actions/dataset';
+import { pollTxImportStatus, startTx, endTx, fetchDataset, fetchTextSortedDataset, fetchNumberSortedDataset } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
 import MergeTransformation from '../components/transformation/MergeTransformation';
 import ReverseGeocodeTransformation from '../components/transformation/ReverseGeocodeTransformation';
@@ -43,7 +44,6 @@ class Transformation extends Component {
 
     dispatch(startTx(datasetId));
 
-    // TODO move this into an action instead of here
     api.post(`/api/transformations/${datasetId}/transform/${transformation.op}`, transformation)
       .then((response) => {
         if (!response.ok) {
@@ -68,12 +68,13 @@ class Transformation extends Component {
     const { loading, transforming } = this.state;
     if (loading) return null;
 
-    const { datasetId, datasets, routeParams } = this.props;
+    const { datasetId, datasets, routeParams, intl } = this.props;
     const TransformationComponent = transformationComponent[routeParams.transformationType];
 
     return (
       <div className="Transformation">
         <TransformationComponent
+          intl={intl}
           transforming={transforming}
           datasetId={datasetId}
           datasets={datasets}
@@ -81,8 +82,12 @@ class Transformation extends Component {
           onFetchDataset={(id) => {
             this.props.dispatch(fetchDataset(id));
           }}
-          onFetchSortedDataset={(id, columnName) => {
-            this.props.dispatch(fetchSortedDataset(id, columnName));
+          onFetchSortedDataset={(id, columnName, columnType) => {
+            if (columnType === 'text') {
+              this.props.dispatch(fetchTextSortedDataset(id, columnName));
+            } else {
+              this.props.dispatch(fetchNumberSortedDataset(id, columnName));
+            }
           }}
           onAlert={(alert) => {
             this.props.dispatch(alert);
@@ -99,6 +104,7 @@ Transformation.propTypes = {
   datasets: PropTypes.object,
   datasetId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
+  intl: intlShape,
 };
 
 function mapStateToProps(state, props) {
@@ -108,4 +114,4 @@ function mapStateToProps(state, props) {
   };
 }
 
-export default connect(mapStateToProps)(withRouter(Transformation));
+export default connect(mapStateToProps)(withRouter(injectIntl(Transformation)));

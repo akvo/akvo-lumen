@@ -1,60 +1,61 @@
 (ns akvo.lumen.lib.user
   (:require [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.user :as db.user]
             [akvo.lumen.lib.share :refer [random-url-safe-string]]
             [akvo.lumen.protocols :as p]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [clojure.string :as str]
-            [hugsql.core :as hugsql]
+            [clojure.string :as str]            
             [selmer.parser :as selmer]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/user.sql")
+(defn expire-time []
+  (c/to-sql-time (t/plus (t/now)
+                         (t/weeks 2))))
+
+(defn- invite-id* [tenant-conn author email]
+  (-> (db.user/insert-invite tenant-conn
+                     {:author author
+                      :email email
+                      :expire (expire-time)})
+      first :id))
 
 (defn invite-to-tenant
   "Create an invite and use provider emailer to send an invitation email."
   [emailer tenant-conn location email author-claims]
-  (let [invite-id (-> (insert-invite tenant-conn
-                        {:author author-claims
-                         :email email
-                         :expire (c/to-sql-time (t/plus (t/now)
-                                                  (t/weeks 2)))})
-                    first :id)
-        text-part (selmer/render-file "akvo/lumen/email/invite_to_tenant.txt"
+  (let [invite-id (invite-id* tenant-conn author-claims email)
+        text-part (selmer/render-file (format "akvo/lumen/email/invite_to_tenant.txt")
                     {:author-email (get author-claims "email")
                      :invite-id invite-id
                      :location location})]
     (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                         "Text-part" text-part})))
+                                   "Text-part" text-part})))
 
-(defn create-new-account-and-invite-to-tenant
-  ""
-  [emailer keycloak tenant-conn location email
-   {:strs [name] :as author-claims}]
-  (let [request-headers (keycloak/request-headers keycloak)
-        user-id (as-> (p/create-user keycloak request-headers email) x
-                  (:headers x)
-                  (get x "Location")
-                  (str/split x #"/")
-                  (last x))
-        tmp-password (random-url-safe-string 6)
-        invite-id (-> (insert-invite tenant-conn
-                        {:author author-claims
-                         :email email
-                         :expire (c/to-sql-time (t/plus (t/now)
-                                                  (t/weeks 2)))})
-                    first :id)
+(defn new-invitation-id [tenant-conn author-claims email]
+  (invite-id* tenant-conn author-claims email))
 
-        text-part (selmer/render-file
-                    "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt"
-                    {:author-email (get author-claims "email")
-                     :email email
-                     :invite-id invite-id
-                     :location location
-                     :tmp-password tmp-password})]
-    (p/reset-password keycloak request-headers user-id tmp-password)
+(defn send-invitation-account-email [emailer sender-email email location invite-id tmp-password]
+  (let [text-part (selmer/render-file
+                   (format "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt")
+                   {:author-email sender-email
+                    :email email
+                    :invite-id invite-id
+                    :location location
+                    :tmp-password tmp-password})]
     (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                         "Text-part" text-part})))
+                                   "Text-part" text-part})))
+
+(defn create-new-account [keycloak tenant-conn email]
+  (let [headers (keycloak/request-headers keycloak)
+        user-id (-> (p/create-user keycloak headers email)
+                    (get-in [:headers "Location"])
+                    (str/split #"/")
+                    last)
+        tmp-password (random-url-safe-string 6)]
+    (p/reset-password keycloak headers user-id tmp-password)
+    {:email email
+     :user-id user-id
+     :tmp-password tmp-password}))
 
 (defn create-invite
   "First check if user is already a member of current tenant, then don't invite.
@@ -64,17 +65,19 @@
   [emailer keycloak tenant-conn tenant location email author-claims]
   (cond
     (keycloak/tenant-member?
-     keycloak tenant email) (lib/bad-request
-                             {"reason" "Already tenant member"})
-    (p/user? keycloak email) (invite-to-tenant emailer tenant-conn location email
-                                       author-claims)
+     keycloak tenant email)  (lib/bad-request {"reason" "Already tenant member"})
+    (p/user? keycloak email) (do (invite-to-tenant emailer tenant-conn location email
+                                                   author-claims)
+                                 (lib/ok {}))
     :else
-    (create-new-account-and-invite-to-tenant
-     emailer keycloak tenant-conn location email author-claims))
-  (lib/ok {}))
+    (let [tmp-password  (:tmp-password (create-new-account keycloak tenant-conn email))
+          invitation-id (new-invitation-id tenant-conn author-claims email)
+          sender-email  (get author-claims "email")]
+      (send-invitation-account-email emailer sender-email email location invitation-id tmp-password)
+      (lib/ok {}))))
 
 (defn active-invites [tenant-conn]
-  (lib/ok {:invites (select-active-invites tenant-conn)}))
+  (lib/ok {:invites (db.user/select-active-invites tenant-conn)}))
 
 (defn delete-invite
   "Deletes non consumed invites, returns 210 if invite was consumed and
@@ -83,14 +86,14 @@
   created the invite in the \"author\" db field, and this provides
   traceability. Hence we don't allow deletion of consumed invite."
   [tenant-conn id]
-  (if (zero? (first (delete-invite-by-id tenant-conn {:id id})))
+  (if (zero? (first (db.user/delete-invite-by-id tenant-conn {:id id})))
     (lib/gone {})
     (lib/ok {})))
 
 (defn verify-invite
   "Try and consume invite; Add user to keycloak; redirect to app."
   [keycloak tenant-conn tenant id location]
-  (if-let [{:keys [email]} (first (consume-invite tenant-conn {:id id}))]
+  (if-let [{:keys [email]} (first (db.user/consume-invite tenant-conn {:id id}))]
     (if-let [accepted (p/add-user-with-email keycloak tenant email)]
       (lib/redirect location)
       (lib/unprocessable-entity (format "<html><body>%s</body></html>"
@@ -100,6 +103,10 @@
 (defn users
   [keycloak tenant]
   (p/users keycloak tenant))
+
+(defn user
+  [keycloak tenant email]
+  (p/user keycloak tenant email))
 
 (defn remove-user
   [keycloak tenant author-claims user-id]
@@ -112,3 +119,7 @@
 (defn promote-user-to-admin
   [keycloak tenant author-claims user-id]
   (p/promote-user-to-admin keycloak tenant author-claims user-id))
+
+(defn change-names
+  [keycloak tenant author-claims user-id first-name last-name]
+  (p/change-names keycloak tenant author-claims user-id first-name last-name))

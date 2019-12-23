@@ -2,17 +2,14 @@
   (:require [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.util :as util]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
+            [akvo.lumen.db.transformation :as db.transformation]
             [clojure.java.jdbc :as jdbc]
             [akvo.lumen.postgres :as postgres]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
-            [clojure.walk :as walk]
-            [hugsql.core :as hugsql])
+            [clojure.walk :as walk])
   (:import [java.util.regex Pattern]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
-
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
 
 (defn pattern-analysis [re-pattern* column-values]
   (reduce
@@ -57,7 +54,7 @@
 
 (defn columns-to-extract [prefix number-new-rows selected-column columns]
   (let [selected-column (find-column (walk/keywordize-keys columns) (:columnName selected-column))
-        base-column (dissoc selected-column :type :columnName)
+        base-column (dissoc selected-column :type :columnName :groupId :groupName)
         new-columns (map #(assoc base-column :title (str prefix "-" %) :type "text")
                          (range 1 (inc number-new-rows)))]
     (add-name-to-new-columns columns new-columns)))
@@ -88,7 +85,7 @@
           pattern                   (pattern* args)
           re-pattern*               (re-pattern (Pattern/quote pattern))]
       (if-let [pattern-analysis (get
-                                 (->> (select-column-data tenant-conn {:table-name table-name :column-name column-name})
+                                 (->> (db.transformation/select-column-data tenant-conn {:table-name table-name :column-name column-name})
                                       (map (comp str (keyword column-name)))
                                       (pattern-analysis re-pattern*)
                                       :analysis)
@@ -96,10 +93,10 @@
         (let [new-rows-count    (inc (:max-coincidences-in-one-row pattern-analysis))
               new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) columns)
               add-db-columns    (doseq [c new-columns]
-                                  (add-column tenant-conn {:table-name      table-name
+                                  (db.tx.engine/add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
                                                            :new-column-name (:id c)}))
-              update-db-columns (doseq [row (select-rnum-and-column tenant-conn {:table-name table-name
+              update-db-columns (doseq [row (db.transformation/select-rnum-and-column tenant-conn {:table-name table-name
                                                                                  :column-name column-name})]
                                   (->>
                                    (split ((keyword column-name) row) re-pattern* new-rows-count)
@@ -112,3 +109,7 @@
         {:success? false
          :message  (format "No results trying to split column '%s' with pattern '%s'"
                            (:title (selected-column args)) (pattern* args))}))))
+
+(defmethod engine/columns-used "core/split-column"
+  [applied-transformation columns]
+  [(:columnName (:selectedColumn (:args applied-transformation)))])

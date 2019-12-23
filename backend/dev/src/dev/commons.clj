@@ -1,9 +1,11 @@
 (ns dev.commons
   (:require [akvo.lumen.test-utils :as tu]
+            [akvo.lumen.config :as config]
+            [clojure.java.io :as io]
             [integrant.core :as ig]
             [integrant.repl :as ir]))
 
-(derive :akvo.lumen.component.emailer/dev-emailer :akvo.lumen.component.emailer/emailer)
+(derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 
 (derive :akvo.lumen.component.error-tracker/config-dev
@@ -19,12 +21,20 @@
           :akvo.lumen.component.error-tracker/config-prod
           :akvo.lumen.component.error-tracker/sentry
           :akvo.lumen.component.error-tracker/config-test
-          :akvo.lumen.component.error-tracker/void))
+          :akvo.lumen.component.error-tracker/void
+          :akvo.lumen.component.error-tracker/prod))
 
-(defn config []
-  (let [c (dissoc-prod-components (tu/prep "akvo/lumen/config.edn" "test.edn" "dev.edn"))]
-    (ir/set-prep! (fn [] c))
-    (ig/load-namespaces c)
-    c))
+(defn config
+  ([]
+   (config false))
+  ([prod?]
+   (config ["akvo/lumen/config.edn" "test.edn" "dev.edn"
+            (when (io/resource "local.edn") "local.edn")] prod?))
+  ([config-files prod?]
+   (let [config-files* (config/prep config-files)
+         config-files* (if-not prod? (dissoc-prod-components config-files*) config-files*)]
+     (ir/set-prep! (fn [] config-files*))
+     (ig/load-namespaces config-files*)
+     config-files*)))
 
 (def tenants (-> (config) :akvo.lumen.migrate/migrate :seed :tenants))

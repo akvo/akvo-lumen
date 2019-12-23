@@ -1,9 +1,10 @@
 const barSpec = {
-  version: 1,
+  version: 2,
   metricColumnY: null, // primary
   metricColumnX: null, // secondary
   bucketColumn: null,
   subBucketColumn: null,
+  metricColumnsY: [], // series
   subBucketMethod: 'split', // can be "split" or "stack"
   metricAggregation: 'count', // default to count,
   axisLabelX: null,

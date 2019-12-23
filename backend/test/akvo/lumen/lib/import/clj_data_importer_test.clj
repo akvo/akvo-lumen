@@ -3,6 +3,7 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          system-fixture
+                                         *system*
                                          *error-tracker*
                                          error-tracker-fixture]]
             [clojure.tools.logging :as log]
@@ -32,7 +33,9 @@
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))]
-      (is (= (map keys (:columns dataset)) '(("key"
+      (is (= (map keys (:columns dataset)) '(("groupId"
+                                              "key"
+                                              "groupName"
 	                                      "sort"
 	                                      "direction"
 	                                      "title"
@@ -41,7 +44,9 @@
 	                                      "hidden"
 	                                      "multipleId"
 	                                      "columnName")
-                                             ("key"
+                                             ("groupId"
+                                              "key"
+                                              "groupName"
 	                                      "sort"
 	                                      "direction"
 	                                      "title"
@@ -70,7 +75,8 @@
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))
-          updated-res (update-file *tenant-conn* *error-tracker* (:dataset_id job) (:data_source_id job)
+          updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                   *error-tracker* (:dataset-id job) (:data-source-id job)
                         {:kind "clj"
                          :data (i-c/sample-imported-dataset [:text :number] 2)})]
       (is (some? updated-res)))))

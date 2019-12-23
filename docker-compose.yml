@@ -7,7 +7,7 @@ services:
    volumes:
      - pg-data:/var/lib/postgresql/data
  keycloak:
-   image: akvo/akvo-keycloak-dev:20181015.be5740a
+   image: akvo/akvo-keycloak-dev:20191018.105315.b2d1c7d
  backend:
    volumes:
       - pg-data:/pg-certs:ro
@@ -35,12 +35,12 @@ services:
    volumes:
       - pg-data:/pg-certs:ro
  fe-e2e-tests:
-   image: akvo/akvo-lumen-e2e-test:20181024.271ce79
+   image: akvo/akvo-lumen-e2e-test:20190607.073620.6426562
    volumes:
      - ./client/e2e-test:/app/e2e-test
    environment:
       - LUMEN_URL=http://t1.lumen.local:3030/
-      - LUMEN_USER=jerome
+      - LUMEN_USER=jerome@t1.akvolumen.org
       - LUMEN_PASSWORD=password
       - APP_DIR=/app/e2e-test
    links:
@@ -48,7 +48,6 @@ services:
       - client:t1.lumen.local
    command: "true"
  exporter:
-   build: exporter
    expose:
       - 3001
 volumes:

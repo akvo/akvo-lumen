@@ -1,4 +1,5 @@
-(ns akvo.lumen.protocols)
+(ns akvo.lumen.protocols
+  (:require [clojure.spec.alpha :as s]))
 
 (defprotocol IErrorTracker
   (track [this error]))
@@ -13,13 +14,13 @@
 (defprotocol SendEmail
   (send-email [this recipients email] "Send email"))
 
-(defprotocol KeycloakUserManagement
+(defprotocol UserManagement
   (add-user-with-email
     [this tenant-label email]
     "Add user to tenant")
 
   (create-user
-    [this request-headers email]
+    [this headers email]
     "Create user")
 
   (demote-user-from-admin
@@ -30,13 +31,20 @@
     [this tenant author-claims user-id]
     "Promote existing tenant member to admin")
 
+  (change-names
+    [this tenant author-claims user-id first-name last-name])
+
   (reset-password
-    [this request-headers user-id tmp-password]
+    [this headers user-id tmp-password]
     "Set temporary user password")
 
   (remove-user
     [this tenant author-claims user-id]
     "Remove user from tenant")
+
+  (user
+    [this tenant email]
+    "get user details")
 
   (user?
     [this email]
@@ -45,6 +53,11 @@
   (users
     [this tenant-label]
     "List tenants users"))
+
+(defprotocol Authorizer
+  (allowed-paths
+    [this {:keys [email iat]}]
+    "Allowed paths by email"))
 
 (defprotocol DatasetImporter
   "
@@ -104,9 +117,15 @@
     [_ type* uuid])
   (allow? [_ d]))
 
+(defprotocol AuthServiceClient
+  (check-permissions [_ user-identity data]))
+
 (defprotocol AuthService2080
   (optimistic-allow? [_ d]
     "Provisional workaround for
      https://github.com/akvo/akvo-lumen/issues/2080
     'Refactor api/collections payload'"))
 
+
+(s/def ::authorizer (s/and (partial satisfies? UserManagement)
+                           (partial satisfies? Authorizer)))

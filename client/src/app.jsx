@@ -4,13 +4,22 @@ import { render } from 'react-dom';
 import { browserHistory } from 'react-router';
 import { AppContainer } from 'react-hot-loader';
 import { syncHistoryWithStore } from 'react-router-redux';
+import Error from './containers/Error';
 import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
+import { UserManager, WebStorageStateStore } from 'oidc-client';
 import queryString from 'querystringify';
+import url from 'url';
+import { get } from './utilities/api';
+import Raven from 'raven-js';
 
 function initAuthenticated(profile, env) {
+  if (process.env.NODE_ENV === 'production') {
+    Raven.setUserContext(profile);
+  }
+
   const initialState = { profile, env };
 
   const store = configureStore(initialState);
@@ -45,8 +54,19 @@ function initAuthenticated(profile, env) {
   }
 }
 
+const locales = new Set(['en', 'es', 'fr']);
+function userLocale(lo) {
+  if (lo) {
+    const l = lo.toLowerCase().substring(0, 2);
+    if (locales.has(l)) {
+      return l;
+    }
+  }
+  return 'en';
+}
+
 function initWithAuthToken(locale) {
-  const initialState = { profile: { attributes: { locale: [locale] } } };
+  const initialState = { profile: { admin: false, attributes: { locale: [userLocale(locale)] } } };
   const rootElement = document.querySelector('#root');
   const store = configureStore(initialState);
   const history = syncHistoryWithStore(browserHistory, store);
@@ -59,20 +79,89 @@ function initWithAuthToken(locale) {
   );
 }
 
-function initNotAuthenticated(msg) {
-  document.querySelector('#root').innerHTML = msg;
+function initNotAuthenticated(error) {
+  const locale = userLocale(navigator.language);
+  const initialState =
+    { profile: { admin: false, attributes: { locale: [locale] } } };
+  const rootElement = document.querySelector('#root');
+  const store = configureStore(initialState);
+
+  render(
+    <Error store={store} error={error} locale={locale} />,
+    rootElement
+  );
 }
 
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
-  if (accessToken == null) {
-    auth
-      .init()
-      .then(({ profile, env }) => initAuthenticated(profile, env))
-      .catch(err => initNotAuthenticated(err.message));
-  } else {
+  if (url.parse(location.href).pathname !== '/auth_callback' && accessToken == null) {
+    get('/env')
+    .then(
+      ({
+        body,
+      // eslint-disable-next-line consistent-return
+      }) => {
+        auth.init(body, auth.initService(body.auth))
+        // eslint-disable-next-line consistent-return
+        .then((user) => {
+          // auth0.authorize();
+          if (user == null) {
+            const redirect = url.parse(location.href).pathname;
+            if (redirect !== '/library' && redirect !== '/') {
+              window.localStorage.setItem('redirect', redirect);
+            }
+            auth.signinRedirect();
+          } else {
+            const userProfile = user.profile;
+            return Promise.resolve(get('/api/user/profile', {
+              email: user.profile.email,
+            }).then((response) => {
+              try {
+                const {
+                  admin, firstName, id, lastName,
+                } = response.body;
+                userProfile.admin = admin;
+                userProfile.firstName = firstName;
+                userProfile.keycloakId = id;
+                userProfile.lastName = lastName;
+              } catch (e) {
+                userProfile.admin = false;
+                Raven.captureException(e, {
+                  extra: {
+                    user,
+                  },
+                });
+              }
+              userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+              userProfile.username = user.username || user.nickname;
+              return { profile: userProfile, env: body };
+            }));
+          }
+        })
+        .then((res) => {
+          if (res) {
+            initAuthenticated(res.profile, res.env);
+          }
+        });
+      });
+  } else if (accessToken != null) {
     auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
+  } else {
+    get('/env')
+    .then(
+      ({
+        body,
+      // eslint-disable-next-line consistent-return
+      }) => {
+        auth.initService(body.auth);
+        const mgr = new UserManager({ userStore: new WebStorageStateStore() });
+        mgr.signinRedirectCallback().then(() => {
+          window.location.href = '../';
+        }).catch((err) => {
+          initNotAuthenticated(err.error_description);
+        });
+      });
   }
 }
 

@@ -8,7 +8,6 @@ import { itsSet } from 'its-set';
 
 import './DeriveCategoryMappingText.scss';
 import Popover from '../../common/Popover';
-import Button from '../../common/Button';
 import ClickAway from '../../common/ClickAway';
 
 const SEARCH_RESULTS_LIMIT = 10;
@@ -56,14 +55,14 @@ class DeriveCategoryMapping extends Component {
     const {
       sourceValues,
       onSourceValuesUpdate,
+      unassignedValues,
     } = this.props;
 
     if (checked) {
-      const searchResults = this.getSearchResults();
       onSourceValuesUpdate(
         sourceValues,
         uniqBy(
-          [...sourceValues, ...searchResults],
+          [...sourceValues, ...unassignedValues],
           // eslint-disable-next-line no-unused-vars
           ([count, value]) => value
         )
@@ -80,6 +79,7 @@ class DeriveCategoryMapping extends Component {
       targetCategoryName,
       onChangeCategoryName,
       onSourceValuesUpdate,
+      unassignedValues,
       onToggleGrouping,
       isGrouping,
       isInvalid,
@@ -109,25 +109,20 @@ class DeriveCategoryMapping extends Component {
                   />
                 </div>
               )}
-              footer={(
+              footer={!search.length ? (
                 <Row>
-                  <Col xs={6}>
+                  <Col xs={12}>
                     <input
                       type="checkbox"
                       id="select-all-checkbox"
                       onChange={this.handleSelectAll}
                     />
                     <label htmlFor="select-all-checkbox">
-                      <FormattedMessage id="select_all" />
+                      <FormattedMessage id="select_all" /> {unassignedValues.length > 1 ? `(${unassignedValues.length - 1} values)` : ''}
                     </label>
                   </Col>
-                  <Col xs={6} className="text-right">
-                    <Button>
-                      <FormattedMessage id="close" />
-                    </Button>
-                  </Col>
                 </Row>
-              )}
+              ) : ''}
               placement="bottom-right"
               left={30}
               top={50}
@@ -145,7 +140,7 @@ class DeriveCategoryMapping extends Component {
                   <li key={value}>
                     <input
                       type="checkbox"
-                      checked
+                      defaultChecked
                       onChange={() => {
                         onSourceValuesUpdate(
                           sourceValues,

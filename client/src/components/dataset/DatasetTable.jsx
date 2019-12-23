@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, Column, Cell } from 'fixed-data-table-2';
+import { Table, Column, Cell, ColumnGroup } from 'fixed-data-table-2';
 import moment from 'moment';
 import { withRouter } from 'react-router';
+import { injectIntl, intlShape } from 'react-intl';
 import ColumnHeader from './ColumnHeader';
+import ColumnGroupHeader from './ColumnGroupHeader';
 import DataTableSidebar from './DataTableSidebar';
 import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
+import { reducerGroup, datasetHasQuestionGroups } from './../../utilities/column';
 
 require('./DatasetTable.scss');
 
@@ -249,6 +252,8 @@ class DatasetTable extends Component {
         onApply: (transformation) => {
           this.props.onTransform(transformation).then(() => {
             this.hideSidebar();
+          }).catch((error) => {
+            console.log(error);
           });
         },
         columns: this.props.columns,
@@ -407,8 +412,9 @@ class DatasetTable extends Component {
       width,
       height,
     } = this.state;
-
-    const cols = columns.map((column, index) => {
+    let columnIndex = 0;
+    const createColumn = (column) => {
+      const index = columnIndex;
       const columnHeader = (
         <ColumnHeader
           key={index}
@@ -420,13 +426,14 @@ class DatasetTable extends Component {
             activeColumnContextMenu.column.get('title') === column.get('title')}
           onRemoveSort={transformation => this.props.onTransform(transformation)}
         />
-      );
-      const formatCell = (props) => {
-        const formattedCellValue =
-          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, index]));
+    );
 
+      const formatCell = idx => (props) => {
+        const formattedCellValue =
+          formatCellValue(column.get('type'), rows.getIn([props.rowIndex, idx]));
+        const cellStyle = column.get('type') === 'number' ? { textAlign: 'right', width: '100%' } : { textAlign: 'left' };
         return (
-          <Cell>
+          <Cell style={cellStyle} className={column.get('type')}>
             <span
               title={formattedCellValue}
             >
@@ -435,17 +442,35 @@ class DatasetTable extends Component {
           </Cell>
         );
       };
+      columnIndex += 1;
+      return (<Column
+        cellClassName={this.getCellClassName(column.get('title'))}
+        key={column.get('idx') || index}
+        header={columnHeader}
+        cell={formatCell(column.get('idx') || index)}
+        width={200}
+      />);
+    };
 
-      return (
-        <Column
-          cellClassName={this.getCellClassName(column.get('title'))}
-          key={index}
-          header={columnHeader}
-          cell={formatCell}
-          width={200}
-        />
-      );
-    });
+    let cols;
+    if (datasetHasQuestionGroups(columns)) {
+      const groups = columns.reduce(reducerGroup('Metadata', 'Transformations'), {});
+      const reducer2 = (accumulator, k, idx) => {
+        const columnsGroup = groups[k];
+        accumulator.push(
+          <ColumnGroup
+            header={<ColumnGroupHeader groupName={k} />}
+            key={`gr-${idx}`}
+          >
+            {columnsGroup.map(createColumn)}
+          </ColumnGroup>
+        );
+        return accumulator;
+      };
+      cols = Object.keys(groups).reduce(reducer2, []);
+    } else {
+      cols = columns.map(createColumn);
+    }
     return (
       <div className="DatasetTable">
         <DatasetControls
@@ -467,6 +492,7 @@ class DatasetTable extends Component {
             {sidebarProps &&
               <DataTableSidebar
                 {...sidebarProps}
+                intl={this.props.intl}
                 transformations={transformations}
                 isLockedFromTransformations={isLockedFromTransformations}
                 datasetId={datasetId}
@@ -495,6 +521,7 @@ class DatasetTable extends Component {
               />
             )}
             <Table
+              groupHeaderHeight={30}
               headerHeight={60}
               rowHeight={30}
               rowsCount={rows.size}
@@ -523,6 +550,7 @@ DatasetTable.propTypes = {
   router: PropTypes.object.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
   isLockedFromTransformations: PropTypes.bool,
+  intl: intlShape,
 };
 
-export default withRouter(DatasetTable);
+export default withRouter(injectIntl(DatasetTable));

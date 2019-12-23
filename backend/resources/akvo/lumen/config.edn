@@ -6,8 +6,11 @@
                                           :minimum-idle 2
                                           :metric-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry}
 
+
+ :akvo.lumen.component.tenant-manager/data {:encryption-key #duct/env "LUMEN_ENCRYPTION_KEY"}
+
  :akvo.lumen.component.tenant-manager/tenant-manager {:dropwizard-registry #ig/ref :akvo.lumen.monitoring/dropwizard-registry
-                                                      :encryption-key #duct/env "LUMEN_ENCRYPTION_KEY"
+                                                      :data #ig/ref :akvo.lumen.component.tenant-manager/data
                                                       :db #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
  :akvo.lumen.component.error-tracker/config-prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
@@ -37,13 +40,15 @@
                                                           :content-types true
                                                           :default-charset "utf-8"}}
 
- :akvo.lumen.auth/wrap-auth {}
+ :akvo.lumen.auth/wrap-authorization {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                                      :public-client #ig/ref :akvo.lumen.component.authentication/public-client}
 
  :akvo.lumen.lib.auth/wrap-auth-datasets {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                          :flow-api #ig/ref :akvo.lumen.component.flow/api
+                                          :authz-service-client #ig/ref :akvo.lumen.component.authz-service/http-service-client
                                           :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}}
 
- :akvo.lumen.auth/wrap-jwt {:keycloak #ig/ref :akvo.lumen.component.keycloak/data}
+ :akvo.lumen.auth/wrap-jwt-authentication {:public-client #ig/ref :akvo.lumen.component.authentication/public-client
+                                           :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
 
@@ -55,11 +60,21 @@
 
  :akvo.lumen.endpoint.dashboard/dashboard {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
+ :akvo.lumen.component.flow/api-headers {}
+
+ :akvo.lumen.component.flow/internal-api-headers {}
+
  :akvo.lumen.component.flow/api {:url #duct/env "LUMEN_FLOW_API_URL"
-                                 :keycloak #ig/ref :akvo.lumen.component.keycloak/data}
+                                 :internal-url "http://flow-api-internal"
+                                 :api-headers #ig/ref :akvo.lumen.component.flow/api-headers
+                                 :internal-api-headers #ig/ref :akvo.lumen.component.flow/internal-api-headers}
+
+ :akvo.lumen.component.authz-service/http-service-client {:url "http://akvo-authz-api-internal"
+                                                          :api-headers-fn #ig/ref :akvo.lumen.component.flow/internal-api-headers}
 
  :akvo.lumen.endpoint.dataset/dataset {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                        :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
+                                       :caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly
                                        :upload-config #ig/ref :akvo.lumen.upload/data
                                        :import-config {:flow-api #ig/ref :akvo.lumen.component.flow/api}}
 
@@ -67,11 +82,13 @@
 
  :akvo.lumen.endpoint.env/env {:routes-opts
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
-                               :keycloak #ig/ref :akvo.lumen.component.keycloak/data
-                               :keycloak-public-client-id #duct/env [ "LUMEN_KEYCLOAK_PUBLIC_CLIENT_ID" :or "akvo-lumen" ]
+                               :public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
-                               :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"}
+                               :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"
+                               :lumen-deployment-color #duct/env "LUMEN_DEPLOYMENT_COLOR"
+                               :lumen-deployment-environment #duct/env "LUMEN_DEPLOYMENT_ENVIRONMENT"
+                               :lumen-deployment-version #duct/env "LUMEN_DEPLOYMENT_VERSION"}
 
  :akvo.lumen.endpoint.export/export {:exporter-api-url #duct/env [ "EXPORTER_API_URL" :or "http://localhost:3001" ]}
 
@@ -82,11 +99,12 @@
  :akvo.lumen.endpoint.healthz/healthz {}
 
  :akvo.lumen.endpoint.invite/invite {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak
+                                     :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                                     :public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                      :emailer #ig/ref :akvo.lumen.component.emailer/emailer}
 
  :akvo.lumen.endpoint.invite/verify {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
-                                     :keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
+                                     :authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.endpoint.job-execution/job-execution {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
@@ -111,7 +129,7 @@
  :akvo.lumen.endpoint.transformation/transformation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                      :caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
- :akvo.lumen.endpoint.user/user {:keycloak #ig/ref :akvo.lumen.component.keycloak/keycloak}
+ :akvo.lumen.endpoint.user/user {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
 
  :akvo.lumen.endpoint.visualisation/visualisation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                    :windshaft-url "http://localhost:4000"}
@@ -120,10 +138,10 @@
 
  :akvo.lumen.component.handler/handler-api {:path "/api"
                                             :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
-                                                         #ig/ref :akvo.lumen.auth/wrap-jwt
-                                                         #ig/ref :akvo.lumen.auth/wrap-auth
-                                                         #ig/ref :akvo.lumen.lib.auth/wrap-auth-datasets
                                                          #ig/ref :akvo.lumen.component.handler/common-middleware
+                                                         #ig/ref :akvo.lumen.auth/wrap-jwt-authentication
+                                                         #ig/ref :akvo.lumen.auth/wrap-authorization
+                                                         #ig/ref :akvo.lumen.lib.auth/wrap-auth-datasets
                                                          #ig/ref :akvo.lumen.monitoring/middleware]
                                             :routes [#ig/ref :akvo.lumen.endpoint.aggregation/aggregation
                                                      #ig/ref :akvo.lumen.endpoint.collection/collection
@@ -155,7 +173,6 @@
                                                            #ig/ref :akvo.lumen.component.handler/common-middleware]
                                               :routes [#ig/ref :akvo.lumen.endpoint.public/public]}
 
-
  :akvo.lumen.component.handler/common-middleware [#ig/ref :akvo.lumen.component.handler/wrap-hide-errors
                                                   #ig/ref :akvo.lumen.component.error-tracker/wrap-sentry
                                                   #ig/ref :akvo.lumen.component.handler/wrap-defaults
@@ -177,12 +194,20 @@
 
  :akvo.lumen.component.caddisfly/prod {:schema-uri #duct/env [ "LUMEN_CADDISFLY_SCHEMA_URI" :or "https://s3-eu-west-1.amazonaws.com/akvoflow-public/caddisfly-tests-v2.json"]}
 
- :akvo.lumen.component.keycloak/data {:url #duct/env "LUMEN_KEYCLOAK_URL"
-                                      :realm "akvo"}
+ :akvo.lumen.component.authentication/public-client {:url #duct/env ["LUMEN_AUTH_URL" :or "https://akvofoundation.eu.auth0.com/"]
+                                                     :rsa-suffix-url  #duct/env ["LUMEN_AUTH_RSA_SUFFIX_URL" :or ".well-known/jwks.json"] 
+                                                     :client-id #duct/env [ "LUMEN_AUTH_PUBLIC_CLIENT_ID" :or "7Ze0JP6Jjf7zItGy3ekyuTvwGyik4Lay"]
+                                                     :end-session-endpoint-suffix #duct/env [ "LUMEN_AUTH_END_SESSION_ENDPOINT_SUFFIX" :or "v2/logout"]}
 
- :akvo.lumen.component.keycloak/keycloak {:data #ig/ref :akvo.lumen.component.keycloak/data
-                                          :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
-                                                        :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
+ :akvo.lumen.component.keycloak/authorization-service {:url #duct/env "LUMEN_KEYCLOAK_URL"
+                                                       :issuer-suffix-url "/realms/akvo"
+                                                       :realm "akvo"
+                                                       :max-user-ids-cache 1000
+                                                       :paths-cache-seconds #duct/env [ "LUMEN_PATHS_CACHE_SECONDS" :or 60]
+                                                       :monitoring {:collector #ig/ref :akvo.lumen.monitoring/collector}
+                                                       :error-tracker #ig/ref :akvo.lumen.component.error-tracker/error-tracker
+                                                       :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
+                                                                     :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
 
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
                                                    :email-user #duct/env "LUMEN_EMAIL_USER"

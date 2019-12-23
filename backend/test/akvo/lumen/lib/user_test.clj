@@ -17,10 +17,7 @@
 ;;;
 
 
-(def keycloak-config (let [c (tu/start-config)]
-                       (merge (select-keys (:akvo.lumen.component.keycloak/keycloak c) [:credentials])
-                              {:data (:akvo.lumen.component.keycloak/data c)}
-                              )))
+(def system-config )
 
 (def test-system
   {:emailer {}
@@ -31,9 +28,12 @@
 
 
 (defn fixture [f]
-  (binding [*emailer* (ig/init-key :akvo.lumen.component.emailer/dev-emailer {:config {:from-email "" :from-name ""}})
-            *keycloak* (ig/init-key :akvo.lumen.component.keycloak/keycloak keycloak-config)]
-    (f)))
+  (let [c                      (tu/start-config)
+        keycloak-config        (select-keys (:akvo.lumen.component.keycloak/authorization-service c)
+                                            [:credentials :max-user-ids-cache :realm :url :issuer-suffix-url])]
+    (binding [*emailer*  (ig/init-key :akvo.lumen.utils.dev-emailer/emailer {:config {:from-email "" :from-name ""}})         
+              *keycloak* (ig/init-key :akvo.lumen.component.keycloak/authorization-service keycloak-config )]
+      (f))))
 
 (use-fixtures :once system-fixture tenant-conn-fixture fixture tu/spec-instrument)
 
@@ -43,26 +43,26 @@
 ;;;
 
 (def author-claims {"name" "Jerome Eginla"})
-(def ruth-email  "ruth@t2.lumen.localhost")
+(def ruth-email  "ruth@t2.akvolumen.org")
 (def server-name "t1.lumen.localhost")
 (def tenant "t1")
 
 
 (defn- admin-and-members
   [keycloak tenant]
-  (let [request-headers (keycloak/request-headers keycloak)
+  (let [headers (keycloak/request-headers keycloak)
         admin-group-id (get (keycloak/group-by-path
-                             keycloak request-headers (format "%s/admin" tenant))
+                             keycloak headers (format "%s/admin" tenant))
                             "id")
         tenant-group-id (get (keycloak/group-by-path
-                              keycloak request-headers tenant)
+                              keycloak headers tenant)
                              "id")]
     {:admin-ids (into #{}
                       (map #(get % "id"))
-                      (keycloak/group-members keycloak request-headers admin-group-id))
+                      (keycloak/group-members keycloak headers admin-group-id))
      :member-ids (into #{}
                        (map #(get % "id"))
-                       (keycloak/group-members keycloak request-headers tenant-group-id))}))
+                       (keycloak/group-members keycloak headers tenant-group-id))}))
 
 (deftest ^:functional create-delete-invite
   (testing "Create invite"
@@ -109,8 +109,8 @@
   (testing "Promote user"
     (let [{api-root :api-root :as keycloak} *keycloak*
           admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
-          request-headers (keycloak/request-headers keycloak)
-          ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
+          headers (keycloak/request-headers keycloak)
+          ruth-user (keycloak/fetch-user-by-email headers api-root ruth-email)
           resp (user/promote-user-to-admin *keycloak* tenant admin-claims (get ruth-user "id"))]
       (is (= ::lib/ok (variant/tag resp)))
       (is (= (get ruth-user "id")
@@ -124,8 +124,8 @@
   (testing "Demote user"
     (let [{api-root :api-root :as keycloak} *keycloak*
           admin-claims {"realm_access" {"roles" ["akvo:lumen:t1:admin"]}}
-          request-headers (keycloak/request-headers keycloak)
-          ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
+          headers (keycloak/request-headers keycloak)
+          ruth-user (keycloak/fetch-user-by-email headers api-root ruth-email)
           resp (user/demote-user-from-admin *keycloak* tenant admin-claims (get ruth-user "id"))]
       (is (= ::lib/ok (variant/tag resp)))
       (is (= (get ruth-user "id")
@@ -138,8 +138,8 @@
 
   (testing "Remove user"
     (let [{api-root :api-root :as keycloak} *keycloak*
-          request-headers (keycloak/request-headers keycloak)
-          ruth-user (keycloak/fetch-user-by-email request-headers api-root ruth-email)
+          request (keycloak/request-headers keycloak)
+          ruth-user (keycloak/fetch-user-by-email request api-root ruth-email)
           resp (user/remove-user *keycloak* tenant author-claims (get ruth-user "id"))]
       (is (= ::lib/ok (variant/tag resp)))
       (let [{:keys [admin-ids member-ids]} (admin-and-members keycloak tenant)

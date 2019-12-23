@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.visualisation.maps
-  (:require [akvo.lumen.lib :as lib]
+  (:require [akvo.lumen.http.client :as http.client]
+            [akvo.lumen.lib :as lib]
             [akvo.lumen.postgres.filter :as filter]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
@@ -7,15 +8,14 @@
             [clojure.tools.logging :as log]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
-            [clj-http.client :as client]
             [clojure.core.match :refer [match]]
             [clojure.walk :as walk]
-            [hugsql.core :as hugsql])
+            [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.raster :as db.raster])
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
+(def http-client-req-defaults (http.client/req-opts 5000))
 
 (defn- headers [tenant-conn]
   (let [db-uri (-> ^HikariDataSource (:datasource tenant-conn)
@@ -85,14 +85,15 @@
       :else [(if (not dataset-id) raster-id dataset-id)])))
 
 (defn create-raster [tenant-conn windshaft-url raster-id]
-  (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id raster-id})
-        headers (headers tenant-conn)
+  (let [{:keys [raster_table metadata]} (db.raster/raster-by-id tenant-conn {:id raster-id})
+        headers* (headers tenant-conn)
         url (format "%s/layergroup" windshaft-url)
         map-config (map-config/build-raster raster_table (:min metadata) (:max metadata))
         _ (log/debug :map-config map-config)
-        layer-group-id (-> (client/post url {:body (json/encode map-config)
-                                             :headers headers
-                                             :content-type :json})
+        layer-group-id (-> (http.client/post* url (merge http-client-req-defaults
+                                                         {:body (json/encode map-config)
+                                                          :headers headers
+                                                          :content-type :json}))
                            :body json/decode (get "layergroupid"))
         layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil)]
     (lib/ok {:layerGroupId layer-group-id
@@ -105,8 +106,8 @@
                                     (:rasterId current-layer)
                                     (:datasetId current-layer))
                {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
-                                                           (raster-by-id tenant-conn {:id current-dataset-id})
-                                                           (dataset-by-id tenant-conn {:id current-dataset-id}))
+                                                           (db.raster/raster-by-id tenant-conn {:id current-dataset-id})
+                                                           (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id}))
                current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
            (map-metadata/build tenant-conn
                                (or raster_table
@@ -124,12 +125,11 @@
     (let [metadata-array (metadata-layers tenant-conn layers)
           map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
           headers* (headers tenant-conn)
-          _ (log/warn :map-config map-config)
-          _ (log/warn :headers headers)
-          layer-group-id (-> (client/post (format "%s/layergroup" windshaft-url)
-                                          {:body (json/encode map-config)
-                                           :headers headers*
-                                           :content-type :json})
+          layer-group-id (-> (http.client/post* (format "%s/layergroup" windshaft-url)
+                                                (merge http-client-req-defaults
+                                                       {:body (json/encode map-config)
+                                                        :headers headers*
+                                                        :content-type :json}))
                              :body json/decode (get "layergroupid"))]
       (lib/ok {:layerGroupId layer-group-id
                :layerMetadata metadata-array}))

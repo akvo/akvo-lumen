@@ -1,12 +1,15 @@
 version: "3"
 services:
  backend:
-   image: "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${TRAVIS_COMMIT}"
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${CI_COMMIT}"
    environment:
      - WAIT_FOR_DEPS=true
      - LUMEN_DB_URL=jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true
      - CI_BUILD=yes
      - LUMEN_FILE_UPLOAD_PATH=/tmp/akvo/lumen
+     - LUMEN_AUTH_URL=http://auth.lumen.local:8080/auth/realms/akvo
+     - LUMEN_AUTH_PUBLIC_CLIENT_ID=akvo-lumen
+     - LUMEN_AUTH_RSA_SUFFIX_URL=/protocol/openid-connect/certs
      - LUMEN_KEYCLOAK_URL=http://auth.lumen.local:8080/auth
      - LUMEN_KEYCLOAK_CLIENT_SECRET=caed3964-09dd-4752-b0bb-22c8e8ffd631
      - LUMEN_ENCRYPTION_KEY=secret
@@ -20,8 +23,11 @@ services:
      - LUMEN_EMAIL_PASSWORD=password
      - LUMEN_FLOW_API_URL=flow-url
      - LUMEN_PIWIK_SITE_ID=165
+     - LUMEN_DEPLOYMENT_COLOR=${CI_BRANCH}
+     - LUMEN_DEPLOYMENT_ENVIRONMENT=${USER}
+     - LUMEN_DEPLOYMENT_VERSION=${CI_COMMIT}
  client:
-   image: "eu.gcr.io/${PROJECT_NAME}/lumen-client:${TRAVIS_COMMIT}"
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-client:${CI_COMMIT}"
    expose:
       - 80
    depends_on:
@@ -31,10 +37,10 @@ services:
       sh -c "sed -i /etc/nginx/conf.d/default.conf -e 's/localhost:3000/backend:3000/' -e 's/localhost:4000/windshaft:4000/' && nginx -g 'daemon off;'"
  redis:
  windshaft:
-   image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${TRAVIS_COMMIT}"
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${CI_COMMIT}"
 
  backend-functional-tests:
-   image: akvo/akvo-lumen-backend-dev:20181029.3606771
+   image: akvo/akvo-lumen-backend-dev:20191001.144150.7c1e95e
    environment:
      - PGSSLMODE=require
      - PGSSLROOTCERT=/pg-certs/server.crt
@@ -50,3 +56,5 @@ services:
  fe-e2e-tests:
    environment:
       - LUMEN_URL=http://t1.lumen.local/
+ exporter:
+   image: "eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${CI_COMMIT}"

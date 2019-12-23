@@ -1,7 +1,17 @@
 -- :name all-dashboards :? :*
 -- :doc Return all dashboards
-SELECT id, title, 'ok' AS status, 'dashboard' AS type, created, modified, author
+SELECT id,
+       title,
+       'ok' AS status,
+       'dashboard' AS type,
+       created,
+       modified,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author"
 FROM dashboard;
+
+-- :name all-dashboards-ids :? :*
+-- :doc Return all dashboards ids
+SELECT id FROM dashboard;
 
 -- :name all-dashboards-with-visualisations :? :*
 -- :doc Return all dashboards with visualisations, no distinct result, so need some processing in case
@@ -13,13 +23,23 @@ FROM dashboard;
 -- :name insert-dashboard :<!
 -- :doc Insert dashboard.
 INSERT INTO dashboard (id, title, spec, author)
-VALUES (:id, :title, :spec::jsonb, :author)
+VALUES (
+       :id,
+       :title,
+       :spec::jsonb,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
+)
 RETURNING *;
 
 -- :name upsert-dashboard :<!
 -- :doc Insert or update dashboard.
 INSERT INTO dashboard (id, title, spec, author)
-VALUES (:id, :title, :spec::jsonb, :author)
+VALUES (
+       :id,
+       :title,
+       :spec::jsonb,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
+)
 ON CONFLICT (id)
 DO UPDATE SET id=:id, title=:title, spec=:spec::jsonb
 RETURNING *;

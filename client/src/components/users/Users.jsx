@@ -3,102 +3,31 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 
-import EntityTypeHeader from './entity-editor/EntityTypeHeader';
-import ConfirmUserAction from './users/ConfirmUserAction';
-import InviteUser from './users/InviteUser';
-import * as api from '../utilities/api';
-import { showNotification } from '../actions/notification';
+import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
+import ConfirmUserAction from './ConfirmUserAction';
+import InviteUser from './InviteUser';
+import User from './User';
+import * as api from '../../utilities/api';
+import { showNotification } from '../../actions/notification';
 
-require('./entity-editor/EntityTypeHeader.scss');
+require('../entity-editor/EntityTypeHeader.scss');
 require('./Users.scss');
 
-function UserActionSelector({ getUserActions, onChange, user }) {
-  const actions = getUserActions(user);
-  return (
-    <select
-      className="UserActionSelector"
-      onChange={event => onChange(user, event.target.value)}
-      value="?"
-    >
-      <option value="?">...</option>
-      {actions.map(([value, text, disabled]) => (
-        <option disabled={disabled} key={value} value={value}>{text}</option>
-      ))}
-    </select>
-  );
-}
-
-UserActionSelector.propTypes = {
-  getUserActions: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
-  user: PropTypes.shape({
-    active: PropTypes.bool.isRequired,
-    admin: PropTypes.bool,
-    email: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
-    username: PropTypes.string,
-  }),
-};
-
-UserActionSelector.defaultProps = {
-  user: {
-    admin: false,
-    username: '',
-  },
-};
-
-function User({ getUserActions, invitationMode, onChange, user }) {
-  const { active, admin, email, username } = user;
-  return (
-    <tr>
-      {!invitationMode &&
-        <td>
-          {username}
-          {active && <span className="isMe"> (me)</span>}
-        </td>
-      }
-      <td>{email}</td>
-      {!invitationMode && <td>{admin ? 'Admin' : 'User'}</td>}
-      <td>
-        <UserActionSelector
-          getUserActions={getUserActions}
-          onChange={onChange}
-          user={user}
-        />
-      </td>
-    </tr>
-  );
-}
-
-User.propTypes = {
-  getUserActions: PropTypes.func.isRequired,
-  invitationMode: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  user: PropTypes.shape({
-    active: PropTypes.bool.isRequired,
-    admin: PropTypes.bool,
-    email: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
-    username: PropTypes.string,
-  }).isRequired,
-};
-
-User.defaultProps = {
-  user: {
-    admin: false,
-    username: '',
-  },
-};
-
-function UserList({ activeUserId, getUserActions, invitationMode, onChange, users }) {
+function UserList({
+  currentUserEmail, getUserActions, invitationMode, onChange, users,
+}) {
   return (
     <table>
       <tbody>
         <tr>
           {!invitationMode && (
-            <th>
-              <FormattedMessage id="name" />
-            </th>
+            <th />
+          )}
+          {!invitationMode && (
+            <th><FormattedMessage id="first_name" /></th>
+          )}
+          {!invitationMode && (
+            <th><FormattedMessage id="last_name" /></th>
           )}
           <th><FormattedMessage id="email" /></th>
           {!invitationMode && (
@@ -110,18 +39,22 @@ function UserList({ activeUserId, getUserActions, invitationMode, onChange, user
             <FormattedMessage id="actions" />
           </th>
         </tr>
-        {users.map(({ admin, email, id, username }) => (
+        {users.map(({
+          admin, email, id, firstName, lastName,
+        }) => (
           <User
             getUserActions={getUserActions}
             key={id}
             onChange={onChange}
             invitationMode={invitationMode}
             user={{
-              active: id === activeUserId,
+              currentUser: email === currentUserEmail,
               admin,
               email,
               id,
-              username }}
+              firstName,
+              lastName,
+            }}
           />
         ))}
       </tbody>
@@ -130,12 +63,43 @@ function UserList({ activeUserId, getUserActions, invitationMode, onChange, user
 }
 
 UserList.propTypes = {
-  activeUserId: PropTypes.string.isRequired,
+  currentUserEmail: PropTypes.string.isRequired,
   getUserActions: PropTypes.func.isRequired,
   invitationMode: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   users: PropTypes.array.isRequired,
 };
+
+UserList.defaultProps = {
+  invitationMode: false,
+};
+
+function compareByRoleAndNames(a, b) {
+  const aFirstName = a.firstName && a.firstName.toLowerCase();
+  const aLastName = a.lastName && a.lastName.toLowerCase();
+  const bFirstName = b.firstName && b.firstName.toLowerCase();
+  const bLastName = b.lastName && b.lastName.toLowerCase();
+
+  if (a.admin < b.admin) {
+    return 1;
+  }
+  if (a.admin > b.admin) {
+    return -1;
+  }
+  if (aFirstName > bFirstName) {
+    return 1;
+  }
+  if (aFirstName < bFirstName) {
+    return -1;
+  }
+  if (aLastName > bLastName) {
+    return 1;
+  }
+  if (aLastName < bLastName) {
+    return -1;
+  }
+  return 0;
+}
 
 class Users extends Component {
   constructor(props) {
@@ -143,7 +107,9 @@ class Users extends Component {
     this.state = {
       userAction: {
         action: '',
-        user: { email: '', id: '', username: '' },
+        user: {
+          email: '', id: '', firstName: '', lastName: '',
+        },
       },
       invitationMode: false,
       invitations: [],
@@ -161,39 +127,46 @@ class Users extends Component {
   }
 
   componentDidMount() {
-    if (this.props.profile.admin) {
+    const { profile } = this.props;
+    if (profile.admin) {
       this.getInvitations();
       this.getUsers();
     }
   }
 
   onInviteUser(email) {
+    const { dispatch } = this.props;
     this.setState({ isInviteModalVisible: false });
     api.post('/api/admin/invites', { email })
       .then(() => this.getInvitations())
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to invite user.'));
+        dispatch(showNotification('error', 'Failed to invite user.'));
       });
   }
 
   getUsers() {
+    const { dispatch } = this.props;
     api.get('/api/admin/users')
-      .then(({ body: { users } }) => this.setState({ users }))
+      .then(({ body: { users } }) => {
+        users.sort(compareByRoleAndNames);
+        this.setState({ users });
+      })
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to fetch users.'));
+        dispatch(showNotification('error', 'Failed to fetch users.'));
       });
   }
 
   getInvitations() {
+    const { dispatch } = this.props;
     api.get('/api/admin/invites')
       .then(({ body: { invites } }) => this.setState({ invitations: invites }))
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to fetch invitations.'));
+        dispatch(showNotification('error', 'Failed to fetch invitations.'));
       });
   }
 
   getUserActionButtons() {
-    const invitationMode = this.state.invitationMode;
+    const { invitationMode } = this.state;
     const buttons = [
       {
         buttonText: invitationMode ? 'Manage users' : 'Manage invitations',
@@ -208,17 +181,17 @@ class Users extends Component {
   }
 
   getUserActions(user) {
-    const { active, admin } = user;
+    const { invitationMode } = this.state;
+    const { currentUser, admin } = user;
     let actions = [];
-    if (this.state.invitationMode) {
+    if (invitationMode) {
       actions = [['revoke', 'Revoke invitation', false]];
     } else {
       actions = [
-        ['edit', 'Edit user', true],
-        ['delete', 'Delete user', active],
+        ['delete', 'Delete user', currentUser],
       ];
       if (admin) {
-        actions.push(['demote', 'Revoke admin privileges', (!admin || active)]);
+        actions.push(['demote', 'Revoke admin privileges', (!admin || currentUser)]);
       } else {
         actions.push(['promote', 'Enable admin privileges', admin]);
       }
@@ -234,7 +207,9 @@ class Users extends Component {
   }
 
   handleUserAction() {
-    const { action, user } = this.state.userAction;
+    const { dispatch } = this.props;
+    const { userAction } = this.state;
+    const { action, user } = userAction;
     const { id } = user;
     this.setState({ isActionModalVisible: false });
     const usersUrl = `/api/admin/users/${id}`;
@@ -243,36 +218,39 @@ class Users extends Component {
       api.del(usersUrl)
         .then(() => this.getUsers())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     } else if (action === 'demote') {
       api.patch(usersUrl, { admin: false })
         .then(() => this.getUsers())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     } else if (action === 'promote') {
       api.patch(usersUrl, { admin: true })
         .then(() => this.getUsers())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     } else if (action === 'revoke') {
       api.del(invitesUrl)
         .then(() => this.getInvitations())
         .catch(() => {
-          this.props.dispatch(showNotification('error', `Failed to ${action} user.`));
+          dispatch(showNotification('error', `Failed to ${action} user.`));
         });
     }
   }
 
   render() {
+    const { profile } = this.props;
+    const { admin, email } = profile;
+    const {
+      invitationMode, isActionModalVisible, isInviteModalVisible, invitations, users, userAction,
+    } = this.state;
     const actionButtons = this.getUserActionButtons();
-    const { admin, id } = this.props.profile;
     const saveStatus = '';
-    const invitationMode = this.state.invitationMode;
-    const title = invitationMode ? 'Invitations' : 'Members';
 
+    const title = invitationMode ? 'Invitations' : 'Members';
     if (!admin) {
       return (
         <div>
@@ -290,46 +268,39 @@ class Users extends Component {
         />
         <div className="UserList">
           <UserList
-            activeUserId={id}
+            currentUserEmail={email}
             getUserActions={this.getUserActions}
             onChange={this.handleUserActionSelect}
             invitationMode={invitationMode}
-            users={invitationMode ? this.state.invitations : this.state.users}
+            users={invitationMode ? invitations : users}
           />
         </div>
         <InviteUser
-          isOpen={this.state.isInviteModalVisible}
+          isOpen={isInviteModalVisible}
           onClose={() => this.setState({ isInviteModalVisible: false })}
           onInviteUser={this.onInviteUser}
         />
         <ConfirmUserAction
-          isOpen={this.state.isActionModalVisible}
+          isOpen={isActionModalVisible}
           onChange={this.handleUserAction}
           onClose={() => this.setState({ isActionModalVisible: false })}
-          userAction={this.state.userAction}
+          userAction={userAction}
         />
       </div>
     );
   }
 }
 
-export default connect(state => ({
-  profile: state.profile,
-}))(Users);
-
 Users.propTypes = {
   profile: PropTypes.shape({
     admin: PropTypes.bool,
     email: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
-    username: PropTypes.string.isRequired,
+    firstName: PropTypes.string.isRequired,
+    lastName: PropTypes.string.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
 };
 
-Users.defaultProps = {
-  profile: {
-    admin: false,
-    username: '',
-  },
-};
+export default connect(state => ({
+  profile: state.profile,
+}))(Users);

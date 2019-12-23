@@ -8,7 +8,7 @@ import Dataset from './Dataset';
 import Raster from './Raster';
 import Transformation from './Transformation';
 import Dashboard from './Dashboard';
-import Users from '../components/Users';
+import Users from '../components/users/Users';
 import Resources from '../components/Resources';
 import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';
@@ -20,6 +20,7 @@ export default function App({ history, location }) {
     <IntlWrapper>
       <Router history={history}>
         <Route path="/" component={Main}>
+          <Redirect from="auth_callback" to="/" />
           <IndexRedirect from="" to="library" />
           <Route
             path="library"

@@ -9,7 +9,7 @@ spec:
       labels:
         run: redis
         role: master
-        client: windshaft
+        client: windshaft        
     spec:
       containers:
       - name: master

@@ -1,25 +1,26 @@
 {:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
 
  :akvo.lumen.component.http/http {:port 3100}
-
- :akvo.lumen.component.tenant-manager/tenant-manager {:encryption-key "secret"}
+ :akvo.lumen.component.tenant-manager/data {:encryption-key "secret"}
 
  :akvo.lumen.component.caddisfly/local {:local-schema-uri "./caddisfly/caddisfly-tests-v2.json"}
 
  :akvo.lumen.component.error-tracker/config-test {}
  :akvo.lumen.component.error-tracker/void #ig/ref :akvo.lumen.component.error-tracker/config-test
 
- :akvo.lumen.component.emailer/dev-emailer {:from-email "devops@akvo.localhost"
-                                            :from-name "Akvo Lumen"}
+ :akvo.lumen.utils.dev-emailer/emailer {:from-email "devops@akvo.localhost"
+                                        :from-name "Akvo Lumen"}
 
  :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 
- :akvo.lumen.component.keycloak/data {:url "http://auth.lumen.local:8080/auth"
-                                      :realm "akvo"}
+ :akvo.lumen.component.authentication/public-client {:url "http://auth.lumen.local:8080/auth/realms/akvo"
+                                                     :client-id "akvo-lumen"
+                                                     :rsa-suffix-url "/protocol/openid-connect/certs"}
 
- :akvo.lumen.component.keycloak/keycloak {:credentials
-                                          {:client_id "akvo-lumen-confidential"
-                                           :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
+ :akvo.lumen.component.keycloak/authorization-service {:url "http://auth.lumen.local:8080/auth"
+                                                       :credentials
+                                                       {:client_id "akvo-lumen-confidential"
+                                                        :client_secret "caed3964-09dd-4752-b0bb-22c8e8ffd631"}}
 
  :akvo.lumen.component.handler/wrap-stacktrace {}
 
@@ -39,12 +40,18 @@
 
  :akvo.lumen.upload/data {:file-upload-path "/tmp/akvo/lumen"}
 
- :akvo.lumen.component.flow/api {:url "https://api.akvotest.org/flow"}
+ :akvo.lumen.component.flow/api {:url "https://api.akvotest.org/flow"
+                                 :internal-url "https://api.akvotest.org/flow"
+                                 :internal-api-headers #ig/ref :akvo.lumen.component.flow/api-headers}
 
- :akvo.lumen.endpoint.env/env {:keycloak-public-client-id "akvo-lumen"
-                               :keycloak-url "http://auth.lumen.local:8080/auth"
-                               :sentry-client-dsn "dev-sentry-client-dsn"
-                               :piwik-site-id "165"}
+ :akvo.lumen.component.authz-service/http-service-client {:url "https://authz.akvotest.org/authz"
+                                                          :api-headers-fn #ig/ref :akvo.lumen.component.flow/api-headers}
+
+ :akvo.lumen.endpoint.env/env {:lumen-deployment-color #duct/env ["LUMEN_DEPLOYMENT_COLOR" :or "Pink"]
+                               :lumen-deployment-environment #duct/env ["LUMEN_DEPLOYMENT_ENVIRONMENT" :or "Local test"]
+                               :lumen-deployment-version #duct/env ["LUMEN_DEPLOYMENT_VERSION" :or "Local version"]
+                               :piwik-site-id "165"
+                               :sentry-client-dsn "dev-sentry-client-dsn"}
 
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"

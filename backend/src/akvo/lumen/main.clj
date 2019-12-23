@@ -6,9 +6,15 @@
             [clojure.java.io :as io]
             [clojure.spec.test.alpha :as stest]
             [duct.core :as duct]
+            [duct.core.env :as env]
             [integrant.core :as ig]))
 
 (def config-file "akvo/lumen/config.edn")
+
+;; While Duct core.env does not have support for doubles
+;; https://github.com/duct-framework/core/pull/28
+(defmethod env/coerce 'Double [x _]
+  (Double/parseDouble x))
 
 (defn -main [& args]
   (config/assert-bindings)

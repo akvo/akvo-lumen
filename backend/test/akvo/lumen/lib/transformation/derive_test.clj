@@ -6,7 +6,8 @@
             [clojure.tools.logging :as log]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.clojure-test :refer (defspec)]
-            [clojure.test :refer :all]))
+            [clojure.test :refer :all]
+            [clojure.walk :as walk]))
 
 (defspec parse-row-object-references-double-quote-gen-test
   10000
@@ -28,6 +29,23 @@
                   (when-not res (log/error v expression res))
                   res)))
 
+(deftest parse-row-nested-object-references
+  (is (= '(("row[\"g1\"][\"q2\"]" "g1" "q2"))
+         (derive/parse-row-object-references  "row[\"g1\"][\"q2\"]")))
+  (is (= '(("row['g1']['q2']" "g1" "q2"))
+         (derive/parse-row-object-references  "row['g1']['q2']")))
+  (testing "unconsistency second prop reference"
+    (is (= '(("row.group1" "group1"))
+           (derive/parse-row-object-references  "row.group1['q2']")))
+    (is (= '(("row[\"g1\"]" "g1"))
+           (derive/parse-row-object-references  "row[\"g1\"]['q2']"))))
+  (testing "second property if using '.' is not parsed thus could be confused with a function like .toUpperCase or a property"
+    (is (= '(("row[\"g1\"]" "g1"))
+           (derive/parse-row-object-references  "row[\"g1\"].q2")))
+    (is (= '(("row['g1']" "g1"))
+           (derive/parse-row-object-references  "row['g1'].q2")))
+    (is (= '(("row.g1" "g1"))
+           (derive/parse-row-object-references  "row.g1.g2")))))
 
 (deftest parse-row-object-references
   (is (= '(["row.a" "a"])
@@ -140,7 +158,31 @@
         computed (derive/compute-transformation-code (get-in t1 ["args" "code"]) older-columns)]
     (is (= code_v2 (derive/columnName>columnTitle computed new-columns)))
     (is (= (update-in t1 ["args" "code"] (constantly code_v2))
-           (engine/adapt-transformation t1 older-columns new-columns)))
-    ))
+           (engine/adapt-transformation t1 older-columns new-columns)))))
 
+(deftest row-template-format-test
+  (is (= "row['%s']"
+         (derive/row-template-format "row.hi")))
+  (is (= "row[\"%s\"]"
+         (derive/row-template-format "row[\"hi\"]")))
+  (is (= "row['%s']"
+       (derive/row-template-format "row['hi']"))))
 
+(deftest column-groups-test
+  (let [columns (walk/keywordize-keys
+                 [{"sort" nil
+                   "type" "text"
+                   "title" "A"
+                   "hidden" false
+                   "direction" nil
+                   "columnName" "c1"}
+                  {"sort" nil
+                   "type" "text"
+                   "title" "b"
+                   "hidden" false
+                   "direction" nil
+                   "columnName" "c2"}])]
+    (is (= nil (derive/columns-groups columns)))
+    (is (= {"Transformations" [:d1]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :columnName "d1"))))))
+    (is (= {"Metadata" [:identifier]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :columnName "identifier"))))))
+    (is (= {"My Group" [:c1]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :groupName "My Group"))))))))

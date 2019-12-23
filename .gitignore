@@ -6,6 +6,7 @@ npm-debug.log
 .DS_Store
 client/dist
 client/yarn.lock
+notify.slack.sh
 
 # docker-compose
 .env
@@ -27,6 +28,7 @@ backend/dev/src/local.clj
 # CI
 ci/dev/deployment.yaml
 ci/prod/deployment.yaml
+ci/flipped.service.yaml
 
 # E2E tests
 client/e2e-test/cypress/plugins

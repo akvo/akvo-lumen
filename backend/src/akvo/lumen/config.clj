@@ -22,10 +22,18 @@
     (assert (:lumen-sentry-client-dsn env) (error-msg "LUMEN_SENTRY_CLIENT_DSN"))
     (assert (:lumen-flow-api-url env) (error-msg "LUMEN_FLOW_API_URL"))))
 
+(defn read-config
+  [resource-path]
+  (duct/read-config (io/resource resource-path)))
+
+(defn prep [paths]
+  (ig/prep (apply duct/merge-configs (map read-config (filter some? paths)))))
+
 (defn construct
   "Create a system definition."
   ([] (construct "akvo/lumen/config.edn"))
-  ([config-path]
-   (ig/prep (duct/read-config (io/resource config-path)))))
+  ([& config-paths]
+   (prep config-paths)))
 
 
+;;(construct "akvo/lumen/config.edn" "akvo/lumen/admin.edn")

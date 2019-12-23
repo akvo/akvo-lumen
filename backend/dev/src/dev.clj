@@ -1,7 +1,6 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [akvo.lumen.config :as config]
-            [akvo.lumen.endpoint.commons]
+  (:require [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
             [akvo.lumen.protocols :as p]
@@ -12,6 +11,7 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
+            [akvo.lumen.component.tenant-manager]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
             [clojure.tools.logging :as log]
@@ -77,3 +77,9 @@
 (defn reset-db []
   (rollback)
   (migrate))
+
+(defn db-conn
+  ([label] (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) label))
+  ([] (db-conn "t1")))
+
+

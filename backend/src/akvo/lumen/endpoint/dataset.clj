@@ -1,5 +1,6 @@
 (ns akvo.lumen.endpoint.dataset
-  (:require [akvo.lumen.component.error-tracker :as error-tracker]
+  (:require [akvo.lumen.component.caddisfly :as caddisfly]
+            [akvo.lumen.component.error-tracker :as error-tracker]
             [akvo.lumen.component.flow]
             [akvo.lumen.component.keycloak :as keycloak]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
@@ -21,7 +22,7 @@
         auth-res (filter #(contains? auth-datasets (:id %)) res)]
     (lib/ok auth-res)))
 
-(defn routes [{:keys [upload-config import-config error-tracker tenant-manager] :as opts}]
+(defn routes [{:keys [upload-config import-config error-tracker tenant-manager caddisfly] :as opts}]
   ["/datasets"
    ["" {:get {:handler (fn [{tenant :tenant
                              auth-service :auth-service}]
@@ -29,9 +30,12 @@
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
+                              jwt-token :jwt-token
                               body :body}]
                           (dataset/create (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                          error-tracker jwt-claims (w/stringify-keys body)))}}]
+                                          error-tracker jwt-claims (-> (w/stringify-keys body)
+                                                                       (assoc-in ["source" "email"] (get jwt-claims "email"))
+                                                                       (assoc-in ["source" "token"] jwt-token))))}}]
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
@@ -61,13 +65,18 @@
                                   {:keys [id]} :path-params}]
                               (dataset/delete (p/connection tenant-manager tenant) id))}}]
      ["/sort"
-      [["/:column-name" {:get {:parameters {:path-params {:id string?
-                                                          :column-name string?}
-                                            :query-params {:offset (s/nilable string?)}}
-                               :handler (fn [{tenant :tenant
-                                              {:keys [id column-name]} :path-params
-                                              query-params :query-params}]
-                                          (lib/ok (dataset/sort* (p/connection tenant-manager tenant) id column-name (get query-params "offset"))))}}]]]
+      [["/:column-name/text" {:get {:parameters {:path-params {:id string?
+                                                               :column-name string?}
+                                                 :query-params {:limit (s/nilable string?)}}
+                                    :handler (fn [{tenant :tenant
+                                                   {:keys [id column-name]} :path-params
+                                                   query-params :query-params}]
+                                               (lib/ok (dataset/sort-text (p/connection tenant-manager tenant) id column-name (get query-params "limit"))))}}]]
+      [["/:column-name/number" {:get {:parameters {:path-params {:id string?
+                                                                 :column-name string?}}
+                                      :handler (fn [{tenant :tenant
+                                                     {:keys [id column-name]} :path-params}]
+                                                 (lib/ok (dataset/sort-number (p/connection tenant-manager tenant) id column-name)))}}]]]
      ["/meta" {:get {:parameters {:path-params {:id string?}}
                      :handler (fn [{tenant :tenant
                                     {:keys [id]} :path-params}]
@@ -75,10 +84,13 @@
      ["/update" {:post {:parameters {:path-params {:id string?}}
                         :handler (fn [{tenant :tenant
                                        jwt-claims :jwt-claims
+                                       jwt-token :jwt-token
                                        body :body
                                        {:keys [id]} :path-params}]
-                                   (dataset/update (p/connection tenant-manager tenant) (merge import-config upload-config)
-                                                   error-tracker id (w/stringify-keys body)))}}]]]])
+                                   (dataset/update (p/connection tenant-manager tenant) caddisfly (merge import-config upload-config)
+                                                   error-tracker id (assoc (w/stringify-keys body)
+                                                                           "token" jwt-token
+                                                                           "email" (get jwt-claims "email"))))}}]]]])
 
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dataset/dataset  [_ opts]
@@ -89,6 +101,7 @@
 (s/def ::import-config (s/keys :req-un [::flow-api]))
 (s/def ::config (s/keys :req-un [::tenant-manager/tenant-manager
                                  ::error-tracker/error-tracker
+                                 ::caddisfly/caddisfly
                                  ::upload-config
                                  ::import-config]))
 

@@ -1,8 +1,11 @@
 /* global cy, before, context, Cypress, after, it */
 const baseUrl = Cypress.env('LUMEN_URL') || 'http://t1.lumen.local:3030/';
-const username = Cypress.env('LUMEN_USER') || 'jerome';
+const auth = Cypress.env('LUMEN_AUTH') || 'keycloak';
+const auth_client_id = Cypress.env('LUMEN_AUTH_CLIENT_ID');
+const auth_client_password = Cypress.env('LUMEN_AUTH_CLIENT_PASSWORD');
+const username = Cypress.env('LUMEN_USER') || 'jerome@t1.akvolumen.org';
 const password = Cypress.env('LUMEN_PASSWORD') || 'password';
-const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/develop/client/e2e-test/sample-data-1.csv';
+const DATASET_LINK = 'https://raw.githubusercontent.com/akvo/akvo-lumen/master/client/e2e-test/sample-data-1.csv';
 const datasetName = `Dataset ${Date.now().toString()}`;
 const COLUMNS = {
   TEXT_1: 'Name',
@@ -24,17 +27,45 @@ Cypress.on('fail', (error) => {
 });
 
 context('Akvo Lumen', ()  => {
-  // login
-  before(() => {
-    cy.visit(baseUrl);
-    cy.get('#username')
-      .type(username)
-      .should('have.value', username);
-    cy.get('#password')
-      .type(password)
-      .should('have.value', password);
-    cy.get('#kc-login').click();
-  });
+    // login
+    before(() => {
+	if(auth === "keycloak"){
+	    cy.visit(baseUrl);
+	    cy.get('#username')
+		.type(username)
+		.should('have.value', username);
+	    cy.get('#password')
+		.type(password)
+		.should('have.value', password);
+	    cy.get('#kc-login').click();
+	} else {
+	    Cypress.log({
+		name: 'loginViaAuth0',
+	    });
+	    const options = {
+		method: 'POST',
+		url: 'https://akvotest.eu.auth0.com/oauth/token',
+		body: {
+		    grant_type: 'password',
+		    username: username,
+		    password: password,
+		    audience: 'https://akvotest.eu.auth0.com/api/v2/',
+		    scope: 'openid profile email',
+		    client_id: auth_client_id,
+		    client_secret: auth_client_password
+		},
+	    };
+
+	    cy.request(options)
+		.then((resp) => {
+		    return resp.body;
+		})
+		.then((body) => {
+		    const { id_token } = body;
+		    cy.visit(baseUrl+"?access_token="+id_token+"&edit_user=false");
+		});
+	}
+    });
 
   // delete entities created during test
   after(() => {
@@ -47,15 +78,16 @@ context('Akvo Lumen', ()  => {
         cy.wrap(el)
           .find('[data-test-id="delete"]')
           .click({ force: true });
-        cy.get('.DeleteConfirmationModal button.delete')
-          .click();
+        cy.get('.DeleteConfirmationModal button.delete').click();
         setTimeout(5000, tryDelete);
       });
     };
     tryDelete();
   });
 
-  it('create dataset: link', () => {
+  it('e2e tests', () => {
+  context('create dataset: link', ()  => {
+
     cy.get('button[data-test-id="dataset"]').click();
     // Select link option
     cy.get('input[data-test-id="source-option"][value="LINK"]').click();
@@ -74,32 +106,18 @@ context('Akvo Lumen', ()  => {
     // see if table cells exist
     cy.get('.fixedDataTableCellLayout_main').should('have.length.of.at.least', 4);
     // back to library
-    cy.get('[data-test-id="back-button"]').click();
+      cy.get('[data-test-id="back-button"]').click();
   });
-
-  it('create visualisation (pivot table)', () => {
+  context('create visualisation (pivot table)', () => {
     cy.get('button[data-test-id="visualisation"]').click();
     cy.get('[data-test-id="visualisation-type-pivot-table"]')
       .click({ force: true });
-    cy.get('[data-test-id="dataset-menu"] .Select-control').click();
-    // Finding dataset option
-    cy.get('[role="option"]')
-      .contains(datasetName)
-      .should('have.attr', 'id')
-      .then((optionId) => {
-        // Selecting dataset
-        cy.get(`#${optionId}`).click();
-        // open column menu
-        cy.get('[data-test-id="column-select"] .Select-control').click();
-        // Finding column to select
-        return cy.get('[role="option"]')
-          .contains(COLUMNS.TEXT_1)
-          .should('have.attr', 'id');
-      })
+
+      cy.get('[data-test-id="dataset-menu"] .SelectMenu input').first().click({ force: true}).type(`${datasetName}{enter}`, { force: true}).then(() => {
+    // open column menu
+    cy.get('[data-test-id="column-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.TEXT_1}{enter}`, { force: true})
       .then((columnId) => {
         const title = `Visualisation of ${datasetName}`;
-        // Selecting column
-        cy.get(`#${columnId}`).click();
         // Focusing title
         cy.get('div[data-test-id="entity-title"]').click();
         // Typing visualisation name
@@ -123,31 +141,19 @@ context('Akvo Lumen', ()  => {
         cy.get('[data-test-id="back-button"]').click();
       });
   });
-
-  it('create visualisation from dataset page', () => {
+  context('create visualisation from dataset page', () => {
     cy.get('.dataset').contains(datasetName).click({ force: true });
     cy.get('button[data-test-id="visualise"]').click({ force: true });
     cy.get('[data-test-id="visualisation-type-pivot-table"]')
       .click({ force: true });
-    cy.get('[data-test-id="dataset-menu"] .Select-control').click();
-    // Finding dataset option
-    cy.get('[role="option"]')
-      .contains(datasetName)
-      .should('have.attr', 'id')
-      .then((optionId) => {
-        // Selecting dataset
-        cy.get(`#${optionId}`).click();
-        // open column menu
-        cy.get('[data-test-id="column-select"] .Select-control').click();
-        // Finding column to select
-        return cy.get('[role="option"]')
-          .contains(COLUMNS.TEXT_1)
-          .should('have.attr', 'id');
+
+    cy.get('[data-test-id="dataset-menu"] .SelectMenu input').first().click({ force: true}).type(`${datasetName}{enter}`, { force: true})
+        .then(() => {
+            cy.get('[data-test-id="column-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.TEXT_1}{enter}`, { force: true});
       })
-      .then((columnId) => {
+      .then(() => {
         const title = `Visualisation of ${datasetName} 2`;
         // Selecting column
-        cy.get(`#${columnId}`).click();
         // Focusing title
         cy.get('div[data-test-id="entity-title"]').click();
         // Typing visualisation name
@@ -171,8 +177,7 @@ context('Akvo Lumen', ()  => {
         cy.get('[data-test-id="back-button"]').click();
       });
   });
-
-  it('create dashboard', () => {
+  context('create dashboard', () => {
     cy.get('button[data-test-id="dashboard"]')
       .click({ force: true });
     // Selecting visualisation
@@ -190,38 +195,19 @@ context('Akvo Lumen', ()  => {
     // back to library
     cy.get('[data-test-id="back-button"]').click();
   });
-
-  it('change visualization types', () => {
+  context('change visualization types', () => {
     cy.get('button[data-test-id="visualisation"]').click();
 
     // Area
     cy.get('[data-test-id="visualisation-type-area"]')
       .click({ force: true });
-    cy.get('[data-test-id="dataset-menu"] .Select-control').click();
-
-    // Finding dataset option
-    cy.get('[role="option"]')
-      .contains(datasetName)
-      .should('have.attr', 'id')
-      .then((optionId) => {
-        // Selecting dataset
-        cy.get(`#${optionId}`).click();
-      })
+      cy.get('[data-test-id="dataset-menu"] .SelectMenu input').first().click({ force: true}).type(`${datasetName}{enter}`, { force: true})
 
       .then(() => {
-        // open x axis menu
-        cy.get('[data-test-id="x-axis-select"] .Select-control').click();
-        // Finding column to select
-        cy.get('[role="option"]')
-          .contains(COLUMNS.NUMBER_1)
-          .click();
+          // open x axis menu
+	  cy.get('[data-test-id="x-axis-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.NUMBER_1}{enter}`, { force: true});
 
-          // open y axis menu
-        cy.get('[data-test-id="y-axis-select"] .Select-control').click();
-        // Finding column to select
-        cy.get('[role="option"]')
-          .contains(COLUMNS.NUMBER_2)
-          .click();
+ 	  cy.get('[data-test-id="y-axis-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.NUMBER_2}{enter}`, { force: true});
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
@@ -247,19 +233,10 @@ context('Akvo Lumen', ()  => {
 
         cy.get('.Chart circle').should('exist');
 
-        // open bucket menu
-        cy.get('[data-test-id="category-select"] .Select-control').click();
-        // Finding column to select
-        cy.get('[role="option"]')
-          .contains(COLUMNS.TEXT_1)
-          .click();
-
+          // open bucket menu
+ 	  cy.get('[data-test-id="category-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.TEXT_1}{enter}`, { force: true});
         // open size menu
-        cy.get('[data-test-id="size-select"] .Select-control').click();
-        // Finding column to select
-        cy.get('[role="option"]')
-          .contains(COLUMNS.NUMBER_3)
-          .click();
+ 	  cy.get('[data-test-id="size-select"] .SelectMenu input').first().click({ force: true}).type(`${COLUMNS.NUMBER_3}{enter}`, { force: true});
 
         // wait for changes to be saved
         cy.get('.saveStatus').should('contain', 'All changes saved');
@@ -333,4 +310,5 @@ context('Akvo Lumen', ()  => {
         cy.get('[data-test-id="back-button"]').click();
       });
   });
-});
+  });
+})});

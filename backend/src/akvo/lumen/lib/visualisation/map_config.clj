@@ -2,12 +2,9 @@
   (:require [akvo.lumen.postgres.filter :as filter]
             [clojure.string :as str]
             [clojure.walk :as walk]
-            [hugsql.core :as hugsql])
+            [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.raster :as db.raster])
   (:import [java.awt Color]))
-
-
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 
 (defn layer-point-color [layer-index]
   ({0 "#2ca409"
@@ -144,10 +141,10 @@
 
 (defn shape-aggregation-sql
   [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index]
-  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id (:aggregationDataset current-layer)})
+  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id (:aggregationDataset current-layer)})
         point-table-name table-name
         point-columns columns
-        {:keys [table-name columns]} (dataset-by-id tenant-conn {:id (:datasetId current-layer)})
+        {:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id (:datasetId current-layer)})
         shape-table-name table-name
         shape-columns columns
         aggregation-method (:aggregationMethod current-layer "avg")
@@ -234,7 +231,7 @@
 
 (defn point-sql [tenant-conn columns table-name geom-column popup-columns
                  point-color-column where-clause {:keys [datasetId] :as layer}]
-  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
+  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
                                 #{} columns)
@@ -253,7 +250,7 @@
 
 (defn shape-sql [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause
                  {:keys [datasetId shapeLabelColumn ] :as layer}]
-  (let [{:keys [table-name columns]} (dataset-by-id tenant-conn {:id datasetId})
+  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
                                 #{} columns)
@@ -330,7 +327,7 @@
   (map-indexed (fn [idx {:keys [datasetId rasterId filters geom popup pointColorColumn]
                          :as layer}]
                  (if (= (:layerType layer) "raster")
-                   (let [{:keys [raster_table metadata]} (raster-by-id tenant-conn {:id (:rasterId layer)})]
+                   (let [{:keys [raster_table metadata]} (db.raster/raster-by-id tenant-conn {:id (:rasterId layer)})]
                      {:type "mapnik"
                       :options {:cartocss (raster-css (:startColor layer) (:endColor layer) (:min metadata) (:max metadata))
                                  :cartocss_version "2.3.0"
@@ -340,7 +337,7 @@
                                  :sql (format "SELECT * FROM %s" raster_table)
                                  :srid "3857"}})
                    (let [geom-column (get-geom-column layer)
-                         {:keys [columns]} (dataset-by-id tenant-conn {:id datasetId})
+                         {:keys [columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
                          where-clause (filter/sql-str (walk/keywordize-keys columns) filters)
                          popup-columns (mapv :column popup)
                          point-color-column pointColorColumn

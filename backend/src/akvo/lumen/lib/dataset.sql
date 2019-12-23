@@ -32,15 +32,21 @@ SELECT id, name, error_log as reason, status, modified, created, '{}'::jsonb AS 
 SELECT id, name, NULL, status, modified, created, '{}'::jsonb AS author, '{}'::jsonb AS source
   FROM pending_imports
  UNION
-SELECT id, title, NULL, 'OK', modified, created, author, source_data.source::jsonb
+SELECT id, title, NULL, 'OK', modified, created,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author",
+       source_data.source::jsonb
   FROM dataset, source_data
   WHERE source_data.dataset_id = dataset.id;
-
 
 -- :name insert-dataset :! :n
 -- :doc Insert new dataset
 INSERT INTO dataset(id, title, description, author)
-VALUES (:id, :title, :description, :author);
+VALUES (
+       :id,
+       :title,
+       :description,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
+);
 
 -- :name delete-dataset-by-id :! :n
 -- :doc delete dataset
@@ -121,4 +127,14 @@ SELECT COUNT(*) as counter, :i:column-name as coincidence
   FROM :i:table-name
   GROUP BY coincidence
   ORDER BY counter DESC
-  LIMIT :offset
+  --~ (when (:limit params) "LIMIT :i:limit")
+
+
+
+-- :name count-num-vals-by-column-name :? :1
+SELECT COUNT(*) as "all", max(:i:column-name) as "max", min(:i:column-name) as "min"
+  FROM :i:table-name
+
+
+-- :name count-unique-vals-by-colum-name :? :1
+select COUNT(DISTINCT :i:column-name) as "uniques" from :i:table-name

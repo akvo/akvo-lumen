@@ -69,14 +69,18 @@
 ;;; Local client (print to std out)
 ;;;
 
-(defrecord LocalErrorTracker [])
-
-(defn local-error-tracker []
-  (->LocalErrorTracker))
-
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/local
   [_]
   (s/keys :req-un [::opts]))
+
+(defrecord LocalErrorTracker [store])
+
+(defn local-error-tracker []
+  (->LocalErrorTracker (atom [])))
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
+  (local-error-tracker))
+
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local
   [_ {{:keys [opts]} :tracker :as config}]
@@ -127,6 +131,7 @@
 
   LocalErrorTracker
   (track [this error]
+    (swap! (:store this) conj (event-map error))
     (println "LocalErrorTracker:" (.getMessage error)))
 
   VoidErrorTracker

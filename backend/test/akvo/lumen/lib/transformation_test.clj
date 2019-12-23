@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.transformation-test
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                         *system*
                                          tenant-conn-fixture
                                          system-fixture
                                          *error-tracker*
@@ -11,15 +12,15 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
-            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.import :as import.s]
             [akvo.lumen.specs.import.column :as import.column.s]
             [akvo.lumen.specs.import.values :as import.values.s]
             [akvo.lumen.specs.transformation :as transformation.s]
-            [akvo.lumen.test-utils :refer [import-file at-least-one-true retry-job-execution] :as tu]
+            [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
             [akvo.lumen.util :refer [conform squuid]]
             [cheshire.core :as json]
             [clj-time.coerce :as tcc]
@@ -73,7 +74,7 @@
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
-    (conj res (:status job))))
+    (conj res (:status job) job)))
 
 (defn latest-data [dataset-id]
   (let [table-name (:table-name
@@ -117,9 +118,18 @@
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
+(def change-datatype-tx (fn [column-name & [new-type]]
+   {:type :transformation
+    :transformation
+    (-> (gen-transformation
+         "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
+                                 ::transformation.change-datatype.s/newType (or new-type "number")
+                                 ::transformation.engine.s/onError "default-value"})
+        (assoc-in ["args" "defaultValue"] nil))}))
+
 (deftest ^:functional test-transformations
   (testing "Transformation application"
-    (is (= [::lib/bad-request {:message "Dataset not found"} nil]
+    (is (= [::lib/bad-request {:message "Dataset not found"} nil nil]
            (async-tx-apply {:tenant-conn *tenant-conn*} "Not-valid-id" []))))
   (testing "Valid log"
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
@@ -287,26 +297,89 @@
         (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
         (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
 
+
+
+(deftest ^:functional test-update-issue-2254
+  (testing "Testing https://github.com/akvo/akvo-lumen/issues/2254 "
+    (let [[job dataset] (import-file *tenant-conn* *error-tracker*
+                                     {:dataset-name "Padded titles"
+                                      :kind "clj"
+                                      :data (import.s/sample-imported-dataset [:text :number :text :number :text :number :text :number] 2)
+                                      :with-job? true})
+          dataset-id (:dataset_id dataset)
+          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                 {:dataset-id dataset-id})
+                           (get-data *tenant-conn*))]
+      (testing "Testing columns are removed without tx"
+        (let [updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
+          (is (some? updated-res))))
+
+      (testing "Removing column with change-datatype tx"
+        (let [_ (apply-transformation (change-datatype-tx "c6" "text"))
+              updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text] 2)})]
+          (is (some? updated-res))))
+
+      (testing "Removing column with rename-name tx, should fails"
+        (let [jow (apply-transformation
+                 {:type :transformation
+                  :transformation (gen-transformation "core/rename-column"
+                                                      {::transformation.derive.s/newColumnTitle    "New Title"
+                                                       ::transformation.rename-column.s/columnName "c5"
+                                                       ::transformation.engine.s/onError           "fail"})})
+              updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
+          (is (= "FAILED" (:status (first updated-res))))))
+
+      (testing "Removing column with delete-column tx"
+        (let [_ (apply-transformation {:type :transformation
+                                       :transformation
+                                       (gen-transformation "core/delete-column"
+                                                           {::db.dataset-version.column.s/columnName "c5"
+})})
+              updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
+                                       *error-tracker* (:dataset-id job) (:data-source-id job)
+                                       {:kind "clj"
+                                        :with-job? true
+                                        :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
+          (is (some? updated-res)))))))
+
 (deftest ^:functional derived-column-test
-  (let [change-datatype-transformation (fn [column-name]
-                                         {:type :transformation
-                                          :transformation
-                                          (-> (gen-transformation
-                                               "core/change-datatype" {::db.dataset-version.column.s/columnName "column-name"
-                                                                      ::transformation.change-datatype.s/newType "number"
-                                                                      ::transformation.engine.s/onError "default-value"})
-                                              (assoc-in ["args" "defaultValue"] nil))})
-        dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
                                                                :file "derived-column.csv"})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (do (apply-transformation (change-datatype-transformation "c2"))
-        (apply-transformation (change-datatype-transformation "c3")))
+    (do (apply-transformation (change-datatype-tx "c2"))
+        (apply-transformation (change-datatype-tx "c3")))
 
     (testing "Import and initial transforms"
       (is (= (latest-data dataset-id)
              [{:rnum 1 :c1 "a" :c2 1.0 :c3 2.0}
               {:rnum 2 :c1 "b" :c2 3.0 :c3 nil}
               {:rnum 3 :c1 nil :c2 4.0 :c3 5.0}])))
+
+    (testing "js references a non existent row"
+      (let [[_ _ status job] (apply-transformation {:type :transformation
+                                       :transformation
+                                       (gen-transformation "core/derive"
+                                                           {::transformation.derive.s/newColumnTitle "Derived 1"
+                                                            ::transformation.derive.s/code "row['oops'].toUpperCase()"
+                                                            ::transformation.derive.s/newColumnType "text"
+                                                            ::transformation.engine.s/onError "leave-empty"})})]
+        (is (= status "FAILED"))
+        (is (= (:error-message job) "Failed to transform: Column 'oops' doesn't exist."))))
 
     (testing "Basic text transform"
       (apply-transformation {:type :transformation
@@ -355,31 +428,43 @@
                                                   ::transformation.engine.s/onError "leave-empty"})})
       (is (= ["A" "B" nil] (map :d2 (latest-data dataset-id))))
 
-      (apply-transformation {:type :transformation
-                             :transformation
-                             (gen-transformation "core/derive"
-                                                 {::transformation.derive.s/newColumnTitle "Derived 5"
-                                                  ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
-                                                  ::transformation.derive.s/newColumnType "text"
-                                                  ::transformation.engine.s/onError "leave-empty"})})
-      (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id)))))
-
-    (testing "Date transform"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 5"
-                                                                ::transformation.derive.s/code "new Date()"
+                                                                ::transformation.derive.s/code "row['Derived 4'].toLowerCase()"
+                                                                ::transformation.derive.s/newColumnType "text"
+                                                                ::transformation.engine.s/onError "leave-empty"})})]
+        (is (= tag ::lib/ok))
+        (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id))))))
+
+    (testing "Date transform"
+      (let [[tag res] (apply-transformation {:type :transformation
+                                           :transformation
+                                           (gen-transformation "core/derive"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 6"
+                                                                ::transformation.derive.s/code "new Date().getTime()+row.bar"
                                                                 ::transformation.derive.s/newColumnType "date"
                                                                 ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
+    (testing "derive to number column"
+      (let [[tag res] (apply-transformation {:type :transformation
+                                             :transformation
+                                             (gen-transformation "core/derive"
+                                                                 {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                  ::transformation.derive.s/code "row.bar"
+                                                                  ::transformation.derive.s/newColumnType "number"
+                                                                  ::transformation.engine.s/onError "fail"})})]
+        (is (= tag ::lib/ok))
+        (is (every? number? (map :d5 (latest-data dataset-id))))))
+  
     (testing "Valid type check"
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
                                                   (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 6"
+                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                        ::transformation.derive.s/code "new Date()"
                                                                        ::transformation.derive.s/newColumnType "number"
                                                                        ::transformation.engine.s/onError "fail"})})]
@@ -389,7 +474,7 @@
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
                                                   (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                        ::transformation.derive.s/code "new java.util.Date()"
                                                                        ::transformation.derive.s/newColumnType "number"
                                                                        ::transformation.engine.s/onError "fail"})})]
@@ -399,7 +484,7 @@
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
                                                   (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                        ::transformation.derive.s/code "quit()"
                                                                        ::transformation.derive.s/newColumnType "number"
                                                                        ::transformation.engine.s/onError "fail"})})]
@@ -419,18 +504,17 @@
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 9"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code "while(true) {}"
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/bad-request))))
 
-
     (testing "Disallow anonymous functions"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 10"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code "(function() {})()"
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]
@@ -439,7 +523,7 @@
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 11"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code "(() => 'foo')()"
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]
@@ -617,7 +701,7 @@
         new-column-name      "Derived column name"
         uncategorized-value  "Uncategorised value"
         new-derived-column   {:sort       nil,
-	                      :type       "number",
+	                      :type       "text",
 	                      :title      new-column-name
 	                      :hidden     false,
 	                      :direction  nil,

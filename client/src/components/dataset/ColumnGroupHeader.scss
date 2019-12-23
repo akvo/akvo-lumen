@@ -1,0 +1,14 @@
+@import "../../styles/modules/importAll";
+
+.fixedDataTableRowLayout_rowWrapper > .fixedDataTableRowLayout_main.public_fixedDataTableRow_main.public_fixedDataTableRow_even.fixedDataTableLayout_header.public_fixedDataTable_header > .fixedDataTableRowLayout_body > .fixedDataTableCellGroupLayout_cellGroupWrapper > .fixedDataTableCellGroupLayout_cellGroup > .fixedDataTableCellLayout_main.public_fixedDataTableCell_main{
+    border-left: 1px;
+    border-right: 0px;
+    border-style: solid;
+    border-color: #d3d3d3;
+
+}
+
+.ColumnGroupHeader {
+    margin: 5px;
+
+}

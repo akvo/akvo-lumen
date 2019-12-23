@@ -8,12 +8,13 @@
             [clojure.set :refer (rename-keys) :as set]
             [clojure.string :as string]
             [clojure.walk :as walk]
-            [hugsql.core :as hugsql]
+            [akvo.lumen.db.transformation.engine :as db.tx.engine]
+            [akvo.lumen.db.transformation.derive :as db.tx.derive]
             [clojure.spec.alpha :as s]
             [akvo.lumen.specs.transformation :as transformation.s]))
 
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/derive.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation/engine.sql")
+
+
 
 (defmethod engine/valid? "core/derive-category"
   [op-spec]
@@ -31,52 +32,61 @@
   (get mappings v uncategorized-value))
 
 (defn find-number-cat [mappings v uncategorized-value]
-  (or
-   (some (fn [[[a b :as x] [c d :as y] cat]]
-           (let [exp (read-string (format "(%s %s %s)" a v b))
-                 eval1 (eval exp)]
-             (if y
-               (let [exp2 (read-string (format "(%s %s %s)" c v d))
-                     eval1&2 (and eval1 (eval exp2))]
-                 (when eval1&2 cat))
-               (when eval1 cat))))
-         mappings)
-   uncategorized-value))
+  (if-not v
+    uncategorized-value
+    (or
+     (some (fn [[[a b :as x] [c d :as y] cat]]
+             (let [exp (read-string (format "(%s %s %s)" a v b))
+                   eval1 (eval exp)]
+               (if y
+                 (let [exp2 (read-string (format "(%s %s %s)" c v d))
+                       eval1&2 (and eval1 (eval exp2))]
+                   (when eval1&2 cat))
+                 (when eval1 cat))))
+           mappings)
+     uncategorized-value)))
 
 
 (defmethod engine/apply-operation "core/derive-category"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [op-spec               (walk/keywordize-keys op-spec)
         source-column-name    (get-in op-spec [:args :source :column :columnName])
+        source-column-title    (get-in op-spec [:args :source :column :title])
         column-title          (get-in op-spec [:args :target :column :title])
         uncategorized-value   (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
         new-column-name       (engine/next-column-name columns)
-        all-data              (all-data tenant-conn {:table-name table-name})
         mappings              (get-in op-spec [:args :derivation :mappings])
         derivation-type       (get-in op-spec [:args :derivation :type] "text")
-        execution-log-message (format "Derived %s category '%s' using column: '%s' and mappings: '%s'"
-                                      derivation-type
+        execution-log-message (format "Derived category '%s' using column: '%s'(%s) and mappings: '%s'"
                                       column-title
-                                      (:title (dataset.utils/find-column (walk/keywordize-keys columns) source-column-name))
+                                      source-column-title
+                                      derivation-type
                                       mappings)]
-    (jdbc/with-db-transaction [tenant-conn tenant-conn]
-      (add-column tenant-conn {:table-name      table-name
-                               :column-type     "text"
-                               :new-column-name new-column-name})
-      (doseq [i all-data]
-        (let [v (get i (keyword source-column-name))]
-          (set-cell-value tenant-conn
-                          {:rnum        (:rnum i)
-                           :value       (condp = derivation-type
-                                          "text"   (find-text-cat (mappings-dict mappings) v uncategorized-value)
-                                          "number" (find-number-cat mappings v uncategorized-value))
-                           :column-name new-column-name
-                           :table-name  table-name})))
-      {:success?      true
-       :execution-log [execution-log-message]
-       :columns       (conj columns {"title"      column-title
-                                     "type"       derivation-type
-                                     "sort"       nil
-                                     "hidden"     false
-                                     "direction"  nil
-                                     "columnName" new-column-name})})))
+    (if-let [response-error (engine/column-title-error? column-title columns)]
+      response-error
+      (let [all-data (db.tx.derive/all-data tenant-conn {:table-name table-name})]
+        (jdbc/with-db-transaction [tenant-conn tenant-conn]
+          (db.tx.engine/add-column tenant-conn {:table-name      table-name
+                                                :column-type     "text"
+                                                :new-column-name new-column-name})
+          (doseq [i all-data]
+            (let [v (get i (keyword source-column-name))]
+              (db.tx.derive/set-cell-value tenant-conn
+                                           {:rnum        (:rnum i)
+                                            :value       (condp = derivation-type
+                                                           "text"   (find-text-cat (mappings-dict mappings) v uncategorized-value)
+                                                           "number" (find-number-cat mappings v uncategorized-value))
+                                            :column-name new-column-name
+                                            :table-name  table-name})))
+          {:success?      true
+           :execution-log [execution-log-message]
+           :columns       (conj columns {"title"      column-title
+                                         "type"       "text"
+                                         "sort"       nil
+                                         "hidden"     false
+                                         "direction"  nil
+                                         "columnName" new-column-name})})))))
+
+(defmethod engine/columns-used "core/derive-category"
+  [applied-transformation columns]
+  [(-> applied-transformation :args :source :column :columnName)])

@@ -1,8 +1,13 @@
 (ns akvo.lumen.lib.auth
   (:require
    [akvo.commons.jwt :as jwt]
-   [akvo.lumen.component.flow :as c.flow]
+   [akvo.lumen.component.authz-service :as c.authz]
    [akvo.lumen.component.tenant-manager :as tenant-manager]
+   [akvo.lumen.db.collection :as db.collection]
+   [akvo.lumen.db.dashboard :as db.dashboard]
+   [akvo.lumen.db.dataset :as db.dataset]
+   [akvo.lumen.db.raster :as db.raster]
+   [akvo.lumen.db.visualisation :as db.visualisation]
    [akvo.lumen.monitoring :as monitoring]
    [akvo.lumen.protocols :as p]
    [akvo.lumen.specs :as lumen.s]
@@ -15,16 +20,9 @@
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [clojure.walk :as w]
-   [hugsql.core :as hugsql]
    [iapetos.core :as prometheus]
    [iapetos.registry :as registry]
    [integrant.core :as ig]))
-
-(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
 (declare ids)
 
@@ -91,13 +89,16 @@
                  "/api/datasets/:id" {:methods #{:get :put :delete}}
                  "/api/datasets/:id/meta" {:methods #{:get}}
                  "/api/datasets/:id/update" {:methods #{:post}}
+                 "/api/datasets/:id/sort/:column-name/text" {:methods #{:get}}
+                 "/api/datasets/:id/sort/:column-name/number" {:methods #{:get}}
                  "/api/datasets" {:methods #{:get}}
                  "/api/visualisations" {:methods #{:get :post}}
                  "/api/visualisations/:id" {:methods #{:get :put :delete}}
                  "/api/visualisations/maps" {:methods #{:post}}
                  "/api/dashboards" {:methods #{:get :post}}
                  "/api/dashboards/:id" {:methods #{:get :put :delete}}
-                 "/api/collections" {:methods #{:get}}})
+                 "/api/collections" {:methods #{:get :post}}
+                 "/api/collections/:id" {:methods #{:get :put :delete}}})
 
 (defn- auth-datasets [all-datasets permissions]
   (->> all-datasets
@@ -105,13 +106,15 @@
         (fn [ds]
           (let [source (:source ds)]
             (if (= "AKVO_FLOW" (get source "kind"))
-              (contains? permissions (c.flow/>api-model source))
+              (contains? permissions (c.authz/>api-model source))
               true))))
        (mapv :id)))
 
 (defn- auth-visualisations [tenant-conn auth-datasets-set]
-  (let [[maps nomaps] (split-with #(= "map" (:visualisationType %))
-                                  (w/keywordize-keys (all-visualisations tenant-conn {} {} {:identifiers identity})))
+  (let [all-visualisations (w/keywordize-keys (db.visualisation/all-visualisations-slim
+                                               tenant-conn {} {} {:identifiers identity}))
+        maps (filter #(= "map" (:visualisationType %)) all-visualisations)
+        nomaps (filter #(not= "map" (:visualisationType %)) all-visualisations)
         maps*         (->> maps
                            (reduce (fn [c m]
                                      (let [datasets (reduce (fn [c l]
@@ -132,7 +135,7 @@
     (apply conj nomaps* maps*)))
 
 (defn- auth-dashboards [tenant-conn auth-visualisations-set]
-  (->> (all-dashboards-with-visualisations tenant-conn {} {} {:identifiers identity})
+  (->> (db.dashboard/all-dashboards-with-visualisations tenant-conn {} {} {:identifiers identity})
                (group-by :id)
                (reduce (fn [c [i col*]]
                    (conj c (-> (first col*)
@@ -144,72 +147,88 @@
                (mapv :id)))
 
 (defn- auth-collections [tenant-conn auth-datasets auth-visualisations auth-dashboards]
-  (mapv :id (auth-collection-ids tenant-conn
+  (mapv :id (db.collection/auth-collection-ids tenant-conn
                                  {:dataset-ids auth-datasets
                                   :visualisation-ids auth-visualisations
                                   :dashboard-ids auth-dashboards})))
 
-(defn- flow-check-permissions [flow-api request collector tenant data]
-  (prometheus/with-duration (registry/get collector :app/flow-check-permissions {"tenant" tenant})
-    (c.flow/check-permissions flow-api (jwt/jwt-token request) data)))
+(defn- user-identity [request]
+  {:email (get-in request [:jwt-claims "email"])
+   :token (jwt/jwt-token request)})
 
-(defn- load-auth-data [dss rasters tenant-conn flow-api request collector tenant]
-  (let [permissions         (let [flow-data (->> (map :source dss)
-                                                 (filter #(= "AKVO_FLOW" (get % "kind")))
-                                                 (map c.flow/>api-model))]
-                              (if (seq flow-data)
-                                (->> flow-data
-                                     (flow-check-permissions flow-api request collector tenant)
-                                     :body
-                                     set)
-                                #{}))
-        auth-datasets       (auth-datasets dss permissions)
-        auth-visualisations (auth-visualisations tenant-conn (set auth-datasets))
-        auth-dashboards     (auth-dashboards tenant-conn (set auth-visualisations))
-        auth-collections    (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)]
-    {:rasters             rasters
-     :auth-datasets       auth-datasets
-     :auth-visualisations auth-visualisations
-     :auth-dashboards     auth-dashboards
-     :auth-collections    auth-collections}))
+(defn- flow-check-permissions [authz-service-client request collector tenant data]
+  (prometheus/with-duration (registry/get collector :app/flow-check-permissions {"tenant" tenant})
+    (p/check-permissions authz-service-client (user-identity request) data)))
+
+(defn- load-auth-data [dss rasters tenant-conn authz-service-client request collector tenant]
+  (prometheus/with-duration (registry/get collector :app/load-auth-data {"tenant" tenant})
+    (let [permissions         (let [flow-data (->> (map :source dss)
+                                                   (filter #(= "AKVO_FLOW" (get % "kind")))
+                                                   (map c.authz/>api-model)
+                                                   (into #{})
+                                                   vec)]
+                                (if (seq flow-data)
+                                  (->> flow-data
+                                       (flow-check-permissions authz-service-client request collector tenant)
+                                       :body
+                                       set)
+                                  #{}))
+          auth-datasets (->> (auth-datasets dss permissions)
+                             (prometheus/with-duration
+                               (registry/get collector :app/auth-datasets {"tenant" tenant})))
+
+          auth-visualisations (->> (auth-visualisations tenant-conn (set auth-datasets))
+                                   (prometheus/with-duration
+                                     (registry/get collector :app/auth-visualisations {"tenant" tenant})))
+
+          auth-dashboards (->> (auth-dashboards tenant-conn (set auth-visualisations))
+                               (prometheus/with-duration
+                                 (registry/get collector :app/auth-dashboards {"tenant" tenant})))
+
+          auth-collections (->> (auth-collections tenant-conn auth-datasets auth-visualisations auth-dashboards)
+                                (prometheus/with-duration
+                                  (registry/get collector :app/auth-collections {"tenant" tenant})))]
+      {:rasters             rasters
+       :auth-datasets       auth-datasets
+       :auth-visualisations auth-visualisations
+       :auth-dashboards     auth-dashboards
+       :auth-collections    auth-collections})))
 
 (defn wrap-auth-datasets
   "Add to the request an auth-service protocol impl using flow-api check_permissions"
-  [tenant-manager flow-api collector]
+  [tenant-manager authz-service-client collector]
   (fn [handler]
-    (fn [{:keys [jwt-claims tenant] :as request}]
-      (let [tenant-conn    (p/connection tenant-manager tenant)
-            dss            (all-datasets tenant-conn)
-            rasters        (mapv :id (all-rasters tenant-conn))
-            auth-uuid-tree (if (and (match-by-jwt-family-name? request)
-                                    (match-by-template-and-method? auth-calls request))
-                             (load-auth-data dss rasters tenant-conn flow-api request collector tenant)
-                             (do
-                               (future
-                                 (load-auth-data dss rasters tenant-conn flow-api request collector tenant))
-                               {:rasters             rasters
-                                :auth-datasets       (mapv :id dss)
-                                :auth-visualisations (mapv :id (all-visualisations tenant-conn))
-                                :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
-                                :auth-collections    (mapv :id (all-collections tenant-conn))}))]
-        (handler (assoc request
-                        :auth-service (new-auth-service auth-uuid-tree)))))))
+    (fn [{:keys [tenant] :as request}]
+      (if-not (match-by-template-and-method? auth-calls request)
+        (handler request)
+        (let [tenant-conn    (p/connection tenant-manager tenant)
+              dss            (db.dataset/all-datasets tenant-conn)
+              rasters        (mapv :id (db.raster/all-rasters tenant-conn))
+              auth-uuid-tree (if (match-by-jwt-family-name? request)
+                               (load-auth-data dss rasters tenant-conn authz-service-client request collector tenant)
+                               (do
+                                 (future
+                                   (load-auth-data dss rasters tenant-conn authz-service-client request collector tenant))
+                                 {:rasters             rasters
+                                  :auth-datasets       (mapv :id dss)
+                                  :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
+                                  :auth-dashboards     (mapv :id (db.dashboard/all-dashboards-ids tenant-conn))
+                                  :auth-collections    (mapv :id (db.collection/all-collections-ids tenant-conn))}))]
+          (handler (assoc request
+                          :auth-service (new-auth-service auth-uuid-tree))))))))
 
-
-(defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager flow-api monitoring] :as opts}]
-  (wrap-auth-datasets tenant-manager flow-api (:collector monitoring)))
-
-(s/def ::flow-api ::c.flow/config)
+(defmethod ig/init-key :akvo.lumen.lib.auth/wrap-auth-datasets  [_ {:keys [tenant-manager authz-service-client monitoring] :as opts}]
+  (wrap-auth-datasets tenant-manager authz-service-client (:collector monitoring)))
 
 (s/def ::monitoring (s/keys :req-un [::monitoring/collector]))
 
 (defmethod ig/pre-init-spec :akvo.lumen.lib.auth/wrap-auth-datasets [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
-                   ::flow-api
+                   ::c.authz/authz-service-client
                    ::monitoring]))
 
 (defn ids
-  "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec` 
+  "returns `{:dataset-ids #{id...} :dashboard-ids #{id...} :visualisation-ids #{id...} :collection-ids #{id...}}` found in `data` arg. Logic based on clojure.spec/def `spec`
    Based on dynamic thread binding."
   [spec data]
   (let [ids    (atom {:collection-ids    #{}

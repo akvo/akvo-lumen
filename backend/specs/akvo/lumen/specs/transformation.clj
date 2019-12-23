@@ -227,7 +227,8 @@
 
 
 (s/def ::transformation.derive-category.source/columnName ::i.values.s/id)
-(s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName]))
+(s/def ::transformation.derive-category.source/title ::i.values.s/title)
+(s/def ::transformation.derive-category.source/column (s/keys :req-un [::transformation.derive-category.source/columnName ::transformation.derive-category.source/title]))
 
 (s/def ::transformation.derive-category/source (s/keys
                                                :req-un [::transformation.derive-category.source/column]))
@@ -236,7 +237,7 @@
 (s/def ::transformation.derive-category/target (s/keys
                                                :req-un [::transformation.derive-category.target/column]))
 
-(s/def ::transformation.derive-category.derivation.text/mappings (s/coll-of (s/tuple (s/coll-of (s/nilable string?) :kind vector? :min-count 1) string?) :kind vector? :min-count 1))
+(s/def ::transformation.derive-category.derivation.text/mappings (s/coll-of (s/tuple (s/coll-of (s/nilable string?) :kind vector? :min-count 1) ::lumen.s/non-empty-string) :kind vector? :min-count 1))
 
 (s/def ::transformation.derive-category.derivation.number/op #{">" "<" ">=" "<=" "="})
 

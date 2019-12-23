@@ -1,7 +1,7 @@
 -- :name all-rasters :? :*
 WITH
 failed_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS metadata, '{}'::jsonb AS author, '{}'::jsonb AS source 
+  SELECT j.id, d.spec->>'name' AS name, j.error_log->>0 AS error_log, j.status, j.created, j.modified, '{}'::jsonb AS metadata, '{}'::jsonb AS author, '{}'::jsonb AS source
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -9,7 +9,7 @@ failed_imports AS (
      AND d.spec->'source'->>'kind' = 'GEOTIFF'
 ),
 pending_imports AS (
-  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS metadata, '{}'::jsonb AS author, '{}'::jsonb AS source 
+  SELECT j.id, d.spec->>'name' AS name, j.status, j.created, j.modified, '{}'::jsonb AS metadata, '{}'::jsonb AS author, '{}'::jsonb AS source
     FROM data_source d, job_execution j
    WHERE j.data_source_id = d.id
      AND j.type = 'IMPORT'
@@ -28,7 +28,16 @@ SELECT id, title, NULL, 'OK', created, modified, metadata, author, source
 -- :name insert-raster :! :n
 -- :doc Insert new raster dataset
 INSERT INTO raster_dataset (id, title, description, job_execution_id, raster_table, metadata, author, source)
-VALUES (:id, :title, :description, :job-execution-id, :raster-table, :metadata, :author, :source);
+VALUES (
+       :id,
+       :title,
+       :description,
+       :job-execution-id,
+       :raster-table,
+       :metadata,
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email')),
+       :source
+);
 
 -- :name create-raster-table :!
 -- :doc Creates a raster table

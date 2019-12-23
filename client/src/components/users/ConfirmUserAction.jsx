@@ -6,16 +6,16 @@ import ModalFooter from '../modals/ModalFooter';
 
 require('./ConfirmUserAction.scss');
 
-function getQuestion({ username, email }, action) {
+function getQuestion({ email }, action) {
   let question = '';
   if (action === 'delete') {
-    question = `Remove user: ${username}`;
+    question = `Remove user: ${email}`;
   } else if (action === 'revoke') {
     question = `Revoke invitation sent to: ${email}`;
   } else if (action === 'demote') {
-    question = `Remove admin privileges for user: ${username}`;
+    question = `Remove admin privileges for user: ${email}`;
   } else if (action === 'promote') {
-    question = `Enable admin privileges for user: ${username}`;
+    question = `Enable admin privileges for user: ${email}`;
   }
   return `${question}?`;
 }
@@ -82,7 +82,6 @@ ConfirmUserAction.propTypes = {
     user: PropTypes.shape({
       email: PropTypes.string.isRequired,
       id: PropTypes.string.isRequired,
-      username: PropTypes.string,
     }),
   }).isRequired,
 };

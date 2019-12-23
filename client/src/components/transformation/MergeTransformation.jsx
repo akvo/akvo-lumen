@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Immutable from 'immutable';
+import { intlShape } from 'react-intl';
 import TransformationHeader from './TransformationHeader';
 import TargetMergeOptions from './merge/TargetMergeOptions';
 import SourceMergeOptions from './merge/SourceMergeOptions';
@@ -19,7 +21,7 @@ export default class MergeTransformation extends Component {
             mergeColumn: null,
             aggregationColumn: null,
             aggregationDirection: 'DESC',
-            mergeColumns: [], // Array of column names.
+            mergeColumns: Immutable.fromJS([]), // Array of column names.
           },
           target: {
             mergeColumn: null,
@@ -34,7 +36,7 @@ export default class MergeTransformation extends Component {
     return (
       source.datasetId != null &&
       source.mergeColumn != null &&
-      source.mergeColumns.length > 0 &&
+      source.mergeColumns.size > 0 &&
       target.mergeColumn != null
     );
   }
@@ -56,7 +58,7 @@ export default class MergeTransformation extends Component {
   }
 
   render() {
-    const { datasetId, datasets, onApplyTransformation, transforming } = this.props;
+    const { datasetId, datasets, onApplyTransformation, transforming, intl } = this.props;
     const { transformation } = this.state;
     return (
       <div className="MergeTransformation">
@@ -71,11 +73,13 @@ export default class MergeTransformation extends Component {
           <TargetMergeOptions
             dataset={datasets[datasetId]}
             onChange={target => this.handleTargetChange(target)}
+            intl={intl}
           />
           <div className="separator" />
           <SourceMergeOptions
             datasets={datasets}
             onChange={source => this.handleSourceChange(source)}
+            intl={intl}
           />
         </div>
       </div>
@@ -89,4 +93,5 @@ MergeTransformation.propTypes = {
   onApplyTransformation: PropTypes.func.isRequired,
   // Are we currently applying a transformation.
   transforming: PropTypes.bool.isRequired,
+  intl: intlShape,
 };

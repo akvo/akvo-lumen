@@ -1,0 +1,19 @@
+@import "../../../styles/modules/importAll";
+
+.DeriveCategoryMapping {
+
+  .DeriveCategoryMapping__action_btn {
+    visibility: visible;
+    color: $anchorLinkLight;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    font-style: italic;
+  }
+
+  &:hover {
+    .DeriveCategoryMapping__action_btn {
+      visibility: visible; 
+    }    
+  }
+
+}

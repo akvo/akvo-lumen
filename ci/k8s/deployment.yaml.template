@@ -80,7 +80,7 @@ spec:
           requests:
             cpu: "50m"
           limits:
-            cpu: "1000m"
+            cpu: "4000m"
         env:
         - name: LUMEN_CONFORM_SPECS
           valueFrom:
@@ -117,6 +117,26 @@ spec:
             configMapKeyRef:
               name: akvo
               key: keycloak.url
+        - name: LUMEN_AUTH_URL
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: auth.url
+        - name: LUMEN_AUTH_PUBLIC_CLIENT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: auth.public.client.id
+        - name: LUMEN_AUTH_END_SESSION_ENDPOINT_SUFFIX
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: auth.end.session.endpoint.suffix
+        - name: LUMEN_AUTH_RSA_SUFFIX_URL
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: auth.rsa.suffix.url
         - name: LUMEN_FILE_UPLOAD_PATH
           value: /tmp/akvo/lumen
         - name: LUMEN_FLOW_API_URL
@@ -158,6 +178,19 @@ spec:
           valueFrom:
              fieldRef:
                fieldPath: metadata.name
+        - name: LUMEN_DEPLOYMENT_COLOR
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['color']
+        - name: LUMEN_DEPLOYMENT_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: environment
+        - name: LUMEN_DEPLOYMENT_VERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['lumen-version']                            
       - name: flow-maps-statsd-to-prometheus
       # If you change this version, probably you want to change the /windsahft/Dockerfile version
         image: akvo/akvo-maps-statsd-to-prometheus:f156d42c

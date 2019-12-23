@@ -34,6 +34,5 @@ export default function SortInput({ spec, onChangeSpec }) {
 
 SortInput.propTypes = {
   spec: PropTypes.object.isRequired,
-  columnOptions: PropTypes.array.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
 };

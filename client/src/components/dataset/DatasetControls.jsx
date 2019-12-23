@@ -23,7 +23,7 @@ class DatasetControls extends Component {
 
   render() {
     const {
-      intl,
+      // intl,
       onNavigateToVisualise,
       isLockedFromTransformations,
     } = this.props;
@@ -128,14 +128,6 @@ class DatasetControls extends Component {
             className="rowCount"
           >
             {this.props.rowsCount} <FormattedMessage id="rows" />
-          </span>
-          <span
-            className="search"
-          >
-            <input
-              type="text"
-              placeholder={intl.formatMessage({ id: 'search_not_implemented_yet' })}
-            />
           </span>
           <span
             className="transformationLogToggleContainer"

@@ -3,20 +3,18 @@
    [akvo.lumen.component.hikaricp :as hikaricp]
    [akvo.lumen.config :as config]
    [akvo.lumen.lib.aes :as aes]
+   [akvo.lumen.db.migrate :as db.migrate]
    [clojure.java.io :as io]
    [clojure.tools.logging :as log]
    [duct.core :as duct]
    [clojure.spec.alpha :as s]
    [environ.core :refer [env]]
-   [hugsql.core :as hugsql]
    [integrant.core :as ig]
    [meta-merge.core :refer [meta-merge]]
-   [ragtime
-    strategy
-    [jdbc :as ragtime-jdbc]
-    [repl :as ragtime-repl]]))
-
-(hugsql/def-db-fns "akvo/lumen/migrate.sql")
+   [ragtime.jdbc :as ragtime-jdbc]
+   [ragtime.repl :as ragtime-repl]
+   [ragtime.reporter :as reporter]
+   [ragtime.strategy]))
 
 (def source-files ["akvo/lumen/system.edn" "dev.edn" "local.edn"])
 
@@ -33,8 +31,11 @@
                     " but " (first conflicts) " was applied.")))
       (for [m unapplied] [:migrate m]))))
 
+(def ^:dynamic *reporter* reporter/print)
+
 (defn do-migrate [datastore migrations]
   (ragtime-repl/migrate {:datastore datastore
+                         :reporter *reporter*
                          :migrations migrations
                          :strategy ignore-future-migrations}))
 
@@ -53,10 +54,10 @@
          tenant-manager-db {:connection-uri (hikaricp/ssl-url (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri]))}]
      (do-migrate (ragtime-jdbc/sql-database tenant-manager-db)
                  (:tenant-manager migrations))
-     (doseq [tenant (all-tenants tenant-manager-db)]
+     (doseq [tenant (db.migrate/all-tenants tenant-manager-db)]
        (try
          (do-migrate (ragtime-jdbc/sql-database
-                      {:connection-uri (hikaricp/ssl-url (aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
+                      {:connection-uri (hikaricp/ssl-url (aes/decrypt (get-in config [:akvo.lumen.component.tenant-manager/data :encryption-key])
                                                                       (:db_uri tenant)))})
                         (:tenants migrations))
          (catch Exception e (throw (ex-info "Migration failed" {:tenant (:label tenant)} e))))))))
@@ -70,11 +71,12 @@
 
 (defn do-rollback [datastore migrations amount-or-id]
   (ragtime-repl/rollback {:datastore  datastore
+                          :reporter *reporter*
                           :migrations migrations}
                          amount-or-id))
 
 (defn rollback-tenants [db connection-uri-fn migrations amount-or-id]
-  (doseq [tenant (all-tenants db)]
+  (doseq [tenant (db.migrate/all-tenants db)]
     (do-rollback (ragtime-jdbc/sql-database {:connection-uri (connection-uri-fn tenant)})
                  migrations
                  amount-or-id)))
@@ -91,7 +93,7 @@
         tenant-manager-db {:connection-uri (hikaricp/ssl-url (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri]))}
         tenant-connection-uri-fn #(hikaricp/ssl-url
                                    (aes/decrypt
-                                    (get-in config [:akvo.lumen.component.tenant-manager/tenant-manager :encryption-key])
+                                    (get-in config [:akvo.lumen.component.tenant-manager/data :encryption-key])
                                     (:db_uri %)))]
     (cond
       (= arg :tenant-manager)
