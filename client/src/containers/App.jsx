@@ -10,6 +10,7 @@ import Raster from './Raster';
 import Transformation from './Transformation';
 import Dashboard from './Dashboard';
 import Dashboard2 from './Dashboard2';
+import Dashboard2Export from './Dashboard2Export';
 import Users from '../components/users/Users';
 import Resources from '../components/Resources';
 import Main from './Main';
@@ -18,9 +19,10 @@ import AdminNav from '../components/AdminNav';
 import withProps from '../utilities/withProps';
 
 export default function App({ history, location, store }) {
-  const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features'];
-  const { dashboard2 } = _.get(store.getState(), path);
-  console.log(dashboard2);
+  // new Dashboard feature flag
+  const { dashboard2 } = _.get(
+      store.getState(),
+      ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features']);
   return (
     <IntlWrapper>
       <Router history={history}>
@@ -113,6 +115,11 @@ export default function App({ history, location, store }) {
             location={location}
           />
         </Route>
+        <Route
+          path="dashboard2/:dashboardId/export"
+          component={Dashboard2Export}
+          location={location}
+        />
       </Router>
     </IntlWrapper>
   );
