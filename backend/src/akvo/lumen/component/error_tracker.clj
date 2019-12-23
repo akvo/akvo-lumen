@@ -71,7 +71,7 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/local
   [_]
-  (s/keys :req-un [::opts]))
+  empty?)
 
 (defrecord LocalErrorTracker [store])
 
@@ -83,7 +83,7 @@
 
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local
-  [_ {{:keys [opts]} :tracker :as config}]
+  [_ _]
   (local-error-tracker))
 
 

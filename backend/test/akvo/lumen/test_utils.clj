@@ -114,6 +114,7 @@
 
 ;; system utils
 
+
 (derive :akvo.lumen.component.error-tracker/config-test :akvo.lumen.component.error-tracker/config)
 
 (derive :akvo.lumen.component.error-tracker/void :akvo.lumen.component.error-tracker/client)
