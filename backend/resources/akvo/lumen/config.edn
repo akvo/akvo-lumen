@@ -84,6 +84,7 @@
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
                                :public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
+                               :error-tracker-config #ig/ref :akvo.lumen.component.error-tracker/config
                                :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"
                                :lumen-deployment-color #duct/env "LUMEN_DEPLOYMENT_COLOR"
