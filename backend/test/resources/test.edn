@@ -46,6 +46,11 @@
  :akvo.lumen.component.authz-service/http-service-client {:url "https://authz.akvotest.org/authz"
                                                           :api-headers-fn #ig/ref :akvo.lumen.component.flow/api-headers}
 
+ :akvo.lumen.component.error-tracker/config {:dsn "dev-sentry-client-dsn"
+                                             :opts {:environment "test"
+                                                    :release "test"
+                                                    :server-name "blue"}}
+
  :akvo.lumen.endpoint.env/env {:lumen-deployment-color #duct/env ["LUMEN_DEPLOYMENT_COLOR" :or "Pink"]
                                :lumen-deployment-environment #duct/env ["LUMEN_DEPLOYMENT_ENVIRONMENT" :or "Local test"]
                                :lumen-deployment-version #duct/env ["LUMEN_DEPLOYMENT_VERSION" :or "Local version"]
