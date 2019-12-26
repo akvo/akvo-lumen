@@ -71,7 +71,7 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/local
   [_]
-  empty?)
+  any?)
 
 (defrecord LocalErrorTracker [store])
 
