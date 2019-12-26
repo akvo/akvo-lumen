@@ -42,11 +42,11 @@
 (defn sentry-error-tracker [dsn]
   (SentryErrorTracker. dsn))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/sentry
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod
   [_]
   :akvo.lumen.component.error-tracker/config)
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/sentry
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod
   [_ {{:keys [dsn opts]} :tracker :as config}]
   (sentry-error-tracker dsn))
 
@@ -58,6 +58,8 @@
   [_ {:keys [dsn opts] :as config}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
 
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
+  ::config)
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts]
   opts)
