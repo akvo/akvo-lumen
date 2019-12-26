@@ -124,7 +124,7 @@
 (defn dissoc-prod-components [c more-ks]
   (let [ks [:akvo.lumen.component.emailer/mailjet-v3-emailer
             :akvo.lumen.component.caddisfly/prod
-            :akvo.lumen.component.error-tracker/sentry
+            :akvo.lumen.component.error-tracker/prod
             ]
         ks (if more-ks (apply conj ks more-ks) ks)]
     (apply dissoc c ks)))
