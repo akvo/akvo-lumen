@@ -1,5 +1,9 @@
 {:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
 
+ :akvo.lumen.component.error-tracker/config-dev {:opts {:namespaces ["org.akvo" "akvo"]}}
+
+ :akvo.lumen.component.error-tracker/local #ig/ref :akvo.lumen.component.error-tracker/config
+
  :akvo.lumen.component.http/http {:port 3000}
  :dev.endpoints.transit/middleware {}
  :dev.endpoints/spec {}
