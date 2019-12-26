@@ -17,10 +17,10 @@ if [[ "${DOCKER_COMPOSE_PROJECT}" == "akvolumen" ]]; then
 	run --no-deps \
         -e CYPRESS_LUMEN_AUTH="${LUMEN_AUTH}" \
         -e CYPRESS_LUMEN_URL="${LUMEN_URL}" \
-        -e CYPRESS_LUMEN_USER="${LUMEN_USER}" \
-        -e CYPRESS_LUMEN_PASSWORD="${LUMEN_PASSWORD}" \
-        -e CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY}" \
-        fe-e2e-tests run.sh
+	-e CYPRESS_LUMEN_USER="${LUMEN_USER}" \
+	-e CYPRESS_LUMEN_PASSWORD="${LUMEN_PASSWORD}" \
+	-e CYPRESS_RECORD_KEY="${CYPRESS_RECORD_KEY}" \
+	fe-e2e-tests run.sh
 else
     docker-compose \
 	-p akvo-lumen-ci \
