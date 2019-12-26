@@ -1,11 +1,12 @@
 (ns akvo.lumen.component.error-tracker
   (:require [akvo.lumen.protocols :as p]
+            [clojure.spec.alpha :as s]
+            [clojure.tools.logging :as log]
+            [integrant.core :as ig]
             [integrant.core :as ig]
             [raven-clj.core :as raven]
-            [integrant.core :as ig]
-            [raven-clj.ring]
-            [clojure.spec.alpha :as s]
-            [raven-clj.interfaces :as raven-interface]))
+            [raven-clj.interfaces :as raven-interface]
+            [raven-clj.ring]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -52,7 +53,15 @@
 ;;; Sentry client
 ;;;
 
-(defrecord SentryErrorTracker [dsn])
+(defrecord SentryErrorTracker [dsn]
+  p/IErrorTracker
+  (track [{dsn :dsn
+           {:keys [namespaces] :as opts} :opts}
+          error]
+    (let [event-info (event-map error opts)]
+      (->> (raven-interface/stacktrace event-info error namespaces)
+           (raven/capture dsn)
+           future))))
 
 (defn sentry-error-tracker [dsn]
   (SentryErrorTracker. dsn))
@@ -73,14 +82,18 @@
   [_]
   any?)
 
-(defrecord LocalErrorTracker [store])
+(defrecord LocalErrorTracker [store]
+  p/IErrorTracker
+  (track [this error]
+    (swap! (:store this) conj (event-map error))
+    (log/info "LocalErrorTracker:" (.getMessage error))))
+
 
 (defn local-error-tracker []
   (->LocalErrorTracker (atom [])))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
   (local-error-tracker))
-
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/local
   [_ _]
@@ -91,7 +104,9 @@
 ;;; Local client (no output)
 ;;;
 
-(defrecord VoidErrorTracker [])
+(defrecord VoidErrorTracker []
+  p/IErrorTracker
+  (track [this error]))
 
 (defn void-error-tracker []
   (->VoidErrorTracker))
@@ -116,29 +131,6 @@
      (assoc m
             :extra {:ex-data (subs text 0 (min (count text) 4096))}
             :message (.getMessage error)))))
-
-
-(extend-protocol p/IErrorTracker
-
-  SentryErrorTracker
-  (track [{dsn :dsn
-           {:keys [namespaces] :as opts} :opts}
-          error]
-    (let [event-info (event-map error opts)]
-      (->> (raven-interface/stacktrace event-info error namespaces)
-           (raven/capture dsn)
-           future)))
-
-  LocalErrorTracker
-  (track [this error]
-    (swap! (:store this) conj (event-map error))
-    (println "LocalErrorTracker:" (.getMessage error)))
-
-  VoidErrorTracker
-  (tracker [this error]
-    ;; Into the void
-    ))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Ring Sentry tracker wrapper
