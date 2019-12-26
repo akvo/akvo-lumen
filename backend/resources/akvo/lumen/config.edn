@@ -13,15 +13,13 @@
                                                       :data #ig/ref :akvo.lumen.component.tenant-manager/data
                                                       :db #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
- :akvo.lumen.component.error-tracker/config-prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
-                                                  :opts {:environment #duct/env "LUMEN_SENTRY_ENVIRONMENT"
-                                                         :namespaces ["org.akvo" "akvo"]
-                                                         :release #duct/env "LUMEN_SENTRY_RELEASE"
-                                                         :server_name #duct/env "LUMEN_SENTRY_SERVER_NAME"}}
+ :akvo.lumen.component.error-tracker/config {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
+                                             :opts {:environment #duct/env "LUMEN_SENTRY_ENVIRONMENT"
+                                                    :namespaces ["org.akvo" "akvo"]
+                                                    :release #duct/env "LUMEN_SENTRY_RELEASE"
+                                                    :server-name #duct/env "LUMEN_SENTRY_SERVER_NAME"}}
 
- :akvo.lumen.component.error-tracker/sentry #ig/ref :akvo.lumen.component.error-tracker/config
-
- :akvo.lumen.component.error-tracker/error-tracker #ig/ref :akvo.lumen.component.error-tracker/client
+ :akvo.lumen.component.error-tracker/prod #ig/ref :akvo.lumen.component.error-tracker/config
 
  :akvo.lumen.component.handler/wrap-hide-errors {:error-response "Internal Server Error"}
 
