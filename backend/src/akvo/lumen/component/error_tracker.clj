@@ -40,6 +40,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Error tracker component
 ;;;
+(defn event-map
+  ([error]
+   (event-map error {}))
+  ([error m]
+   (let [text (str (ex-data error))]
+     (assoc m
+            :extra {:ex-data (subs text 0 (min (count text) 4096))}
+            :message (.getMessage error)))))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/error-tracker
   [_]
@@ -48,10 +56,6 @@
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/error-tracker
   [_ tracker]
   tracker)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Sentry client
-;;;
 
 (defrecord SentryErrorTracker [dsn]
   p/IErrorTracker
@@ -75,67 +79,16 @@
   (sentry-error-tracker dsn))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Local client (print to std out)
-;;;
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/local
-  [_]
-  any?)
-
-(defrecord LocalErrorTracker [store]
-  p/IErrorTracker
-  (track [this error]
-    (swap! (:store this) conj (event-map error))
-    (log/info "LocalErrorTracker:" (.getMessage error))))
-
-
-(defn local-error-tracker []
-  (->LocalErrorTracker (atom [])))
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
-  (local-error-tracker))
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/local
-  [_ _]
-  (local-error-tracker))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Local client (no output)
-;;;
-
-(defrecord VoidErrorTracker []
-  p/IErrorTracker
-  (track [this error]))
-
-(defn void-error-tracker []
-  (->VoidErrorTracker))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/void
-  [_]
-  map?)
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/void
-  [_ _]
-  (void-error-tracker))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; IErrorTracker implementations
-;;;
-
-(defn event-map
-  ([error]
-   (event-map error {}))
-  ([error m]
-   (let [text (str (ex-data error))]
-     (assoc m
-            :extra {:ex-data (subs text 0 (min (count text) 4096))}
-            :message (.getMessage error)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Ring Sentry tracker wrapper
 ;;;
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry
   [_ {:keys [dsn opts] :as config}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
+
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts #_{:keys [_] :as opts}]
+  opts)
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config [_]
+  any?)
