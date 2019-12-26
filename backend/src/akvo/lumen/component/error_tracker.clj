@@ -73,7 +73,8 @@
 (s/def ::namespaces (s/coll-of string?))
 (s/def ::release string?)
 (s/def ::server-name blue-green?)
-(s/def ::opts (s/keys :req-un [::environment ::namespaces ::release ::server-name]))
+(s/def ::opts (s/keys :req-un [::namespaces]
+                      :opt-un [::environment ::release ::server-name]))
 (s/def ::dsn string?)
 (s/def ::config (s/keys :req-un [::dsn ::opts]))
 
