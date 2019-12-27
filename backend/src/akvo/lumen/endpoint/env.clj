@@ -1,6 +1,7 @@
 (ns akvo.lumen.endpoint.env
   (:require [akvo.lumen.component.authentication]
             [akvo.lumen.component.keycloak]
+            [akvo.lumen.component.error-tracker]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
@@ -13,7 +14,7 @@
 
 (defn handler
   [{:keys [public-client flow-api lumen-deployment-color lumen-deployment-environment
-           lumen-deployment-version piwik-site-id sentry-client-dsn]}]
+           lumen-deployment-version piwik-site-id error-tracker-config]}]
   (fn [{tenant :tenant
         :as request}]
     (let [{:keys [url client-id end-session-endpoint-suffix open-id-config]} public-client]
@@ -32,8 +33,8 @@
                 "lumenDeploymentVersion" lumen-deployment-version
                 "piwikSiteId" piwik-site-id
                 "tenant" (:tenant request)}
-         (string? sentry-client-dsn)
-         (assoc "sentryDSN" sentry-client-dsn))))))
+         (string? (:dsn error-tracker-config))
+         (assoc "sentryDSN" (:dsn error-tracker-config)))))))
 
 (defn routes [{:keys [routes-opts] :as opts}]
   ["/env" (merge {:get {:handler (handler opts)}}
@@ -48,7 +49,7 @@
 (s/def ::lumen-deployment-environment string?)
 (s/def ::lumen-deployment-version string?)
 (s/def ::piwik-site-id string?)
-(s/def ::sentry-client-dsn string?)
+(s/def ::error-tracker-config  any?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
   (s/keys :req-un [::public-client
@@ -57,4 +58,4 @@
                    ::lumen-deployment-environment
                    ::lumen-deployment-version
                    ::piwik-site-id
-                   ::sentry-client-dsn]))
+                   ::error-tracker-config]))
