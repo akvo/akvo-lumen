@@ -38,7 +38,7 @@
   [_ {:keys [dsn opts] :as config}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts #_{:keys [_] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts]
   opts)
 
 
@@ -52,7 +52,7 @@
 (s/def ::environment string?)
 (s/def ::namespaces (s/coll-of string?))
 (s/def ::release string?)
-(s/def ::server-name any?)
+(s/def ::server-name blue-green?)
 (s/def ::opts
   (s/keys :req-un [::namespaces]
           :opt-un [::environment ::release ::server-name]))
