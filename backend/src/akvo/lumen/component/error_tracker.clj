@@ -8,10 +8,6 @@
             [raven-clj.interfaces :as raven-interface]
             [raven-clj.ring]))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/config
-  [_ config]
-  config)
-
 (defn event-map
   ([error]
    (event-map error {}))
@@ -20,10 +16,6 @@
      (assoc m
             :extra {:ex-data (subs text 0 (min (count text) 4096))}
             :message (.getMessage error)))))
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/error-tracker
-  [_ tracker]
-  tracker)
 
 (defrecord SentryErrorTracker [dsn]
   p/IErrorTracker
@@ -42,14 +34,9 @@
   [_ {{:keys [dsn opts]} :tracker :as config}]
   (sentry-error-tracker dsn))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Ring Sentry tracker wrapper
-;;;
-
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry
   [_ {:keys [dsn opts] :as config}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
-
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts #_{:keys [_] :as opts}]
   opts)
@@ -73,9 +60,7 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config [_]
   any?)
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/error-tracker
-  [_]
-  (partial satisfies? p/IErrorTracker))
+(s/def :akvo.lumen.component.error-tracker/error-tracker (partial satisfies? p/IErrorTracker))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/sentry
   [_]
