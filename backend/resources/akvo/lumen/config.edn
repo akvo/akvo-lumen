@@ -13,6 +13,14 @@
                                                       :data #ig/ref :akvo.lumen.component.tenant-manager/data
                                                       :db #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
+ :akvo.lumen.component.error-tracker/config {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
+                                             :opts {:environment #duct/env ["LUMEN_SENTRY_ENVIRONMENT" :or "prod"]
+                                                    :namespaces ["org.akvo" "akvo"]
+                                                    :release #duct/env ["LUMEN_SENTRY_RELEASE" :or "lumen-ci"]
+                                                    :server-name #duct/env ["LUMEN_SENTRY_SERVER_NAME" :or "blue"]}}
+
+ :akvo.lumen.component.error-tracker/prod #ig/ref :akvo.lumen.component.error-tracker/config
+
  :akvo.lumen.component.handler/wrap-hide-errors {:error-response "Internal Server Error"}
 
  :akvo.lumen.component.handler/wrap-not-found {:error-response "Resource Not Found"}
@@ -42,8 +50,7 @@
 
  :akvo.lumen.component.tenant-manager/wrap-label-tenant {}
 
- :akvo.lumen.component.error-tracker/wrap-sentry {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
-                                                  :opts {:namespaces ["org.akvo" "akvo"]}}
+ :akvo.lumen.component.error-tracker/wrap-sentry #ig/ref :akvo.lumen.component.error-tracker/config
 
  :akvo.lumen.endpoint.aggregation/aggregation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
@@ -75,7 +82,7 @@
                                {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant]}
                                :public-client #ig/ref :akvo.lumen.component.authentication/public-client
                                :flow-api #ig/ref :akvo.lumen.component.flow/api
-                               :sentry-client-dsn #duct/env "LUMEN_SENTRY_CLIENT_DSN"
+                               :error-tracker-config #ig/ref :akvo.lumen.component.error-tracker/config
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"
                                :lumen-deployment-color #duct/env "LUMEN_DEPLOYMENT_COLOR"
                                :lumen-deployment-environment #duct/env "LUMEN_DEPLOYMENT_ENVIRONMENT"
@@ -205,7 +212,7 @@
                                                    :from-email "noreply@akvo.org"
                                                    :from-name "Akvo Lumen"}
 
- :akvo.lumen.component.error-tracker/prod {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"}
+
 
  :akvo.lumen.migrate/migrate {:migrations {:tenant-manager "akvo/lumen/migrations/tenant_manager"
                                            :tenants "akvo/lumen/migrations/tenants"}}
