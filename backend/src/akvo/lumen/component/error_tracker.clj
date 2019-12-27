@@ -61,7 +61,7 @@
 
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
- ::config)
+ any? #_::config)
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config [_]
   any? #_::config)
