@@ -1,6 +1,6 @@
 (ns akvo.lumen.fixtures
   (:require [akvo.lumen.component.caddisfly-test :refer (caddisfly)]
-            [akvo.lumen.component.error-tracker :refer [local-error-tracker]]
+            [akvo.lumen.utils.local-error-tracker :refer [local-error-tracker]]
             [akvo.lumen.migrate :as lumen-migrate]
             [akvo.lumen.lib.transformation.engine :refer (log-ex)]
             [akvo.lumen.protocols :as p]

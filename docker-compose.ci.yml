@@ -15,6 +15,10 @@ services:
      - LUMEN_ENCRYPTION_KEY=secret
      - LUMEN_SENTRY_BACKEND_DSN=https://xxxx@sentry.io/111111
      - LUMEN_SENTRY_CLIENT_DSN=https://xxxx@sentry.io/111111
+     - LUMEN_SENTRY_BACKEND_DSN=${LUMEN_SENTRY_BACKEND_DSN}
+     - LUMEN_SENTRY_SERVER_NAME="green"
+     - LUMEN_SENTRY_RELEASE=${TRAVIS_COMMIT}
+     - LUMEN_SENTRY_ENVIRONMENT="Travis E2E tests"
      - LUMEN_EMAIL_USER=admin@akvo.org
      - LUMEN_EMAIL_PASSWORD=password
      - LUMEN_FLOW_API_URL=flow-url
