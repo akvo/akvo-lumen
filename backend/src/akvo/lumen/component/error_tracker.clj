@@ -52,7 +52,7 @@
 (s/def ::environment string?)
 (s/def ::namespaces (s/coll-of string?))
 (s/def ::release string?)
-(s/def ::server-name blue-green?)
+(s/def ::server-name any?)
 (s/def ::opts
   (s/keys :req-un [::namespaces]
           :opt-un [::environment ::release ::server-name]))
