@@ -64,7 +64,7 @@
  ::config)
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config [_]
-  ::config)
+  any? #_::config)
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod
   [_]
