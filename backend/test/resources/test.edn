@@ -5,12 +5,10 @@
 
  :akvo.lumen.component.caddisfly/local {:local-schema-uri "./caddisfly/caddisfly-tests-v2.json"}
 
- :akvo.lumen.component.error-tracker/local {}
+ :akvo.lumen.utils.local-error-tracker/local {}
 
  :akvo.lumen.utils.dev-emailer/emailer {:from-email "devops@akvo.localhost"
                                         :from-name "Akvo Lumen"}
-
- :akvo.lumen.component.error-tracker/wrap-sentry {:dsn "dev-dsn"}
 
  :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 
