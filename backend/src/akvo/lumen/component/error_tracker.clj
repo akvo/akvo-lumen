@@ -38,7 +38,7 @@
   [_ {:keys [dsn opts] :as config}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts #_{:keys [_] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts]
   opts)
 
 
