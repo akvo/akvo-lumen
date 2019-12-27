@@ -49,7 +49,7 @@
 (s/def ::lumen-deployment-environment string?)
 (s/def ::lumen-deployment-version string?)
 (s/def ::piwik-site-id string?)
-(s/def ::error-tracker-config  :akvo.lumen.component.error-tracker/config)
+(s/def ::error-tracker-config  any?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
   (s/keys :req-un [::public-client
