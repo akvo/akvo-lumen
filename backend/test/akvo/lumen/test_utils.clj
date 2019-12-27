@@ -114,16 +114,16 @@
 
 ;; system utils
 
-
-
 (derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
-(derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
+(derive :akvo.lumen.utils.local-error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
+
 
 (defn dissoc-prod-components [c more-ks]
   (let [ks [:akvo.lumen.component.emailer/mailjet-v3-emailer
             :akvo.lumen.component.caddisfly/prod
-            :akvo.lumen.component.error-tracker/prod]
+            :akvo.lumen.component.error-tracker/prod
+            ]
         ks (if more-ks (apply conj ks more-ks) ks)]
     (apply dissoc c ks)))
 
