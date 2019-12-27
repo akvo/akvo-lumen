@@ -1,65 +1,94 @@
 (ns akvo.lumen.component.error-tracker
   (:require [akvo.lumen.protocols :as p]
+            [clojure.spec.alpha :as s]
+            [clojure.tools.logging :as log]
+            [integrant.core :as ig]
             [integrant.core :as ig]
             [raven-clj.core :as raven]
-            [integrant.core :as ig]
-            [raven-clj.ring]
-            [clojure.spec.alpha :as s]
-            [raven-clj.interfaces :as raven-interface]))
+            [raven-clj.interfaces :as raven-interface]
+            [raven-clj.ring]))
 
-(defrecord SentryErrorTracker [dsn])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Error tracker config
+;;;
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config
+  [_]
+  map?)
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/config
+  [_ config]
+  config)
+
+(defn blue-green?
+  [server-name]
+  (and (string? server-name)
+       (or (= "blue" server-name)
+           (= "green" server-name))))
+
+(s/def ::dsn string?)
+
+(s/def ::environment string?)
+(s/def ::namespaces (s/coll-of string?))
+(s/def ::release string?)
+(s/def ::server-name blue-green?)
+(s/def ::opts
+  (s/keys :req-un [::namespaces]
+          :opt-un [::environment ::release ::server-name]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Error tracker component
+;;;
+(defn event-map
+  ([error]
+   (event-map error {}))
+  ([error m]
+   (let [text (str (ex-data error))]
+     (assoc m
+            :extra {:ex-data (subs text 0 (min (count text) 4096))}
+            :message (.getMessage error)))))
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/error-tracker
+  [_]
+  (partial satisfies? p/IErrorTracker))
+
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/error-tracker
+  [_ tracker]
+  tracker)
+
+(defrecord SentryErrorTracker [dsn]
+  p/IErrorTracker
+  (track [{dsn :dsn
+           {:keys [namespaces] :as opts} :opts}
+          error]
+    (let [event-info (event-map error opts)]
+      (->> (raven-interface/stacktrace event-info error namespaces)
+           (raven/capture dsn)
+           future))))
 
 (defn sentry-error-tracker [dsn]
   (SentryErrorTracker. dsn))
 
-(defrecord LocalErrorTracker [store])
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/sentry
+  [_]
+  (s/keys :req-un [::dsn ::opts]))
 
-(defn local-error-tracker []
-  (->LocalErrorTracker (atom [])))
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/local  [_ opts]
-  (local-error-tracker))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod [_]
-  empty?)
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod  [_ {:keys [dsn] :as opts}]
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/sentry
+  [_ {{:keys [dsn opts]} :tracker :as config}]
   (sentry-error-tracker dsn))
 
-(s/def ::dsn string?)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Ring Sentry tracker wrapper
+;;;
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod [_]
-  (s/keys :req-un [::dsn]))
-
-
-(defn event-map [error]
-  (let [text (str (ex-data error))]
-    {:extra {:ex-data (subs text 0 (min (count text) 4096))}
-     :message (.getMessage error)}))
-
-(extend-protocol p/IErrorTracker
-
-  SentryErrorTracker
-  (track [{:keys [dsn]} error]
-    (let [app-namespaces ["org.akvo" "akvo"]
-          event-map (event-map error)
-          event-info (raven-interface/stacktrace event-map error app-namespaces)]
-      (future (raven/capture dsn event-info))))
-
-  LocalErrorTracker
-  (track [this error]
-    (swap! (:store this) conj (event-map error))
-    (println "LocalErrorTracker:" (.getMessage error))))
-
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry  [_ {:keys [dsn opts]}]
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry
+  [_ {:keys [dsn opts] :as config}]
   #(raven-clj.ring/wrap-sentry % dsn opts))
 
 
-(s/def ::error-tracker (partial satisfies? p/IErrorTracker))
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts #_{:keys [_] :as opts}]
+  opts)
 
-(s/def ::dsn string?)
-(s/def ::namespaces (s/coll-of string?))
-(s/def ::opts (s/keys :req-un [::namespaces]))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
-  (s/keys :req-un [::dsn ::opts] ))
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config [_]
+  any?)
