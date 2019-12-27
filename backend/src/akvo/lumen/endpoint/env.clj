@@ -1,14 +1,12 @@
 (ns akvo.lumen.endpoint.env
   (:require [akvo.lumen.component.authentication]
             [akvo.lumen.component.keycloak]
-            [akvo.lumen.component.error-tracker]
+            [akvo.lumen.component.error-tracker :as et]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
             [akvo.lumen.specs :as lumen.s]
             [ring.util.response :as response]))
-
-
 
 (s/def ::auth-type ::lumen.s/non-empty-string)
 
@@ -49,7 +47,7 @@
 (s/def ::lumen-deployment-environment string?)
 (s/def ::lumen-deployment-version string?)
 (s/def ::piwik-site-id string?)
-(s/def ::error-tracker-config  any?)
+(s/def ::error-tracker-config  ::et/config)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
   (s/keys :req-un [::public-client
