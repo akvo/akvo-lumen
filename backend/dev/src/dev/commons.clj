@@ -12,7 +12,6 @@
   (dissoc c
           :akvo.lumen.component.emailer/mailjet-v3-emailer
           :akvo.lumen.component.caddisfly/prod
-          :akvo.lumen.component.error-tracker/sentry
           :akvo.lumen.component.error-tracker/prod))
 
 (defn config
