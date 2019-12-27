@@ -17,7 +17,7 @@
                                              :opts {:environment #duct/env "LUMEN_SENTRY_ENVIRONMENT"
                                                     :namespaces ["org.akvo" "akvo"]
                                                     :release #duct/env "LUMEN_SENTRY_RELEASE"
-                                                    :server_name #duct/env "LUMEN_SENTRY_SERVER_NAME"}}
+                                                    :server-name #duct/env "LUMEN_SENTRY_SERVER_NAME"}}
 
  :akvo.lumen.component.error-tracker/prod #ig/ref :akvo.lumen.component.error-tracker/config
 
