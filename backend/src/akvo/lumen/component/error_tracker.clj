@@ -8,38 +8,10 @@
             [raven-clj.interfaces :as raven-interface]
             [raven-clj.ring]))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Error tracker config
-;;;
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config
-  [_]
-  map?)
-
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config
   [_ config]
   config)
 
-(defn blue-green?
-  [server-name]
-  (and (string? server-name)
-       (or (= "blue" server-name)
-           (= "green" server-name))))
-
-(s/def ::dsn string?)
-
-(s/def ::environment string?)
-(s/def ::namespaces (s/coll-of string?))
-(s/def ::release string?)
-(s/def ::server-name blue-green?)
-(s/def ::opts
-  (s/keys :req-un [::namespaces]
-          :opt-un [::environment ::release ::server-name]))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Error tracker component
-;;;
 (defn event-map
   ([error]
    (event-map error {}))
@@ -48,10 +20,6 @@
      (assoc m
             :extra {:ex-data (subs text 0 (min (count text) 4096))}
             :message (.getMessage error)))))
-
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/error-tracker
-  [_]
-  (partial satisfies? p/IErrorTracker))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/error-tracker
   [_ tracker]
@@ -70,10 +38,6 @@
 (defn sentry-error-tracker [dsn]
   (SentryErrorTracker. dsn))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/sentry
-  [_]
-  (s/keys :req-un [::dsn ::opts]))
-
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/sentry
   [_ {{:keys [dsn opts]} :tracker :as config}]
   (sentry-error-tracker dsn))
@@ -90,5 +54,29 @@
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts #_{:keys [_] :as opts}]
   opts)
 
+
+(defn blue-green?
+  [server-name]
+  (and (string? server-name)
+       (or (= "blue" server-name)
+           (= "green" server-name))))
+
+(s/def ::dsn string?)
+(s/def ::environment string?)
+(s/def ::namespaces (s/coll-of string?))
+(s/def ::release string?)
+(s/def ::server-name blue-green?)
+(s/def ::opts
+  (s/keys :req-un [::namespaces]
+          :opt-un [::environment ::release ::server-name]))
+
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config [_]
   any?)
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/error-tracker
+  [_]
+  (partial satisfies? p/IErrorTracker))
+
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/sentry
+  [_]
+  (s/keys :req-un [::dsn ::opts]))
