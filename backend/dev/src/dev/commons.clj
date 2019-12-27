@@ -7,7 +7,6 @@
 
 (derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
-(derive :akvo.lumen.component.error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
 
 (defn dissoc-prod-components [c]
   (dissoc c
@@ -27,6 +26,5 @@
      (ir/set-prep! (fn [] config-files*))
      (ig/load-namespaces config-files*)
      config-files*)))
-
 
 (def tenants (-> (config) :akvo.lumen.migrate/migrate :seed :tenants))
