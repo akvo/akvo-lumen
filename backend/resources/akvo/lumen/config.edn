@@ -21,8 +21,6 @@
 
  :akvo.lumen.component.error-tracker/sentry #ig/ref :akvo.lumen.component.error-tracker/config
 
- :akvo.lumen.component.error-tracker/error-tracker #ig/ref :akvo.lumen.component.error-tracker/client
-
  :akvo.lumen.component.handler/wrap-hide-errors {:error-response "Internal Server Error"}
 
  :akvo.lumen.component.handler/wrap-not-found {:error-response "Resource Not Found"}
