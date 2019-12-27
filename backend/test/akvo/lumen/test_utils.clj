@@ -114,8 +114,6 @@
 
 ;; system utils
 
-(derive :akvo.lumen.component.error-tracker/void :akvo.lumen.component.error-tracker/client)
-
 (derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
 (derive :akvo.lumen.component.caddisfly/local :akvo.lumen.component.caddisfly/caddisfly)
 (derive :akvo.lumen.utils.local-error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
