@@ -26,7 +26,7 @@
     (derive :akvo.lumen.component.caddisfly/prod
             :akvo.lumen.component.caddisfly/caddisfly)
 
-    (derive :akvo.lumen.component.error-tracker/sentry
+    (derive :akvo.lumen.component.error-tracker/prod
             :akvo.lumen.component.error-tracker/error-tracker)
 
     (let [config (config/construct config-file)

@@ -19,7 +19,7 @@
                                                     :release #duct/env "LUMEN_SENTRY_RELEASE"
                                                     :server_name #duct/env "LUMEN_SENTRY_SERVER_NAME"}}
 
- :akvo.lumen.component.error-tracker/sentry #ig/ref :akvo.lumen.component.error-tracker/config
+ :akvo.lumen.component.error-tracker/prod #ig/ref :akvo.lumen.component.error-tracker/config
 
  :akvo.lumen.component.handler/wrap-hide-errors {:error-response "Internal Server Error"}
 

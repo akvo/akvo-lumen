@@ -30,7 +30,7 @@
 (defn sentry-error-tracker [dsn]
   (SentryErrorTracker. dsn))
 
-(defmethod ig/init-key :akvo.lumen.component.error-tracker/sentry
+(defmethod ig/init-key :akvo.lumen.component.error-tracker/prod
   [_ {{:keys [dsn opts]} :tracker :as config}]
   (sentry-error-tracker dsn))
 
@@ -62,6 +62,6 @@
 
 (s/def :akvo.lumen.component.error-tracker/error-tracker (partial satisfies? p/IErrorTracker))
 
-(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/sentry
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod
   [_]
   (s/keys :req-un [::dsn ::opts]))
