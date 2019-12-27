@@ -14,10 +14,10 @@
                                                       :db #ig/ref :akvo.lumen.component.hikaricp/hikaricp}
 
  :akvo.lumen.component.error-tracker/config {:dsn #duct/env "LUMEN_SENTRY_BACKEND_DSN"
-                                             :opts {:environment #duct/env "LUMEN_SENTRY_ENVIRONMENT"
+                                             :opts {:environment #duct/env ["LUMEN_SENTRY_ENVIRONMENT" :or "prod"]
                                                     :namespaces ["org.akvo" "akvo"]
-                                                    :release #duct/env "LUMEN_SENTRY_RELEASE"
-                                                    :server-name #duct/env "LUMEN_SENTRY_SERVER_NAME"}}
+                                                    :release #duct/env ["LUMEN_SENTRY_RELEASE" :or "lumen-ci"]
+                                                    :server-name #duct/env ["LUMEN_SENTRY_SERVER_NAME" :or "blue"]}}
 
  :akvo.lumen.component.error-tracker/prod #ig/ref :akvo.lumen.component.error-tracker/config
 
