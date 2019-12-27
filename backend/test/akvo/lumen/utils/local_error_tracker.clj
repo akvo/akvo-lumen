@@ -27,4 +27,4 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.utils.local-error-tracker/local
   [_]
-  any?)
+  empty?)
