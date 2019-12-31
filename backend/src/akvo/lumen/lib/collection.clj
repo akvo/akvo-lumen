@@ -1,25 +1,44 @@
 (ns akvo.lumen.lib.collection
-  (:refer-clojure :exclude [update])
-  (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.db.collection :as db.collection]
+  (:require [akvo.lumen.db.collection :as db.collection]
+            [akvo.lumen.lib :as lib]
             [clojure.java.jdbc :as jdbc]
-            [clojure.set :as set])
+            [clojure.set :as set]
+            [clojure.string :as str])
   (:import [java.sql SQLException Connection]))
 
-(alias 'core 'clojure.core)
+(defrecord Entity [uuid type])
+
+(defn new-entity [[uuid type]]
+  (Entity. uuid (keyword type)))
+
+(defn feed-entities [collection]
+  (when collection
+    (let [model (->> (.getArray (:entities collection))
+                     (mapv (fn [e] (new-entity (str/split e #"::")))))
+          collection (assoc collection :entities model)
+          data (reduce (fn [m e]
+                         (let [m (update m :entities #(conj % (:uuid e)))]
+                           (condp = (:type e)
+                             :raster-dataset-id (update m :rasters #(conj % (:uuid e)))
+                             :dataset-id (update m :datasets #(conj % (:uuid e)))
+                             :visualisation-id (update m :visualisations #(conj % (:uuid e)))
+                             :dashboard-id (update m :dashboards #(conj % (:uuid e))))))
+                       {:entities []
+                        :dashboards []
+                        :datasets []
+                        :rasters []
+                        :visualisations []} model)]
+      (merge collection data))))
+
 
 (defn all
   ([tenant-conn]
    (all tenant-conn nil))
   ([tenant-conn ids]
-   (mapv (fn [collection]
-           (core/update collection :entities #(vec (.getArray %))))
-         (db.collection/all-collections tenant-conn (if ids {:ids ids} {})))))
+   (mapv feed-entities (db.collection/all-collections tenant-conn (if ids {:ids ids} {})))))
 
 (defn fetch [tenant-conn id]
-  (if-let [collection (db.collection/fetch-collection tenant-conn {:id id})]
-    (lib/ok (core/update collection :entities #(vec (.getArray %))))
-    (lib/not-found {:id id})))
+  (feed-entities (db.collection/fetch-collection tenant-conn {:id id})))
 
 (defn- text-array
   "Creates the sql type text[] from a collection of strings"
@@ -61,14 +80,14 @@
           (when entities
             (doseq [entity (categorize-entities tx-conn entities)]
               (db.collection/insert-collection-entity tx-conn (assoc entity :collection-id id))))
-          (lib/created (second (fetch tx-conn id))))
+          (lib/created (fetch tx-conn id)))
         (catch SQLException e
           (if (unique-violation? e)
             (lib/conflict {:title title
                            :error "Collection title already exists"})
             (throw e)))))))
 
-(defn update
+(defn update*
   "Update a collection. Updates the title and all the entities"
   [tenant-conn id collection]
   (let [{:keys [entities title]} collection]
