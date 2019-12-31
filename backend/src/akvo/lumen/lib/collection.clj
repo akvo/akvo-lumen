@@ -1,24 +1,21 @@
 (ns akvo.lumen.lib.collection
-  (:refer-clojure :exclude [update])
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.db.collection :as db.collection]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set])
   (:import [java.sql SQLException Connection]))
 
-(alias 'core 'clojure.core)
-
 (defn all
   ([tenant-conn]
    (all tenant-conn nil))
   ([tenant-conn ids]
    (mapv (fn [collection]
-           (core/update collection :entities #(vec (.getArray %))))
+           (update collection :entities #(vec (.getArray %))))
          (db.collection/all-collections tenant-conn (if ids {:ids ids} {})))))
 
 (defn fetch [tenant-conn id]
   (if-let [collection (db.collection/fetch-collection tenant-conn {:id id})]
-    (lib/ok (core/update collection :entities #(vec (.getArray %))))
+    (lib/ok (update collection :entities #(vec (.getArray %))))
     (lib/not-found {:id id})))
 
 (defn- text-array
@@ -68,7 +65,7 @@
                            :error "Collection title already exists"})
             (throw e)))))))
 
-(defn update
+(defn update*
   "Update a collection. Updates the title and all the entities"
   [tenant-conn id collection]
   (let [{:keys [entities title]} collection]

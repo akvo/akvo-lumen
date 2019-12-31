@@ -73,15 +73,15 @@
     (testing "Update collection"
       (let [id (-> (collection/create *tenant-conn* {:title "col4" :entities [ds2 vs2 db2]})
                    variant/value :id)]
-        (let [coll (variant/value (collection/update *tenant-conn* id {:title "col4 renamed"}))]
+        (let [coll (variant/value (collection/update* *tenant-conn* id {:title "col4 renamed"}))]
           (is (= (:title coll) "col4 renamed"))
           (is (= (-> coll :entities set)
                  #{ds2 vs2 db2}))
-          (collection/update *tenant-conn* id {:entities []})
+          (collection/update* *tenant-conn* id {:entities []})
           (is (= [] (-> (collection/fetch *tenant-conn* id) variant/value :entities)))
-          (collection/update *tenant-conn* id {:entities [ds1 vs1]})
+          (collection/update* *tenant-conn* id {:entities [ds1 vs1]})
           (is (= #{ds1 vs1} (-> (collection/fetch *tenant-conn* id) variant/value :entities set)))
-          (collection/update *tenant-conn* id {:entities [vs1 vs2]})
+          (collection/update* *tenant-conn* id {:entities [vs1 vs2]})
           (is (= #{vs1 vs2} (-> (collection/fetch *tenant-conn* id) variant/value :entities set))))))
 
     (testing "Delete collection"
