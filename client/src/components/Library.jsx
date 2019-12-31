@@ -38,14 +38,23 @@ const filterLibraryByCollection = (library, collection) => {
   filteredLibrary.dashboards = {};
   filteredLibrary.rasters = {};
 
-  collection.entities.forEach((entityId) => {
+  collection.datasets.forEach((entityId) => {
+    if (library.datasets[entityId]) {
+      filteredLibrary.datasets[entityId] = library.datasets[entityId];
+    }
+  });
+  collection.visualisations.forEach((entityId) => {
     if (library.visualisations[entityId]) {
       filteredLibrary.visualisations[entityId] = library.visualisations[entityId];
-    } else if (library.datasets[entityId]) {
-      filteredLibrary.datasets[entityId] = library.datasets[entityId];
-    } else if (library.dashboards[entityId]) {
+    }
+  });
+  collection.dashboards.forEach((entityId) => {
+    if (library.dashboards[entityId]) {
       filteredLibrary.dashboards[entityId] = library.dashboards[entityId];
-    } else if (library.rasters[entityId]) {
+    }
+  });
+  collection.rasters.forEach((entityId) => {
+    if (library.rasters[entityId]) {
       filteredLibrary.rasters[entityId] = library.rasters[entityId];
     }
   });

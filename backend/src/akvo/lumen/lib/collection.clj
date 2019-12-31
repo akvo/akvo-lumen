@@ -13,22 +13,20 @@
 
 (defn feed-entities [collection]
   (when collection
-    (let [model (->> (.getArray (:entities collection))
-                     (mapv (fn [e] (new-entity (str/split e #"::")))))
-          collection (assoc collection :entities model)
+    (let [entities (->> (.getArray (:entities collection))
+                        (mapv (fn [e] (new-entity (str/split e #"::")))))
+
           data (reduce (fn [m e]
-                         (let [m (update m :entities #(conj % (:uuid e)))]
-                           (condp = (:type e)
-                             :raster-dataset-id (update m :rasters #(conj % (:uuid e)))
-                             :dataset-id (update m :datasets #(conj % (:uuid e)))
-                             :visualisation-id (update m :visualisations #(conj % (:uuid e)))
-                             :dashboard-id (update m :dashboards #(conj % (:uuid e))))))
-                       {:entities []
-                        :dashboards []
+                         (condp = (:type e)
+                           :raster-dataset-id (update m :rasters #(conj % (:uuid e)))
+                           :dataset-id (update m :datasets #(conj % (:uuid e)))
+                           :visualisation-id (update m :visualisations #(conj % (:uuid e)))
+                           :dashboard-id (update m :dashboards #(conj % (:uuid e)))))
+                       {:dashboards []
                         :datasets []
                         :rasters []
-                        :visualisations []} model)]
-      (merge collection data))))
+                        :visualisations []} entities)]
+      (merge (dissoc collection :entities) data))))
 
 
 (defn all
