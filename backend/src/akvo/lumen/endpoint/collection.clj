@@ -43,7 +43,9 @@
                :parameters {:path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               {:keys [id]} :path-params}]
-                          (collection/fetch (p/connection tenant-manager tenant) id))}
+                          (if-let [c (collection/fetch (p/connection tenant-manager tenant) id)]
+                              (lib/ok c)
+                              (lib/not-found {:id id})))}
          :put {:responses {200 {}}
                :parameters {:body map?
                             :path-params {:id string?}}
