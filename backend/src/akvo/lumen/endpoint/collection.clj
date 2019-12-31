@@ -54,7 +54,7 @@
                         (let [vis-payload (w/keywordize-keys body)
                               ids (l.auth/ids ::collection.s/collection-payload vis-payload)]
                           (if (p/optimistic-allow? auth-service ids)
-                            (collection/update (p/connection tenant-manager tenant) id vis-payload)
+                            (collection/update* (p/connection tenant-manager tenant) id vis-payload)
                             (lib/not-authorized {:ids ids}))))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
