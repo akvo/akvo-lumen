@@ -1,4 +1,4 @@
-import update from 'react-addons-update';
+import update from 'immutability-helper';
 import * as constants from '../constants/dataset';
 
 export const initialState = {
