@@ -1,7 +1,6 @@
 (ns akvo.lumen.lib.collection
   (:require [akvo.lumen.db.collection :as db.collection]
             [akvo.lumen.lib :as lib]
-            [cheshire.generate :refer [add-encoder]]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.string :as str])
@@ -12,22 +11,20 @@
 (defn new-entity [[uuid type]]
   (Entity. uuid (keyword type)))
 
-(add-encoder akvo.lumen.lib.collection.Entity
-             (fn [entity jsonGenerator]
-               (.writeString jsonGenerator (:uuid entity))))
-
 (defn feed-entities [collection]
   (when collection
     (let [model (->> (.getArray (:entities collection))
                      (mapv (fn [e] (new-entity (str/split e #"::")))))
           collection (assoc collection :entities model)
           data (reduce (fn [m e]
-                         (condp = (:type e)
-                           :raster-dataset-id (update m :rasters #(conj % e))
-                           :dataset-id (update m :datasets #(conj % e))
-                           :visualisation-id (update m :visualisations #(conj % e))
-                           :dashboard-id (update m :dashboards #(conj % e))))
-                       {:dashboards []
+                         (let [m (update m :entities #(conj % (:uuid e)))]
+                           (condp = (:type e)
+                             :raster-dataset-id (update m :rasters #(conj % (:uuid e)))
+                             :dataset-id (update m :datasets #(conj % (:uuid e)))
+                             :visualisation-id (update m :visualisations #(conj % (:uuid e)))
+                             :dashboard-id (update m :dashboards #(conj % (:uuid e))))))
+                       {:entities []
+                        :dashboards []
                         :datasets []
                         :rasters []
                         :visualisations []} model)]
@@ -83,7 +80,7 @@
           (when entities
             (doseq [entity (categorize-entities tx-conn entities)]
               (db.collection/insert-collection-entity tx-conn (assoc entity :collection-id id))))
-          (lib/created (second (fetch tx-conn id))))
+          (lib/created (fetch tx-conn id)))
         (catch SQLException e
           (if (unique-violation? e)
             (lib/conflict {:title title
