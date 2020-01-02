@@ -53,52 +53,52 @@
     :raster-dataset-id}
 
    where only one of the individual map ids will be non-nil"
-  [conn entities]
-  (let [entity-array (text-array conn entities)]
-    (->> (concat
-           (db.collection/fetch-dataset-ids conn {:ids entity-array})
-           (db.collection/fetch-visualisation-ids conn {:ids entity-array})
-           (db.collection/fetch-dashboard-ids conn {:ids entity-array})
-           (db.collection/fetch-raster-dataset-ids conn {:ids entity-array}))
-      (map #(merge {:dataset-id nil :visualisation-id nil :dashboard-id nil
-                    :raster-dataset-id nil} %)))))
+  [conn {:keys [datasets visualisations dashboards rasters]}]
+  (->> (concat
+        (db.collection/fetch-dataset-ids conn {:ids (text-array conn datasets)})
+        (db.collection/fetch-visualisation-ids conn {:ids (text-array conn visualisations)})
+        (db.collection/fetch-dashboard-ids conn {:ids (text-array conn dashboards)})
+        (db.collection/fetch-raster-dataset-ids conn {:ids (text-array conn rasters)}))
+       (map #(merge {:dataset-id nil :visualisation-id nil :dashboard-id nil
+                     :raster-dataset-id nil} %))))
 
 (defn unique-violation? [^SQLException e]
   (= (.getSQLState e) "23505"))
 
-(defn create [tenant-conn {:keys [title entities]}]
-  (cond
-    (empty? title) (lib/bad-request {:error "Title is missing"})
-    (> (count title) 128) (lib/bad-request {:error "Title is too long"
-                                            :title title})
-    :else
-    (jdbc/with-db-transaction [tx-conn tenant-conn]
-      (try
-        (let [{:keys [id]} (db.collection/create-collection tenant-conn {:title title})]
-          (when entities
-            (doseq [entity (categorize-entities tx-conn entities)]
-              (db.collection/insert-collection-entity tx-conn (assoc entity :collection-id id))))
-          (lib/created (fetch tx-conn id)))
-        (catch SQLException e
-          (if (unique-violation? e)
-            (lib/conflict {:title title
-                           :error "Collection title already exists"})
-            (throw e)))))))
+(defn- entities? [data]
+  (or (:dashboards data) (:visualisations data) (:rasters data) (:datasets data)))
+
+(defn create [tenant-conn payload]
+  (let [title (:title payload)]
+    (cond
+      (empty? title) (lib/bad-request {:error "Title is missing"})
+      (> (count title) 128) (lib/bad-request {:error "Title is too long"
+                                              :title title})
+      :else
+      (jdbc/with-db-transaction [tx-conn tenant-conn]
+        (try
+          (let [{:keys [id]} (db.collection/create-collection tenant-conn {:title title})]
+            (when (entities? payload)
+              (doseq [entity (categorize-entities tx-conn payload)]
+                (db.collection/insert-collection-entity tx-conn (assoc entity :collection-id id))))
+            (lib/created (fetch tx-conn id)))
+          (catch SQLException e
+            (if (unique-violation? e)
+              (lib/conflict {:title title
+                             :error "Collection title already exists"})
+              (throw e))))))))
 
 (defn update*
   "Update a collection. Updates the title and all the entities"
   [tenant-conn id collection]
-  (let [{:keys [entities title]} collection]
+  (let [{:keys [title]} collection]
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (when title
         (db.collection/update-collection-title tx-conn {:id id :title title}))
-
-      ;; Replace entity ids
-      (when entities
+      (when (entities? collection)
         (db.collection/delete-collection-entities tx-conn {:id id})
-        (doseq [entity (categorize-entities tx-conn entities)]
+        (doseq [entity (categorize-entities tx-conn collection)]
           (db.collection/insert-collection-entity tx-conn (assoc entity :collection-id id))))
-
       (fetch tx-conn id))))
 
 (defn delete

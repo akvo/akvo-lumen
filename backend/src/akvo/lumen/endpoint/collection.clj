@@ -26,9 +26,10 @@
                :handler (fn [{tenant :tenant
                               auth-service :auth-service
                               body :body}]
+                          (log/error :post-body (w/keywordize-keys body))
                           (let [vis-payload (w/keywordize-keys body)
                                 ids (l.auth/ids ::collection.s/collection-post-payload vis-payload)]
-                            (if (p/optimistic-allow? auth-service ids)
+                            (if (p/allow? auth-service ids)
                               (collection/create (p/connection tenant-manager tenant) vis-payload)
                               (lib/not-authorized {:ids ids}))))}}]
    ["/:id"
@@ -55,7 +56,8 @@
                               {:keys [id]} :path-params}]
                         (let [vis-payload (w/keywordize-keys body)
                               ids (l.auth/ids ::collection.s/collection-payload vis-payload)]
-                          (if (p/optimistic-allow? auth-service ids)
+                          (log/error :put-body (w/keywordize-keys body))
+                          (if (p/allow? auth-service ids)
                             (collection/update* (p/connection tenant-manager tenant) id vis-payload)
                             (lib/not-authorized {:ids ids}))))}
          :delete {:parameters {:path-params {:id string?}}
