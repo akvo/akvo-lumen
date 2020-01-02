@@ -26,9 +26,10 @@
                :handler (fn [{tenant :tenant
                               auth-service :auth-service
                               body :body}]
+                          (log/error :post-body (w/keywordize-keys body))
                           (let [vis-payload (w/keywordize-keys body)
                                 ids (l.auth/ids ::collection.s/collection-post-payload vis-payload)]
-                            (if (p/optimistic-allow? auth-service ids)
+                            (if (p/allow? auth-service ids)
                               (collection/create (p/connection tenant-manager tenant) vis-payload)
                               (lib/not-authorized {:ids ids}))))}}]
    ["/:id"
@@ -43,7 +44,9 @@
                :parameters {:path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               {:keys [id]} :path-params}]
-                          (collection/fetch (p/connection tenant-manager tenant) id))}
+                          (if-let [c (collection/fetch (p/connection tenant-manager tenant) id)]
+                              (lib/ok c)
+                              (lib/not-found {:id id})))}
          :put {:responses {200 {}}
                :parameters {:body map?
                             :path-params {:id string?}}
@@ -53,8 +56,9 @@
                               {:keys [id]} :path-params}]
                         (let [vis-payload (w/keywordize-keys body)
                               ids (l.auth/ids ::collection.s/collection-payload vis-payload)]
-                          (if (p/optimistic-allow? auth-service ids)
-                            (collection/update (p/connection tenant-manager tenant) id vis-payload)
+                          (log/error :put-body (w/keywordize-keys body))
+                          (if (p/allow? auth-service ids)
+                            (collection/update* (p/connection tenant-manager tenant) id vis-payload)
                             (lib/not-authorized {:ids ids}))))}
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
