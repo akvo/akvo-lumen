@@ -120,12 +120,6 @@
 (defprotocol AuthServiceClient
   (check-permissions [_ user-identity data]))
 
-(defprotocol AuthService2080
-  (optimistic-allow? [_ d]
-    "Provisional workaround for
-     https://github.com/akvo/akvo-lumen/issues/2080
-    'Refactor api/collections payload'"))
-
 
 (s/def ::authorizer (s/and (partial satisfies? UserManagement)
                            (partial satisfies? Authorizer)))

@@ -14,6 +14,7 @@
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.test-utils :refer [import-file]]
+            [clojure.tools.logging :as log]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]))
 
@@ -67,29 +68,38 @@
                                          {:title (apply str (repeat 129 "a"))}))))))
     (testing "Create a collection with entities"
       (let [[tag collection] (collection/create *tenant-conn* {:title "col2"
-                                                               :entities [ds1 vs1 db1]})]
+                                                               :datasets [ds1]
+                                                               :visualisations [vs1]
+                                                               :dashboards [db1]})]
         (is (= ::lib/created tag))
         (is (= #{ds1 vs1 db1} (entities-set collection)))))
 
     (testing "Fetch collection"
       (let [id (-> (collection/create *tenant-conn*
-                                      {:title "col3" :entities [ds2 vs2 db2]})
+                                      {:title "col3"
+                                       :datasets [ds2]
+                                       :visualisations [vs2]
+                                       :dashboards [db2]})
                    variant/value :id)
             coll (collection/fetch *tenant-conn* id)]
         (is (= #{ds2 vs2 db2} (entities-set coll)))))
 
     (testing "Update collection"
-      (let [id (-> (collection/create *tenant-conn* {:title "col4" :entities [ds2 vs2 db2]})
+      (let [id (-> (collection/create *tenant-conn* {:title "col4"
+                                                     :datasets [ds2]
+                                                     :visualisations [vs2]
+                                                     :dashboards [db2]})
                    variant/value :id)]
         (let [coll (collection/update* *tenant-conn* id {:title "col4 renamed"})]
           (is (= (:title coll) "col4 renamed"))
           (is (= (entities-set coll)
                  #{ds2 vs2 db2}))
-          (collection/update* *tenant-conn* id {:entities []})
+          (collection/update* *tenant-conn* id {:datasets [] :visualisations [] :dashboards [] :rasters []})
           (is (= #{} (entities-set (collection/fetch *tenant-conn* id))))
-          (collection/update* *tenant-conn* id {:entities [ds1 vs1]})
+          (collection/update* *tenant-conn* id {:datasets [ds1]
+                                                :visualisations [vs1]})
           (is (= #{ds1 vs1} (entities-set (collection/fetch *tenant-conn* id))))
-          (collection/update* *tenant-conn* id {:entities [vs1 vs2]})
+          (collection/update* *tenant-conn* id {:visualisations [vs1 vs2]})
           (is (= #{vs1 vs2} (entities-set (collection/fetch *tenant-conn* id)))))))
 
     (testing "Delete collection"
@@ -99,7 +109,9 @@
 
     (testing "Delete collection entities"
       (let [id (-> (collection/create *tenant-conn* {:title "col6"
-                                                     :entities [ds1 ds2 vs1 vs2 db1 db2]})
+                                                     :datasets [ds1 ds2]
+                                                     :visualisations [vs1 vs2]
+                                                     :dashboards [db1 db2]})
                    variant/value :id)]
         (dashboard/delete *tenant-conn* db1)
         (is (= #{ds1 ds2 vs1 vs2 db2}
