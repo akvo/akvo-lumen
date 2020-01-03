@@ -178,6 +178,6 @@ LibraryListing.propTypes = {
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,
-  checkboxEntities: PropTypes.array.isRequired,
+  checkboxEntities: PropTypes.object.isRequired,
   onCheckEntity: PropTypes.func.isRequired,
 };
