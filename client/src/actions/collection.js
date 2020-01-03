@@ -24,10 +24,7 @@ export function editCollection(collection) {
   return (dispatch) => {
     dispatch(editCollectionRequest);
     api.put(`/api/collections/${id}`, collection)
-      .then(({ body }) => {
-        dispatch(editCollectionSuccess(body));
-      }
-        )
+      .then(({ body }) => dispatch(editCollectionSuccess(body)))
       .catch((error) => {
         dispatch(showNotification('error', 'Failed to edit collection.'));
         dispatch(editCollectionFailure(error));

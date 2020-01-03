@@ -9,12 +9,10 @@
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.collection :as collection]
             [akvo.lumen.lib.dashboard :as dashboard]
-            [clojure.tools.logging :as log]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.test-utils :refer [import-file]]
-            [clojure.tools.logging :as log]
             [akvo.lumen.endpoint.commons.variant :as variant]
             [clojure.test :refer :all]))
 
