@@ -1,5 +1,5 @@
 import { handleActions } from 'redux-actions';
-import update from 'react-addons-update';
+import update from 'immutability-helper';
 import * as actions from '../actions/collection';
 
 export const initialState = null;
