@@ -93,7 +93,7 @@ export function removeEntitiesFromCollection(entityIds, collectionId) {
       datasets: new Set(entityIds.datasets) };
     const visualisations = c.visualisations.filter(o => dicts.visualisations.has(o) === false);
     const dashboards = c.dashboards.filter(o => dicts.dashboards.has(o) === false);
-    const rasters = c.rasters.filter(o => dicts.rastes.has(o) === false);
+    const rasters = c.rasters.filter(o => dicts.rasters.has(o) === false);
     const datasets = c.datasets.filter(o => dicts.datasets.has(o) === false);
     const entities = { visualisations, dashboards, rasters, datasets };
     const newCollection = { ...c, ...entities };
