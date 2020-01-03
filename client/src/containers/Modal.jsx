@@ -124,7 +124,7 @@ Modal.propTypes = {
   activeModal: PropTypes.shape({
     modal: PropTypes.string.isRequired,
     id: PropTypes.number,
-    entities: PropTypes.array,
+    entities: PropTypes.object,
     collection: PropTypes.object,
   }),
   collections: PropTypes.object,
