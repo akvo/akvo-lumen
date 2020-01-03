@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedDate } from 'react-intl';
 import LibraryListingItem from './LibraryListingItem';
-import { getTitle, getId, getCreatedTimestamp, getModifiedTimestamp } from '../../domain/entity';
+import { getTitle, getCreatedTimestamp, getModifiedTimestamp } from '../../domain/entity';
+import { isSelectionFilled } from '../../utilities/collection';
 
 const getListGroupTitle = (listGroupName, sortOrder) => {
   switch (sortOrder) {
@@ -46,8 +47,7 @@ const sortListGroupEntities = (entities, sortOrder, isReverseSort) => {
   return sortedEntities;
 };
 
-const isEntityChecked = (entity, checkboxEntities = []) =>
-  checkboxEntities.indexOf(getId(entity)) > -1;
+const isEntityChecked = (entity, checkboxEntities = []) => checkboxEntities[`${entity.type || entity.get('type')}s`].find(o => o === (entity.id || entity.get('id'))) !== undefined;
 
 export default function LibraryListingGroup({
   listGroup,
@@ -76,7 +76,7 @@ export default function LibraryListingGroup({
             currentCollection={currentCollection}
             onCheckEntity={onCheckEntity}
             onEntityAction={onEntityAction}
-            showCheckbox={checkboxEntities.length > 0}
+            showCheckbox={isSelectionFilled(checkboxEntities)}
           />
         )}
       </ol>
@@ -95,6 +95,6 @@ LibraryListingGroup.propTypes = {
   onEntityAction: PropTypes.func.isRequired,
   collections: PropTypes.object.isRequired,
   currentCollection: PropTypes.object,
-  checkboxEntities: PropTypes.array.isRequired,
+  checkboxEntities: PropTypes.object.isRequired,
   onCheckEntity: PropTypes.func.isRequired,
 };

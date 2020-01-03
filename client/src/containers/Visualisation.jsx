@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import update from 'react-addons-update';
+import update from 'immutability-helper';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
