@@ -15,6 +15,7 @@ export default function CollectionsList({
       <CollectionListItem
         collection={collection}
         pathname={pathname}
+        key={collection.id}
         onDeleteCollection={onDeleteCollection}
       />
     </li>

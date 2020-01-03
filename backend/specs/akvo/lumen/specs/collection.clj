@@ -3,6 +3,7 @@
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.visualisation :as visualisation.s]
             [akvo.lumen.specs.dashboard :as dashboard.s]
+            [akvo.lumen.specs.raster :as raster.s]
             [akvo.lumen.specs.dataset :as dataset.s]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.lib.visualisation :as visualisation]
@@ -22,13 +23,17 @@
 
 (s/def ::title string?)
 
-(s/def ::entity (s/or :dash ::dashboard.s/id :vis ::visualisation.s/id :ds ::dataset.s/id))
+(s/def ::dashboards (s/coll-of ::dashboard.s/id :distinct true))
 
-(s/def ::entities (s/coll-of ::entity :distinct true))
+(s/def ::visualisations (s/coll-of ::visualisation.s/id :distinct true))
 
-(s/def ::collection (s/keys :req-un [::id ::created ::modified ::entities]))
+(s/def ::datasets (s/coll-of ::dataset.s/id :distinct true))
+
+(s/def ::rasters (s/coll-of ::raster.s/id :distinct true))
+
+(s/def ::collection (s/keys :req-un [::id ::created ::modified]))
 
 (s/def ::collection-post-payload (s/keys :req-un [::title]
-                                         :opt-un [::entities]))
+                                         :opt-un [::rasters ::datasets ::visualisations ::dashboards]))
 
 (s/def ::collection-payload (s/merge ::collection ::collection-post-payload))

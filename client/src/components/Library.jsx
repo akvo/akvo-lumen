@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
+import update from 'immutability-helper';
 import LibraryHeader from './library/LibraryHeader';
 import LibraryListing from './library/LibraryListing';
 import CheckboxEntityMenu from './library/CheckboxEntityMenu';
@@ -14,7 +15,8 @@ import { deleteVisualisation } from '../actions/visualisation';
 import { deleteDataset, deleteFailedDataset, deletePendingDataset, updateDataset } from '../actions/dataset';
 import { deleteDashboard } from '../actions/dashboard';
 import { deleteRaster, deletePendingRaster } from '../actions/raster';
-import { editCollection, addEntitiesToCollection } from '../actions/collection';
+import { addEntitiesToCollection, removeEntitiesFromCollection } from '../actions/collection';
+import { isSelectionFilled, collectionModel, filterLibraryByCollection } from '../utilities/collection';
 import * as entity from '../domain/entity';
 import { trackPageView } from '../utilities/analytics';
 
@@ -30,36 +32,13 @@ function updateQueryAction(location, query) {
   return push(mergeQuery(location, query));
 }
 
-const filterLibraryByCollection = (library, collection) => {
-  const filteredLibrary = {};
-
-  filteredLibrary.datasets = {};
-  filteredLibrary.visualisations = {};
-  filteredLibrary.dashboards = {};
-  filteredLibrary.rasters = {};
-
-  collection.entities.forEach((entityId) => {
-    if (library.visualisations[entityId]) {
-      filteredLibrary.visualisations[entityId] = library.visualisations[entityId];
-    } else if (library.datasets[entityId]) {
-      filteredLibrary.datasets[entityId] = library.datasets[entityId];
-    } else if (library.dashboards[entityId]) {
-      filteredLibrary.dashboards[entityId] = library.dashboards[entityId];
-    } else if (library.rasters[entityId]) {
-      filteredLibrary.rasters[entityId] = library.rasters[entityId];
-    }
-  });
-
-  return Object.assign({}, library, filteredLibrary);
-};
-
 class Library extends Component {
   constructor() {
     super();
     this.state = {
       pendingDeleteEntity: null,
       collection: null,
-      checkboxEntities: [],
+      checkboxEntities: collectionModel(),
     };
 
     this.handleCheckEntity = this.handleCheckEntity.bind(this);
@@ -86,7 +65,6 @@ class Library extends Component {
     if (nextProps.collections) {
       const collectionId = nextProps.params.collectionId;
       const collection = collectionId ? nextProps.collections[collectionId] : null;
-
       if (collection) {
         if (collection !== this.state.collection) {
           this.setState({ collection: Object.assign({}, collection) });
@@ -102,20 +80,15 @@ class Library extends Component {
     }
   }
 
-  handleAddEntitiesToCollection(entityId, collectionId) {
-    this.props.dispatch(addEntitiesToCollection(entityId, collectionId));
-  }
-
-  handleCheckEntity(id) {
-    let newCheckboxEntities = this.state.checkboxEntities.slice(0);
-
-    if (newCheckboxEntities.indexOf(id) > -1) {
-      newCheckboxEntities = newCheckboxEntities.filter(oldId => oldId !== id);
+  handleCheckEntity(entityId, entityType) {
+    const e = { entityId, entityType };
+    let newCheckboxEntities = this.state.checkboxEntities[`${entityType}s`].slice(0);
+    if (newCheckboxEntities.find(o => o === e.entityId) !== undefined) {
+      newCheckboxEntities = newCheckboxEntities.filter(o => o !== e.entityId);
+      this.setState({ checkboxEntities: update(this.state.checkboxEntities, { [`${entityType}s`]: { $set: newCheckboxEntities } }) });
     } else {
-      newCheckboxEntities.push(id);
+      this.setState({ checkboxEntities: update(this.state.checkboxEntities, { [`${entityType}s`]: { $push: [e.entityId] } }) });
     }
-
-    this.setState({ checkboxEntities: newCheckboxEntities });
   }
 
   handleDeleteEntity(entityType, id) {
@@ -153,39 +126,27 @@ class Library extends Component {
     dispatch(updateDataset(id));
   }
 
-  handleCreateCollection(optionalEntities = []) {
-    const entities = Array.isArray(optionalEntities) ? optionalEntities : [optionalEntities];
-
+  handleCreateCollection(entities) {
     if (entities) {
       return this.props.dispatch(showModal('create-collection', { entities }));
     }
     return this.props.dispatch(showModal('create-collection'));
   }
+
   handleDeleteCollection(collectionId) {
     return this.props.dispatch(
       showModal('delete-collection', { collection: this.props.collections[collectionId] })
     );
   }
-  handleRemoveEntitiesFromCollection(entityIds, collectionId) {
-    const collection = this.props.collections[collectionId];
 
-    // Convenience conversion so that "entityIds" can be a naked single ID
-    const entitiesToRemove = Array.isArray(entityIds) ? entityIds : [entityIds];
-    const oldEntities = collection.entities || [];
-
-    const updatedEntityArray = [];
-
-    // Add any new entities that are not already in the collection
-    oldEntities.forEach((oldEntityId) => {
-      if (!entitiesToRemove.some(entityToRemoveId => entityToRemoveId === oldEntityId)) {
-        updatedEntityArray.push(oldEntityId);
-      }
-    });
-
-    const newCollection = Object.assign({}, collection, { entities: updatedEntityArray });
-
-    this.props.dispatch(editCollection(newCollection));
+  handleAddEntitiesToCollection(entities, collectionId) {
+    this.props.dispatch(addEntitiesToCollection(entities, collectionId));
   }
+
+  handleRemoveEntitiesFromCollection(entities, collectionId) {
+    this.props.dispatch(removeEntitiesFromCollection(entities, collectionId));
+  }
+
   handleEntityAction(actionType, entityType, entityId) {
     if (actionType === 'delete') {
       this.setState({ pendingDeleteEntity: { entityType, entityId } });
@@ -193,18 +154,20 @@ class Library extends Component {
       this.handleUpdateDataset(entityId);
     } else if (actionType === 'add-to-collection:new') {
       if (!this.state.collection) {
-        this.handleCreateCollection(entityId);
+        this.handleCreateCollection(update(this.state.checkboxEntities, { [`${entityType}s`]: { $push: [entityId] } }));
       }
     } else if (actionType.indexOf('add-to-collection:') > -1) {
       if (!this.state.collection) {
         const collectionId = actionType.replace('add-to-collection:', '');
-
-        this.handleAddEntitiesToCollection(entityId, collectionId);
+        const m = collectionModel();
+        m[`${entityType}s`].push(entityId);
+        this.handleAddEntitiesToCollection(m, collectionId);
       }
     } else if (actionType.indexOf('remove-from-collection:') > -1) {
       const collectionId = actionType.replace('remove-from-collection:', '');
-
-      this.handleRemoveEntitiesFromCollection(entityId, collectionId);
+      const m = collectionModel();
+      m[`${entityType}s`].push(entityId);
+      this.handleRemoveEntitiesFromCollection(m, collectionId);
     } else {
       throw new Error(`Action ${actionType} not yet implemented for entity type ${entityType}`);
     }
@@ -314,7 +277,7 @@ class Library extends Component {
 
         {this.props.children}
 
-        {this.state.checkboxEntities.length > 0 && (
+        {isSelectionFilled(this.state.checkboxEntities) && (
           <CheckboxEntityMenu
             collections={collections}
             collection={collection}
@@ -322,7 +285,7 @@ class Library extends Component {
             onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
             onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
             checkboxEntities={this.state.checkboxEntities}
-            onDeselectEntities={() => this.setState({ checkboxEntities: [] })}
+            onDeselectEntities={() => this.setState({ checkboxEntities: collectionModel() })}
           />
         )}
       </div>
