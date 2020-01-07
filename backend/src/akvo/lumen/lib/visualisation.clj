@@ -4,21 +4,23 @@
             [akvo.lumen.util :refer [squuid]])
   (:import [java.sql SQLException]))
 
-(defn all [tenant-conn]
+
+(defn all
+  [tenant-conn params]
   (db.visualisation/all-visualisations tenant-conn
-                      {}
-                      {}
-                      {:identifiers identity}))
+                                       params
+                                       {}
+                                       {:identifiers identity}))
 
 (defn create [tenant-conn body jwt-claims]
   (let [id (squuid)
         v (first (db.visualisation/upsert-visualisation tenant-conn
-                                       {:id id
-                                        :dataset-id (:datasetId body)
-                                        :type (:visualisationType body)
-                                        :name (:name body)
-                                        :spec (:spec body)
-                                        :author jwt-claims}))]
+                                                        {:id id
+                                                         :dataset-id (:datasetId body)
+                                                         :type (:visualisationType body)
+                                                         :name (:name body)
+                                                         :spec (:spec body)
+                                                         :author jwt-claims}))]
     (assoc body
            :id (str id)
            :status "OK"
