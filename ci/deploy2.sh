@@ -93,15 +93,15 @@ sed -e "s/\${BUILD_HASH}/$CI_COMMIT/" \
   -e "s/\${MAPS_POD_MEM_REQUESTS}/${MAPS_POD_MEM_REQUESTS}/" \
   -e "s/\${MAPS_POD_CPU_LIMITS}/${MAPS_POD_CPU_LIMITS}/" \
   -e "s/\${MAPS_POD_MEM_LIMITS}/${MAPS_POD_MEM_LIMITS}/" \
-  ci/k8s/deployment.yaml.template > deployment.yaml
+  ci/k8s/deployment.yaml.template > ci/k8s/deployment.yaml
 
-kubectl apply -f deployment.yaml
+kubectl apply -f ci/k8s/deployment.yaml
 
 sed -e "s/\${ENVIRONMENT}/${ENVIRONMENT}/" \
   -e "s/\${REDIS_POD_CPU_REQUESTS}/${REDIS_POD_CPU_REQUESTS}/" \
   -e "s/\${REDIS_POD_MEM_REQUESTS}/${REDIS_POD_MEM_REQUESTS}/" \
   -e "s/\${REDIS_POD_CPU_LIMITS}/${REDIS_POD_CPU_LIMITS}/" \
-  ci/k8s/redis-master-windshaft.yaml.template > redis-master-windshaft.yaml
+  ci/k8s/redis-master-windshaft.yaml.template > ci/k8s/redis-master-windshaft.yaml
 
 kubectl apply -f ci/k8s/redis-master-windshaft.yaml
 
@@ -109,7 +109,7 @@ sed -e "s/\${ENVIRONMENT}/${ENVIRONMENT}/" \
   -e "s/\${GW_POD_CPU_REQUESTS}/${GW_POD_CPU_REQUESTS}/" \
   -e "s/\${GW_POD_MEM_REQUESTS}/${GW_POD_MEM_REQUESTS}/" \
   -e "s/\${GW_POD_CPU_LIMITS}/${GW_POD_CPU_LIMITS}/" \
-  ci/k8s/blue-green-gateway.yaml.template > blue-green-gateway.yaml
+  ci/k8s/blue-green-gateway.yaml.template > ci/k8s/blue-green-gateway.yaml
 
 kubectl apply -f ci/k8s/blue-green-gateway.yaml
 kubectl apply -f ci/k8s/grafana/lumen-authz-allowed-paths.yml
