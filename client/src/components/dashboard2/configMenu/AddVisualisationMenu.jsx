@@ -19,8 +19,10 @@ class AddVisualisationMenu extends Component {
       limit: 1,
       offset: 0,
       visualisations: [],
+      selectVisualisationValue: null,
     };
     this.pendingRequests = [];
+    this.onChangeSelectVis = this.onChangeSelectVis.bind(this);
   }
 
   componentDidMount() {
@@ -48,6 +50,7 @@ class AddVisualisationMenu extends Component {
       offset: prevState.offset - prevState.limit,
     }));
   }
+  onChangeSelectVis = selectVisualisationValue => this.setState({ selectVisualisationValue })
 
   getItems = () => {
     const { limit, offset } = this.state;
@@ -78,8 +81,8 @@ class AddVisualisationMenu extends Component {
           </label>
           <SelectMenu
             name="visualisation"
-            value={{ value: '', label: '' }}
-            onChange={o => console.log('onChange', o)}
+            value={this.state.selectVisualisationValue}
+            onChange={this.onChangeSelectVis}
             options={this.props.libraryVisualisations ? Object.values(this.props.libraryVisualisations).map(v => ({ value: v.id, label: v.name })) : []}
           />
         </div>
