@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import { intlShape, injectIntl } from 'react-intl';
 import { withRouter } from 'react-router';
 import { saveAs } from 'file-saver/FileSaver';
-
+import { fetchLibrary } from '../actions/library';
+import { isEmpty } from 'lodash';
 import { base64ToBlob, extToContentType } from '../utilities/export';
 import * as api from '../utilities/api';
 import { showNotification } from '../actions/notification';
@@ -30,7 +31,11 @@ class Dashboard2 extends Component {
 
   componentDidMount() {
     const { dashboardId } = this.props.routeParams;
+    const isLibraryLoaded = !isEmpty(this.props.library.visualisations);
 
+    if (!isLibraryLoaded) {
+      this.props.dispatch(fetchLibrary());
+    }
     if (dashboardId != null) {
       const controller = new AbortController();
       const signal = controller.signal;
