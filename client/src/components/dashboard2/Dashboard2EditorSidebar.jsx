@@ -19,8 +19,17 @@ class Dashboard2EditorSidebar extends Component {
     };
   }
 
-  onAddVisualisation = () => {
-    console.log('@onAddVisualisation');
+  onAddVisualisation = (item) => {
+    console.log('@onAddVisualisation item:', item);
+    const newEntities = Object.assign({}, this.props.dashboard.entities);
+//    const dashboardEntity = this.props.dashboard.entities[item.id];
+//    let newEntityId = item.id;
+//    this.props.onAddVisualisation(this.props.visualisations[item.id]);
+    newEntities[item.id] = {
+      type: 'visualisation',
+      id: item.id,
+    };
+    this.props.onUpdateEntities(newEntities);
   }
 
   onAddFilter = () => {
@@ -65,7 +74,12 @@ class Dashboard2EditorSidebar extends Component {
             </div>
           </div>
           {tabSelection === 0 ?
-            <AddVisualisationMenu onAddVisualisation={this.onAddVisualisation} library={this.props.library} intl={this.props.intl} dashboard={this.props.dashboard}/>
+            <AddVisualisationMenu
+              onAddVisualisation={this.onAddVisualisation}
+              library={this.props.library}
+              intl={this.props.intl}
+              dashboard={this.props.dashboard}
+            />
           : null}
           {tabSelection === 1 ?
             <AddFilterMenu onAddFilter={this.onAddFilter} />
@@ -80,6 +94,7 @@ Dashboard2EditorSidebar.propTypes = {
   intl: intlShape,
   dashboard: PropTypes.object.isRequired,
   library: PropTypes.object,
+  onUpdateEntities: PropTypes.func.isRequired,
 };
 
 export default Dashboard2EditorSidebar;

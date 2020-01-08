@@ -73,7 +73,7 @@ class AddVisualisationMenu extends Component {
 
   render() {
     const { offset, visualisations } = this.state;
-    const { dashboard, library } = this.props;
+    const { dashboard, library, onAddVisualisation } = this.props;
 
     const isOnDashboard = item => Boolean(dashboard.entities[item.id]);
 
@@ -102,7 +102,6 @@ class AddVisualisationMenu extends Component {
             <button onClick={this.onNextOffset}>Next</button>
             <ul className="list">
               {visualisations.map((i) => { const h = i; h.type = 'visualisation'; return h; }).map((item) => {
-                console.log('item', item);
                 const dataLastUpdated = getDataLastUpdated({
                   visualisation: item,
                   datasets: library.datasets,
@@ -112,6 +111,7 @@ class AddVisualisationMenu extends Component {
                     className={`listItem clickable  ${item.visualisationType.replace(' ', '')} `}
                     data-test-name={item.name}
                     key={item.id}
+                    onClick={() => onAddVisualisation(item)}
                   >
                     <div className="entityIcon">
                       <img src={getIconUrl(item)} role="presentation" />

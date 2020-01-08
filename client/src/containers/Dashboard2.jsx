@@ -27,6 +27,7 @@ class Dashboard2 extends Component {
       },
     };
     this.pendingRequests = [];
+    this.updateEntities = this.updateEntities.bind(this);
   }
 
   componentDidMount() {
@@ -84,7 +85,7 @@ class Dashboard2 extends Component {
       this.setState(
         {
           dashboard,
-          unSaved: true,
+          isUnsavedChanges: true,
         },
         () => {
           this.saveDashboard();
@@ -123,7 +124,7 @@ class Dashboard2 extends Component {
   };
 
   saveDashboard = () => {
-    if (this.state.unSaved) {
+    if (this.state.isUnsavedChanges) {
       const newDashboard = this.state.dashboard;
 
       const controller = new AbortController();
@@ -136,7 +137,7 @@ class Dashboard2 extends Component {
           const dashboard = body;
           this.setState({
             dashboard,
-            unSaved: false,
+            isUnsavedChanges: false,
           });
         })
         .catch(() => {
@@ -214,6 +215,15 @@ class Dashboard2 extends Component {
         throw new Error(`Action ${action} not yet implemented`);
     }
   };
+  updateEntities(entities) {
+    const dashboard = Object.assign({}, this.state.dashboard, { entities });
+    this.setState({
+      dashboard,
+      isUnsavedChanges: true,
+    }, () => {
+      this.saveDashboard();
+    });
+  }
 
   render() {
     const { dashboard, intl } = this.state;
@@ -229,7 +239,7 @@ class Dashboard2 extends Component {
         />
         {!this.isDashboardDraft() && (
           <div className="Dashboard2Content">
-            <Dashboard2Editor dashboard={dashboard} library={this.props.library} intl={intl} />
+            <Dashboard2Editor dashboard={dashboard} library={this.props.library} intl={intl} onUpdateEntities={this.updateEntities}/>
           </div>
         )}
       </div>

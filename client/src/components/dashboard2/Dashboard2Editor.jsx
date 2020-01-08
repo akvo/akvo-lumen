@@ -22,4 +22,6 @@ Dashboard2Editor.propTypes = {
   intl: intlShape,
   dashboard: PropTypes.object.isRequired,
   library: PropTypes.object,
+  onUpdateEntities: PropTypes.func.isRequired,
+
 };
