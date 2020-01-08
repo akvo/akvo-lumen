@@ -7,7 +7,9 @@ SELECT id,
        created,
        modified,
        (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author"
-FROM visualisation;
+FROM visualisation
+LIMIT :limit
+OFFSET :offset;
 
 -- :name all-visualisations-ids :? :*
 -- :doc All visualisations ids.

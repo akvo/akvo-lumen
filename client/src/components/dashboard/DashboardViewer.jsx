@@ -88,7 +88,7 @@ class DashboardViewer extends Component {
   }
 
   render() {
-    const { dashboard, datasets, metadata, windowWidth } = this.props;
+    const { exporting, dashboard, datasets, metadata, windowWidth } = this.props;
     const layout = dashboard.layout;
     const viewportType = getViewportType(windowWidth);
     const minHeight = viewportType === 'large' ?
@@ -103,7 +103,9 @@ class DashboardViewer extends Component {
         ref={(ref) => { this.DashboardViewer = ref; }}
         style={{ width: '100%', minHeight, height: 'auto' }}
       >
-        <h1 className="DashboaredViewerTitle">{dashboard.title}</h1>
+        {!exporting && (
+          <h1 className="DashboaredViewerTitle">{dashboard.title}</h1>
+        )}
         <div
           className="dashboardEntities"
           style={{
@@ -137,6 +139,7 @@ DashboardViewer.propTypes = {
     layout: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
   }),
+  exporting: PropTypes.bool,
 };
 
 export default connect(({ print }) => ({ print }))(windowSize(DashboardViewer));

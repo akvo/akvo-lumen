@@ -12,21 +12,31 @@
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
-(defn all-visualisations [auth-service tenant-conn]
-  (let [visualisations      (visualisation/all tenant-conn)
-        auth-visualisations (->> visualisations
-                                 (l.auth/ids ::visualisation.s/visualisations)
-                                 (p/auth auth-service)
-                                 :auth-visualisations)]
-    (->> visualisations
-         (filter #(contains? auth-visualisations (:id %)))
-         (lib/ok))))
+(defn all-visualisations
+  ([auth-service tenant-conn]
+   (all-visualisations auth-service tenant-conn {:limit nil
+                                                 :offset nil}))
+  ([auth-service tenant-conn params]
+   (let [visualisations      (visualisation/all tenant-conn params)
+         auth-visualisations (->> visualisations
+                                  (l.auth/ids ::visualisation.s/visualisations)
+                                  (p/auth auth-service)
+                                  :auth-visualisations)]
+     (->> visualisations
+          (filter #(contains? auth-visualisations (:id %)))
+          (lib/ok)))))
 
 (defn routes [{:keys [windshaft-url tenant-manager] :as opts}]
   ["/visualisations"
    ["" {:get {:handler (fn [{tenant :tenant
-                             auth-service :auth-service}]
-                         (all-visualisations auth-service (p/connection tenant-manager tenant)))}
+                             auth-service :auth-service
+                             {:strs [limit offset] :as query-params} :query-params}]
+                         (if (or (nil? limit) (nil? offset))
+                           (all-visualisations auth-service (p/connection tenant-manager tenant))
+                           (let [limit (Integer. (re-find  #"\d+" limit)) ;; VIP
+                                 offset (Integer. (re-find  #"\d+" offset))]
+                             (all-visualisations auth-service (p/connection tenant-manager tenant) {:limit limit
+                                                                                                    :offset offset}))))}
         :post {:parameters {:body map?}
                :handler (fn [{tenant :tenant
                               jwt-claims :jwt-claims
@@ -43,13 +53,13 @@
                                    (let [{:strs [spec]} body
                                          layers (w/keywordize-keys (get-in spec ["layers"]))]
                                      (maps/create (p/connection tenant-manager tenant) windshaft-url layers)))}}]]
-   ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
+   ;; rasters don't depend on flow data (yet!), so no need to wrap this call
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant
                                           body :body}]
                                       (let [{:strs [rasterId spec]} body]
                                         (maps/create-raster (p/connection tenant-manager tenant) windshaft-url rasterId)))}}]]
-   ;; todo: fix path routing inconsistency here 
+   ;; todo: fix path routing inconsistency here
    ["/:id"
     {:middleware [(fn [handler]
                     (fn [{{:keys [id]} :path-params
