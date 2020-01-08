@@ -224,7 +224,7 @@ class Dashboard2 extends Component {
         />
         {!this.isDashboardDraft() && (
           <div className="Dashboard2Content">
-            <Dashboard2Editor dashboard={dashboard} intl={intl} />
+            <Dashboard2Editor dashboard={dashboard} library={this.props.library} intl={intl} />
           </div>
         )}
       </div>
@@ -239,6 +239,9 @@ Dashboard2.propTypes = {
   params: PropTypes.object,
   router: PropTypes.object.isRequired,
   routeParams: PropTypes.object.isRequired,
+  library: PropTypes.object,
 };
 
-export default connect()(withRouter(injectIntl(Dashboard2)));
+export default connect((state, props) => ({
+  library: state.library,
+}))(withRouter(injectIntl(Dashboard2)));

@@ -4,6 +4,7 @@ import { FormattedMessage, intlShape } from 'react-intl';
 
 import * as api from '../../../utilities/api';
 import { getIconUrl } from '../../../domain/entity';
+import SelectMenu from '../../common/SelectMenu';
 
 require('../../dashboard/DashboardVisualisationList.scss');
 
@@ -70,9 +71,18 @@ class AddVisualisationMenu extends Component {
   render() {
     const { offset, visualisations } = this.state;
     return (
-      <div
-        className="DashboardVisualisationList"
-      >
+      <div className="DashboardVisualisationList">
+        <div className="inputGroup">
+          <label htmlFor="columnName">
+            <FormattedMessage id="select_a_visualisation" />
+          </label>
+          <SelectMenu
+            name="visualisation"
+            value={{ value: '', label: '' }}
+            onChange={o => console.log('onChange', o)}
+            options={this.props.libraryVisualisations ? Object.values(this.props.libraryVisualisations).map(v => ({ value: v.id, label: v.name })) : []}
+          />
+        </div>
         {visualisations.length === 0 ?
           <div>
             <button onClick={this.onBackOffset}>Back</button>
@@ -106,6 +116,7 @@ class AddVisualisationMenu extends Component {
 AddVisualisationMenu.propTypes = {
   intl: intlShape,
   onAddVisualisation: PropTypes.func.isRequired,
+  libraryVisualisations: PropTypes.object,
 };
 
 export default AddVisualisationMenu;

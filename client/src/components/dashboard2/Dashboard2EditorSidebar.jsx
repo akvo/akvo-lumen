@@ -65,7 +65,7 @@ class Dashboard2EditorSidebar extends Component {
             </div>
           </div>
           {tabSelection === 0 ?
-            <AddVisualisationMenu onAddVisualisation={this.onAddVisualisation} />
+            <AddVisualisationMenu onAddVisualisation={this.onAddVisualisation} libraryVisualisations={this.props.library.visualisations} intl={this.props.intl} />
           : null}
           {tabSelection === 1 ?
             <AddFilterMenu onAddFilter={this.onAddFilter} />
@@ -79,6 +79,7 @@ class Dashboard2EditorSidebar extends Component {
 Dashboard2EditorSidebar.propTypes = {
   intl: intlShape,
   dashboard: PropTypes.object.isRequired,
+  library: PropTypes.object,
 };
 
 export default Dashboard2EditorSidebar;

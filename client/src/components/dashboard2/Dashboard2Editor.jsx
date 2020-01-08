@@ -9,11 +9,10 @@ require('../dashboard/DashboardEditor.scss');
 
 export default class Dashboard2Editor extends Component {
   render() {
-    const { dashboard } = this.props;
     return (
       <div className="DashboardEditor">
-        <Dashboard2EditorSidebar dashboard={dashboard} />
-        <Dashboard2EditorCanvas dashboard={dashboard} />
+        <Dashboard2EditorSidebar {...this.props} />
+        <Dashboard2EditorCanvas {...this.props} />
       </div>
     );
   }
@@ -22,4 +21,5 @@ export default class Dashboard2Editor extends Component {
 Dashboard2Editor.propTypes = {
   intl: intlShape,
   dashboard: PropTypes.object.isRequired,
+  library: PropTypes.object,
 };

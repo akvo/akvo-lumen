@@ -283,6 +283,7 @@
   "select_a_styling_indicator_geopoint_column": "Select a styling indicator geopoint column",
   "select_a_sub_bucket_column": "Select a sub-bucket column",
   "select_a_value_column": "Select a value column",
+  "select_a_visualisation": "Select a visualisation",
   "select_aggregation_method": "Select aggregation method",
   "select_another_metric_column": "Select another metric column",
   "select_all": "Select all",
