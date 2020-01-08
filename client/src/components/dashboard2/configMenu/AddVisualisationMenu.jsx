@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape } from 'react-intl';
-
+import { getDataLastUpdated } from '../../../utilities/chart';
 import * as api from '../../../utilities/api';
-import { getIconUrl } from '../../../domain/entity';
+import { getIconUrl, getAuthor } from '../../../domain/entity';
 import SelectMenu from '../../common/SelectMenu';
 
 require('../../dashboard/DashboardVisualisationList.scss');
@@ -73,6 +73,10 @@ class AddVisualisationMenu extends Component {
 
   render() {
     const { offset, visualisations } = this.state;
+    const { dashboard, library } = this.props;
+
+    const isOnDashboard = item => Boolean(dashboard.entities[item.id]);
+
     return (
       <div className="DashboardVisualisationList">
         <div className="inputGroup">
@@ -83,7 +87,7 @@ class AddVisualisationMenu extends Component {
             name="visualisation"
             value={this.state.selectVisualisationValue}
             onChange={this.onChangeSelectVis}
-            options={this.props.libraryVisualisations ? Object.values(this.props.libraryVisualisations).map(v => ({ value: v.id, label: v.name })) : []}
+            options={Object.values(library.visualisations).map(v => ({ value: v.id, label: v.name }))}
           />
         </div>
         {visualisations.length === 0 ?
@@ -96,15 +100,38 @@ class AddVisualisationMenu extends Component {
           <div>
             {offset !== 0 && <button onClick={this.onPrevious}>Previous</button> }
             <button onClick={this.onNextOffset}>Next</button>
-            <ul>
-              {visualisations.map((item) => {
+            <ul className="list">
+              {visualisations.map((i) => { const h = i; h.type = 'visualisation'; return h; }).map((item) => {
+                console.log('item', item);
+                const dataLastUpdated = getDataLastUpdated({
+                  visualisation: item,
+                  datasets: library.datasets,
+                });
                 return (
                   <li
-                    className="listItem clickable"
+                    className={`listItem clickable  ${item.visualisationType.replace(' ', '')} `}
                     data-test-name={item.name}
                     key={item.id}
                   >
-                    <h4>{item.name}</h4>
+                    <div className="entityIcon">
+                      <img src={getIconUrl(item)} role="presentation" />
+                    </div>
+                    <div className="textContent">
+                      <h3>
+                        {item.name}
+                        <span
+                          className="isOnDashboardIndicator"
+                        >
+                          {isOnDashboard(item) ? '✔' : ''}
+                        </span>
+                      </h3>
+                      {dataLastUpdated && (
+                        <div className="lastModified">
+                         {getAuthor(item)} - {dataLastUpdated}
+                        </div>
+                      )}
+
+                    </div>
                   </li>
                 );
               })}
@@ -119,7 +146,8 @@ class AddVisualisationMenu extends Component {
 AddVisualisationMenu.propTypes = {
   intl: intlShape,
   onAddVisualisation: PropTypes.func.isRequired,
-  libraryVisualisations: PropTypes.object,
+  dashboard: PropTypes.object.isRequired,
+  library: PropTypes.object,
 };
 
 export default AddVisualisationMenu;

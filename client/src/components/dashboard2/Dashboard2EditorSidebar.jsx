@@ -65,7 +65,7 @@ class Dashboard2EditorSidebar extends Component {
             </div>
           </div>
           {tabSelection === 0 ?
-            <AddVisualisationMenu onAddVisualisation={this.onAddVisualisation} libraryVisualisations={this.props.library.visualisations} intl={this.props.intl} />
+            <AddVisualisationMenu onAddVisualisation={this.onAddVisualisation} library={this.props.library} intl={this.props.intl} dashboard={this.props.dashboard}/>
           : null}
           {tabSelection === 1 ?
             <AddFilterMenu onAddFilter={this.onAddFilter} />
