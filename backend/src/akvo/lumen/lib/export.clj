@@ -20,7 +20,7 @@
   [exporter-url access-token locale spec]
   (let [{:keys [body headers status] :as response}
         (time* (http.client/post* exporter-url
-                                  (merge http-client-req-defaults 
+                                  (merge http-client-req-defaults
                                          {:headers {"access_token" (str/replace-first access-token
                                                                                       #"Bearer "
                                                                                       "")
