@@ -26,7 +26,7 @@
                              "bar"       "bar"
                              "scatter"   "scatter"})
 
-(defn run-visualisation 
+(defn run-visualisation
   [tenant-conn visualisation]
   (let [visualisation (walk/keywordize-keys visualisation)
         [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
@@ -57,7 +57,7 @@
             {:visualisations {(:id visualisation) (merge visualisation map-data)}
              :metadata {(:id visualisation) map-data}})))))
 
-(defn run-unknown-type-visualisation 
+(defn run-unknown-type-visualisation
   [tenant-conn visualisation]
   (let [dataset-id (:datasetId visualisation)
         [tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
@@ -104,3 +104,7 @@
         (lib/not-authorized {"shareId" id}))
       (lib/ok (response-data tenant-conn share windshaft-url)))
     (lib/not-found {"shareId" id})))
+
+(defn dashboard-export [tenant-conn id windshaft-url]
+  (assoc (dashboard-response-data tenant-conn id windshaft-url)
+         :dashboardId id))

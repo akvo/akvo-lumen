@@ -3,6 +3,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.dashboard :as dashboard]
+            [akvo.lumen.lib.public :as public]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs.dashboard :as dashboard.s]
             [clojure.spec.alpha :as s]
@@ -21,7 +22,7 @@
          (filter #(contains? auth-dashboards (:id %)))
          (lib/ok))))
 
-(defn routes [{:keys [tenant-manager] :as opts}]
+(defn routes [{:keys [tenant-manager windshaft-url] :as opts}]
   ["/dashboards"
    ["" {:get {:handler (fn [{tenant :tenant
                              auth-service :auth-service}]
@@ -64,7 +65,12 @@
          :delete {:parameters {:path-params {:id string?}}
                   :handler (fn [{tenant :tenant
                                  {:keys [id]} :path-params}]
-                             (dashboard/delete (p/connection tenant-manager tenant) id))}}]]])
+                             (dashboard/delete (p/connection tenant-manager tenant) id))}}]
+    ["/export" {:get {:handler (fn [{tenant :tenant
+                                     {:keys [id]} :path-params}]
+                                 (if-let [d (public/dashboard-export (p/connection tenant-manager tenant) id windshaft-url)]
+                                   (lib/ok d)
+                                   (lib/not-found {:error "Not found"})))}}]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (routes opts))

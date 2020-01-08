@@ -11,7 +11,7 @@ import { showModal } from '../actions/activeModal';
 
 require('./WorkspaceNav.scss');
 
-const hiddenLocations = ['visualisation/', 'dataset/', 'dashboard/', 'admin/users'];
+const hiddenLocations = ['visualisation/', 'dataset/', 'dashboard/', 'dashboard2/', 'admin/users'];
 
 const getHiddenStatus = (pathname) => {
   let hiddenStatus = false;
