@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { isEmpty } from 'lodash';
 import { intlShape, injectIntl } from 'react-intl';
-import { withRouter } from 'react-router';
 import { saveAs } from 'file-saver/FileSaver';
 import { fetchLibrary } from '../actions/library';
 import { base64ToBlob, extToContentType } from '../utilities/export';
@@ -29,14 +28,15 @@ class Dashboard2 extends Component {
     this.pendingRequests = [];
     this.updateEntities = this.updateEntities.bind(this);
   }
-
-  componentDidMount() {
-    const { dashboardId } = this.props.routeParams;
+  componentWillMount() {
     const isLibraryLoaded = !isEmpty(this.props.library.visualisations);
 
     if (!isLibraryLoaded) {
       this.props.dispatch(fetchLibrary());
     }
+  }
+  componentDidMount() {
+    const { dashboardId } = this.props.params;
     if (dashboardId != null) {
       const controller = new AbortController();
       const signal = controller.signal;
@@ -113,7 +113,7 @@ class Dashboard2 extends Component {
         this.setState({
           dashboard,
         });
-        this.props.router.push(`/dashboard/${dashboard.id}`);
+     // TODO REVIEW:   this.props.router.push(`/dashboard/${dashboard.id}`);
       })
       .catch(() => {
         this.props.dispatch(showNotification('error', 'Failed to create dashboard'));
@@ -257,11 +257,8 @@ Dashboard2.propTypes = {
   intl: intlShape,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
-  router: PropTypes.object.isRequired,
-  routeParams: PropTypes.object.isRequired,
+//  router: PropTypes.object.isRequired,
   library: PropTypes.object,
 };
 
-export default connect((state, props) => ({
-  library: state.library,
-}))(withRouter(injectIntl(Dashboard2)));
+export default connect(state => state)(injectIntl(Dashboard2));
