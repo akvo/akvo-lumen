@@ -85,6 +85,7 @@
                  "/api/visualisations/maps" {:methods #{:post}}
                  "/api/dashboards" {:methods #{:get :post}}
                  "/api/dashboards/:id" {:methods #{:get :put :delete}}
+                 "/api/dashboards/:id/export" {:methods #{:get}}
                  "/api/collections" {:methods #{:get :post}}
                  "/api/collections/:id" {:methods #{:get :put :delete}}})
 
