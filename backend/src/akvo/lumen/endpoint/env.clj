@@ -50,7 +50,7 @@
 (s/def ::lumen-deployment-version string?)
 (s/def ::piwik-site-id string?)
 (s/def ::sentry-client-dsn string?)
-(s/def ::living-lumen string?)
+(s/def ::living string?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
   (s/keys :req-un [::public-client
@@ -60,4 +60,4 @@
                    ::lumen-deployment-version
                    ::piwik-site-id
                    ::sentry-client-dsn
-                   ::living-lumen]))
+                   ::living]))
