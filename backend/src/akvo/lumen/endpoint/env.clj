@@ -31,8 +31,7 @@
                 "lumenDeploymentEnvironment" lumen-deployment-environment
                 "lumenDeploymentVersion" lumen-deployment-version
                 "piwikSiteId" piwik-site-id
-                "tenant" (:tenant request)
-                "living" "lumen"}
+                "tenant" (:tenant request)}
          (string? sentry-client-dsn)
          (assoc "sentryDSN" sentry-client-dsn))))))
 
@@ -50,7 +49,6 @@
 (s/def ::lumen-deployment-version string?)
 (s/def ::piwik-site-id string?)
 (s/def ::sentry-client-dsn string?)
-(s/def ::living string?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.env/env [_]
   (s/keys :req-un [::public-client
@@ -59,5 +57,4 @@
                    ::lumen-deployment-environment
                    ::lumen-deployment-version
                    ::piwik-site-id
-                   ::sentry-client-dsn
-                   ::living]))
+                   ::sentry-client-dsn]))
