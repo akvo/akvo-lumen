@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { isEmpty } from 'lodash';
 import { intlShape, injectIntl } from 'react-intl';
 import { withRouter } from 'react-router';
 import { saveAs } from 'file-saver/FileSaver';
 import { fetchLibrary } from '../actions/library';
-import { isEmpty } from 'lodash';
 import { base64ToBlob, extToContentType } from '../utilities/export';
 import * as api from '../utilities/api';
 import { showNotification } from '../actions/notification';
@@ -239,7 +239,12 @@ class Dashboard2 extends Component {
         />
         {!this.isDashboardDraft() && (
           <div className="Dashboard2Content">
-            <Dashboard2Editor dashboard={dashboard} library={this.props.library} intl={intl} onUpdateEntities={this.updateEntities}/>
+            <Dashboard2Editor
+              dashboard={dashboard}
+              library={this.props.library}
+              intl={intl}
+              onUpdateEntities={this.updateEntities}
+            />
           </div>
         )}
       </div>

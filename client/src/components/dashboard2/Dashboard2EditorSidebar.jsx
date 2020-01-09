@@ -25,10 +25,15 @@ class Dashboard2EditorSidebar extends Component {
 //    const dashboardEntity = this.props.dashboard.entities[item.id];
 //    let newEntityId = item.id;
 //    this.props.onAddVisualisation(this.props.visualisations[item.id]);
-    newEntities[item.id] = {
-      type: 'visualisation',
-      id: item.id,
-    };
+    if (newEntities[item.id]) {
+      delete newEntities[item.id];
+    } else {
+      newEntities[item.id] = {
+        type: 'visualisation',
+        id: item.id,
+      };
+    }
+
     this.props.onUpdateEntities(newEntities);
   }
 

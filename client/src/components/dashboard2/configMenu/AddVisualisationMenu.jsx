@@ -50,7 +50,10 @@ class AddVisualisationMenu extends Component {
       offset: prevState.offset - prevState.limit,
     }));
   }
-  onChangeSelectVis = selectVisualisationValue => this.setState({ selectVisualisationValue })
+  onChangeSelectVis = (selectVisualisationValue) => {
+    this.setState({ selectVisualisationValue });
+    this.props.onAddVisualisation({ id: selectVisualisationValue });
+  }
 
   getItems = () => {
     const { limit, offset } = this.state;
@@ -87,7 +90,8 @@ class AddVisualisationMenu extends Component {
             name="visualisation"
             value={this.state.selectVisualisationValue}
             onChange={this.onChangeSelectVis}
-            options={Object.values(library.visualisations).map(v => ({ value: v.id, label: v.name }))}
+            options={Object.values(library.visualisations).map(v => (
+              { value: v.id, label: v.name }))}
           />
         </div>
         {visualisations.length === 0 ?
@@ -127,7 +131,7 @@ class AddVisualisationMenu extends Component {
                       </h3>
                       {dataLastUpdated && (
                         <div className="lastModified">
-                         {getAuthor(item)} - {dataLastUpdated}
+                          {getAuthor(item)} - {dataLastUpdated}
                         </div>
                       )}
 
