@@ -31,7 +31,8 @@
                 "lumenDeploymentEnvironment" lumen-deployment-environment
                 "lumenDeploymentVersion" lumen-deployment-version
                 "piwikSiteId" piwik-site-id
-                "tenant" (:tenant request)}
+                "tenant" (:tenant request)
+                "key" "value"}
          (string? sentry-client-dsn)
          (assoc "sentryDSN" sentry-client-dsn))))))
 
