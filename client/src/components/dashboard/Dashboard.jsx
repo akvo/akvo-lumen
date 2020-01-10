@@ -27,7 +27,7 @@ import { showNotification } from '../../actions/notification';
 
 require('./Dashboard.scss');
 
-const dashboardHasAggreagtedVisualisations = dashboardEntities => dashboardEntities.filter(entity => entity.type === 'visualisation').every(entity => entity.data !== undefined);
+const dashboardHasAggreagtedVisualisations = dashboardEntities => dashboardEntities.filter(entity => entity.type === 'visualisation').every(entity => entity.data !== undefined || entity.layerMetadata !== undefined);
 
 const getEditingStatus = (location) => {
   const testString = 'create';
