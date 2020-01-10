@@ -110,11 +110,8 @@ class Dashboard extends Component {
       const libraryDashboard = this.props.library.dashboards[dashboardId];
       const existingDashboardLoaded =
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
-      if (!existingDashboardLoaded) {
-        console.log('!existingDashboardLoaded', isLibraryLoaded, libraryDashboard);
-        this.props.dispatch(actions.fetchDashboard(dashboardId));
-      } else if (!dashboardHasAggreagtedVisualisations(Object.values(libraryDashboard.entities))) {
-        console.log('!dashboardHasAggreagtedVisualisations', libraryDashboard.entities);
+      if (!existingDashboardLoaded
+        || !dashboardHasAggreagtedVisualisations(Object.values(libraryDashboard.entities))) {
         this.props.dispatch(actions.fetchDashboard(dashboardId));
       } else {
         this.loadDashboardIntoState(libraryDashboard);
