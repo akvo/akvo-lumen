@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.dashboard
   (:require [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.db.dashboard :as db.dashboard]
             [akvo.lumen.util :refer [squuid]]
             [clojure.walk :as w]
@@ -87,6 +88,14 @@
 (defn fetch [tenant-conn id]
   (when-let [d (db.dashboard/dashboard-by-id tenant-conn {:id id})]
     (handle-dashboard-by-id tenant-conn id)))
+
+(defn fetch-aggregated [tenant-conn id windshaft-url]
+  (when-let [d (db.dashboard/dashboard-by-id tenant-conn {:id id})]
+    (let [dashboard (handle-dashboard-by-id tenant-conn id)
+          aggregated-dashboard (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url)
+          aggregated-entities (reduce (fn [c [k v]] (assoc c k (assoc v :type "visualisation")))
+                                      {} (:visualisations aggregated-dashboard))]
+      (update dashboard :entities #(merge % aggregated-entities)))))
 
 (defn upsert
   "We update a dashboard via upsert of dashboard and clean - insert of

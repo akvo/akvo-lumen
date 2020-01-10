@@ -7,7 +7,7 @@ import Visualisation from './Visualisation';
 import Dataset from './Dataset';
 import Raster from './Raster';
 import Transformation from './Transformation';
-import Dashboard from './Dashboard';
+import Dashboard from '../components/dashboard/Dashboard';
 import Users from '../components/users/Users';
 import Resources from '../components/Resources';
 import Main from './Main';

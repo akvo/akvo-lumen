@@ -28,6 +28,7 @@
  :akvo.lumen.utils.local-server/endpoint {:routes-opts {}}
 
  :akvo.lumen.endpoint.public/public {:windshaft-url "http://windshaft:4000"}
+ :akvo.lumen.endpoint.dashboard/dashboard {:windshaft-url "http://windshaft:4000"}
 
  :akvo.lumen.endpoint.visualisation/visualisation {:windshaft-url "http://windshaft:4000"}
 
