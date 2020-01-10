@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import AsyncVisualisationViewer from '../charts/AsyncVisualisationViewer';
-import { getTitle, getDataLastUpdated } from '../../utilities/chart';
+import AsyncVisualisationViewer from '../../charts/AsyncVisualisationViewer';
+import { getTitle, getDataLastUpdated } from '../../../utilities/chart';
 
 require('./DashboardViewerItem.scss');
 
