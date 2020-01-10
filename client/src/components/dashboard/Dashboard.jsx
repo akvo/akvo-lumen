@@ -6,24 +6,24 @@ import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
 
-import ShareEntity from '../components/modals/ShareEntity';
-import * as actions from '../actions/dashboard';
-import * as api from '../utilities/api';
-import { fetchLibrary } from '../actions/library';
-import { fetchDataset } from '../actions/dataset';
-import { trackPageView, trackEvent } from '../utilities/analytics';
-import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
-import LoadingSpinner from '../components/common/LoadingSpinner';
-import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
-import NavigationPrompt from '../components/common/NavigationPrompt';
-import { printShape } from './PrintProvider';
-import { specIsValidForApi } from '../utilities/aggregation';
+import ShareEntity from '../modals/ShareEntity';
+import * as actions from '../../actions/dashboard';
+import * as api from '../../utilities/api';
+import { fetchLibrary } from '../../actions/library';
+import { fetchDataset } from '../../actions/dataset';
+import { trackPageView, trackEvent } from '../../utilities/analytics';
+import aggregationOnlyVisualisationTypes from '../../utilities/aggregationOnlyVisualisationTypes';
+import LoadingSpinner from '../common/LoadingSpinner';
+import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../../constants/time';
+import NavigationPrompt from '../common/NavigationPrompt';
+import { printShape } from '../../containers/PrintProvider';
+import { specIsValidForApi } from '../../utilities/aggregation';
 import {
   SHARE_DASHBOARD,
   EXPORT_DASHBOARD_PNG,
   EXPORT_DASHBOARD_PDF,
-} from '../constants/analytics';
-import { showNotification } from '../actions/notification';
+} from '../../constants/analytics';
+import { showNotification } from '../../actions/notification';
 
 require('./Dashboard.scss');
 
@@ -118,11 +118,11 @@ class Dashboard extends Component {
 
   componentDidMount() {
     this.isMountedFlag = true;
-    require.ensure(['../components/charts/VisualisationViewer'], () => {
+    require.ensure(['../charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
-        const DashboardEditor = require('../components/dashboard/DashboardEditor').default;
-        const DashboardHeader = require('../components/dashboard/DashboardHeader').default;
+        const DashboardEditor = require('./DashboardEditor').default;
+        const DashboardHeader = require('./DashboardHeader').default;
         /* eslint-enable global-require */
 
         this.setState({
