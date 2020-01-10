@@ -3,6 +3,7 @@
             [akvo.lumen.lib.aggregation :as aggregation]
             [akvo.lumen.db.dashboard :as db.dashboard]
             [akvo.lumen.util :refer [squuid]]
+            [clojure.tools.logging :as log]
             [clojure.walk :as w]
             [clojure.java.jdbc :as jdbc]))
 
@@ -95,6 +96,8 @@
           aggregated-dashboard (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url)
           aggregated-entities (reduce (fn [c [k v]] (assoc c k (assoc v :type "visualisation")))
                                       {} (:visualisations aggregated-dashboard))]
+      (log/info :fetch-aggregated :aggregated-dashboard aggregated-dashboard)
+      (log/info :fetch-aggregated :aggregated-entities aggregated-entities)
       (update dashboard :entities #(merge % aggregated-entities)))))
 
 (defn upsert
