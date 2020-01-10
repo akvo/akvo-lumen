@@ -94,7 +94,7 @@
   (when-let [d (db.dashboard/dashboard-by-id tenant-conn {:id id})]
     (let [dashboard (handle-dashboard-by-id tenant-conn id)
           aggregated-dashboard (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url)
-          aggregated-entities (reduce (fn [c [k v]] (assoc c k (assoc v :type "visualisation")))
+          aggregated-entities (reduce (fn [c [k v]] (assoc c (keyword k) (assoc v :type "visualisation")))
                                       {} (:visualisations aggregated-dashboard))
           res (update dashboard :entities #(merge % aggregated-entities))]
       (log/info :fetch-aggregated :aggregated-dashboard aggregated-dashboard)
