@@ -27,6 +27,8 @@ import { showNotification } from '../../actions/notification';
 
 require('./Dashboard.scss');
 
+const dashboardHasAggreagtedVisualisations = dashboardEntities => dashboardEntities.filter(entity => entity.type === 'visualisation').every(entity => entity.data !== undefined);
+
 const getEditingStatus = (location) => {
   const testString = 'create';
 
@@ -105,13 +107,14 @@ class Dashboard extends Component {
     if (isEditingExistingDashboard) {
       this.setState({ isUnsavedChanges: false });
       const dashboardId = this.props.params.dashboardId;
+      const libraryDashboard = this.props.library.dashboards[dashboardId];
       const existingDashboardLoaded =
-        isLibraryLoaded && !isEmpty(this.props.library.dashboards[dashboardId].layout);
-
-      if (!existingDashboardLoaded) {
+        isLibraryLoaded && !isEmpty(libraryDashboard.layout);
+      if (!existingDashboardLoaded ||
+        !dashboardHasAggreagtedVisualisations(Object.values(libraryDashboard.entities))) {
         this.props.dispatch(actions.fetchDashboard(dashboardId));
       } else {
-        this.loadDashboardIntoState(this.props.library.dashboards[dashboardId], this.props.library);
+        this.loadDashboardIntoState(libraryDashboard);
       }
     }
   }
@@ -164,7 +167,9 @@ class Dashboard extends Component {
           /* componentWillReceiveProps will be called again. */
           return;
         }
-        this.loadDashboardIntoState(dash, nextProps.library);
+        if (dashboardHasAggreagtedVisualisations(dashboardEntities)) {
+          this.loadDashboardIntoState(dash);
+        }
       }
     }
 
@@ -446,7 +451,7 @@ class Dashboard extends Component {
     });
   }
 
-  loadDashboardIntoState(dash, library) {
+  loadDashboardIntoState(dash) {
     /* Put the dashboard into component state so it is fed to the DashboardEditor */
     const dashboard = Object.assign({}, dash,
       { layout: Object.keys(dash.layout).map(key => dash.layout[key]) }
@@ -458,20 +463,20 @@ class Dashboard extends Component {
     /* onAddVisualisation also checks to see if a datasetId has already been requested, setState is
     /* not synchronous and is too slow here, hence the extra check */
     const requestedDatasetIds = this.state.requestedDatasetIds.slice(0);
+    const { ...aggregatedDatasets } = this.state.aggregatedDatasets;
 
     Object.keys(dash.entities).filter(key => Boolean(dash.entities[key])).forEach((key) => {
       const entity = dash.entities[key];
       const isVisualisation = entity.type === 'visualisation';
-
       if (isVisualisation) {
-        const visualisation = library.visualisations[key];
-
+        const visualisation = entity;
         if (aggregationOnlyVisualisationTypes.some(type =>
           type === visualisation.visualisationType)) {
           const alreadyProcessed = Boolean(visualisation.data);
-
           if (!alreadyProcessed) {
             this.onAddVisualisation(visualisation);
+          } else {
+            aggregatedDatasets[key] = visualisation.data;
           }
         } else {
           const datasetId = visualisation.datasetId;
@@ -480,10 +485,13 @@ class Dashboard extends Component {
           if (!alreadyProcessed) {
             requestedDatasetIds.push(datasetId);
             this.onAddVisualisation(visualisation);
+          } else {
+            aggregatedDatasets[key] = visualisation.data;
           }
         }
       }
     });
+    this.setState({ aggregatedDatasets });
   }
 
   addDataToVisualisations(visualisations) {
