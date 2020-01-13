@@ -95,13 +95,10 @@
     (let [dashboard (handle-dashboard-by-id tenant-conn id)
           aggregated-dashboard (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url)
           aggregated-entities (reduce (fn [c [k v]] (assoc c (keyword k) (assoc v :type "visualisation")))
-                                      {} (:visualisations aggregated-dashboard))
-          res (update dashboard :entities #(merge % aggregated-entities))]
-      (log/info :fetch-aggregated :aggregated-dashboard aggregated-dashboard)
-      (log/info :fetch-aggregated :aggregated-entities aggregated-entities)
-      (log/info :fetch-aggregated :dashboard dashboard)
-      (log/info :fetch-aggregated :res res)
-      res)))
+                                      {} (:visualisations aggregated-dashboard))]
+      (-> dashboard
+          (assoc :aggregated true)
+          (update :entities #(merge % aggregated-entities))))))
 
 (defn upsert
   "We update a dashboard via upsert of dashboard and clean - insert of
