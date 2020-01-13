@@ -111,7 +111,8 @@ class Dashboard extends Component {
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         this.setState({ fetchingDashboard: true });
-        this.props.dispatch(actions.fetchDashboard(dashboardId, () => this.setState({ fetchingDashboard: false })));
+        this.props.dispatch(actions.fetchDashboard(dashboardId,
+          () => this.setState({ fetchingDashboard: false })));
       } else {
         this.loadDashboardIntoState(this.props.library, libraryDashboard);
       }
