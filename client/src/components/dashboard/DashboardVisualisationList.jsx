@@ -5,6 +5,8 @@ import { getDataLastUpdated } from '../../utilities/chart';
 import { getIconUrl } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
 import SelectMenu from '../common/SelectMenu';
+import { trackEvent } from '../../utilities/analytics';
+import { FILTER_DASHBOARD_BY_DATASET } from '../../constants/analytics';
 
 require('./DashboardVisualisationList.scss');
 
@@ -73,7 +75,10 @@ export default class DashboardVisualisationList extends Component {
                   name="datasets"
                   value={filterByDataset}
                   isClearable
-                  onChange={id => this.setState({ filterByDataset: id, filterText: null })}
+                  onChange={(id) => {
+                    this.setState({ filterByDataset: id, filterText: null });
+                    trackEvent(FILTER_DASHBOARD_BY_DATASET);
+                  }}
                   options={datasets ? Object.keys(datasets).map(d =>
                     ({ value: datasets[d].get('id'), label: datasets[d].get('name') })) : []}
                 />
