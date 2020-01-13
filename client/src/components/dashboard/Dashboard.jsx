@@ -27,8 +27,6 @@ import { showNotification } from '../../actions/notification';
 
 require('./Dashboard.scss');
 
-const dashboardHasAggreagtedVisualisations = dashboardEntities => dashboardEntities.filter(entity => entity.type === 'visualisation').every(entity => entity.data !== undefined || entity.layerMetadata !== undefined);
-
 const getEditingStatus = (location) => {
   const testString = 'create';
 
@@ -110,11 +108,10 @@ class Dashboard extends Component {
       const libraryDashboard = this.props.library.dashboards[dashboardId];
       const existingDashboardLoaded =
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
-      if (!existingDashboardLoaded
-        || !dashboardHasAggreagtedVisualisations(Object.values(libraryDashboard.entities))) {
+      if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         this.props.dispatch(actions.fetchDashboard(dashboardId));
       } else {
-        this.loadDashboardIntoState(libraryDashboard);
+        this.loadDashboardIntoState(this.props.library, libraryDashboard);
       }
     }
   }
@@ -167,8 +164,8 @@ class Dashboard extends Component {
           /* componentWillReceiveProps will be called again. */
           return;
         }
-        if (dashboardHasAggreagtedVisualisations(dashboardEntities)) {
-          this.loadDashboardIntoState(dash);
+        if (dash.aggregated) {
+          this.loadDashboardIntoState(nextProps.library, dash);
         }
       }
     }
@@ -451,7 +448,7 @@ class Dashboard extends Component {
     });
   }
 
-  loadDashboardIntoState(dash) {
+  loadDashboardIntoState(library, dash) {
     /* Put the dashboard into component state so it is fed to the DashboardEditor */
     const dashboard = Object.assign({}, dash,
       { layout: Object.keys(dash.layout).map(key => dash.layout[key]) }
@@ -474,7 +471,7 @@ class Dashboard extends Component {
           type === visualisation.visualisationType)) {
           const alreadyProcessed = Boolean(visualisation.data);
           if (!alreadyProcessed) {
-            this.onAddVisualisation(visualisation);
+            this.onAddVisualisation(library.visualisations[visualisation.id]);
           } else {
             aggregatedDatasets[key] = visualisation.data;
           }
@@ -484,7 +481,7 @@ class Dashboard extends Component {
 
           if (!alreadyProcessed) {
             requestedDatasetIds.push(datasetId);
-            this.onAddVisualisation(visualisation);
+            this.onAddVisualisation(library.visualisations[visualisation.id]);
           } else {
             aggregatedDatasets[key] = visualisation.data;
           }
