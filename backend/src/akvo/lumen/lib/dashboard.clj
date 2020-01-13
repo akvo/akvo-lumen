@@ -96,7 +96,9 @@
           aggregated-dashboard (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url)
           aggregated-entities (reduce (fn [c [k v]] (assoc c (keyword k) (assoc v :type "visualisation")))
                                       {} (:visualisations aggregated-dashboard))]
-      (update dashboard :entities #(merge % aggregated-entities)))))
+      (-> dashboard
+          (assoc :aggregated true)
+          (update :entities #(merge % aggregated-entities))))))
 
 (defn upsert
   "We update a dashboard via upsert of dashboard and clean - insert of
