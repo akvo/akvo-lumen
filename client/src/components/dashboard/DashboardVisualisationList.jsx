@@ -4,16 +4,23 @@ import { FormattedMessage } from 'react-intl';
 import { getDataLastUpdated } from '../../utilities/chart';
 import { getIconUrl } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
+import SelectMenu from '../common/SelectMenu';
+import { trackEvent } from '../../utilities/analytics';
+import { FILTER_DASHBOARD_BY_DATASET } from '../../constants/analytics';
 
 require('./DashboardVisualisationList.scss');
 
-const filterVisualisations = (visualisations, filterText) => {
+const filterVisualisations = (visualisations, filterText, filterByDataset) => {
   // NB - this naive approach is fine with a few hundred visualisations, but we should replace
   // with something more serious before users start to have thousands of visualisations
+  let datasetCondition = () => true;
+  if (filterByDataset) {
+    datasetCondition = datasetId => datasetId === filterByDataset;
+  }
 
   if (!filterText) {
-    return visualisations.filter(({ spec, visualisationType }) =>
-      specIsValidForApi(spec, visualisationType)
+    return visualisations.filter(({ spec, visualisationType, datasetId }) =>
+      specIsValidForApi(spec, visualisationType) && datasetCondition(datasetId)
     );
   }
 
@@ -24,8 +31,8 @@ const filterVisualisations = (visualisations, filterText) => {
 
     let name = visualisation.name || '';
     name = name.toString().toLowerCase();
-
-    return name.indexOf(filterText.toString().toLowerCase()) > -1;
+    return name.indexOf(filterText.toString().toLowerCase()) > -1
+            && datasetCondition(visualisation.datasetId);
   });
 };
 
@@ -34,23 +41,24 @@ export default class DashboardVisualisationList extends Component {
     super();
     this.state = {
       filterText: '',
+      filterByDataset: '',
     };
   }
 
   render() {
-    const { props } = this;
-    const isOnDashboard = item => Boolean(props.dashboardItems[item.id]);
-    let visualisations = props.visualisations.slice(0);
+    const { dashboardItems, visualisations, datasets, onEntityClick } = this.props;
+    const { filterByDataset, filterText } = this.state;
+    const isOnDashboard = item => Boolean(dashboardItems[item.id]);
+
+    const viss = filterVisualisations(visualisations, filterText, filterByDataset);
     const showFilterInput = visualisations.length > 5;
 
-    visualisations = filterVisualisations(visualisations, this.state.filterText);
-    visualisations.sort((a, b) => b.modified - a.modified);
-
+    viss.sort((a, b) => b.modified - a.modified);
     return (
       <div
         className="DashboardVisualisationList"
       >
-        {props.visualisations.length === 0 ?
+        {visualisations.length === 0 ?
           <div
             className="noVisualisationsMessage"
           >
@@ -58,7 +66,25 @@ export default class DashboardVisualisationList extends Component {
           </div>
           :
           <div>
-            {showFilterInput &&
+            { showFilterInput &&
+              <div className="filterInput">
+                <label htmlFor="datasets">
+                  <FormattedMessage id="filter_visualisations_by_dataset" />
+                </label>
+                <SelectMenu
+                  name="datasets"
+                  value={filterByDataset}
+                  isClearable
+                  onChange={(id) => {
+                    this.setState({ filterByDataset: id, filterText: '' });
+                    trackEvent(FILTER_DASHBOARD_BY_DATASET);
+                  }}
+                  options={datasets ? Object.keys(datasets).map(d =>
+                    ({ value: datasets[d].get('id'), label: datasets[d].get('name') })) : []}
+                />
+              </div>
+            }
+            {showFilterInput && filterByDataset &&
               <div className="filterInput">
                 <label
                   htmlFor="filterText"
@@ -69,16 +95,16 @@ export default class DashboardVisualisationList extends Component {
                   type="text"
                   name="filterText"
                   placeholder="Visualisation title"
-                  value={this.state.filterText}
+                  value={filterText}
                   onChange={evt => this.setState({ filterText: evt.target.value })}
                 />
               </div>
             }
             <ul className="list">
-              {visualisations.map((item) => {
+              {viss.map((item) => {
                 const dataLastUpdated = getDataLastUpdated({
                   visualisation: item,
-                  datasets: props.datasets,
+                  datasets,
                 });
                 return (
                   <li
@@ -86,7 +112,7 @@ export default class DashboardVisualisationList extends Component {
                     ${isOnDashboard(item) ? 'added' : ''}`}
                     data-test-name={item.name}
                     key={item.id}
-                    onClick={() => props.onEntityClick(item, 'visualisation')}
+                    onClick={() => onEntityClick(item, 'visualisation')}
                   >
                     <div className="entityIcon">
                       <img src={getIconUrl(item)} role="presentation" />
@@ -121,7 +147,7 @@ export default class DashboardVisualisationList extends Component {
                 );
               })}
             </ul>
-            {(this.state.filterText && visualisations.length === 0) &&
+            {(this.state.filterText && viss.length === 0) &&
               <div className="filterHelpText">
                 <FormattedMessage id="no_visualisations_match_your_filter" />
                 <div className="buttonContainer">

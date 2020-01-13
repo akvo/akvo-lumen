@@ -122,6 +122,7 @@
   "filter_match_value": "Valeur de correspondance du filtre",
   "filter_operation": "Opération de filtrage",
   "filter_text": "Filtrer texte",
+  "filter_visualisations_by_dataset": "Filtrer les visualisations par données",
   "flow_application_url": "Flow Application URL",
   "first_name": "Prénom",
   "generate": "Generer",
