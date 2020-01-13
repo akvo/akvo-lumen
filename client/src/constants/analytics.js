@@ -1,5 +1,6 @@
 export const IMPORT_DATASET = 'Import dataset. Source:';
 export const RENDER_MAP_LAYER_TYPE = 'Render map layer type:';
+export const FILTER_DASHBOARD_BY_DATASET = 'Filter dashboard by dataset';
 export const EXPORT_EMBED_CODE = 'Get embed code';
 export const SELECT_MAP_LAYER_TYPE = 'Selected map layer type';
 export const SHARE_DASHBOARD = 'Share dashboard';
