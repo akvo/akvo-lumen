@@ -70,6 +70,7 @@ class Dashboard extends Component {
         modified: null,
         shareId: '',
       },
+      fetchingDashboard: false,
       isSavePending: null,
       isUnsavedChanges: null,
       isShareModalVisible: false,
@@ -109,7 +110,9 @@ class Dashboard extends Component {
       const existingDashboardLoaded =
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
-        this.props.dispatch(actions.fetchDashboard(dashboardId));
+        this.setState({ fetchingDashboard: true });
+        this.props.dispatch(actions.fetchDashboard(dashboardId,
+          () => this.setState({ fetchingDashboard: false })));
       } else {
         this.loadDashboardIntoState(this.props.library, libraryDashboard);
       }
@@ -540,7 +543,7 @@ class Dashboard extends Component {
   }
 
   render() {
-    if (!this.state.asyncComponents || this.state.isSavePending) {
+    if (!this.state.asyncComponents || this.state.isSavePending || this.state.fetchingDashboard) {
       return <LoadingSpinner />;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
