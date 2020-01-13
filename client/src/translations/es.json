@@ -121,6 +121,7 @@
   "filter_match_value": "Valor de coincidencia de filtro",
   "filter_operation": "Operación de filtro",
   "filter_text": "Filtrar texto",
+  "filter_visualisations_by_dataset": "Filtrar visualizaciones por conjunto de datos",
   "flow_application_url": "URL de la aplicación Flow",
   "first_name": "Nombre",
   "generate": "Generar",
