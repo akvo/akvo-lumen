@@ -69,12 +69,15 @@ export const fetchDashboardRequest = createAction('FETCH_DASHBOARD_REQUEST');
 export const fetchDashboardFailure = createAction('FETCH_DASHBOARD_FAILURE');
 export const fetchDashboardSuccess = createAction('FETCH_DASHBOARD_SUCCESS');
 
-export function fetchDashboard(id) {
+export function fetchDashboard(id, callback) {
   return (dispatch) => {
     dispatch(fetchDashboardRequest(id));
     api
       .get(`/api/dashboards/${id}`)
-      .then(({ body }) => dispatch(fetchDashboardSuccess(body)))
+      .then(({ body }) => {
+        dispatch(fetchDashboardSuccess(body));
+        callback();
+      })
       .catch((error) => {
         dispatch(showNotification('error', 'Failed to fetch dashboard.'));
         dispatch(fetchDashboardFailure(error));
