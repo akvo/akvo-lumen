@@ -76,7 +76,7 @@ export default class DashboardVisualisationList extends Component {
                   value={filterByDataset}
                   isClearable
                   onChange={(id) => {
-                    this.setState({ filterByDataset: id, filterText: null });
+                    this.setState({ filterByDataset: id, filterText: '' });
                     trackEvent(FILTER_DASHBOARD_BY_DATASET);
                   }}
                   options={datasets ? Object.keys(datasets).map(d =>
