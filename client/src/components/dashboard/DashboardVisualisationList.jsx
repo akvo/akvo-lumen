@@ -51,7 +51,7 @@ export default class DashboardVisualisationList extends Component {
     const isOnDashboard = item => Boolean(dashboardItems[item.id]);
 
     const viss = filterVisualisations(visualisations, filterText, filterByDataset);
-    const showFilterInput = visualisations.length > 5;
+    const showFilterByDataset = visualisations.length > 5;
 
     viss.sort((a, b) => b.modified - a.modified);
     return (
@@ -66,7 +66,7 @@ export default class DashboardVisualisationList extends Component {
           </div>
           :
           <div>
-            { showFilterInput &&
+            { showFilterByDataset &&
               <div className="filterInput">
                 <label htmlFor="datasets">
                   <FormattedMessage id="filter_visualisations_by_dataset" />
@@ -84,7 +84,7 @@ export default class DashboardVisualisationList extends Component {
                 />
               </div>
             }
-            {showFilterInput && filterByDataset &&
+            { filterByDataset && (viss.length > 5 || filterText) &&
               <div className="filterInput">
                 <label
                   htmlFor="filterText"
