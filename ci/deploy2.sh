@@ -93,6 +93,10 @@ sed -e "s/\${BUILD_HASH}/$CI_COMMIT/" \
   -e "s/\${MAPS_POD_MEM_REQUESTS}/${MAPS_POD_MEM_REQUESTS}/" \
   -e "s/\${MAPS_POD_CPU_LIMITS}/${MAPS_POD_CPU_LIMITS}/" \
   -e "s/\${MAPS_POD_MEM_LIMITS}/${MAPS_POD_MEM_LIMITS}/" \
+  -e "s/\${EXPORTER_POD_CPU_REQUESTS}/${EXPORTER_POD_CPU_REQUESTS}/" \
+  -e "s/\${EXPORTER_POD_MEM_REQUESTS}/${EXPORTER_POD_MEM_REQUESTS}/" \
+  -e "s/\${EXPORTER_POD_CPU_LIMITS}/${EXPORTER_POD_CPU_LIMITS}/" \
+  -e "s/\${EXPORTER_POD_MEM_LIMITS}/${EXPORTER_POD_MEM_LIMITS}/" \
   ci/k8s/deployment.yaml.template > ci/k8s/deployment.yaml
 
 kubectl apply -f ci/k8s/deployment.yaml
