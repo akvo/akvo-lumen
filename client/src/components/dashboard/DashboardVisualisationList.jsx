@@ -49,7 +49,9 @@ export default class DashboardVisualisationList extends Component {
     const { dashboardItems, visualisations, datasets, onEntityClick } = this.props;
     const { filterByDataset, filterText } = this.state;
     const isOnDashboard = item => Boolean(dashboardItems[item.id]);
-
+    const visualisationsSet = new Set(visualisations.map(v => v.datasetId).filter(v => v));
+    const datasetsWithViss = Object.keys(datasets).filter(d => visualisationsSet.has(d))
+                              .reduce((c, v) => { const h = c; h[v] = datasets[v]; return c; }, {});
     const viss = filterVisualisations(visualisations, filterText, filterByDataset);
     const numMaxVisualisations = 5;
     const showFilterByDataset = visualisations.length > numMaxVisualisations;
@@ -80,8 +82,8 @@ export default class DashboardVisualisationList extends Component {
                     this.setState({ filterByDataset: id, filterText: '' });
                     trackEvent(FILTER_DASHBOARD_BY_DATASET);
                   }}
-                  options={datasets ? Object.keys(datasets).map(d =>
-                    ({ value: datasets[d].get('id'), label: datasets[d].get('name') })) : []}
+                  options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
+                    ({ value: datasetsWithViss[d].get('id'), label: datasetsWithViss[d].get('name') })) : []}
                 />
               </div>
             }
