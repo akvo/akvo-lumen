@@ -62,6 +62,9 @@
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/config [_]
   ::config)
 
+(defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/wrap-sentry [_]
+  ::config)
+
 (s/def :akvo.lumen.component.error-tracker/error-tracker (partial satisfies? p/IErrorTracker))
 
 (defmethod ig/pre-init-spec :akvo.lumen.component.error-tracker/prod
