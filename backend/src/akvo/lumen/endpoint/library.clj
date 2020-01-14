@@ -25,6 +25,7 @@
           :visualisations (variant/value (e.visualisation/all-visualisations auth-service tenant-conn))
           :collections (variant/value (e.collection/all auth-service tenant-conn))}))))
 
+
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.library/library [_]
   (s/keys :req-un [::tenant-manager/tenant-manager] ))
 
