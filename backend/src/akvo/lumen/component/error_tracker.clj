@@ -19,11 +19,9 @@
 
 (defrecord SentryErrorTracker [dsn opts]
   p/IErrorTracker
-  (track [{dsn :dsn
-           {:keys [namespaces] :as opts} :opts}
-          error]
+  (track [this error]
     (let [event-info (event-map error opts)]
-      (->> (raven-interface/stacktrace event-info error namespaces)
+      (->> (raven-interface/stacktrace event-info error (:namespaces opts))
            (raven/capture dsn)
            future))))
 
