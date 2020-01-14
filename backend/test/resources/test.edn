@@ -7,6 +7,12 @@
 
  :akvo.lumen.utils.local-error-tracker/local {}
 
+ :akvo.lumen.component.error-tracker/config {:dsn "dev-sentry-client-dsn"
+                                             :opts {:environment  "LUMEN_SENTRY_ENVIRONMENT"
+                                                    :release  "LUMEN_SENTRY_RELEASE"
+                                                    :server-name  "LUMEN_SENTRY_SERVER_NAME"}}
+
+
  :akvo.lumen.utils.dev-emailer/emailer {:from-email "devops@akvo.localhost"
                                         :from-name "Akvo Lumen"}
 
