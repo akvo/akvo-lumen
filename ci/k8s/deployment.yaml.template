@@ -163,6 +163,19 @@ spec:
             secretKeyRef:
               name: lumen
               key: sentry.client_dsn
+        - name: LUMEN_SENTRY_SERVER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['color']
+        - name: LUMEN_SENTRY_RELEASE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['lumen-version']              
+        - name: LUMEN_SENTRY_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: akvo
+              key: environment
         - name: LUMEN_PIWIK_SITE_ID
           valueFrom:
             secretKeyRef:
