@@ -12,8 +12,7 @@
  :akvo.lumen.endpoint.env/env {:lumen-deployment-color #duct/env ["LUMEN_DEPLOYMENT_COLOR" :or "Pink"]
                                :lumen-deployment-environment #duct/env ["LUMEN_DEPLOYMENT_ENVIRONMENT" :or "Local test"]
                                :lumen-deployment-version #duct/env ["LUMEN_DEPLOYMENT_VERSION" :or "Local version"]
-                               :piwik-site-id "165"
-                               :sentry-client-dsn "dev-sentry-client-dsn"}
+                               :piwik-site-id "165"}
 
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
