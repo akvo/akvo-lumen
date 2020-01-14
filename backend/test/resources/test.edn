@@ -5,12 +5,16 @@
 
  :akvo.lumen.component.caddisfly/local {:local-schema-uri "./caddisfly/caddisfly-tests-v2.json"}
 
- :akvo.lumen.component.error-tracker/local {}
+ :akvo.lumen.utils.local-error-tracker/local {}
+
+ :akvo.lumen.component.error-tracker/config {:dsn "dev-sentry-client-dsn"
+                                             :opts {:environment  "LUMEN_SENTRY_ENVIRONMENT"
+                                                    :release  "LUMEN_SENTRY_RELEASE"
+                                                    :server-name  "LUMEN_SENTRY_SERVER_NAME"}}
+
 
  :akvo.lumen.utils.dev-emailer/emailer {:from-email "devops@akvo.localhost"
                                         :from-name "Akvo Lumen"}
-
- :akvo.lumen.component.error-tracker/wrap-sentry {:dsn "dev-dsn"}
 
  :akvo.lumen.component.handler/handler {:middleware [#ig/ref :akvo.lumen.component.handler/wrap-stacktrace]}
 
@@ -52,8 +56,7 @@
  :akvo.lumen.endpoint.env/env {:lumen-deployment-color #duct/env ["LUMEN_DEPLOYMENT_COLOR" :or "Pink"]
                                :lumen-deployment-environment #duct/env ["LUMEN_DEPLOYMENT_ENVIRONMENT" :or "Local test"]
                                :lumen-deployment-version #duct/env ["LUMEN_DEPLOYMENT_VERSION" :or "Local version"]
-                               :piwik-site-id "165"
-                               :sentry-client-dsn "dev-sentry-client-dsn"}
+                               :piwik-site-id "165"}
 
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
