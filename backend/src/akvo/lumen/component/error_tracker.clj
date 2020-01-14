@@ -17,7 +17,7 @@
             :extra {:ex-data (subs text 0 (min (count text) 4096))}
             :message (.getMessage error)))))
 
-(defrecord SentryErrorTracker [dsn]
+(defrecord SentryErrorTracker [dsn opts]
   p/IErrorTracker
   (track [{dsn :dsn
            {:keys [namespaces] :as opts} :opts}
@@ -27,12 +27,12 @@
            (raven/capture dsn)
            future))))
 
-(defn sentry-error-tracker [dsn]
-  (SentryErrorTracker. dsn))
+(defn sentry-error-tracker [dsn opts]
+  (SentryErrorTracker. dsn opts))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/prod
   [_ {{:keys [dsn opts]} :tracker :as config}]
-  (sentry-error-tracker dsn))
+  (sentry-error-tracker dsn opts))
 
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/wrap-sentry
   [_ {:keys [dsn opts] :as config}]
