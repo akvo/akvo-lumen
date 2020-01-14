@@ -7,7 +7,6 @@
             [clojure.spec.test.alpha :as stest]
             [duct.core :as duct]
             [duct.core.env :as env]
-            [clojure.pprint :refer (pprint)]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
@@ -28,12 +27,9 @@
     (let [config (config/construct config-file)
           _   (migrate/migrate config)
           _ (ig/load-namespaces config)
-
           system (try (ig/init config)
                       (catch Exception e
-                        (do
-                          (log/error e)
-                          (pprint config))))]
+                        (log/error e)))]
       (when (:conform-specs (:akvo.lumen.specs/specs system))
         (stest/instrument))
       system)))

@@ -1,5 +1,4 @@
-{:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"
-                                          :error "example"}
+{:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/test_lumen?ssl=true&user=lumen&password=password"}
 
  :akvo.lumen.component.http/http {:port 3100}
  :akvo.lumen.component.tenant-manager/data {:encryption-key "secret"}
