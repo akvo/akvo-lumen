@@ -27,10 +27,11 @@
 (s/def ::maximum-pool-size pos-int?)
 (s/def ::minimum-idle pos-int?)
 (s/def ::hikaricp (partial instance? Boundary))
-
+(s/def ::error string?)
 (defmethod ig/pre-init-spec :akvo.lumen.component.hikaricp/hikaricp [_]
   (s/keys :req-un [::uri
                    ::pool-name
                    ::maximum-pool-size
+                   ::error
                    ::minimum-idle
                    ::monitoring/metric-registry]))
