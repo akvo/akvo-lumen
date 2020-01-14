@@ -55,4 +55,4 @@ blocks:
         on_fail:
           commands:
             - export PROJECT_NAME=akvo-lumen
-            - docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml logs --no-color
+            - docker-compose -f docker-compose.yml -f docker-compose.ci.yml logs --no-color
