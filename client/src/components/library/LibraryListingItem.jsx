@@ -256,7 +256,7 @@ export default class LibraryListingItem extends Component {
         <div
           className={`checkboxContainer ${this.props.showCheckbox ? 'show' : ''}`}
           onClick={() => {
-            this.props.onCheckEntity(getId(entity));
+            this.props.onCheckEntity(getId(entity), getType(entity));
           }}
         >
           <input

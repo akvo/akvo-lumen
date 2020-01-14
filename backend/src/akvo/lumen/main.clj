@@ -7,6 +7,7 @@
             [clojure.spec.test.alpha :as stest]
             [duct.core :as duct]
             [duct.core.env :as env]
+            [clojure.tools.logging :as log]
             [integrant.core :as ig]))
 
 (def config-file "akvo/lumen/config.edn")
@@ -32,9 +33,9 @@
     (let [config (config/construct config-file)
           _   (migrate/migrate config)
           _ (ig/load-namespaces config)
-          system (ig/init config)]
+          system (try (ig/init config)
+                      (catch Exception e
+                        (log/error e)))]
       (when (:conform-specs (:akvo.lumen.specs/specs system))
         (stest/instrument))
-      system))
-
-  )
+      system)))

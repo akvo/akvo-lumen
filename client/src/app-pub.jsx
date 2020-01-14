@@ -7,7 +7,7 @@ import fetch from 'isomorphic-fetch';
 import IntlWrapper from './containers/IntlWrapper';
 import PrintProvider from './containers/PrintProvider';
 import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
-import DashboardViewer from './components/dashboard/DashboardViewer';
+import DashboardViewer from './components/dashboard/shared/DashboardViewer';
 import LumenBranding from './components/common/LumenBranding';
 import ErrorScreen from './components/common/ErrorScreen';
 import configureStore from './store/configureStore';

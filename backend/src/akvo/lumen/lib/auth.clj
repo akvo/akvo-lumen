@@ -26,15 +26,6 @@
 
 (declare ids)
 
-(defn- optimistic-allow?* [this ids]
-  {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
-            (set (keys ids)))]}
-  (set/subset? (set/union (:dataset-ids ids) (:visualisation-ids ids)
-                          (:dashboard-ids ids) (:collection-ids ids))
-               (set/union (:auth-datasets-set this) (:auth-visualisations-set this)
-                          (:auth-dashboards-set this) (:auth-collections-set this)
-                          (:rasters-set this))))
-
 (defn- allow?* [this ids]
   {:pre [(= #{:dataset-ids :visualisation-ids :dashboard-ids :collection-ids}
             (set (keys ids)))]}
@@ -52,9 +43,6 @@
    :auth-collections    (set/intersection (:auth-collections-set this) (set (:collections-ids ids)))})
 
 (defrecord AuthServiceImpl [auth-datasets-set auth-visualisations-set auth-dashboards-set auth-collections-set rasters-set]
-  p/AuthService2080
-  (optimistic-allow? [this ids]
-    (optimistic-allow?* this ids))
   p/AuthService
   (allow? [this ids]
     (allow?* this ids))

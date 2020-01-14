@@ -19,6 +19,13 @@
 
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
+(defn entities-set [collection]
+  (-> #{}
+      (into (:datasets collection))
+      (into (:rasters collection))
+      (into (:visualisations collection))
+      (into (:dashboards collection))))
+
 (defn visualisation-body [dataset-id]
   {:datasetId dataset-id
    :visualisationType "bar"
@@ -46,7 +53,7 @@
       (let [[tag collection] (collection/create *tenant-conn*
                                                 {:title "col1"})]
         (is (= ::lib/created tag))
-        (is (= #{:id :title :modified :created :entities}
+        (is (= #{:datasets :rasters :visualisations :dashboards :created :modified :title :id}
                (-> collection keys set)))
         (is (= ::lib/conflict
                (first (collection/create *tenant-conn*
@@ -59,45 +66,54 @@
                                          {:title (apply str (repeat 129 "a"))}))))))
     (testing "Create a collection with entities"
       (let [[tag collection] (collection/create *tenant-conn* {:title "col2"
-                                                               :entities [ds1 vs1 db1]})]
+                                                               :datasets [ds1]
+                                                               :visualisations [vs1]
+                                                               :dashboards [db1]})]
         (is (= ::lib/created tag))
-        (is (= #{ds1 vs1 db1} (-> collection :entities set)))))
+        (is (= #{ds1 vs1 db1} (entities-set collection)))))
 
     (testing "Fetch collection"
       (let [id (-> (collection/create *tenant-conn*
-                                      {:title "col3" :entities [ds2 vs2 db2]})
+                                      {:title "col3"
+                                       :datasets [ds2]
+                                       :visualisations [vs2]
+                                       :dashboards [db2]})
                    variant/value :id)
-            coll (variant/value (collection/fetch *tenant-conn* id))]
-        (is (= #{ds2 vs2 db2} (-> coll :entities set)))))
+            coll (collection/fetch *tenant-conn* id)]
+        (is (= #{ds2 vs2 db2} (entities-set coll)))))
 
     (testing "Update collection"
-      (let [id (-> (collection/create *tenant-conn* {:title "col4" :entities [ds2 vs2 db2]})
+      (let [id (-> (collection/create *tenant-conn* {:title "col4"
+                                                     :datasets [ds2]
+                                                     :visualisations [vs2]
+                                                     :dashboards [db2]})
                    variant/value :id)]
-        (let [coll (variant/value (collection/update *tenant-conn* id {:title "col4 renamed"}))]
+        (let [coll (collection/update* *tenant-conn* id {:title "col4 renamed"})]
           (is (= (:title coll) "col4 renamed"))
-          (is (= (-> coll :entities set)
+          (is (= (entities-set coll)
                  #{ds2 vs2 db2}))
-          (collection/update *tenant-conn* id {:entities []})
-          (is (= [] (-> (collection/fetch *tenant-conn* id) variant/value :entities)))
-          (collection/update *tenant-conn* id {:entities [ds1 vs1]})
-          (is (= #{ds1 vs1} (-> (collection/fetch *tenant-conn* id) variant/value :entities set)))
-          (collection/update *tenant-conn* id {:entities [vs1 vs2]})
-          (is (= #{vs1 vs2} (-> (collection/fetch *tenant-conn* id) variant/value :entities set))))))
+          (collection/update* *tenant-conn* id {:datasets [] :visualisations [] :dashboards [] :rasters []})
+          (is (= #{} (entities-set (collection/fetch *tenant-conn* id))))
+          (collection/update* *tenant-conn* id {:datasets [ds1]
+                                                :visualisations [vs1]})
+          (is (= #{ds1 vs1} (entities-set (collection/fetch *tenant-conn* id))))
+          (collection/update* *tenant-conn* id {:visualisations [vs1 vs2]})
+          (is (= #{vs1 vs2} (entities-set (collection/fetch *tenant-conn* id)))))))
 
     (testing "Delete collection"
       (let [id (-> (collection/create *tenant-conn* {:title "col5"}) variant/value :id)]
         (collection/delete *tenant-conn* id)
-        (is (= ::lib/not-found (variant/tag (collection/fetch *tenant-conn* id))))))
+        (is (nil? (collection/fetch *tenant-conn* id)))))
 
     (testing "Delete collection entities"
       (let [id (-> (collection/create *tenant-conn* {:title "col6"
-                                                     :entities [ds1 ds2 vs1 vs2 db1 db2]})
+                                                     :datasets [ds1 ds2]
+                                                     :visualisations [vs1 vs2]
+                                                     :dashboards [db1 db2]})
                    variant/value :id)]
         (dashboard/delete *tenant-conn* db1)
         (is (= #{ds1 ds2 vs1 vs2 db2}
-               (-> (collection/fetch *tenant-conn* id)
-                   variant/value :entities set)))
+               (entities-set (collection/fetch *tenant-conn* id))))
         (dataset/delete *tenant-conn* ds1)
         (is (= #{ds2 vs2 db2}
-               (-> (collection/fetch *tenant-conn* id)
-                   variant/value :entities set)))))))
+               (entities-set (collection/fetch *tenant-conn* id))))))))

@@ -54,7 +54,5 @@ blocks:
             - cd ..
         on_fail:
           commands:
-            - >-
-              checkout
-              PROJECT_NAME=akvo-lumen docker-compose -p akvo-lumen-ci -f
-              docker-compose.yml -f docker-compose.ci.yml logs --no-color
+            - export PROJECT_NAME=akvo-lumen
+            - docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml logs --no-color

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ContextMenu from '../common/ContextMenu';
+import { count } from '../../utilities/collection';
 
 require('./CheckboxEntityMenu.scss');
 
@@ -32,7 +33,7 @@ export default class CheckboxEntityMenu extends Component {
     return (
       <div className="CheckboxEntityMenu offscreen">
         <span className="SelectCount">
-          {props.checkboxEntities.length} Selected
+          {count(props.checkboxEntities)} Selected
         </span>
 
         <span
@@ -101,6 +102,6 @@ CheckboxEntityMenu.propTypes = {
   onAddEntitiesToCollection: PropTypes.func.isRequired,
   onRemoveEntitiesFromCollection: PropTypes.func.isRequired,
   onDeselectEntities: PropTypes.func.isRequired,
-  checkboxEntities: PropTypes.array.isRequired,
+  checkboxEntities: PropTypes.object.isRequired,
   collection: PropTypes.object,
 };
