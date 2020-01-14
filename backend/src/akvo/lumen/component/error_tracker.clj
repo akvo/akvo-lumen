@@ -41,18 +41,11 @@
 (defmethod ig/init-key :akvo.lumen.component.error-tracker/config [_ opts]
   opts)
 
-
-(defn blue-green?
-  [server-name]
-  (and (string? server-name)
-       (or (= "blue" server-name)
-           (= "green" server-name))))
-
 (s/def ::dsn string?)
 (s/def ::environment string?)
 (s/def ::namespaces (s/coll-of string?))
 (s/def ::release string?)
-(s/def ::server-name any? #_blue-green?)
+(s/def ::server-name string?)
 (s/def ::opts
   (s/keys :req-un [::namespaces]
           :opt-un [::environment ::release ::server-name]))
