@@ -1,5 +1,5 @@
 (ns dev.import
-  (:require [akvo.lumen.component.error-tracker :as et]
+  (:require [akvo.lumen.utils.local-error-tracker :as et]
             [akvo.lumen.test-utils :as tu]
             [clj-time.core :as tc]
             [clojure.pprint :refer [pprint]]
