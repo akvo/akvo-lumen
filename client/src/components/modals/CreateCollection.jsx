@@ -101,7 +101,7 @@ CreateCollection.propTypes = {
   onCancel: PropTypes.func.isRequired,
   containerClassName: PropTypes.string,
   collections: PropTypes.object.isRequired,
-  entities: PropTypes.array,
+  entities: PropTypes.object,
 };
 
 export default injectIntl(CreateCollection);

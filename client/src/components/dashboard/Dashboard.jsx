@@ -6,24 +6,24 @@ import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
 
-import ShareEntity from '../components/modals/ShareEntity';
-import * as actions from '../actions/dashboard';
-import * as api from '../utilities/api';
-import { fetchLibrary } from '../actions/library';
-import { fetchDataset } from '../actions/dataset';
-import { trackPageView, trackEvent } from '../utilities/analytics';
-import aggregationOnlyVisualisationTypes from '../utilities/aggregationOnlyVisualisationTypes';
-import LoadingSpinner from '../components/common/LoadingSpinner';
-import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
-import NavigationPrompt from '../components/common/NavigationPrompt';
-import { printShape } from './PrintProvider';
-import { specIsValidForApi } from '../utilities/aggregation';
+import ShareEntity from '../modals/ShareEntity';
+import * as actions from '../../actions/dashboard';
+import * as api from '../../utilities/api';
+import { fetchLibrary } from '../../actions/library';
+import { fetchDataset } from '../../actions/dataset';
+import { trackPageView, trackEvent } from '../../utilities/analytics';
+import aggregationOnlyVisualisationTypes from '../../utilities/aggregationOnlyVisualisationTypes';
+import LoadingSpinner from '../common/LoadingSpinner';
+import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../../constants/time';
+import NavigationPrompt from '../common/NavigationPrompt';
+import { printShape } from '../../containers/PrintProvider';
+import { specIsValidForApi } from '../../utilities/aggregation';
 import {
   SHARE_DASHBOARD,
   EXPORT_DASHBOARD_PNG,
   EXPORT_DASHBOARD_PDF,
-} from '../constants/analytics';
-import { showNotification } from '../actions/notification';
+} from '../../constants/analytics';
+import { showNotification } from '../../actions/notification';
 
 require('./Dashboard.scss');
 
@@ -70,6 +70,7 @@ class Dashboard extends Component {
         modified: null,
         shareId: '',
       },
+      fetchingDashboard: false,
       isSavePending: null,
       isUnsavedChanges: null,
       isShareModalVisible: false,
@@ -105,24 +106,26 @@ class Dashboard extends Component {
     if (isEditingExistingDashboard) {
       this.setState({ isUnsavedChanges: false });
       const dashboardId = this.props.params.dashboardId;
+      const libraryDashboard = this.props.library.dashboards[dashboardId];
       const existingDashboardLoaded =
-        isLibraryLoaded && !isEmpty(this.props.library.dashboards[dashboardId].layout);
-
-      if (!existingDashboardLoaded) {
-        this.props.dispatch(actions.fetchDashboard(dashboardId));
+        isLibraryLoaded && !isEmpty(libraryDashboard.layout);
+      if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
+        this.setState({ fetchingDashboard: true });
+        this.props.dispatch(actions.fetchDashboard(dashboardId,
+          () => this.setState({ fetchingDashboard: false })));
       } else {
-        this.loadDashboardIntoState(this.props.library.dashboards[dashboardId], this.props.library);
+        this.loadDashboardIntoState(this.props.library, libraryDashboard);
       }
     }
   }
 
   componentDidMount() {
     this.isMountedFlag = true;
-    require.ensure(['../components/charts/VisualisationViewer'], () => {
+    require.ensure(['../charts/VisualisationViewer'], () => {
       require.ensure([], () => {
         /* eslint-disable global-require */
-        const DashboardEditor = require('../components/dashboard/DashboardEditor').default;
-        const DashboardHeader = require('../components/dashboard/DashboardHeader').default;
+        const DashboardEditor = require('./DashboardEditor').default;
+        const DashboardHeader = require('./DashboardHeader').default;
         /* eslint-enable global-require */
 
         this.setState({
@@ -164,7 +167,9 @@ class Dashboard extends Component {
           /* componentWillReceiveProps will be called again. */
           return;
         }
-        this.loadDashboardIntoState(dash, nextProps.library);
+        if (dash.aggregated) {
+          this.loadDashboardIntoState(nextProps.library, dash);
+        }
       }
     }
 
@@ -446,7 +451,7 @@ class Dashboard extends Component {
     });
   }
 
-  loadDashboardIntoState(dash, library) {
+  loadDashboardIntoState(library, dash) {
     /* Put the dashboard into component state so it is fed to the DashboardEditor */
     const dashboard = Object.assign({}, dash,
       { layout: Object.keys(dash.layout).map(key => dash.layout[key]) }
@@ -458,20 +463,20 @@ class Dashboard extends Component {
     /* onAddVisualisation also checks to see if a datasetId has already been requested, setState is
     /* not synchronous and is too slow here, hence the extra check */
     const requestedDatasetIds = this.state.requestedDatasetIds.slice(0);
+    const { ...aggregatedDatasets } = this.state.aggregatedDatasets;
 
     Object.keys(dash.entities).filter(key => Boolean(dash.entities[key])).forEach((key) => {
       const entity = dash.entities[key];
       const isVisualisation = entity.type === 'visualisation';
-
       if (isVisualisation) {
-        const visualisation = library.visualisations[key];
-
+        const visualisation = entity;
         if (aggregationOnlyVisualisationTypes.some(type =>
           type === visualisation.visualisationType)) {
           const alreadyProcessed = Boolean(visualisation.data);
-
           if (!alreadyProcessed) {
-            this.onAddVisualisation(visualisation);
+            this.onAddVisualisation(library.visualisations[visualisation.id]);
+          } else {
+            aggregatedDatasets[key] = visualisation.data;
           }
         } else {
           const datasetId = visualisation.datasetId;
@@ -479,11 +484,14 @@ class Dashboard extends Component {
 
           if (!alreadyProcessed) {
             requestedDatasetIds.push(datasetId);
-            this.onAddVisualisation(visualisation);
+            this.onAddVisualisation(library.visualisations[visualisation.id]);
+          } else {
+            aggregatedDatasets[key] = visualisation.data;
           }
         }
       }
     });
+    this.setState({ aggregatedDatasets });
   }
 
   addDataToVisualisations(visualisations) {
@@ -535,7 +543,7 @@ class Dashboard extends Component {
   }
 
   render() {
-    if (!this.state.asyncComponents || this.state.isSavePending) {
+    if (!this.state.asyncComponents || this.state.isSavePending || this.state.fetchingDashboard) {
       return <LoadingSpinner />;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;

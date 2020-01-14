@@ -21,7 +21,7 @@
          (filter #(contains? auth-dashboards (:id %)))
          (lib/ok))))
 
-(defn routes [{:keys [tenant-manager] :as opts}]
+(defn routes [{:keys [tenant-manager windshaft-url] :as opts}]
   ["/dashboards"
    ["" {:get {:handler (fn [{tenant :tenant
                              auth-service :auth-service}]
@@ -47,7 +47,7 @@
     ["" {:get {:parameters {:path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               {:keys [id]} :path-params}]
-                          (if-let [d (dashboard/fetch (p/connection tenant-manager tenant) id)]
+                          (if-let [d (dashboard/fetch-aggregated (p/connection tenant-manager tenant) id windshaft-url)]
                             (lib/ok d)
                             (lib/not-found {:error "Not found"})))}
          :put {:parameters {:body map?
@@ -69,5 +69,8 @@
 (defmethod ig/init-key :akvo.lumen.endpoint.dashboard/dashboard  [_ opts]
   (routes opts))
 
+(s/def ::windshaft-url string?)
+
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.dashboard/dashboard [_]
-  (s/keys :req-un [::tenant-manager/tenant-manager] ))
+  (s/keys :req-un [::tenant-manager/tenant-manager
+                   ::windshaft-url] ))

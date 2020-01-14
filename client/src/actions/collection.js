@@ -41,7 +41,7 @@ export function createCollection(title, optionalEntities) {
         const collection = body;
         dispatch(createCollectionSuccess(collection));
         if (optionalEntities) {
-          const collectionWithEntities = { ...collection, entities: optionalEntities };
+          const collectionWithEntities = { id: collection.id, ...optionalEntities };
           dispatch(editCollection(collectionWithEntities));
         }
         dispatch(hideModal());
@@ -73,20 +73,35 @@ export function deleteCollection(id) {
 export function addEntitiesToCollection(entityIds, collectionId) {
   return (dispatch, getState) => {
     const collection = getState().library.collections[collectionId];
-
-    // Convenience conversion so that "entityIds" can be a naked single ID
-    const newEntities = Array.isArray(entityIds) ? entityIds : [entityIds];
-    const oldEntities = collection.entities || [];
-
-    const entities = uniq([...newEntities, ...oldEntities]);
-
-    const newCollection = { ...collection, entities };
+    const visualisations = uniq([...entityIds.visualisations, ...collection.visualisations]);
+    const dashboards = uniq([...entityIds.dashboards, ...collection.dashboards]);
+    const rasters = uniq([...entityIds.rasters, ...collection.rasters]);
+    const datasets = uniq([...entityIds.datasets, ...collection.datasets]);
+    const entities = { visualisations, dashboards, rasters, datasets };
+    const newCollection = { ...collection, ...entities };
     dispatch(editCollection(newCollection));
-
-    // Show a notification because there is no other visual feedback on adding item to collection
     dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
 }
+
+export function removeEntitiesFromCollection(entityIds, collectionId) {
+  return (dispatch, getState) => {
+    const c = getState().library.collections[collectionId];
+    const dicts = { visualisations: new Set(entityIds.visualisations),
+      dashboards: new Set(entityIds.dashboards),
+      rasters: new Set(entityIds.rasters),
+      datasets: new Set(entityIds.datasets) };
+    const visualisations = c.visualisations.filter(o => dicts.visualisations.has(o) === false);
+    const dashboards = c.dashboards.filter(o => dicts.dashboards.has(o) === false);
+    const rasters = c.rasters.filter(o => dicts.rasters.has(o) === false);
+    const datasets = c.datasets.filter(o => dicts.datasets.has(o) === false);
+    const entities = { visualisations, dashboards, rasters, datasets };
+    const newCollection = { ...c, ...entities };
+    dispatch(editCollection(newCollection));
+    dispatch(showNotification('info', `Removed from ${c.title}`, true));
+  };
+}
+
 
 export function addTemporaryEntitiesToCollection(entityIds, collectionId) {
   return (dispatch, getState) => {
