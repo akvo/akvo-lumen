@@ -8,7 +8,60 @@
 
     .DashboardEditorSidebar {
         border-right: 0.1rem solid $lightGrey;
-    }
+        background-color: mintcream;
+      
+        .DashboardSidebarTabMenu {
+      
+          padding: 1rem 0;
+      
+          button {
+            cursor: pointer;
+          } 
+      
+          .tabItem {
+            display: inline-block;
+            margin-left: calc(19% / 6);
+            margin-right: calc(19% / 6);
+            text-align: center;
+            padding: 0.75rem 0.75rem;
+            color: $midGrey;
+            border-bottom: 0.3rem solid $lightGrey;
+            transition: color 0.3s, border 0.3s;
+            transition-timing-function: ease;
+      
+            &.selected {
+                color: $lumenGreen;
+                border-color: $lumenGreen;
+            }
+      
+            &:hover {
+              color: #000;
+              border-color: $lumenGreen;
+            }
+      
+            &.action {
+              border-color: mintcream;
+              width: 20%;
+      
+              &:hover {
+                color: #000;
+                border-color: mintcream;
+              }
+            }
+      
+          }
+      
+          // .selected {
+          //   color: #000;
+          //   border-bottom-color: #000;
+          // } 
+      
+          // :hover {
+          //   color: #F0F;
+          // }
+      
+        } 
+    } 
     
     .DashboardEditorCanvas {
         padding: 16px;
@@ -61,28 +114,6 @@
 
     .react-resizable-handle {
         z-index: 99;
-    }
-
-    .DashboardEditorCanvasControls {
-        padding: 1rem;
-        border-bottom: 0.1rem solid $lightGrey;
-        text-align: center;
-        
-        button {
-            padding: 0.5rem 1rem;
-            color: $lumenGreen;
-            background-color: $white;
-            border: 0.1rem solid $lumenGreen;
-            line-height: 1.4rem;
-
-            @include border-radius(3px);
-
-            margin-right: 1rem;
-
-            i {
-                margin-right: 1em;
-            }
-        }
     }
 
     .DashboardNameInputContainer {
