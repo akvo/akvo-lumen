@@ -98,7 +98,7 @@ export default class DashboardEditor extends Component {
       saveError: false,
       focusedItem: null,
       isDragging: false,
-      tabSelection: 0,
+      tabSelection: 'visualisations',
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -275,8 +275,7 @@ export default class DashboardEditor extends Component {
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
     const { tabSelection } = this.state;
-    const visualisationsSelection = tabSelection === 0 ? 'tabItem selected' : 'tabItem';
-    const filterSelection = tabSelection === 1 ? 'tabItem selected' : 'tabItem';
+    const tabSelected = x => (tabSelection === x ? 'tabItem selected' : 'tabItem');
 
     return (
       <div
@@ -285,13 +284,13 @@ export default class DashboardEditor extends Component {
         {!exporting && (
           <div className="DashboardEditorSidebar">
             <div className="DashboardSidebarTabMenu">
-              <div className={visualisationsSelection}>
-                <button onClick={() => this.setState({ tabSelection: 0 })}>
+              <div className={tabSelected('visualisations')}>
+                <button onClick={() => this.setState({ tabSelection: 'visualisations' })}>
                   Visualisations
                 </button>
               </div>
-              <div className={filterSelection}>
-                <button onClick={() => this.setState({ tabSelection: 1 })}>
+              <div className={tabSelected('filters')}>
+                <button onClick={() => this.setState({ tabSelection: 'filters' })}>
                   Filters
                 </button>
               </div>
@@ -301,12 +300,14 @@ export default class DashboardEditor extends Component {
                 </button>
               </div>
             </div>
-            <DashboardVisualisationList
-              datasets={datasets}
-              visualisations={getArrayFromObject(this.props.visualisations)}
-              onEntityClick={this.handleEntityToggle}
-              dashboardItems={dashboard.entities}
-            />
+            {tabSelection === 'visualisations' &&
+              <DashboardVisualisationList
+                datasets={datasets}
+                visualisations={getArrayFromObject(this.props.visualisations)}
+                onEntityClick={this.handleEntityToggle}
+                dashboardItems={dashboard.entities}
+              />}
+            {tabSelection === 'filters' && <h3>Filters option selected</h3>}
           </div>
         )}
         <div
