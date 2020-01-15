@@ -98,6 +98,7 @@ export default class DashboardEditor extends Component {
       saveError: false,
       focusedItem: null,
       isDragging: false,
+      tabSelection: 0,
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -273,6 +274,9 @@ export default class DashboardEditor extends Component {
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
+    const { tabSelection } = this.state;
+    const visualisationsSelection = tabSelection === 0 ? 'tabItem selected' : 'tabItem';
+    const filterSelection = tabSelection === 1 ? 'tabItem selected' : 'tabItem';
 
     return (
       <div
@@ -280,13 +284,22 @@ export default class DashboardEditor extends Component {
       >
         {!exporting && (
           <div className="DashboardEditorSidebar">
-            <div className="DashboardEditorCanvasControls">
-              <button
-                className="clickable addText"
-                onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
-              >
-                <i className="fa fa-plus" /><FormattedMessage id="add_new_text_element" />
-              </button>
+            <div className="DashboardSidebarTabMenu">
+              <div className={visualisationsSelection}>
+                <button onClick={() => this.setState({ tabSelection: 0 })}>
+                  Visualisations
+                </button>
+              </div>
+              <div className={filterSelection}>
+                <button onClick={() => this.setState({ tabSelection: 1 })}>
+                  Filters
+                </button>
+              </div>
+              <div className="tabItem action">
+                <button onClick={() => this.handleEntityToggle({ content: '' }, 'text')}>
+                  <i className="fa fa-plus" /><FormattedMessage id="text" />
+                </button>
+              </div>
             </div>
             <DashboardVisualisationList
               datasets={datasets}
