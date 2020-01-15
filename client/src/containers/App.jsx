@@ -17,9 +17,8 @@ import AdminNav from '../components/AdminNav';
 import withProps from '../utilities/withProps';
 
 export default function App({ store, history, location }) {
-  const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features'];
-  const { filteredDashboard } = _.get(store.getState(), path);
-
+  const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
+  const filteredDashboard = store && _.get(store.getState(), path);
   return (
     <IntlWrapper>
       <Router history={history}>
