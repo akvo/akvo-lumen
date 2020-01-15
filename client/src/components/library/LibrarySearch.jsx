@@ -24,6 +24,7 @@ export default class LibrarySearch extends Component {
           className="search"
           onChange={evt => this.setState({ searchText: evt.target.value })}
           value={this.state.searchText}
+          onKeyDown={evt => (evt.key === 'Enter' && this.props.onSearch(this.state.searchText.trim()))}
           placeholder="Search"
         />
         <button
