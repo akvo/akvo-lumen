@@ -269,7 +269,7 @@ export default class DashboardEditor extends Component {
   }
 
   render() {
-    const { dashboard, datasets, exporting } = this.props;
+    const { dashboard, datasets, exporting, filteredDashboard } = this.props;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
@@ -301,6 +301,7 @@ export default class DashboardEditor extends Component {
           id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
+          {filteredDashboard && <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>}
           {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
@@ -386,6 +387,7 @@ DashboardEditor.propTypes = {
   onSave: PropTypes.func.isRequired,
   exporting: PropTypes.bool,
   preventPageOverlaps: PropTypes.bool,
+  filteredDashboard: PropTypes.bool,
 };
 
 DashboardEditor.defaultProps = {

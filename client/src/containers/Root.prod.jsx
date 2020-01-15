@@ -9,7 +9,7 @@ export default function Root({ store, history }) {
   return (
     <Provider store={store}>
       <PrintProvider>
-        <App history={history} />
+        <App history={history} store={store} />
       </PrintProvider>
     </Provider>
   );

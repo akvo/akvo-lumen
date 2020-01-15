@@ -548,7 +548,7 @@ class Dashboard extends Component {
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
-    const { exporting } = this.props;
+    const { exporting, filteredDashboard } = this.props;
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
@@ -571,6 +571,7 @@ class Dashboard extends Component {
             )}
             <DashboardEditor
               dashboard={dashboard}
+              filteredDashboard={filteredDashboard}
               datasets={this.props.library.datasets}
               visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
               metadata={this.state.metadata}
@@ -612,6 +613,7 @@ Dashboard.propTypes = {
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
   exporting: PropTypes.bool,
+  filteredDashboard: PropTypes.bool,
   preventPageOverlaps: PropTypes.bool,
   print: printShape,
 };
