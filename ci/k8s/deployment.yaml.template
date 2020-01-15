@@ -66,19 +66,6 @@ spec:
             secretKeyRef:
               name: lumen
               key: sentry.exporter_dsn
-        - name: SENTRY_SERVER_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.labels['color']
-        - name: SENTRY_RELEASE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.labels['lumen-version']              
-        - name: SENTRY_ENVIRONMENT
-          valueFrom:
-            configMapKeyRef:
-              name: akvo
-              key: environment
       - name: lumen-backend
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
