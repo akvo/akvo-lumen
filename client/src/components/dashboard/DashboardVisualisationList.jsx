@@ -109,7 +109,6 @@ export default class DashboardVisualisationList extends Component {
                   datasets,
                   dateFormat: DATE_FORMAT,
                 });
-                console.log('item', item);
                 return (
                   <li
                     className={`listItem clickable ${item.visualisationType.replace(' ', '')}
