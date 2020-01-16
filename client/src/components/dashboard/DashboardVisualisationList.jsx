@@ -4,15 +4,18 @@ import { FormattedMessage } from 'react-intl';
 import { getDataLastUpdated, DATE_FORMAT } from '../../utilities/chart';
 import { getIconUrl } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
+import { datasetsWithVisualizations } from '../../utilities/dataset';
 import SelectMenu from '../common/SelectMenu';
 import { trackEvent } from '../../utilities/analytics';
 import { FILTER_DASHBOARD_BY_DATASET } from '../../constants/analytics';
 
 require('./DashboardVisualisationList.scss');
 
-const filterVisualisations = (visualisations, filterText, filterByDataset) => {
+const filterVisualisations = (visualisations, filterText, filterByDataset, sortedBy) => {
   // NB - this naive approach is fine with a few hundred visualisations, but we should replace
   // with something more serious before users start to have thousands of visualisations
+  if (sortedBy) { visualisations.sort((a, b) => b[sortedBy] - a[sortedBy]); }
+
   let datasetCondition = () => true;
   if (filterByDataset) {
     datasetCondition = datasetId => datasetId === filterByDataset;
@@ -23,7 +26,6 @@ const filterVisualisations = (visualisations, filterText, filterByDataset) => {
       specIsValidForApi(spec, visualisationType) && datasetCondition(datasetId)
     );
   }
-
   return visualisations.filter((visualisation) => {
     if (!specIsValidForApi(visualisation.spec, visualisation.visualisationType)) {
       return false;
@@ -49,14 +51,11 @@ export default class DashboardVisualisationList extends Component {
     const { dashboardItems, visualisations, datasets, onEntityClick } = this.props;
     const { filterByDataset, filterText } = this.state;
     const isOnDashboard = item => Boolean(dashboardItems[item.id]);
-    const visualisationsSet = new Set(visualisations.map(v => v.datasetId).filter(v => v));
-    const datasetsWithViss = Object.keys(datasets).filter(d => visualisationsSet.has(d))
-                              .reduce((c, v) => { const h = c; h[v] = datasets[v]; return c; }, {});
-    const viss = filterVisualisations(visualisations, filterText, filterByDataset);
+    const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
+    const viss = filterVisualisations(visualisations, filterText, filterByDataset, 'modified');
     const numMaxVisualisations = 5;
     const showFilterByDataset = visualisations.length > numMaxVisualisations;
 
-    viss.sort((a, b) => b.modified - a.modified);
     return (
       <div
         className="DashboardVisualisationList"
@@ -110,6 +109,7 @@ export default class DashboardVisualisationList extends Component {
                   datasets,
                   dateFormat: DATE_FORMAT,
                 });
+                console.log('item', item);
                 return (
                   <li
                     className={`listItem clickable ${item.visualisationType.replace(' ', '')}

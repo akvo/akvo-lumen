@@ -3,11 +3,15 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import ReactGridLayout from 'react-grid-layout';
 import { Element, scroller } from 'react-scroll';
+import { connect } from 'react-redux';
 
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
 import { groupIntoPages } from '../../utilities/dashboard';
+import { datasetsWithVisualizations } from '../../utilities/dataset';
 import { A4 } from '../../constants/print';
+import SelectMenu from '../common/SelectMenu';
+import { fetchDataset } from '../../actions/dataset';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -88,7 +92,7 @@ const scrollToItem = (id) => {
   });
 };
 
-export default class DashboardEditor extends Component {
+class DashboardEditor extends Component {
 
   constructor() {
     super();
@@ -98,7 +102,8 @@ export default class DashboardEditor extends Component {
       saveError: false,
       focusedItem: null,
       isDragging: false,
-      tabSelection: 'visualisations',
+      tabSelected: 'visualisations',
+      filterByDataset: null,
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -274,9 +279,9 @@ export default class DashboardEditor extends Component {
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
-    const { tabSelection } = this.state;
-    const tabSelected = x => (tabSelection === x ? 'tabItem selected' : 'tabItem');
-
+    const { tabSelected } = this.state;
+    const selectTab = x => (tabSelected === x ? 'tabItem selected' : 'tabItem');
+    const { filterByDataset } = this.state;
     const plusButton = i18nKey => (
       <button
         className="clickable addText"
@@ -284,7 +289,10 @@ export default class DashboardEditor extends Component {
       >
         <i className="fa fa-plus" /><FormattedMessage id={i18nKey} />
       </button>);
-
+    const visualisations = getArrayFromObject(this.props.visualisations);
+    const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
+    const selectedDataset = filterByDataset && datasets[filterByDataset] && datasets[filterByDataset].get('columns') && datasets[filterByDataset];
+    if (selectedDataset) { console.log('selectedDataset', selectedDataset.get('columns')); }
     return (
       <div
         className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
@@ -295,13 +303,13 @@ export default class DashboardEditor extends Component {
               {plusButton('add_new_text_element')}
             </div>}
             {filteredDashboard && <div className="DashboardSidebarTabMenu">
-              <div className={tabSelected('visualisations')}>
-                <button onClick={() => this.setState({ tabSelection: 'visualisations' })}>
+              <div className={selectTab('visualisations')}>
+                <button onClick={() => this.setState({ tabSelected: 'visualisations' })}>
                   <FormattedMessage id="visualisations" />
                 </button>
               </div>
-              <div className={tabSelected('filters')}>
-                <button onClick={() => this.setState({ tabSelection: 'filters' })}>
+              <div className={selectTab('filters')}>
+                <button onClick={() => this.setState({ tabSelected: 'filters' })}>
                   <FormattedMessage id="filters" />
                 </button>
               </div>
@@ -309,14 +317,51 @@ export default class DashboardEditor extends Component {
                 {plusButton('text')}
               </div>
             </div>}
-            {(!filteredDashboard || tabSelection === 'visualisations') &&
+            {(!filteredDashboard || tabSelected === 'visualisations') &&
               <DashboardVisualisationList
                 datasets={datasets}
-                visualisations={getArrayFromObject(this.props.visualisations)}
+                visualisations={visualisations}
                 onEntityClick={this.handleEntityToggle}
                 dashboardItems={dashboard.entities}
               />}
-            {tabSelection === 'filters' && <h3>Filters option selected</h3>}
+            {tabSelected === 'filters' &&
+            <div className="filtersTab">
+              <FormattedMessage id="set_dataset_columns_as_visualisation_filters" />
+              <br />
+              <div className="filterInput">
+                <label htmlFor="datasets">
+                  <FormattedMessage id="dataset" />
+                </label>
+                <SelectMenu
+                  name="datasets"
+                  value={filterByDataset}
+                  isClearable
+                  onChange={(id) => {
+                    this.setState({ filterByDataset: id, filterText: '' });
+                    this.props.dispatch(fetchDataset(id, true));
+                  }}
+                  options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
+                    ({ value: datasetsWithViss[d].get('id'), label: datasetsWithViss[d].get('name') })) : []}
+                />
+              </div>
+              {selectedDataset && <div className="filterInput">
+                <FormattedMessage id="filters" />
+                - 0/8 <FormattedMessage id="visualisations" />
+                <div name="datasetFilterColumns">
+                  <SelectMenu
+//                    value={filterByDataset}
+                    isClearable
+                    onChange={(columnName) => {
+                      console.log('selectedColumn', columnName);
+                      // this.setState({ filterByDataset: id, filterText: '' });
+                    }}
+                    options={selectedDataset.get('columns').map(c =>
+                      ({ value: c.get('columnName'), label: c.get('title') }))}
+                  />
+                </div>
+              </div>}
+            </div>
+            }
           </div>
         )}
         <div
@@ -411,9 +456,12 @@ DashboardEditor.propTypes = {
   exporting: PropTypes.bool,
   preventPageOverlaps: PropTypes.bool,
   filteredDashboard: PropTypes.bool,
+  dispatch: PropTypes.func.isRequired,
 };
 
 DashboardEditor.defaultProps = {
   exporting: false,
   preventPageOverlaps: false,
 };
+
+export default connect(state => state)(DashboardEditor);
