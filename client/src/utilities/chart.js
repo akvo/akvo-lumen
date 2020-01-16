@@ -671,10 +671,13 @@ export const getLabelFontSize = (xLabel = '', yLabel = '', maxFont, minFont, hei
 
 export const getTitle = visualisation => visualisation.name;
 
-const DATE_FORMAT = 'Do MMM YYYY - HH:mm';
+export const DATE_HOUR_FORMAT = 'Do MMM YYYY - HH:mm';
+export const DATE_FORMAT = 'Do MMM YYYY';
 
-export const getDataLastUpdated = ({ visualisation, datasets }) => {
+export const getDataLastUpdated = ({ visualisation, datasets, dateFormat }) => {
   if (!datasets) return null;
+  let res = null;
+  const dFormat = dateFormat || DATE_HOUR_FORMAT;
   switch (visualisation.visualisationType) {
     case 'map': {
       const mostRecentlyUpdatedLayerDataset = visualisation.spec.layers
@@ -684,9 +687,10 @@ export const getDataLastUpdated = ({ visualisation, datasets }) => {
           if (a.get('updated') > b.get('updated')) return -1;
           return 0;
         })[0];
-      return mostRecentlyUpdatedLayerDataset ?
-        moment(mostRecentlyUpdatedLayerDataset.get('updated')).format(DATE_FORMAT) :
+      res = mostRecentlyUpdatedLayerDataset ?
+        moment(mostRecentlyUpdatedLayerDataset.get('updated')).format(dFormat) :
         null;
+      break;
     }
     case 'bar':
     case 'pivot table':
@@ -694,15 +698,14 @@ export const getDataLastUpdated = ({ visualisation, datasets }) => {
     case 'area':
     case 'line':
     case 'donut':
-    case 'pie': {
+    case 'pie':
+    default: {
       const dataset = datasets[visualisation.datasetId];
       if (!dataset) return null;
-      return moment(dataset.get('modified')).format(DATE_FORMAT);
-    }
-    default: {
-      return null;
+      res = moment(dataset.get('modified')).format(dFormat);
     }
   }
+  return res;
 };
 
 
