@@ -116,6 +116,7 @@
   "file_project": "Fichier / Projet",
   "fill": "Remplir",
   "filter": "Filtre",
+  "filters": "Filtres",
   "filter_column": "Filtrer colonne {title}",
   "filter_list_by_title": "Filtrer liste par titre",
   "filter_match_method": "Méthode de correspondance de filtre",

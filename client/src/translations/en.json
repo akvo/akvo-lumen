@@ -119,6 +119,7 @@
   "file_project": "File / Project",
   "fill": "Fill",
   "filter": "Filter",
+  "filters": "Filters",
   "filter_column": "Filter column {title}",
   "filter_list_by_title": "Filter list by title",
   "filter_match_method": "Filter match method",
