@@ -10,9 +10,11 @@ import { FILTER_DASHBOARD_BY_DATASET } from '../../constants/analytics';
 
 require('./DashboardVisualisationList.scss');
 
-const filterVisualisations = (visualisations, filterText, filterByDataset) => {
+const filterVisualisations = (visualisations, filterText, filterByDataset, sortedBy) => {
   // NB - this naive approach is fine with a few hundred visualisations, but we should replace
   // with something more serious before users start to have thousands of visualisations
+  if (sortedBy) { visualisations.sort((a, b) => b[sortedBy] - a[sortedBy]); }
+
   let datasetCondition = () => true;
   if (filterByDataset) {
     datasetCondition = datasetId => datasetId === filterByDataset;
@@ -23,7 +25,6 @@ const filterVisualisations = (visualisations, filterText, filterByDataset) => {
       specIsValidForApi(spec, visualisationType) && datasetCondition(datasetId)
     );
   }
-
   return visualisations.filter((visualisation) => {
     if (!specIsValidForApi(visualisation.spec, visualisation.visualisationType)) {
       return false;
@@ -52,11 +53,10 @@ export default class DashboardVisualisationList extends Component {
     const visualisationsSet = new Set(visualisations.map(v => v.datasetId).filter(v => v));
     const datasetsWithViss = Object.keys(datasets).filter(d => visualisationsSet.has(d))
                               .reduce((c, v) => { const h = c; h[v] = datasets[v]; return c; }, {});
-    const viss = filterVisualisations(visualisations, filterText, filterByDataset);
+    const viss = filterVisualisations(visualisations, filterText, filterByDataset, 'modified');
     const numMaxVisualisations = 5;
     const showFilterByDataset = visualisations.length > numMaxVisualisations;
 
-    viss.sort((a, b) => b.modified - a.modified);
     return (
       <div
         className="DashboardVisualisationList"
@@ -110,6 +110,7 @@ export default class DashboardVisualisationList extends Component {
                   datasets,
                   dateFormat: DATE_FORMAT,
                 });
+                console.log('item', item);
                 return (
                   <li
                     className={`listItem clickable ${item.visualisationType.replace(' ', '')}
