@@ -299,6 +299,7 @@
   "select_values_to_extract": "Select values to extract",
   "select_values_to_group": "Select values to group",
   "set_permissions": "Set permissions",
+  "set_dataset_columns_as_visualisation_filters": "Set dataset columns as visualisation filters",
   "settings": "Settings",
   "share": "Share",
   "show_column_totals": "Show column totals",
