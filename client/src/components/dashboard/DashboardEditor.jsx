@@ -98,7 +98,7 @@ export default class DashboardEditor extends Component {
       saveError: false,
       focusedItem: null,
       isDragging: false,
-      tabSelection: 'visualisations',
+      tabSelected: 'visualisations',
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -274,8 +274,8 @@ export default class DashboardEditor extends Component {
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
-    const { tabSelection } = this.state;
-    const tabSelected = x => (tabSelection === x ? 'tabItem selected' : 'tabItem');
+    const { tabSelected } = this.state;
+    const selectTab = x => (tabSelected === x ? 'tabItem selected' : 'tabItem');
 
     const plusButton = i18nKey => (
       <button
@@ -295,13 +295,13 @@ export default class DashboardEditor extends Component {
               {plusButton('add_new_text_element')}
             </div>}
             {filteredDashboard && <div className="DashboardSidebarTabMenu">
-              <div className={tabSelected('visualisations')}>
-                <button onClick={() => this.setState({ tabSelection: 'visualisations' })}>
+              <div className={selectTab('visualisations')}>
+                <button onClick={() => this.setState({ tabSelected: 'visualisations' })}>
                   <FormattedMessage id="visualisations" />
                 </button>
               </div>
-              <div className={tabSelected('filters')}>
-                <button onClick={() => this.setState({ tabSelection: 'filters' })}>
+              <div className={selectTab('filters')}>
+                <button onClick={() => this.setState({ tabSelected: 'filters' })}>
                   <FormattedMessage id="filters" />
                 </button>
               </div>
@@ -309,14 +309,14 @@ export default class DashboardEditor extends Component {
                 {plusButton('text')}
               </div>
             </div>}
-            {(!filteredDashboard || tabSelection === 'visualisations') &&
+            {(!filteredDashboard || tabSelected === 'visualisations') &&
               <DashboardVisualisationList
                 datasets={datasets}
                 visualisations={getArrayFromObject(this.props.visualisations)}
                 onEntityClick={this.handleEntityToggle}
                 dashboardItems={dashboard.entities}
               />}
-            {tabSelection === 'filters' && <h3>Filters option selected</h3>}
+            {tabSelected === 'filters' && <h3>Filters option selected</h3>}
           </div>
         )}
         <div
