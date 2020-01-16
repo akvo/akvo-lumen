@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { IndexRedirect, Redirect, Router, Route } from 'react-router';
+import _ from 'lodash';
 import IntlWrapper from './IntlWrapper';
 import Library from '../components/Library';
 import Visualisation from './Visualisation';
@@ -15,7 +16,9 @@ import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
 import withProps from '../utilities/withProps';
 
-export default function App({ history, location }) {
+export default function App({ store, history, location }) {
+  const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
+  const filteredDashboard = store && _.get(store.getState(), path);
   return (
     <IntlWrapper>
       <Router history={history}>
@@ -67,14 +70,16 @@ export default function App({ history, location }) {
           />
           <Route
             path="dashboard/create"
-            components={{ sidebar: WorkspaceNav, content: Dashboard }}
+            components={{ sidebar: WorkspaceNav,
+              content: withProps(Dashboard, { filteredDashboard }) }}
             location={location}
           />
           <Route
             path="dashboard/:dashboardId/export_pages"
             components={{
               sidebar: WorkspaceNav,
-              content: withProps(Dashboard, { exporting: true, preventPageOverlaps: true }),
+              content: withProps(Dashboard,
+                { filteredDashboard, exporting: true, preventPageOverlaps: true }),
             }}
             location={location}
           />
@@ -82,13 +87,14 @@ export default function App({ history, location }) {
             path="dashboard/:dashboardId/export"
             components={{
               sidebar: WorkspaceNav,
-              content: withProps(Dashboard, { exporting: true }),
+              content: withProps(Dashboard, { filteredDashboard, exporting: true }),
             }}
             location={location}
           />
           <Route
             path="dashboard/:dashboardId"
-            components={{ sidebar: WorkspaceNav, content: Dashboard }}
+            components={{ sidebar: WorkspaceNav,
+              content: withProps(Dashboard, { filteredDashboard }) }}
             location={location}
           />
           <Redirect from="admin" to="/admin/users" />
@@ -111,4 +117,5 @@ export default function App({ history, location }) {
 App.propTypes = {
   history: PropTypes.object.isRequired,
   location: PropTypes.object,
+  store: PropTypes.object,
 };
