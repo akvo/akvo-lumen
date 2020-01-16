@@ -115,6 +115,7 @@
   "file_project": "Archivo / Proyecto",
   "fill": "Rellenar",
   "filter": "Filtrar",
+  "filters": "Filtros",
   "filter_column": "Columna de filtro {title}",
   "filter_list_by_title": "Filtrar lista por título",
   "filter_match_method": "Método de coincidencia de filtro",
