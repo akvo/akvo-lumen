@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { getDataLastUpdated } from '../../utilities/chart';
+import { getDataLastUpdated, DATE_FORMAT } from '../../utilities/chart';
 import { getIconUrl } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
 import SelectMenu from '../common/SelectMenu';
@@ -108,6 +108,7 @@ export default class DashboardVisualisationList extends Component {
                 const dataLastUpdated = getDataLastUpdated({
                   visualisation: item,
                   datasets,
+                  dateFormat: DATE_FORMAT,
                 });
                 return (
                   <li
@@ -129,20 +130,13 @@ export default class DashboardVisualisationList extends Component {
                           {isOnDashboard(item) ? '✔' : ''}
                         </span>
                       </h3>
-
-                      <div className="visualisationType">
-                        {item.visualisationType === 'map' ?
-                        'Map'
-                        :
-                        `${item.visualisationType.charAt(0).toUpperCase() +
-                            item.visualisationType.slice(1)} chart`
-                      }
+                      <div className="author">
+                        {item.author.name || item.author.email}
                       </div>
                       <br />
                       {dataLastUpdated && (
                         <div className="lastModified">
-                          <FormattedMessage id="data_last_updated" />
-                          : {dataLastUpdated}
+                          {dataLastUpdated}
                         </div>
                       )}
                     </div>
