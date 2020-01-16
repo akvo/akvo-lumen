@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { getDataLastUpdated, DATE_FORMAT } from '../../utilities/chart';
 import { getIconUrl } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
+import { datasetsWithVisualizations } from '../../utilities/dataset';
 import SelectMenu from '../common/SelectMenu';
 import { trackEvent } from '../../utilities/analytics';
 import { FILTER_DASHBOARD_BY_DATASET } from '../../constants/analytics';
@@ -50,9 +51,7 @@ export default class DashboardVisualisationList extends Component {
     const { dashboardItems, visualisations, datasets, onEntityClick } = this.props;
     const { filterByDataset, filterText } = this.state;
     const isOnDashboard = item => Boolean(dashboardItems[item.id]);
-    const visualisationsSet = new Set(visualisations.map(v => v.datasetId).filter(v => v));
-    const datasetsWithViss = Object.keys(datasets).filter(d => visualisationsSet.has(d))
-                              .reduce((c, v) => { const h = c; h[v] = datasets[v]; return c; }, {});
+    const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
     const viss = filterVisualisations(visualisations, filterText, filterByDataset, 'modified');
     const numMaxVisualisations = 5;
     const showFilterByDataset = visualisations.length > numMaxVisualisations;
