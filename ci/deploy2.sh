@@ -17,8 +17,8 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
     ENVIRONMENT=production
-    BACKEND_POD_CPU_REQUESTS="200m"
-    BACKEND_POD_CPU_LIMITS="400m"
+    BACKEND_POD_CPU_REQUESTS="500m"
+    BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="5Gi"
     BACKEND_POD_MEM_LIMITS="6Gi"
     CLIENT_POD_CPU_REQUESTS="100m"
@@ -42,8 +42,8 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
 else
     log Environement is test
     gcloud container clusters get-credentials test
-    BACKEND_POD_CPU_REQUESTS="100m"
-    BACKEND_POD_CPU_LIMITS="200m"
+    BACKEND_POD_CPU_REQUESTS="250m"
+    BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="768Mi"
     BACKEND_POD_MEM_LIMITS="1024Mi"
     CLIENT_POD_CPU_REQUESTS="100m"
