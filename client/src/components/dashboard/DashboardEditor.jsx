@@ -277,6 +277,14 @@ export default class DashboardEditor extends Component {
     const { tabSelection } = this.state;
     const tabSelected = x => (tabSelection === x ? 'tabItem selected' : 'tabItem');
 
+    const plusButton = i18nKey => (
+      <button
+        className="clickable addText"
+        onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
+      >
+        <i className="fa fa-plus" /><FormattedMessage id={i18nKey} />
+      </button>);
+
     return (
       <div
         className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
@@ -284,28 +292,21 @@ export default class DashboardEditor extends Component {
         {!exporting && (
           <div className="DashboardEditorSidebar">
             {!filteredDashboard && <div className="DashboardEditorCanvasControls">
-              <button
-                className="clickable addText"
-                onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
-              >
-                <i className="fa fa-plus" /><FormattedMessage id="add_new_text_element" />
-              </button>
+              {plusButton('add_new_text_element')}
             </div>}
             {filteredDashboard && <div className="DashboardSidebarTabMenu">
               <div className={tabSelected('visualisations')}>
                 <button onClick={() => this.setState({ tabSelection: 'visualisations' })}>
-                  Visualisations
+                  <FormattedMessage id="visualisations" />
                 </button>
               </div>
               <div className={tabSelected('filters')}>
                 <button onClick={() => this.setState({ tabSelection: 'filters' })}>
-                  Filters
+                  <FormattedMessage id="filters" />
                 </button>
               </div>
               <div className="tabItem action">
-                <button onClick={() => this.handleEntityToggle({ content: '' }, 'text')}>
-                  <i className="fa fa-plus" /><FormattedMessage id="text" />
-                </button>
+                {plusButton('text')}
               </div>
             </div>}
             {(!filteredDashboard || tabSelection === 'visualisations') &&
