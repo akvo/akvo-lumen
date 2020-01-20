@@ -366,7 +366,7 @@ class DashboardEditor extends Component {
                     onChange={(id) => {
                       this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
                       if (id) {
-                        this.props.dispatch(fetchDataset(id, true));
+                        this.props.dispatch(fetchDataset(id, false));
                       }
                     }}
                     options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
@@ -403,7 +403,35 @@ class DashboardEditor extends Component {
           id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
-          {filteredDashboard && <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>}
+          {filteredDashboard &&
+          <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
+            <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
+            {
+              selectedFilterColumns.map((o, idx) => {
+                const columns = datasets[filterByDataset].get('columns');
+                const column = columns.find(x => x.get('columnName') === o);
+                const finding = columns.indexOf(column);
+                let vals = new Set(datasets[filterByDataset].get('rows').map(y => y.get(finding)));
+                vals = Array.from(vals).map(x => ({ label: x, value: x }));
+                return (
+                  <div style={{ paddingBottom: '10px' }}>
+                    <span style={{ fontWeight: 'bold' }}>{column.get('title')}</span>
+                    <SelectMenu
+                      name="datasets"
+                      isClearable
+                      key={`filterColumn-${idx}`}
+                      width="200px"
+                      onChange={(id) => {
+                        // eslint-disable-next-line no-console
+                        console.log('selecting', id, 'column', o);
+                      }}
+                      options={vals}
+                    />
+                  </div>);
+              })
+            }
+          </div>
+          }
           {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
