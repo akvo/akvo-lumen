@@ -9,6 +9,7 @@ import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
 import { groupIntoPages } from '../../utilities/dashboard';
 import { datasetsWithVisualizations } from '../../utilities/dataset';
+import { filterColumns } from '../../utilities/column';
 import { A4 } from '../../constants/print';
 import SelectMenu from '../common/SelectMenu';
 import { fetchDataset } from '../../actions/dataset';
@@ -292,10 +293,9 @@ class DashboardEditor extends Component {
       </button>);
     const visualisations = getArrayFromObject(this.props.visualisations);
     const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
-    const selectedDatasetColumns = filterByDataset && datasets[filterByDataset] && datasets[filterByDataset].get('columns');
-
+    const selectedDatasetColumns = filterByDataset && datasets[filterByDataset] && filterColumns(datasets[filterByDataset].get('columns'), 'text');
     const newColumnFilterSelect = idx => (options, finder) =>
-    (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`}>
+    (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px' }}>
       <SelectMenu
         isClearable
         key={`selectFilterColumn-${idx}`}
@@ -311,10 +311,14 @@ class DashboardEditor extends Component {
         value={finder(selectedFilterColumns[idx])}
       />
     </div>);
-    const columnFilterSelectOptions = selectedDatasetColumns && selectedDatasetColumns.map(c =>
-      ({ value: c.get('columnName'), label: c.get('title') }));
-    const finderFilterSelectOptions = v => columnFilterSelectOptions &&
-    columnFilterSelectOptions.find(o => o.value === v);
+    const selectedFilterColumnsDict = new Set(selectedFilterColumns);
+    const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
+    .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
+
+    const columnFilterSelectOptions = columnFilterSelectAllOptions && columnFilterSelectAllOptions
+    .filter(c => !selectedFilterColumnsDict.has(c.value));
+    const finderFilterSelectOptions = v => columnFilterSelectAllOptions &&
+    columnFilterSelectAllOptions.find(o => o.value === v);
     const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
     return (
       <div
@@ -351,33 +355,44 @@ class DashboardEditor extends Component {
             <div className="filtersTab">
               <FormattedMessage id="set_dataset_columns_as_visualisation_filters" />
               <br />
-              <div className="filterInput">
-                <label htmlFor="datasets">
-                  <FormattedMessage id="dataset" />
-                </label>
-                <SelectMenu
-                  name="datasets"
-                  value={filterByDataset}
-                  isClearable
-                  onChange={(id) => {
-                    this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
-                    if (id) {
-                      this.props.dispatch(fetchDataset(id, true));
-                    }
-                  }}
-                  options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
-                    ({ value: datasetsWithViss[d].get('id'), label: datasetsWithViss[d].get('name') })) : []}
-                />
+              <div style={{ marginTop: '15px', display: 'flex' }}>
+                <div style={{ lineHeight: '2.9em', flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="dataset" /></div>
+                <div>
+                  <SelectMenu
+                    name="datasets"
+                    value={filterByDataset}
+                    isClearable
+                    width="200px"
+                    onChange={(id) => {
+                      this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
+                      if (id) {
+                        this.props.dispatch(fetchDataset(id, true));
+                      }
+                    }}
+                    options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
+                      ({ value: datasetsWithViss[d].get('id'), label: datasetsWithViss[d].get('name') })) : []}
+                  />
+                </div>
               </div>
-              {selectedDatasetColumns && <div className="filterInput">
-                <FormattedMessage id="filters" />
-                - {dashboardEntitiesVisualisations.filter(v => v.datasetId === filterByDataset).length}/{dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />
-                {
-                  selectedFilterColumns.map((o, idx) =>
-                  newColumnFilterSelect(idx)(columnFilterSelectOptions, finderFilterSelectOptions))
-                }
-                {newColumnFilterSelect(selectedFilterColumns.length)(columnFilterSelectOptions,
-                  finderFilterSelectOptions)}
+
+                {selectedDatasetColumns &&
+                <div>
+                  <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
+                    <div style={{ flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="filters" /></div>
+                    <div>{dashboardEntitiesVisualisations.filter(v =>
+                      v.datasetId === filterByDataset).length}/
+                      {dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />
+                    </div>
+                  </div>
+                  <div className="filterInput" style={{ marginTop: '5px' }}>
+                    {
+                      selectedFilterColumns.map((o, idx) =>
+                      newColumnFilterSelect(idx)(columnFilterSelectOptions,
+                        finderFilterSelectOptions))
+                    }
+                    {newColumnFilterSelect(selectedFilterColumns.length)(columnFilterSelectOptions,
+                      finderFilterSelectOptions)}
+                  </div>
                 </div>}
             </div>
             }

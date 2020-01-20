@@ -8,7 +8,7 @@
 
     .DashboardEditorSidebar {
         border-right: 0.1rem solid $lightGrey;
-      
+        width: 310px;
         .DashboardSidebarTabMenu {
           background-color: mintcream;
           white-space: nowrap;
@@ -50,8 +50,11 @@
             }
       
           }
-            
         } 
+        .filtersTab{
+            padding: 13px;
+        }
+
     } 
     
     .DashboardEditorCanvas {
