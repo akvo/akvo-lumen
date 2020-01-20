@@ -3,11 +3,16 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import ReactGridLayout from 'react-grid-layout';
 import { Element, scroller } from 'react-scroll';
+import { connect } from 'react-redux';
 
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
 import { groupIntoPages } from '../../utilities/dashboard';
+import { datasetsWithVisualizations } from '../../utilities/dataset';
+import { filterColumns } from '../../utilities/column';
 import { A4 } from '../../constants/print';
+import SelectMenu from '../common/SelectMenu';
+import { fetchDataset } from '../../actions/dataset';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -88,7 +93,7 @@ const scrollToItem = (id) => {
   });
 };
 
-export default class DashboardEditor extends Component {
+class DashboardEditor extends Component {
 
   constructor() {
     super();
@@ -98,7 +103,9 @@ export default class DashboardEditor extends Component {
       saveError: false,
       focusedItem: null,
       isDragging: false,
-      tabSelection: 'visualisations',
+      tabSelected: 'visualisations',
+      filterByDataset: null,
+      selectedFilterColumns: [],
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -274,9 +281,9 @@ export default class DashboardEditor extends Component {
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
-    const { tabSelection } = this.state;
-    const tabSelected = x => (tabSelection === x ? 'tabItem selected' : 'tabItem');
-
+    const { tabSelected } = this.state;
+    const selectTab = x => (tabSelected === x ? 'tabItem selected' : 'tabItem');
+    const { filterByDataset, selectedFilterColumns } = this.state;
     const plusButton = i18nKey => (
       <button
         className="clickable addText"
@@ -284,7 +291,35 @@ export default class DashboardEditor extends Component {
       >
         <i className="fa fa-plus" /><FormattedMessage id={i18nKey} />
       </button>);
+    const visualisations = getArrayFromObject(this.props.visualisations);
+    const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
+    const selectedDatasetColumns = filterByDataset && datasets[filterByDataset] && filterColumns(datasets[filterByDataset].get('columns'), 'text');
+    const newColumnFilterSelect = idx => (options, finder) =>
+    (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px' }}>
+      <SelectMenu
+        isClearable
+        key={`selectFilterColumn-${idx}`}
+        onChange={(columnName) => {
+          if (columnName) {
+            selectedFilterColumns.splice(idx, 1, columnName);
+          } else {
+            selectedFilterColumns.splice(idx, 1);
+          }
+          this.setState({ selectedFilterColumns });
+        }}
+        options={options}
+        value={finder(selectedFilterColumns[idx])}
+      />
+    </div>);
+    const selectedFilterColumnsDict = new Set(selectedFilterColumns);
+    const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
+    .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
 
+    const columnFilterSelectOptions = columnFilterSelectAllOptions && columnFilterSelectAllOptions
+    .filter(c => !selectedFilterColumnsDict.has(c.value));
+    const finderFilterSelectOptions = v => columnFilterSelectAllOptions &&
+    columnFilterSelectAllOptions.find(o => o.value === v);
+    const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
     return (
       <div
         className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
@@ -295,13 +330,13 @@ export default class DashboardEditor extends Component {
               {plusButton('add_new_text_element')}
             </div>}
             {filteredDashboard && <div className="DashboardSidebarTabMenu">
-              <div className={tabSelected('visualisations')}>
-                <button onClick={() => this.setState({ tabSelection: 'visualisations' })}>
+              <div className={selectTab('visualisations')}>
+                <button onClick={() => this.setState({ tabSelected: 'visualisations' })}>
                   <FormattedMessage id="visualisations" />
                 </button>
               </div>
-              <div className={tabSelected('filters')}>
-                <button onClick={() => this.setState({ tabSelection: 'filters' })}>
+              <div className={selectTab('filters')}>
+                <button onClick={() => this.setState({ tabSelected: 'filters' })}>
                   <FormattedMessage id="filters" />
                 </button>
               </div>
@@ -309,14 +344,58 @@ export default class DashboardEditor extends Component {
                 {plusButton('text')}
               </div>
             </div>}
-            {(!filteredDashboard || tabSelection === 'visualisations') &&
+            {(!filteredDashboard || tabSelected === 'visualisations') &&
               <DashboardVisualisationList
                 datasets={datasets}
-                visualisations={getArrayFromObject(this.props.visualisations)}
+                visualisations={visualisations}
                 onEntityClick={this.handleEntityToggle}
                 dashboardItems={dashboard.entities}
               />}
-            {tabSelection === 'filters' && <h3>Filters option selected</h3>}
+            {tabSelected === 'filters' &&
+            <div className="filtersTab">
+              <FormattedMessage id="set_dataset_columns_as_visualisation_filters" />
+              <br />
+              <div style={{ marginTop: '15px', display: 'flex' }}>
+                <div style={{ lineHeight: '2.9em', flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="dataset" /></div>
+                <div>
+                  <SelectMenu
+                    name="datasets"
+                    value={filterByDataset}
+                    isClearable
+                    width="200px"
+                    onChange={(id) => {
+                      this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
+                      if (id) {
+                        this.props.dispatch(fetchDataset(id, false));
+                      }
+                    }}
+                    options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
+                      ({ value: datasetsWithViss[d].get('id'), label: datasetsWithViss[d].get('name') })) : []}
+                  />
+                </div>
+              </div>
+
+                {selectedDatasetColumns &&
+                <div>
+                  <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
+                    <div style={{ flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="filters" /></div>
+                    <div>{dashboardEntitiesVisualisations.filter(v =>
+                      v.datasetId === filterByDataset).length}/
+                      {dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />
+                    </div>
+                  </div>
+                  <div className="filterInput" style={{ marginTop: '5px' }}>
+                    {
+                      selectedFilterColumns.map((o, idx) =>
+                      newColumnFilterSelect(idx)(columnFilterSelectOptions,
+                        finderFilterSelectOptions))
+                    }
+                    {newColumnFilterSelect(selectedFilterColumns.length)(columnFilterSelectOptions,
+                      finderFilterSelectOptions)}
+                  </div>
+                </div>}
+            </div>
+            }
           </div>
         )}
         <div
@@ -324,7 +403,35 @@ export default class DashboardEditor extends Component {
           id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
-          {filteredDashboard && <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>}
+          {filteredDashboard &&
+          <div style={{ paddingRight: '20px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
+            <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
+            {
+              selectedFilterColumns.map((o, idx) => {
+                const columns = datasets[filterByDataset].get('columns');
+                const finding = columns.indexOf(columns.find(x => x.get('columnName') === o));
+                console.log('finding', finding);
+                 datasets[filterByDataset].get('rows').map(y => console.log(y.get(finding)));
+                return (
+                  <SelectMenu
+                    name="datasets"
+                    value={filterByDataset}
+                    isClearable
+                    key={`filterColumn-${idx}`}
+                    width="200px"
+                    onChange={(id) => {
+                      this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
+                      if (id) {
+                        this.props.dispatch(fetchDataset(id, true));
+                      }
+                    }}
+                    options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
+                      ({ value: datasetsWithViss[d].get('id'), label: datasetsWithViss[d].get('name') })) : []}
+                  />);
+              })
+            }
+          </div>
+          }
           {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
@@ -411,9 +518,12 @@ DashboardEditor.propTypes = {
   exporting: PropTypes.bool,
   preventPageOverlaps: PropTypes.bool,
   filteredDashboard: PropTypes.bool,
+  dispatch: PropTypes.func.isRequired,
 };
 
 DashboardEditor.defaultProps = {
   exporting: false,
   preventPageOverlaps: false,
 };
+
+export default connect(state => state)(DashboardEditor);
