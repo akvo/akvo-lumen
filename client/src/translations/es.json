@@ -295,6 +295,7 @@
   "select_values_to_extract": "Seleccione valores a extraer",
   "select_values_to_group": "Seleccionar valores a agrupar",
   "set_permissions": "Establecer permisos",
+  "set_dataset_columns_as_visualisation_filters": "Establecer columnas de conjunto de datos como filtros de visualización",
   "settings": "Ajustes",
   "share": "Compartir",
   "show_column_totals": "Mostrar totales de columna",
