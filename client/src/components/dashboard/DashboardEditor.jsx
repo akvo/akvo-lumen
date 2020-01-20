@@ -366,7 +366,7 @@ class DashboardEditor extends Component {
                     onChange={(id) => {
                       this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
                       if (id) {
-                        this.props.dispatch(fetchDataset(id, true));
+                        this.props.dispatch(fetchDataset(id, false));
                       }
                     }}
                     options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
@@ -403,7 +403,35 @@ class DashboardEditor extends Component {
           id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
-          {filteredDashboard && <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>}
+          {filteredDashboard &&
+          <div style={{ paddingRight: '20px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
+            <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
+            {
+              selectedFilterColumns.map((o, idx) => {
+                const columns = datasets[filterByDataset].get('columns');
+                const finding = columns.indexOf(columns.find(x => x.get('columnName') === o));
+                console.log('finding', finding);
+                 datasets[filterByDataset].get('rows').map(y => console.log(y.get(finding)));
+                return (
+                  <SelectMenu
+                    name="datasets"
+                    value={filterByDataset}
+                    isClearable
+                    key={`filterColumn-${idx}`}
+                    width="200px"
+                    onChange={(id) => {
+                      this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
+                      if (id) {
+                        this.props.dispatch(fetchDataset(id, true));
+                      }
+                    }}
+                    options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
+                      ({ value: datasetsWithViss[d].get('id'), label: datasetsWithViss[d].get('name') })) : []}
+                  />);
+              })
+            }
+          </div>
+          }
           {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
             <div className="blankDashboardHelpText">
               <FormattedMessage id="blank_dashboard_help_text" />
