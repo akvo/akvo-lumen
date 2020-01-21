@@ -21,9 +21,7 @@
 (s/def ::modified ::lumen.s/date-number)
 (s/def ::visualisationId (s/nilable ::visualisation.s/id))
 (s/def ::visualisations (s/coll-of ::visualisationId :distinct true))
-(s/def ::dashboard (s/keys :req-un [::id ::title ::status ::type ::created ::modified]
-                           :opt-un [::visualisations]))
-(s/def ::dashboards (s/coll-of ::dashboard :distinct true))
+
 (s/def ::author map?)
 (s/def ::layout map?)
 
