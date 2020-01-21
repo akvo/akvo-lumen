@@ -21,7 +21,6 @@ function SelectMenu(props) {
     options,
   }));
   const value = props.value && typeof props.value === 'string' ? options.filter(o => o.value === props.value)[0] : props.value;
-
   const colorStyles = {
     menu: styles => ({
       ...styles,
@@ -54,8 +53,9 @@ function SelectMenu(props) {
       fontWeight: 'normal',
     }),
   };
+  const width = props.width ? { width: props.width } : {};
   return (
-    <div className={`SelectMenu ${props.disabled ? 'disabled' : 'enabled'}`}>
+    <div className={`SelectMenu ${props.disabled ? 'disabled' : 'enabled'}`} style={{ ...width }} >
       <Select
         {...props}
         value={value}
@@ -95,6 +95,7 @@ SelectMenu.propTypes = {
   multi: PropTypes.bool,
   disabled: PropTypes.bool,
   inputProps: PropTypes.object,
+  width: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
 

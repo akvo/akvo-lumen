@@ -8,10 +8,10 @@
 
     .DashboardEditorSidebar {
         border-right: 0.1rem solid $lightGrey;
-      
+        width: 310px;
         .DashboardSidebarTabMenu {
           background-color: mintcream;
-
+          white-space: nowrap;
           padding: 1rem 0;
       
           button {
@@ -50,8 +50,11 @@
             }
       
           }
-            
         } 
+        .filtersTab{
+            padding: 13px;
+        }
+
     } 
     
     .DashboardEditorCanvas {
