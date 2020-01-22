@@ -81,7 +81,7 @@
           (is (not (nil? d)))
           (is (every? #(contains? d %)
                       [:id :title :entities :layout :type :status :created
-                       :modified]))
+                       :filter :modified]))
           (is (= (get d-spec :title)
                  (get d :title)))
           (is (= (set (mapv name (keys (:entities d))))
