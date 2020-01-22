@@ -104,7 +104,6 @@ class DashboardEditor extends Component {
       focusedItem: null,
       isDragging: false,
       tabSelected: 'visualisations',
-      selectedFilterColumns: [],
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -283,7 +282,6 @@ class DashboardEditor extends Component {
     const layout = this.getLayout();
     const { tabSelected } = this.state;
     const selectTab = x => (tabSelected === x ? 'tabItem selected' : 'tabItem');
-    const { selectedFilterColumns } = this.state;
     const plusButton = i18nKey => (
       <button
         className="clickable addText"
@@ -301,17 +299,17 @@ class DashboardEditor extends Component {
         key={`selectFilterColumn-${idx}`}
         onChange={(columnName) => {
           if (columnName) {
-            selectedFilterColumns.splice(idx, 1, columnName);
+            filter.columns.splice(idx, 1, columnName);
           } else {
-            selectedFilterColumns.splice(idx, 1);
+            filter.columns.splice(idx, 1);
           }
-          this.setState({ selectedFilterColumns });
+          onFilterChange(filter);
         }}
         options={options}
-        value={finder(selectedFilterColumns[idx])}
+        value={finder(filter.columns[idx])}
       />
     </div>);
-    const selectedFilterColumnsDict = new Set(selectedFilterColumns);
+    const selectedFilterColumnsDict = new Set(filter.columns);
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
     .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
 
@@ -364,7 +362,7 @@ class DashboardEditor extends Component {
                     isClearable
                     width="200px"
                     onChange={(id) => {
-                      this.setState({ filterText: '', selectedFilterColumns: [] });
+                      this.setState({ filterText: '' });
                       filter.datasetId = id;
                       onFilterChange(filter);
                       if (id) {
@@ -388,11 +386,11 @@ class DashboardEditor extends Component {
                   </div>
                   <div className="filterInput" style={{ marginTop: '5px' }}>
                     {
-                      selectedFilterColumns.map((o, idx) =>
+                      filter.columns.map((o, idx) =>
                       newColumnFilterSelect(idx)(columnFilterSelectOptions,
                         finderFilterSelectOptions))
                     }
-                    {newColumnFilterSelect(selectedFilterColumns.length)(columnFilterSelectOptions,
+                    {newColumnFilterSelect(filter.columns.length)(columnFilterSelectOptions,
                       finderFilterSelectOptions)}
                   </div>
                 </div>}
@@ -409,7 +407,7 @@ class DashboardEditor extends Component {
           <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
             <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
             {
-              selectedFilterColumns.map((o, idx) => {
+              filter.columns.map((o, idx) => {
                 const columns = datasets[filter.datasetId].get('columns');
                 const column = columns.find(x => x.get('columnName') === o);
                 const finding = columns.indexOf(column);
