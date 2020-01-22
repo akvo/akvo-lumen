@@ -1,16 +1,18 @@
 (ns akvo.lumen.endpoint.share-test
   {:functional true}
-  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+  (:require [akvo.lumen.endpoint.commons.variant :as variant]
+            [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          system-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
+            [akvo.lumen.lib.dataset :as ds]
             [akvo.lumen.lib.share :as share]
-            [akvo.lumen.util :refer [gen-table-name squuid]]
-            [akvo.lumen.endpoint.commons.variant :as variant]
-            [clojure.walk :as w]
-            [clojure.java.jdbc :as jdbc]
             [akvo.lumen.test-utils :as tu]
+            [akvo.lumen.util :refer [gen-table-name squuid]]
+            [clojure.java.jdbc :as jdbc]
             [clojure.test :refer :all]
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w]
             [hugsql.core :as hugsql]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -23,7 +25,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 
-(defn dashboard-spec [v1-id v2-id]
+(defn dashboard-spec [v1-id v2-id ds]
   (w/keywordize-keys
    {"type"     "dashboard"
     "title"    "My first Dashboard"
@@ -38,6 +40,7 @@
                 "text-2" {"id"      "text-2"
                           "type"    "text"
                           "content" "I am another text entity."}}
+    "filter" {"datasetId" (:id ds) "columns" [(get (-> ds :columns first) "columnName")]}
     "layout"   {v1-id    {"x" 1
                           "y" 0
                           "w" 0
@@ -59,7 +62,6 @@
                           "h" 0
                           "i" "text-2"}}}))
 
-
 (defn seed* [conn vis-spec]
   (let [data {:columns [{:id "c1", :title "A", :type "text"}
                         {:id "c2", :title "B", :type "number"}
@@ -74,17 +76,21 @@
                                                         :with-job? true
                                                         :data data})
         dataset-id (:dataset_id job)
+        dataset    (last (ds/fetch-metadata conn dataset-id))
         data-source-id (:data_source_id job)]
 
     (upsert-visualisation conn (merge vis-spec {:dataset-id dataset-id}))
-    {:visualisation-id (:id vis-spec) :dataset-id dataset-id :data-source-id data-source-id}))
+    {:visualisation-id (:id vis-spec) :dataset-id dataset-id :data-source-id data-source-id :dataset dataset}))
 
 (defn seed
   [conn spec]
-  (seed* conn (:vis-1 spec))
-  (seed* conn (:vis-2 spec))
-  (dashboard/create conn (dashboard-spec (:id (:vis-1 spec))
-                                         (:id (:vis-2 spec))) {}))
+  (let [res1 (seed* conn (:vis-1 spec))
+        res2 (seed* conn (:vis-2 spec))
+        dash-res (dashboard/create conn (dashboard-spec (:id (:vis-1 spec))
+                                                        (:id (:vis-2 spec))
+                                                        (:dataset res1))
+                                   {})]
+    {:seed-1 res1 :seed-2 res2 :dashboard dash-res}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Test data
