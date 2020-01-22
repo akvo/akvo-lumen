@@ -15,9 +15,13 @@
                         [(do (admin.system/ig-derives)
                              (admin.system/ig-select-keys
                               [:akvo.lumen.admin/remove-tenant
+                               :akvo.lumen.component.error-tracker/config
+                               :akvo.lumen.component.error-tracker/prod
                                :akvo.lumen.admin/add-tenant])) prod-edn]
                         [(do (derive :akvo.lumen.utils.dev-emailer/emailer :akvo.lumen.component.emailer/emailer)
+                             (derive :akvo.lumen.utils.local-error-tracker/local :akvo.lumen.component.error-tracker/error-tracker)
                              [:akvo.lumen.utils.dev-emailer/emailer
+                              :akvo.lumen.utils.local-error-tracker/local
                               :akvo.lumen.admin.db/config
                               :akvo.lumen.admin/remove-tenant
                               :akvo.lumen.admin/add-tenant
