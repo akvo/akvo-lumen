@@ -25,11 +25,26 @@ function fetchDatasetRequest(id) {
     id,
   };
 }
+function fetchColumnDatasetRequest(datasetId, columnName) {
+  return {
+    type: constants.FETCH_COLUMN_DATASET_REQUEST,
+    datasetId,
+    columnName,
+  };
+}
 
 function fetchDatasetSuccess(dataset) {
   return {
     type: constants.FETCH_DATASET_SUCCESS,
     dataset,
+  };
+}
+function fetchColumnDatasetSuccess(datasetId, columnName, column) {
+  return {
+    type: constants.FETCH_COLUMN_DATASET_SUCCESS,
+    datasetId,
+    columnName,
+    column,
   };
 }
 
@@ -39,6 +54,15 @@ function fetchDatasetFailure(error, id) {
     id,
   };
 }
+
+function fetchColumnDatasetFailure(error, datasetId, columnName) {
+  return {
+    type: constants.FETCH_COLUMN_DATASET_FAILURE,
+    datasetId,
+    columnName,
+  };
+}
+
 
 export function fetchDataset(id, metaOnly) {
   const suffix = metaOnly ? '/meta' : '';
@@ -56,6 +80,24 @@ export function fetchDataset(id, metaOnly) {
       });
   };
 }
+
+export function fetchColumn(datasetId, columnName, type) {
+  const t = type || 'text';
+  return (dispatch) => {
+    dispatch(fetchColumnDatasetRequest(datasetId, columnName));
+    return api.get(`/api/datasets/${datasetId}/sort/${columnName}/${t}`)
+      .then(({ body }) => {
+        const column = body.map(o => o[1]);
+        dispatch(fetchColumnDatasetSuccess(datasetId, columnName, column));
+        return column;
+      })
+      .catch((error) => {
+        dispatch(showNotification('error', 'Failed to fetch text column.'));
+        dispatch(fetchColumnDatasetFailure(error, datasetId, columnName));
+      });
+  };
+}
+
 
 function fetchSortedDatasetRequest(id) {
   return {

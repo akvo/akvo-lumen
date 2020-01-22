@@ -50,6 +50,15 @@ function saveDataset(state, dataset) {
   };
 }
 
+function saveColumnDataset(state, datasetId, columnName, column) {
+  const dataset = state[datasetId];
+  const data = dataset.setIn(['columnsFetched', columnName], column);
+  return Object.assign({}, state, {
+    [datasetId]: data,
+  });
+}
+
+
 function saveSortedDataset(state, { id, sortedValues }) {
   return {
     ...state,
@@ -155,6 +164,8 @@ export default function datasets(state = initialState, action) {
       return importDatasetSuccess(state, action);
     case constants.FETCH_DATASET_SUCCESS:
       return saveDataset(state, action.dataset);
+    case constants.FETCH_COLUMN_DATASET_SUCCESS:
+      return saveColumnDataset(state, action.datasetId, action.columnName, action.column);
     case constants.FETCH_SORTED_DATASET_SUCCESS:
       return saveSortedDataset(state, action.payload);
     case constants.FETCH_DATASETS_SUCCESS:
