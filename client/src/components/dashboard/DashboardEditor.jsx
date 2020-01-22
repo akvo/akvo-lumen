@@ -12,7 +12,7 @@ import { datasetsWithVisualizations } from '../../utilities/dataset';
 import { filterColumns } from '../../utilities/column';
 import { A4 } from '../../constants/print';
 import SelectMenu from '../common/SelectMenu';
-import { fetchDataset } from '../../actions/dataset';
+import { fetchDataset, fetchColumn } from '../../actions/dataset';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -303,6 +303,7 @@ class DashboardEditor extends Component {
           } else {
             filter.columns.splice(idx, 1);
           }
+          this.props.dispatch(fetchColumn(filter.datasetId, columnName));
           onFilterChange(filter);
         }}
         options={options}
@@ -366,7 +367,7 @@ class DashboardEditor extends Component {
                       filter.datasetId = id;
                       onFilterChange(filter);
                       if (id) {
-                        this.props.dispatch(fetchDataset(id, false));
+                        this.props.dispatch(fetchDataset(id, true));
                       }
                     }}
                     options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
@@ -410,9 +411,8 @@ class DashboardEditor extends Component {
               filter.columns.map((o, idx) => {
                 const columns = datasets[filter.datasetId].get('columns');
                 const column = columns.find(x => x.get('columnName') === o);
-                const finding = columns.indexOf(column);
-                let vals = new Set(datasets[filter.datasetId].get('rows').map(y => y.get(finding)));
-                vals = Array.from(vals).map(x => ({ label: x, value: x }));
+                const columnVals = datasets[filter.datasetId].getIn(['columnsFetched', o]);
+                const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
                 return (
                   <div style={{ paddingBottom: '10px' }}>
                     <span style={{ fontWeight: 'bold' }}>{column.get('title')}</span>
