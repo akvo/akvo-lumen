@@ -64,6 +64,7 @@ class Dashboard extends Component {
         type: 'dashboard',
         title: props.intl.formatMessage({ id: 'untitled_dashboard' }),
         entities: {},
+        filter: { datasetId: null, columns: [] },
         layout: [],
         id: null,
         created: null,
@@ -93,6 +94,7 @@ class Dashboard extends Component {
     this.handleFetchShareId = this.handleFetchShareId.bind(this);
     this.handleSetSharePassword = this.handleSetSharePassword.bind(this);
     this.handleToggleShareProtected = this.handleToggleShareProtected.bind(this);
+    this.onFilterChange = this.onFilterChange.bind(this);
   }
 
   componentWillMount() {
@@ -168,6 +170,9 @@ class Dashboard extends Component {
           return;
         }
         if (dash.aggregated) {
+          if (dash.filter.datasetId) {
+            this.props.dispatch(fetchDataset(dash.filter.datasetId, false));
+          }
           this.loadDashboardIntoState(nextProps.library, dash);
         }
       }
@@ -233,7 +238,12 @@ class Dashboard extends Component {
       });
     }
   }
-
+  onFilterChange(filter) {
+    const dashboard = this.state.dashboard;
+    dashboard.filter = filter;
+    this.setState({ dashboard });
+    this.onSave();
+  }
   onAddVisualisation(visualisation) {
     const { id, datasetId, spec } = visualisation;
     const vType = visualisation.visualisationType;
@@ -571,6 +581,7 @@ class Dashboard extends Component {
             )}
             <DashboardEditor
               dashboard={dashboard}
+              onFilterChange={this.onFilterChange}
               filteredDashboard={filteredDashboard}
               datasets={this.props.library.datasets}
               visualisations={this.addDataToVisualisations(this.props.library.visualisations)}

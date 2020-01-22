@@ -37,6 +37,8 @@
                                                    :type "visualisation"}) dvs ))]
     (zipmap (map (comp keyword :id) entries) entries)))
 
+(def empty-filter {:datasetId nil :columns []})
+
 (defn all-layouts
   "Merge text & dashboard_visualisations (dvs) layouts, return an id keyed map."
   [text-layout dvs]
@@ -47,6 +49,7 @@
   [dashboard dvs]
   (assoc (select-keys dashboard [:author :created :id :modified :title])
          :entities (all-entities (get-in dashboard [:spec :entities]) dvs)
+         :filter (get-in dashboard [:spec :filter] empty-filter)
          :layout (all-layouts (get-in dashboard [:spec :layout]) dvs)
          :type "dashboard"
          :status "OK"))
@@ -73,7 +76,7 @@
       (jdbc/with-db-transaction [tx tenant-conn]
         (db.dashboard/insert-dashboard tx {:id dashboard-id
                               :title (:title spec)
-                              :spec (:texts parted-spec)
+                              :spec (assoc (:texts parted-spec) :filter (or (:filter spec) empty-filter))
                               :author claims})
         (doseq [visualisation (get-in parted-spec [:visualisations :entities])]
           (let [visualisation-id (:id visualisation)
@@ -114,7 +117,7 @@
     (jdbc/with-db-transaction [tx tenant-conn]
       (db.dashboard/update-dashboard tx {:id id
                             :title (:title spec)
-                            :spec texts})
+                            :spec (assoc texts :filter (or (:filter spec) empty-filter))})
       (db.dashboard/delete-dashboard_visualisation tenant-conn {:dashboard-id id})
       (doseq [visualisation-entity (:entities visualisations)]
         (let [visualisation-id (:id visualisation-entity)
