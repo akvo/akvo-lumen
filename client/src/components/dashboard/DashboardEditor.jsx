@@ -12,7 +12,7 @@ import { datasetsWithVisualizations } from '../../utilities/dataset';
 import { filterColumns } from '../../utilities/column';
 import { A4 } from '../../constants/print';
 import SelectMenu from '../common/SelectMenu';
-import { fetchDataset } from '../../actions/dataset';
+import { fetchDataset, fetchColumn } from '../../actions/dataset';
 
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
@@ -104,8 +104,6 @@ class DashboardEditor extends Component {
       focusedItem: null,
       isDragging: false,
       tabSelected: 'visualisations',
-      filterByDataset: null,
-      selectedFilterColumns: [],
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -277,13 +275,13 @@ class DashboardEditor extends Component {
   }
 
   render() {
-    const { dashboard, datasets, exporting, filteredDashboard } = this.props;
+    const { dashboard, datasets, exporting, filteredDashboard, onFilterChange } = this.props;
+    const { filter } = dashboard;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
     const { tabSelected } = this.state;
     const selectTab = x => (tabSelected === x ? 'tabItem selected' : 'tabItem');
-    const { filterByDataset, selectedFilterColumns } = this.state;
     const plusButton = i18nKey => (
       <button
         className="clickable addText"
@@ -293,7 +291,7 @@ class DashboardEditor extends Component {
       </button>);
     const visualisations = getArrayFromObject(this.props.visualisations);
     const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
-    const selectedDatasetColumns = filterByDataset && datasets[filterByDataset] && filterColumns(datasets[filterByDataset].get('columns'), 'text');
+    const selectedDatasetColumns = filter.datasetId && datasets[filter.datasetId] && filterColumns(datasets[filter.datasetId].get('columns'), 'text');
     const newColumnFilterSelect = idx => (options, finder) =>
     (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px' }}>
       <SelectMenu
@@ -301,17 +299,18 @@ class DashboardEditor extends Component {
         key={`selectFilterColumn-${idx}`}
         onChange={(columnName) => {
           if (columnName) {
-            selectedFilterColumns.splice(idx, 1, columnName);
+            filter.columns.splice(idx, 1, columnName);
           } else {
-            selectedFilterColumns.splice(idx, 1);
+            filter.columns.splice(idx, 1);
           }
-          this.setState({ selectedFilterColumns });
+          this.props.dispatch(fetchColumn(filter.datasetId, columnName));
+          onFilterChange(filter);
         }}
         options={options}
-        value={finder(selectedFilterColumns[idx])}
+        value={finder(filter.columns[idx])}
       />
     </div>);
-    const selectedFilterColumnsDict = new Set(selectedFilterColumns);
+    const selectedFilterColumnsDict = new Set(filter.columns);
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
     .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
 
@@ -360,13 +359,15 @@ class DashboardEditor extends Component {
                 <div>
                   <SelectMenu
                     name="datasets"
-                    value={filterByDataset}
+                    value={filter.datasetId}
                     isClearable
                     width="200px"
                     onChange={(id) => {
-                      this.setState({ filterByDataset: id, filterText: '', selectedFilterColumns: [] });
+                      this.setState({ filterText: '' });
+                      filter.datasetId = id;
+                      onFilterChange(filter);
                       if (id) {
-                        this.props.dispatch(fetchDataset(id, false));
+                        this.props.dispatch(fetchDataset(id, true));
                       }
                     }}
                     options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
@@ -380,17 +381,17 @@ class DashboardEditor extends Component {
                   <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
                     <div style={{ flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="filters" /></div>
                     <div>{dashboardEntitiesVisualisations.filter(v =>
-                      v.datasetId === filterByDataset).length}/
+                      v.datasetId === filter.datasetId).length}/
                       {dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />
                     </div>
                   </div>
                   <div className="filterInput" style={{ marginTop: '5px' }}>
                     {
-                      selectedFilterColumns.map((o, idx) =>
+                      filter.columns.map((o, idx) =>
                       newColumnFilterSelect(idx)(columnFilterSelectOptions,
                         finderFilterSelectOptions))
                     }
-                    {newColumnFilterSelect(selectedFilterColumns.length)(columnFilterSelectOptions,
+                    {newColumnFilterSelect(filter.columns.length)(columnFilterSelectOptions,
                       finderFilterSelectOptions)}
                   </div>
                 </div>}
@@ -407,12 +408,11 @@ class DashboardEditor extends Component {
           <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
             <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
             {
-              selectedFilterColumns.map((o, idx) => {
-                const columns = datasets[filterByDataset].get('columns');
+              filter.columns.map((o, idx) => {
+                const columns = datasets[filter.datasetId].get('columns');
                 const column = columns.find(x => x.get('columnName') === o);
-                const finding = columns.indexOf(column);
-                let vals = new Set(datasets[filterByDataset].get('rows').map(y => y.get(finding)));
-                vals = Array.from(vals).map(x => ({ label: x, value: x }));
+                const columnVals = datasets[filter.datasetId].getIn(['columnsFetched', o]);
+                const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
                 return (
                   <div style={{ paddingBottom: '10px' }}>
                     <span style={{ fontWeight: 'bold' }}>{column.get('title')}</span>
@@ -519,6 +519,7 @@ DashboardEditor.propTypes = {
   preventPageOverlaps: PropTypes.bool,
   filteredDashboard: PropTypes.bool,
   dispatch: PropTypes.func.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
 };
 
 DashboardEditor.defaultProps = {
