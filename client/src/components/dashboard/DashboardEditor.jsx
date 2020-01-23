@@ -364,10 +364,13 @@ class DashboardEditor extends Component {
                     width="200px"
                     onChange={(id) => {
                       this.setState({ filterText: '' });
-                      filter.datasetId = id;
-                      onFilterChange(filter);
-                      if (id) {
-                        this.props.dispatch(fetchDataset(id, true));
+                      if (filter.datasetId !== id) {
+                        filter.datasetId = id;
+                        filter.columns = [];
+                        onFilterChange(filter);
+                        if (id) {
+                          this.props.dispatch(fetchDataset(id, true));
+                        }
                       }
                     }}
                     options={datasetsWithViss ? Object.keys(datasetsWithViss).map(d =>
@@ -409,25 +412,28 @@ class DashboardEditor extends Component {
             <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
             {
               filter.columns.map((o, idx) => {
-                const columns = datasets[filter.datasetId].get('columns');
-                const column = columns.find(x => x.get('columnName') === o);
-                const columnVals = datasets[filter.datasetId].getIn(['columnsFetched', o]);
-                const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
-                return (
-                  <div style={{ paddingBottom: '10px' }}>
-                    <span style={{ fontWeight: 'bold' }}>{column.get('title')}</span>
-                    <SelectMenu
-                      name="datasets"
-                      isClearable
-                      key={`filterColumn-${idx}`}
-                      width="200px"
-                      onChange={(id) => {
-                        // eslint-disable-next-line no-console
-                        console.log('selecting', id, 'column', o);
-                      }}
-                      options={vals}
-                    />
-                  </div>);
+                const columns = datasets[filter.datasetId] && datasets[filter.datasetId].get('columns');
+                if (columns) {
+                  const column = columns.find(x => x.get('columnName') === o);
+                  const columnVals = datasets[filter.datasetId].getIn(['columnsFetched', o]);
+                  const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
+                  return (
+                    <div style={{ paddingBottom: '10px' }}>
+                      <span style={{ fontWeight: 'bold' }}>{column.get('title')}</span>
+                      <SelectMenu
+                        name="datasets"
+                        isClearable
+                        key={`filterColumn-${idx}`}
+                        width="200px"
+                        onChange={(id) => {
+                          // eslint-disable-next-line no-console
+                          console.log('selecting', id, 'column', o);
+                        }}
+                        options={vals}
+                      />
+                    </div>);
+                }
+                return null;
               })
             }
           </div>
