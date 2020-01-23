@@ -10,7 +10,7 @@ import ShareEntity from '../modals/ShareEntity';
 import * as actions from '../../actions/dashboard';
 import * as api from '../../utilities/api';
 import { fetchLibrary } from '../../actions/library';
-import { fetchDataset } from '../../actions/dataset';
+import { fetchDataset, fetchColumn } from '../../actions/dataset';
 import { trackPageView, trackEvent } from '../../utilities/analytics';
 import aggregationOnlyVisualisationTypes from '../../utilities/aggregationOnlyVisualisationTypes';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -111,6 +111,12 @@ class Dashboard extends Component {
       const libraryDashboard = this.props.library.dashboards[dashboardId];
       const existingDashboardLoaded =
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
+      if (libraryDashboard.filter.datasetId) {
+        this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, false));
+        libraryDashboard.filter.columns.map(o =>
+          this.props.dispatch(fetchColumn(libraryDashboard.filter.datasetId, o)));
+      }
+
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         this.setState({ fetchingDashboard: true });
         this.props.dispatch(actions.fetchDashboard(dashboardId,
@@ -170,9 +176,6 @@ class Dashboard extends Component {
           return;
         }
         if (dash.aggregated) {
-          if (dash.filter.datasetId) {
-            this.props.dispatch(fetchDataset(dash.filter.datasetId, false));
-          }
           this.loadDashboardIntoState(nextProps.library, dash);
         }
       }
