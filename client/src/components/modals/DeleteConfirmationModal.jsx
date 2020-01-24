@@ -67,6 +67,45 @@ VisualisationsList.propTypes = {
   visualisations: PropTypes.object.isRequired,
 };
 
+
+function DashboardsList({ datasetId, dashboards }) {
+  const dependentDashboards = Object.keys(dashboards)
+    .map(id => dashboards[id])
+    .filter((dash) => {
+      if (dash.filter.datasetId === datasetId) {
+        return true;
+      }
+      return false;
+    })
+    .map((dash, idx) => <li key={idx}>{dash.title}</li>);
+
+  if (dependentDashboards.length > 0) {
+    return (
+      <div>
+        <p>
+          The following
+          {dependentDashboards.length === 1
+            ? ' dashboard '
+            : ` ${dependentDashboards.length} dashboards `}
+          will not be more filtered by the dataset to be removed:
+        </p>
+        <ul>{dependentDashboards}</ul>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <span>No filters dashboards depend on this datataset</span>
+    </div>
+  );
+}
+
+DashboardsList.propTypes = {
+  datasetId: PropTypes.string.isRequired,
+  dashboards: PropTypes.object.isRequired,
+};
+
+
 export default function DeleteConfirmationModal({
   isOpen,
   onCancel,
@@ -74,6 +113,7 @@ export default function DeleteConfirmationModal({
   entityId,
   entityType,
   library,
+  filteredDashboard,
 }) {
   const entity = getEntity(entityId, entityType, library);
 
@@ -102,8 +142,19 @@ export default function DeleteConfirmationModal({
         <ModalHeader title={`Delete ${entityType} ${getTitle(entity)}?`} onCloseModal={onCancel} />
         <div className="ModalContents">
           {entityType === 'dataset' && (
-            <VisualisationsList datasetId={getId(entity)} visualisations={library.visualisations} />
-          )}
+            <div>
+              <VisualisationsList
+                datasetId={getId(entity)}
+                visualisations={library.visualisations}
+              />
+              {filteredDashboard &&
+              <DashboardsList
+                datasetId={getId(entity)}
+                dashboards={library.dashboards}
+              />
+              }
+            </div>
+            )}
         </div>
         <ModalFooter
           leftButton={{
@@ -133,4 +184,5 @@ DeleteConfirmationModal.propTypes = {
   }),
   entityId: PropTypes.string.isRequired,
   entityType: PropTypes.oneOf(['dataset', 'visualisation', 'dashboard', 'raster']).isRequired,
+  filteredDashboard: PropTypes.bool,
 };
