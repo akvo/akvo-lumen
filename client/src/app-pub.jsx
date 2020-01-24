@@ -21,14 +21,18 @@ require('./styles/style.global.scss');
 const rootElement = document.querySelector('#root');
 const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '1';
 
-function renderSuccessfulShare(data, initialState) {
+function renderSuccessfulShare(data, filterColumnsFetched, initialState) {
   const datasets = data.datasets;
   const immutableDatasets = {};
 
   // Transform datasets into immutable objects
   if (datasets != null) {
     Object.keys(datasets).forEach((key) => {
-      const dataset = Immutable.fromJS(datasets[key]);
+      let dataset = Immutable.fromJS(datasets[key]);
+      const datasetId = data.dashboards[data.dashboardId].filter.datasetId;
+      if (filteredDashboardCondition() && key === datasetId) {
+        dataset = filterColumnsFetched.reduce((d, { columnName, values }) => d.setIn(['columnsFetched', columnName], values), dataset);
+      }
       immutableDatasets[key] = dataset;
     });
   }
@@ -85,6 +89,20 @@ const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
 let hasSubmitted = false;
 
+const fetchFilterColumn = (dashboardId, columnName, columnType, password, callback) =>
+fetch(`/share/dataset/${dashboardId}/column/${columnName}`, { headers: { 'X-Password': password } })
+.then((response) => {
+  if (response.status === 403) {
+    renderPrivacyGate(); // eslint-disable-line
+    callback();
+    return null;
+  }
+  return response.json();
+})
+.then(body => ({ columnName, values: body.map(o => o[1]) })
+);
+
+
 const fetchData = (password = undefined, callback = () => {}) => {
   auth.initPublic()
     .then(({ env }) => {
@@ -98,8 +116,24 @@ const fetchData = (password = undefined, callback = () => {}) => {
           return response.json();
         })
         .then((data) => {
-          if (data) renderSuccessfulShare(data, { env });
+          if (data) return data;
+          throw Error(`NO DATA FOR: /share/${shareId}`);
         })
+        .then((data) => {
+          if (data.dashboardId) {
+            const dashboard = data.dashboards[data.dashboardId];
+            const datasetId = dashboard.filter.datasetId;
+            if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
+              const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o, 'text', password, callback));
+              return Promise.all(columnsFetch).then(responses => [data, responses]);
+            }
+            return [data];
+          }
+          return [data];
+        })
+        .then(([data, filterColumnsFetched]) =>
+          renderSuccessfulShare(data, filterColumnsFetched, { env })
+        )
         .catch((error) => {
           renderNoSuchShare();
           throw error;

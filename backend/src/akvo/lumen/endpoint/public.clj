@@ -2,6 +2,7 @@
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.public :as public]
             [cheshire.core :as json]
+            [akvo.lumen.endpoint.dataset :as e.dataset]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig]))
@@ -21,9 +22,10 @@
       (public/share tenant-conn windshaft-url id password))))
 
 (defn routes [{:keys [tenant-manager] :as opts}]
-  ["/:id"
-   {:get {:parameters {:path-params {:id string?}}
-          :handler (handler opts)}}])
+  [["/:id"
+     {:get {:parameters {:path-params {:id string?}}
+            :handler (handler opts)}}]
+   ["/dataset/:id/column/:column-name" (e.dataset/fetch-column-text-handler tenant-manager)]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
   (routes opts))
