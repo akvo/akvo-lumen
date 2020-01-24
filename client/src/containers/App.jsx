@@ -27,12 +27,14 @@ export default function App({ store, history, location }) {
           <IndexRedirect from="" to="library" />
           <Route
             path="library"
-            components={{ sidebar: WorkspaceNav, content: Library }}
+            components={{ sidebar: WorkspaceNav,
+              content: withProps(Library, { filteredDashboard }) }}
             location={location}
           />
           <Route
             path="library/collections/:collectionId"
-            components={{ sidebar: WorkspaceNav, content: Library }}
+            components={{ sidebar: WorkspaceNav,
+              content: withProps(Library, { filteredDashboard }) }}
             location={location}
           />
           <Route
