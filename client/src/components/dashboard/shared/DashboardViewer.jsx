@@ -88,7 +88,7 @@ class DashboardViewer extends Component {
   }
 
   render() {
-    const { dashboard, datasets, metadata, windowWidth } = this.props;
+    const { dashboard, datasets, metadata, windowWidth, filteredDashboard } = this.props;
     const layout = dashboard.layout;
     const viewportType = getViewportType(windowWidth);
     const minHeight = viewportType === 'large' ?
@@ -132,6 +132,7 @@ DashboardViewer.propTypes = {
   datasets: PropTypes.object,
   metadata: PropTypes.object,
   windowWidth: PropTypes.number,
+  filteredDashboard: PropTypes.bool,
   dashboard: PropTypes.shape({
     entities: PropTypes.object.isRequired,
     layout: PropTypes.object.isRequired,

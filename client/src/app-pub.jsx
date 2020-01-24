@@ -13,11 +13,13 @@ import ErrorScreen from './components/common/ErrorScreen';
 import configureStore from './store/configureStore';
 import { init as initAnalytics, trackPageView } from './utilities/analytics';
 import * as auth from './utilities/auth';
+import queryString from 'querystringify';
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
+const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '1';
 
 function renderSuccessfulShare(data, initialState) {
   const datasets = data.datasets;
@@ -52,6 +54,7 @@ function renderSuccessfulShare(data, initialState) {
                 visualisations={data.visualisations}
                 datasets={immutableDatasets}
                 metadata={data.metadata ? data.metadata : null}
+                filteredDashboard={filteredDashboardCondition()}
               />
             ) : (
               <VisualisationViewerContainer
