@@ -12,6 +12,7 @@ import { datasetsWithVisualizations } from '../../utilities/dataset';
 import { filterColumns } from '../../utilities/column';
 import { A4 } from '../../constants/print';
 import SelectMenu from '../common/SelectMenu';
+import FilterColumns from './filter/FilterColumns';
 import { fetchDataset, fetchColumn } from '../../actions/dataset';
 
 require('./DashboardEditor.scss');
@@ -410,32 +411,7 @@ class DashboardEditor extends Component {
           {filteredDashboard &&
           <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
             <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
-            {
-              filter.columns.map((o, idx) => {
-                const columns = datasets[filter.datasetId] && datasets[filter.datasetId].get('columns');
-                if (columns) {
-                  const column = columns.find(x => x.get('columnName') === o);
-                  const columnVals = datasets[filter.datasetId].getIn(['columnsFetched', o]);
-                  const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
-                  return (
-                    <div style={{ paddingBottom: '10px' }}>
-                      <span style={{ fontWeight: 'bold' }}>{column.get('title')}</span>
-                      <SelectMenu
-                        name="datasets"
-                        isClearable
-                        key={`filterColumn-${idx}`}
-                        width="200px"
-                        onChange={(id) => {
-                          // eslint-disable-next-line no-console
-                          console.log('selecting', id, 'column', o);
-                        }}
-                        options={vals}
-                      />
-                    </div>);
-                }
-                return null;
-              })
-            }
+            <FilterColumns filter={filter} dataset={datasets[filter.datasetId]} />
           </div>
           }
           {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&

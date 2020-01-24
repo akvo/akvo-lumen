@@ -22,6 +22,15 @@
         auth-res (filter #(contains? auth-datasets (:id %)) res)]
     (lib/ok auth-res)))
 
+(defn fetch-column-text-handler [tenant-manager]
+  {:get {:parameters {:path-params {:id string?
+                                    :column-name string?}
+                      :query-params {:limit (s/nilable string?)}}
+         :handler (fn [{tenant :tenant
+                        {:keys [id column-name]} :path-params
+                        query-params :query-params}]
+                    (lib/ok (dataset/sort-text (p/connection tenant-manager tenant) id column-name (get query-params "limit"))))}})
+
 (defn routes [{:keys [upload-config import-config error-tracker tenant-manager caddisfly] :as opts}]
   ["/datasets"
    ["" {:get {:handler (fn [{tenant :tenant
@@ -65,13 +74,7 @@
                                   {:keys [id]} :path-params}]
                               (dataset/delete (p/connection tenant-manager tenant) id))}}]
      ["/sort"
-      [["/:column-name/text" {:get {:parameters {:path-params {:id string?
-                                                               :column-name string?}
-                                                 :query-params {:limit (s/nilable string?)}}
-                                    :handler (fn [{tenant :tenant
-                                                   {:keys [id column-name]} :path-params
-                                                   query-params :query-params}]
-                                               (lib/ok (dataset/sort-text (p/connection tenant-manager tenant) id column-name (get query-params "limit"))))}}]]
+      [["/:column-name/text" (fetch-column-text-handler tenant-manager)]]
       [["/:column-name/number" {:get {:parameters {:path-params {:id string?
                                                                  :column-name string?}}
                                       :handler (fn [{tenant :tenant

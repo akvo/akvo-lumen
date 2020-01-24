@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import windowSize from 'react-window-size';
 import DashboardViewerItem from './DashboardViewerItem';
+import FilterColumns from './../filter/FilterColumns';
 
 require('./DashboardViewer.scss');
 
@@ -88,7 +89,7 @@ class DashboardViewer extends Component {
   }
 
   render() {
-    const { dashboard, datasets, metadata, windowWidth } = this.props;
+    const { dashboard, datasets, metadata, windowWidth, filteredDashboard } = this.props;
     const layout = dashboard.layout;
     const viewportType = getViewportType(windowWidth);
     const minHeight = viewportType === 'large' ?
@@ -96,7 +97,6 @@ class DashboardViewer extends Component {
       0;
     const sortFunc = getSortFunc(layout);
     const sortedDashboard = getArrayFromObject(dashboard.entities).sort(sortFunc);
-
     return (
       <div
         className="DashboardViewer"
@@ -104,6 +104,9 @@ class DashboardViewer extends Component {
         style={{ width: '100%', minHeight, height: 'auto' }}
       >
         <h1 className="DashboaredViewerTitle">{dashboard.title}</h1>
+        {filteredDashboard &&
+          <div style={{ marginLeft: '10px' }}><FilterColumns filter={dashboard.filter} dataset={datasets[dashboard.filter.datasetId]} /></div>
+        }
         <div
           className="dashboardEntities"
           style={{
@@ -132,6 +135,7 @@ DashboardViewer.propTypes = {
   datasets: PropTypes.object,
   metadata: PropTypes.object,
   windowWidth: PropTypes.number,
+  filteredDashboard: PropTypes.bool,
   dashboard: PropTypes.shape({
     entities: PropTypes.object.isRequired,
     layout: PropTypes.object.isRequired,
