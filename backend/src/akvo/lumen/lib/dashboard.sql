@@ -6,7 +6,8 @@ SELECT id,
        'dashboard' AS type,
        created,
        modified,
-       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author"
+       (SELECT jsonb_object_agg(key, value) FROM jsonb_each(author) WHERE key IN ('name', 'given_name', 'family_name', 'email')) AS "author",
+       spec::json#>'{filter}' AS filter
 FROM dashboard;
 
 -- :name all-dashboards-ids :? :*
