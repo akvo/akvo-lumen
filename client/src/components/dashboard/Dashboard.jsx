@@ -80,6 +80,7 @@ class Dashboard extends Component {
       aggregatedDatasets: {},
       timeToNextSave: SAVE_INITIAL_TIMEOUT,
       timeFromPreviousSave: 0,
+      tabSelected: 'visualisations',
     };
     this.loadDashboardIntoState = this.loadDashboardIntoState.bind(this);
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
@@ -114,6 +115,7 @@ class Dashboard extends Component {
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         this.setState({ fetchingDashboard: true });
         this.props.dispatch(actions.fetchDashboard(dashboardId,
+          {},
           () => this.setState({ fetchingDashboard: false })));
       } else {
         this.loadDashboardIntoState(this.props.library, libraryDashboard);
@@ -213,7 +215,7 @@ class Dashboard extends Component {
     });
   }
 
-  onSave() {
+  onSave(filter) {
     const { dispatch, location } = this.props;
     const dashboard = getDashboardFromState(this.state.dashboard, false);
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
@@ -234,17 +236,23 @@ class Dashboard extends Component {
 
     if (isEditingExistingDashboard) {
       dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
+      if (filter) {
+        this.setState({ fetchingDashboard: true });
+        this.props.dispatch(actions.fetchDashboard(dashboard.id,
+          { filter: dashboard.filter },
+          () => this.setState({ fetchingDashboard: false, tabSelected: 'filters' })));
+      }
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
         dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleResponse));
       });
     }
   }
-  onFilterChange(filter) {
+  onFilterChange(filter, needToAggregate) {
     const dashboard = this.state.dashboard;
     dashboard.filter = filter;
     this.setState({ dashboard });
-    this.onSave();
+    this.onSave(needToAggregate && filter);
   }
   onAddVisualisation(visualisation) {
     const { id, datasetId, spec } = visualisation;
@@ -595,6 +603,8 @@ class Dashboard extends Component {
               onUpdateName={this.onUpdateName}
               print={this.props.print}
               exporting={exporting}
+              tabSelected={this.state.tabSelected}
+              onTabSelected={tab => this.setState({ tabSelected: tab })}
               preventPageOverlaps={this.props.preventPageOverlaps}
             />
             {!exporting && (
