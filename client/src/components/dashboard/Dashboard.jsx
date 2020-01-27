@@ -122,7 +122,7 @@ class Dashboard extends Component {
         if (libraryDashboard.filter.datasetId) {
           this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, false));
           libraryDashboard.filter.columns.map(o =>
-            this.props.dispatch(fetchColumn(libraryDashboard.filter.datasetId, o)));
+            this.props.dispatch(fetchColumn(libraryDashboard.filter.datasetId, o.column)));
         }
       }
     }

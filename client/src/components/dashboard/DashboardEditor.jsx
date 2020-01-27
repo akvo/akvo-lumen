@@ -321,8 +321,8 @@ class DashboardEditor extends Component {
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
     .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
 
-    const columnFilterSelectOptions = columnFilterSelectAllOptions && columnFilterSelectAllOptions
-    .filter(c => !selectedFilterColumnsDict.has(c.value));
+    const columnFilterSelectOptions = columnFilterSelectAllOptions ? columnFilterSelectAllOptions
+    .filter(c => !selectedFilterColumnsDict.has(c.value)) : [];
     const finderFilterSelectOptions = v => columnFilterSelectAllOptions &&
     columnFilterSelectAllOptions.find(o => (v ? o.value === v.column : false));
     const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
@@ -414,7 +414,7 @@ class DashboardEditor extends Component {
           id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
-          {filteredDashboard &&
+          {filteredDashboard && filter.datasetId &&
           <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
             <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
             <FilterColumns
