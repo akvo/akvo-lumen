@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ModalWrapper from 'react-modal';
+import { FormattedMessage } from 'react-intl';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
 import { getTitle, getId } from '../../domain/entity';
@@ -45,11 +46,9 @@ function VisualisationsList({ datasetId, visualisations }) {
     return (
       <div>
         <p>
-          The following
-          {dependentVisualisations.length === 1
-            ? ' visualisation '
-            : ` ${dependentVisualisations.length} visualisations `}
-          will also be deleted:
+          <FormattedMessage
+            id={dependentVisualisations.length === 1 ? 'following_visualisation_will_be_deleted ' : 'following_visualisations_will_be_deleted'}
+          />:
         </p>
         <ul>{dependentVisualisations}</ul>
       </div>
@@ -57,7 +56,7 @@ function VisualisationsList({ datasetId, visualisations }) {
   }
   return (
     <div>
-      <span>No visualisations depend on this datataset</span>
+      <FormattedMessage id="no_visualisations_depend_on_dataset" />
     </div>
   );
 }
@@ -72,7 +71,7 @@ function DashboardsList({ datasetId, dashboards }) {
   const dependentDashboards = Object.keys(dashboards)
     .map(id => dashboards[id])
     .filter((dash) => {
-      if (dash.filter.datasetId === datasetId) {
+      if (dash.filter && dash.filter.datasetId === datasetId) {
         return true;
       }
       return false;
@@ -83,11 +82,9 @@ function DashboardsList({ datasetId, dashboards }) {
     return (
       <div>
         <p>
-          The following
-          {dependentDashboards.length === 1
-            ? ' dashboard '
-            : ` ${dependentDashboards.length} dashboards `}
-          will not be more filtered by the dataset to be removed:
+          <FormattedMessage
+            id={dependentDashboards.length === 1 ? 'following_filter_dash_will_be_deleted ' : 'following_filters_dash_will_be_deleted'}
+          />:
         </p>
         <ul>{dependentDashboards}</ul>
       </div>
@@ -95,7 +92,7 @@ function DashboardsList({ datasetId, dashboards }) {
   }
   return (
     <div>
-      <span>No filters dashboards depend on this datataset</span>
+      <FormattedMessage id="no_filter_dashboards_depend_on_dataset" />
     </div>
   );
 }
