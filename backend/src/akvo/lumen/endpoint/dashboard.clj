@@ -47,9 +47,20 @@
     ["" {:get {:parameters {:path-params {:id string?}}
                :handler (fn [{tenant :tenant
                               {:keys [id]} :path-params}]
-                          (if-let [d (dashboard/fetch-aggregated (p/connection tenant-manager tenant) id windshaft-url)]
-                            (lib/ok d)
-                            (lib/not-found {:error "Not found"})))}
+                          (let [;; VIP Inject dashboard filter from payload
+                                ;; filters {"filters" [{"value" "lisa",
+                                ;;                      "column" "c2",
+                                ;;                      "strategy" "is",
+                                ;;                      "operation" "keep",
+                                ;;                      "columnType" "text"}]
+                                ;;          "datasetId" "5e2a05a0-69ba-43b8-aa6e-7f6e200158c4"}
+                                filters {}
+                                ]
+                            (if-let [d (-> tenant-manager
+                                           (p/connection tenant)
+                                           (dashboard/fetch-aggregated id windshaft-url filters))]
+                              (lib/ok d)
+                              (lib/not-found {:error "Not found"}))))}
          :put {:parameters {:body map?
                             :path-params {:id string?}}
                :handler (fn [{tenant :tenant
