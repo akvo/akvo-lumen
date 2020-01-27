@@ -69,11 +69,13 @@ export const fetchDashboardRequest = createAction('FETCH_DASHBOARD_REQUEST');
 export const fetchDashboardFailure = createAction('FETCH_DASHBOARD_FAILURE');
 export const fetchDashboardSuccess = createAction('FETCH_DASHBOARD_SUCCESS');
 
-export function fetchDashboard(id, callback) {
+export function fetchDashboard(id, filter, callback) {
   return (dispatch) => {
     dispatch(fetchDashboardRequest(id));
     api
-      .get(`/api/dashboards/${id}`)
+      .get(`/api/dashboards/${id}`, {
+        query: JSON.stringify(filter),
+      })
       .then(({ body }) => {
         dispatch(fetchDashboardSuccess(body));
         callback();

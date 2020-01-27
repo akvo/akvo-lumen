@@ -104,7 +104,6 @@ class DashboardEditor extends Component {
       saveError: false,
       focusedItem: null,
       isDragging: false,
-      tabSelected: 'visualisations',
     };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
@@ -281,7 +280,7 @@ class DashboardEditor extends Component {
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
     const layout = this.getLayout();
-    const { tabSelected } = this.state;
+    const { tabSelected, onTabSelected } = this.props;
     const selectTab = x => (tabSelected === x ? 'tabItem selected' : 'tabItem');
     const plusButton = i18nKey => (
       <button
@@ -299,8 +298,15 @@ class DashboardEditor extends Component {
         isClearable
         key={`selectFilterColumn-${idx}`}
         onChange={(columnName) => {
+          const filterColumn = {
+            value: null,
+            column: columnName,
+            strategy: 'is',
+            operation: 'keep',
+            columnType: 'text',
+          };
           if (columnName) {
-            filter.columns.splice(idx, 1, columnName);
+            filter.columns.splice(idx, 1, filterColumn);
           } else {
             filter.columns.splice(idx, 1);
           }
@@ -311,14 +317,14 @@ class DashboardEditor extends Component {
         value={finder(filter.columns[idx])}
       />
     </div>);
-    const selectedFilterColumnsDict = new Set(filter.columns);
+    const selectedFilterColumnsDict = new Set(filter.columns.map(x => x.column));
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
     .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
 
     const columnFilterSelectOptions = columnFilterSelectAllOptions && columnFilterSelectAllOptions
     .filter(c => !selectedFilterColumnsDict.has(c.value));
     const finderFilterSelectOptions = v => columnFilterSelectAllOptions &&
-    columnFilterSelectAllOptions.find(o => o.value === v);
+    columnFilterSelectAllOptions.find(o => (v ? o.value === v.column : false));
     const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
     return (
       <div
@@ -331,12 +337,12 @@ class DashboardEditor extends Component {
             </div>}
             {filteredDashboard && <div className="DashboardSidebarTabMenu">
               <div className={selectTab('visualisations')}>
-                <button onClick={() => this.setState({ tabSelected: 'visualisations' })}>
+                <button onClick={() => onTabSelected('visualisations')}>
                   <FormattedMessage id="visualisations" />
                 </button>
               </div>
               <div className={selectTab('filters')}>
-                <button onClick={() => this.setState({ tabSelected: 'filters' })}>
+                <button onClick={() => onTabSelected('filters')}>
                   <FormattedMessage id="filters" />
                 </button>
               </div>
@@ -411,7 +417,11 @@ class DashboardEditor extends Component {
           {filteredDashboard &&
           <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
             <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
-            <FilterColumns filter={filter} dataset={datasets[filter.datasetId]} />
+            <FilterColumns
+              filter={filter}
+              dataset={datasets[filter.datasetId]}
+              onFilterChange={onFilterChange}
+            />
           </div>
           }
           {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
@@ -502,6 +512,8 @@ DashboardEditor.propTypes = {
   filteredDashboard: PropTypes.bool,
   dispatch: PropTypes.func.isRequired,
   onFilterChange: PropTypes.func.isRequired,
+  tabSelected: PropTypes.string.isRequired,
+  onTabSelected: PropTypes.func.isRequired,
 };
 
 DashboardEditor.defaultProps = {
