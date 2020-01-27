@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ModalWrapper from 'react-modal';
+import { FormattedMessage } from 'react-intl';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
 import { getTitle, getId } from '../../domain/entity';
@@ -45,11 +46,9 @@ function VisualisationsList({ datasetId, visualisations }) {
     return (
       <div>
         <p>
-          The following
-          {dependentVisualisations.length === 1
-            ? ' visualisation '
-            : ` ${dependentVisualisations.length} visualisations `}
-          will also be deleted:
+          <FormattedMessage
+            id={dependentVisualisations.length === 1 ? 'following_visualisation_will_be_deleted ' : 'following_visualisations_will_be_deleted'}
+          />:
         </p>
         <ul>{dependentVisualisations}</ul>
       </div>
@@ -57,7 +56,7 @@ function VisualisationsList({ datasetId, visualisations }) {
   }
   return (
     <div>
-      <span>No visualisations depend on this datataset</span>
+      <FormattedMessage id="no_visualisations_depend_on_dataset" />
     </div>
   );
 }
@@ -67,6 +66,43 @@ VisualisationsList.propTypes = {
   visualisations: PropTypes.object.isRequired,
 };
 
+
+function DashboardsList({ datasetId, dashboards }) {
+  const dependentDashboards = Object.keys(dashboards)
+    .map(id => dashboards[id])
+    .filter((dash) => {
+      if (dash.filter && dash.filter.datasetId === datasetId) {
+        return true;
+      }
+      return false;
+    })
+    .map((dash, idx) => <li key={idx}>{dash.title}</li>);
+
+  if (dependentDashboards.length > 0) {
+    return (
+      <div>
+        <p>
+          <FormattedMessage
+            id={dependentDashboards.length === 1 ? 'following_filter_dash_will_be_deleted ' : 'following_filters_dash_will_be_deleted'}
+          />:
+        </p>
+        <ul>{dependentDashboards}</ul>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <FormattedMessage id="no_filter_dashboards_depend_on_dataset" />
+    </div>
+  );
+}
+
+DashboardsList.propTypes = {
+  datasetId: PropTypes.string.isRequired,
+  dashboards: PropTypes.object.isRequired,
+};
+
+
 export default function DeleteConfirmationModal({
   isOpen,
   onCancel,
@@ -74,6 +110,7 @@ export default function DeleteConfirmationModal({
   entityId,
   entityType,
   library,
+  filteredDashboard,
 }) {
   const entity = getEntity(entityId, entityType, library);
 
@@ -102,8 +139,19 @@ export default function DeleteConfirmationModal({
         <ModalHeader title={`Delete ${entityType} ${getTitle(entity)}?`} onCloseModal={onCancel} />
         <div className="ModalContents">
           {entityType === 'dataset' && (
-            <VisualisationsList datasetId={getId(entity)} visualisations={library.visualisations} />
-          )}
+            <div>
+              <VisualisationsList
+                datasetId={getId(entity)}
+                visualisations={library.visualisations}
+              />
+              {filteredDashboard &&
+              <DashboardsList
+                datasetId={getId(entity)}
+                dashboards={library.dashboards}
+              />
+              }
+            </div>
+            )}
         </div>
         <ModalFooter
           leftButton={{
@@ -133,4 +181,5 @@ DeleteConfirmationModal.propTypes = {
   }),
   entityId: PropTypes.string.isRequired,
   entityType: PropTypes.oneOf(['dataset', 'visualisation', 'dashboard', 'raster']).isRequired,
+  filteredDashboard: PropTypes.bool,
 };

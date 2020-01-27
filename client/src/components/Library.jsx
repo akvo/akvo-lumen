@@ -174,7 +174,8 @@ class Library extends Component {
   }
 
   render() {
-    const { dispatch, location, datasets, visualisations, dashboards, rasters } = this.props;
+    const { dispatch, location, datasets, visualisations, dashboards, rasters,
+      filteredDashboard } = this.props;
 
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
@@ -191,6 +192,7 @@ class Library extends Component {
         {this.state.pendingDeleteEntity && (
           <DeleteConfirmationModal
             isOpen
+            filteredDashboard={filteredDashboard}
             entityId={pendingDeleteEntity.entityId}
             entityType={pendingDeleteEntity.entityType}
             library={{ datasets, visualisations, dashboards, rasters }}
@@ -304,6 +306,7 @@ Library.propTypes = {
   rasters: PropTypes.object.isRequired,
   collections: PropTypes.object,
   router: PropTypes.object.isRequired,
+  filteredDashboard: PropTypes.bool,
 };
 
 export default connect(state => state.library)(withRouter(Library));
