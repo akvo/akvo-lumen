@@ -183,7 +183,6 @@ class FilterMenu extends Component {
       value: newFilterValue,
       operation: newFilterOperation,
       strategy: newFilterStrategy,
-      origin: 'filterMenu',
     });
 
     this.props.onChangeSpec({

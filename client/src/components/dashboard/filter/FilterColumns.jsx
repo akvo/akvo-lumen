@@ -2,13 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import SelectMenu from '../../common/SelectMenu';
 
-export default function FilterColumns({ filter, dataset }) {
+export default function FilterColumns({ filter, dataset, onFilterChange }) {
   return filter.columns.map((o, idx) => {
     const columns = dataset && dataset.get('columns');
     if (columns) {
-      const column = columns.find(x => x.get('columnName') === o);
-      const columnVals = dataset.getIn(['columnsFetched', o]);
+      const column = columns.find(x => x.get('columnName') === o.column);
+      const columnVals = dataset.getIn(['columnsFetched', o.column]);
       const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
+      const columnIndex = filter.columns.findIndex(x => x.column === o.column);
       return (
         <div style={{ paddingBottom: '10px' }} key={`div-filterColumn-${idx}`}>
           <span style={{ fontWeight: 'bold' }}>{column.get('title')}</span>
@@ -17,9 +18,11 @@ export default function FilterColumns({ filter, dataset }) {
             isClearable
             key={`filterColumn-${idx}`}
             width="200px"
+            value={filter.columns[columnIndex].value}
             onChange={(id) => {
-              // eslint-disable-next-line no-console
-              console.log('selecting', id, 'column', o);
+              const editedFilter = filter;
+              editedFilter.columns[columnIndex].value = id;
+              onFilterChange(editedFilter, true);
             }}
             options={vals}
           />
@@ -32,4 +35,5 @@ export default function FilterColumns({ filter, dataset }) {
 FilterColumns.propTypes = {
   filter: PropTypes.object.isRequired,
   dataset: PropTypes.object.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
 };
