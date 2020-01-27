@@ -116,13 +116,27 @@ class Dashboard extends Component {
         this.setState({ fetchingDashboard: true });
         this.props.dispatch(actions.fetchDashboard(dashboardId,
           {},
-          () => this.setState({ fetchingDashboard: false })));
+          (dash) => {
+            if (dash.filter.datasetId) {
+              this.props.dispatch(fetchDataset(dash.filter.datasetId, true,
+                () => {
+                  const calls = dash.filter.columns.map(o =>
+                  this.props.dispatch(fetchColumn(dash.filter.datasetId, o.column)));
+                  Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
+                }
+                ));
+            }
+          }));
       } else {
         this.loadDashboardIntoState(this.props.library, libraryDashboard);
         if (libraryDashboard.filter.datasetId) {
-          this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, false));
-          libraryDashboard.filter.columns.map(o =>
-            this.props.dispatch(fetchColumn(libraryDashboard.filter.datasetId, o.column)));
+          this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, false,
+            (dash) => {
+              const calls = dash.filter.columns.map(o =>
+              this.props.dispatch(fetchColumn(dash.filter.datasetId, o.column)));
+              Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
+            }
+            ));
         }
       }
     }
