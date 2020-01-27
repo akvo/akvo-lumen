@@ -14,6 +14,7 @@
 (s/def ::postgres.filter/value (s/nilable (s/or :string string?
                                                 :number number?)))
 
+(s/def ::postgres.filter/origin #{"filterMenu" "dashboardFilter"})
 
 (alias 'db.dsv.column 'akvo.lumen.specs.db.dataset-version.column)
 
@@ -22,7 +23,8 @@
   (s/nilable (s/keys :req-un [::postgres.filter/operation
                               ::postgres.filter/strategy
                               ::postgres.filter/value
-                              ::postgres.filter/column])))
+                              ::postgres.filter/column
+                              ::postgres.filter/origin])))
 
 (s/def ::postgres.filter/filters (s/coll-of ::postgres.filter/filter :gen-max 3))
 
