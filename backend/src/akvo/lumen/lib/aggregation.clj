@@ -85,17 +85,26 @@
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))
 
-(defn spread-filters
+(defn spread-filters ;; Payload v0
   [{:keys [datasetId] :as visualisation} filters]
   (reduce (fn [v f]
             (update-in v [:spec "filters"] #(conj % f)))
           visualisation
           (get filters datasetId)))
 
+(defn spread-filters2 ;; Payload v1
+  [visualisation {:strs [columns datasetId] :as filters}]
+  (reduce (fn [v f]
+            (if (= datasetId (:datasetId visualisation))
+              (update-in v [:spec "filters"] #(conj % f))
+              v))
+          visualisation
+          columns))
+
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
     (when-let [vis (-> (visualisation/fetch tenant-conn id)
-                       (spread-filters filters))]
+                       (spread-filters2 filters))]
       (condp contains? (:visualisationType vis)
         #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
         (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
