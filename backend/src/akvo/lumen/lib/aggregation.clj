@@ -89,7 +89,9 @@
   [visualisation {:strs [columns datasetId]}]
   (reduce (fn [v f]
             (if (= datasetId (:datasetId visualisation))
-              (update-in v [:spec "filters"] #(conj % f))
+              (-> v
+                  (update-in [:spec "filters"] #(conj % f))
+                  (assoc "isFiltered" true))
               v))
           visualisation
           columns))
