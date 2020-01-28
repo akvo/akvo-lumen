@@ -112,6 +112,11 @@ class Dashboard extends Component {
       const libraryDashboard = this.props.library.dashboards[dashboardId];
       const existingDashboardLoaded =
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
+      const fetchDatasetCallback = (dash) => {
+        const calls = dash.filter.columns.map(o =>
+        this.props.dispatch(fetchColumn(dash.filter.datasetId, o.column)));
+        Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
+      };
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         this.setState({ fetchingDashboard: true });
         this.props.dispatch(actions.fetchDashboard(dashboardId,
@@ -119,23 +124,14 @@ class Dashboard extends Component {
           (dash) => {
             if (dash.filter.datasetId) {
               this.props.dispatch(fetchDataset(dash.filter.datasetId, true,
-                () => {
-                  const calls = dash.filter.columns.map(o =>
-                  this.props.dispatch(fetchColumn(dash.filter.datasetId, o.column)));
-                  Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
-                }
-                ));
+                fetchDatasetCallback(dash)));
             }
           }));
       } else {
         this.loadDashboardIntoState(this.props.library, libraryDashboard);
         if (libraryDashboard.filter.datasetId) {
           this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, false,
-            (dash) => {
-              const calls = dash.filter.columns.map(o =>
-              this.props.dispatch(fetchColumn(dash.filter.datasetId, o.column)));
-              Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
-            }
+            fetchDatasetCallback(libraryDashboard)
             ));
         }
       }
