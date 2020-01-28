@@ -92,6 +92,8 @@ class DashboardViewer extends Component {
     const { dashboard, datasets, metadata, windowWidth, filteredDashboard } = this.props;
     const layout = dashboard.layout;
     const viewportType = getViewportType(windowWidth);
+    // eslint-disable-next-line no-console
+    const onFilterChange = (filter, needToAggregate) => console.log('TODO:', filter, needToAggregate);
     const minHeight = viewportType === 'large' ?
       (this.getBottomMostPoint() * (windowWidth / 12)) + TITLE_HEIGHT + 100 :
       0;
@@ -105,7 +107,7 @@ class DashboardViewer extends Component {
       >
         <h1 className="DashboaredViewerTitle">{dashboard.title}</h1>
         {filteredDashboard &&
-          <div style={{ marginLeft: '10px' }}><FilterColumns filter={dashboard.filter} dataset={datasets[dashboard.filter.datasetId]} /></div>
+          <div style={{ marginLeft: '10px' }}><FilterColumns filter={dashboard.filter} dataset={datasets[dashboard.filter.datasetId]} onFilterChange={onFilterChange} /></div>
         }
         <div
           className="dashboardEntities"
