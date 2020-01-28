@@ -124,7 +124,7 @@ const fetchData = (password = undefined, callback = () => {}) => {
             const dashboard = data.dashboards[data.dashboardId];
             const datasetId = dashboard.filter.datasetId;
             if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
-              const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o, 'text', password, callback));
+              const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
               return Promise.all(columnsFetch).then(responses => [data, responses]);
             }
             return [data];
