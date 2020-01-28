@@ -85,9 +85,21 @@
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))
 
-(defn visualisation-response-data [tenant-conn id windshaft-url]
+(defn spread-filters
+  [visualisation {:strs [columns datasetId]}]
+  (reduce (fn [v f]
+            (if (= datasetId (:datasetId visualisation))
+              (-> v
+                  (update-in [:spec "filters"] #(conj % f))
+                  (assoc "isFiltered" true))
+              v))
+          visualisation
+          columns))
+
+(defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
-    (when-let [vis (visualisation/fetch tenant-conn id)]
+    (when-let [vis (-> (visualisation/fetch tenant-conn id)
+                       (spread-filters filters))]
       (condp contains? (:visualisationType vis)
         #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
         (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
@@ -95,13 +107,13 @@
     (catch Exception e
       (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
 
-(defn aggregate-dashboard-viss [dashboard tenant-conn windshaft-url]
+(defn aggregate-dashboard-viss [dashboard tenant-conn windshaft-url filters]
   (->> dashboard
        :entities
        vals
        (filter #(= "visualisation" (:type %)))
        (map :id)
-       (map #(visualisation-response-data tenant-conn % windshaft-url))
+       (map #(visualisation-response-data tenant-conn % windshaft-url filters))
        (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
        (apply merge-with merge)))
 
