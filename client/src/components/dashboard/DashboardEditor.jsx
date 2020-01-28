@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import ReactGridLayout from 'react-grid-layout';
 import { Element, scroller } from 'react-scroll';
 import { connect } from 'react-redux';
+import Immutable from 'immutable';
 
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
@@ -321,8 +322,11 @@ class DashboardEditor extends Component {
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
     .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
 
-    const columnFilterSelectOptions = columnFilterSelectAllOptions ? columnFilterSelectAllOptions
+    let columnFilterSelectOptions = columnFilterSelectAllOptions ? columnFilterSelectAllOptions
     .filter(c => !selectedFilterColumnsDict.has(c.value)) : [];
+    if (Immutable.isImmutable(columnFilterSelectOptions)) {
+      columnFilterSelectOptions = columnFilterSelectOptions.toJS();
+    }
     const finderFilterSelectOptions = v => columnFilterSelectAllOptions &&
     columnFilterSelectAllOptions.find(o => (v ? o.value === v.column : false));
     const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
