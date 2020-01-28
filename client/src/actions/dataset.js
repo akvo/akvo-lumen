@@ -77,6 +77,8 @@ export function fetchDataset(id, metaOnly, callback) {
         return immutableDataset;
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log(error);
         dispatch(showNotification('error', 'Failed to fetch dataset.'));
         dispatch(fetchDatasetFailure(error, id));
       });
