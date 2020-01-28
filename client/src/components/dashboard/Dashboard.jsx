@@ -105,7 +105,15 @@ class Dashboard extends Component {
     if (!isLibraryLoaded) {
       this.props.dispatch(fetchLibrary());
     }
-
+    const datasetCallback = d => () => {
+      if (d.filter.columns.length > 0) {
+        const calls = d.filter.columns.map(o =>
+        this.props.dispatch(fetchColumn(d.filter.datasetId, o.column)));
+        Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
+      } else {
+        this.setState({ fetchingDashboard: false });
+      }
+    };
     if (isEditingExistingDashboard) {
       this.setState({ isUnsavedChanges: false });
       const dashboardId = this.props.params.dashboardId;
@@ -119,24 +127,20 @@ class Dashboard extends Component {
           (dash) => {
             if (dash.filter.datasetId) {
               this.props.dispatch(fetchDataset(dash.filter.datasetId, true,
-                () => {
-                  const calls = dash.filter.columns.map(o =>
-                  this.props.dispatch(fetchColumn(dash.filter.datasetId, o.column)));
-                  Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
-                }
+                datasetCallback(dash)
                 ));
+            } else {
+              this.setState({ fetchingDashboard: false });
             }
           }));
       } else {
         this.loadDashboardIntoState(this.props.library, libraryDashboard);
         if (libraryDashboard.filter.datasetId) {
-          this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, false,
-            (dash) => {
-              const calls = dash.filter.columns.map(o =>
-              this.props.dispatch(fetchColumn(dash.filter.datasetId, o.column)));
-              Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
-            }
+          this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, true,
+            datasetCallback(libraryDashboard)
             ));
+        } else {
+          this.setState({ fetchingDashboard: false });
         }
       }
     }
