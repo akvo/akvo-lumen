@@ -64,7 +64,7 @@ function fetchColumnDatasetFailure(error, datasetId, columnName) {
 }
 
 
-export function fetchDataset(id, metaOnly) {
+export function fetchDataset(id, metaOnly, callback) {
   const suffix = metaOnly ? '/meta' : '';
   return (dispatch) => {
     dispatch(fetchDatasetRequest(id));
@@ -72,6 +72,8 @@ export function fetchDataset(id, metaOnly) {
       .then(({ body }) => {
         const immutableDataset = Immutable.fromJS(body);
         dispatch(fetchDatasetSuccess(immutableDataset));
+        // eslint-disable-next-line no-unused-expressions
+        callback && callback();
         return immutableDataset;
       })
       .catch((error) => {
@@ -92,6 +94,8 @@ export function fetchColumn(datasetId, columnName, type) {
         return column;
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log(error);
         dispatch(showNotification('error', 'Failed to fetch text column.'));
         dispatch(fetchColumnDatasetFailure(error, datasetId, columnName));
       });

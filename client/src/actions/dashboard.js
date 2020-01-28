@@ -78,7 +78,7 @@ export function fetchDashboard(id, filter, callback) {
       })
       .then(({ body }) => {
         dispatch(fetchDashboardSuccess(body));
-        callback();
+        callback(body);
       })
       .catch((error) => {
         dispatch(showNotification('error', 'Failed to fetch dashboard.'));
