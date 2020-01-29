@@ -258,7 +258,12 @@ class Dashboard extends Component {
         this.setState({ fetchingDashboard: true });
         this.props.dispatch(actions.fetchDashboard(dashboard.id,
           { filter: dashboard.filter },
-          () => this.setState({ fetchingDashboard: false, tabSelected: 'filters' })));
+          (body) => {
+            const dash = body;
+            dash.filter = dashboard.filter;
+            this.loadDashboardIntoState(this.props.library, dash);
+            this.setState({ fetchingDashboard: false, tabSelected: 'filters' });
+          }));
       }
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
