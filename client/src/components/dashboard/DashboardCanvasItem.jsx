@@ -144,7 +144,7 @@ export default class DashboardCanvasItem extends Component {
               }}
             >
               <h2>{getTitle(item.visualisation)} { filtered ? '*' : null }</h2>
-              <span>{this.getSubTitle()}</span>      
+              <span>{this.getSubTitle()}</span>
             </div>
             <div className="noPointerEvents itemContainer visualisation">
               {getIsDatasetLoaded(this.props) ?
