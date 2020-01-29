@@ -90,7 +90,7 @@
   (if (= (:datasetId visualisation)
          (:datasetId filters))
     (-> visualisation
-        (update-in [:spec "filters"] #(concat % (:columns filters)))
+        (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
         (assoc :filtered true))
     (assoc visualisation :filtered false)))
 
