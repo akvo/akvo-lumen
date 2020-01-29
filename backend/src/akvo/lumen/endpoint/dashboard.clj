@@ -8,7 +8,8 @@
             [clojure.spec.alpha :as s]
             [clojure.walk :as w]
             [clojure.tools.logging :as log]
-            [integrant.core :as ig]))
+            [integrant.core :as ig]
+            [cheshire.core :as json]))
 
 (defn all-dashboards [auth-service tenant-conn]
   (let [dashboards      (dashboard/all tenant-conn)
@@ -45,7 +46,8 @@
                         (handler req)
                         (lib/not-authorized {:id id}))))]}
     ["" {:get {:parameters {:path-params {:id string?}}
-               :handler (fn [{tenant :tenant
+               :handler (fn [{query-params :query-params
+                              tenant :tenant
                               {:keys [id]} :path-params}]
                           (let [;; VIP Inject dashboard filter from payload
                                 ;; filters {"filters" [{"value" "lisa",
@@ -54,8 +56,7 @@
                                 ;;                      "operation" "keep",
                                 ;;                      "columnType" "text"}]
                                 ;;          "datasetId" "5e2a05a0-69ba-43b8-aa6e-7f6e200158c4"}
-                                filters {}
-                                ]
+                                filters (-> query-params (get "query") json/decode (get "filter"))]
                             (if-let [d (-> tenant-manager
                                            (p/connection tenant)
                                            (dashboard/fetch-aggregated id windshaft-url filters))]

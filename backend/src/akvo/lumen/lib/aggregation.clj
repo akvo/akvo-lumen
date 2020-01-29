@@ -47,7 +47,8 @@
                              "scatter"   "scatter"})
 
 (defn run-visualisation
-  [tenant-conn visualisation]
+  [tenant-conn {:keys [filtered] :as visualisation}]
+  (println "@run-visualiation")
   (let [visualisation (walk/keywordize-keys visualisation)
         [dataset-tag dataset] (dataset/fetch-metadata tenant-conn (:datasetId visualisation))
         aggregation-type (get vis-aggregation-mapper (:visualisationType visualisation))
@@ -55,10 +56,13 @@
                                   (:datasetId visualisation)
                                   aggregation-type
                                   (:spec visualisation))]
-    (when (and (= tag ::lib/ok)
-               (= dataset-tag ::lib/ok))
-      {:visualisations {(:id visualisation) (assoc visualisation :data query-result)}
-       :datasets { (:id dataset) dataset}})))
+    (let [qr2 (assoc query-result :filtered (true? filtered))]
+      (clojure.pprint/pprint qr2)
+      (when (and (= tag ::lib/ok)
+                 (= dataset-tag ::lib/ok))
+        {:visualisations {(:id visualisation) (assoc visualisation :data qr2)}
+         :datasets {(:id dataset) dataset}}))))
+
 
 (defn run-map-visualisation
   [tenant-conn visualisation windshaft-url]
@@ -67,15 +71,15 @@
       (let [dataset-id (some #(get % "datasetId") layers)
             [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
             [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
-          (when (and (= map-data-tag ::lib/ok)
-                     (= dataset-tag ::lib/ok))
-            {:datasets {dataset-id dataset}
-             :visualisations {(:id visualisation) (merge visualisation map-data)}
-             :metadata {(:id visualisation) map-data}}))
+        (when (and (= map-data-tag ::lib/ok)
+                   (= dataset-tag ::lib/ok))
+          {:datasets {dataset-id dataset}
+           :visualisations {(:id visualisation) (merge visualisation map-data)}
+           :metadata {(:id visualisation) map-data}}))
       (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))]
-          (when (= map-data-tag ::lib/ok)
-            {:visualisations {(:id visualisation) (merge visualisation map-data)}
-             :metadata {(:id visualisation) map-data}})))))
+        (when (= map-data-tag ::lib/ok)
+          {:visualisations {(:id visualisation) (merge visualisation map-data)}
+           :metadata {(:id visualisation) map-data}})))))
 
 (defn run-unknown-type-visualisation
   [tenant-conn visualisation]
@@ -91,7 +95,7 @@
             (if (= datasetId (:datasetId visualisation))
               (-> v
                   (update-in [:spec "filters"] #(conj % f))
-                  (assoc "isFiltered" true))
+                  (assoc :filtered true))
               v))
           visualisation
           columns))

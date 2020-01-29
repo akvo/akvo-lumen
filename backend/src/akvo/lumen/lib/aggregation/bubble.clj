@@ -23,8 +23,8 @@
                          table-name
                          (sql-str columns (:filters query))
                          max-points)
-        sql-text (format "SELECT %1$s AS size, %2$s AS label 
-                          FROM %3$s 
+        sql-text (format "SELECT %1$s AS size, %2$s AS label
+                          FROM %3$s
                           GROUP BY %2$s"
                          (sql-aggregation-subquery aggregation-method (or column-size column-bucket))
                          (:columnName column-bucket) ;; maybe we need to use => (or c-size c-bucket)
