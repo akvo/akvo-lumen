@@ -93,10 +93,10 @@
   (when-let [d (db.dashboard/dashboard-by-id tenant-conn {:id id})]
     (handle-dashboard-by-id tenant-conn id)))
 
-(defn fetch-aggregated [tenant-conn id windshaft-url]
+(defn fetch-aggregated [tenant-conn id windshaft-url filters]
   (when-let [d (db.dashboard/dashboard-by-id tenant-conn {:id id})]
     (let [dashboard (handle-dashboard-by-id tenant-conn id)
-          aggregated-dashboard (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url)
+          aggregated-dashboard (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url filters)
           aggregated-entities (reduce (fn [c [k v]] (assoc c (keyword k) (assoc v :type "visualisation")))
                                       {} (:visualisations aggregated-dashboard))]
       (-> dashboard

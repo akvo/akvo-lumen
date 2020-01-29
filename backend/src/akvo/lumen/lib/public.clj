@@ -18,7 +18,7 @@
 
 (defn dashboard-response-data [tenant-conn id windshaft-url]
   (when-let [dashboard (dashboard/fetch tenant-conn id)]
-    (assoc (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url)
+    (assoc (aggregation/aggregate-dashboard-viss dashboard tenant-conn windshaft-url {})
            :dashboards {id dashboard})))
 
 (defn response-data [tenant-conn share windshaft-url]
@@ -26,7 +26,7 @@
     (assoc (dashboard-response-data tenant-conn dashboard-id windshaft-url)
            :dashboardId dashboard-id)
     (let [visualisation-id (:visualisation-id share)]
-      (assoc (aggregation/visualisation-response-data tenant-conn visualisation-id windshaft-url)
+      (assoc (aggregation/visualisation-response-data tenant-conn visualisation-id windshaft-url {})
              :visualisationId visualisation-id))))
 
 (defn share
