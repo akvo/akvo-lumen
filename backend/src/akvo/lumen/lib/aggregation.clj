@@ -89,8 +89,10 @@
   [visualisation filters]
   (if (= (:datasetId visualisation)
          (:datasetId filters))
-    (update-in visualisation [:spec "filters"] #(concat % (:columns filters)))
-    visualisation))
+    (-> visualisation
+        (update-in [:spec "filters"] #(concat % (:columns filters)))
+        (assoc :filtered true))
+    (assoc visualisation :filtered false)))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
