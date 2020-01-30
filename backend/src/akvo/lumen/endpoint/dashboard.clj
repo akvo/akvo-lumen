@@ -11,6 +11,13 @@
             [integrant.core :as ig]
             [cheshire.core :as json]))
 
+(defn extract-query-filter [query-params]
+  (-> query-params
+      (get "query")
+      json/decode
+      (get "filter")
+      w/keywordize-keys))
+
 (defn all-dashboards [auth-service tenant-conn]
   (let [dashboards      (dashboard/all tenant-conn)
         auth-dashboards (->> dashboards
@@ -49,11 +56,7 @@
                :handler (fn [{query-params :query-params
                               tenant :tenant
                               {:keys [id]} :path-params}]
-                          (let [filters (-> query-params
-                                            (get "query")
-                                            json/decode
-                                            (get "filter")
-                                            w/keywordize-keys)]
+                          (let [filters (extract-query-filter query-params)]
                             (if-let [d (dashboard/fetch-aggregated
                                         (p/connection tenant-manager tenant) id windshaft-url filters)]
                               (lib/ok d)

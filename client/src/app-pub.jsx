@@ -21,7 +21,7 @@ require('./styles/style.global.scss');
 const rootElement = document.querySelector('#root');
 const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '1';
 
-function renderSuccessfulShare(data, filterColumnsFetched, initialState) {
+function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChangeFilter) {
   const datasets = data.datasets;
   const immutableDatasets = {};
 
@@ -59,6 +59,7 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState) {
                 datasets={immutableDatasets}
                 metadata={data.metadata ? data.metadata : null}
                 filteredDashboard={filteredDashboardCondition()}
+                onChangeFilter={onChangeFilter}
               />
             ) : (
               <VisualisationViewerContainer
@@ -102,42 +103,49 @@ fetch(`/share/dataset/${dashboardId}/column/${columnName}`, { headers: { 'X-Pass
 .then(body => ({ columnName, values: body.map(o => o[1]) })
 );
 
+const fetchDashboard = (env, password, callback) =>
+  (queryParams, onChangeFilter) => {
+    const url = `/share/${shareId}`;
+    const urlWithOptionalParams = queryParams == null ? url : `${url}?query=${encodeURIComponent(queryParams)}`;
+    fetch(urlWithOptionalParams, { headers: { 'X-Password': password } })
+          .then((response) => {
+            if (response.status === 403) {
+              renderPrivacyGate(); // eslint-disable-line
+              callback();
+              return null;
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data) return data;
+            throw Error(`NO DATA FOR: /share/${shareId}`);
+          })
+          .then((data) => {
+            if (data.dashboardId) {
+              const dashboard = data.dashboards[data.dashboardId];
+              const datasetId = dashboard.filter.datasetId;
+              if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
+                const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
+                return Promise.all(columnsFetch).then(responses => [data, responses]);
+              }
+              return [data];
+            }
+            return [data];
+          })
+          .then(([data, filterColumnsFetched]) =>
+            renderSuccessfulShare(data, filterColumnsFetched, { env }, onChangeFilter)
+          )
+          .catch((error) => {
+            renderNoSuchShare();
+            throw error;
+          });
+  };
 
 const fetchData = (password = undefined, callback = () => {}) => {
   auth.initPublic()
     .then(({ env }) => {
-      fetch(`/share/${shareId}`, { headers: { 'X-Password': password } })
-        .then((response) => {
-          if (response.status === 403) {
-            renderPrivacyGate(); // eslint-disable-line
-            callback();
-            return null;
-          }
-          return response.json();
-        })
-        .then((data) => {
-          if (data) return data;
-          throw Error(`NO DATA FOR: /share/${shareId}`);
-        })
-        .then((data) => {
-          if (data.dashboardId) {
-            const dashboard = data.dashboards[data.dashboardId];
-            const datasetId = dashboard.filter.datasetId;
-            if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
-              const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
-              return Promise.all(columnsFetch).then(responses => [data, responses]);
-            }
-            return [data];
-          }
-          return [data];
-        })
-        .then(([data, filterColumnsFetched]) =>
-          renderSuccessfulShare(data, filterColumnsFetched, { env })
-        )
-        .catch((error) => {
-          renderNoSuchShare();
-          throw error;
-        });
+      const onChangeFilter = fetchDashboard(env, password, callback);
+      onChangeFilter(null, onChangeFilter);
     });
 };
 
