@@ -17,7 +17,7 @@ function SelectMergeColumn({ onChange, columns, mergeColumn, intl }) {
       <h1>Merge column</h1>
       <SelectMenu
         placeholder="Select key column"
-        value={columnSelectSelectedOption(columnName(mergeColumn), columns)}
+        value={mergeColumn && columnSelectSelectedOption(columnName(mergeColumn), columns)}
         intl={intl}
         options={columnSelectOptions(intl, columns)}
         onChange={onChange}
@@ -51,7 +51,7 @@ function SelectAggregation({
             placeholder="Select aggregation column"
             showColumnType
             options={columnSelectOptions(intl, dataset.get('columns'))}
-            value={columnSelectSelectedOption(columnName(aggregationColumn), dataset.get('columns'))}
+            value={aggregationColumn && columnSelectSelectedOption(columnName(aggregationColumn), dataset.get('columns'))}
             intl={intl}
             onChange={onChangeColumn}
           />
@@ -176,6 +176,7 @@ class SourceMergeOptions extends Component {
   }
 
   handleSelectMergeColumn(column) {
+    console.log('handleSelectMergeColumn', column);
     const { onChange } = this.props;
     const { dataset, mergeColumns, aggregationColumn, aggregationDirection } = this.state;
     this.setState({ mergeColumn: column });
@@ -272,6 +273,7 @@ class SourceMergeOptions extends Component {
       aggregationColumn,
       aggregationDirection,
     } = this.state;
+    console.log('mergeColumn', mergeColumn);
     const columns = dataset ? dataset.get('columns').filter(col => col !== mergeColumn) : Immutable.List();
     return (
       <div className="SourceMergeOptions">
