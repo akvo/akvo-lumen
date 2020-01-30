@@ -5,6 +5,7 @@ import { isEmpty, cloneDeep } from 'lodash';
 import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
+import queryString from 'querystringify';
 
 import ShareEntity from '../modals/ShareEntity';
 import * as actions from '../../actions/dashboard';
@@ -26,6 +27,8 @@ import {
 import { showNotification } from '../../actions/notification';
 
 require('./Dashboard.scss');
+
+const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '1';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -122,8 +125,9 @@ class Dashboard extends Component {
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         this.setState({ fetchingDashboard: true });
+        const filter = libraryDashboard.filter || {};
         this.props.dispatch(actions.fetchDashboard(dashboardId,
-          {},
+          { filter },
           (dash) => {
             if (dash.filter.datasetId) {
               this.props.dispatch(fetchDataset(dash.filter.datasetId, true,
@@ -591,7 +595,8 @@ class Dashboard extends Component {
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
-    const { exporting, filteredDashboard } = this.props;
+    const { exporting } = this.props;
+    const filteredDashboard = this.props.filteredDashboard || filteredDashboardCondition();
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
