@@ -40,7 +40,11 @@
                 "text-2" {"id"      "text-2"
                           "type"    "text"
                           "content" "I am another text entity."}}
-    "filter" {"datasetId" (:id ds) "columns" [(get (-> ds :columns first) "columnName")]}
+    "filter" {"datasetId" (:id ds) "columns" [{"value" nil
+                                               "strategy" "is"
+                                               "operation" "keep"
+                                               "columnType" "text"
+                                               "column" (get (-> ds :columns first) "columnName")}]}
     "layout"   {v1-id    {"x" 1
                           "y" 0
                           "w" 0
