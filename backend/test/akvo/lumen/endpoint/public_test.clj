@@ -42,7 +42,7 @@
           dashboard-share (variant/value (share/fetch *tenant-conn*
                                                       {"dashboardId" dashboard-id}))
           share           (public/get-share *tenant-conn* (:id dashboard-share))
-          share-data      (public/response-data *tenant-conn* share {})]
+          share-data      (public/response-data *tenant-conn* share {} nil)]
       (is (every? #(contains? share-data %)
                   [:dashboardId :dashboards :visualisations :datasets]))
       (is (= 2
