@@ -3,6 +3,7 @@
             [akvo.lumen.lib.public :as public]
             [cheshire.core :as json]
             [akvo.lumen.endpoint.dataset :as e.dataset]
+            [akvo.lumen.endpoint.dashboard :as dashboard]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig]))
@@ -15,11 +16,12 @@
 
 (defn handler [{:keys [tenant-manager windshaft-url]}]
   (fn [{{:keys [id]} :path-params
+        query-params :query-params
         tenant :tenant
         headers :headers}]
     (let [tenant-conn (p/connection tenant-manager tenant)
           password (get headers "x-password")]
-      (public/share tenant-conn windshaft-url id password))))
+      (public/share tenant-conn windshaft-url id password (dashboard/extract-query-filter query-params)))))
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   [["/:id"
