@@ -29,9 +29,11 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
   if (datasets != null) {
     Object.keys(datasets).forEach((key) => {
       let dataset = Immutable.fromJS(datasets[key]);
-      const datasetId = data.dashboards[data.dashboardId].filter.datasetId;
-      if (filteredDashboardCondition() && key === datasetId) {
-        dataset = filterColumnsFetched.reduce((d, { columnName, values }) => d.setIn(['columnsFetched', columnName], values), dataset);
+      if (filteredDashboardCondition()) {
+        const datasetId = data.dashboards[data.dashboardId].filter.datasetId;
+        if (key === datasetId) {
+          dataset = filterColumnsFetched.reduce((d, { columnName, values }) => d.setIn(['columnsFetched', columnName], values), dataset);
+        }
       }
       immutableDatasets[key] = dataset;
     });
