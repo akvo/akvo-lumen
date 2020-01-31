@@ -112,7 +112,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
     if (selectors.length) {
       await Promise.all(selectors.map(async (s) => {
         try {
-          await page.waitFor(s);
+            await page.waitFor(s, {timeout: 100000});
         } catch (error) {
           captureException(error);
           reject(error);
