@@ -125,7 +125,7 @@ class Dashboard extends Component {
         isLibraryLoaded && !isEmpty(libraryDashboard.layout);
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         this.setState({ fetchingDashboard: true });
-        const filter = libraryDashboard.filter || {};
+        const filter = (libraryDashboard && libraryDashboard.filter) || {};
         this.props.dispatch(actions.fetchDashboard(dashboardId,
           { filter },
           (dash) => {

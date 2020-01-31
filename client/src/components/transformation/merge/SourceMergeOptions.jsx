@@ -176,7 +176,6 @@ class SourceMergeOptions extends Component {
   }
 
   handleSelectMergeColumn(column) {
-    console.log('handleSelectMergeColumn', column);
     const { onChange } = this.props;
     const { dataset, mergeColumns, aggregationColumn, aggregationDirection } = this.state;
     this.setState({ mergeColumn: column });
@@ -273,7 +272,6 @@ class SourceMergeOptions extends Component {
       aggregationColumn,
       aggregationDirection,
     } = this.state;
-    console.log('mergeColumn', mergeColumn);
     const columns = dataset ? dataset.get('columns').filter(col => col !== mergeColumn) : Immutable.List();
     return (
       <div className="SourceMergeOptions">
