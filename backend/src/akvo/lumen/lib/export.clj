@@ -3,7 +3,7 @@
             [clojure.tools.logging :as log]
             [akvo.lumen.http.client :as http.client]))
 
-(def http-client-req-defaults (http.client/req-opts 60000))
+(def http-client-req-defaults (http.client/req-opts 120000))
 
 (defmacro time*
   "Evaluates expr and prints the time it took.  Returns the value of
