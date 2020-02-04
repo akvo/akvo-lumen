@@ -22,7 +22,6 @@ const validation = {
 };
 
 let sentryClient;
-
 const sentryIsEnabled = () => sentryClient;
 
 const enableSentry = process.env.SENTRY_DSN
@@ -93,7 +92,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip,
   } = req.body;
-    console.log('Starting run: ', runId, ' - ', target, selector);
+  console.log('Starting run: ', runId, ' - ', target);
 
   configureScope({ target, format, title }, async () => {
     // Create a new incognito browser context.
@@ -106,19 +105,17 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
 
     const token = req.header('access_token');
     const locale = req.header('locale');
-      const dest = `${target}?access_token=${token}&locale=${locale}&edit_user=false`;
-      console.log('dest', dest);
+    const dest = `${target}?access_token=${token}&locale=${locale}&edit_user=false`;
     await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
 
     const selectors = (selector || '').split(',');
     if (selectors.length) {
       await Promise.all(selectors.map(async (s) => {
         try {
-            await page.waitFor(s, {timeout: 60000});
+          await page.waitFor(s);
         } catch (error) {
-	    console.log('error: ', runId, ' - ', target, selector, error);
-//          captureException(error);
-//          reject(error);
+          captureException(error);
+          reject(error);
         }
       }));
     } else {
@@ -193,10 +190,6 @@ const sendScreenshotResponse = ({
 };
 
 app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
-    const {
-	target,
-    } = req.body;
-
   if (currentJobCount > MAX_CONCURRENT_JOBS) {
     res.sendStatus(503);
     return;
@@ -212,14 +205,14 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
       data = await takeScreenshot(req, runId);
     } catch (error) {
       if (retryCount < MAX_RETRIES) {
-          retryCount += 1;
-	  console.log('Duplicating/retrying run: ', runId, ' Retry/Count: ', retryCount, ' Target:', target);	  
-          tryTakeScreenshot();
-          return;
+        console.log('Duplicating/retrying run: ', runId);
+        retryCount += 1;
+        tryTakeScreenshot();
+        return;
       }
-	console.log('Run failed: ', runId, ' Retry/Count: ', retryCount, 'Target: ', target);
-	res.status(500).send(error);
-	currentJobCount -= 1;
+      console.log('Run failed: ', runId);
+      res.status(500).send(error);
+      currentJobCount -= 1;
       return;
     }
     currentJobCount -= 1;
