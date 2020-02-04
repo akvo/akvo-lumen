@@ -22,6 +22,7 @@ const validation = {
 };
 
 let sentryClient;
+
 const sentryIsEnabled = () => sentryClient;
 
 const enableSentry = process.env.SENTRY_DSN
@@ -190,6 +191,10 @@ const sendScreenshotResponse = ({
 };
 
 app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
+    const {
+	target,
+    } = req.body;
+
   if (currentJobCount > MAX_CONCURRENT_JOBS) {
     res.sendStatus(503);
     return;
@@ -205,14 +210,14 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
       data = await takeScreenshot(req, runId);
     } catch (error) {
       if (retryCount < MAX_RETRIES) {
-        console.log('Duplicating/retrying run: ', runId);
-        retryCount += 1;
-        tryTakeScreenshot();
-        return;
+          retryCount += 1;
+	  console.log('Duplicating/retrying run: ', runId, ' Retry/Count: ', retryCount, ' Target:', target);	  
+          tryTakeScreenshot();
+          return;
       }
-      console.log('Run failed: ', runId);
-      res.status(500).send(error);
-      currentJobCount -= 1;
+	console.log('Run failed: ', runId, ' Retry/Count: ', retryCount, 'Target: ', target);
+	res.status(500).send(error);
+	currentJobCount -= 1;
       return;
     }
     currentJobCount -= 1;
