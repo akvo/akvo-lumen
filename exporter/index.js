@@ -93,7 +93,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip,
   } = req.body;
-  console.log('Starting run: ', runId, ' - ', target);
+    console.log('Starting run: ', runId, ' - ', target, selector);
 
   configureScope({ target, format, title }, async () => {
     // Create a new incognito browser context.
@@ -115,8 +115,9 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
         try {
             await page.waitFor(s, {timeout: 60000});
         } catch (error) {
-          captureException(error);
-          reject(error);
+	    console.log('error: ', runId, ' - ', target, selector, error);
+//          captureException(error);
+//          reject(error);
         }
       }));
     } else {

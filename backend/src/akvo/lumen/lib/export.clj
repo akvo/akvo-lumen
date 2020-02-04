@@ -28,7 +28,7 @@
                                           :form-params spec
                                           :content-type :json
                                           :throw-exceptions false})))]
-    (log/info :response-without-body (dissoc response :body))
+    (log/info :status status :response-without-body (dissoc response :body))
     {:body body
      :headers {"Content-Type" (get headers "Content-Type")
                "Content-Disposition" (get headers "Content-Disposition")}
