@@ -242,7 +242,6 @@ export default class MapVisualisation extends Component {
     this.state = {
       hasTrackedLayerTypes: false,
     };
-    this.initialLayersToLoadCount = 0;
     this.hasAddedLayers = false;
   }
 
@@ -261,36 +260,18 @@ export default class MapVisualisation extends Component {
   addLayer(layer, map) {
     if (!this.hasAddedLayers) {
       this.loadInterval = setInterval(() => {
-        console.log(this.initialLayersToLoadCount, 'setInterval', Date.now());
-        if (!this.initialLayersToLoadCount) {
-          console.log(this.initialLayersToLoadCount, 'hasRendered:true', Date.now());
+        const checks = Object.values(map._layers).map(l => l.isLoading());
+        console.log('layers', map._layers);
+        console.log('checks', checks);
+        const check = checks.filter(o => o).length === 0;
+        console.log('check', check);
+        if (check) {
           this.setState({ hasRendered: true });
           clearInterval(this.loadInterval);
         }
       }, 1000);
     }
     this.hasAddedLayers = true;
-    console.log(layer.isLoading(), this.initialLayersToLoadCount, 'addLayer', layer._leaflet_id, Date.now());
-    this.initialLayersToLoadCount += 1;
-    layer.on('load', () => {
-      this.initialLayersToLoadCount -= 1;
-      console.log(layer.isLoading(), this.initialLayersToLoadCount, 'loadLayer', layer._leaflet_id, Date.now());
-    });
-    layer.on('loading', () => {
-      console.log(layer.isLoading(), this.initialLayersToLoadCount, 'loading', layer._leaflet_id, Date.now());
-    });
-    layer.on('tileunload', () => {
-      console.log(layer.isLoading(), this.initialLayersToLoadCount, 'tileunload', layer._leaflet_id, Date.now());
-    });
-    layer.on('tileloadstart', () => {
-      console.log(layer.isLoading(), this.initialLayersToLoadCount, 'tileloadstart', layer._leaflet_id, Date.now());
-    });
-    layer.on('tileerror', () => {
-      console.log(layer.isLoading(), this.initialLayersToLoadCount, 'tileerror', layer._leaflet_id, Date.now());
-    });
-    layer.on('tileload', () => {
-      console.log(layer.isLoading(), this.initialLayersToLoadCount, 'tileload', layer._leaflet_id, Date.now());
-    });
     return layer.addTo(map);
   }
 
