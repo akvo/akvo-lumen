@@ -267,10 +267,9 @@ export default class MapVisualisation extends Component {
       }, 1000);
     }
     this.hasAddedLayers = true;
-    this.layersToLoad.add(layer._url);
-
+    this.layersToLoad.add(layer);
     layer.on('load', () => {
-      this.layersToLoad.delete(layer._url);
+      this.layersToLoad.delete(layer);
     });
     return layer.addTo(map);
   }
