@@ -12,7 +12,9 @@
 (defn exec
   [prod? remove? & [url email title]]
   (let [[ks edn-file] (if prod?
-                        [(do (admin.system/ig-derives)
+                        [(do
+                           (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker)
+                           (admin.system/ig-derives)
                              (admin.system/ig-select-keys
                               [:akvo.lumen.admin/remove-tenant
                                :akvo.lumen.component.error-tracker/config
