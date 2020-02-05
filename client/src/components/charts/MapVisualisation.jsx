@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
@@ -269,12 +270,16 @@ export default class MapVisualisation extends Component {
     }
     this.hasAddedLayers = true;
     const layerUrl = layer._url;
+    console.log('addingLayer', layerUrl, this.layersToLoad[layerUrl]);
     if (!this.layersToLoad[layerUrl]) {
       this.layersToLoad[layerUrl] = false;
     }
+    console.log('after addingLayer this.layersToLoad', this.layersToLoad);
     layer.on('load', () => {
       const layerUrlLoad = layer._url;
+      console.log('loadingLayer', layerUrlLoad, this.layersToLoad[layerUrlLoad]);
       this.layersToLoad[layerUrlLoad] = true;
+      console.log('after loadingLayer this.layersToLoad', this.layersToLoad);
     });
     return layer.addTo(map);
   }
