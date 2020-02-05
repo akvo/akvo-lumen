@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
@@ -242,7 +241,7 @@ export default class MapVisualisation extends Component {
     this.state = {
       hasTrackedLayerTypes: false,
     };
-    this.layersToLoad = {};
+    this.initialLayersToLoadCount = 0;
     this.hasAddedLayers = false;
   }
 
@@ -261,29 +260,16 @@ export default class MapVisualisation extends Component {
   addLayer(layer, map) {
     if (!this.hasAddedLayers) {
       this.loadInterval = setInterval(() => {
-        const x = Object.values(this.layersToLoad).filter(o => !o);
-        if (!x.length) {
+        if (!this.initialLayersToLoadCount) {
           this.setState({ hasRendered: true });
           clearInterval(this.loadInterval);
         }
       }, 1000);
     }
     this.hasAddedLayers = true;
-    const layerUrl = layer._url;
-    console.log('addingLayer', layer, layerUrl, this.layersToLoad[layerUrl]);
-    if (!this.layersToLoad[layerUrl]) {
-      this.layersToLoad[layerUrl] = false;
-    }
-    console.log('after addingLayer this.layersToLoad', this.layersToLoad);
+    this.initialLayersToLoadCount += 1;
     layer.on('load', () => {
-      const layerUrlLoad = layer._url;
-      console.log('loadingLayer', layerUrlLoad, this.layersToLoad[layerUrlLoad]);
-      this.layersToLoad[layerUrlLoad] = true;
-      console.log('after loadingLayer this.layersToLoad', layer, this.layersToLoad);
-    });
-    layer.on('tileerror', (error, tile) => {
-      console.log('ontileerror error', error);
-      console.log('ontileerror tile', tile);
+      this.initialLayersToLoadCount -= 1;
     });
     return layer.addTo(map);
   }
