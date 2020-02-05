@@ -270,7 +270,7 @@ export default class MapVisualisation extends Component {
     }
     this.hasAddedLayers = true;
     const layerUrl = layer._url;
-    console.log('addingLayer', layerUrl, this.layersToLoad[layerUrl]);
+    console.log('addingLayer', layer, layerUrl, this.layersToLoad[layerUrl]);
     if (!this.layersToLoad[layerUrl]) {
       this.layersToLoad[layerUrl] = false;
     }
@@ -279,7 +279,7 @@ export default class MapVisualisation extends Component {
       const layerUrlLoad = layer._url;
       console.log('loadingLayer', layerUrlLoad, this.layersToLoad[layerUrlLoad]);
       this.layersToLoad[layerUrlLoad] = true;
-      console.log('after loadingLayer this.layersToLoad', this.layersToLoad);
+      console.log('after loadingLayer this.layersToLoad', layer, this.layersToLoad);
     });
     layer.on('tileerror', (error, tile) => {
       console.log('ontileerror error', error);
