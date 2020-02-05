@@ -261,33 +261,35 @@ export default class MapVisualisation extends Component {
   addLayer(layer, map) {
     if (!this.hasAddedLayers) {
       this.loadInterval = setInterval(() => {
+        console.log(this.initialLayersToLoadCount, 'setInterval', Date.now());
         if (!this.initialLayersToLoadCount) {
+          console.log(this.initialLayersToLoadCount, 'hasRendered:true', Date.now());
           this.setState({ hasRendered: true });
           clearInterval(this.loadInterval);
         }
       }, 1000);
     }
     this.hasAddedLayers = true;
-    console.log(this.initialLayersToLoadCount, 'addLayer', layer);
+    console.log(this.initialLayersToLoadCount, 'addLayer', layer._leaflet_id, Date.now());
     this.initialLayersToLoadCount += 1;
     layer.on('load', () => {
       this.initialLayersToLoadCount -= 1;
-      console.log(this.initialLayersToLoadCount, 'loadLayer', layer);
+      console.log(this.initialLayersToLoadCount, 'loadLayer', layer._leaflet_id, Date.now());
     });
     layer.on('loading', () => {
-      console.log(this.initialLayersToLoadCount, 'loading', layer);
+      console.log(this.initialLayersToLoadCount, 'loading', layer._leaflet_id, Date.now());
     });
     layer.on('tileunload', () => {
-      console.log(this.initialLayersToLoadCount, 'tileunload', layer);
+      console.log(this.initialLayersToLoadCount, 'tileunload', layer._leaflet_id, Date.now());
     });
     layer.on('tileloadstart', () => {
-      console.log(this.initialLayersToLoadCount, 'tileloadstart', layer);
+      console.log(this.initialLayersToLoadCount, 'tileloadstart', layer._leaflet_id, Date.now());
     });
     layer.on('tileerror', () => {
-      console.log(this.initialLayersToLoadCount, 'tileerror', layer);
+      console.log(this.initialLayersToLoadCount, 'tileerror', layer._leaflet_id, Date.now());
     });
     layer.on('tileload', () => {
-      console.log(this.initialLayersToLoadCount, 'tileload', layer);
+      console.log(this.initialLayersToLoadCount, 'tileload', layer._leaflet_id, Date.now());
     });
     return layer.addTo(map);
   }
