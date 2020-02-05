@@ -241,7 +241,7 @@ export default class MapVisualisation extends Component {
     this.state = {
       hasTrackedLayerTypes: false,
     };
-    this.initialLayersToLoadCount = 0;
+    this.layersToLoad = new Set([]);
     this.hasAddedLayers = false;
   }
 
@@ -260,16 +260,17 @@ export default class MapVisualisation extends Component {
   addLayer(layer, map) {
     if (!this.hasAddedLayers) {
       this.loadInterval = setInterval(() => {
-        if (!this.initialLayersToLoadCount) {
+        if (!this.layersToLoad.size) {
           this.setState({ hasRendered: true });
           clearInterval(this.loadInterval);
         }
       }, 1000);
     }
     this.hasAddedLayers = true;
-    this.initialLayersToLoadCount += 1;
+    this.layersToLoad.add(layer._url);
+
     layer.on('load', () => {
-      this.initialLayersToLoadCount -= 1;
+      this.layersToLoad.delete(layer._url);
     });
     return layer.addTo(map);
   }
