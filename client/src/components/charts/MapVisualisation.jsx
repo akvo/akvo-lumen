@@ -274,6 +274,21 @@ export default class MapVisualisation extends Component {
       this.initialLayersToLoadCount -= 1;
       console.log(this.initialLayersToLoadCount, 'loadLayer', layer);
     });
+    layer.on('loading', () => {
+      console.log(this.initialLayersToLoadCount, 'loading', layer);
+    });
+    layer.on('tileunload', () => {
+      console.log(this.initialLayersToLoadCount, 'tileunload', layer);
+    });
+    layer.on('tileloadstart', () => {
+      console.log(this.initialLayersToLoadCount, 'tileloadstart', layer);
+    });
+    layer.on('tileerror', () => {
+      console.log(this.initialLayersToLoadCount, 'tileerror', layer);
+    });
+    layer.on('tileload', () => {
+      console.log(this.initialLayersToLoadCount, 'tileload', layer);
+    });
     return layer.addTo(map);
   }
 
