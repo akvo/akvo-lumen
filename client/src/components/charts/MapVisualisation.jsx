@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
@@ -267,9 +268,11 @@ export default class MapVisualisation extends Component {
       }, 1000);
     }
     this.hasAddedLayers = true;
+    console.log(this.initialLayersToLoadCount, 'addLayer', layer);
     this.initialLayersToLoadCount += 1;
     layer.on('load', () => {
       this.initialLayersToLoadCount -= 1;
+      console.log(this.initialLayersToLoadCount, 'loadLayer', layer);
     });
     return layer.addTo(map);
   }
