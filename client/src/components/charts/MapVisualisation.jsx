@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
@@ -261,10 +260,10 @@ export default class MapVisualisation extends Component {
     if (!this.hasAddedLayers) {
       this.loadInterval = setInterval(() => {
         const checks = Object.values(map._layers).map(l => l.isLoading());
-        console.log('layers', map._layers);
-        console.log('checks', checks);
+        // console.log('layers', map._layers);
+        // console.log('checks', checks);
         const check = checks.filter(o => o).length === 0;
-        console.log('check', check);
+//        console.log('check', check);
         if (check) {
           this.setState({ hasRendered: true });
           clearInterval(this.loadInterval);
