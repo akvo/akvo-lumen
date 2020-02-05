@@ -281,6 +281,10 @@ export default class MapVisualisation extends Component {
       this.layersToLoad[layerUrlLoad] = true;
       console.log('after loadingLayer this.layersToLoad', this.layersToLoad);
     });
+    layer.on('tileerror', (error, tile) => {
+      console.log('ontileerror error', error);
+      console.log('ontileerror tile', tile);
+    });
     return layer.addTo(map);
   }
 
