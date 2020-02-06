@@ -42,16 +42,14 @@ export const editDashboardFailure = createAction('EDIT_DASHBOARD_FAILURE');
 export const editDashboardSuccess = createAction('EDIT_DASHBOARD_SUCCESS');
 
 export function saveDashboardChanges(dashboard, callback = () => {}) {
-  const now = Date.now();
-  const dash = Object.assign({}, dashboard, {
-    modified: now,
-  });
-  const id = dash.id;
+  const dash = JSON.parse(JSON.stringify(dashboard));
+  dash.filter.columns.forEach(f => delete f.value); // eslint-disable-line no-param-reassign
+  dash.modified = Date.now();
 
   return (dispatch) => {
     dispatch(editDashboardRequest);
     api
-      .put(`/api/dashboards/${id}`, dashboard)
+      .put(`/api/dashboards/${dash.id}`, dash)
       .then(({ body }) => {
         dispatch(editDashboardSuccess(body));
         callback();
