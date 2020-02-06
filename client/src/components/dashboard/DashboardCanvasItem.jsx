@@ -121,7 +121,6 @@ export default class DashboardCanvasItem extends Component {
 
     const { item, exporting, canvasLayout } = this.props;
     const { unfiltered } = item;
-    console.log(unfiltered);
     let marginTop = 0;
 
     if (exporting) {
@@ -144,7 +143,7 @@ export default class DashboardCanvasItem extends Component {
                 this.titleEl = c;
               }}
             >
-              <h2>{getTitle(item.visualisation)} { unfiltered ? '*' : null }</h2>
+              <h2>{getTitle(item.visualisation)}</h2>
               <span>{this.getSubTitle()}</span>
             </div>
             <div className="noPointerEvents itemContainer visualisation">
