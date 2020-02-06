@@ -136,7 +136,7 @@ export default class DashboardCanvasItem extends Component {
         style={{ marginTop }}
       >
         {item.type === 'visualisation' && (
-          <div className="itemContainerWrap">
+          <div className={`itemContainerWrap ${!filtered ? 'isNotFiltered' : ''}`}>
             <div
               className="itemTitle"
               ref={(c) => {
