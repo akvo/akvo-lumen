@@ -137,6 +137,7 @@ export default class DashboardCanvasItem extends Component {
       >
         {item.type === 'visualisation' && (
           <div className={`itemContainerWrap ${unfiltered ? 'unFiltered' : ''}`}>
+
             <div
               className="itemTitle"
               ref={(c) => {
