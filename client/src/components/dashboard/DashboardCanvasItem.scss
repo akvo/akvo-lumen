@@ -55,6 +55,13 @@
         }
     }
 
+    .isNotFiltered {
+      background-image: url("../../styles/img/exclamation_mark_icon.svg");
+      background-repeat: no-repeat;
+      background-size: 24px 24px;
+      background-position: right 10px top 10px;
+    }
+
     &--focused {
         z-index: 10;
     }
