@@ -259,7 +259,15 @@ export default class MapVisualisation extends Component {
   addLayer(layer, map) {
     if (!this.hasAddedLayers) {
       this.loadInterval = setInterval(() => {
-        const checks = Object.values(map._layers).map(l => l.isLoading());
+        const checks = Object.values(map._layers).map((l) => {
+          try {
+            return l.isLoading();
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.log(l, error);
+            return false;
+          }
+        });
         // console.log('layers', map._layers);
         // console.log('checks', checks);
         const check = checks.filter(o => o).length === 0;
