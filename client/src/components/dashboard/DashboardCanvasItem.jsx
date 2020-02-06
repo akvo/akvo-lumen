@@ -120,7 +120,8 @@ export default class DashboardCanvasItem extends Component {
       TITLE_HEIGHT;
 
     const { item, exporting, canvasLayout } = this.props;
-    const { filtered } = item;
+    const { unfiltered } = item;
+    console.log(unfiltered);
     let marginTop = 0;
 
     if (exporting) {
@@ -136,14 +137,14 @@ export default class DashboardCanvasItem extends Component {
         style={{ marginTop }}
       >
         {item.type === 'visualisation' && (
-          <div className={`itemContainerWrap ${!filtered ? 'isNotFiltered' : ''}`}>
+          <div className={`itemContainerWrap ${unfiltered ? 'unFiltered' : ''}`}>
             <div
               className="itemTitle"
               ref={(c) => {
                 this.titleEl = c;
               }}
             >
-              <h2>{getTitle(item.visualisation)} { filtered ? '*' : null }</h2>
+              <h2>{getTitle(item.visualisation)} { unfiltered ? '*' : null }</h2>
               <span>{this.getSubTitle()}</span>
             </div>
             <div className="noPointerEvents itemContainer visualisation">
