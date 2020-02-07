@@ -333,9 +333,14 @@ class Dashboard extends Component {
       }
 
       if (!specIsValidForApi(visualisation.spec, vType)) return;
-
+      const adaptedSpec = cloneDeep(spec);
+      if (datasetId === this.state.dashboard.filter.datasetId) {
+        const filters = adaptedSpec.filters
+        .concat(this.state.dashboard.filter.columns.filter(c => c.value));
+        adaptedSpec.filters = filters;
+      }
       api.get(`/api/aggregation/${datasetId}/${aggType}`, {
-        query: JSON.stringify(spec),
+        query: JSON.stringify(adaptedSpec),
       })
       .then(({ body }) => {
         const change = {};
