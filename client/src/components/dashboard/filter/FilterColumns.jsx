@@ -12,7 +12,7 @@ export default function FilterColumns({ filter, intl, dataset, onFilterChange })
       const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
       const columnIndex = filter.columns.findIndex(x => x.column === o.column);
       return (
-        <div style={{ paddingBottom: '10px' }} key={`div-filterColumn-${idx}`}>
+        <div style={{ paddingBottom: '10px', paddingRight: '1rem', display: 'inline-block' }} key={`div-filterColumn-${idx}`}>
           <span style={{ fontWeight: 'bold' }}>{column && column.get('title')}</span>
           <SelectMenu
             name="datasets"

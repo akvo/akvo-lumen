@@ -422,7 +422,7 @@ class DashboardEditor extends Component {
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
           {filteredDashboard && filter.datasetId &&
-          <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
+          <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7', whiteSpace: 'nowrap' }}>
             <FilterColumns
               filter={filter}
               dataset={datasets[filter.datasetId]}
