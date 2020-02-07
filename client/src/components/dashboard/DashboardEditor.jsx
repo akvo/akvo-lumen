@@ -288,7 +288,7 @@ class DashboardEditor extends Component {
         className="clickable addText"
         onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
       >
-        <i className="fa fa-plus" /> <FormattedMessage id={i18nKey} />
+        <span style={{ fontSize: 'medium' }}>&#43; </span><FormattedMessage id={i18nKey} />
       </button>);
     const visualisations = getArrayFromObject(this.props.visualisations);
     const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
@@ -423,7 +423,6 @@ class DashboardEditor extends Component {
         >
           {filteredDashboard && filter.datasetId &&
           <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7' }}>
-            <h3 style={{ padding: '10px', backgroundColor: 'pink' }}>filteredDashboard feature flag active!</h3>
             <FilterColumns
               filter={filter}
               dataset={datasets[filter.datasetId]}

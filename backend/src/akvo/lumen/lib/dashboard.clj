@@ -118,7 +118,7 @@
       (db.dashboard/update-dashboard tx {:id id
                             :title (:title spec)
                             :spec (assoc texts :filter (or (:filter spec) empty-filter))})
-      (db.dashboard/delete-dashboard_visualisation tenant-conn {:dashboard-id id})
+      (db.dashboard/delete-dashboard_visualisation tx {:dashboard-id id})
       (doseq [visualisation-entity (:entities visualisations)]
         (let [visualisation-id (:id visualisation-entity)
               visualisations-layout (first (filter #(= visualisation-id
@@ -127,8 +127,8 @@
           (db.dashboard/insert-dashboard_visualisation
            tx {:dashboard-id id
                :visualisation-id visualisation-id
-               :layout visualisations-layout}))))
-    (lib/ok (handle-dashboard-by-id tenant-conn id))))
+               :layout visualisations-layout})))
+      (lib/ok (handle-dashboard-by-id tx id)))))
 
 (defn delete [tenant-conn id]
   (db.dashboard/delete-dashboard_visualisation tenant-conn {:dashboard-id id})
