@@ -127,8 +127,8 @@
           (db.dashboard/insert-dashboard_visualisation
            tx {:dashboard-id id
                :visualisation-id visualisation-id
-               :layout visualisations-layout}))))
-    (lib/ok (handle-dashboard-by-id tenant-conn id))))
+               :layout visualisations-layout})))
+      (lib/ok (handle-dashboard-by-id tenant-conn id)))))
 
 (defn delete [tenant-conn id]
   (db.dashboard/delete-dashboard_visualisation tenant-conn {:dashboard-id id})
