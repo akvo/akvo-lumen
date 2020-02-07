@@ -634,7 +634,6 @@ class Dashboard extends Component {
               tabSelected={this.state.tabSelected}
               onTabSelected={tab => this.setState({ tabSelected: tab })}
               preventPageOverlaps={this.props.preventPageOverlaps}
-              intl={this.props.intl}
             />
             {!exporting && (
               <ShareEntity
