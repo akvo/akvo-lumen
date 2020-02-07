@@ -395,7 +395,9 @@ class DashboardEditor extends Component {
                   <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
                     <div style={{ flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="filters" /></div>
                     <div>
-                      <span title={intl.messages.visualizations_that_can_be_filtered_by_selected_dataset}>
+                      <span
+                        title={intl.messages.visualizations_that_can_be_filtered_by_selected_dataset}
+                      >
                         {dashboardEntitiesVisualisations.filter(v =>
                           v.datasetId === filter.datasetId).length}/
                         {dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />

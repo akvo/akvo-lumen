@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SelectMenu from '../../common/SelectMenu';
 import { intlShape } from 'react-intl';
+import SelectMenu from '../../common/SelectMenu';
 
 export default function FilterColumns({ filter, intl, dataset, onFilterChange }) {
   return filter.columns.map((o, idx) => {
