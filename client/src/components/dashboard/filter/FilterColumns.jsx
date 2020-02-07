@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SelectMenu from '../../common/SelectMenu';
+import { FormattedMessage } from 'react-intl';
 
 export default function FilterColumns({ filter, dataset, onFilterChange }) {
   return filter.columns.map((o, idx) => {
@@ -25,6 +26,7 @@ export default function FilterColumns({ filter, dataset, onFilterChange }) {
               onFilterChange(editedFilter, true);
             }}
             options={vals}
+            placeholder={<FormattedMessage id="all" />}
           />
         </div>);
     }
