@@ -10,7 +10,6 @@
         border-right: 0.1rem solid $lightGrey;
         width: 310px;
         .DashboardSidebarTabMenu {
-          background-color: mintcream;
           white-space: nowrap;
           padding: 1rem 0;
       
@@ -23,29 +22,28 @@
             margin-left: calc(19% / 6);
             margin-right: calc(19% / 6);
             text-align: center;
-            padding: 0.75rem 0.75rem;
+            padding: 0.75rem 0.75rem 0.45rem 0.75rem;
             color: $midGrey;
             border-bottom: 0.3rem solid $lightGrey;
             transition: color 0.3s, border 0.3s;
             transition-timing-function: ease;
+            border-width: 0.1rem;
+            border-color: $lightGrey;
       
             &.selected {
-                color: $lumenGreen;
-                border-color: $lumenGreen;
+                border-color: $midGrey;
+                border-width: 0.15rem;
             }
       
             &:hover {
               color: #000;
-              border-color: $lumenGreen;
             }
       
             &.action {
-              border-color: mintcream;
               width: 20%;
       
               &:hover {
                 color: #000;
-                border-color: mintcream;
               }
             }
             
