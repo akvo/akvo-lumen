@@ -85,10 +85,33 @@
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))
 
-(defn merge-dashboard-filters
+(defmulti merge-dashboard-filters
   "Merge dashboard filters into applicable visualisation spec and mark filter
   status."
-  [visualisation filters]
+  (fn [{:keys [visualisationType]} _]
+    visualisationType))
+
+(defmethod merge-dashboard-filters "map" [visualisation filters]
+  (println "@merge-dashboard-filters")
+  (clojure.pprint/pprint visualisation)
+  (clojure.pprint/pprint filters)
+  (let [layers (-> visualisation :spec "layers")
+        map-datasets-ids (reduce (fn [ids {:strs [datasetId]}]
+                                   (conj ids datasetId))
+                                 #{}
+                                 layers)]
+    (cond
+      (empty? (:columns filters))
+      (assoc visualisation :unfiltered false)
+
+      (not (contains? map-datasets-ids (:datasetId filters)))
+      (assoc visualisation :unfiltered true)
+
+      :else
+      (assoc visualisation :unfiltered false))))
+
+
+(defmethod merge-dashboard-filters :default [visualisation filters]
   (cond
     (empty? (:columns filters)) ;; No valid filter
     (assoc visualisation :unfiltered false)
@@ -101,6 +124,22 @@
     (-> visualisation
         (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
         (assoc :unfiltered false))))
+
+#_(defn merge-dashboard-filters
+
+    [{:keys [visualisationType] :as visualisation} filters]
+    (cond
+      (empty? (:columns filters)) ;; No valid filter
+      (assoc visualisation :unfiltered false)
+
+      (not (= (:datasetId visualisation) ;; Valid filter but no match on datasets
+              (:datasetId filters)))
+      (assoc visualisation :unfiltered true)
+
+      :else ;; Valid filter and matching dataset
+      (-> visualisation
+          (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
+          (assoc :unfiltered false))))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
