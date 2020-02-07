@@ -368,7 +368,7 @@ class DashboardEditor extends Component {
               <FormattedMessage id="set_dataset_columns_as_visualisation_filters" />
               <br />
               <div style={{ marginTop: '15px', display: 'flex' }}>
-                <div style={{ lineHeight: '2.9em', flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="dataset" /></div>
+                <div style={{ lineHeight: '2.9em', flex: 'auto' }}><FormattedMessage id="dataset" /></div>
                 <div>
                   <SelectMenu
                     name="datasets"
@@ -395,7 +395,7 @@ class DashboardEditor extends Component {
                 {selectedDatasetColumns &&
                 <div>
                   <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
-                    <div style={{ flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="filters" /></div>
+                    <div style={{ flex: 'auto' }}><FormattedMessage id="filters" /></div>
                     <div>
                       <span title={intl.messages.visualisations_that_can_be_filtered}>
                         {dashboardEntitiesVisualisations.filter(v =>
