@@ -150,6 +150,7 @@
   "if_cell_format_is_invalid": "Si le format de cellule est invalide",
   "if_transformation_fails": "Si la transformation echoue",
   "import": "Importer",
+  "insert_text": "Insérer du texte",
   "invalid_expression": "Expression invalide",
   "invalid_filter": "Cette visualisation contient un filtre invalide et ne peut être affichée.",
   "is_after": "est après",

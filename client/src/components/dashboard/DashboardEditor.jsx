@@ -351,7 +351,9 @@ class DashboardEditor extends Component {
                 </button>
               </div>
               <div className="tabItem action textItem">
-                {plusButton('text')}
+                <span title={intl.messages.insert_text}>
+                  {plusButton('text')}
+                </span>
               </div>
             </div>}
             {(!filteredDashboard || tabSelected === 'visualisations') &&
