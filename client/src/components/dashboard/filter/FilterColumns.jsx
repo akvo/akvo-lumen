@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SelectMenu from '../../common/SelectMenu';
+import { intlShape } from 'react-intl';
 
-export default function FilterColumns({ filter, dataset, onFilterChange }) {
+export default function FilterColumns({ filter, intl, dataset, onFilterChange }) {
   return filter.columns.map((o, idx) => {
     const columns = dataset && dataset.get('columns');
     if (columns) {
@@ -25,6 +26,7 @@ export default function FilterColumns({ filter, dataset, onFilterChange }) {
               onFilterChange(editedFilter, true);
             }}
             options={vals}
+            placeholder={intl.messages.all}
           />
         </div>);
     }
@@ -33,6 +35,7 @@ export default function FilterColumns({ filter, dataset, onFilterChange }) {
 }
 
 FilterColumns.propTypes = {
+  intl: intlShape,
   filter: PropTypes.object.isRequired,
   dataset: PropTypes.object.isRequired,
   onFilterChange: PropTypes.func.isRequired,
