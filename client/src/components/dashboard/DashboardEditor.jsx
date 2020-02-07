@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape } from 'react-intl';
 import ReactGridLayout from 'react-grid-layout';
 import { Element, scroller } from 'react-scroll';
 import { connect } from 'react-redux';
@@ -276,7 +276,7 @@ class DashboardEditor extends Component {
   }
 
   render() {
-    const { dashboard, datasets, exporting, filteredDashboard, onFilterChange } = this.props;
+    const { dashboard, datasets, exporting, filteredDashboard, intl, onFilterChange } = this.props;
     const { filter } = dashboard;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
@@ -288,7 +288,7 @@ class DashboardEditor extends Component {
         className="clickable addText"
         onClick={() => this.handleEntityToggle({ content: '' }, 'text')}
       >
-        <i className="fa fa-plus" /><FormattedMessage id={i18nKey} />
+        <i className="fa fa-plus" /> <FormattedMessage id={i18nKey} />
       </button>);
     const visualisations = getArrayFromObject(this.props.visualisations);
     const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
@@ -350,7 +350,7 @@ class DashboardEditor extends Component {
                   <FormattedMessage id="filters" />
                 </button>
               </div>
-              <div className="tabItem action">
+              <div className="tabItem action textItem">
                 {plusButton('text')}
               </div>
             </div>}
@@ -394,9 +394,14 @@ class DashboardEditor extends Component {
                 <div>
                   <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
                     <div style={{ flex: 'auto', fontWeight: 'bold' }}><FormattedMessage id="filters" /></div>
-                    <div>{dashboardEntitiesVisualisations.filter(v =>
-                      v.datasetId === filter.datasetId).length}/
-                      {dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />
+                    <div>
+                      <span
+                        title={intl.messages.visualizations_that_can_be_filtered_by_selected_dataset}
+                      >
+                        {dashboardEntitiesVisualisations.filter(v =>
+                          v.datasetId === filter.datasetId).length}/
+                        {dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />
+                      </span>
                     </div>
                   </div>
                   <div className="filterInput" style={{ marginTop: '5px' }}>
@@ -425,6 +430,7 @@ class DashboardEditor extends Component {
               filter={filter}
               dataset={datasets[filter.datasetId]}
               onFilterChange={onFilterChange}
+              intl={this.props.intl}
             />
           </div>
           }
@@ -518,6 +524,7 @@ DashboardEditor.propTypes = {
   onFilterChange: PropTypes.func.isRequired,
   tabSelected: PropTypes.string.isRequired,
   onTabSelected: PropTypes.func.isRequired,
+  intl: intlShape,
 };
 
 DashboardEditor.defaultProps = {
