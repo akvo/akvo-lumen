@@ -279,7 +279,7 @@ class Dashboard extends Component {
     const dashboard = this.state.dashboard;
     dashboard.filter = filter;
     this.setState({ dashboard });
-    this.onSave(needToAggregate && filter);
+    this.onSave((needToAggregate || filter.columns.length === 0) && filter);
   }
   onAddVisualisation(visualisation) {
     const { id, datasetId, spec } = visualisation;
