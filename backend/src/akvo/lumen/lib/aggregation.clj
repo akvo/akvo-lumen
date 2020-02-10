@@ -127,8 +127,6 @@
   (try
     (when-let [vis (-> (visualisation/fetch tenant-conn id)
                        (dashboard-filters filters))]
-      (log/info "@visualisation-response-data")
-      (log/info :vis vis)
       (condp contains? (:visualisationType vis)
         #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
         (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
