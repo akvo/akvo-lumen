@@ -300,7 +300,8 @@ class Dashboard extends Component {
             const layers = adaptedVisualisation.spec.layers.map((l) => {
               if (l.datasetId === filterDatasetId) {
                 const layer = cloneDeep(l);
-                layer.filters = l.filters.concat(dashboardFilter.columns);
+                const columnFilters = dashboardFilter.columns.filter(c => Boolean(c.value));
+                layer.filters = l.filters.concat(columnFilters);
                 return layer;
               }
               return l;
