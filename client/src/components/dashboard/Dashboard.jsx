@@ -290,8 +290,25 @@ class Dashboard extends Component {
       let aggType;
 
       switch (vType) {
-        case 'map':
-          api.post('/api/visualisations/maps', visualisation)
+        case 'map': {
+          const dashboardFilter = this.state.dashboard.filter;
+          const filterDatasetId = dashboardFilter.datasetId;
+          let adaptedVisualisation = visualisation;
+          if (filterDatasetId) {
+            adaptedVisualisation = cloneDeep(visualisation);
+
+            const layers = adaptedVisualisation.spec.layers.map((l) => {
+              if (l.datasetId === filterDatasetId) {
+                const layer = cloneDeep(l);
+                layer.filters = l.filters.concat(dashboardFilter.columns);
+                return layer;
+              }
+              return l;
+            });
+            adaptedVisualisation.spec.layers = layers;
+          }
+
+          api.post('/api/visualisations/maps', adaptedVisualisation)
             .then((response) => {
               if (response.status >= 200 && response.status < 300) {
                 const change = {};
@@ -317,6 +334,7 @@ class Dashboard extends Component {
             });
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
+        }
         case 'donut':
         case 'polararea':
           aggType = 'pie';
@@ -524,7 +542,8 @@ class Dashboard extends Component {
         const visualisation = entity;
         if (aggregationOnlyVisualisationTypes.some(type =>
           type === visualisation.visualisationType)) {
-          const alreadyProcessed = Boolean(visualisation.data);
+          const alreadyProcessed = Boolean(visualisation.data) ||
+          Boolean(visualisation.layerMetadata);
           if (!alreadyProcessed) {
             this.onAddVisualisation(library.visualisations[visualisation.id]);
           } else {
@@ -628,7 +647,7 @@ class Dashboard extends Component {
               filteredDashboard={filteredDashboard}
               datasets={this.props.library.datasets}
               visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
-              metadata={this.state.metadata}
+              metadata={this.state.dashboard.metadata}
               onAddVisualisation={this.onAddVisualisation}
               onSave={this.onSave}
               onUpdateLayout={this.updateLayout}
