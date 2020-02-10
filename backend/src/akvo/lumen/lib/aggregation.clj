@@ -5,6 +5,7 @@
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [akvo.lumen.lib.aggregation.pie :as pie]
+            [akvo.lumen.lib.aggregation.maps :as a.maps]
             [akvo.lumen.lib.aggregation.line :as line]
             [akvo.lumen.lib.aggregation.bar :as bar]
             [akvo.lumen.lib.aggregation.pivot :as pivot]
@@ -62,20 +63,21 @@
 
 (defn run-map-visualisation
   [tenant-conn visualisation windshaft-url]
+  (prn "@run-map-visualisation")
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
             [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
             [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
-          (when (and (= map-data-tag ::lib/ok)
-                     (= dataset-tag ::lib/ok))
-            {:datasets {dataset-id dataset}
-             :visualisations {(:id visualisation) (merge visualisation map-data)}
-             :metadata {(:id visualisation) map-data}}))
+        (when (and (= map-data-tag ::lib/ok)
+                   (= dataset-tag ::lib/ok))
+          {:datasets {dataset-id dataset}
+           :visualisations {(:id visualisation) (merge visualisation map-data)}
+           :metadata {(:id visualisation) map-data}}))
       (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))]
-          (when (= map-data-tag ::lib/ok)
-            {:visualisations {(:id visualisation) (merge visualisation map-data)}
-             :metadata {(:id visualisation) map-data}})))))
+        (when (= map-data-tag ::lib/ok)
+          {:visualisations {(:id visualisation) (merge visualisation map-data)}
+           :metadata {(:id visualisation) map-data}})))))
 
 (defn run-unknown-type-visualisation
   [tenant-conn visualisation]
@@ -85,14 +87,29 @@
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))
 
-(defn merge-dashboard-filters
+(defmulti merge-dashboard-filters
   "Merge dashboard filters into applicable visualisation spec and mark filter
   status."
-  [visualisation filters]
-  (cond
-    (empty? (:columns filters)) ;; No valid filter
-    (assoc visualisation :unfiltered false)
+  (fn [{:keys [visualisationType]} _]
+    visualisationType))
 
+(defmethod merge-dashboard-filters "map" [visualisation filters]
+  (let [layers (-> visualisation :spec (get "layers"))
+        map-datasets-ids (reduce (fn [ids {:strs [datasetId]}]
+                                   (conj ids datasetId))
+                                 #{}
+                                 layers)]
+    (cond
+      (not (contains? map-datasets-ids (:datasetId filters)))
+      (assoc visualisation :unfiltered true)
+
+      :else
+      (-> visualisation
+          (assoc :unfiltered false)
+          (a.maps/add-filters filters)))))
+
+(defmethod merge-dashboard-filters :default [visualisation filters]
+  (cond
     (not (= (:datasetId visualisation) ;; Valid filter but no match on datasets
             (:datasetId filters)))
     (assoc visualisation :unfiltered true)
@@ -102,10 +119,17 @@
         (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
         (assoc :unfiltered false))))
 
+(defn dashboard-filters [visualisation filters]
+  (if (empty? (:columns filters)) ;; No valid filter
+    (assoc visualisation :unfiltered false)
+    (merge-dashboard-filters visualisation filters)))
+
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
     (when-let [vis (-> (visualisation/fetch tenant-conn id)
-                       (merge-dashboard-filters filters))]
+                       (dashboard-filters filters))]
+      (log/info "@visualisation-response-data")
+      (log/info :vis vis)
       (condp contains? (:visualisationType vis)
         #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
         (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
