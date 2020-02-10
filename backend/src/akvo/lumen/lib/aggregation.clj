@@ -63,7 +63,6 @@
 
 (defn run-map-visualisation
   [tenant-conn visualisation windshaft-url]
-  (prn "@run-map-visualisation")
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
