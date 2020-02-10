@@ -290,8 +290,25 @@ class Dashboard extends Component {
       let aggType;
 
       switch (vType) {
-        case 'map':
-          api.post('/api/visualisations/maps', visualisation)
+        case 'map': {
+          const dashboardFilter = this.state.dashboard.filter;
+          const filterDatasetId = dashboardFilter.datasetId;
+          let adaptedVisualisation = visualisation;
+          if (filterDatasetId) {
+            adaptedVisualisation = cloneDeep(visualisation);
+
+            const layers = adaptedVisualisation.spec.layers.map((l) => {
+              if (l.datasetId === filterDatasetId) {
+                const layer = cloneDeep(l);
+                layer.filters = l.filters.concat(dashboardFilter.columns);
+                return layer;
+              }
+              return l;
+            });
+            adaptedVisualisation.spec.layers = layers;
+          }
+
+          api.post('/api/visualisations/maps', adaptedVisualisation)
             .then((response) => {
               if (response.status >= 200 && response.status < 300) {
                 const change = {};
