@@ -120,6 +120,8 @@
 
 (defn create
   [tenant-conn windshaft-url layers]
+  (prn "@maps/create")
+  (clojure.pprint/pprint layers)
   (try
     (conform-create-args layers)
     (let [metadata-array (metadata-layers tenant-conn layers)
