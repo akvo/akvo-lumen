@@ -122,7 +122,7 @@
 (defn dashboard-filters [visualisation filters]
   (if (empty? (:columns filters)) ;; No valid filter
     (assoc visualisation :unfiltered false)
-    (merge-dashboard-filters filters)))
+    (merge-dashboard-filters visualisation filters)))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
