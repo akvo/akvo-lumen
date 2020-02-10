@@ -62,20 +62,21 @@
 
 (defn run-map-visualisation
   [tenant-conn visualisation windshaft-url]
+  (prn "@run-map-visualisation")
   (let [layers (get-in visualisation [:spec "layers"])]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
             [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
             [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
-          (when (and (= map-data-tag ::lib/ok)
-                     (= dataset-tag ::lib/ok))
-            {:datasets {dataset-id dataset}
-             :visualisations {(:id visualisation) (merge visualisation map-data)}
-             :metadata {(:id visualisation) map-data}}))
+        (when (and (= map-data-tag ::lib/ok)
+                   (= dataset-tag ::lib/ok))
+          {:datasets {dataset-id dataset}
+           :visualisations {(:id visualisation) (merge visualisation map-data)}
+           :metadata {(:id visualisation) map-data}}))
       (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))]
-          (when (= map-data-tag ::lib/ok)
-            {:visualisations {(:id visualisation) (merge visualisation map-data)}
-             :metadata {(:id visualisation) map-data}})))))
+        (when (= map-data-tag ::lib/ok)
+          {:visualisations {(:id visualisation) (merge visualisation map-data)}
+           :metadata {(:id visualisation) map-data}})))))
 
 (defn run-unknown-type-visualisation
   [tenant-conn visualisation]
@@ -85,10 +86,65 @@
       {:datasets {dataset-id dataset}
        :visualisations {(:id visualisation) visualisation}})))
 
-(defn merge-dashboard-filters
+(defmulti merge-dashboard-filters
   "Merge dashboard filters into applicable visualisation spec and mark filter
   status."
-  [visualisation filters]
+  (fn [{:keys [visualisationType]} _]
+    visualisationType))
+
+(defn spread-filters [map-visualisation filters]
+  (let [layers (get-in map-visualisation [:spec "layers"])
+        new-layers (map (fn [layer]
+                          (if (= (get layer "datasetId") (:datasetId filters))
+                            (reduce (fn [layer f]
+                                      (update layer "filters" conj f))
+                                    layer
+                                    (:columns filters))))
+                        layers)]
+    (assoc-in map-visualisation [:spec "layers"] new-layers)))
+
+(defmethod merge-dashboard-filters "map" [visualisation filters]
+  (let [layers (-> visualisation :spec (get "layers"))
+        map-datasets-ids (reduce (fn [ids {:strs [datasetId]}]
+                                   (conj ids datasetId))
+                                 #{}
+                                 layers)]
+    (cond
+      (empty? (:columns filters))
+      (assoc visualisation :unfiltered false)
+
+      (not (contains? map-datasets-ids (:datasetId filters)))
+      (assoc visualisation :unfiltered true)
+
+      :else
+      (-> visualisation
+          (assoc :unfiltered false)
+          (spread-filters filters)))))
+
+(comment
+  (let [layers [{"filters" []
+                 "datasetId" "1"}]
+        filters {:columns
+                 [{:value nil,
+                   :column "c1",
+                   :strategy "is",
+                   :operation "keep",
+                   :columnType "text"}],
+                 :datasetId "1"}
+        new-layers(map (fn [layer]
+                         (if (= (get layer "datasetId") (:datasetId filters))
+                           (reduce (fn [layer f]
+                                     (update layer "filters" conj f))
+                                   layer
+                                   (:columns filters))))
+                       layers)]
+    (clojure.pprint/pprint new-layers))
+
+  (prn "--------")
+  )
+
+
+(defmethod merge-dashboard-filters :default [visualisation filters]
   (cond
     (empty? (:columns filters)) ;; No valid filter
     (assoc visualisation :unfiltered false)
@@ -102,10 +158,28 @@
         (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
         (assoc :unfiltered false))))
 
+#_(defn merge-dashboard-filters
+
+    [{:keys [visualisationType] :as visualisation} filters]
+    (cond
+      (empty? (:columns filters)) ;; No valid filter
+      (assoc visualisation :unfiltered false)
+
+      (not (= (:datasetId visualisation) ;; Valid filter but no match on datasets
+              (:datasetId filters)))
+      (assoc visualisation :unfiltered true)
+
+      :else ;; Valid filter and matching dataset
+      (-> visualisation
+          (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
+          (assoc :unfiltered false))))
+
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
     (when-let [vis (-> (visualisation/fetch tenant-conn id)
                        (merge-dashboard-filters filters))]
+      (prn "@visualisation-response-data")
+      (clojure.pprint/pprint vis)
       (condp contains? (:visualisationType vis)
         #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
         (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
