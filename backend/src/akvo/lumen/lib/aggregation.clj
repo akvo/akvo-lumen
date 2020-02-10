@@ -5,6 +5,7 @@
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
             [akvo.lumen.lib.aggregation.pie :as pie]
+            [akvo.lumen.lib.aggregation.maps :as a.maps]
             [akvo.lumen.lib.aggregation.line :as line]
             [akvo.lumen.lib.aggregation.bar :as bar]
             [akvo.lumen.lib.aggregation.pivot :as pivot]
@@ -92,17 +93,6 @@
   (fn [{:keys [visualisationType]} _]
     visualisationType))
 
-(defn spread-filters [map-visualisation filters]
-  (let [layers (get-in map-visualisation [:spec "layers"])
-        new-layers (map (fn [layer]
-                          (if (= (get layer "datasetId") (:datasetId filters))
-                            (reduce (fn [layer f]
-                                      (update layer "filters" conj f))
-                                    layer
-                                    (:columns filters))))
-                        layers)]
-    (assoc-in map-visualisation [:spec "layers"] new-layers)))
-
 (defmethod merge-dashboard-filters "map" [visualisation filters]
   (let [layers (-> visualisation :spec (get "layers"))
         map-datasets-ids (reduce (fn [ids {:strs [datasetId]}]
@@ -110,45 +100,16 @@
                                  #{}
                                  layers)]
     (cond
-      (empty? (:columns filters))
-      (assoc visualisation :unfiltered false)
-
       (not (contains? map-datasets-ids (:datasetId filters)))
       (assoc visualisation :unfiltered true)
 
       :else
       (-> visualisation
           (assoc :unfiltered false)
-          (spread-filters filters)))))
-
-(comment
-  (let [layers [{"filters" []
-                 "datasetId" "1"}]
-        filters {:columns
-                 [{:value nil,
-                   :column "c1",
-                   :strategy "is",
-                   :operation "keep",
-                   :columnType "text"}],
-                 :datasetId "1"}
-        new-layers(map (fn [layer]
-                         (if (= (get layer "datasetId") (:datasetId filters))
-                           (reduce (fn [layer f]
-                                     (update layer "filters" conj f))
-                                   layer
-                                   (:columns filters))))
-                       layers)]
-    (clojure.pprint/pprint new-layers))
-
-  (prn "--------")
-  )
-
+          (a.maps/add-filters filters)))))
 
 (defmethod merge-dashboard-filters :default [visualisation filters]
   (cond
-    (empty? (:columns filters)) ;; No valid filter
-    (assoc visualisation :unfiltered false)
-
     (not (= (:datasetId visualisation) ;; Valid filter but no match on datasets
             (:datasetId filters)))
     (assoc visualisation :unfiltered true)
@@ -158,28 +119,17 @@
         (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
         (assoc :unfiltered false))))
 
-#_(defn merge-dashboard-filters
-
-    [{:keys [visualisationType] :as visualisation} filters]
-    (cond
-      (empty? (:columns filters)) ;; No valid filter
-      (assoc visualisation :unfiltered false)
-
-      (not (= (:datasetId visualisation) ;; Valid filter but no match on datasets
-              (:datasetId filters)))
-      (assoc visualisation :unfiltered true)
-
-      :else ;; Valid filter and matching dataset
-      (-> visualisation
-          (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
-          (assoc :unfiltered false))))
+(defn dashboard-filters [visualisation filters]
+  (if (empty? (:columns filters)) ;; No valid filter
+    (assoc visualisation :unfiltered false)
+    (merge-dashboard-filters filters)))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]
   (try
     (when-let [vis (-> (visualisation/fetch tenant-conn id)
-                       (merge-dashboard-filters filters))]
-      (prn "@visualisation-response-data")
-      (clojure.pprint/pprint vis)
+                       (dashboard-filters filters))]
+      (log/info "@visualisation-response-data")
+      (log/info :vis vis)
       (condp contains? (:visualisationType vis)
         #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
         (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
