@@ -101,6 +101,7 @@
                                       {} (:visualisations aggregated-dashboard))]
       (-> dashboard
           (assoc :aggregated true)
+          (update :metadata #(merge % (:metadata aggregated-dashboard)))
           (update :entities #(merge % aggregated-entities))))))
 
 (defn upsert

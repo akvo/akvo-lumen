@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [akvo.lumen.postgres.filter :as filter]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [clojure.walk :as walk]
             [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.raster :as db.raster])
