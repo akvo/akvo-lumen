@@ -334,6 +334,7 @@ class Dashboard extends Component {
             });
           /* Maps hit a different endpoint than other aggregations, so bail out now */
           return;
+        }
         case 'donut':
         case 'polararea':
           aggType = 'pie';
@@ -541,7 +542,8 @@ class Dashboard extends Component {
         const visualisation = entity;
         if (aggregationOnlyVisualisationTypes.some(type =>
           type === visualisation.visualisationType)) {
-          const alreadyProcessed = Boolean(visualisation.data);
+          const alreadyProcessed = Boolean(visualisation.data) ||
+          Boolean(visualisation.layerMetadata);
           if (!alreadyProcessed) {
             this.onAddVisualisation(library.visualisations[visualisation.id]);
           } else {
@@ -645,7 +647,7 @@ class Dashboard extends Component {
               filteredDashboard={filteredDashboard}
               datasets={this.props.library.datasets}
               visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
-              metadata={this.state.metadata}
+              metadata={this.state.dashboard.metadata}
               onAddVisualisation={this.onAddVisualisation}
               onSave={this.onSave}
               onUpdateLayout={this.updateLayout}
