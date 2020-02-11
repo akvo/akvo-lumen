@@ -16,9 +16,10 @@ import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
 import withProps from '../utilities/withProps';
 
-export default function App({ store, history, location }) {
+export default function App({ store, history, location, query }) {
   const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
   const filteredDashboard = store && _.get(store.getState(), path);
+  const queryParsed = (query && JSON.parse(query)) || {};
   return (
     <IntlWrapper>
       <Router history={history}>
@@ -89,7 +90,8 @@ export default function App({ store, history, location }) {
             path="dashboard/:dashboardId/export"
             components={{
               sidebar: WorkspaceNav,
-              content: withProps(Dashboard, { filteredDashboard, exporting: true }),
+              content: withProps(Dashboard,
+                { query: queryParsed, filteredDashboard, exporting: true }),
             }}
             location={location}
           />
@@ -120,4 +122,5 @@ App.propTypes = {
   history: PropTypes.object.isRequired,
   location: PropTypes.object,
   store: PropTypes.object,
+  query: PropTypes.string,
 };

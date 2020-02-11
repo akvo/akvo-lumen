@@ -90,11 +90,12 @@ function adaptTitle(title) {
 
 const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
-    target, format, title, selector, clip,
+    target, format, title, selector, clip, filter,
   } = req.body;
   console.log('Starting run: ', runId, ' - ', target);
+  console.log('Filter: ', filter);
 
-  configureScope({ target, format, title }, async () => {
+    configureScope({ target, format, title, filter }, async () => {
     // Create a new incognito browser context.
     const context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
@@ -105,7 +106,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
 
     const token = req.header('access_token');
     const locale = req.header('locale');
-    const dest = `${target}?access_token=${token}&locale=${locale}&edit_user=false`;
+    const dest = `${target}?access_token=${token}&locale=${locale}&edit_user=false&query=${encodeURIComponent(JSON.stringify({filter}))}`;
     await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
 
     const selectors = (selector || '').split(',');
