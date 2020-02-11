@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { intlShape, injectIntl } from 'react-intl';
 import windowSize from 'react-window-size';
 import DashboardViewerItem from './DashboardViewerItem';
 import FilterColumns from './../filter/FilterColumns';
@@ -112,6 +113,7 @@ class DashboardViewer extends Component {
               filter={dashboard.filter}
               dataset={datasets[dashboard.filter.datasetId]}
               onFilterChange={filter => onChangeFilter(JSON.stringify({ filter }), onChangeFilter)}
+              intl={this.props.intl}
             /></div>
         }
         <div
@@ -138,6 +140,7 @@ class DashboardViewer extends Component {
 }
 
 DashboardViewer.propTypes = {
+  intl: intlShape,
   visualisations: PropTypes.object,
   datasets: PropTypes.object,
   metadata: PropTypes.object,
@@ -151,4 +154,4 @@ DashboardViewer.propTypes = {
   }),
 };
 
-export default connect(({ print }) => ({ print }))(windowSize(DashboardViewer));
+export default injectIntl(connect(({ print }) => ({ print }))(windowSize(DashboardViewer)));

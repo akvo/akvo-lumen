@@ -98,5 +98,8 @@
 (defn sql-str [columns filters]
   (if (empty? filters)
     "TRUE"
-    (let [filters (map #(assoc % :column (find-column columns (:column %))) filters)]
-      (str/join " AND " (map #(format "(%s)" (filter-sql %)) filters)))))
+    (let [filters (->> filters
+                       (filter :value)
+                       (map #(assoc % :column (find-column columns (:column %)))))]
+      (str/join " AND " (map #(format "(%s)" (filter-sql %))
+                             filters)))))

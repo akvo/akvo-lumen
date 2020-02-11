@@ -19,6 +19,7 @@ require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
+const store = configureStore();
 const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '1';
 
 function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChangeFilter) {
@@ -50,7 +51,7 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
   trackPageView(`Share ${entityType}: ${entity.name || `Untitled ${entityType}`}`);
 
   render(
-    <Provider store={configureStore()}>
+    <Provider store={store}>
       <PrintProvider>
         <IntlWrapper>
           <div className="viewer" style={{ display: 'flex' }}>
