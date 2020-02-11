@@ -90,6 +90,7 @@ class Dashboard extends Component {
     this.updateLayout = this.updateLayout.bind(this);
     this.updateEntities = this.updateEntities.bind(this);
     this.onUpdateName = this.onUpdateName.bind(this);
+    this.onApplyFilterValue = this.onApplyFilterValue.bind(this);
     this.onSave = this.onSave.bind(this);
     this.onSaveFailure = this.onSaveFailure.bind(this);
     this.toggleShareDashboard = this.toggleShareDashboard.bind(this);
@@ -237,10 +238,24 @@ class Dashboard extends Component {
     });
   }
 
-  onSave(filter) {
+  onApplyFilterValue(filter) {
+    const dashboard = getDashboardFromState(this.state.dashboard, false);
+    if (filter) {
+      this.setState({ fetchingDashboard: true });
+      this.props.dispatch(actions.fetchDashboard(dashboard.id,
+        { filter: ((this.props.query && this.props.query.filter) || dashboard.filter) },
+        (body) => {
+          const dash = body;
+          dash.filter = dashboard.filter;
+          this.loadDashboardIntoState(this.props.library, dash);
+          this.setState({ fetchingDashboard: false, tabSelected: 'filters' });
+        }));
+    }
+  }
+
+  onSave() {
     const { dispatch, location } = this.props;
     const dashboard = getDashboardFromState(this.state.dashboard, false);
-    const isEditingExistingDashboard = getEditingStatus(this.props.location);
 
     const handleResponse = (error) => {
       if (!this.isMountedFlag) return;
@@ -256,31 +271,22 @@ class Dashboard extends Component {
       });
     };
 
-    if (isEditingExistingDashboard) {
+    if (getEditingStatus(this.props.location)) {
       dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
-      if (filter) {
-        this.setState({ fetchingDashboard: true });
-        this.props.dispatch(actions.fetchDashboard(dashboard.id,
-          { filter: ((this.props.query && this.props.query.filter) || dashboard.filter) },
-          (body) => {
-            const dash = body;
-            dash.filter = dashboard.filter;
-            this.loadDashboardIntoState(this.props.library, dash);
-            this.setState({ fetchingDashboard: false, tabSelected: 'filters' });
-          }));
-      }
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
         dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleResponse));
       });
     }
   }
+
   onFilterChange(filter, needToAggregate) {
     const dashboard = this.state.dashboard;
     dashboard.filter = filter;
     this.setState({ dashboard });
-    this.onSave((needToAggregate || filter.columns.length === 0) && filter);
+    this.onApplyFilterValue((needToAggregate || filter.columns.length === 0) && filter);
   }
+
   onAddVisualisation(visualisation) {
     const { id, datasetId, spec } = visualisation;
     const vType = visualisation.visualisationType;
