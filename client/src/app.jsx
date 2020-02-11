@@ -65,7 +65,7 @@ function userLocale(lo) {
   return 'en';
 }
 
-function initWithAuthToken(locale) {
+function initWithAuthToken(locale, query) {
   const initialState = { profile: { admin: false, attributes: { locale: [userLocale(locale)] } } };
   const rootElement = document.querySelector('#root');
   const store = configureStore(initialState);
@@ -73,7 +73,7 @@ function initWithAuthToken(locale) {
 
   render(
     <AppContainer>
-      <Root store={store} history={history} />
+      <Root store={store} history={history} query={query} />
     </AppContainer>,
     rootElement
   );
@@ -146,7 +146,7 @@ function dispatchOnMode() {
         });
       });
   } else if (accessToken != null) {
-    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale));
+    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale, queryParams.query));
   } else {
     get('/env')
     .then(
