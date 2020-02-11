@@ -181,6 +181,7 @@ export function exportDashboard(dashboard, options) {
 
     return api
       .post('/api/exports', {
+        filter: dashboard.filter,
         format,
         title,
         selector: Object.keys(dashboard.entities)

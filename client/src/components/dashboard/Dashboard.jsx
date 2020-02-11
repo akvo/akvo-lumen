@@ -127,7 +127,7 @@ class Dashboard extends Component {
         this.setState({ fetchingDashboard: true });
         const filter = (libraryDashboard && libraryDashboard.filter) || {};
         this.props.dispatch(actions.fetchDashboard(dashboardId,
-          { filter },
+          { filter: (this.props.query && this.props.query.filter) || filter },
           (dash) => {
             if (dash.filter.datasetId) {
               this.props.dispatch(fetchDataset(dash.filter.datasetId, true,
@@ -261,7 +261,7 @@ class Dashboard extends Component {
       if (filter) {
         this.setState({ fetchingDashboard: true });
         this.props.dispatch(actions.fetchDashboard(dashboard.id,
-          { filter: dashboard.filter },
+          { filter: ((this.props.query && this.props.query.filter) || dashboard.filter) },
           (body) => {
             const dash = body;
             dash.filter = dashboard.filter;
@@ -693,6 +693,7 @@ Dashboard.propTypes = {
   filteredDashboard: PropTypes.bool,
   preventPageOverlaps: PropTypes.bool,
   print: printShape,
+  query: PropTypes.object,
 };
 
 export default connect(state => state)(injectIntl(Dashboard));

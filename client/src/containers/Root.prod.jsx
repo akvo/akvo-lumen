@@ -5,11 +5,11 @@ import { Provider } from 'react-redux';
 import App from './App';
 import PrintProvider from './PrintProvider';
 
-export default function Root({ store, history }) {
+export default function Root({ store, history, query }) {
   return (
     <Provider store={store}>
       <PrintProvider>
-        <App history={history} store={store} />
+        <App history={history} store={store} query={query} />
       </PrintProvider>
     </Provider>
   );
@@ -18,4 +18,5 @@ export default function Root({ store, history }) {
 Root.propTypes = {
   store: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
+  query: PropTypes.string,
 };
