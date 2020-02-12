@@ -276,7 +276,8 @@ class DashboardEditor extends Component {
   }
 
   render() {
-    const { dashboard, datasets, exporting, filteredDashboard, intl, onFilterChange } = this.props;
+    const { dashboard, datasets, exporting, filteredDashboard,
+      intl, onFilterChange, onFilterValueChange } = this.props;
     const { filter } = dashboard;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
@@ -426,7 +427,7 @@ class DashboardEditor extends Component {
             <FilterColumns
               filter={filter}
               dataset={datasets[filter.datasetId]}
-              onFilterChange={onFilterChange}
+              onFilterValueChange={onFilterValueChange}
               intl={this.props.intl}
             />
           </div>
@@ -519,6 +520,7 @@ DashboardEditor.propTypes = {
   filteredDashboard: PropTypes.bool,
   dispatch: PropTypes.func.isRequired,
   onFilterChange: PropTypes.func.isRequired,
+  onFilterValueChange: PropTypes.func.isRequired,
   tabSelected: PropTypes.string.isRequired,
   onTabSelected: PropTypes.func.isRequired,
   intl: intlShape,
