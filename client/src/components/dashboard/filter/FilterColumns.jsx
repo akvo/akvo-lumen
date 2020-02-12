@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { intlShape } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 
-export default function FilterColumns({ filter, intl, dataset, onFilterChange }) {
+export default function FilterColumns({ filter, intl, dataset, onFilterValueChange }) {
   return filter.columns.map((o, idx) => {
     const columns = dataset && dataset.get('columns');
     if (columns) {
@@ -23,7 +23,7 @@ export default function FilterColumns({ filter, intl, dataset, onFilterChange })
             onChange={(id) => {
               const editedFilter = filter;
               editedFilter.columns[columnIndex].value = id;
-              onFilterChange(editedFilter, true);
+              onFilterValueChange(editedFilter, true);
             }}
             options={vals}
             placeholder={intl.messages.all}
@@ -38,5 +38,5 @@ FilterColumns.propTypes = {
   intl: intlShape,
   filter: PropTypes.object.isRequired,
   dataset: PropTypes.object.isRequired,
-  onFilterChange: PropTypes.func.isRequired,
+  onFilterValueChange: PropTypes.func.isRequired,
 };
