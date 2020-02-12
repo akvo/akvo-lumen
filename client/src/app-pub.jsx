@@ -62,7 +62,7 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
                 datasets={immutableDatasets}
                 metadata={data.metadata ? data.metadata : null}
                 filteredDashboard={filteredDashboardCondition()}
-                onChangeFilter={onChangeFilter}
+                onFilterValueChange={onChangeFilter}
               />
             ) : (
               <VisualisationViewerContainer
@@ -130,8 +130,10 @@ const fetchDashboard = (env, password, callback) =>
               if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
                 const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
                 return Promise.all(columnsFetch).then(responses => [data, responses]);
+              // eslint-disable-next-line no-else-return
+              } else {
+                return [data];
               }
-              return [data];
             }
             return [data];
           })

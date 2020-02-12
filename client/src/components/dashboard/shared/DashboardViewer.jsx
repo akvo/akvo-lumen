@@ -91,7 +91,7 @@ class DashboardViewer extends Component {
 
   render() {
     // eslint-disable-next-line max-len
-    const { dashboard, datasets, metadata, windowWidth, filteredDashboard, onChangeFilter } = this.props;
+    const { dashboard, datasets, metadata, windowWidth, filteredDashboard, onFilterValueChange } = this.props;
     const layout = dashboard.layout;
     const viewportType = getViewportType(windowWidth);
     // eslint-disable-next-line no-console
@@ -112,7 +112,8 @@ class DashboardViewer extends Component {
             <FilterColumns
               filter={dashboard.filter}
               dataset={datasets[dashboard.filter.datasetId]}
-              onFilterChange={filter => onChangeFilter(JSON.stringify({ filter }), onChangeFilter)}
+              onFilterValueChange={filter => onFilterValueChange(JSON.stringify({ filter }),
+              onFilterValueChange)}
               intl={this.props.intl}
             /></div>
         }
@@ -146,7 +147,7 @@ DashboardViewer.propTypes = {
   metadata: PropTypes.object,
   windowWidth: PropTypes.number,
   filteredDashboard: PropTypes.bool,
-  onChangeFilter: PropTypes.func.isRequired,
+  onFilterValueChange: PropTypes.func.isRequired,
   dashboard: PropTypes.shape({
     entities: PropTypes.object.isRequired,
     layout: PropTypes.object.isRequired,

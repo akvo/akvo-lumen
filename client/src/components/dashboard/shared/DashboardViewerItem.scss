@@ -8,6 +8,14 @@
   color: $dashboardFG;
   @include border-radius(8px);
   float: left;
+  
+  .unFiltered {
+
+    background-image: url("../../../styles/img/exclamation_mark_icon.svg");
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+    background-position: right 10px top 10px;
+  }
 
   .title {
       display: none;

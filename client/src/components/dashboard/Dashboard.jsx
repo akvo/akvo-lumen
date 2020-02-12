@@ -100,6 +100,7 @@ class Dashboard extends Component {
     this.handleSetSharePassword = this.handleSetSharePassword.bind(this);
     this.handleToggleShareProtected = this.handleToggleShareProtected.bind(this);
     this.onFilterChange = this.onFilterChange.bind(this);
+    this.onFilterValueChange = this.onFilterValueChange.bind(this);
   }
 
   componentWillMount() {
@@ -280,12 +281,20 @@ class Dashboard extends Component {
     }
   }
 
-  onFilterChange(filter, needToAggregate) {
+  onFilterChange(filter) {
+    const dashboard = this.state.dashboard;
+    dashboard.filter = filter;
+    this.setState({ dashboard });
+    this.onSave();
+  }
+
+  onFilterValueChange(filter, needToAggregate) {
     const dashboard = this.state.dashboard;
     dashboard.filter = filter;
     this.setState({ dashboard });
     this.onApplyFilterValue((needToAggregate || filter.columns.length === 0) && filter);
   }
+
 
   onAddVisualisation(visualisation) {
     const { id, datasetId, spec } = visualisation;
@@ -651,6 +660,7 @@ class Dashboard extends Component {
             <DashboardEditor
               dashboard={dashboard}
               onFilterChange={this.onFilterChange}
+              onFilterValueChange={this.onFilterValueChange}
               filteredDashboard={filteredDashboard}
               datasets={this.props.library.datasets}
               visualisations={this.addDataToVisualisations(this.props.library.visualisations)}
