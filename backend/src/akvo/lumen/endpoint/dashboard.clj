@@ -16,7 +16,8 @@
       (get "query")
       json/decode
       (get "filter")
-      w/keywordize-keys))
+      w/keywordize-keys
+      (update :columns #(filter (fn [c] (some? (:value c))) %))))
 
 (defn all-dashboards [auth-service tenant-conn]
   (let [dashboards      (dashboard/all tenant-conn)
