@@ -296,7 +296,6 @@ class DashboardEditor extends Component {
     const newColumnFilterSelect = idx => (options, finder) =>
     (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px', position: 'relative' }}>
       <SelectMenu
-        isClearable
         key={`selectFilterColumn-${idx}`}
         onChange={(columnName) => {
           const filterColumn = {
