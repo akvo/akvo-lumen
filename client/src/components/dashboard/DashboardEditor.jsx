@@ -294,7 +294,7 @@ class DashboardEditor extends Component {
     const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
     const selectedDatasetColumns = filter.datasetId && datasets[filter.datasetId] && filterColumns(datasets[filter.datasetId].get('columns'), 'text');
     const newColumnFilterSelect = idx => (options, finder) =>
-    (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px' }}>
+    (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px', position: 'relative' }}>
       <SelectMenu
         isClearable
         key={`selectFilterColumn-${idx}`}
@@ -316,7 +316,16 @@ class DashboardEditor extends Component {
         }}
         options={options}
         value={finder(filter.columns[idx])}
+        width={'calc(100% - 2rem)'}
+        style={{ position: 'absolute' }}
       />
+      <button
+        className="selectFilterColumnRemove"
+        style={{ position: 'absolute', right: 0, top: 0, height: '2rem', width: '2rem' }}
+        onClick={() => this.props.removeFilterColumn(idx)}
+      >
+        <span />
+      </button>
     </div>);
     const selectedFilterColumnsDict = new Set(filter.columns.map(x => x.column));
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
@@ -525,6 +534,7 @@ DashboardEditor.propTypes = {
   onTabSelected: PropTypes.func.isRequired,
   intl: intlShape,
   query: PropTypes.object,
+  removeFilterColumn: PropTypes.func.isRequired,
 };
 
 DashboardEditor.defaultProps = {

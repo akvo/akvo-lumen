@@ -102,6 +102,7 @@ class Dashboard extends Component {
     this.handleToggleShareProtected = this.handleToggleShareProtected.bind(this);
     this.onFilterChange = this.onFilterChange.bind(this);
     this.onFilterValueChange = this.onFilterValueChange.bind(this);
+    this.removeFilterColumn = this.removeFilterColumn.bind(this);
   }
 
   UNSAFE_componentWillMount() {
@@ -628,6 +629,23 @@ class Dashboard extends Component {
     return out;
   }
 
+  removeFilterColumn(idx) {
+    const { dashboard } = this.state;
+    console.log('@removeFilterColumn');
+    // console.log(idx);
+    // const newColumns = dashboard.filter.columns.splice(idx, 1);
+    this.setState(prevState => ({
+      dashboard: {
+        ...prevState.dashboard,
+        filter: {
+          ...prevState.dashboard.filter,
+          columns: prevState.dashboard.filter.columns.splice(idx, 1),
+        },
+      },
+    }));
+    this.onSave();
+  }
+
   render() {
     if (!this.state.asyncComponents || this.state.isSavePending || this.state.fetchingDashboard) {
       return <LoadingSpinner />;
@@ -677,6 +695,7 @@ class Dashboard extends Component {
               onTabSelected={tab => this.setState({ tabSelected: tab })}
               preventPageOverlaps={this.props.preventPageOverlaps}
               intl={this.props.intl}
+              removeFilterColumn={this.removeFilterColumn}
             />
             {!exporting && (
               <ShareEntity
