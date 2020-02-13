@@ -671,6 +671,7 @@ class Dashboard extends Component {
               onUpdateEntities={this.updateEntities}
               onUpdateName={this.onUpdateName}
               print={this.props.print}
+              query={this.props.query}
               exporting={exporting}
               tabSelected={this.state.tabSelected}
               onTabSelected={tab => this.setState({ tabSelected: tab })}
