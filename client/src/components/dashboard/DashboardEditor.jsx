@@ -10,7 +10,7 @@ import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
 import { groupIntoPages } from '../../utilities/dashboard';
 import { datasetsWithVisualizations } from '../../utilities/dataset';
-import { filterColumns } from '../../utilities/column';
+import { filterColumns, findColumnI } from '../../utilities/column';
 import { A4 } from '../../constants/print';
 import SelectMenu from '../common/SelectMenu';
 import FilterColumns from './filter/FilterColumns';
@@ -331,6 +331,11 @@ class DashboardEditor extends Component {
     const finderFilterSelectOptions = v => columnFilterSelectAllOptions &&
     columnFilterSelectAllOptions.find(o => (v ? o.value === v.column : false));
     const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
+    let filterExportedAsMessage;
+    if (exporting) {
+      const exporterFilter = this.props.query && this.props.query.filter;
+      filterExportedAsMessage = exporterFilter.columns.filter(c => c.value).map(c => [findColumnI(selectedDatasetColumns, c.column).get('title'), c.value].join(': '));
+    }
     return (
       <div
         className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
@@ -422,7 +427,13 @@ class DashboardEditor extends Component {
           id={editorCanvasId}
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
-          {filteredDashboard && filter.datasetId &&
+          {exporting && filterExportedAsMessage.length > 0(
+            <div className="export-filter">
+              Visualisations based on dataset <b>{datasetsWithViss[filter.datasetId].get('name')}</b> are filtered by following column and values: {filterExportedAsMessage.join(', ')}
+            </div>
+          )}
+
+          {!exporting && filteredDashboard && filter.datasetId &&
           <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7', whiteSpace: 'nowrap' }}>
             <FilterColumns
               filter={filter}
@@ -524,6 +535,7 @@ DashboardEditor.propTypes = {
   tabSelected: PropTypes.string.isRequired,
   onTabSelected: PropTypes.func.isRequired,
   intl: intlShape,
+  query: PropTypes.object,
 };
 
 DashboardEditor.defaultProps = {

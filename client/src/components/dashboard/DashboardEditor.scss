@@ -175,6 +175,14 @@
             display: none;
         }
     }
+    .export-filter {
+        padding: 10px 30px;
+        font-size: 1.1em;
+        border-bottom: 1px dashed $midLightGrey;
+        b {
+            font-weight: bolder;
+        }
+      }
 }
 
 @media print {
