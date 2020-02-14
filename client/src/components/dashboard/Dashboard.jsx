@@ -130,6 +130,7 @@ class Dashboard extends Component {
         const filter = (libraryDashboard && libraryDashboard.filter) || {};
         this.props.dispatch(actions.fetchDashboard(dashboardId,
           { filter: (this.props.query && this.props.query.filter) || filter },
+          Boolean(this.props.query && this.props.query.filter),
           (dash) => {
             if (dash.filter.datasetId) {
               this.props.dispatch(fetchDataset(dash.filter.datasetId, true,
@@ -245,6 +246,7 @@ class Dashboard extends Component {
       this.setState({ fetchingDashboard: true });
       this.props.dispatch(actions.fetchDashboard(dashboard.id,
         { filter: ((this.props.query && this.props.query.filter) || dashboard.filter) },
+        Boolean(this.props.query && this.props.query.filter),
         (body) => {
           const dash = body;
           dash.filter = dashboard.filter;
@@ -636,7 +638,8 @@ class Dashboard extends Component {
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
     const { exporting } = this.props;
-    const filteredDashboard = this.props.filteredDashboard || filteredDashboardCondition();
+    const filteredDashboard = this.props.filteredDashboard || filteredDashboardCondition() ||
+    Boolean(this.props.query && this.props.query.filter);
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
@@ -671,6 +674,7 @@ class Dashboard extends Component {
               onUpdateEntities={this.updateEntities}
               onUpdateName={this.onUpdateName}
               print={this.props.print}
+              query={this.props.query}
               exporting={exporting}
               tabSelected={this.state.tabSelected}
               onTabSelected={tab => this.setState({ tabSelected: tab })}
