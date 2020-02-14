@@ -82,7 +82,10 @@ export default function App({ store, history, location, query }) {
             components={{
               sidebar: WorkspaceNav,
               content: withProps(Dashboard,
-                { filteredDashboard, exporting: true, preventPageOverlaps: true }),
+                { query: queryParsed,
+                  filteredDashboard,
+                  exporting: true,
+                  preventPageOverlaps: true }),
             }}
             location={location}
           />
