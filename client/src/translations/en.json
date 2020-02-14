@@ -219,6 +219,7 @@
   "no_visualisations_to_show": "No visualisations to show",
   "no_visualisations_depend_on_dataset": "No visualisations depend on this datataset",
   "no_filter_dashboards_depend_on_dataset": "No filters dashboards depend on this datataset",
+  "not_affected_by_applied_filters": "Not affected by applied filters",
   "none": "None",
   "number": "Number",
   "number_of_buckets_to_show": "Number of buckets to show",

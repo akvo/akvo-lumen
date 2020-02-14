@@ -214,6 +214,7 @@
   "no_visualisations_to_show": "Ninguna visualización a mostrar",
   "no_visualisations_depend_on_dataset": "Ninguna visualización depende de este conjunto de datos",
   "no_filter_dashboards_depend_on_dataset": "Ningún filtro de tablero depende de este conjunto de datos",
+  "not_affected_by_applied_filters": "No afectada por los filtros aplicados",
   "none": "Ninguna",
   "number": "Número",
   "number_of_buckets_to_show": "Número de cubos a mostrar",
