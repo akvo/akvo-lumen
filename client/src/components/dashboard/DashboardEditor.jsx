@@ -274,10 +274,9 @@ class DashboardEditor extends Component {
       this.setState({ saveError: true });
     }
   }
-
   render() {
     const { dashboard, datasets, exporting, filteredDashboard,
-      intl, onFilterChange, onFilterValueChange } = this.props;
+            intl, onFilterChange, onFilterValueChange } = this.props;
     const { filter } = dashboard;
     const canvasWidth = this.state.gridWidth;
     const rowHeight = this.getRowHeight();
@@ -423,14 +422,15 @@ class DashboardEditor extends Component {
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
           {filteredDashboard && filter.datasetId &&
-          <div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7', whiteSpace: 'nowrap' }}>
-            <FilterColumns
-              filter={filter}
-              dataset={datasets[filter.datasetId]}
-              onFilterValueChange={onFilterValueChange}
-              intl={this.props.intl}
-            />
-          </div>
+           (<div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7', whiteSpace: 'nowrap' }}>
+             <FilterColumns
+               exporting={exporting}
+               filter={filter}
+               dataset={datasets[filter.datasetId]}
+               onFilterValueChange={onFilterValueChange}
+               intl={this.props.intl}
+             />
+           </div>)
           }
           {getArrayFromObject(dashboard.entities).length === 0 && !exporting &&
             <div className="blankDashboardHelpText">
@@ -524,6 +524,7 @@ DashboardEditor.propTypes = {
   tabSelected: PropTypes.string.isRequired,
   onTabSelected: PropTypes.func.isRequired,
   intl: intlShape,
+  query: PropTypes.object,
 };
 
 DashboardEditor.defaultProps = {
