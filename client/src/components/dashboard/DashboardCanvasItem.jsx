@@ -136,8 +136,7 @@ export default class DashboardCanvasItem extends Component {
         style={{ marginTop }}
       >
         {item.type === 'visualisation' && (
-          <div className={`itemContainerWrap ${unfiltered ? 'unFiltered' : ''}`}>
-
+          <div className={`itemContainerWrap ${!exporting && unfiltered ? 'unFiltered' : ''}`}>
             <div
               className="itemTitle"
               ref={(c) => {
@@ -145,7 +144,10 @@ export default class DashboardCanvasItem extends Component {
               }}
             >
               <h2>{getTitle(item.visualisation)}</h2>
-              <span>{this.getSubTitle()}</span>
+              <div className="unfilteredMessage">
+                {this.getSubTitle()}
+                {exporting && unfiltered && <span className="notAffected"> <FormattedMessage id="not_affected_by_applied_filters" /></span>}
+              </div>
             </div>
             <div className="noPointerEvents itemContainer visualisation">
               {getIsDatasetLoaded(this.props) ?

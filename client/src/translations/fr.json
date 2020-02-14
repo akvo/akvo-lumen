@@ -215,6 +215,7 @@
   "no_visualisations_to_show": "Pas de visualisation à montrer",
   "no_visualisations_depend_on_dataset": "Aucune visualisation ne dépend de cet ensemble de données",
   "no_filter_dashboards_depend_on_dataset": "Aucun tableau de bord de filtres ne dépend de cet ensemble de données",
+  "not_affected_by_applied_filters": "Not affected by applied filters",
   "none": "Aucun",
   "number": "Nombre",
   "number_of_buckets_to_show": "Nombre de contenant à montrer",
