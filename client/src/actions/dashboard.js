@@ -67,7 +67,7 @@ export const fetchDashboardRequest = createAction('FETCH_DASHBOARD_REQUEST');
 export const fetchDashboardFailure = createAction('FETCH_DASHBOARD_FAILURE');
 export const fetchDashboardSuccess = createAction('FETCH_DASHBOARD_SUCCESS');
 
-export function fetchDashboard(id, filter, callback) {
+export function fetchDashboard(id, filter, mergeFilter, callback) {
   return (dispatch) => {
     dispatch(fetchDashboardRequest(id));
     api
@@ -75,8 +75,12 @@ export function fetchDashboard(id, filter, callback) {
         query: JSON.stringify(filter),
       })
       .then(({ body }) => {
-        dispatch(fetchDashboardSuccess(body));
-        callback(body);
+        const res = body;
+        if (mergeFilter) {
+          res.filter = filter.filter;
+        }
+        dispatch(fetchDashboardSuccess(res));
+        callback(res);
       })
       .catch((error) => {
         dispatch(showNotification('error', 'Failed to fetch dashboard.'));

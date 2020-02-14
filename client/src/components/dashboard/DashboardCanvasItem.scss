@@ -52,7 +52,16 @@
         span {
             color: $dashboardFGSecondary;
             font-size: 0.9em;
+
         }
+        .notAffected{
+            span{
+                color: #f6a431;
+                font-size: 1em;
+                font-weight: bolder;
+                padding-left: 10px;
+            }
+        }        
     }
 
     .unFiltered {
