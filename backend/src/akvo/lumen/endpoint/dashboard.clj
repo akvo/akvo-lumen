@@ -9,7 +9,10 @@
             [clojure.walk :as w]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [iapetos.core :as prometheus]
+            [iapetos.registry :as registry]
+            [akvo.lumen.monitoring :as monitoring]))
 
 (defn extract-query-filter [query-params]
   (-> query-params
@@ -30,7 +33,7 @@
          (filter #(contains? auth-dashboards (:id %)))
          (lib/ok))))
 
-(defn routes [{:keys [tenant-manager windshaft-url] :as opts}]
+(defn routes [{:keys [tenant-manager windshaft-url collector] :as opts}]
   ["/dashboards"
    ["" {:get {:handler (fn [{tenant :tenant
                              auth-service :auth-service}]
@@ -58,6 +61,10 @@
                               tenant :tenant
                               {:keys [id]} :path-params}]
                           (let [filters (extract-query-filter query-params)]
+                            (when (seq (:columns filters))
+                              (prometheus/inc
+                               (registry/get collector :app/dashboard-apply-filter {"tenant" tenant
+                                                                                    "dashboard" id})))
                             (if-let [d (dashboard/fetch-aggregated
                                         (p/connection tenant-manager tenant) id windshaft-url filters)]
                               (lib/ok d)
@@ -85,4 +92,5 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.endpoint.dashboard/dashboard [_]
   (s/keys :req-un [::tenant-manager/tenant-manager
-                   ::windshaft-url] ))
+                   ::windshaft-url
+                   ::monitoring/collector] ))
