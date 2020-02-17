@@ -164,8 +164,10 @@
         }
 
         .DashboardCanvasItem {
-            border: none;
-
+            border-width: 1px;
+            border-style: solid;
+            border-color:rgb(206, 206, 206);
+            
             .deleteButton {
                 display: none;
             }
