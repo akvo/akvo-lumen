@@ -57,6 +57,7 @@
  :akvo.lumen.endpoint.collection/collection {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.endpoint.dashboard/dashboard {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
+                                           :collector #ig/ref :akvo.lumen.monitoring/collector
                                            :windshaft-url "http://localhost:4000"}
 
  :akvo.lumen.component.flow/api-headers {}
@@ -112,6 +113,7 @@
  :akvo.lumen.endpoint.multiple-column/multiple-column {:caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
  :akvo.lumen.endpoint.public/public {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
+                                     :collector #ig/ref :akvo.lumen.monitoring/collector
                                      :windshaft-url "http://localhost:4000"}
 
  :akvo.lumen.endpoint.raster/raster {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
