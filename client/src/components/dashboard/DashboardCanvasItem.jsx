@@ -1,4 +1,4 @@
-import React, { Component, useRef } from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
@@ -29,7 +29,6 @@ const getItemLayout = (props) => {
 };
 
 const getIsDatasetLoaded = (props) => {
-  console.log('THE THING', props.item.type);
   if (props.item.type !== 'visualisation') {
     return false;
   }
@@ -46,23 +45,17 @@ const getIsDatasetLoaded = (props) => {
     case 'bubble':
       return true;
 
-  case 'map':
-    {
-    console.log('metatada:', props.item.visualisation.id, Boolean(props.metadata && props.metadata[props.item.visualisation.id]), props.metadata && props.metadata[props.item.visualisation.id]);
+    case 'map':
       return Boolean(props.metadata && props.metadata[props.item.visualisation.id]);
-    }
-  default:
-    {
-      console.log('DEFAULT???', props.item.visualisation.id, props.item.type );
+    default:
       return Boolean(props.datasets[props.item.visualisation.datasetId].get('columns'));
-    }
   }
 };
 
 export default function DashboardCanvasItem(props) {
   const el = useRef(null);
   const titleEl = useRef(null);
-    const getRenderDimensions = () => {
+  const getRenderDimensions = () => {
     const unit = props.canvasWidth / 12;
     const layout = getItemLayout(props);
 
@@ -74,101 +67,99 @@ export default function DashboardCanvasItem(props) {
     }
 
     return null;
-    };
+  };
 
-    const getSubTitle = () => {
-      const { item, datasets } = props;
-      const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
-      return lastUpdated ? (
-        <span>
-          <FormattedMessage id="data_last_updated" />
-          : {lastUpdated}
-        </span>
-      ) : null;
-    };
+  const getSubTitle = () => {
+    const { item, datasets } = props;
+    const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
+    return lastUpdated ? (
+      <span>
+        <FormattedMessage id="data_last_updated" />
+        : {lastUpdated}
+      </span>
+    ) : null;
+  };
+  const dimensions = getRenderDimensions();
 
-    
-    const dimensions = getRenderDimensions();
+  if (dimensions === null) {
+    // Layout has not been updated in parent yet
+    return null;
+  }
 
-    if (dimensions === null) {
-      // Layout has not been updated in parent yet
-      return null;
-    }
+  const titleHeight = titleEl && titleEl.current ?
+    titleEl.current.getBoundingClientRect().height :
+    TITLE_HEIGHT;
 
-    const titleHeight = titleEl && titleEl.current ?
-      titleEl.current.getBoundingClientRect().height :
-      TITLE_HEIGHT;
+  const { item, exporting, canvasLayout } = props;
+  const { unfiltered } = item;
+  let marginTop = 0;
 
-    const { item, exporting, canvasLayout } = props;
-    const { unfiltered } = item;
-    let marginTop = 0;
+  if (exporting) {
+    const layoutItem = canvasLayout.filter(({ i }) => i === item.id)[0];
+    marginTop = layoutItem.y >= ROW_COUNT ? -40 : 10;
+  }
 
-    if (exporting) {
-      const layoutItem = canvasLayout.filter(({ i }) => i === item.id)[0];
-      marginTop = layoutItem.y >= ROW_COUNT ? -40 : 10;
-    }
-
-    return (
-      <div
-        data-test-id="dashboard-canvas-item"
-        className="DashboardCanvasItem"
-        ref={el}
-        style={{ marginTop }}
-      >
-        {item.type === 'visualisation' && (
-          <div className={`itemContainerWrap ${!exporting && unfiltered ? 'unFiltered' : ''}`}>
-            <div
-              className="itemTitle"
-              ref={titleEl}
-            >
-              <h2>{getTitle(item.visualisation)}</h2>
-              <div className="unfilteredMessage">
-                {getSubTitle()}
-                {exporting && unfiltered && <span className="notAffected"> <FormattedMessage id="not_affected_by_applied_filters" /></span>}
-              </div>
-            </div>
-            <div className="noPointerEvents itemContainer visualisation">
-              {getIsDatasetLoaded(props) ?
-                <VisualisationViewer
-                  metadata={checkUndefined(props, 'metadata', item.visualisation.id)}
-                  visualisation={item.visualisation}
-                  datasets={props.datasets}
-                  width={dimensions.width}
-                  height={dimensions.height - titleHeight}
-                  showTitle={false}
-                  exporting={exporting}
-                /> : null
-              }
-            </div>
-          </div>
-        )}
-        {item.type === 'text' && (
+  return (
+    <div
+      data-test-id="dashboard-canvas-item"
+      className="DashboardCanvasItem"
+      ref={el}
+      style={{ marginTop }}
+    >
+      {item.type === 'visualisation' && (
+        <div className={`itemContainerWrap ${!exporting && unfiltered ? 'unFiltered' : ''}`}>
           <div
-            className="itemContainer text"
-            style={{
-              height: dimensions.height,
-              width: dimensions.width,
-              fontSize: Math.floor(20 * (props.canvasWidth / 1280)),
-              lineHeight: '1.5em',
-            }}
+            className="itemTitle"
+            ref={titleEl}
           >
-            <DashboardCanvasItemEditable
-              onFocus={props.onFocus}
-              focused={props.focused}
-              onEntityUpdate={props.onEntityUpdate}
-              item={item}
-              onSave={props.onSave}
-            />
+            <h2>{getTitle(item.visualisation)}</h2>
+            <div className="unfilteredMessage">
+              {getSubTitle()}
+              {exporting && unfiltered && <span className="notAffected"> <FormattedMessage id="not_affected_by_applied_filters" /></span>}
+            </div>
           </div>
-        )}
-        <button
-          className="clickable deleteButton noSelect"
-          onClick={() => props.onDeleteClick(item)}
+          <div className="noPointerEvents itemContainer visualisation">
+            {getIsDatasetLoaded(props) ?
+              <VisualisationViewer
+                metadata={checkUndefined(props, 'metadata', item.visualisation.id)}
+                visualisation={item.visualisation}
+                datasets={props.datasets}
+                width={dimensions.width}
+                height={dimensions.height - titleHeight}
+                showTitle={false}
+                exporting={exporting}
+              /> : <LoadingSpinner />
+            }
+          </div>
+        </div>
+      )}
+      {item.type === 'text' && (
+        <div
+          className="itemContainer text"
+          style={{
+            height: dimensions.height,
+            width: dimensions.width,
+            fontSize: Math.floor(20 * (props.canvasWidth / 1280)),
+            lineHeight: '1.5em',
+          }}
         >
-          ✕
-        </button>
-      </div>
-    );
+          <DashboardCanvasItemEditable
+            onFocus={props.onFocus}
+            focused={props.focused}
+            onEntityUpdate={props.onEntityUpdate}
+            item={item}
+            onSave={props.onSave}
+          />
+        </div>
+      )}
+      <button
+        className="clickable deleteButton noSelect"
+        onClick={() => props.onDeleteClick(item)}
+      >
+        ✕
+      </button>
+    </div>
+  );
 }
 
 DashboardCanvasItem.propTypes = {
