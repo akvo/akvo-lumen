@@ -14,6 +14,7 @@ const HTML_CONFIG = {
 export default {
   resolve: {
     extensions: ['*', '.js', '.jsx', '.json'],
+    alias: { 'react-dom': '@hot-loader/react-dom' },
   },
   devtool: 'cheap-module-eval-source-map', // more info:https://webpack.js.org/guides/development/#using-source-maps and https://webpack.js.org/configuration/devtool/
   entry: {
