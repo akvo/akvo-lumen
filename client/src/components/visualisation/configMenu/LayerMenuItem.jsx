@@ -16,7 +16,7 @@ class LayerMenuItem extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.setState({
       workingTitle: this.props.layer.title,
     });

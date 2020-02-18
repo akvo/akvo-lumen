@@ -271,7 +271,7 @@ class TransformationList extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // Fetch all dependent datasets (currently  only due to merge transformations)
     const { transformations, dispatch } = this.props;
 

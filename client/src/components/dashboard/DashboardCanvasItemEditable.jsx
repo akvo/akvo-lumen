@@ -16,7 +16,7 @@ class DashboardCanvasItemEditable extends Component {
     this.handleFocus = this.handleFocus.bind(this);
     this.inputElement = React.createRef();
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.setState({
       textContents: this.placeholder !== this.props.item.content ?
         this.props.item.content :
