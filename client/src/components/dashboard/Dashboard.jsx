@@ -336,17 +336,12 @@ class Dashboard extends Component {
                 const aggregatedDatasets =
                   Object.assign({}, this.state.aggregatedDatasets, change);
 
-                const metadataChange = {};
+                const metadataChange = this.state.dashboard.metadata || {};
                 metadataChange[id] = response.body;
+                const dash = this.state.dashboard;
+                dash.metadata = metadataChange;
 
-                const metadata =
-                  Object.assign(
-                    {},
-                    this.state.metadata,
-                    metadataChange
-                  );
-
-                this.setState({ aggregatedDatasets, metadata });
+                this.setState({ aggregatedDatasets, dashboard: dash });
               }
             })
             .catch(() => {
