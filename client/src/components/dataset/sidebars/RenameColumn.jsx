@@ -11,7 +11,7 @@ function trim(transformation) {
 
 export default class RenameColumn extends Component {
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { column } = this.props;
     this.setState({
       transformation: Immutable.fromJS({

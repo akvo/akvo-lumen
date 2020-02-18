@@ -18,7 +18,7 @@ export default class Filter extends Component {
     this.handleChangeExpressionOperator = this.handleChangeExpressionOperator.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.setState({
       transformation: Immutable.fromJS({
         op: 'core/filter-column',

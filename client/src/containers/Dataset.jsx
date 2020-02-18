@@ -67,7 +67,7 @@ class Dataset extends Component {
     }, 'Dataset');
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.handleTrackPageView(nextProps);
   }
 

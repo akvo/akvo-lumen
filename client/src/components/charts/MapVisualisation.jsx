@@ -248,7 +248,7 @@ export default class MapVisualisation extends Component {
     this.renderLeafletMap(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.renderLeafletMap(nextProps);
   }
 

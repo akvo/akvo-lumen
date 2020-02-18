@@ -104,7 +104,7 @@ class Dashboard extends Component {
     this.onFilterValueChange = this.onFilterValueChange.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const isLibraryLoaded = !isEmpty(this.props.library.datasets);
 
@@ -173,7 +173,7 @@ class Dashboard extends Component {
     }, 'VisualisationViewerPreload');
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const dashboardAlreadyLoaded = this.state.dashboard.layout.length !== 0;
     const { dashboardId } = nextProps.params;
@@ -336,17 +336,12 @@ class Dashboard extends Component {
                 const aggregatedDatasets =
                   Object.assign({}, this.state.aggregatedDatasets, change);
 
-                const metadataChange = {};
+                const metadataChange = this.state.dashboard.metadata || {};
                 metadataChange[id] = response.body;
+                const dash = this.state.dashboard;
+                dash.metadata = metadataChange;
 
-                const metadata =
-                  Object.assign(
-                    {},
-                    this.state.metadata,
-                    metadataChange
-                  );
-
-                this.setState({ aggregatedDatasets, metadata });
+                this.setState({ aggregatedDatasets, dashboard: dash });
               }
             })
             .catch(() => {

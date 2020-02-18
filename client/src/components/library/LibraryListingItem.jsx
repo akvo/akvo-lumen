@@ -261,7 +261,7 @@ export default class LibraryListingItem extends Component {
         >
           <input
             type="checkbox"
-            checked={this.props.isChecked}
+            defaultChecked={this.props.isChecked}
           />
         </div>
         <div className="entityControls">

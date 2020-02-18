@@ -115,7 +115,7 @@ class DashboardEditor extends Component {
     this.handleSave = this.handleSave.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (this.props.dashboard.layout) {
       this.setState({
         propLayout: this.props.dashboard.layout,
@@ -128,7 +128,7 @@ class DashboardEditor extends Component {
     window.addEventListener('resize', this.handleResize);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.dashboard.layout.length > this.state.propLayout.length) {
       this.setState({ propLayout: nextProps.dashboard.layout });
     }

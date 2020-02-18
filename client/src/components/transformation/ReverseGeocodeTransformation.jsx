@@ -31,7 +31,7 @@ class ReverseGeocodeTransformation extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { dispatch, datasetId } = this.props;
     const { spec } = this.state;
     dispatch(ensureDatasetFullyLoaded(datasetId))
