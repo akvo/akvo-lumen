@@ -16,7 +16,7 @@ export default class AsyncVisualisationViewer extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { visualisation } = this.props;
     let output;
 

@@ -104,7 +104,7 @@ class Dashboard extends Component {
     this.onFilterValueChange = this.onFilterValueChange.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const isLibraryLoaded = !isEmpty(this.props.library.datasets);
 
@@ -173,7 +173,7 @@ class Dashboard extends Component {
     }, 'VisualisationViewerPreload');
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const dashboardAlreadyLoaded = this.state.dashboard.layout.length !== 0;
     const { dashboardId } = nextProps.params;

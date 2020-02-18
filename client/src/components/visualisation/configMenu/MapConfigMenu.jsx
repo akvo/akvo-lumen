@@ -49,7 +49,7 @@ class MapConfigMenu extends Component {
     this.handleChangeLayerOrder = this.handleChangeLayerOrder.bind(this);
   }
 
-  componentWillReceiveProps(next) {
+  UNSAFE_componentWillReceiveProps(next) {
     const prev = this.props;
 
     /* If only one geopoint column exists in dataset, select it for map.

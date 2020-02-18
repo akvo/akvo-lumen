@@ -57,7 +57,7 @@ class Resources extends Component {
     this.getResources = this.getResources.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.getResources();
   }
 
