@@ -23,6 +23,7 @@ import {
   SHARE_DASHBOARD,
   EXPORT_DASHBOARD_PNG,
   EXPORT_DASHBOARD_PDF,
+  DASHBOARD_FILTER_CHANGE,
 } from '../../constants/analytics';
 import { showNotification } from '../../actions/notification';
 
@@ -288,6 +289,7 @@ class Dashboard extends Component {
     dashboard.filter = filter;
     this.setState({ dashboard });
     this.onSave();
+    trackEvent(DASHBOARD_FILTER_CHANGE, window.location.href);
   }
 
   onFilterValueChange(filter, needToAggregate) {

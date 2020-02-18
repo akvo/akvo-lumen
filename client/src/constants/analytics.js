@@ -11,3 +11,4 @@ export const EXPORT_VISUALISATION_PNG = 'Export visualisation (png)';
 export const EXPORT_VISUALISATION_PDF = 'Export visualisation (pdf)';
 export const TRANSFORM_DATASET = 'Transform dataset';
 export const SELECT_VISUALISATION_TYPE = 'Select vis type:';
+export const DASHBOARD_FILTER_CHANGE = 'Change dashboard filter';
