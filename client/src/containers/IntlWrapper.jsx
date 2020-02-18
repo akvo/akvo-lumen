@@ -56,7 +56,7 @@ class IntlWrapper extends Component {
     this.handleChangeLocale(locale);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { locale } = this.props;
     if (locale !== nextProps.locale) {
       this.handleChangeLocale(nextProps.locale);

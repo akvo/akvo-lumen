@@ -89,7 +89,7 @@ class Visualisation extends Component {
     this.handleFetchShareId = this.handleFetchShareId.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { params, library, dispatch } = this.props;
     const visualisationId = params.visualisationId;
     const isEditingExistingVisualisation = visualisationId != null;
@@ -156,7 +156,7 @@ class Visualisation extends Component {
     }, 'VisualisationViewerPreload');
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
     /* from nextProps if it exists there */
     const { visualisationId } = this.props.params;
