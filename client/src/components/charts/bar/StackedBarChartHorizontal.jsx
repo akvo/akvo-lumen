@@ -71,7 +71,7 @@ export default class StackedBarChart extends Component {
     this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.setState({ data: this.getData(nextProps) });
   }
 

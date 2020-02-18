@@ -31,7 +31,7 @@ class Transformation extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.dispatch(ensureLibraryLoaded())
       .then(() => this.setState({ loading: false }));
   }

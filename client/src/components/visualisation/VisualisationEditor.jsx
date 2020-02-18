@@ -25,11 +25,11 @@ class VisualisationEditor extends Component {
     window.state = this.state;
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.handleProps(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.handleProps(nextProps);
   }
 

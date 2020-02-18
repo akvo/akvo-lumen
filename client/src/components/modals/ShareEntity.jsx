@@ -26,7 +26,7 @@ export default class ShareEntity extends Component {
     this.handleFocusPassword = this.handleFocusPassword.bind(this);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!nextProps.isOpen) {
       this.setState({ copiedToClipboard: null, showEmbed: false });
     }

@@ -61,7 +61,7 @@ class Library extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.collections) {
       const collectionId = nextProps.params.collectionId;
       const collection = collectionId ? nextProps.collections[collectionId] : null;

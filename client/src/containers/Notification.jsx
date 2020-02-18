@@ -16,7 +16,7 @@ class Notification extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (this.props.autohide) {
       this.scheduleAutoHide();
     }
@@ -29,7 +29,7 @@ class Notification extends Component {
     setTimeout(() => this.setState({ onscreen: true }), 0);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.autohide) {
       this.scheduleAutoHide();
     } else {

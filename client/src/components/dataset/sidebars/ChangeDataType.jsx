@@ -70,7 +70,7 @@ export default class ChangeDataType extends Component {
   }
 
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { column, newColumnType } = this.props;
     this.setState({
       transformation: Immutable.fromJS({

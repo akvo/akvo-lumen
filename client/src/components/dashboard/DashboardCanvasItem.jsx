@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
@@ -52,52 +52,25 @@ const getIsDatasetLoaded = (props) => {
   }
 };
 
-export default class DashboardCanvasItem extends Component {
-  shouldComponentUpdate(nextProps) {
-    const oldLayout = getItemLayout(this.props);
-    const newLayout = getItemLayout(nextProps);
-    const layoutsExist = Boolean(oldLayout && newLayout);
-    const dimensionsChanged = layoutsExist ?
-      oldLayout.w !== newLayout.w || oldLayout.h !== newLayout.h : true;
-    const canvasWidthChanged = this.props.canvasWidth !== nextProps.canvasWidth;
-    const needDataset = this.props.item.type === 'visualisation';
-    const datasetDependencyMet = needDataset ? getIsDatasetLoaded(this.props) : true;
-
-    if (this.props.item.type === 'visualisation' &&
-        !this.props.item.visualisation.data
-        && nextProps.item.visualisation.data) {
-      return true;
-    }
-
-    const shouldUpdate = Boolean(
-      dimensionsChanged ||
-      canvasWidthChanged ||
-      !datasetDependencyMet
-    );
-
-    return shouldUpdate;
-  }
-
-  getElement() {
-    return this.el;
-  }
-
-  getRenderDimensions() {
-    const unit = this.props.canvasWidth / 12;
-    const layout = getItemLayout(this.props);
+export default function DashboardCanvasItem(props) {
+  const el = useRef(null);
+  const titleEl = useRef(null);
+  const getRenderDimensions = () => {
+    const unit = props.canvasWidth / 12;
+    const layout = getItemLayout(props);
 
     if (layout !== null) {
       return ({
         width: (layout.w * unit) - 60,
-        height: (layout.h * this.props.rowHeight) - 60,
+        height: (layout.h * props.rowHeight) - 60,
       });
     }
 
     return null;
-  }
+  };
 
-  getSubTitle() {
-    const { item, datasets } = this.props;
+  const getSubTitle = () => {
+    const { item, datasets } = props;
     const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
     return lastUpdated ? (
       <span>
@@ -105,93 +78,88 @@ export default class DashboardCanvasItem extends Component {
         : {lastUpdated}
       </span>
     ) : null;
+  };
+  const dimensions = getRenderDimensions();
+
+  if (dimensions === null) {
+    // Layout has not been updated in parent yet
+    return null;
   }
 
-  render() {
-    const dimensions = this.getRenderDimensions();
+  const titleHeight = titleEl && titleEl.current ?
+    titleEl.current.getBoundingClientRect().height :
+    TITLE_HEIGHT;
 
-    if (dimensions === null) {
-      // Layout has not been updated in parent yet
-      return null;
-    }
+  const { item, exporting, canvasLayout } = props;
+  const { unfiltered } = item;
+  let marginTop = 0;
 
-    const titleHeight = this.titleEl ?
-      this.titleEl.getBoundingClientRect().height :
-      TITLE_HEIGHT;
+  if (exporting) {
+    const layoutItem = canvasLayout.filter(({ i }) => i === item.id)[0];
+    marginTop = layoutItem.y >= ROW_COUNT ? -40 : 10;
+  }
 
-    const { item, exporting, canvasLayout } = this.props;
-    const { unfiltered } = item;
-    let marginTop = 0;
-
-    if (exporting) {
-      const layoutItem = canvasLayout.filter(({ i }) => i === item.id)[0];
-      marginTop = layoutItem.y >= ROW_COUNT ? -40 : 10;
-    }
-
-    return (
-      <div
-        data-test-id="dashboard-canvas-item"
-        className="DashboardCanvasItem"
-        ref={(c) => { this.el = c; }}
-        style={{ marginTop }}
-      >
-        {item.type === 'visualisation' && (
-          <div className={`itemContainerWrap ${!exporting && unfiltered ? 'unFiltered' : ''}`}>
-            <div
-              className="itemTitle"
-              ref={(c) => {
-                this.titleEl = c;
-              }}
-            >
-              <h2>{getTitle(item.visualisation)}</h2>
-              <div className="unfilteredMessage">
-                {this.getSubTitle()}
-                {exporting && unfiltered && <span className="notAffected"> <FormattedMessage id="not_affected_by_applied_filters" /></span>}
-              </div>
-            </div>
-            <div className="noPointerEvents itemContainer visualisation">
-              {getIsDatasetLoaded(this.props) ?
-                <VisualisationViewer
-                  metadata={checkUndefined(this.props, 'metadata', item.visualisation.id)}
-                  visualisation={item.visualisation}
-                  datasets={this.props.datasets}
-                  width={dimensions.width}
-                  height={dimensions.height - titleHeight}
-                  showTitle={false}
-                  exporting={exporting}
-                /> : <LoadingSpinner />
-              }
-            </div>
-          </div>
-        )}
-        {item.type === 'text' && (
+  return (
+    <div
+      data-test-id="dashboard-canvas-item"
+      className="DashboardCanvasItem"
+      ref={el}
+      style={{ marginTop }}
+    >
+      {item.type === 'visualisation' && (
+        <div className={`itemContainerWrap ${!exporting && unfiltered ? 'unFiltered' : ''}`}>
           <div
-            className="itemContainer text"
-            style={{
-              height: dimensions.height,
-              width: dimensions.width,
-              fontSize: Math.floor(20 * (this.props.canvasWidth / 1280)),
-              lineHeight: '1.5em',
-            }}
+            className="itemTitle"
+            ref={titleEl}
           >
-            <DashboardCanvasItemEditable
-              onFocus={this.props.onFocus}
-              focused={this.props.focused}
-              onEntityUpdate={this.props.onEntityUpdate}
-              item={item}
-              onSave={this.props.onSave}
-            />
+            <h2>{getTitle(item.visualisation)}</h2>
+            <div className="unfilteredMessage">
+              {getSubTitle()}
+              {exporting && unfiltered && <span className="notAffected"> <FormattedMessage id="not_affected_by_applied_filters" /></span>}
+            </div>
           </div>
-        )}
-        <button
-          className="clickable deleteButton noSelect"
-          onClick={() => this.props.onDeleteClick(item)}
+          <div className="noPointerEvents itemContainer visualisation">
+            {getIsDatasetLoaded(props) ?
+              <VisualisationViewer
+                metadata={checkUndefined(props, 'metadata', item.visualisation.id)}
+                visualisation={item.visualisation}
+                datasets={props.datasets}
+                width={dimensions.width}
+                height={dimensions.height - titleHeight}
+                showTitle={false}
+                exporting={exporting}
+              /> : <LoadingSpinner />
+            }
+          </div>
+        </div>
+      )}
+      {item.type === 'text' && (
+        <div
+          className="itemContainer text"
+          style={{
+            height: dimensions.height,
+            width: dimensions.width,
+            fontSize: Math.floor(20 * (props.canvasWidth / 1280)),
+            lineHeight: '1.5em',
+          }}
         >
-          ✕
-        </button>
-      </div>
-    );
-  }
+          <DashboardCanvasItemEditable
+            onFocus={props.onFocus}
+            focused={props.focused}
+            onEntityUpdate={props.onEntityUpdate}
+            item={item}
+            onSave={props.onSave}
+          />
+        </div>
+      )}
+      <button
+        className="clickable deleteButton noSelect"
+        onClick={() => props.onDeleteClick(item)}
+      >
+        ✕
+      </button>
+    </div>
+  );
 }
 
 DashboardCanvasItem.propTypes = {

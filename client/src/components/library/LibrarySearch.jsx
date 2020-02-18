@@ -11,7 +11,7 @@ export default class LibrarySearch extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (this.props.searchString) {
       this.setState({ searchText: this.props.searchString });
     }
