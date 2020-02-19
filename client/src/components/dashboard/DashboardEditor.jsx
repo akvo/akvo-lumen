@@ -293,7 +293,7 @@ class DashboardEditor extends Component {
     const visualisations = getArrayFromObject(this.props.visualisations);
     const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
     const selectedDatasetColumns = filter.datasetId && datasets[filter.datasetId] && filterColumns(datasets[filter.datasetId].get('columns'), 'text');
-    const newColumnFilterSelect = idx => (options, finder) =>
+    const newColumnFilterSelect = idx => (options, finder, removeable) =>
     (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px', position: 'relative' }}>
       <SelectMenu
         key={`selectFilterColumn-${idx}`}
@@ -318,13 +318,19 @@ class DashboardEditor extends Component {
         width={'calc(100% - 2rem)'}
         style={{ position: 'absolute' }}
       />
-      <button
-        className="selectFilterColumnRemove"
-        style={{ position: 'absolute', right: 0, top: 0, height: '2rem', width: '2rem' }}
-        onClick={() => this.props.removeFilterColumn(idx)}
-      >
-        <span />
-      </button>
+      {removeable &&
+        <button
+          className="selectFilterColumnRemove"
+          style={{ position: 'absolute', right: 0, top: 0, height: '2rem', width: '2rem' }}
+          onClick={() => {
+            filter.columns.splice(idx, 1);
+            this.props.dispatch(fetchColumn(filter.datasetId, null));
+            onFilterChange(filter);
+          }}
+        >
+          <span />
+        </button>
+      }
     </div>);
     const selectedFilterColumnsDict = new Set(filter.columns.map(x => x.column));
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
@@ -414,10 +420,10 @@ class DashboardEditor extends Component {
                     {
                       filter.columns.map((o, idx) =>
                       newColumnFilterSelect(idx)(columnFilterSelectOptions,
-                        finderFilterSelectOptions))
+                        finderFilterSelectOptions, true))
                     }
                     {newColumnFilterSelect(filter.columns.length)(columnFilterSelectOptions,
-                      finderFilterSelectOptions)}
+                      finderFilterSelectOptions, false)}
                   </div>
                 </div>}
             </div>
@@ -533,7 +539,6 @@ DashboardEditor.propTypes = {
   onTabSelected: PropTypes.func.isRequired,
   intl: intlShape,
   query: PropTypes.object,
-  removeFilterColumn: PropTypes.func.isRequired,
 };
 
 DashboardEditor.defaultProps = {
