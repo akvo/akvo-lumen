@@ -20,7 +20,8 @@ const filterVisualisations = (visualisations, filterText, filterByDataset, sorte
   if (filterByDataset) {
     datasetCondition = (viz, datasetId) => {
       if (viz.visualisationType === 'map') {
-        return Boolean(mapDatasetLayers(viz).find(layerDatasetId => layerDatasetId === datasetId));
+        return Boolean(mapDatasetLayers(viz).find(layerDatasetId =>
+          layerDatasetId === filterByDataset));
       }
       return datasetId === filterByDataset;
     };
@@ -39,7 +40,7 @@ const filterVisualisations = (visualisations, filterText, filterByDataset, sorte
     let name = visualisation.name || '';
     name = name.toString().toLowerCase();
     return name.indexOf(filterText.toString().toLowerCase()) > -1
-            && datasetCondition(visualisation.datasetId);
+            && datasetCondition(visualisation, visualisation.datasetId);
   });
 };
 
