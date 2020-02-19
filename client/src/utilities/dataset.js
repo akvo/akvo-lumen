@@ -1,10 +1,12 @@
 /* eslint-disable import/prefer-default-export */
 
+export const mapDatasetLayers = viz => viz.spec.layers.map(l => l.datasetId);
+
 export const datasetsWithVisualizations = (visualisations, datasets) => {
   const datasetIds = visualisations.reduce((acc, viz) => {
     let ids = viz.datasetId;
     if (viz.visualisationType === 'map') {
-      ids = viz.spec.layers.map(l => l.datasetId);
+      ids = mapDatasetLayers(viz);
     }
     return acc.concat(ids);
   }, []);
