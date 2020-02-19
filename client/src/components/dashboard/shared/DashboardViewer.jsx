@@ -108,7 +108,7 @@ class DashboardViewer extends Component {
       >
         <h1 className="DashboaredViewerTitle">{dashboard.title}</h1>
         {filteredDashboard &&
-          <div style={{ marginLeft: '10px' }}>
+          <div style={{ marginLeft: '10px', zIndex: 2000 }}>
             <FilterColumns
               filter={dashboard.filter}
               dataset={datasets[dashboard.filter.datasetId]}
