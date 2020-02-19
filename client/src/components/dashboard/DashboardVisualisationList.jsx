@@ -27,8 +27,8 @@ const filterVisualisations = (visualisations, filterText, filterByDataset, sorte
   }
 
   if (!filterText) {
-    return visualisations.filter(({ spec, visualisationType, datasetId, ...viz }) =>
-      specIsValidForApi(spec, visualisationType) && datasetCondition(viz, datasetId)
+    return visualisations.filter(viz =>
+      specIsValidForApi(viz.spec, viz.visualisationType) && datasetCondition(viz, viz.datasetId)
     );
   }
   return visualisations.filter((visualisation) => {
