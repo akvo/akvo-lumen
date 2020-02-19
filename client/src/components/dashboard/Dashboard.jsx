@@ -299,7 +299,6 @@ class Dashboard extends Component {
     this.onApplyFilterValue((needToAggregate || filter.columns.length === 0) && filter);
   }
 
-
   onAddVisualisation(visualisation) {
     const { id, datasetId, spec } = visualisation;
     const vType = visualisation.visualisationType;
