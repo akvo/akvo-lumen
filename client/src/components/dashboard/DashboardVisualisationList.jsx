@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { getDataLastUpdated, DATE_FORMAT } from '../../utilities/chart';
-import { getIconUrl } from '../../domain/entity';
+import moment from 'moment';
+import { getIconUrl, getModifiedTimestamp } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
 import { datasetsWithVisualizations, mapDatasetLayers } from '../../utilities/dataset';
 import SelectMenu from '../common/SelectMenu';
@@ -109,11 +109,7 @@ export default class DashboardVisualisationList extends Component {
             }
             <ul className="list">
               {viss.map((item) => {
-                const dataLastUpdated = getDataLastUpdated({
-                  visualisation: item,
-                  datasets,
-                  dateFormat: DATE_FORMAT,
-                });
+                const dataLastUpdated = moment(getModifiedTimestamp(item)).format('Do MMM YYYY - HH:mm');
                 return (
                   <li
                     className={`listItem clickable ${item.visualisationType.replace(' ', '')}
