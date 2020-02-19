@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { getDataLastUpdated, DATE_FORMAT } from '../../utilities/chart';
 import { getIconUrl } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
-import { datasetsWithVisualizations } from '../../utilities/dataset';
+import { datasetsWithVisualizations, mapDatasetLayers } from '../../utilities/dataset';
 import SelectMenu from '../common/SelectMenu';
 import { trackEvent } from '../../utilities/analytics';
 import { FILTER_VISUALISATIONS_BY_DATASET_IN_DASHBOARD } from '../../constants/analytics';
@@ -18,12 +18,17 @@ const filterVisualisations = (visualisations, filterText, filterByDataset, sorte
 
   let datasetCondition = () => true;
   if (filterByDataset) {
-    datasetCondition = datasetId => datasetId === filterByDataset;
+    datasetCondition = (viz, datasetId) => {
+      if (viz.visualisationType === 'map') {
+        return Boolean(mapDatasetLayers(viz).find(layerDatasetId => layerDatasetId === datasetId));
+      }
+      return datasetId === filterByDataset;
+    };
   }
 
   if (!filterText) {
-    return visualisations.filter(({ spec, visualisationType, datasetId }) =>
-      specIsValidForApi(spec, visualisationType) && datasetCondition(datasetId)
+    return visualisations.filter(({ spec, visualisationType, datasetId, ...viz }) =>
+      specIsValidForApi(spec, visualisationType) && datasetCondition(viz, datasetId)
     );
   }
   return visualisations.filter((visualisation) => {
