@@ -293,10 +293,9 @@ class DashboardEditor extends Component {
     const visualisations = getArrayFromObject(this.props.visualisations);
     const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
     const selectedDatasetColumns = filter.datasetId && datasets[filter.datasetId] && filterColumns(datasets[filter.datasetId].get('columns'), 'text');
-    const newColumnFilterSelect = idx => (options, finder) =>
-    (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px' }}>
+    const newColumnFilterSelect = idx => (options, finder, removeable) =>
+    (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px', position: 'relative' }}>
       <SelectMenu
-        isClearable
         key={`selectFilterColumn-${idx}`}
         onChange={(columnName) => {
           const filterColumn = {
@@ -316,7 +315,22 @@ class DashboardEditor extends Component {
         }}
         options={options}
         value={finder(filter.columns[idx])}
+        width={'calc(100% - 2rem)'}
+        style={{ position: 'absolute' }}
       />
+      {removeable &&
+        <button
+          className="selectFilterColumnRemove"
+          style={{ position: 'absolute', right: 0, top: 0, height: '2rem', width: '2rem' }}
+          onClick={() => {
+            filter.columns.splice(idx, 1);
+            this.props.dispatch(fetchColumn(filter.datasetId, null));
+            onFilterChange(filter);
+          }}
+        >
+          <span />
+        </button>
+      }
     </div>);
     const selectedFilterColumnsDict = new Set(filter.columns.map(x => x.column));
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
@@ -406,10 +420,10 @@ class DashboardEditor extends Component {
                     {
                       filter.columns.map((o, idx) =>
                       newColumnFilterSelect(idx)(columnFilterSelectOptions,
-                        finderFilterSelectOptions))
+                        finderFilterSelectOptions, true))
                     }
                     {newColumnFilterSelect(filter.columns.length)(columnFilterSelectOptions,
-                      finderFilterSelectOptions)}
+                      finderFilterSelectOptions, false)}
                   </div>
                 </div>}
             </div>
