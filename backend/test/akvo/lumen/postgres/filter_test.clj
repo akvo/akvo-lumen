@@ -114,5 +114,5 @@
                     :columnType "text",
                     :value nil}]
           r (f/sql-str columns filters)]
-      (is (= "(coalesce(c4, '') = 'South')"
+      (is (= "(coalesce(c4, '') = 'South') AND (coalesce(c3, '') = 'null')"
              r) ))))
