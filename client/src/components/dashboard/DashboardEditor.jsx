@@ -416,7 +416,7 @@ class DashboardEditor extends Component {
                       </span>
                     </div>
                   </div>
-                  <div className="filterInput" style={{ marginTop: '5px' }}>
+                  <div className="filterInput" style={{ marginTop: '0.7rem' }}>
                     {
                       filter.columns.map((o, idx) =>
                       newColumnFilterSelect(idx)(columnFilterSelectOptions,
