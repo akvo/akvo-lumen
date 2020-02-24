@@ -112,7 +112,11 @@ export default function DashboardCanvasItem(props) {
             className="itemTitle"
             ref={titleEl}
           >
-            <span title={(exporting || unfiltered) ? intl.messages.not_affected_by_applied_filters : null}>
+            <span
+              title={
+                (exporting || unfiltered) ? intl.messages.not_affected_by_applied_filters : null
+              }
+            >
               <h2>{getTitle(item.visualisation)}</h2>
               <div className="unfilteredMessage">
                 {getSubTitle()}
