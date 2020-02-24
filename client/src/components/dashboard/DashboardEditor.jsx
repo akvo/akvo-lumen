@@ -496,6 +496,7 @@ class DashboardEditor extends Component {
                     onEntityUpdate={this.handleEntityUpdate}
                     ref={(c) => { this.canvasElements[item.id] = c; }}
                     exporting={exporting}
+                    intl={this.props.intl}
                   />
                 </div>
               ))}
