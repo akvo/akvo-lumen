@@ -99,7 +99,6 @@
   (if (empty? filters)
     "TRUE"
     (let [filters (->> filters
-                       (filter :value)
                        (map #(assoc % :column (find-column columns (:column %)))))]
       (str/join " AND " (map #(format "(%s)" (filter-sql %))
                              filters)))))
