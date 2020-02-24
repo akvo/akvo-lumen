@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape } from 'react-intl';
 
 import VisualisationViewer from '../charts/VisualisationViewer';
 import DashboardCanvasItemEditable from './DashboardCanvasItemEditable';
@@ -90,7 +90,7 @@ export default function DashboardCanvasItem(props) {
     titleEl.current.getBoundingClientRect().height :
     TITLE_HEIGHT;
 
-  const { item, exporting, canvasLayout } = props;
+  const { intl, item, exporting, canvasLayout } = props;
   const { unfiltered } = item;
   let marginTop = 0;
 
@@ -112,11 +112,16 @@ export default function DashboardCanvasItem(props) {
             className="itemTitle"
             ref={titleEl}
           >
-            <h2>{getTitle(item.visualisation)}</h2>
-            <div className="unfilteredMessage">
-              {getSubTitle()}
-              {exporting && unfiltered && <span className="notAffected"> <FormattedMessage id="not_affected_by_applied_filters" /></span>}
-            </div>
+            <span
+              title={
+                (exporting || unfiltered) ? intl.messages.not_affected_by_applied_filters : null
+              }
+            >
+              <h2>{getTitle(item.visualisation)}</h2>
+              <div className="unfilteredMessage">
+                {getSubTitle()}
+              </div>
+            </span>
           </div>
           <div className="noPointerEvents itemContainer visualisation">
             {getIsDatasetLoaded(props) ?
@@ -175,4 +180,5 @@ DashboardCanvasItem.propTypes = {
   focused: PropTypes.bool,
   onSave: PropTypes.func,
   exporting: PropTypes.bool,
+  intl: intlShape,
 };
