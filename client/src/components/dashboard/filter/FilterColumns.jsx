@@ -19,7 +19,9 @@ export default function FilterColumns({ filter, intl, dataset, onFilterValueChan
       const columnIndex = filter.columns.findIndex(x => x.column === o.column);
       return (
         <div style={{ paddingBottom: '10px', paddingRight: '1rem', display: 'inline-block' }} key={`div-filterColumn-${idx}`}>
-          <span style={{ fontWeight: 'bold' }}>{column && column.get('title')}</span>
+          <span style={{ fontWeight: 'bold', marginBottom: '0.5rem', display: 'block' }}>
+            {column && column.get('title')}
+          </span>
           <SelectMenu
             name="datasets"
             isClearable
