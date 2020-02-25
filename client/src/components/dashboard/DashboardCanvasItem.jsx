@@ -90,9 +90,10 @@ export default function DashboardCanvasItem(props) {
     titleEl.current.getBoundingClientRect().height :
     TITLE_HEIGHT;
 
-  const { intl, item, exporting, canvasLayout } = props;
-  const { unfiltered } = item;
+  const { intl, item, filter, exporting, canvasLayout } = props;
+  const { filterAffected } = item;
   let marginTop = 0;
+  const dashFiltered = filter.columns.find(c => c.value);
 
   if (exporting) {
     const layoutItem = canvasLayout.filter(({ i }) => i === item.id)[0];
@@ -107,14 +108,15 @@ export default function DashboardCanvasItem(props) {
       style={{ marginTop }}
     >
       {item.type === 'visualisation' && (
-        <div className={`itemContainerWrap ${!exporting && unfiltered ? 'unFiltered' : ''}`}>
+        <div className={`itemContainerWrap ${!exporting && !filterAffected && dashFiltered ? 'unFiltered' : ''}`}>
           <div
             className="itemTitle"
             ref={titleEl}
           >
             <span
               title={
-                (exporting || unfiltered) ? intl.messages.not_affected_by_applied_filters : null
+                (exporting ||
+                  !filterAffected) ? intl.messages.not_affected_by_applied_filters : null
               }
             >
               <h2>{getTitle(item.visualisation)}</h2>
@@ -174,6 +176,7 @@ DashboardCanvasItem.propTypes = {
   rowHeight: PropTypes.number.isRequired,
   datasets: PropTypes.object.isRequired,
   metadata: PropTypes.object,
+  filter: PropTypes.object,
   onEntityUpdate: PropTypes.func.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   onFocus: PropTypes.func.isRequired,
