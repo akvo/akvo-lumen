@@ -117,32 +117,32 @@ const fetchDashboard = (env, password, callback) =>
               callback();
               return null;
             }
-            return response.json();
-          })
-          .then((data) => {
-            if (data) return data;
-            throw Error(`NO DATA FOR: /share/${shareId}`);
-          })
-          .then((data) => {
-            if (data.dashboardId) {
-              const dashboard = data.dashboards[data.dashboardId];
-              const datasetId = dashboard.filter.datasetId;
-              if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
-                const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
-                return Promise.all(columnsFetch).then(responses => [data, responses]);
-              // eslint-disable-next-line no-else-return
-              } else {
-                return [data];
-              }
-            }
-            return [data];
-          })
-          .then(([data, filterColumnsFetched]) =>
-            renderSuccessfulShare(data, filterColumnsFetched, { env }, onChangeFilter)
-          )
-          .catch((error) => {
-            renderNoSuchShare();
-            throw error;
+            return response.json()
+                    .then((data) => {
+                      if (data) return data;
+                      throw Error(`NO DATA FOR: /share/${shareId}`);
+                    })
+                    .then((data) => {
+                      if (data.dashboardId) {
+                        const dashboard = data.dashboards[data.dashboardId];
+                        const datasetId = dashboard.filter.datasetId;
+                        if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
+                          const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
+                          return Promise.all(columnsFetch).then(responses => [data, responses]);
+                        // eslint-disable-next-line no-else-return
+                        } else {
+                          return [data];
+                        }
+                      }
+                      return [data];
+                    })
+                    .then(([data, filterColumnsFetched]) =>
+                      renderSuccessfulShare(data, filterColumnsFetched, { env }, onChangeFilter)
+                    )
+                    .catch((error) => {
+                      renderNoSuchShare();
+                      throw error;
+                    });
           });
   };
 

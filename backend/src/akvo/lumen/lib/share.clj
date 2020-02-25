@@ -69,7 +69,7 @@
                                           :protected protected}))
           (lib/ok {}))
         (lib/bad-request {:message "Invalid password (min 8 characters)"}))
-      (if (boolean? protected)
+      (if (and (boolean? protected) protected)
         (if (-> (db.public/public-by-id tenant-conn {:id id})
                 :password
                 (valid-password?))
@@ -77,7 +77,9 @@
             (db.share/db-set-protected-flag tenant-conn {:id id :protected protected})
             (lib/ok {}))
           (lib/bad-request {:message "Can't enable protection without valid password"}))
-        (lib/bad-request {:message "Nothing to update"})))
+        (do
+          (db.share/db-set-protected-flag tenant-conn {:id id :protected protected})
+          (lib/ok {:message "Dashboard is not protected now"}))))
 
     (catch Exception e
       (prn e)
