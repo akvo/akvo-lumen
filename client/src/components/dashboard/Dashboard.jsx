@@ -500,7 +500,7 @@ class Dashboard extends Component {
       this.setState({ passwordAlert: { message: this.props.intl.formatMessage({ id: 'enter_password' }), type: 'danger' } });
       return;
     }
-    if (password.length < 7) {
+    if (password.length < 8) {
       this.setState({ passwordAlert: { message: this.props.intl.formatMessage({ id: 'enter_password_8' }), type: 'danger' } });
       return;
     }
@@ -521,13 +521,30 @@ class Dashboard extends Component {
   }
 
   handleToggleShareProtected(isProtected) {
-    this.setState({
-      passwordAlert: null,
-      dashboard: {
-        ...this.state.dashboard,
-        protected: isProtected,
-      },
-    });
+    if (isProtected) {
+      this.setState({
+        passwordAlert: null,
+        dashboard: {
+          ...this.state.dashboard,
+          protected: isProtected,
+        },
+      });
+    } else {
+      const dashboard = getDashboardFromState(this.state.dashboard, true);
+      this.setState({ passwordAlert: null });
+      this.props.dispatch(actions.setShareProtection(
+        dashboard.shareId,
+        { protected: false },
+        (error) => {
+          const message = get(error, 'message');
+          if (message) {
+            this.setState({ passwordAlert: { message, type: 'danger' } });
+            return;
+          }
+          this.setState({ passwordAlert: { message: 'Saved successfully.' } });
+        }
+      ));
+    }
   }
 
   toggleShareDashboard() {
