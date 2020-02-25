@@ -521,13 +521,30 @@ class Dashboard extends Component {
   }
 
   handleToggleShareProtected(isProtected) {
-    this.setState({
-      passwordAlert: null,
-      dashboard: {
-        ...this.state.dashboard,
-        protected: isProtected,
-      },
-    });
+    if (isProtected) {
+      this.setState({
+        passwordAlert: null,
+        dashboard: {
+          ...this.state.dashboard,
+          protected: isProtected,
+        },
+      });
+    } else {
+      const dashboard = getDashboardFromState(this.state.dashboard, true);
+      this.setState({ passwordAlert: null });
+      this.props.dispatch(actions.setShareProtection(
+        dashboard.shareId,
+        { protected: false },
+        (error) => {
+          const message = get(error, 'message');
+          if (message) {
+            this.setState({ passwordAlert: { message, type: 'danger' } });
+            return;
+          }
+          this.setState({ passwordAlert: { message: 'Saved successfully.' } });
+        }
+      ));
+    }
   }
 
   toggleShareDashboard() {
