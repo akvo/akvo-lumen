@@ -104,6 +104,8 @@
   "email_verified_error": "Vous devez vérifier votre adresse e-mail. Vérifiez votre boîte de courrier electronique et cliquez sur le lien de vérification",
   "enter_a_number": "Entrez un nombre",
   "enter_text_here": "Entrez le texte ici",
+  "enter_password": "Entrez un mot de passe.",
+  "enter_password_8": "Votre mot de passe doit contenir un minimum de 8 caractères.",
   "exactly_matches": "Correspond exactement",
   "export": "Exporter",
   "extract": "Extrait",
