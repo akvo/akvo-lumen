@@ -106,6 +106,8 @@
   "email_verified_error": "You need to verify your email address. Please check your inbox and click the verification link.",
   "enter_text_here": "Enter text here",
   "enter_a_number": "Enter a number",
+  "enter_password": "Please enter a password.",
+  "enter_password_8": "Please enter a password with at least 8 characters.",
   "exactly_matches": "exactly matches",
   "export": "Export",
   "extract": "Extract",

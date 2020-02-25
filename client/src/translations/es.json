@@ -103,6 +103,8 @@
   "email_verified_error": "Necesita verificar su dirección de email, por favor revise su buzón de correo y haga click en el enlace de verificación",
   "enter_a_number": "Introduzca un número",
   "enter_text_here": "Introduzca el texto aquí",
+  "enter_password": "Por favor, introduzca una contraseña.",
+  "enter_password_8": "Por favor, introduzca una contraseña con al menos 8 caracteres.",
   "exactly_matches": "Exactamente coincide",
   "export": "Exportar",
   "extract": "Extraer",
