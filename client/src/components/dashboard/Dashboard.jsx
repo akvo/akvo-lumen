@@ -177,12 +177,9 @@ class Dashboard extends Component {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const dashboardAlreadyLoaded = this.state.dashboard.layout.length !== 0;
     const { dashboardId } = nextProps.params;
-
-    if (
-      (isEditingExistingDashboard && !dashboardAlreadyLoaded) ||
-      get(this.state, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`) ||
-      get(this.state, 'dashboard.protected') !== get(nextProps, `library.dashboards[${dashboardId}].protected`)
-    ) {
+    const sharedAction = get(this.state, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`) ||
+    get(this.state, 'dashboard.protected') !== get(nextProps, `library.dashboards[${dashboardId}].protected`);
+    if ((isEditingExistingDashboard && !dashboardAlreadyLoaded) || sharedAction) {
       /* We need to load a dashboard, and we haven't loaded it yet. Check if nextProps has both i)
       /* the dashboard and ii) the visualisations the dashboard contains, then load the dashboard
       /* editor if both these conditions are true. */
@@ -202,7 +199,7 @@ class Dashboard extends Component {
           /* componentWillReceiveProps will be called again. */
           return;
         }
-        if (dash.aggregated) {
+        if (dash.aggregated || sharedAction) {
           this.loadDashboardIntoState(nextProps.library, dash);
         }
       }
