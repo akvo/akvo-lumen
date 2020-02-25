@@ -500,7 +500,7 @@ class Dashboard extends Component {
       this.setState({ passwordAlert: { message: this.props.intl.formatMessage({ id: 'enter_password' }), type: 'danger' } });
       return;
     }
-    if (password.length < 7) {
+    if (password.length < 8) {
       this.setState({ passwordAlert: { message: this.props.intl.formatMessage({ id: 'enter_password_8' }), type: 'danger' } });
       return;
     }
