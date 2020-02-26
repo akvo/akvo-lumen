@@ -115,13 +115,16 @@ export default function DashboardCanvasItem(props) {
           >
             <span
               title={
-                (exporting ||
-                  !filterAffected) ? intl.messages.not_affected_by_applied_filters : null
+                exporting && !filterAffected && dashFiltered ?
+                intl.messages.not_affected_by_applied_filters : null
               }
             >
               <h2>{getTitle(item.visualisation)}</h2>
               <div className="unfilteredMessage">
                 {getSubTitle()}
+                {exporting && !filterAffected && dashFiltered &&
+                <span className="notAffected"> <FormattedMessage id="not_affected_by_applied_filters" /></span>}
+
               </div>
             </span>
           </div>
