@@ -93,8 +93,8 @@ const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
 let hasSubmitted = false;
 
-const fetchFilterColumn = (dashboardId, columnName, columnType, password, callback) =>
-fetch(`/share/dataset/${dashboardId}/column/${columnName}`, { headers: { 'X-Password': password } })
+const fetchFilterColumn = (datasetId, columnName, columnType, password, callback) =>
+fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}`, { headers: { 'X-Password': password } })
 .then((response) => {
   if (response.status === 403) {
     renderPrivacyGate(); // eslint-disable-line
@@ -126,6 +126,7 @@ const fetchDashboard = (env, password, callback) =>
                       if (data.dashboardId) {
                         const dashboard = data.dashboards[data.dashboardId];
                         const datasetId = dashboard.filter.datasetId;
+                        console.log(Object.keys(data.datasets), dashboard.filter.datasetId);
                         if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
                           const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
                           return Promise.all(columnsFetch).then(responses => [data, responses]);
