@@ -10,6 +10,7 @@ import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
 import { groupIntoPages } from '../../utilities/dashboard';
 import { datasetsWithVisualizations } from '../../utilities/dataset';
+import { withDatasetRelated } from '../../utilities/visualisation';
 import { filterColumns } from '../../utilities/column';
 import { A4 } from '../../constants/print';
 import SelectMenu from '../common/SelectMenu';
@@ -344,6 +345,7 @@ class DashboardEditor extends Component {
     const finderFilterSelectOptions = v => columnFilterSelectAllOptions &&
     columnFilterSelectAllOptions.find(o => (v ? o.value === v.column : false));
     const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
+    const datasetCondition = withDatasetRelated(filter.datasetId);
     return (
       <div
         className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
@@ -411,7 +413,7 @@ class DashboardEditor extends Component {
                     <div>
                       <span title={intl.messages.visualisations_that_can_be_filtered}>
                         {dashboardEntitiesVisualisations.filter(v =>
-                          v.datasetId === filter.datasetId).length}/
+                          datasetCondition(v)).length}/
                         {dashboardEntitiesVisualisations.length} <FormattedMessage id="visualisations" />
                       </span>
                     </div>
