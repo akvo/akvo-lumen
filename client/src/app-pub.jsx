@@ -126,10 +126,29 @@ const fetchDashboard = (env, password, callback) =>
                       if (data.dashboardId) {
                         const dashboard = data.dashboards[data.dashboardId];
                         const datasetId = dashboard.filter.datasetId;
-                        console.log(Object.keys(data.datasets), dashboard.filter.datasetId);
+                        const datasetKeys = new Set(Object.keys(data.datasets));
                         if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
                           const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
-                          return Promise.all(columnsFetch).then(responses => [data, responses]);
+                          return Promise.all(columnsFetch).then((responses) => {
+                            if (datasetKeys.has(dashboard.filter.datasetId)) {
+                              return [data, responses];
+                            }
+                            return fetch(`/share/${shareId}/dataset/${datasetId}`, { headers: { 'X-Password': password } })
+                            // eslint-disable-next-line no-shadow
+                            .then((response) => {
+                              if (response.status === 403) {
+                                renderPrivacyGate(); // eslint-disable-line
+                                callback();
+                                return null;
+                              }
+                              return response.json();
+                            }).then((dataset) => {
+                              const udpatedData = data;
+                              udpatedData.datasets[dataset.id] = dataset;
+                              return [udpatedData, responses];
+                            });
+                          }
+                            );
                         // eslint-disable-next-line no-else-return
                         } else {
                           return [data];
