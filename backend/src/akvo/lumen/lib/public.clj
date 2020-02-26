@@ -31,12 +31,19 @@
       (assoc (aggregation/visualisation-response-data tenant-conn visualisation-id windshaft-url {})
              :visualisationId visualisation-id))))
 
+(defn share* [tenant-conn id]
+  (get-share tenant-conn id))
+
+(defn auth-share* [share password]
+  (if (:protected share)
+    (when (scrypt/verify (format "%s|%s" (:id share) password) (:password share))
+      share)
+    share))
+
 (defn share
   [tenant-conn windshaft-url id password dashboard-filter]
-  (if-let [share (get-share tenant-conn id)]
-    (if (:protected share)
-      (if (scrypt/verify (format "%s|%s" id password) (:password share))
-        (lib/ok (response-data tenant-conn share windshaft-url dashboard-filter))
-        (lib/not-authorized {"shareId" id}))
-      (lib/ok (response-data tenant-conn share windshaft-url dashboard-filter)))
+  (if-let [share (share* tenant-conn id)]
+    (if-let [auth-share* (auth-share* share password)]
+      (lib/ok (response-data tenant-conn auth-share* windshaft-url dashboard-filter))
+      (lib/not-authorized {"shareId" id}))
     (lib/not-found {"shareId" id})))
