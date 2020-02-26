@@ -61,6 +61,9 @@ const getViewportType = (width) => {
 class DashboardViewer extends Component {
   constructor() {
     super();
+    this.state = {
+      dashFiltered: false,
+    };
     this.getItemFromProps = this.getItemFromProps.bind(this);
   }
 
@@ -112,8 +115,12 @@ class DashboardViewer extends Component {
             <FilterColumns
               filter={dashboard.filter}
               dataset={datasets[dashboard.filter.datasetId]}
-              onFilterValueChange={filter => onFilterValueChange(JSON.stringify({ filter }),
-              onFilterValueChange)}
+              onFilterValueChange={(filter) => {
+                this.setState({ dashFiltered: Boolean(filter.columns.find(c => c.value)) });
+                onFilterValueChange(JSON.stringify({ filter }),
+              onFilterValueChange);
+              }
+            }
               intl={this.props.intl}
             /></div>
         }
@@ -126,7 +133,7 @@ class DashboardViewer extends Component {
           {sortedDashboard.map(item =>
             <DashboardViewerItem
               key={item.id}
-              filter={dashboard.filter}
+              dashFiltered={this.state.dashFiltered || false}
               item={this.getItemFromProps(item)}
               layout={layout[item.id]}
               canvasWidth={windowWidth}

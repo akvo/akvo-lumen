@@ -96,14 +96,13 @@ export default class DashboardViewerItem extends Component {
   }
 
   render() {
-    const { item, filter } = this.props;
+    const { item, dashFiltered } = this.props;
     const isText = item.type === 'text';
     const isVisualisation = (item.type === 'visualisation' && item.visualisation);
     const style = this.getItemStyle();
     const titleHeight = this.titleEl ?
       this.titleEl.getBoundingClientRect().height :
       TITLE_HEIGHT;
-    const dashFiltered = filter.columns.find(c => c.value);
 
     return (
       <div
@@ -151,7 +150,7 @@ DashboardViewerItem.propTypes = {
   canvasWidth: PropTypes.number.isRequired,
   viewportType: PropTypes.oneOf(['small', 'medium', 'large']),
   datasets: PropTypes.object,
-  filter: PropTypes.object,
+  dashFiltered: PropTypes.boolean,
   metadata: PropTypes.object,
 };
 
