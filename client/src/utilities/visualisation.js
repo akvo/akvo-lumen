@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import itsSet from 'its-set';
+import { mapDatasetLayers } from './dataset';
 
 import specMappings from '../constants/Visualisation/visualisationSpecMappings';
 
@@ -23,4 +24,18 @@ export const remapVisualisationDataColumnMappings = (visualisation, newVisualisa
       }
       return result;
     }, {});
+};
+
+
+export const withDatasetRelated = (datasetId) => {
+  if (datasetId) {
+    return (viz) => {
+      if (viz.visualisationType === 'map') {
+        return Boolean(mapDatasetLayers(viz).find(layerDatasetId =>
+          layerDatasetId === datasetId));
+      }
+      return viz.datasetId === datasetId;
+    };
+  }
+  return () => true;
 };
