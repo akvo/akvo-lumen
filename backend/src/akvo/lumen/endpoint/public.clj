@@ -38,25 +38,33 @@
   [["/:id"
     ["" {:get {:parameters {:path-params {:id string?}}
             :handler (handler opts)}}]
-    ["/dataset/:dataset-id/column/:column-name"
+    ["/dataset/:dataset-id"
+     ["" {:get {:parameters e.dataset/fetch-column-params
+                :handler (fn [{tenant :tenant
+                               headers :headers
+                               {:keys [id dataset-id]} :path-params}]
+                           (let [password (get headers "x-password")
+                                 tenant-conn (p/connection tenant-manager tenant)]
+                             (if-let [share (public/share* tenant-conn id)]
+                               (if-let [auth-share (public/auth-share* share password)]
+                                 (lib/ok
+                                  (dataset/fetch tenant-conn dataset-id))
+                                 (lib/not-authorized {:share-id id}))
+                               (lib/not-found {:share-id id}))))}}]
+     ["/column/:column-name" {:get {:parameters e.dataset/fetch-column-params
+                                    :handler (fn [{tenant :tenant
+                                                   headers :headers
+                                                   {:keys [id dataset-id column-name]} :path-params
 
-     {:get {:parameters e.dataset/fetch-column-params
-            :handler (fn [{tenant :tenant
-                           headers :headers
-                           {:keys [id dataset-id column-name]} :path-params
-
-                           query-params :query-params}]
-                       (let [password (get headers "x-password")
-                             tenant-conn (p/connection tenant-manager tenant)]
-                         (if-let [share (public/share* tenant-conn id)]
-                           (if-let [auth-share (public/auth-share* share password)]
-                             (lib/ok
-                              (dataset/sort-text tenant-conn dataset-id column-name (get query-params "limit")))
-                             (lib/not-authorized {:share-id id}))
-                           (lib/not-found {:share-id id})
-                           )
-))}}
-     ]]])
+                                                   query-params :query-params}]
+                                               (let [password (get headers "x-password")
+                                                     tenant-conn (p/connection tenant-manager tenant)]
+                                                 (if-let [share (public/share* tenant-conn id)]
+                                                   (if-let [auth-share (public/auth-share* share password)]
+                                                     (lib/ok
+                                                      (dataset/sort-text tenant-conn dataset-id column-name (get query-params "limit")))
+                                                     (lib/not-authorized {:share-id id}))
+                                                   (lib/not-found {:share-id id}))))}}]]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
   (routes opts))
