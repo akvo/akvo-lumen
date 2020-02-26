@@ -4,7 +4,8 @@ import { FormattedMessage } from 'react-intl';
 import moment from 'moment';
 import { getIconUrl, getModifiedTimestamp } from '../../domain/entity';
 import { specIsValidForApi } from '../../utilities/aggregation';
-import { datasetsWithVisualizations, mapDatasetLayers } from '../../utilities/dataset';
+import { datasetsWithVisualizations } from '../../utilities/dataset';
+import { withDatasetRelated } from '../../utilities/visualisation';
 import SelectMenu from '../common/SelectMenu';
 import { trackEvent } from '../../utilities/analytics';
 import { FILTER_VISUALISATIONS_BY_DATASET_IN_DASHBOARD } from '../../constants/analytics';
@@ -16,20 +17,11 @@ const filterVisualisations = (visualisations, filterText, filterByDataset, sorte
   // with something more serious before users start to have thousands of visualisations
   if (sortedBy) { visualisations.sort((a, b) => b[sortedBy] - a[sortedBy]); }
 
-  let datasetCondition = () => true;
-  if (filterByDataset) {
-    datasetCondition = (viz, datasetId) => {
-      if (viz.visualisationType === 'map') {
-        return Boolean(mapDatasetLayers(viz).find(layerDatasetId =>
-          layerDatasetId === filterByDataset));
-      }
-      return datasetId === filterByDataset;
-    };
-  }
+  const datasetCondition = withDatasetRelated(filterByDataset);
 
   if (!filterText) {
     return visualisations.filter(viz =>
-      specIsValidForApi(viz.spec, viz.visualisationType) && datasetCondition(viz, viz.datasetId)
+      specIsValidForApi(viz.spec, viz.visualisationType) && datasetCondition(viz)
     );
   }
   return visualisations.filter((visualisation) => {
