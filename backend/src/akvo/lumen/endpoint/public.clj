@@ -20,51 +20,45 @@
                    ::monitoring/collector
                    ::windshaft-url] ))
 
-(defn handler [{:keys [tenant-manager windshaft-url collector]}]
-  (fn [{{:keys [id]} :path-params
-        query-params :query-params
-        tenant :tenant
-        headers :headers}]
-    (let [tenant-conn (p/connection tenant-manager tenant)
-          password (get headers "x-password")
-          filters (dashboard/extract-query-filter query-params)]
-      (when (seq (:columns filters))
-        (prometheus/inc
-         (registry/get collector :app/dashboard-apply-filter {"tenant" tenant
-                                                              "dashboard" id})))
-      (public/share tenant-conn windshaft-url id password filters))))
-
-(defn routes [{:keys [tenant-manager collector] :as opts}]
+(defn routes [{:keys [tenant-manager windshaft-url collector] :as opts}]
   [["/:id"
+    {:middleware [(fn [handler]
+                   (fn [{tenant :tenant
+                         headers :headers
+                         {:keys [id]} :path-params
+                         :as req}]
+                     (let [password (get headers "x-password")
+                           tenant-conn (p/connection tenant-manager tenant)]
+                       (if-let [share (public/share* tenant-conn id)]
+                         (if-let [auth-share (public/auth-share* share password)]
+                           (handler (assoc req :auth-share auth-share))                         
+                           (lib/not-authorized {"shareId" id}))
+                         (lib/not-found {"shareId" id})))))]}
     ["" {:get {:parameters {:path-params {:id string?}}
-            :handler (handler opts)}}]
+               :handler (fn [{query-params :query-params
+                              tenant :tenant
+                              {:keys [id]} :path-params
+                              auth-share :auth-share}]
+                          (let [filters (dashboard/extract-query-filter query-params)]
+                            (when (seq (:columns filters))
+                              (prometheus/inc
+                               (registry/get collector :app/dashboard-apply-filter {"tenant" tenant
+                                                                                    "dashboard" id})))
+                            (lib/ok (public/response-data (p/connection tenant-manager tenant)
+                                                          auth-share windshaft-url filters))))}}]
     ["/dataset/:dataset-id"
      ["" {:get {:parameters e.dataset/fetch-column-params
                 :handler (fn [{tenant :tenant
-                               headers :headers
-                               {:keys [id dataset-id]} :path-params}]
-                           (let [password (get headers "x-password")
-                                 tenant-conn (p/connection tenant-manager tenant)]
-                             (if-let [share (public/share* tenant-conn id)]
-                               (if-let [auth-share (public/auth-share* share password)]
-                                 (lib/ok
-                                  (dataset/fetch tenant-conn dataset-id))
-                                 (lib/not-authorized {:share-id id}))
-                               (lib/not-found {:share-id id}))))}}]
+                               {:keys [dataset-id]} :path-params}]
+                           (lib/ok
+                            (dataset/fetch (p/connection tenant-manager tenant) dataset-id)))}}]
      ["/column/:column-name" {:get {:parameters e.dataset/fetch-column-params
                                     :handler (fn [{tenant :tenant
-                                                   headers :headers
-                                                   {:keys [id dataset-id column-name]} :path-params
-
+                                                   {:keys [dataset-id column-name]} :path-params
                                                    query-params :query-params}]
-                                               (let [password (get headers "x-password")
-                                                     tenant-conn (p/connection tenant-manager tenant)]
-                                                 (if-let [share (public/share* tenant-conn id)]
-                                                   (if-let [auth-share (public/auth-share* share password)]
-                                                     (lib/ok
-                                                      (dataset/sort-text tenant-conn dataset-id column-name (get query-params "limit")))
-                                                     (lib/not-authorized {:share-id id}))
-                                                   (lib/not-found {:share-id id}))))}}]]]])
+                                               (let [tenant-conn (p/connection tenant-manager tenant)]
+                                                 (lib/ok
+                                                  (dataset/sort-text tenant-conn dataset-id column-name (get query-params "limit")))))}}]]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
   (routes opts))
