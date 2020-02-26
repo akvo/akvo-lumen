@@ -100,27 +100,27 @@
                                  layers)]
     (cond
       (not (contains? map-datasets-ids (:datasetId filters)))
-      (assoc visualisation :unfiltered true)
+      (assoc visualisation :filterAffected false)
 
       :else
       (-> visualisation
-          (assoc :unfiltered false)
+          (assoc :filterAffected true)
           (a.maps/add-filters filters)))))
 
 (defmethod merge-dashboard-filters :default [visualisation filters]
   (cond
     (not (= (:datasetId visualisation) ;; Valid filter but no match on datasets
             (:datasetId filters)))
-    (assoc visualisation :unfiltered true)
+    (assoc visualisation :filterAffected false)
 
     :else ;; Valid filter and matching dataset
     (-> visualisation
         (update-in [:spec "filters"] #(concat % (filter :value (:columns filters))))
-        (assoc :unfiltered false))))
+        (assoc :filterAffected true))))
 
 (defn dashboard-filters [visualisation filters]
   (if (empty? (:columns filters)) ;; No valid filter
-    (assoc visualisation :unfiltered false)
+    (assoc visualisation :filterAffected false)
     (merge-dashboard-filters visualisation filters)))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url filters]

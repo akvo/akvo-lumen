@@ -126,6 +126,7 @@ class DashboardViewer extends Component {
           {sortedDashboard.map(item =>
             <DashboardViewerItem
               key={item.id}
+              filter={dashboard.filter}
               item={this.getItemFromProps(item)}
               layout={layout[item.id]}
               canvasWidth={windowWidth}

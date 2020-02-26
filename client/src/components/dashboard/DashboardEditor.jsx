@@ -325,7 +325,7 @@ class DashboardEditor extends Component {
           onClick={() => {
             filter.columns.splice(idx, 1);
             this.props.dispatch(fetchColumn(filter.datasetId, null));
-            onFilterChange(filter);
+            onFilterChange(filter, true);
           }}
         >
           <span />
@@ -392,7 +392,7 @@ class DashboardEditor extends Component {
                       if (filter.datasetId !== id) {
                         filter.datasetId = id;
                         filter.columns = [];
-                        onFilterChange(filter);
+                        onFilterChange(filter, true);
                         if (id) {
                           this.props.dispatch(fetchDataset(id, true));
                         }
@@ -484,6 +484,7 @@ class DashboardEditor extends Component {
                     onFocus={() => {
                       this.setState({ focusedItem: item.id });
                     }}
+                    filter={filter}
                     focused={this.state.focusedItem === item.id}
                     item={this.getItemFromLibrary(item)}
                     datasets={this.props.datasets}
