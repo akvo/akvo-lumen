@@ -29,7 +29,7 @@ import { showNotification } from '../../actions/notification';
 
 require('./Dashboard.scss');
 
-const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '1';
+const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '0';
 
 const getEditingStatus = (location) => {
   const testString = 'create';
@@ -654,8 +654,9 @@ class Dashboard extends Component {
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
     const { exporting } = this.props;
-    const filteredDashboard = this.props.filteredDashboard || filteredDashboardCondition() ||
+    const filteredDashboard = (this.props.filteredDashboard && !filteredDashboardCondition()) ||
     Boolean(this.props.query && this.props.query.filter);
+    console.log(filteredDashboard, this.props.filteredDashboard, filteredDashboardCondition());
     return (
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
