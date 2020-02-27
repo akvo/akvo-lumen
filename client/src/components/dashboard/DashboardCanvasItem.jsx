@@ -115,7 +115,7 @@ export default function DashboardCanvasItem(props) {
           >
             <span
               title={
-                exporting && !filterAffected && dashFiltered ?
+                !exporting && !filterAffected && dashFiltered ?
                 intl.messages.not_affected_by_applied_filters : null
               }
             >

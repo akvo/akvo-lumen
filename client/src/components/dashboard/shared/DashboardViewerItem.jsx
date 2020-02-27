@@ -1,7 +1,7 @@
 /* eslint-disable react/no-danger */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape } from 'react-intl';
 
 import AsyncVisualisationViewer from '../../charts/AsyncVisualisationViewer';
 import { getTitle, getDataLastUpdated } from '../../../utilities/chart';
@@ -96,7 +96,7 @@ export default class DashboardViewerItem extends Component {
   }
 
   render() {
-    const { item, dashFiltered } = this.props;
+    const { item, dashFiltered, intl } = this.props;
     const isText = item.type === 'text';
     const isVisualisation = (item.type === 'visualisation' && item.visualisation);
     const style = this.getItemStyle();
@@ -119,8 +119,15 @@ export default class DashboardViewerItem extends Component {
                 this.titleEl = c;
               }}
             >
-              <h2>{getTitle(item.visualisation)}</h2>
-              <span>{this.getSubTitle()}</span>
+              <span
+                title={
+                  !item.filterAffected && dashFiltered ?
+                  intl.messages.not_affected_by_applied_filters : null
+                }
+              >
+                <h2>{getTitle(item.visualisation)}</h2>
+                <span>{this.getSubTitle()}</span>
+              </span>
             </div>
             <AsyncVisualisationViewer
               visualisation={item.visualisation}
@@ -152,5 +159,6 @@ DashboardViewerItem.propTypes = {
   datasets: PropTypes.object,
   dashFiltered: PropTypes.boolean,
   metadata: PropTypes.object,
+  intl: intlShape,
 };
 
