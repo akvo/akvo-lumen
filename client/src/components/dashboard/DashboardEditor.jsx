@@ -440,7 +440,6 @@ class DashboardEditor extends Component {
           {filteredDashboard && filter.datasetId &&
            (<div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7', whiteSpace: 'nowrap' }}>
              <FilterColumns
-               exporting={exporting}
                filter={filter}
                dataset={datasets[filter.datasetId]}
                onFilterValueChange={onFilterValueChange}

@@ -3,13 +3,9 @@ import PropTypes from 'prop-types';
 import { intlShape } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 
-export default function FilterColumns({ filter, intl, dataset, onFilterValueChange, exporting }) {
-  let filterColumns;
-  if (exporting) {
-    filterColumns = filter.columns.filter(c => c.value);
-  } else {
-    filterColumns = filter.columns;
-  }
+export default function FilterColumns({ filter, intl, dataset, onFilterValueChange }) {
+  const filterColumns = filter.columns;
+
   return filterColumns.map((o, idx) => {
     const columns = dataset && dataset.get('columns');
     if (columns) {
