@@ -116,9 +116,10 @@ class DashboardViewer extends Component {
               filter={dashboard.filter}
               dataset={datasets[dashboard.filter.datasetId]}
               onFilterValueChange={(filter) => {
-                this.setState({ dashFiltered: Boolean(filter.columns.find(c => c.value)) });
                 onFilterValueChange(JSON.stringify({ filter }),
-              onFilterValueChange);
+              onFilterValueChange, () =>
+              this.setState({ dashFiltered: Boolean(filter.columns.find(c => c.value)) })
+              );
               }
             }
               intl={this.props.intl}

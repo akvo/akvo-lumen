@@ -103,7 +103,6 @@ export default class DashboardViewerItem extends Component {
     const titleHeight = this.titleEl ?
       this.titleEl.getBoundingClientRect().height :
       TITLE_HEIGHT;
-
     return (
       <div
         className={`DashboardViewerItem DashboardCanvasItem ${item.type}`}
