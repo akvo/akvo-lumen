@@ -20,7 +20,7 @@ require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
 const store = configureStore();
-const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '1';
+const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '0';
 
 function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChangeFilter) {
   const datasets = data.datasets;
@@ -30,7 +30,7 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
   if (datasets != null) {
     Object.keys(datasets).forEach((key) => {
       let dataset = Immutable.fromJS(datasets[key]);
-      if (filteredDashboardCondition()) {
+      if (!filteredDashboardCondition()) {
         const datasetId = data.dashboards[data.dashboardId].filter.datasetId;
         if (key === datasetId) {
           dataset = filterColumnsFetched.reduce((d, { columnName, values }) => d.setIn(['columnsFetched', columnName], values), dataset);
@@ -61,7 +61,7 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
                 visualisations={data.visualisations}
                 datasets={immutableDatasets}
                 metadata={data.metadata ? data.metadata : null}
-                filteredDashboard={filteredDashboardCondition()}
+                filteredDashboard={!filteredDashboardCondition()}
                 onFilterValueChange={onChangeFilter}
               />
             ) : (
@@ -127,7 +127,7 @@ const fetchDashboard = (env, password, callback) =>
                         const dashboard = data.dashboards[data.dashboardId];
                         const datasetId = dashboard.filter.datasetId;
                         const datasetKeys = new Set(Object.keys(data.datasets));
-                        if (filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
+                        if (!filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
                           const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
                           return Promise.all(columnsFetch).then((responses) => {
                             if (datasetKeys.has(dashboard.filter.datasetId)) {
