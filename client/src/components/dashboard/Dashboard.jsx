@@ -283,22 +283,18 @@ class Dashboard extends Component {
 
   onFilterChange(filter, needToAggregate) {
     const dashboard = this.state.dashboard;
-    dashboard.filter = filter;
-    this.setState({ dashboard });
     if (needToAggregate && dashboard.entities
       && Object.values(dashboard.entities).length > 0
       && Object.values(dashboard.entities).find(e => e.filterAffected)) {
       this.onApplyFilterValue(filter);
     } else {
+      this.setState({ dashboard });
       this.onSave();
     }
     trackEvent(DASHBOARD_FILTER_CHANGE, window.location.href);
   }
 
   onFilterValueChange(filter, needToAggregate) {
-    const dashboard = this.state.dashboard;
-    dashboard.filter = filter;
-    this.setState({ dashboard });
     this.onApplyFilterValue((needToAggregate || filter.columns.length === 0) && filter);
   }
 
