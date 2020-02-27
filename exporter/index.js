@@ -101,6 +101,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
     const page = await context.newPage();
     page.setDefaultNavigationTimeout(100000);
 
+    
     page.on('pageerror', resolve);
     page.on('error', resolve);
 
