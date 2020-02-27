@@ -140,6 +140,7 @@ class DashboardViewer extends Component {
               viewportType={viewportType}
               datasets={datasets}
               metadata={metadata}
+              intl={this.props.intl}
             />
           )}
         </div>
