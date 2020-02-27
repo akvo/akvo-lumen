@@ -116,7 +116,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
           await page.waitFor(s);
         } catch (error) {
           captureException(error);
-          reject(error);
+          resolve(error);
         }
       }));
     } else {
