@@ -107,7 +107,7 @@ fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}`, { headers: 
 );
 
 const fetchDashboard = (env, password, callback) =>
-  (queryParams, onChangeFilter) => {
+  (queryParams, onChangeFilter, callbackReady) => {
     const url = `/share/${shareId}`;
     const urlWithOptionalParams = queryParams == null ? url : `${url}?query=${encodeURIComponent(queryParams)}`;
     fetch(urlWithOptionalParams, { headers: { 'X-Password': password } })
@@ -156,8 +156,11 @@ const fetchDashboard = (env, password, callback) =>
                       }
                       return [data];
                     })
-                    .then(([data, filterColumnsFetched]) =>
-                      renderSuccessfulShare(data, filterColumnsFetched, { env }, onChangeFilter)
+                    .then(([data, filterColumnsFetched]) => {
+                      if (callbackReady) callbackReady();
+                      return renderSuccessfulShare(data, filterColumnsFetched, { env },
+                        onChangeFilter);
+                    }
                     )
                     .catch((error) => {
                       renderNoSuchShare();
