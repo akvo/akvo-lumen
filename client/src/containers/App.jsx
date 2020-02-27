@@ -18,7 +18,7 @@ import withProps from '../utilities/withProps';
 
 export default function App({ store, history, location, query }) {
   const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
-  const filteredDashboard = store && _.get(store.getState(), path);
+  const filteredDashboard = (store && _.get(store.getState(), path)) === false;
   const queryParsed = (query && JSON.parse(query)) || {};
   return (
     <IntlWrapper>
