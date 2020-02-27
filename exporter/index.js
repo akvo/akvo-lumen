@@ -166,6 +166,7 @@ const MAX_RETRIES = 2;
 const sendScreenshotResponse = ({
   res, format, data, title,
 }) => {
+  if (data.length === undefined) console.log('data.length === undefined', data);
   switch (format) {
     case 'png': {
       res.setHeader('Content-Length', data.length);
