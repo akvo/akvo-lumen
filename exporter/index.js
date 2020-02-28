@@ -61,7 +61,7 @@ const configureScope = (contextData, callback) => {
 };
 
 const app = express();
-let browser;
+
 let currentJobCount = 0;
 const MAX_CONCURRENT_JOBS = 5;
 
@@ -70,9 +70,6 @@ app.use(cors());
 
 (async () => {
   try {
-    browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    });
     console.log('Exporter started...');
     app.listen(process.env.PORT || 3001, '0.0.0.0');
   } catch (err) {
@@ -114,7 +111,11 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   console.log('Filter: ', filter);
 
     configureScope({ target, format, title, filter }, async () => {
-    // Create a new incognito browser context.
+      // Create a new incognito browser context.
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    });
+
     const page = await newPageWithNewContext(browser);
     page.setDefaultNavigationTimeout(100000);
     page.on('pageerror', reject);
@@ -170,7 +171,11 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
       // no default
     }
 
-      await closePage(browser, page);
+    await closePage(browser, page);
+
+    await browser.close();
+
+
 
   });
 });
@@ -242,9 +247,6 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
 });
 
 function exitHandler(options, err) {
-  if (browser) {
-    browser.close();
-  }
   if (err) {
     captureException(err);
   }
