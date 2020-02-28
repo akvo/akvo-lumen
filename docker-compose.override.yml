@@ -36,3 +36,6 @@ services:
    links:
       - keycloak:auth.lumen.local
       - client:t1.lumen.local
+   volumes:
+     - ./exporter:/usr/src/app
+   command: ["bash", "-c", "npm i && npm start"]

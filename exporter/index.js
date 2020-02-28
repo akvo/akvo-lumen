@@ -300,6 +300,5 @@ function exitHandler (t) {
 
 process.on('exit', exitHandler('exit')); // do something when app is closing
 process.on('SIGINT', exitHandler('SIGINT')); // catches ctrl+c event
-process.on('SIGUSR1', exitHandler('SIGUSR1')); // catches "kill pid" (for example: nodemon restart)
 process.on('SIGUSR2', exitHandler('SIGUSR2'));
 process.on('uncaughtException', exitHandler('uncaughtException')); // catches uncaught exceptions
