@@ -100,16 +100,13 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
     const context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
     page.setDefaultNavigationTimeout(100000);
-
-    
-    page.on('pageerror', resolve);
-    page.on('error', resolve);
-
+    page.on('pageerror', reject);
+    page.on('error', reject);
     const token = req.header('access_token');
     const locale = req.header('locale');
     const dest = `${target}?access_token=${token}&locale=${locale}&edit_user=false&query=${encodeURIComponent(JSON.stringify({filter}))}`;
     await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
-
+      console.log('page loaded', page);
     const selectors = (selector || '').split(',');
     if (selectors.length) {
       await Promise.all(selectors.map(async (s) => {
@@ -117,7 +114,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
           await page.waitFor(s);
         } catch (error) {
           captureException(error);
-          resolve(error);
+          reject(error);
         }
       }));
     } else {
