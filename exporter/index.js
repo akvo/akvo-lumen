@@ -119,7 +119,10 @@ function addListeners(page, reject){
 
   page.on('request', r => console.log(now(), 'onpageevent request', r.url()));
   page.on('requestfailed', r => {
-    console.log(now(), 'onpageevent requestfailed', r.url(), r.failure(), r.status(), r.headers());
+    const response = r.response();
+    const status = response && r.status();
+    const headers = response && r.headers();
+    console.log(now(), 'onpageevent requestfailed', r.url(), r.failure(), status, headers);
     r.response().text().then( res =>
                               {
                                 if(res){
