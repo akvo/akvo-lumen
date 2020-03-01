@@ -8,6 +8,10 @@ const httpCommon = require('_http_common');
 const _ = require('lodash');
 const Sentry = require('@sentry/node');
 
+function now(){
+  return new Date().toUTCString();
+}
+
 const validation = {
   screenshot: {
     body: {
@@ -30,7 +34,7 @@ const enableSentry = process.env.SENTRY_DSN
   && process.env.SENTRY_SERVER_NAME;
 
 if (enableSentry) {
-  console.log('Init Sentry');
+  console.log(now(), 'Init Sentry');
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     release: process.env.SENTRY_RELEASE,
@@ -39,11 +43,11 @@ if (enableSentry) {
   });
   sentryClient = Sentry.getCurrentHub().getClient();
 } else {
-  console.log('Skipping Sentry');
+  console.log(now(), 'Skipping Sentry');
 }
 
 const captureException = (error, runId = '') => {
-  console.error(`Exception captured for run ID: ${runId} -`, error);
+  console.error(now(), `Exception captured for run ID: ${runId} -`, error);
   if (sentryIsEnabled()) Sentry.captureException(error);
 };
 
@@ -73,7 +77,7 @@ app.use(cors());
     browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--dumpio'],
     });
-    console.log('Exporter started...');
+    console.log(now(), 'Exporter started...');
     app.listen(process.env.PORT || 3001, '0.0.0.0');
   } catch (err) {
     captureException(err);
@@ -92,35 +96,35 @@ function adaptTitle(title) {
 function addListeners(page, reject){
   page.on('pageerror', reject);
   page.on('error', reject);
-  page.on('close', p => console.log('onpageevent close'));
+  page.on('close', p => console.log(now(), 'onpageevent close'));
   page.on('console', msg => {
   for (let i = 0; i < msg.args().length; ++i)
-    console.log(`${i}: ${msg.args()[i]}`);
+    console.log(now(), `${i}: ${msg.args()[i]}`);
 });
-  page.on('dialog', d => console.log('onpageevent dialog', d.message()));
-  page.on('domcontentloaded', e => console.log('onpageevent domcontentloaded', 'DOM fully loaded and parsed', e));
-  page.on('error', e => console.log('onpageevent error', e.message));
+  page.on('dialog', d => console.log(now(), 'onpageevent dialog', d.message()));
+  page.on('domcontentloaded', e => console.log(now(), 'onpageevent domcontentloaded', 'DOM fully loaded and parsed', e));
+  page.on('error', e => console.log(now(), 'onpageevent error', e.message));
   
-  page.on('frameattached', f => console.log('onpageevent frameattached', f.name()));
-  page.on('framedetached', f => console.log('onpageevent framedetached', f.name()));
-  page.on('framenavigated', f => console.log('onpageevent framenavigated', f.name()));
+  page.on('frameattached', f => console.log(now(), 'onpageevent frameattached', f.name()));
+  page.on('framedetached', f => console.log(now(), 'onpageevent framedetached', f.name()));
+  page.on('framenavigated', f => console.log(now(), 'onpageevent framenavigated', f.name()));
   
-  page.on('load', e => console.log('onpageevent load page is fully loaded'));
+  page.on('load', e => console.log(now(), 'onpageevent load page is fully loaded'));
 
-  page.on('metrics', p => console.log('onpageevent metrics', p.title));
+  page.on('metrics', p => console.log(now(), 'onpageevent metrics', p.title));
 
-  page.on('pageerror', e => console.log('onpageevent pageerror', e.message));
+  page.on('pageerror', e => console.log(now(), 'onpageevent pageerror', e.message));
   
-  page.on('popup', p => console.log('onpageevent popup', p.url()));
+  page.on('popup', p => console.log(now(), 'onpageevent popup', p.url()));
 
-  page.on('request', r => console.log('onpageevent request', r.url()));
-  page.on('requestfailed', r => console.log('onpageevent requestfailed', r.failure()));
-  page.on('requestfinished', r => console.log('onpageevent requestfinished', r.url()));
+  page.on('request', r => console.log(now(), 'onpageevent request', r.url()));
+  page.on('requestfailed', r => console.log(now(), 'onpageevent requestfailed', r.failure()));
+  page.on('requestfinished', r => console.log(now(), 'onpageevent requestfinished', r.url()));
 
-  page.on('response', r => console.log('onpageevent response', r.url()));
+  page.on('response', r => console.log(now(), 'onpageevent response', r.url()));
 
-  page.on('workercreated', w => console.log('onpageevent workercreated', w.url()));
-  page.on('workerdestroyed', w => console.log('onpageevent workerdestroyed', w.url()));
+  page.on('workercreated', w => console.log(now(), 'onpageevent workercreated', w.url()));
+  page.on('workerdestroyed', w => console.log(now(), 'onpageevent workerdestroyed', w.url()));
 
 }
 
@@ -128,15 +132,15 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip, filter,
   } = req.body;
-  console.log('Starting run: ', runId, ' - ', target);
-  console.log('Filter: ', filter);
+  console.log(now(), 'Starting run: ', runId, ' - ', target);
+  console.log(now(), 'Filter: ', filter);
 
     configureScope({ target, format, title, filter }, async () => {
       // Create a new incognito browser context.
       const context = await browser.createIncognitoBrowserContext();
-      context.on('targetchanged', t => console.log(t.url()));
-      context.on('targetcreated', t => console.log(t.url()));
-      context.on('targetdestroyed', t => console.log(t.url()));
+      context.on('targetchanged', t => console.log(now(), t.url()));
+      context.on('targetcreated', t => console.log(now(), t.url()));
+      context.on('targetdestroyed', t => console.log(now(), t.url()));
 
 
       
@@ -246,13 +250,13 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
       data = await takeScreenshot(req, runId);
     } catch (error) {
       if (retryCount < MAX_RETRIES) {
-        console.log(error);
-        console.log('Duplicating/retrying run: ', runId);
+        console.log(now(), error);
+        console.log(now(), 'Duplicating/retrying run: ', runId);
         retryCount += 1;
         tryTakeScreenshot();
         return;
       }
-      console.log('Run failed: ', error, runId);
+      console.log(now(), 'Run failed: ', error, runId);
       res.status(500).send(error);
       currentJobCount -= 1;
       return;
@@ -261,7 +265,7 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
     sendScreenshotResponse({
       res, data, format, title,
     });
-    console.log('Done run: ', runId);
+    console.log(now(), 'Done run: ', runId);
   };
   tryTakeScreenshot();
 });
