@@ -93,10 +93,10 @@ function addListeners(page, reject){
   page.on('pageerror', reject);
   page.on('error', reject);
   page.on('close', p => console.log('onpageevent close'));
-  page.on('console', p => console.log('onpageevent console', msg => {
+  page.on('console', msg => {
   for (let i = 0; i < msg.args().length; ++i)
     console.log(`${i}: ${msg.args()[i]}`);
-}));
+});
   page.on('dialog', d => console.log('onpageevent dialog', d.message()));
   page.on('domcontentloaded', e => console.log('onpageevent domcontentloaded', 'DOM fully loaded and parsed', e));
   page.on('error', e => console.log('onpageevent error', e.message));
