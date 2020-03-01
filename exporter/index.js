@@ -61,7 +61,7 @@ const configureScope = (contextData, callback) => {
 };
 
 const app = express();
-
+let browser;
 let currentJobCount = 0;
 const MAX_CONCURRENT_JOBS = 5;
 
@@ -70,6 +70,9 @@ app.use(cors());
 
 (async () => {
   try {
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    });
     console.log('Exporter started...');
     app.listen(process.env.PORT || 3001, '0.0.0.0');
   } catch (err) {
@@ -85,24 +88,6 @@ function adaptTitle(title) {
   return r;
 }
 
-async function newPageWithNewContext(browser) {
-  const { browserContextId } = await browser._connection.send('Target.createBrowserContext');
-  const { targetId } = await browser._connection.send('Target.createTarget', { url: 'about:blank', browserContextId });
-  var targetInfo = { targetId: targetId };
-  const client = await browser._connection.createSession(targetInfo);
-  const page = await browser.newPage({ context: 'another-context' }, client, browser._ignoreHTTPSErrors, browser._screenshotTaskQueue);
-  page.browserContextId = browserContextId;
-  return page;
-}
-
-async function closePage(browser, page) {
-  if (page.browserContextId != undefined) {
-    await browser._connection.send('Target.disposeBrowserContext', { browserContextId: page.browserContextId });
-  }
-  await page.close();
-}
-
-
 const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip, filter,
@@ -111,20 +96,19 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   console.log('Filter: ', filter);
 
     configureScope({ target, format, title, filter }, async () => {
-      // Create a new incognito browser context.
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    });
-
-    const page = await newPageWithNewContext(browser);
+    // Create a new incognito browser context.
+    const context = await browser.createIncognitoBrowserContext();
+    const page = await context.newPage();
     page.setDefaultNavigationTimeout(100000);
+
     page.on('pageerror', reject);
     page.on('error', reject);
+
     const token = req.header('access_token');
     const locale = req.header('locale');
     const dest = `${target}?access_token=${token}&locale=${locale}&edit_user=false&query=${encodeURIComponent(JSON.stringify({filter}))}`;
     await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
-      console.log('page loaded'); //page._screenshotTaskQueue
+
     const selectors = (selector || '').split(',');
     if (selectors.length) {
       await Promise.all(selectors.map(async (s) => {
@@ -171,12 +155,8 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
       // no default
     }
 
-    await closePage(browser, page);
-
-    await browser.close();
-
-
-
+    await page.close();
+    await context.close();
   });
 });
 
@@ -185,7 +165,6 @@ const MAX_RETRIES = 2;
 const sendScreenshotResponse = ({
   res, format, data, title,
 }) => {
-  if (data.length === undefined) console.log('data.length === undefined', data);
   switch (format) {
     case 'png': {
       res.setHeader('Content-Length', data.length);
@@ -247,6 +226,9 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
 });
 
 function exitHandler(options, err) {
+  if (browser) {
+    browser.close();
+  }
   if (err) {
     captureException(err);
   }
