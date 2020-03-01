@@ -71,7 +71,7 @@ app.use(cors());
 (async () => {
   try {
     browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--dumpio'],
     });
     console.log('Exporter started...');
     app.listen(process.env.PORT || 3001, '0.0.0.0');
@@ -88,6 +88,42 @@ function adaptTitle(title) {
   return r;
 }
 
+
+function addListeners(page, reject){
+  page.on('pageerror', reject);
+  page.on('error', reject);
+  page.on('close', p => console.log('onpageevent close'));
+  page.on('console', p => console.log('onpageevent console', msg => {
+  for (let i = 0; i < msg.args().length; ++i)
+    console.log(`${i}: ${msg.args()[i]}`);
+}));
+  page.on('dialog', d => console.log('onpageevent dialog', d.message()));
+  page.on('domcontentloaded', e => console.log('onpageevent domcontentloaded', 'DOM fully loaded and parsed', e));
+  page.on('error', e => console.log('onpageevent error', e.message));
+  
+  page.on('frameattached', f => console.log('onpageevent frameattached', f.name()));
+  page.on('framedetached', f => console.log('onpageevent framedetached', f.name()));
+  page.on('framenavigated', f => console.log('onpageevent framenavigated', f.name()));
+  
+  page.on('load', e => console.log('onpageevent load page is fully loaded'));
+
+  page.on('metrics', p => console.log('onpageevent metrics', p.title));
+
+  page.on('pageerror', e => console.log('onpageevent pageerror', e.message));
+  
+  page.on('popup', p => console.log('onpageevent popup', p.url()));
+
+  page.on('request', r => console.log('onpageevent request', r.url()));
+  page.on('requestfailed', r => console.log('onpageevent requestfailed', r.failure()));
+  page.on('requestfinished', r => console.log('onpageevent requestfinished', r.url()));
+
+  page.on('response', r => console.log('onpageevent response', r.url()));
+
+  page.on('workercreated', w => console.log('onpageevent workercreated', w.url()));
+  page.on('workerdestroyed', w => console.log('onpageevent workerdestroyed', w.url()));
+
+}
+
 const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   const {
     target, format, title, selector, clip, filter,
@@ -96,13 +132,17 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
   console.log('Filter: ', filter);
 
     configureScope({ target, format, title, filter }, async () => {
-    // Create a new incognito browser context.
-    const context = await browser.createIncognitoBrowserContext();
+      // Create a new incognito browser context.
+      const context = await browser.createIncognitoBrowserContext();
+      context.on('targetchanged', t => console.log(t.url()));
+      context.on('targetcreated', t => console.log(t.url()));
+      context.on('targetdestroyed', t => console.log(t.url()));
+
+
+      
     const page = await context.newPage();
     page.setDefaultNavigationTimeout(100000);
-
-    page.on('pageerror', reject);
-    page.on('error', reject);
+      addListeners(page, reject);
 
     const token = req.header('access_token');
     const locale = req.header('locale');
@@ -206,12 +246,13 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
       data = await takeScreenshot(req, runId);
     } catch (error) {
       if (retryCount < MAX_RETRIES) {
+        console.log(error);
         console.log('Duplicating/retrying run: ', runId);
         retryCount += 1;
         tryTakeScreenshot();
         return;
       }
-      console.log('Run failed: ', runId);
+      console.log('Run failed: ', error, runId);
       res.status(500).send(error);
       currentJobCount -= 1;
       return;
