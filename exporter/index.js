@@ -119,11 +119,16 @@ function addListeners(page, reject){
 
   page.on('request', r => console.log(now(), 'onpageevent request', r.url()));
   page.on('requestfailed', r => {
-    console.log(now(), 'onpageevent requestfailed', r.url(), r.failure());
-                r.response().text().then( res =>
-                                          console.log(now(), 'onpageevent requestfailed', r.url(), res,
-                                                      r.failure()));
-               });
+    console.log(now(), 'onpageevent requestfailed', r.url(), r.failure(), r.status(), r.headers());
+    r.response().text().then( res =>
+                              {
+                                if(res){
+                                  console.log(now(), res);
+                                }
+                                console.log('no res');
+      
+                              });
+  });
   page.on('requestfinished', r => console.log(now(), 'onpageevent requestfinished', r.url()));
 
   page.on('response', r => console.log(now(), 'onpageevent response', r.url()));
