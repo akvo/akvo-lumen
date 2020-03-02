@@ -88,6 +88,7 @@ data:
                 proxy_set_header    X-Forwarded-Proto $http_x_forwarded_proto;
                 proxy_set_header    X-Blue-Green-State 'live';
                 proxy_pass          http://lumen-live;
+                proxy_read_timeout  120s;
             }
 
         }
@@ -105,6 +106,7 @@ data:
                 proxy_set_header    X-Blue-Green-State 'dark';
                 proxy_set_header    X-Forwarded-Proto $http_x_forwarded_proto;
                 proxy_pass          http://lumen-dark;
+                proxy_read_timeout  120s;
             }
         }
 kind: ConfigMap
