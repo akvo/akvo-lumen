@@ -168,6 +168,9 @@ export default class PieChart extends Component {
     const showKey = Boolean(!legendVisible);
     const showLabel = Boolean(!interactive || print || labelsVisible);
     const nextNodeAngle = nextNode.endAngle - nextNode.startAngle;
+    let labelText = key;
+    labelText = labelText.length <= 16 ?
+      labelText : `${labelText.substring(0, 13)}…`;
     return (
       (print || !interactive || !legendVisible || labelsVisible) &&
       (angle > Math.PI / 12 || nextNodeAngle > Math.PI / 12)
@@ -178,7 +181,7 @@ export default class PieChart extends Component {
           transform={{ translate: [labelPosition.x, labelPosition.y] }}
           {...labelFont}
         >
-          {showKey && `${key}`}
+          {showKey && `${labelText}`}
           {(showKey && showLabel) && ': '}
           {showLabel && getLabelText(value, totalCount)}
         </Text>
