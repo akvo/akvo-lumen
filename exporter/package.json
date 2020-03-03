@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "nodemon -L index.js"
   },
   "author": "",
   "license": "AGPL-3.0",
@@ -31,6 +31,7 @@
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.11.1",
-    "eslint-watch": "^4.0.2"
+    "eslint-watch": "^4.0.2",
+    "nodemon": "2.0.2"
   }
 }
