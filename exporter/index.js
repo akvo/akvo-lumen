@@ -117,24 +117,14 @@ function addListeners(page, reject){
   
   page.on('popup', p => console.log(now(), 'onpageevent popup', p.url()));
 
-  page.on('request', r => console.log(now(), 'onpageevent request', r.url()));
+//  page.on('request', r => console.log(now(), 'onpageevent request', r.url()));
   page.on('requestfailed', r => {
     const response = r.response();
-    const status = response && r.status();
-    const headers = response && r.headers();
-    console.log(now(), 'onpageevent requestfailed', r.url(), r.failure(), status, headers);
-    response && response.text().then( res =>
-                              {
-                                if(res){
-                                  console.log(now(), res);
-                                }
-                                console.log('no res');
-      
-                              });
+    console.log(now(), 'onpageevent requestfailed', r.url(), r.failure());
   });
   page.on('requestfinished', r => console.log(now(), 'onpageevent requestfinished', r.url()));
 
-  page.on('response', r => console.log(now(), 'onpageevent response', r.url()));
+//  page.on('response', r => console.log(now(), 'onpageevent response', r.url()));
 
   page.on('workercreated', w => console.log(now(), 'onpageevent workercreated', w.url()));
   page.on('workerdestroyed', w => console.log(now(), 'onpageevent workerdestroyed', w.url()));
