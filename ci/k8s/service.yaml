@@ -11,7 +11,7 @@ metadata:
   name: lumen-live
   annotations:
       flipDate: ${UTCDATE}
-      beta.cloud.google.com/backend-config: '{"ports": {"80":"lumen-backendconfig}}'
+      beta.cloud.google.com/backend-config: '{"ports": {"80":"lumen-backendconfig"}}'
       flipBy: ${ACCOUNT}
 spec:
   type: NodePort
@@ -30,7 +30,7 @@ metadata:
   name: lumen-dark
   annotations:
     flipDate: ${UTCDATE}
-    beta.cloud.google.com/backend-config: '{"ports": {"80":"lumen-backendconfig}}'
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"lumen-backendconfig"}}'
     flipBy: ${ACCOUNT}
 spec:
   type: NodePort
@@ -48,7 +48,7 @@ kind: Service
 metadata:
   name: lumen-blue-green-gateway
   annotations:
-    beta.cloud.google.com/backend-config: '{"ports": {"80":"lumen-backendconfig}}'
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"lumen-backendconfig"}}'
 spec:
   type: NodePort
   ports:
