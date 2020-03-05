@@ -46,6 +46,7 @@ export default class PieChart extends Component {
     style: PropTypes.object,
     labelsVisible: PropTypes.bool,
     visualisation: PropTypes.object,
+    onSVGBbox: PropTypes.func,
   }
 
   static defaultProps = {
@@ -181,7 +182,7 @@ export default class PieChart extends Component {
           transform={{ translate: [labelPosition.x, labelPosition.y] }}
           {...labelFont}
         >
-          {showKey && `${labelText}`}
+          {showKey && `${key}`}
           {(showKey && showLabel) && ': '}
           {showLabel && getLabelText(value, totalCount)}
         </Text>
@@ -210,6 +211,7 @@ export default class PieChart extends Component {
       edit,
       outerRadius,
       visualisation,
+      onSVGBbox,
     } = this.props;
 
     const innerRadius = donut ? Math.floor(Math.min(width, height) / 8) : 0;
@@ -275,7 +277,12 @@ export default class PieChart extends Component {
                     {...tooltipPosition}
                   />
                 )}
-                <Svg width={dimensions.width} height={dimensions.height}>
+                <Svg width={dimensions.width} height={dimensions.height}
+                  id='chartSvg'
+                     ref={(c) => {
+                    onSVGBbox && onSVGBbox(document.getElementById('chartSvg').getBBox());
+                  }}
+                >
                   <Group transform={{ translate: [dimensions.width / 2, dimensions.height / 2] }}>
                     <Pie
                       data={series.data}

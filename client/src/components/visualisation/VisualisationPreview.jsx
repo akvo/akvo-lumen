@@ -65,6 +65,20 @@ function shouldRender(visualisation, datasets) {
 }
 
 class VisualisationPreview extends Component {
+  constructor(props) {
+    super(props);
+    this.onSVGBbox = this.onSVGBbox.bind(this);
+  }
+
+  state = {
+    SVGBbox: null,
+  }
+
+  onSVGBbox(Bbox) {
+    if (!this.state.SVGBbox) {
+      this.setState({ SVGBbox: Bbox });
+    }
+  }
   render() {
     const { visualisation,
       metadata,
@@ -74,7 +88,6 @@ class VisualisationPreview extends Component {
       height,
       exporting,
     } = this.props;
-
     return (
       <div className="VisualisationPreview">
         {shouldRender(visualisation, datasets) ?
@@ -84,7 +97,9 @@ class VisualisationPreview extends Component {
             datasets={datasets}
             context="editor"
             exporting={exporting}
+            onSVGBbox={this.onSVGBbox}
             height={
+              // this.state.SVGBbox ? this.state.SVGBbox.height + 5 :
               height ||
               (
                 visualisation.visualisationType === 'map' ?
@@ -92,7 +107,7 @@ class VisualisationPreview extends Component {
                   Math.max(500, window.outerHeight - HEADER_HEIGHT)
               )
             }
-            width={width || (visualisation.visualisationType === 'map' ? null : 800)}
+            width={this.state.SVGBbox ? this.state.SVGBbox.width + 5 : width || (visualisation.visualisationType === 'map' ? null : 800)}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
           /> : null
         }

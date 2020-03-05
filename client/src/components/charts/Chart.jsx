@@ -81,6 +81,7 @@ export default class Chart extends Component {
     width: PropTypes.number,
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     onChangeVisualisationSpec: PropTypes.func,
+    onSVGBbox: PropTypes.func,
     showTitle: PropTypes.bool,
   }
 
@@ -111,6 +112,7 @@ export default class Chart extends Component {
       height,
       onChangeVisualisationSpec,
       showTitle,
+      onSVGBbox,
     } = this.props;
 
     if (!visualisation.data) {
@@ -153,6 +155,7 @@ export default class Chart extends Component {
             legendVisible={visualisation.spec.showLegend}
             legendPosition={visualisation.spec.legendPosition}
             labelsVisible={visualisation.spec.showLabels}
+            onSVGBbox={onSVGBbox}
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
