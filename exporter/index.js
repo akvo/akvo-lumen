@@ -273,22 +273,6 @@ app.post('/screenshot', validate(validation.screenshot), async (req, res) => {
   tryTakeScreenshot();
 });
 
-function exitHandler (t) {
-  return function (options, err) {
-    console.log('exitHandler', t, options, err);
-  if (browser) {
-    browser.close();
-  }
-  if (err) {
-    captureException(err);
-  }
-  if (options.exit) {
-    process.exit(err ? err.code : 0);
-  }
-  };
-}
-
-process.on('exit', exitHandler('exit')); // do something when app is closing
-process.on('SIGINT', exitHandler('SIGINT')); // catches ctrl+c event
-process.on('SIGUSR2', exitHandler('SIGUSR2'));
-process.on('uncaughtException', exitHandler('uncaughtException')); // catches uncaught exceptions
+app.get('/', async (req, res) => {
+  res.send("OK");
+});
