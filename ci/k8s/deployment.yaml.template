@@ -53,6 +53,16 @@ spec:
         image: eu.gcr.io/akvo-lumen/lumen-exporter:${BUILD_HASH}
         ports:
         - containerPort: 3001
+        livenessProbe:
+          httpGet:
+             path: /
+             port: 3001
+          initialDelaySeconds: 5
+        readinessProbe:
+          httpGet:
+             path: /
+             port: 3001
+          initialDelaySeconds: 5
         resources:
           requests:
             cpu: ${EXPORTER_POD_CPU_REQUESTS}
