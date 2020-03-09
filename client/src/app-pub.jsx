@@ -12,7 +12,6 @@ import LumenBranding from './components/common/LumenBranding';
 import ErrorScreen from './components/common/ErrorScreen';
 import configureStore from './store/configureStore';
 import { init as initAnalytics, trackPageView } from './utilities/analytics';
-import { init as initFeedback } from './utilities/feedback';
 import * as auth from './utilities/auth';
 import queryString from 'querystringify';
 
@@ -42,7 +41,6 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
   }
 
   initAnalytics(initialState);
-  initFeedback(initialState);
 
   const entity = data.dashboards ?
     data.dashboards[data.dashboardId] :
