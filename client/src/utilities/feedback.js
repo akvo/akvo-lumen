@@ -2,17 +2,15 @@
 
 let feedbackInited;
 
-export const init = () => {
-  if (feedbackInited) {
+export const init = (state) => {
+  if (feedbackInited || !state.profile) {
     return;
   }
   feedbackInited = true;
-  const b = document.createElement('script');
-  b.setAttribute('data-bugyard', '5e65daa3f74c520014b05cfa');
-  b.setAttribute('async', 'async');
-  b.setAttribute('defer', 'defer');
-  b.setAttribute('src', 'https://widget.bugyard.io/bugyard.min.js');
-  document.getElementsByTagName('head')[0].appendChild(b);
+  window.bugyard('setUser', {
+    email: 'devops@akvo.org',
+    id: profile.sub || 'Unknown',
+  });
 };
 
 export default { init };
