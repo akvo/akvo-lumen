@@ -9,7 +9,7 @@ export const init = (state) => {
   feedbackInited = true;
   window.bugyard('setUser', {
     email: 'devops@akvo.org',
-    id: profile.sub || 'Unknown',
+    id: state.profile.sub || 'Unknown',
   });
 };
 
