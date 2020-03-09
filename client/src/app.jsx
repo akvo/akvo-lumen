@@ -9,7 +9,6 @@ import Root from './containers/Root';
 import configureStore from './store/configureStore';
 import * as auth from './utilities/auth';
 import { init as initAnalytics } from './utilities/analytics';
-import { init as initFeedback } from './utilities/feedback';
 import { UserManager, WebStorageStateStore } from 'oidc-client';
 import queryString from 'querystringify';
 import url from 'url';
@@ -29,7 +28,6 @@ function initAuthenticated(profile, env) {
 
   store.subscribe(() => {
     initAnalytics(store.getState());
-    initFeedback(store.getState());
   });
 
   // Refreshing the token on a fixed schedule (every 10 minutes)
