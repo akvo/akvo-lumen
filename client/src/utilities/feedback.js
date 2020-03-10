@@ -7,9 +7,9 @@ export const init = (state) => {
     return;
   }
   hasInited = true;
-  window.UsersnapCX.on('open', function(event) {
-    event.api.setValue('visitor', state.profile.sub);
-  });
+  window.UsersnapCX.on('open',
+    event => event.api.setValue('visitor', state.profile.sub)
+  );
 };
 
 export default { init };
