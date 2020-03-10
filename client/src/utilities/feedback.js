@@ -1,13 +1,15 @@
 /* eslint-disable no-undef, no-use-before-define, no-underscore-dangle */
 
 
+let feedbackInited;
+
 export const init = (state) => {
-  if (!state || !state.profile) {
+  if (feedbackInited || !state.profile) {
     return;
   }
+  feedbackInited = true;
   window.bugyard('setUser', {
     email: 'devops@akvo.org',
-    name: state.profile.sub || 'Unknown',
     id: state.profile.sub || 'Unknown',
   });
 };
