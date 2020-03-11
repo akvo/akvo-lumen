@@ -553,8 +553,8 @@ export default class MapVisualisation extends Component {
         >
           <div
             style={{
-              height: mapHeight,
-              width: mapWidth,
+              height: `${height}px`,
+              width: `${width}px`,
             }}
             className="leafletMap" id="leafletMap"
             ref={(ref) => { this.leafletMapNode = ref; }}
