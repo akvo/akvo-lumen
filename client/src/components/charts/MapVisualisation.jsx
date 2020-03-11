@@ -371,8 +371,6 @@ export default class MapVisualisation extends Component {
     const layerGroupId = metadata.layerGroupId;
     const xCenter = [0, 0];
     const xZoom = 2;
-    document.getElementById('leafletMap').style.width = `${width}px`;
-    document.getElementById('leafletMap').style.height = `${height}px`;
 
     const node = this.leafletMapNode;
 
@@ -554,6 +552,10 @@ export default class MapVisualisation extends Component {
           }}
         >
           <div
+            style={{
+              height: mapHeight,
+              width: mapWidth,
+            }}
             className="leafletMap" id="leafletMap"
             ref={(ref) => { this.leafletMapNode = ref; }}
           />
