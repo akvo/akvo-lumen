@@ -7,15 +7,19 @@
     <link rel="shortcut icon" href="/favicon.ico">
     <script src="https://use.fontawesome.com/51ad00bb8c.js"></script>
     <script async data-cfasync='false' src='https://d29l98y0pmei9d.cloudfront.net/js/widget.min.js?k=Y2xpZW50SWQ9NzQ3Jmhvc3ROYW1lPWFrdm9sdW1lbi5zdXBwb3J0aGVyby5pbw=='></script>
-    <script>
+    <script type="text/javascript">
+      if(location.pathname.indexOf('\/export') === -1){
       window.onUsersnapCXLoad = function(api) {
-        api.init();
-        window.UsersnapCX = api;
+          api.init();
+          window.UsersnapCX = api;
       }
       var script = document.createElement('script');
       script.async = 1;
       script.src = 'https://widget.usersnap.com/load/c21c4d79-c1ff-4b8d-8a12-c4a96207315a?onload=onUsersnapCXLoad';
-      document.getElementsByTagName('head')[0].appendChild(script);
+        document.getElementsByTagName('head')[0].appendChild(script);
+      } else {
+          window.UsersnapCX = {on: () => {}};
+      }
     </script>
   </head>
   <body>
