@@ -394,7 +394,9 @@ export default class MapVisualisation extends Component {
     const dimensionsChanged = Boolean(height !== this.oldHeight || width !== this.oldWidth);
 
     if (!haveDimensions || dimensionsChanged) {
-      this.map.invalidateSize();
+      setTimeout(() => {
+        map.invalidateSize(false);
+      }, 300);
       this.oldHeight = height;
       this.oldWidth = width;
     }
