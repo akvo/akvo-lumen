@@ -371,8 +371,6 @@ export default class MapVisualisation extends Component {
     const layerGroupId = metadata.layerGroupId;
     const xCenter = [0, 0];
     const xZoom = 2;
-    document.getElementById('leafletMap').style.width = `${width}px`;
-    document.getElementById('leafletMap').style.height = `${height}px`;
 
     const node = this.leafletMapNode;
 
@@ -396,7 +394,9 @@ export default class MapVisualisation extends Component {
     const dimensionsChanged = Boolean(height !== this.oldHeight || width !== this.oldWidth);
 
     if (!haveDimensions || dimensionsChanged) {
-      this.map.invalidateSize();
+      setTimeout(() => {
+        map.invalidateSize(false);
+      }, 300);
       this.oldHeight = height;
       this.oldWidth = width;
     }
@@ -554,6 +554,10 @@ export default class MapVisualisation extends Component {
           }}
         >
           <div
+            style={{
+              height: `${height}px`,
+              width: `${width}px`,
+            }}
             className="leafletMap" id="leafletMap"
             ref={(ref) => { this.leafletMapNode = ref; }}
           />
