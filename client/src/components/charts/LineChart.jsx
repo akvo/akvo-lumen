@@ -242,9 +242,6 @@ export default class LineChart extends Component {
             const maxNodesForTooltip = 50;
             const showTooltip = numNodes <= maxNodesForTooltip;
             const abbreviateNumber = value => this.context.abbrNumber(value);
-
-            const xTickFormatConditional = series.metadata.type === 'number' ?
-              { tickFormat: abbreviateNumber } : {};
             const yTickFormat = (num) => {
               if (num >= 10000) {
                 return abbreviateNumber(num);
@@ -403,7 +400,6 @@ export default class LineChart extends Component {
                       transform: `rotate(45, ${xScale(val)}, 18)`,
                       fontSize: 10,
                     })}
-                    {...xTickFormatConditional}
                   />
                 </Svg>
               </div>
