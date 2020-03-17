@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape } from 'react-intl';
@@ -21,23 +22,6 @@ import { fetchDataset, fetchColumn } from '../../actions/dataset';
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
-
-const waitForEl = function(selector, callback) {
-  console.log('selector', selector);
-  if (document.getElementsByClassName(selector).length) {
-    
-    console.log('calling callback', selector);
-    callback();
-  } else {
-    console.log('calling timeout', selector);
-
-    setTimeout(function() {
-      console.log('inside timeout', selector);
-      waitForEl(selector, callback);
-    }, 100);
-  }
-};
-
 
 export const ROW_COUNT = 16;
 const COL_COUNT = 12;
@@ -118,13 +102,6 @@ class DashboardEditor extends Component {
 
   constructor() {
     super();
-    this.state = {
-      gridWidth: 1024,
-      propLayout: [],
-      saveError: false,
-      focusedItem: null,
-      isDragging: false,
-    };
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
@@ -132,6 +109,57 @@ class DashboardEditor extends Component {
     this.handleEntityUpdate = this.handleEntityUpdate.bind(this);
     this.handleChangeName = this.handleChangeName.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.onBeforeIntroChange = this.onBeforeIntroChange.bind(this);
+
+    const intro = introJs();
+    intro.onbeforechange(this.onBeforeIntroChange);
+    intro.setOptions({
+      steps: [
+        {
+          intro: 'Hello world!',
+        },
+        {
+          element: '#visualisationsTab',
+          intro: 'This is a tooltip.',
+        },
+        {
+          element: '#visualisationList',
+          intro: 'Ok, wasn\'t that fun?',
+          position: 'right',
+        },
+        {
+          element: '#filtersTab',
+          intro: 'Click on filters tab to see filter options.',
+          position: 'right',
+        },
+        {
+          element: '#filtersTabDiv',
+          intro: 'Select the dataset that you want to use in the filter.',
+          position: 'right',
+          dynamic: true,
+        },
+        {
+          element: '#filterDatasetColumnsDiv',
+          intro: 'Select the columns you want to filter by.',
+          position: 'right',
+          dynamic: true,
+        },
+        {
+          element: '#filterDatasetColumnsValuesDiv',
+          intro: 'And finally change your filter values to filter your dashboard content.',
+          position: 'left',
+          dynamic: true,
+        },
+      ],
+    });
+    this.state = {
+      gridWidth: 1024,
+      propLayout: [],
+      saveError: false,
+      focusedItem: null,
+      isDragging: false,
+      intro,
+    };
   }
 
   UNSAFE_componentWillMount() {
@@ -263,6 +291,36 @@ class DashboardEditor extends Component {
     });
     this.props.onUpdateEntities(newEntities);
   }
+  onBeforeIntroChange(targetElement) {
+    const idx = 4;
+    const intro = this.state.intro;
+    
+    const currentStepIdx = intro._currentStep;
+    const currentStepDynamic = Boolean(intro._options.steps[currentStepIdx].dynamic);
+    console.log('targetElement', targetElement);
+    console.log('state.intro', this.state.intro);
+    console.log('currentStepIdx', currentStepIdx, intro._options.steps[currentStepIdx]);
+
+    if (currentStepIdx === idx) {
+      this.props.onTabSelected('filters');
+    }
+    if (targetElement.id === 'visualisationList') {
+      this.props.onTabSelected('visualisations');
+    }
+
+    if (currentStepDynamic) {
+      const step = intro._options.steps[currentStepIdx];
+
+      const element = document.querySelector(step.element);
+      console.log('element', element);
+
+      if (element) {
+        const introItem = intro._introItems[currentStepIdx];
+        introItem.element = element;
+        introItem.position = step.position || 'auto';
+      }
+    }
+  }
 
   handleResize() {
     // Offset the padding width (16px on each side)
@@ -387,16 +445,15 @@ class DashboardEditor extends Component {
               <div className="tabItem action textItem">
                 {plusButton('text')}
               </div>
-                                  </div>}
-            <div id='filtersTabContent' style={{height:'100%'}}>
-            <div id='visualisationList'>
-            {(!filteredDashboard || tabSelected === 'visualisations') &&
-              <DashboardVisualisationList
-                datasets={datasets}
-                visualisations={visualisations}
-                onEntityClick={this.handleEntityToggle}
-                dashboardItems={dashboard.entities}
-             />}
+            </div>}
+            <div id="visualisationList">
+              {(!filteredDashboard || tabSelected === 'visualisations') &&
+                <DashboardVisualisationList
+                  datasets={datasets}
+                  visualisations={visualisations}
+                  onEntityClick={this.handleEntityToggle}
+                  dashboardItems={dashboard.entities}
+                />}
             </div>
             {tabSelected === 'filters' &&
             <div className="filtersTab" id="filtersTabDiv">
@@ -428,8 +485,8 @@ class DashboardEditor extends Component {
               </div>
 
                 {selectedDatasetColumns &&
-                <div>
-                  <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
+                <div id='filterDatasetColumnsDiv'>
+                  <div  className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
                     <div style={{ flex: 'auto' }}><FormattedMessage id="filters" /></div>
                     <div>
                       <span title={intl.messages.visualisations_that_can_be_filtered}>
@@ -451,9 +508,6 @@ class DashboardEditor extends Component {
                 </div>}
             </div>
             }
-            </div>
-
-
           </div>
         )}
         <div
@@ -462,7 +516,7 @@ class DashboardEditor extends Component {
           ref={(ref) => { this.DashboardEditorCanvasContainer = ref; }}
         >
           {filteredDashboard && filter.datasetId &&
-           (<div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7', whiteSpace: 'nowrap' }}>
+           (<div style={{ paddingLeft: '25px', paddingTop: '15px', backgroundColor: '#F2F3F7', whiteSpace: 'nowrap' }} id="filterDatasetColumnsValuesDiv">
              <FilterColumns
                filter={filter}
                dataset={datasets[filter.datasetId]}
@@ -477,54 +531,9 @@ class DashboardEditor extends Component {
             </div>
           }
           <div className="DashboardEditorCanvas">
-            <a className="btn btn-large btn-success"
-               onClick={(o) => {
-                 console.log(o);
-                 const intro = introJs();
-                 intro.onbeforechange(
-                   function(targetElement) {
-                     console.log(targetElement.id);
-                     if(targetElement.id === 'filtersTabContent') { onTabSelected('filters');}
-                     if(targetElement.id === 'visualisationList') { onTabSelected('visualisations');}
-
-                   });
-                 intro.setOptions({
-                   steps: [
-                     { 
-                       intro: "Hello world!"
-                     },
-                     {
-                       element: document.querySelector('#visualisationsTab'),
-                       intro: "This is a tooltip."
-                     },
-                     {
-                       element: document.querySelector('#visualisationList'),
-                       intro: "Ok, wasn't that fun?",
-                       position: 'right'
-                     },
-                     {
-                       element: document.querySelector('#filtersTab'),
-                       intro: "This is a tooltip."
-                     },
-
-                     {
-                       element: document.querySelector('#filtersTabContent'),
-                       intro: 'More features, more fun.',
-                       position: 'left'
-                     },
-                     {
-                       element: document.querySelector('#filtersTabDiv'),
-                       intro: "YIHA.",
-                       position: 'bottom'
-                     },
-                     {
-                       element: '#step5',
-                       intro: 'Get it, use it.'
-                     }
-                   ]
-                 });
-                 intro.start();
-                 this.setState({intro});}}
+            <a
+              className="btn btn-large btn-success"
+              onClick={() => this.state.intro.start()}
             >Show me how</a>
             <ReactGridLayout
               className="layout"
