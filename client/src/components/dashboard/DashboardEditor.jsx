@@ -5,6 +5,7 @@ import ReactGridLayout from 'react-grid-layout';
 import { Element, scroller } from 'react-scroll';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
+import introJs from 'intro.js';
 
 import DashboardVisualisationList from './DashboardVisualisationList';
 import DashboardCanvasItem from './DashboardCanvasItem';
@@ -20,6 +21,23 @@ import { fetchDataset, fetchColumn } from '../../actions/dataset';
 require('./DashboardEditor.scss');
 require('../../../node_modules/react-grid-layout/css/styles.css');
 require('../../../node_modules/react-resizable/css/styles.css');
+
+const waitForEl = function(selector, callback) {
+  console.log('selector', selector);
+  if (document.getElementsByClassName(selector).length) {
+    
+    console.log('calling callback', selector);
+    callback();
+  } else {
+    console.log('calling timeout', selector);
+
+    setTimeout(function() {
+      console.log('inside timeout', selector);
+      waitForEl(selector, callback);
+    }, 100);
+  }
+};
+
 
 export const ROW_COUNT = 16;
 const COL_COUNT = 12;
@@ -356,12 +374,12 @@ class DashboardEditor extends Component {
               {plusButton('add_new_text_element')}
             </div>}
             {filteredDashboard && <div className="DashboardSidebarTabMenu">
-              <div className={selectTab('visualisations')}>
+              <div className={selectTab('visualisations')} id="visualisationsTab">
                 <button onClick={() => onTabSelected('visualisations')}>
                   <FormattedMessage id="visualisations" />
                 </button>
               </div>
-              <div className={selectTab('filters')}>
+              <div className={selectTab('filters')} id="filtersTab">
                 <button onClick={() => onTabSelected('filters')}>
                   <FormattedMessage id="filters" />
                 </button>
@@ -369,21 +387,24 @@ class DashboardEditor extends Component {
               <div className="tabItem action textItem">
                 {plusButton('text')}
               </div>
-            </div>}
+                                  </div>}
+            <div id='filtersTabContent' style={{height:'100%'}}>
+            <div id='visualisationList'>
             {(!filteredDashboard || tabSelected === 'visualisations') &&
               <DashboardVisualisationList
                 datasets={datasets}
                 visualisations={visualisations}
                 onEntityClick={this.handleEntityToggle}
                 dashboardItems={dashboard.entities}
-              />}
+             />}
+            </div>
             {tabSelected === 'filters' &&
-            <div className="filtersTab">
+            <div className="filtersTab" id="filtersTabDiv">
               <FormattedMessage id="set_dataset_columns_as_visualisation_filters" />
               <br />
               <div style={{ marginTop: '15px', display: 'flex' }}>
                 <div style={{ lineHeight: '2.9em', flex: 'auto' }}><FormattedMessage id="dataset" /></div>
-                <div>
+                <div >
                   <SelectMenu
                     name="datasets"
                     value={filter.datasetId}
@@ -430,6 +451,9 @@ class DashboardEditor extends Component {
                 </div>}
             </div>
             }
+            </div>
+
+
           </div>
         )}
         <div
@@ -453,6 +477,55 @@ class DashboardEditor extends Component {
             </div>
           }
           <div className="DashboardEditorCanvas">
+            <a className="btn btn-large btn-success"
+               onClick={(o) => {
+                 console.log(o);
+                 const intro = introJs();
+                 intro.onbeforechange(
+                   function(targetElement) {
+                     console.log(targetElement.id);
+                     if(targetElement.id === 'filtersTabContent') { onTabSelected('filters');}
+                     if(targetElement.id === 'visualisationList') { onTabSelected('visualisations');}
+
+                   });
+                 intro.setOptions({
+                   steps: [
+                     { 
+                       intro: "Hello world!"
+                     },
+                     {
+                       element: document.querySelector('#visualisationsTab'),
+                       intro: "This is a tooltip."
+                     },
+                     {
+                       element: document.querySelector('#visualisationList'),
+                       intro: "Ok, wasn't that fun?",
+                       position: 'right'
+                     },
+                     {
+                       element: document.querySelector('#filtersTab'),
+                       intro: "This is a tooltip."
+                     },
+
+                     {
+                       element: document.querySelector('#filtersTabContent'),
+                       intro: 'More features, more fun.',
+                       position: 'left'
+                     },
+                     {
+                       element: document.querySelector('#filtersTabDiv'),
+                       intro: "YIHA.",
+                       position: 'bottom'
+                     },
+                     {
+                       element: '#step5',
+                       intro: 'Get it, use it.'
+                     }
+                   ]
+                 });
+                 intro.start();
+                 this.setState({intro});}}
+            >Show me how</a>
             <ReactGridLayout
               className="layout"
               cols={COL_COUNT}
