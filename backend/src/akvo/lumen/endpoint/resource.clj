@@ -8,8 +8,7 @@
 
 (defn handler [{:keys [tenant-manager]}]
   (fn [{tenant :tenant}]
-    (resource/all (p/connection tenant-manager tenant)
-                  (p/current-plan tenant-manager tenant))))
+    (resource/all (p/connection tenant-manager tenant))))
 
 (defn routes [{:keys [tenant-manager] :as opts}]
   ["/resources"
