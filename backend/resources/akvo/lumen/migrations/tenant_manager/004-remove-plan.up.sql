@@ -1,4 +1,2 @@
-DROP INDEX plan_tenant_ends_key;
-ALTER TABLE plan DROP CONSTRAINT plan_pkey;
 DROP TABLE IF EXISTS plan;
 DROP TYPE IF EXISTS tier;
