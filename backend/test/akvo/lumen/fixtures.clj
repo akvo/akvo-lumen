@@ -55,7 +55,6 @@
   ([config-edn more-ks f]
    (let [c (tu/start-config config-edn more-ks)]
      (try
-       (tu/seed c)
        (lumen-migrate/migrate c)
        (binding [*tenant-conn* (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager *system*)
                                              (-> c :akvo.lumen.migrate/migrate :seed :tenants first :label))]

@@ -67,7 +67,6 @@
 
 (defn migrate-and-seed []
   (migrate)
-  (tu/seed (commons/config))
   (migrate))
 
 (defn rollback
