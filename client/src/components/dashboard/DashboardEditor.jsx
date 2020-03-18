@@ -116,37 +116,42 @@ class DashboardEditor extends Component {
     intro.setOptions({
       steps: [
         {
-          intro: 'Hello world!',
+          intro: 'Welcome to the filter dashbboard feature introduction!, you could dynamically filter the dashboard based on dataset column values',
         },
         {
           element: '#visualisationsTab',
-          intro: 'This is a tooltip.',
+          intro: 'Let\'s start adding some vizs to the dashboard editor area',
         },
         {
           element: '#visualisationList',
-          intro: 'Ok, wasn\'t that fun?',
+          intro: 'You can filter all the filters by the dataset you are interested on too, click the viz to add it to the dashboard editor area',
           position: 'right',
         },
         {
           element: '#filtersTab',
-          intro: 'Click on filters tab to see filter options.',
+          intro: 'Now, let\'s click on filters tab to see the new dashboard filter options.',
           position: 'right',
         },
         {
           element: '#filtersTabDiv',
-          intro: 'Select the dataset that you want to use in the filter.',
+          intro: 'Firstly, select the dataset that you want to use in the filter.',
           position: 'right',
           dynamic: true,
         },
         {
           element: '#filterDatasetColumnsDiv',
-          intro: 'Select the columns you want to filter by.',
+          intro: '... and now, select the dataset columns you want to filter by.',
           position: 'right',
           dynamic: true,
         },
         {
           element: '#filterDatasetColumnsValuesDiv',
-          intro: 'And finally change your filter values to filter your dashboard content.',
+          intro: 'Finally change your filter values to filter your dashboard content.',
+          position: 'left',
+          dynamic: true,
+        },
+        {
+          intro: 'Well done!, you get it!',
           position: 'left',
           dynamic: true,
         },
@@ -291,10 +296,12 @@ class DashboardEditor extends Component {
     });
     this.props.onUpdateEntities(newEntities);
   }
+
+  // dynamic component update approach following:
+  // https://github.com/HiDeoo/intro.js-react/blob/9defc1bdfe6afd6bf7d09a3464795faaffd645fa/src/components/Steps/index.js#L201-L213
   onBeforeIntroChange(targetElement) {
     const idx = 4;
     const intro = this.state.intro;
-    
     const currentStepIdx = intro._currentStep;
     const currentStepDynamic = Boolean(intro._options.steps[currentStepIdx].dynamic);
     console.log('targetElement', targetElement);
@@ -485,8 +492,8 @@ class DashboardEditor extends Component {
               </div>
 
                 {selectedDatasetColumns &&
-                <div id='filterDatasetColumnsDiv'>
-                  <div  className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
+                <div id="filterDatasetColumnsDiv">
+                  <div className="filterInput" style={{ marginTop: '25px', display: 'flex' }}>
                     <div style={{ flex: 'auto' }}><FormattedMessage id="filters" /></div>
                     <div>
                       <span title={intl.messages.visualisations_that_can_be_filtered}>
