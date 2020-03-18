@@ -92,11 +92,7 @@
     @(::spec (get-or-create-tenant db encryption-key dropwizard-registry tenants label)))
 
   (uri [{:keys [tenants]} label]
-    (::uri (get-or-create-tenant db encryption-key dropwizard-registry tenants label)))
-
-  p/TenantAdmin
-  (current-plan [{:keys [db]} label]
-    (:tier (db.tenant-manager/select-current-plan (:spec db) {:label label}))))
+    (::uri (get-or-create-tenant db encryption-key dropwizard-registry tenants label))))
 
 (defn- tenant-manager [options]
   (map->TenantManager options))
