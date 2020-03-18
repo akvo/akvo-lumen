@@ -8,6 +8,5 @@
          (db.resource/count-external-datasets tenant-conn {} {} {:identifiers identity})
          (db.resource/count-dashboards tenant-conn {} {} {:identifiers identity})))
 
-(defn all [tenant-conn current-plan]
-  (response {"plan" {:tier current-plan}
-             "resources" (resource-usage tenant-conn)}))
+(defn all [tenant-conn]
+  (response {"resources" (resource-usage tenant-conn)}))
