@@ -14,7 +14,7 @@ export default function FilterColumns({ filter, intl, dataset, onFilterValueChan
       const vals = columnVals ? columnVals.map(x => ({ label: x, value: x })) : [];
       const columnIndex = filter.columns.findIndex(x => x.column === o.column);
       return (
-        <div style={{ paddingBottom: '10px', paddingRight: '1rem', display: 'inline-block' }} key={`div-filterColumn-${idx}`}>
+        <div style={{ paddingBottom: '10px', paddingRight: '1rem', display: 'inline-block' }} key={`div-filterColumn-${idx}`} id="filterDatasetColumnsValuesDiv">
           <span style={{ fontWeight: 'bold', marginBottom: '0.5rem', display: 'block' }}>
             {column && column.get('title')}
           </span>
