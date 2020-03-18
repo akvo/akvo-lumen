@@ -148,12 +148,8 @@
   "Helper function that will seed tenant to the tenants table."
   [db tenant]
   (try
-    (let [{:keys [id]} (first (jdbc/insert! db "tenants" (update (dissoc tenant :plan)
-                                                                 :db_uri #(aes/encrypt "secret" %))))]
-      (jdbc/insert! db "plan" {:tenant id
-                               :tier (doto (org.postgresql.util.PGobject.)
-                                       (.setType "tier")
-                                       (.setValue (:plan tenant)))}))
+    (first (jdbc/insert! db "tenants" (update (dissoc tenant :plan)
+                                              :db_uri #(aes/encrypt "secret" %))))
     (catch PSQLException e
       (println "Seed data already loaded."))))
 
@@ -163,6 +159,7 @@
   (let [db-uri (hikaricp/ssl-url (-> config :akvo.lumen.component.hikaricp/hikaricp :uri))]
     (doseq [tenant (-> config :akvo.lumen.migrate/migrate :seed :tenants)]
       (seed-tenant {:connection-uri db-uri} tenant))))
+
 
 (defmethod ig/init-key :akvo.lumen.test-utils/wrap-jwt-mock  [_ {:keys [public-client]}]
   (fn [handler]
