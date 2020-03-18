@@ -54,8 +54,7 @@
       (testing "/resources"
         (let [res (h (get* (api-url "/resources")))]
           (is (= 200 (:status res)))
-          (is (= {:plan {:tier nil},
-                  :resources
+          (is (= {:resources
                   {:numberOfVisualisations 0,
                    :numberOfExternalDatasets 0,
                    :numberOfDashboards 0}}(body-kw res)))))
