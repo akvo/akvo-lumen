@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IndexRedirect, Redirect, Router, Route } from 'react-router';
+import { Router, Route, Redirect, useLocation } from 'react-router-dom';
 import _ from 'lodash';
 import IntlWrapper from './IntlWrapper';
 import Library from '../components/Library';
@@ -16,106 +16,32 @@ import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
 import withProps from '../utilities/withProps';
 
-export default function App({ store, history, location, query }) {
+function RouteToMain({ toRoute, toMain }) {
+  const location = useLocation();
+  toMain.location = location;
+  console.log({ toRoute, toMain });
+  return (
+    <Route
+      {...toRoute}
+      render={routeProps => (
+          <Main  {...Object.assign({}, routeProps, toMain)} />
+      )}
+    />
+  );
+}
+
+export default function App({ store, history, query }) {
   const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
   const filteredDashboard = !((store && _.get(store.getState(), path)) === false);
   const queryParsed = (query && JSON.parse(query)) || {};
+
   return (
     <IntlWrapper>
       <Router history={history}>
-        <Route path="/" component={Main}>
-          <Redirect from="auth_callback" to="/" />
-          <IndexRedirect from="" to="library" />
-          <Route
-            path="library"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Library, { filteredDashboard }) }}
-            location={location}
-          />
-          <Route
-            path="library/collections/:collectionId"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Library, { filteredDashboard }) }}
-            location={location}
-          />
-          <Route
-            path="dataset/:datasetId"
-            components={{ sidebar: WorkspaceNav, content: Dataset }}
-            location={location}
-          />
-          <Route
-            path="raster/:rasterId"
-            components={{ sidebar: WorkspaceNav, content: Raster }}
-            location={location}
-          />
-          <Route
-            path="dataset/:datasetId/transformation/:transformationType"
-            components={{ sidebar: WorkspaceNav, content: Transformation }}
-            location={location}
-          />
-          <Route
-            path="visualisation/create"
-            components={{ sidebar: WorkspaceNav, content: Visualisation }}
-            location={location}
-          />
-          <Route
-            path="visualisation/:visualisationId/export"
-            components={{
-              sidebar: WorkspaceNav,
-              content: withProps(Visualisation, { exporting: true }),
-            }}
-            location={location}
-          />
-          <Route
-            path="visualisation/:visualisationId"
-            components={{ sidebar: WorkspaceNav, content: Visualisation }}
-            location={location}
-          />
-          <Route
-            path="dashboard/create"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Dashboard, { filteredDashboard }) }}
-            location={location}
-          />
-          <Route
-            path="dashboard/:dashboardId/export_pages"
-            components={{
-              sidebar: WorkspaceNav,
-              content: withProps(Dashboard,
-                { query: queryParsed,
-                  filteredDashboard,
-                  exporting: true,
-                  preventPageOverlaps: true }),
-            }}
-            location={location}
-          />
-          <Route
-            path="dashboard/:dashboardId/export"
-            components={{
-              sidebar: WorkspaceNav,
-              content: withProps(Dashboard,
-                { query: queryParsed, filteredDashboard, exporting: true }),
-            }}
-            location={location}
-          />
-          <Route
-            path="dashboard/:dashboardId"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Dashboard, { filteredDashboard }) }}
-            location={location}
-          />
-          <Redirect from="admin" to="/admin/users" />
-          <Route
-            path="admin/users"
-            components={{ sidebar: AdminNav, content: Users }}
-            location={location}
-          />
-          <Route
-            path="admin/resources"
-            components={{ sidebar: AdminNav, content: Resources }}
-            location={location}
-          />
-        </Route>
+        <RouteToMain
+          toRoute={{path: "/admin/users"}}
+          toMain={{sidebar: <AdminNav/>, content: <Users/>}}
+          />        
       </Router>
     </IntlWrapper>
   );
