@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lumen-${COLOR}
@@ -183,7 +183,7 @@ spec:
         - name: LUMEN_DEPLOYMENT_VERSION
           valueFrom:
             fieldRef:
-              fieldPath: metadata.labels['lumen-version']                            
+              fieldPath: metadata.labels['lumen-version']
       - name: flow-maps-statsd-to-prometheus
       # If you change this version, probably you want to change the /windsahft/Dockerfile version
         image: akvo/akvo-maps-statsd-to-prometheus:f156d42c
