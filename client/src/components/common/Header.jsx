@@ -7,7 +7,7 @@ function Header({
   children,
   actions,
   primaryActions,
-  router,
+  history,
   className = '',
   backButtonTarget,
   location,
@@ -18,7 +18,7 @@ function Header({
   if (backButtonTarget) {
     target = { to: backButtonTarget };
   } else if (haveHistory) {
-    target = { onClick: () => router.goBack() };
+    target = { onClick: () => history.goBack() };
   } else {
     target = { to: '/library' };
   }
@@ -49,7 +49,7 @@ function Header({
 }
 
 Header.propTypes = {
-  router: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
   location: PropTypes.object,
   backButtonTarget: PropTypes.string,
   children: PropTypes.node,

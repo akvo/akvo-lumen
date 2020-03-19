@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Router, Route, Redirect, useLocation } from 'react-router-dom';
+import { Router, Route, Redirect, Switch, useLocation } from 'react-router-dom';
 import _ from 'lodash';
 import IntlWrapper from './IntlWrapper';
 import Library from '../components/Library';
@@ -16,32 +16,30 @@ import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
 import withProps from '../utilities/withProps';
 
-function RouteToMain({ toRoute, toMain }) {
-  const location = useLocation();
-  toMain.location = location;
-  console.log({ toRoute, toMain });
-  return (
-    <Route
-      {...toRoute}
-      render={routeProps => (
-          <Main  {...Object.assign({}, routeProps, toMain)} />
-      )}
-    />
-  );
+function AdminUsers({location}){
+  return <Main location={location} sidebar={<AdminNav/>} content={<Users/>}/>;
+}
+
+function AdminResources({location}){
+  return <Main location={location} sidebar={<AdminNav/>} content={<Resources/>}/>;
 }
 
 export default function App({ store, history, query }) {
   const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
   const filteredDashboard = !((store && _.get(store.getState(), path)) === false);
   const queryParsed = (query && JSON.parse(query)) || {};
-
   return (
     <IntlWrapper>
       <Router history={history}>
-        <RouteToMain
-          toRoute={{path: "/admin/users"}}
-          toMain={{sidebar: <AdminNav/>, content: <Users/>}}
-          />        
+        <Redirect from="/admin" to="/admin/users" />
+        <Switch>
+          <Route path="/admin">
+            <Switch>
+              <Route path="/admin/users" component={AdminUsers} />
+              <Route path="/admin/resources" component={AdminResources} />
+             </Switch>
+          </Route>
+        </Switch>
       </Router>
     </IntlWrapper>
   );
