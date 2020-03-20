@@ -44,6 +44,13 @@ export default function App({ store, history, query }) {
         <Route path="/admin" exact >
           <Redirect to="/admin/users" />
         </Route>
+        <Route path="/auth_callback" exact >
+          <Redirect to="/" />
+        </Route>
+        <Route path="/" exact >
+          <Redirect to="/library" />
+        </Route>
+
         <Route path="/admin/users" exact component={Admin(Users)} />
         <Route path="/admin/resources" exact component={Admin(Resources)} />
         <Route path="/library" exact component={R(Library, {filteredDashboard})} />
