@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
+import { withRouter } from 'react-router';
 import { showModal } from '../actions/activeModal';
 import { fetchDataset, updateDatasetMeta, pollTxImportStatus, startTx, undoTx, endTx } from '../actions/dataset';
 import { showNotification } from '../actions/notification';
@@ -271,6 +272,6 @@ Dataset.propTypes = {
 };
 
 // Just inject `dispatch`
-export default connect((state, props) => ({
+export default withRouter(connect((state, props) => ({
   dataset: state.library.datasets[props.params.datasetId],
-}))(Dataset);
+}))(Dataset));
