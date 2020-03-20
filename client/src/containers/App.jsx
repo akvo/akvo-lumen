@@ -16,25 +16,22 @@ import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
 import withProps from '../utilities/withProps';
 
-function AdminUsers({location}){
-  return <Main location={location} sidebar={<AdminNav/>} content={<Users/>}/>;
+function Admin(C){
+  return function ({location}){
+    return <Main location={location} sidebar={<AdminNav/>} content={<C/>}/>;
+  };
 }
 
-function AdminResources({location}){
-  return <Main location={location} sidebar={<AdminNav/>} content={<Resources/>}/>;
-}
-
-function LibraryI (filteredDashboard) {
-  return function (b) {
-    const { location, match } = b;
+function R (C, componentProps) {
+  return function({location, match}){
+    const props = componentProps || {};
     return <Main location={location}
                  sidebar={<WorkspaceNav
                             location={location}/>}
-                 content={<Library
-                            location={location}
-                            filteredDashboard
-                            params={match.params}/>}/>;
-  };
+                 content={<C params={match.params} 
+                             location={location}
+                             {...props}
+                          />}/>;};
 }
 
 export default function App({ store, history, query }) {
@@ -47,10 +44,35 @@ export default function App({ store, history, query }) {
         <Route path="/admin" exact >
           <Redirect to="/admin/users" />
         </Route>
-        <Route path="/admin/users" exact component={AdminUsers} />
-        <Route path="/admin/resources" exact component={AdminResources} />
-        <Route path="/library" exact component={LibraryI(filteredDashboard)} />
-        <Route path="/library/collections/:collectionId" component={LibraryI(filteredDashboard)} />
+        <Route path="/admin/users" exact component={Admin(Users)} />
+        <Route path="/admin/resources" exact component={Admin(Resources)} />
+        <Route path="/library" exact component={R(Library, {filteredDashboard})} />
+        <Route path="/library/collections/:collectionId" component={R(Library, {filteredDashboard})} />
+        <Route path="/dataset/:datasetId" exact component={R(Dataset)} />
+        <Route path="/raster/:rasterId" component={R(Raster)} />
+        <Route path="/dataset/:datasetId/transformation/:transformationType" exact
+               components={R(Transformation)} />
+        <Route path="/visualisation/create" exact component={R(Visualisation)} />
+        <Route path="/visualisation/:visualisationId" exact component={R(Visualisation)} />
+
+        <Route path="/visualisation/:visualisationId/export" exact
+               component={R(Visualisation, { exporting: true })}/>
+
+        <Route path="/dashboard/create" exact component={R(Dashboard, { filteredDashboard })} />
+
+        <Route path="/dashboard/:dashboardId/export_pages" exact
+               component={R(Dashboard, { query: queryParsed,
+                                         filteredDashboard,
+                                         exporting: true,
+                                         preventPageOverlaps: true })} />
+
+        <Route
+          path="/dashboard/:dashboardId/export" exact
+          componen={R(Dashboard, { query: queryParsed, filteredDashboard, exporting: true })} />
+
+        <Route path="/dashboard/:dashboardId" exact component={R(Dashboard, { filteredDashboard })}/>
+
+        
       </Router>
     </IntlWrapper>
   );
