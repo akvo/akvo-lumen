@@ -179,12 +179,12 @@ class Library extends Component {
 
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
-    const query = location.query;
-    const displayMode = query.display || 'grid';
-    const sortOrder = query.sort || 'last_modified';
-    const isReverseSort = query.reverse === 'true';
-    const filterBy = query.filter || 'all';
-    const searchString = query.search || '';
+    const q = new URLSearchParams(location.search);
+    const displayMode = q.get('display') || 'grid';
+    const sortOrder = q.get('sort') || 'last_modified';
+    const isReverseSort = q.get('reverse') === 'true';
+    const filterBy = q.get('filter') || 'all';
+    const searchString = q.get('search') || '';
 
     return (
       <div className="Library" data-test-id="library">

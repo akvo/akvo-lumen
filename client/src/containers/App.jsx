@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Router, Route, Redirect, Switch, useLocation } from 'react-router-dom';
+import { Router, Route, Redirect, Switch, useLocation, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import IntlWrapper from './IntlWrapper';
 import Library from '../components/Library';
@@ -24,6 +24,19 @@ function AdminResources({location}){
   return <Main location={location} sidebar={<AdminNav/>} content={<Resources/>}/>;
 }
 
+function LibraryI (filteredDashboard) {
+  return function (b) {
+    const { location, match } = b;
+    return <Main location={location}
+                 sidebar={<WorkspaceNav
+                            location={location}/>}
+                 content={<Library
+                            location={location}
+                            filteredDashboard
+                            params={match.params}/>}/>;
+  };
+}
+
 export default function App({ store, history, query }) {
   const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
   const filteredDashboard = !((store && _.get(store.getState(), path)) === false);
@@ -31,15 +44,13 @@ export default function App({ store, history, query }) {
   return (
     <IntlWrapper>
       <Router history={history}>
-        <Redirect from="/admin" to="/admin/users" />
-        <Switch>
-          <Route path="/admin">
-            <Switch>
-              <Route path="/admin/users" component={AdminUsers} />
-              <Route path="/admin/resources" component={AdminResources} />
-             </Switch>
-          </Route>
-        </Switch>
+        <Route path="/admin" exact >
+          <Redirect to="/admin/users" />
+        </Route>
+        <Route path="/admin/users" exact component={AdminUsers} />
+        <Route path="/admin/resources" exact component={AdminResources} />
+        <Route path="/library" exact component={LibraryI(filteredDashboard)} />
+        <Route path="/library/collections/:collectionId" component={LibraryI(filteredDashboard)} />
       </Router>
     </IntlWrapper>
   );
