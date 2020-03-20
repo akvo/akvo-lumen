@@ -23,13 +23,14 @@ function Admin(C){
 }
 
 function R (C, componentProps) {
-  return function({location, match}){
+  return function({location, match, history}){
     const props = componentProps || {};
     return <Main location={location}
                  sidebar={<WorkspaceNav
                             location={location}/>}
                  content={<C params={match.params} 
                              location={location}
+                             history={history}
                              {...props}
                           />}/>;};
 }

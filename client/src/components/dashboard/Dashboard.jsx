@@ -266,6 +266,7 @@ class Dashboard extends Component {
       }
       this.setState({
         isUnsavedChanges: false,
+        isSavePending: false,
         timeToNextSave: SAVE_INITIAL_TIMEOUT,
         timeFromPreviousSave: 0,
         savingFailed: false,
@@ -276,7 +277,7 @@ class Dashboard extends Component {
       dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
-        dispatch(actions.createDashboard(dashboard, get(location, 'state.collectionId'), handleResponse));
+        dispatch(actions.createDashboard(this.props.history, dashboard, get(location, 'state.collectionId'), handleResponse));
       });
     }
   }
