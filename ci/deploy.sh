@@ -2,43 +2,23 @@
 
 set -eu
 
+if [[ "$(./ci/helpers/should_deploy.sh)" == "false" ]] ; then
+    exit 0
+fi
+
 function log {
-   echo "$(date +"%T") - INFO - $*"
+    echo "$(date +"%T") - INFO - $*"
 }
 
 export PROJECT_NAME=akvo-lumen
-
-
-if [[ "${TRAVIS_BRANCH}" != "master" ]] && [[ ! "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
-    exit 0
-fi
-
-if [[ "${CI_PULL_REQUEST}" != "false" ]]; then
-    exit 0
-fi
-
-log Making sure gcloud and kubectl are installed and up to date
-gcloud components install kubectl
-gcloud components update
-gcloud version
-which gcloud kubectl
-
-log Authentication with gcloud and kubectl
-openssl aes-256-cbc -K $encrypted_13abf95e958f_key -iv $encrypted_13abf95e958f_iv \
-	-in ci/gcloud-service-account.json.enc -out ci/gcloud-service-account.json -d
-gcloud auth activate-service-account --key-file ci/gcloud-service-account.json
-gcloud config set project akvo-lumen
-gcloud config set container/cluster europe-west1-d
-gcloud config set compute/zone europe-west1-d
-gcloud config set container/use_client_certificate True
 
 ENVIRONMENT=test
 if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
     ENVIRONMENT=production
-    BACKEND_POD_CPU_REQUESTS="200m"
-    BACKEND_POD_CPU_LIMITS="400m"
+    BACKEND_POD_CPU_REQUESTS="500m"
+    BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="5Gi"
     BACKEND_POD_MEM_LIMITS="6Gi"
     CLIENT_POD_CPU_REQUESTS="100m"
@@ -60,20 +40,20 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     GW_POD_CPU_LIMITS="200m"
     GW_POD_MEM_REQUESTS="32Mi"
 else
-    log Environment is test
+    log Environement is test
     gcloud container clusters get-credentials test
-    BACKEND_POD_CPU_REQUESTS="100m"
-    BACKEND_POD_CPU_LIMITS="200m"
+    BACKEND_POD_CPU_REQUESTS="250m"
+    BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="768Mi"
     BACKEND_POD_MEM_LIMITS="1024Mi"
     CLIENT_POD_CPU_REQUESTS="100m"
     CLIENT_POD_CPU_LIMITS="200m"
     CLIENT_POD_MEM_REQUESTS="32Mi"
     CLIENT_POD_MEM_LIMITS="64Mi"
-    MAPS_POD_CPU_REQUESTS="100m"
-    MAPS_POD_CPU_LIMITS="200m"
-    MAPS_POD_MEM_REQUESTS="128Mi"
-    MAPS_POD_MEM_LIMITS="256Mi"
+    MAPS_POD_CPU_REQUESTS="200m"
+    MAPS_POD_CPU_LIMITS="300m"
+    MAPS_POD_MEM_REQUESTS="256Mi"
+    MAPS_POD_MEM_LIMITS="512Mi"
     EXPORTER_POD_CPU_REQUESTS="200m"
     EXPORTER_POD_CPU_LIMITS="400m"
     EXPORTER_POD_MEM_REQUESTS="128Mi"
@@ -94,7 +74,7 @@ fi
 
 log Finding blue/green state
 LIVE_COLOR=$(./ci/live-color.sh)
-log LIVE is "${LIVE_COLOR}"
+log LIVE is "${LIVE_COLOR}"1
 DARK_COLOR=$(./ci/helpers/dark-color.sh "$LIVE_COLOR")
 
 log "Deploying to dark ($DARK_COLOR)"
@@ -113,6 +93,10 @@ sed -e "s/\${BUILD_HASH}/$CI_COMMIT/" \
   -e "s/\${MAPS_POD_MEM_REQUESTS}/${MAPS_POD_MEM_REQUESTS}/" \
   -e "s/\${MAPS_POD_CPU_LIMITS}/${MAPS_POD_CPU_LIMITS}/" \
   -e "s/\${MAPS_POD_MEM_LIMITS}/${MAPS_POD_MEM_LIMITS}/" \
+  -e "s/\${EXPORTER_POD_CPU_REQUESTS}/${EXPORTER_POD_CPU_REQUESTS}/" \
+  -e "s/\${EXPORTER_POD_MEM_REQUESTS}/${EXPORTER_POD_MEM_REQUESTS}/" \
+  -e "s/\${EXPORTER_POD_CPU_LIMITS}/${EXPORTER_POD_CPU_LIMITS}/" \
+  -e "s/\${EXPORTER_POD_MEM_LIMITS}/${EXPORTER_POD_MEM_LIMITS}/" \
   ci/k8s/deployment.yaml.template > ci/k8s/deployment.yaml
 
 kubectl apply -f ci/k8s/deployment.yaml

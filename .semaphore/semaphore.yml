@@ -39,7 +39,7 @@ blocks:
             - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
             - ./ci/build.sh
             - ./ci/prepare_deploy.sh
-            - ./ci/deploy2.sh
+            - ./ci/deploy.sh
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
