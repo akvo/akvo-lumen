@@ -154,7 +154,7 @@ LibraryListingItemContextMenu.propTypes = {
 };
 
 export default class LibraryListingItem extends Component {
-
+  // eslint-disable-next-line no-undef
   static contextTypes = {
     intl: intlShape,
   };

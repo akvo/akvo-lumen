@@ -1,5 +1,4 @@
 import { createAction } from 'redux-actions';
-import { push } from 'react-router-redux';
 import { saveAs } from 'file-saver/FileSaver';
 
 import { fetchDataset } from './dataset';

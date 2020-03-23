@@ -24,28 +24,29 @@ function Header({
     isLink = true;
     target = { to: '/library' };
   }
-  const Arrow = () => (<i
-          className="fa fa-arrow-left"
-          aria-hidden="true"
-                       />);
+  const Arrow = () => (
+    <i
+      className="fa fa-arrow-left"
+      aria-hidden="true"
+    />);
 
   return (
     <nav className={`Header ${className}`}>
       { isLink ?
         (<Link
-        className="backButton"
-        data-test-id="back-button"
-        {...target}
-         >
-          <Arrow/>
-         </Link>) :
+          className="backButton"
+          data-test-id="back-button"
+          {...target}
+        >
+          <Arrow />
+        </Link>) :
         (<div
-        className="backButton"
-        data-test-id="back-button"
-        {...target}
-         >
-           <Arrow/>
-         </div>)}
+          className="backButton"
+          data-test-id="back-button"
+          {...target}
+        >
+          <Arrow />
+        </div>)}
       <div className="content">
         {children}
       </div>

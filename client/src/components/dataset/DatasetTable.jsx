@@ -253,6 +253,7 @@ class DatasetTable extends Component {
           this.props.onTransform(transformation).then(() => {
             this.hideSidebar();
           }).catch((error) => {
+            // eslint-disable-next-line no-console
             console.log(error);
           });
         },
