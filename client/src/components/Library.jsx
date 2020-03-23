@@ -22,8 +22,9 @@ import { trackPageView } from '../utilities/analytics';
 require('./Library.scss');
 
 function mergeQuery(location, query) {
+  const q = new URLSearchParams(query).toString();
   return Object.assign({}, location, {
-    query: Object.assign({}, location.query, query),
+    search: `?${q}`,
   });
 }
 
@@ -211,45 +212,34 @@ class Library extends Component {
           onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
           onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
           displayMode={displayMode}
-          onChangeDisplayMode={(newDisplayMode) => {
-            dispatch(
-              updateQueryAction(history, location, {
-                display: newDisplayMode,
-              })
-            );
-          }}
+          onChangeDisplayMode={newDisplayMode =>
+                               updateQueryAction(history, location, {
+                                 display: newDisplayMode,
+                               })
+                              }
           sortOrder={sortOrder}
-          onChangeSortOrder={(newSortOrder) => {
-            dispatch(
-              updateQueryAction(history, location, {
-                sort: newSortOrder,
-              })
-            );
-          }}
+          onChangeSortOrder={newSortOrder =>
+                             updateQueryAction(history, location, {
+                               sort: newSortOrder,
+                             })
+                            }
           isReverseSort={isReverseSort}
-          onChangeReverseSort={(newReverseSort) => {
-            dispatch(
-              updateQueryAction(history, location, {
-                reverse: newReverseSort,
-              })
-            );
-          }}
+          onChangeReverseSort={newReverseSort =>
+                               updateQueryAction(history, location, {
+                                 reverse: newReverseSort,
+                               })
+                              }
           filterBy={filterBy}
-          onChangeFilterBy={(newFilterBy) => {
-            dispatch(
-              updateQueryAction(history, location, {
-                filter: newFilterBy,
-              })
-            );
-          }}
+          onChangeFilterBy={newFilterBy =>
+                            updateQueryAction(history, location, {
+                              filter: newFilterBy,
+                            })
+                           }
           searchString={searchString}
-          onSetSearchString={(newSearchString) => {
-            dispatch(
-              updateQueryAction(history, location, {
-                search: newSearchString,
-              })
-            );
-          }}
+          onSetSearchString={newSearchString =>
+                             updateQueryAction(history, location, {
+                               search: newSearchString,
+                             })}
           onCreate={(type) => {
             const { params } = this.props;
             const meta = { collectionId: params.collectionId, from: 'library' };
