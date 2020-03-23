@@ -60,13 +60,13 @@ export default function App({ store, history, query }) {
         <Route path="/raster/:rasterId" component={R(Raster)} />
         <Route path="/dataset/:datasetId/transformation/:transformationType" exact
                components={R(Transformation)} />
-        <Route path="/visualisation/create" exact component={R(Visualisation)} />
+        <Route path="/visualisation//create" exact component={R(Visualisation)} />
         <Route path="/visualisation/:visualisationId" exact component={R(Visualisation)} />
 
         <Route path="/visualisation/:visualisationId/export" exact
                component={R(Visualisation, { exporting: true })}/>
 
-        <Route path="/dashboard/create" exact component={R(Dashboard, { filteredDashboard })} />
+        <Route path="/dashboard//create" exact component={R(Dashboard, { filteredDashboard })} />
 
         <Route path="/dashboard/:dashboardId/export_pages" exact
                component={R(Dashboard, { query: queryParsed,
