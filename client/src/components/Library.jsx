@@ -73,12 +73,10 @@ class Library extends Component {
       } else if (this.state.collection) {
         this.setState({ collection: null });
         this.props.history.push('/library');
-        this.props.dispatch('/library');
       }
 
       if (collectionId && !collection) {
         this.props.history.push('/library');
-        this.props.dispatch('/library');
       }
     }
   }
@@ -263,7 +261,6 @@ class Library extends Component {
             } else {
               const x = { pathname: `/${type}/create`, state: meta };
               this.props.history.push(x);
-              dispatch(x);
             }
           }}
         />
