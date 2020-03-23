@@ -654,7 +654,7 @@ class Dashboard extends Component {
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
-    const { exporting } = this.props;
+    const { exporting, history } = this.props;
     const filteredDashboard = (this.props.filteredDashboard && !filteredDashboardCondition()) ||
     Boolean(this.props.query && this.props.query.filter);
     return (
@@ -663,6 +663,7 @@ class Dashboard extends Component {
           <div className="Dashboard">
             {!exporting && (
               <DashboardHeader
+                history={history}
                 title={dashboard.title}
                 isUnsavedChanges={this.state.isUnsavedChanges}
                 onDashboardAction={this.handleDashboardAction}
@@ -723,6 +724,7 @@ class Dashboard extends Component {
 Dashboard.propTypes = {
   intl: intlShape,
   dispatch: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,

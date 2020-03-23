@@ -210,20 +210,18 @@ class Dataset extends Component {
   }
 
   handleNavigateToVisualise() {
-    this.props.dispatch(
-      push({
-        pathname: '/visualisation/create',
-        state: {
-          preselectedDatasetId: this.props.params.datasetId,
-          from: 'dataset',
-        },
-      })
-    );
+    this.props.history.push({
+      pathname: '/visualisation//create',
+      state: {
+        preselectedDatasetId: this.props.params.datasetId,
+        from: 'dataset',
+      },
+    });
   }
 
   render() {
     const { pendingTransformations } = this.state;
-    const { dataset, params } = this.props;
+    const { dataset, params, history } = this.props;
     const { datasetId } = params;
     if (dataset == null || !this.state.asyncComponents) {
       return <LoadingSpinner />;
@@ -234,6 +232,7 @@ class Dataset extends Component {
       <NavigationPrompt shouldPrompt={this.state.savingFailed}>
         <div className="Dataset">
           <DatasetHeader
+            history={history}
             onShowDatasetSettings={this.handleShowDatasetSettings}
             name={getTitle(dataset)}
             id={getId(dataset)}
@@ -246,6 +245,7 @@ class Dataset extends Component {
           />
           {getRows(dataset) != null ? (
             <DatasetTable
+              history={history}
               datasetId={datasetId}
               columns={getColumns(dataset)}
               rows={getRows(dataset)}
@@ -269,6 +269,7 @@ Dataset.propTypes = {
   dataset: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
 };
 
 // Just inject `dispatch`
