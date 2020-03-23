@@ -88,6 +88,7 @@ class EntityTypeHeader extends Component {
       <Header
         className="EntityTypeHeader"
         actions={this.actionButtons()}
+        history={this.props.history}
         primaryActions={this.actionButtons(IS_PRIMARY)}
       >
         <EntityTitleInput
@@ -119,6 +120,7 @@ EntityTypeHeader.propTypes = {
   onChangeTitle: PropTypes.func,
   timeToNextSave: PropTypes.number,
   savingFailed: PropTypes.bool,
+  history: PropTypes.object.isRequired,
 };
 
 export default injectIntl(EntityTypeHeader);
