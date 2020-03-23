@@ -259,7 +259,7 @@ class Library extends Component {
             } else if (type === 'collection') {
               dispatch(showModal('create-collection'));
             } else {
-              const x = { pathname: `/${type}/create`, state: meta };
+              const x = { pathname: `/${type}//create`, state: meta };
               this.props.history.push(x);
             }
           }}
