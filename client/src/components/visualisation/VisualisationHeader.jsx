@@ -112,6 +112,7 @@ class VisualisationHeader extends Component {
         onBeginEditTitle={onBeginEditTitle}
         saveStatusId={saveStatusId}
         actionButtons={actionButtons}
+        history={this.props.history}
         savingFailed={savingFailed}
         timeToNextSave={timeToNextSave}
       />
@@ -131,6 +132,7 @@ VisualisationHeader.propTypes = {
   onSaveVisualisation: PropTypes.func.isRequired,
   onChangeTitle: PropTypes.func,
   onBeginEditTitle: PropTypes.func,
+  history: PropTypes.object.isRequired,
   isExporting: PropTypes.bool,
 };
 
