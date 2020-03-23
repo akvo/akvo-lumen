@@ -103,7 +103,7 @@ class Visualisation extends Component {
     if (isEditingExistingVisualisation) {
       const visualisation = library.visualisations[visualisationId];
       if (visualisation == null) {
-        dispatch(actions.fetchVisualisation(visualisationId));
+        dispatch(actions.fetchVisualisation(history, visualisationId));
       } else {
         const datasetsRequired = [];
         if (visualisation.visualisationType === 'map') {
@@ -231,6 +231,7 @@ class Visualisation extends Component {
       this.setState({ isSavePending: true });
       dispatch(
         actions.createVisualisation(
+          this.props.history,
           this.state.visualisation,
           get(location, 'state.collectionId'),
           handleResponse
