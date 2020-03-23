@@ -90,7 +90,7 @@ class Visualisation extends Component {
   }
 
   UNSAFE_componentWillMount() {
-    const { params, library, dispatch } = this.props;
+    const { params, library, history, dispatch } = this.props;
     const visualisationId = params.visualisationId;
     const isEditingExistingVisualisation = visualisationId != null;
 
@@ -103,7 +103,7 @@ class Visualisation extends Component {
     if (isEditingExistingVisualisation) {
       const visualisation = library.visualisations[visualisationId];
       if (visualisation == null) {
-        dispatch(actions.fetchVisualisation(visualisationId));
+        dispatch(actions.fetchVisualisation(history, visualisationId));
       } else {
         const datasetsRequired = [];
         if (visualisation.visualisationType === 'map') {
@@ -231,6 +231,7 @@ class Visualisation extends Component {
       this.setState({ isSavePending: true });
       dispatch(
         actions.createVisualisation(
+          this.props.history,
           this.state.visualisation,
           get(location, 'state.collectionId'),
           handleResponse
@@ -367,10 +368,10 @@ class Visualisation extends Component {
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
     const { visualisation } = this.state;
-    const { exporting } = this.props;
+    const { exporting, history } = this.props;
 
     return (
-      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed} history={history}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
           <div className="Visualisation">
             {!exporting && (
@@ -382,6 +383,7 @@ class Visualisation extends Component {
                 onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
                 onSaveVisualisation={this.onSave}
                 savingFailed={this.state.savingFailed}
+                history={this.props.history}
                 timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
                 isExporting={get(this.props, `library.visualisations[${visualisation.id}].isExporting`)}
               />
@@ -418,6 +420,7 @@ class Visualisation extends Component {
 Visualisation.propTypes = {
   intl: intlShape,
   dispatch: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,

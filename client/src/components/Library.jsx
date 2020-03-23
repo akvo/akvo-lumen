@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
 import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 import update from 'immutability-helper';
@@ -23,13 +22,16 @@ import { trackPageView } from '../utilities/analytics';
 require('./Library.scss');
 
 function mergeQuery(location, query) {
+  const q = new URLSearchParams(query).toString();
   return Object.assign({}, location, {
-    query: Object.assign({}, location.query, query),
+    search: `?${q}`,
   });
 }
 
-function updateQueryAction(location, query) {
-  return push(mergeQuery(location, query));
+function updateQueryAction(history, location, query) {
+  const x = mergeQuery(location, query);
+  history.push(x);
+  return x;
 }
 
 class Library extends Component {
@@ -50,11 +52,11 @@ class Library extends Component {
   }
 
   componentDidMount() {
-    const { dispatch, router } = this.props;
+    const { dispatch, history } = this.props;
     const redirect = window.localStorage.getItem('redirect');
     if (redirect) {
       window.localStorage.removeItem('redirect');
-      router.push(redirect);
+      history.push(redirect);
     } else {
       dispatch(fetchLibrary());
       trackPageView('Library');
@@ -71,11 +73,11 @@ class Library extends Component {
         }
       } else if (this.state.collection) {
         this.setState({ collection: null });
-        this.props.dispatch(push('/library'));
+        this.props.history.push('/library');
       }
 
       if (collectionId && !collection) {
-        this.props.dispatch(push('/library'));
+        this.props.history.push('/library');
       }
     }
   }
@@ -175,16 +177,16 @@ class Library extends Component {
 
   render() {
     const { dispatch, location, datasets, visualisations, dashboards, rasters,
-      filteredDashboard } = this.props;
+            filteredDashboard, history } = this.props;
 
     const collections = this.props.collections ? this.props.collections : {};
     const { pendingDeleteEntity, collection } = this.state;
-    const query = location.query;
-    const displayMode = query.display || 'grid';
-    const sortOrder = query.sort || 'last_modified';
-    const isReverseSort = query.reverse === 'true';
-    const filterBy = query.filter || 'all';
-    const searchString = query.search || '';
+    const q = new URLSearchParams(location.search);
+    const displayMode = q.get('display') || 'grid';
+    const sortOrder = q.get('sort') || 'last_modified';
+    const isReverseSort = q.get('reverse') === 'true';
+    const filterBy = q.get('filter') || 'all';
+    const searchString = q.get('search') || '';
 
     return (
       <div className="Library" data-test-id="library">
@@ -210,45 +212,34 @@ class Library extends Component {
           onAddEntitiesToCollection={this.handleAddEntitiesToCollection}
           onRemoveEntitiesFromCollection={this.handleRemoveEntitiesFromCollection}
           displayMode={displayMode}
-          onChangeDisplayMode={(newDisplayMode) => {
-            dispatch(
-              updateQueryAction(location, {
-                display: newDisplayMode,
-              })
-            );
-          }}
+          onChangeDisplayMode={newDisplayMode =>
+                               updateQueryAction(history, location, {
+                                 display: newDisplayMode,
+                               })
+                              }
           sortOrder={sortOrder}
-          onChangeSortOrder={(newSortOrder) => {
-            dispatch(
-              updateQueryAction(location, {
-                sort: newSortOrder,
-              })
-            );
-          }}
+          onChangeSortOrder={newSortOrder =>
+                             updateQueryAction(history, location, {
+                               sort: newSortOrder,
+                             })
+                            }
           isReverseSort={isReverseSort}
-          onChangeReverseSort={(newReverseSort) => {
-            dispatch(
-              updateQueryAction(location, {
-                reverse: newReverseSort,
-              })
-            );
-          }}
+          onChangeReverseSort={newReverseSort =>
+                               updateQueryAction(history, location, {
+                                 reverse: newReverseSort,
+                               })
+                              }
           filterBy={filterBy}
-          onChangeFilterBy={(newFilterBy) => {
-            dispatch(
-              updateQueryAction(location, {
-                filter: newFilterBy,
-              })
-            );
-          }}
+          onChangeFilterBy={newFilterBy =>
+                            updateQueryAction(history, location, {
+                              filter: newFilterBy,
+                            })
+                           }
           searchString={searchString}
-          onSetSearchString={(newSearchString) => {
-            dispatch(
-              updateQueryAction(location, {
-                search: newSearchString,
-              })
-            );
-          }}
+          onSetSearchString={newSearchString =>
+                             updateQueryAction(history, location, {
+                               search: newSearchString,
+                             })}
           onCreate={(type) => {
             const { params } = this.props;
             const meta = { collectionId: params.collectionId, from: 'library' };
@@ -258,7 +249,8 @@ class Library extends Component {
             } else if (type === 'collection') {
               dispatch(showModal('create-collection'));
             } else {
-              dispatch(push({ pathname: `/${type}/create`, state: meta }));
+              const x = { pathname: `/${type}//create`, state: meta };
+              history.push(x);
             }
           }}
         />
@@ -299,13 +291,13 @@ Library.propTypes = {
   dispatch: PropTypes.func,
   location: PropTypes.object,
   params: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
   children: PropTypes.element,
   datasets: PropTypes.object.isRequired,
   visualisations: PropTypes.object.isRequired,
   dashboards: PropTypes.object.isRequired,
   rasters: PropTypes.object.isRequired,
   collections: PropTypes.object,
-  router: PropTypes.object.isRequired,
   filteredDashboard: PropTypes.bool,
 };
 

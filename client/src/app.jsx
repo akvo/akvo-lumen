@@ -1,7 +1,7 @@
 /* eslint-disable import/default, global-require, import/first, no-underscore-dangle */
 import React from 'react';
 import { render } from 'react-dom';
-import { browserHistory } from 'react-router';
+import { createBrowserHistory } from 'history';
 import { AppContainer } from 'react-hot-loader';
 import { syncHistoryWithStore } from 'react-router-redux';
 import Error from './containers/Error';
@@ -24,7 +24,8 @@ function initAuthenticated(profile, env) {
   const initialState = { profile, env };
 
   const store = configureStore(initialState);
-  const history = syncHistoryWithStore(browserHistory, store);
+  const customHistory = createBrowserHistory();
+  const history = syncHistoryWithStore(customHistory, store);
   const rootElement = document.querySelector('#root');
 
   store.subscribe(() => {
@@ -71,7 +72,8 @@ function initWithAuthToken(locale, query) {
   const initialState = { profile: { admin: false, attributes: { locale: [userLocale(locale)] } } };
   const rootElement = document.querySelector('#root');
   const store = configureStore(initialState);
-  const history = syncHistoryWithStore(browserHistory, store);
+  const customHistory = createBrowserHistory();
+  const history = syncHistoryWithStore(customHistory, store);
 
   render(
     <AppContainer>

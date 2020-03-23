@@ -12,15 +12,11 @@ class NavigationPrompt extends React.Component {
   }
 
   promptUnsavedChange() {
-    const { message, shouldPrompt, router, route, routes } = this.props;
-    router.setRouteLeaveHook(
-      routes.length ? routes[routes.length - 1] : route,
-      () => {
-        if (!shouldPrompt) return true;
-        return confirm(message); // eslint-disable-line
-      }
-    );
-    window.onbeforeunload = shouldPrompt && (() => message);
+    const { message, shouldPrompt, history } = this.props;
+    if (shouldPrompt) {
+      const unblock = history.block(message);
+      window.onbeforeunload = () => unblock();
+    }
   }
 
   render() {
@@ -31,7 +27,7 @@ class NavigationPrompt extends React.Component {
 NavigationPrompt.propTypes = {
   shouldPrompt: PropTypes.bool,
   message: PropTypes.string.isRequired,
-  router: PropTypes.object,
+  history: PropTypes.object.isRequired,
   route: PropTypes.object,
   routes: PropTypes.array,
   children: PropTypes.node.isRequired,

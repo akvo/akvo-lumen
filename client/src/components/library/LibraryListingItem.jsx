@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import itsSet from 'its-set';
 import { FormattedMessage, intlShape } from 'react-intl';
 import moment from 'moment';
@@ -154,7 +154,7 @@ LibraryListingItemContextMenu.propTypes = {
 };
 
 export default class LibraryListingItem extends Component {
-
+  // eslint-disable-next-line no-undef
   static contextTypes = {
     intl: intlShape,
   };

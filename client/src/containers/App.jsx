@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { IndexRedirect, Redirect, Router, Route } from 'react-router';
+import { Router, Route, Redirect } from 'react-router-dom';
 import _ from 'lodash';
 import IntlWrapper from './IntlWrapper';
 import Library from '../components/Library';
@@ -14,108 +14,90 @@ import Resources from '../components/Resources';
 import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
-import withProps from '../utilities/withProps';
 
-export default function App({ store, history, location, query }) {
+function admin(C) {
+  // eslint-disable-next-line react/prop-types
+  return ({ location }) =>
+    <Main location={location} sidebar={<AdminNav />} content={<C />} />;
+}
+
+function resource(C, componentProps) {
+  // eslint-disable-next-line react/prop-types
+  return ({ location, match, history }) => {
+    const props = componentProps || {};
+    return (
+      <Main
+        location={location}
+        sidebar={
+          <WorkspaceNav
+            location={location}
+          />}
+        content={
+          <C
+            params={match.params}
+            location={location}
+            history={history}
+            {...props}
+          />}
+      />);
+  };
+}
+
+export default function App({ store, history, query }) {
   const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
   const filteredDashboard = !((store && _.get(store.getState(), path)) === false);
   const queryParsed = (query && JSON.parse(query)) || {};
   return (
     <IntlWrapper>
       <Router history={history}>
-        <Route path="/" component={Main}>
-          <Redirect from="auth_callback" to="/" />
-          <IndexRedirect from="" to="library" />
-          <Route
-            path="library"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Library, { filteredDashboard }) }}
-            location={location}
-          />
-          <Route
-            path="library/collections/:collectionId"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Library, { filteredDashboard }) }}
-            location={location}
-          />
-          <Route
-            path="dataset/:datasetId"
-            components={{ sidebar: WorkspaceNav, content: Dataset }}
-            location={location}
-          />
-          <Route
-            path="raster/:rasterId"
-            components={{ sidebar: WorkspaceNav, content: Raster }}
-            location={location}
-          />
-          <Route
-            path="dataset/:datasetId/transformation/:transformationType"
-            components={{ sidebar: WorkspaceNav, content: Transformation }}
-            location={location}
-          />
-          <Route
-            path="visualisation/create"
-            components={{ sidebar: WorkspaceNav, content: Visualisation }}
-            location={location}
-          />
-          <Route
-            path="visualisation/:visualisationId/export"
-            components={{
-              sidebar: WorkspaceNav,
-              content: withProps(Visualisation, { exporting: true }),
-            }}
-            location={location}
-          />
-          <Route
-            path="visualisation/:visualisationId"
-            components={{ sidebar: WorkspaceNav, content: Visualisation }}
-            location={location}
-          />
-          <Route
-            path="dashboard/create"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Dashboard, { filteredDashboard }) }}
-            location={location}
-          />
-          <Route
-            path="dashboard/:dashboardId/export_pages"
-            components={{
-              sidebar: WorkspaceNav,
-              content: withProps(Dashboard,
-                { query: queryParsed,
-                  filteredDashboard,
-                  exporting: true,
-                  preventPageOverlaps: true }),
-            }}
-            location={location}
-          />
-          <Route
-            path="dashboard/:dashboardId/export"
-            components={{
-              sidebar: WorkspaceNav,
-              content: withProps(Dashboard,
-                { query: queryParsed, filteredDashboard, exporting: true }),
-            }}
-            location={location}
-          />
-          <Route
-            path="dashboard/:dashboardId"
-            components={{ sidebar: WorkspaceNav,
-              content: withProps(Dashboard, { filteredDashboard }) }}
-            location={location}
-          />
-          <Redirect from="admin" to="/admin/users" />
-          <Route
-            path="admin/users"
-            components={{ sidebar: AdminNav, content: Users }}
-            location={location}
-          />
-          <Route
-            path="admin/resources"
-            components={{ sidebar: AdminNav, content: Resources }}
-            location={location}
-          />
+        <Route path="/admin" exact >
+          <Redirect to="/admin/users" />
         </Route>
+        <Route path="/auth_callback" exact >
+          <Redirect to="/" />
+        </Route>
+        <Route path="/" exact >
+          <Redirect to="/library" />
+        </Route>
+
+        <Route path="/admin/users" exact component={admin(Users)} />
+        <Route path="/admin/resources" exact component={admin(Resources)} />
+        <Route path="/library" exact component={resource(Library, { filteredDashboard })} />
+        <Route path="/library/collections/:collectionId" component={resource(Library, { filteredDashboard })} />
+        <Route path="/dataset/:datasetId" exact component={resource(Dataset)} />
+        <Route path="/raster/:rasterId" component={resource(Raster)} />
+        <Route
+          path="/dataset/:datasetId/transformation/:transformationType"
+          exact
+          components={resource(Transformation)}
+        />
+        <Route path="/visualisation//create" exact component={resource(Visualisation)} />
+        <Route path="/visualisation/:visualisationId" exact component={resource(Visualisation)} />
+
+        <Route
+          path="/visualisation/:visualisationId/export"
+          exact
+          component={resource(Visualisation, { exporting: true })}
+        />
+
+        <Route path="/dashboard//create" exact component={resource(Dashboard, { filteredDashboard })} />
+
+        <Route
+          path="/dashboard/:dashboardId/export_pages"
+          exact
+          component={resource(Dashboard,
+            { query: queryParsed,
+              filteredDashboard,
+              exporting: true,
+              preventPageOverlaps: true })}
+        />
+
+        <Route
+          path="/dashboard/:dashboardId/export" exact
+          componen={resource(Dashboard, { query: queryParsed, filteredDashboard, exporting: true })}
+        />
+
+        <Route path="/dashboard/:dashboardId" exact component={resource(Dashboard, { filteredDashboard })} />
       </Router>
     </IntlWrapper>
   );

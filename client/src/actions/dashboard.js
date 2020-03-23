@@ -1,5 +1,4 @@
 import { createAction } from 'redux-actions';
-import { push } from 'react-router-redux';
 import { saveAs } from 'file-saver/FileSaver';
 
 import { addEntitiesToCollection } from './collection';
@@ -14,7 +13,7 @@ export const createDashboardRequest = createAction('CREATE_DASHBOARD_REQUEST');
 export const createDashboardFailure = createAction('CREATE_DASHBOARD_FAILURE');
 export const createDashboardSuccess = createAction('CREATE_DASHBOARD_SUCCESS');
 
-export function createDashboard(dashboard, collectionId, callback = () => {}) {
+export function createDashboard(history, dashboard, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createDashboardRequest(dashboard));
     api
@@ -25,7 +24,7 @@ export function createDashboard(dashboard, collectionId, callback = () => {}) {
         if (collectionId) {
           dispatch(addEntitiesToCollection(dash.id, collectionId));
         }
-        dispatch(push(`/dashboard/${dash.id}`));
+        history.push(`/dashboard/${dash.id}`);
         callback();
       })
       .catch((err) => {

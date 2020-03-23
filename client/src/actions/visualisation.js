@@ -1,5 +1,4 @@
 import { createAction } from 'redux-actions';
-import { push } from 'react-router-redux';
 import { saveAs } from 'file-saver/FileSaver';
 
 import { fetchDataset } from './dataset';
@@ -17,7 +16,7 @@ export const createVisualisationRequest = createAction('CREATE_VISUALISATION_REQ
 export const createVisualisationSuccess = createAction('CREATE_VISUALISATION_SUCCESS');
 export const createVisualisationFailure = createAction('CREATE_VISUALISATION_FAILURE');
 
-export function createVisualisation(visualisation, collectionId, callback = () => {}) {
+export function createVisualisation(history, visualisation, collectionId, callback = () => {}) {
   return (dispatch) => {
     dispatch(createVisualisationRequest(visualisation));
     api
@@ -28,7 +27,7 @@ export function createVisualisation(visualisation, collectionId, callback = () =
         if (collectionId) {
           dispatch(addEntitiesToCollection(vis.id, collectionId));
         }
-        dispatch(push(`/visualisation/${vis.id}`));
+        history.push(`/visualisation/${vis.id}`);
         callback();
       })
       .catch((err) => {
@@ -44,7 +43,7 @@ export const fetchVisualisationRequest = createAction('FETCH_VISUALISATION_REQUE
 export const fetchVisualisationSuccess = createAction('FETCH_VISUALISATION_SUCCESS');
 export const fetchVisualisationFailure = createAction('FETCH_VISUALISATION_FAILURE');
 
-export function fetchVisualisation(id) {
+export function fetchVisualisation(history, id) {
   return (dispatch) => {
     dispatch(fetchVisualisationRequest(id));
     api
