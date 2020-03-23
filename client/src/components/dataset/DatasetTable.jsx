@@ -253,6 +253,7 @@ class DatasetTable extends Component {
           this.props.onTransform(transformation).then(() => {
             this.hideSidebar();
           }).catch((error) => {
+            // eslint-disable-next-line no-console
             console.log(error);
           });
         },
@@ -263,19 +264,19 @@ class DatasetTable extends Component {
 
   // Redirect to merge transform page
   handleMergeDataset() {
-    const { location, router } = this.props;
-    router.push(`${location.pathname}/transformation/merge`);
+    const { location, history } = this.props;
+    history.push(`${location.pathname}/transformation/merge`);
   }
 
   // Redirect to derive column transform page: category
   handleDeriveColumnCategory() {
-    const { location, router } = this.props;
-    router.push(`${location.pathname}/transformation/derive-category`);
+    const { location, history } = this.props;
+    history.push(`${location.pathname}/transformation/derive-category`);
   }
 
   handleReverseGeocode() {
-    const { location, router } = this.props;
-    router.push(`${location.pathname}/transformation/reverse-geocode`);
+    const { location, history } = this.props;
+    history.push(`${location.pathname}/transformation/reverse-geocode`);
   }
 
   handleDataTypeContextMenuClicked({ column, dataTypeOptions, newColumnType }) {
@@ -547,10 +548,10 @@ DatasetTable.propTypes = {
   onTransform: PropTypes.func.isRequired,
   onUndoTransformation: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
-  router: PropTypes.object.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
   isLockedFromTransformations: PropTypes.bool,
   intl: intlShape,
+  history: PropTypes.object.isRequired,
 };
 
 export default withRouter(injectIntl(DatasetTable));

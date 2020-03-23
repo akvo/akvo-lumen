@@ -81,7 +81,7 @@ class DashboardHeader extends Component {
   }
 
   render() {
-    const { isUnsavedChanges, savingFailed, timeToNextSave, intl } = this.props;
+    const { isUnsavedChanges, savingFailed, timeToNextSave, intl, history } = this.props;
     const haveTitle = Boolean(this.props.title);
 
     const actionButtons = this.getActionButtons(isUnsavedChanges, haveTitle);
@@ -111,6 +111,7 @@ class DashboardHeader extends Component {
         actionButtons={actionButtons}
         savingFailed={savingFailed}
         timeToNextSave={timeToNextSave}
+        history={history}
       />
     );
   }
@@ -123,6 +124,7 @@ DashboardHeader.propTypes = {
   timeToNextSave: PropTypes.number,
   title: PropTypes.string.isRequired,
   onDashboardAction: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   onChangeTitle: PropTypes.func.isRequired,
   onSaveDashboard: PropTypes.func.isRequired,
   onBeginEditTitle: PropTypes.func.isRequired,
