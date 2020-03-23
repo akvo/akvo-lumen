@@ -14,27 +14,38 @@ function Header({
 }) {
   const haveHistory = location.state && location.state.from;
   let target;
-
+  let isLink = false;
   if (backButtonTarget) {
     target = { to: backButtonTarget };
+    isLink = true;
   } else if (haveHistory) {
     target = { onClick: () => history.goBack() };
   } else {
+    isLink = true;
     target = { to: '/library' };
   }
+  const Arrow = () => (<i
+          className="fa fa-arrow-left"
+          aria-hidden="true"
+                       />);
 
   return (
     <nav className={`Header ${className}`}>
-      <Link
+      { isLink ?
+        (<Link
         className="backButton"
         data-test-id="back-button"
         {...target}
-      >
-        <i
-          className="fa fa-arrow-left"
-          aria-hidden="true"
-        />
-      </Link>
+         >
+          <Arrow/>
+         </Link>) :
+        (<div
+        className="backButton"
+        data-test-id="back-button"
+        {...target}
+         >
+           <Arrow/>
+         </div>)}
       <div className="content">
         {children}
       </div>
