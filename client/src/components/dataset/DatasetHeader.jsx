@@ -37,6 +37,7 @@ export default class DatasetHeader extends Component {
       isUnsavedChanges,
       savingFailed,
       timeToNextSave,
+      history,
     } = this.props;
 
     let saveStatusId = ({
@@ -50,6 +51,7 @@ export default class DatasetHeader extends Component {
 
     return (
       <EntityTypeHeader
+        history={history}
         title={this.props.name}
         actionButtons={this.getActionButtions()}
         onChangeTitle={onChangeTitle}
@@ -67,6 +69,7 @@ DatasetHeader.propTypes = {
   timeToNextSave: PropTypes.number,
   name: PropTypes.string.isRequired,
   onShowDatasetSettings: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   onSaveDataset: PropTypes.func.isRequired,
   isUnsavedChanges: PropTypes.bool,
   onChangeTitle: PropTypes.func,
