@@ -90,7 +90,7 @@ class Visualisation extends Component {
   }
 
   UNSAFE_componentWillMount() {
-    const { params, library, dispatch } = this.props;
+    const { params, library, history, dispatch } = this.props;
     const visualisationId = params.visualisationId;
     const isEditingExistingVisualisation = visualisationId != null;
 
@@ -382,6 +382,7 @@ class Visualisation extends Component {
                 onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
                 onSaveVisualisation={this.onSave}
                 savingFailed={this.state.savingFailed}
+                history={this.props.history}
                 timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
                 isExporting={get(this.props, `library.visualisations[${visualisation.id}].isExporting`)}
               />
@@ -418,6 +419,7 @@ class Visualisation extends Component {
 Visualisation.propTypes = {
   intl: intlShape,
   dispatch: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
