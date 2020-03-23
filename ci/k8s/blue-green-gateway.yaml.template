@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: lumen-blue-green-gateway
 spec:
+  selector:
+    matchLabels:
+      run: lumen-blue-green-gateway
   template:
     metadata:
       labels:
