@@ -66,7 +66,7 @@ class CreateCollection extends Component {
           </label>
           <input
             id="titleInput"
-            onInput={this.handleInputChange}
+            onChange={this.handleInputChange}
             value={this.state.title}
             type="text"
             placeholder={intl.formatMessage({ id: 'untitled_collection' })}
