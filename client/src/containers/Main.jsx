@@ -17,7 +17,7 @@ require('fixed-data-table-2/dist/fixed-data-table.css');
 
 class Main extends Component {
   componentDidMount() {
-    const queryParams = queryString.parse(location.search);
+    const queryParams = queryString.parse(this.props.location.search);
     const showEditUser = queryParams.edit_user === 'false';
     const {
       dispatch,
@@ -72,7 +72,6 @@ Main.propTypes = {
   notification: PropTypes.object,
   loadStatus: PropTypes.string,
   env: PropTypes.object,
-  location: PropTypes.object,
   dispatch: PropTypes.func.isRequired,
   profile: PropTypes.shape({
     firstName: PropTypes.string,
