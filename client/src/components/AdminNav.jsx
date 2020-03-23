@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import NavLink from './workspace-nav/NavLink';
 import OrganizationMenu from './workspace-nav/OrganizationMenu';
@@ -20,7 +20,8 @@ const getActiveSubtitle = (pathname) => {
 };
 
 const AdminNav = function AdminNav(props) {
-  const activeSubtitle = getActiveSubtitle(props.location.pathname);
+  const location = useLocation();
+  const activeSubtitle = getActiveSubtitle(location.pathname);
   return (
     <nav
       className="WorkspaceNav noSelect"
@@ -62,7 +63,6 @@ const AdminNav = function AdminNav(props) {
 
 AdminNav.propTypes = {
   profile: PropTypes.object.isRequired,
-  location: PropTypes.object,
   dispatch: PropTypes.func.isRequired,
 };
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import itsSet from 'its-set';
 import { FormattedMessage, intlShape } from 'react-intl';
 import moment from 'moment';
@@ -155,10 +155,6 @@ LibraryListingItemContextMenu.propTypes = {
 
 export default class LibraryListingItem extends Component {
 
-  static contextTypes = {
-    intl: intlShape,
-  };
-
   constructor() {
     super();
     this.state = {
@@ -298,4 +294,5 @@ LibraryListingItem.propTypes = {
   onCheckEntity: PropTypes.func.isRequired,
   isChecked: PropTypes.bool.isRequired,
   showCheckbox: PropTypes.bool,
+  intl: intlShape,
 };
