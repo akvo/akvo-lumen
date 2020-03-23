@@ -229,7 +229,7 @@ class Dataset extends Component {
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
 
     return (
-      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed} history={history}>
         <div className="Dataset">
           <DatasetHeader
             history={history}
