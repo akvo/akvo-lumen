@@ -658,7 +658,7 @@ class Dashboard extends Component {
     const filteredDashboard = (this.props.filteredDashboard && !filteredDashboardCondition()) ||
     Boolean(this.props.query && this.props.query.filter);
     return (
-      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed} history={history}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
           <div className="Dashboard">
             {!exporting && (

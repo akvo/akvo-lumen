@@ -368,10 +368,10 @@ class Visualisation extends Component {
     }
     const { VisualisationHeader, VisualisationEditor } = this.state.asyncComponents;
     const { visualisation } = this.state;
-    const { exporting } = this.props;
+    const { exporting, history } = this.props;
 
     return (
-      <NavigationPrompt shouldPrompt={this.state.savingFailed}>
+      <NavigationPrompt shouldPrompt={this.state.savingFailed} history={history}>
         <BodyClassName className={exporting ? 'exporting' : ''}>
           <div className="Visualisation">
             {!exporting && (
