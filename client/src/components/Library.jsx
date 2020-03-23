@@ -250,7 +250,7 @@ class Library extends Component {
               dispatch(showModal('create-collection'));
             } else {
               const x = { pathname: `/${type}//create`, state: meta };
-              this.props.history.push(x);
+              history.push(x);
             }
           }}
         />
@@ -291,6 +291,7 @@ Library.propTypes = {
   dispatch: PropTypes.func,
   location: PropTypes.object,
   params: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
   children: PropTypes.element,
   datasets: PropTypes.object.isRequired,
   visualisations: PropTypes.object.isRequired,

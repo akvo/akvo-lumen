@@ -155,10 +155,6 @@ LibraryListingItemContextMenu.propTypes = {
 
 export default class LibraryListingItem extends Component {
 
-  static contextTypes = {
-    intl: intlShape,
-  };
-
   constructor() {
     super();
     this.state = {
@@ -298,4 +294,5 @@ LibraryListingItem.propTypes = {
   onCheckEntity: PropTypes.func.isRequired,
   isChecked: PropTypes.bool.isRequired,
   showCheckbox: PropTypes.bool,
+  intl: intlShape,
 };

@@ -69,6 +69,7 @@ class Main extends Component {
 Main.propTypes = {
   content: PropTypes.object,
   sidebar: PropTypes.object,
+  location: PropTypes.object,
   notification: PropTypes.object,
   loadStatus: PropTypes.string,
   env: PropTypes.object,

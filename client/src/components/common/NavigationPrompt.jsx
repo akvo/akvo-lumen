@@ -12,9 +12,8 @@ class NavigationPrompt extends React.Component {
   }
 
   promptUnsavedChange() {
-    const { message, shouldPrompt, history, route, routes } = this.props;
-    console.log(history);
-    if (shouldPrompt){
+    const { message, shouldPrompt, history } = this.props;
+    if (shouldPrompt) {
       const unblock = history.block(message);
       window.onbeforeunload = () => unblock();
     }

@@ -20,7 +20,6 @@ const getActiveSubtitle = (pathname) => {
 };
 
 const AdminNav = function AdminNav(props) {
-  console.log('AdminNav props', props);
   const location = useLocation();
   const activeSubtitle = getActiveSubtitle(location.pathname);
   return (
