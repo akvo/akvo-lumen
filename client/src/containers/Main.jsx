@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { every } from 'lodash';
-import queryString from 'querystringify';
 import { FormattedMessage } from 'react-intl';
 import Modal from './Modal';
 import { showModal } from '../actions/activeModal';
@@ -17,13 +16,13 @@ require('fixed-data-table-2/dist/fixed-data-table.css');
 
 class Main extends Component {
   componentDidMount() {
-    const queryParams = queryString.parse(this.props.location.search);
-    const showEditUser = queryParams.edit_user === 'false';
+    const q = new URLSearchParams(this.props.location.search);
+    const showEditUser = q.get('edit_user') !== 'false';
     const {
       dispatch,
       profile: { firstName, lastName },
     } = this.props;
-    if ((!showEditUser)
+    if (showEditUser
       && (!every([firstName, lastName], Boolean))) {
       dispatch(showModal('edit-user'));
     }
