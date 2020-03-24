@@ -14,6 +14,7 @@ import Resources from '../components/Resources';
 import Main from './Main';
 import WorkspaceNav from '../components/WorkspaceNav';
 import AdminNav from '../components/AdminNav';
+import { getQueryString } from '../utilities/api';
 
 function admin(C) {
   // eslint-disable-next-line react/prop-types
@@ -47,6 +48,7 @@ export default function App({ store, history, query }) {
   const path = ['profile', 'https://akvo.org/app_metadata', 'lumen', 'features', 'filteredDashboard'];
   const filteredDashboard = !((store && _.get(store.getState(), path)) === false);
   const queryParsed = (query && JSON.parse(query)) || {};
+
   return (
     <IntlWrapper>
       <Router history={history}>
@@ -57,7 +59,7 @@ export default function App({ store, history, query }) {
           <Redirect to="/" />
         </Route>
         <Route path="/" exact >
-          <Redirect to="/library" />
+          <Redirect to={{ pathname: '/library', search: `?${getQueryString(queryParsed)}` }} />
         </Route>
 
         <Route path="/admin/users" exact component={admin(Users)} />

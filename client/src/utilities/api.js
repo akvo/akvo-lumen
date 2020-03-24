@@ -123,7 +123,7 @@ const requestHeaders = (token, additionalHeaders = {}) => ({
   Authorization: `Bearer ${token}`,
 });
 
-const getQueryString = queryParams =>
+export const getQueryString = queryParams =>
   Object.keys(queryParams).map((key, index) =>
     `${index > 0 ? '&' : ''}${key}=${encodeURIComponent(queryParams[key])}`
   ).join('');
