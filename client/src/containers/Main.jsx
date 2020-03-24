@@ -23,7 +23,8 @@ class Main extends Component {
       profile: { firstName, lastName },
     } = this.props;
     if (showEditUser
-      && (!every([firstName, lastName], Boolean))) {
+        && (!every([firstName, lastName], Boolean))) {
+      console.log(showEditUser, q.get('edit_user'));
       dispatch(showModal('edit-user'));
     }
   }

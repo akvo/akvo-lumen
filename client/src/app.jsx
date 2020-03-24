@@ -36,10 +36,10 @@ function initAuthenticated(profile, env) {
   // Refreshing the token on a fixed schedule (every 10 minutes)
   // will disable SSO Idle Timeout
   setInterval(auth.token, 1000 * 60 * 10);
-
+  const q = JSON.stringify(queryString.parse(location.search));
   render(
     <AppContainer>
-      <Root store={store} history={history} />
+      <Root store={store} history={history} query={q} />
     </AppContainer>,
     rootElement
   );
@@ -49,7 +49,7 @@ function initAuthenticated(profile, env) {
       const NewRoot = require('./containers/Root').default;
       render(
         <AppContainer>
-          <NewRoot store={store} history={history} />
+          <NewRoot store={store} history={history} query={q} />
         </AppContainer>,
         rootElement
       );
@@ -74,7 +74,6 @@ function initWithAuthToken(locale, query) {
   const store = configureStore(initialState);
   const customHistory = createBrowserHistory();
   const history = syncHistoryWithStore(customHistory, store);
-
   render(
     <AppContainer>
       <Root store={store} history={history} query={query} />
@@ -110,7 +109,7 @@ function dispatchOnMode() {
         // eslint-disable-next-line consistent-return
         .then((user) => {
           // auth0.authorize();
-          if (user == null) {
+          if (user === null) {
             const redirect = url.parse(location.href).pathname;
             if (redirect !== '/library' && redirect !== '/') {
               window.localStorage.setItem('redirect', redirect);
@@ -149,8 +148,10 @@ function dispatchOnMode() {
           }
         });
       });
-  } else if (accessToken != null) {
-    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale, queryParams.query));
+  } else if (accessToken !== null) {
+    const q = queryString.parse(location.search);
+    delete q.access_token;
+    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale, JSON.stringify(q)));
   } else {
     get('/env')
     .then(
