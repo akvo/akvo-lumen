@@ -31,7 +31,8 @@
     ["/profile" {:get {:handler (fn [{tenant :tenant
                                     query-params :query-params}]
                                 (let [u (user/user authorizer tenant (get query-params "email"))]
-                                  (lib/ok (select-keys u [:admin :email :firstName :id :lastName]))))}}]]
+                                    (log/error :email (get query-params "email") :profile u)
+                                    (lib/ok (select-keys u [:admin :email :firstName :id :lastName])))))}}]]
    ["/admin/users"
     ["" {:get {:handler (fn [{tenant :tenant}]
                           (user/users authorizer tenant))}}]
