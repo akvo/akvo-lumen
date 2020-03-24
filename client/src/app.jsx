@@ -131,7 +131,7 @@ function dispatchOnMode() {
         // eslint-disable-next-line consistent-return
         .then((user) => {
           // auth0.authorize();
-          if (user == null) {
+          if (user === null) {
             const redirect = url.parse(location.href).pathname;
             if (redirect !== '/library' && redirect !== '/') {
               window.localStorage.setItem('redirect', redirect);
