@@ -16,15 +16,11 @@ require('fixed-data-table-2/dist/fixed-data-table.css');
 
 class Main extends Component {
   componentDidMount() {
-    const q = new URLSearchParams(this.props.location.search);
-    const showEditUser = q.get('edit_user') !== 'false';
     const {
       dispatch,
       profile: { firstName, lastName },
     } = this.props;
-    if (showEditUser
-        && (!every([firstName, lastName], Boolean))) {
-      console.log(showEditUser, q.get('edit_user'));
+    if (!every([firstName, lastName], Boolean)) {
       dispatch(showModal('edit-user'));
     }
   }

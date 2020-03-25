@@ -37,7 +37,6 @@ const handleResponse = (response) => {
     useFinalURL,
     bodyUsed,
   } = response;
-
   const headers = iteratorToObject(response.headers);
   const contentType = getContentType(headers['content-type']);
 
@@ -95,7 +94,6 @@ const handleResponse = (response) => {
       }
     }
   }
-
   switch (contentType) {
     case CONTENT_TYPE.JSON: {
       return response.json().then(body => ({
@@ -137,6 +135,15 @@ export const get = (url, queryParams, headers) => {
     })
   )
   .then(handleResponse);
+};
+
+export const getWithToken = (token, url, queryParams, headers) => {
+  const urlWithOptionalParams = queryParams == null ? url : `${url}?${getQueryString(queryParams)}`;
+  return fetch(urlWithOptionalParams, {
+    method: 'GET',
+    headers: omit(requestHeaders(token, headers), 'Content-Type'),
+  })
+    .then(handleResponse);
 };
 
 export const post = (url, body, headers) =>

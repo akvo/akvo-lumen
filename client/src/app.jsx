@@ -1,6 +1,7 @@
 /* eslint-disable import/default, global-require, import/first, no-underscore-dangle */
 import React from 'react';
 import { render } from 'react-dom';
+import jwtDecode from 'jwt-decode';
 import { createBrowserHistory } from 'history';
 import { AppContainer } from 'react-hot-loader';
 import { syncHistoryWithStore } from 'react-router-redux';
@@ -13,7 +14,7 @@ import { init as initFeedback } from './utilities/feedback';
 import { UserManager, WebStorageStateStore } from 'oidc-client';
 import queryString from 'querystringify';
 import url from 'url';
-import { get } from './utilities/api';
+import { get, getWithToken } from './utilities/api';
 import Raven from 'raven-js';
 
 function initAuthenticated(profile, env) {
@@ -68,20 +69,6 @@ function userLocale(lo) {
   return 'en';
 }
 
-function initWithAuthToken(locale, query) {
-  const initialState = { profile: { admin: false, attributes: { locale: [userLocale(locale)] } } };
-  const rootElement = document.querySelector('#root');
-  const store = configureStore(initialState);
-  const customHistory = createBrowserHistory();
-  const history = syncHistoryWithStore(customHistory, store);
-  render(
-    <AppContainer>
-      <Root store={store} history={history} query={query} />
-    </AppContainer>,
-    rootElement
-  );
-}
-
 function initNotAuthenticated(error) {
   const locale = userLocale(navigator.language);
   const initialState =
@@ -93,6 +80,41 @@ function initNotAuthenticated(error) {
     <Error store={store} error={error} locale={locale} />,
     rootElement
   );
+}
+
+function feedUserProfile(user, env, token) {
+  const userProfile = user.profile;
+  let fn = () => get('/api/user/profile', {
+    email: userProfile.email,
+  });
+  if (token) {
+    fn = () => getWithToken(token, '/api/user/profile', {
+      email: userProfile.email,
+    });
+  }
+
+  return Promise.resolve(
+    fn().then((response) => {
+      try {
+        const {
+          admin, firstName, id, lastName,
+        } = response.body;
+        userProfile.admin = admin;
+        userProfile.firstName = firstName;
+        userProfile.keycloakId = id;
+        userProfile.lastName = lastName;
+      } catch (e) {
+        userProfile.admin = false;
+        Raven.captureException(e, {
+          extra: {
+            user,
+          },
+        });
+      }
+      userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
+      userProfile.username = user.username || user.nickname;
+      return { profile: userProfile, env };
+    }));
 }
 
 function dispatchOnMode() {
@@ -116,30 +138,7 @@ function dispatchOnMode() {
             }
             auth.signinRedirect();
           } else {
-            const userProfile = user.profile;
-            return Promise.resolve(get('/api/user/profile', {
-              email: user.profile.email,
-            }).then((response) => {
-              try {
-                const {
-                  admin, firstName, id, lastName,
-                } = response.body;
-                userProfile.admin = admin;
-                userProfile.firstName = firstName;
-                userProfile.keycloakId = id;
-                userProfile.lastName = lastName;
-              } catch (e) {
-                userProfile.admin = false;
-                Raven.captureException(e, {
-                  extra: {
-                    user,
-                  },
-                });
-              }
-              userProfile.attributes = user.attributes || { locale: [userLocale(user.locale)] };
-              userProfile.username = user.username || user.nickname;
-              return { profile: userProfile, env: body };
-            }));
+            return feedUserProfile(user, body);
           }
         })
         .then((res) => {
@@ -149,9 +148,25 @@ function dispatchOnMode() {
         });
       });
   } else if (accessToken != null) {
-    const q = queryString.parse(location.search);
-    delete q.access_token;
-    auth.initExport(accessToken).then(initWithAuthToken(queryParams.locale, JSON.stringify(q)));
+    get('/env')
+      .then(
+        ({
+        body,
+      // eslint-disable-next-line consistent-return
+        }) => {
+          const q = queryString.parse(location.search);
+          delete q.access_token;
+          const p = jwtDecode(accessToken);
+          const x = {
+            profile: p,
+            nickname: p.nickname,
+          };
+          return feedUserProfile(x, body, accessToken);
+        }
+      )
+      .then((res) => {
+        auth.initExport(accessToken).then(initAuthenticated(res.profile, res.env));
+      });
   } else {
     get('/env')
     .then(

@@ -153,7 +153,7 @@ const takeScreenshot = (req, runId) => new Promise((resolve, reject) => {
 
     const token = req.header('access_token');
     const locale = req.header('locale');
-    const dest = `${target}?access_token=${token}&locale=${locale}&edit_user=false&query=${encodeURIComponent(JSON.stringify({filter}))}`;
+    const dest = `${target}?access_token=${token}&locale=${locale}&query=${encodeURIComponent(JSON.stringify({filter}))}`;
     await page.goto(dest, { waitUntil: 'networkidle2', timeout: 0 });
 
     const selectors = (selector || '').split(',');
