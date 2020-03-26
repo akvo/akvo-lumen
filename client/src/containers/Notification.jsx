@@ -9,20 +9,17 @@ require('./Notification.scss');
 const autohideDelay = 3000;
 
 class Notification extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       onscreen: false,
     };
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     if (this.props.autohide) {
       this.scheduleAutoHide();
     }
-  }
-
-  componentDidMount() {
     // Force one additional render so we can change the className and animate position with css.
     //  Lint exception is OK here - it's designed to prevent re-renders, but we want the re-render.
     //  eslint-disable-next-line react/no-did-mount-set-state

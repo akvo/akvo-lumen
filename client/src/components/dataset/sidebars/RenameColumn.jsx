@@ -22,7 +22,6 @@ export default class RenameColumn extends Component {
         onError: 'fail',
       }),
     };
-    console.log('x', x);
     this.state = x;
   }
 
