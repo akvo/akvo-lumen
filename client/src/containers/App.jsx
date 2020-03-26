@@ -71,7 +71,7 @@ export default function App({ store, history, query }) {
         <Route
           path="/dataset/:datasetId/transformation/:transformationType"
           exact
-          components={resource(Transformation)}
+          component={resource(Transformation)}
         />
         <Route path="/visualisation//create" exact component={resource(Visualisation)} />
         <Route path="/visualisation/:visualisationId" exact component={resource(Visualisation)} />
