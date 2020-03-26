@@ -14,7 +14,7 @@ class UserMenuPopUp extends React.Component {
     this.handleShowEditUserModal = this.handleShowEditUserModal.bind(this);
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     document.addEventListener('mousedown', this.handleClick, false);
   }
 

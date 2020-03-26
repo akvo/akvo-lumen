@@ -18,7 +18,7 @@ class TargetMergeOptions extends Component {
     };
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     const { dispatch, dataset, onChange } = this.props;
     dispatch(ensureDatasetFullyLoaded(dataset.get('id')))
       .then((ds) => {
