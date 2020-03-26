@@ -10,19 +10,17 @@ class DashboardCanvasItemEditable extends Component {
   constructor(props) {
     super(props);
     this.placeholder = props.intl.formatMessage({ id: 'enter_text_here' });
-    this.state = {};
+    this.state = {
+      textContents: this.placeholder !== props.item.content ?
+        props.item.content :
+        this.placeholder,
+    };
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.handleFocus = this.handleFocus.bind(this);
     this.inputElement = React.createRef();
   }
-  UNSAFE_componentWillMount() {
-    this.setState({
-      textContents: this.placeholder !== this.props.item.content ?
-        this.props.item.content :
-        this.placeholder,
-    });
-  }
+
   componentDidMount() {
     if (this.props.focused) {
       this.focusInput();
