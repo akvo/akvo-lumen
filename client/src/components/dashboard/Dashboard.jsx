@@ -59,11 +59,17 @@ const getDashboardFromState = (stateDashboard, isForEditor) => {
   return dashboard;
 };
 
+const isEditingExistingDashboardFn = props => getEditingStatus(props.location);
+
+const isLibraryLoadedFn = props => !isEmpty(props.library.datasets);
+
+const existingDashboardLoadedFn = (props, id) => isLibraryLoadedFn(props)
+      && !isEmpty(props.library.dashboards[id].layout);
 class Dashboard extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
+    const initialState = {
       dashboard: {
         type: 'dashboard',
         title: props.intl.formatMessage({ id: 'untitled_dashboard' }),
@@ -86,6 +92,19 @@ class Dashboard extends Component {
       timeFromPreviousSave: 0,
       tabSelected: 'visualisations',
     };
+    const isEditingExistingDashboard = isEditingExistingDashboardFn(props);
+    const dashboardId = props.params.dashboardId;
+    const libraryDashboard = props.library.dashboards[dashboardId];
+    if (isEditingExistingDashboard) {
+      const existingDashboardLoaded = existingDashboardLoadedFn(props, dashboardId);
+      initialState.isUnsavedChanges = false;
+      if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
+        initialState.fetchingDashboard = true;
+      } else if (!libraryDashboard.filter.datasetId) {
+        initialState.fetchingDashboard = false;
+      }
+    }
+    this.state = initialState;
     this.loadDashboardIntoState = this.loadDashboardIntoState.bind(this);
     this.onAddVisualisation = this.onAddVisualisation.bind(this);
     this.updateLayout = this.updateLayout.bind(this);
@@ -104,9 +123,9 @@ class Dashboard extends Component {
     this.onFilterValueChange = this.onFilterValueChange.bind(this);
   }
 
-  UNSAFE_componentWillMount() {
-    const isEditingExistingDashboard = getEditingStatus(this.props.location);
-    const isLibraryLoaded = !isEmpty(this.props.library.datasets);
+  componentDidMount() {
+    const isEditingExistingDashboard = isEditingExistingDashboardFn(this.props);
+    const isLibraryLoaded = isLibraryLoadedFn(this.props);
 
     if (!isLibraryLoaded) {
       this.props.dispatch(fetchLibrary());
@@ -121,13 +140,10 @@ class Dashboard extends Component {
       }
     };
     if (isEditingExistingDashboard) {
-      this.setState({ isUnsavedChanges: false });
       const dashboardId = this.props.params.dashboardId;
       const libraryDashboard = this.props.library.dashboards[dashboardId];
-      const existingDashboardLoaded =
-        isLibraryLoaded && !isEmpty(libraryDashboard.layout);
+      const existingDashboardLoaded = existingDashboardLoadedFn(this.props, dashboardId);
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
-        this.setState({ fetchingDashboard: true });
         const filter = (libraryDashboard && libraryDashboard.filter) || {};
         this.props.dispatch(actions.fetchDashboard(dashboardId,
           { filter: (this.props.query && this.props.query.filter) || filter },
@@ -147,14 +163,10 @@ class Dashboard extends Component {
           this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, true,
             datasetCallback(libraryDashboard)
             ));
-        } else {
-          this.setState({ fetchingDashboard: false });
         }
       }
     }
-  }
 
-  componentDidMount() {
     this.isMountedFlag = true;
     require.ensure(['../charts/VisualisationViewer'], () => {
       require.ensure([], () => {
@@ -174,7 +186,7 @@ class Dashboard extends Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    const isEditingExistingDashboard = getEditingStatus(this.props.location);
+    const isEditingExistingDashboard = isEditingExistingDashboardFn(this.props);
     const dashboardAlreadyLoaded = this.state.dashboard.layout.length !== 0;
     const { dashboardId } = nextProps.params;
     const sharedAction = get(this.state, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`) ||
