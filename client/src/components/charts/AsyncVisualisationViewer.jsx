@@ -9,14 +9,14 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export default class AsyncVisualisationViewer extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       asyncComponents: null,
     };
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     const { visualisation } = this.props;
     let output;
 
