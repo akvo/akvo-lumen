@@ -62,29 +62,23 @@ const errorOptions = [
 
 export default class ChangeDataType extends Component {
 
-  constructor() {
-    super();
-    this.state = {};
-    this.handleChangeErrorStrategy = this.handleChangeErrorStrategy.bind(this);
-    this.mergeArgs = this.mergeArgs.bind(this);
-  }
-
-
-  UNSAFE_componentWillMount() {
-    const { column, newColumnType } = this.props;
-    this.setState({
+  constructor(props) {
+    super(props);
+    this.state = {
       transformation: Immutable.fromJS({
         op: 'core/change-datatype',
         args: {
-          columnName: column.get('columnName'),
-          newType: newColumnType,
+          columnName: props.column.get('columnName'),
+          newType: props.newColumnType,
           defaultValue: null,
           parseFormat: 'YYYY-MM-DD',
         },
         onError: 'default-value',
       }),
       errorStrategy: 'empty-cell',
-    });
+    };
+    this.handleChangeErrorStrategy = this.handleChangeErrorStrategy.bind(this);
+    this.mergeArgs = this.mergeArgs.bind(this);
   }
 
   mergeArgs(args) {
