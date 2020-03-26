@@ -4,17 +4,11 @@ import { FormattedMessage } from 'react-intl';
 
 export default class LibrarySearch extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
-      searchText: '',
+      searchText: props.searchString || '',
     };
-  }
-
-  UNSAFE_componentWillMount() {
-    if (this.props.searchString) {
-      this.setState({ searchText: this.props.searchString });
-    }
   }
 
   render() {

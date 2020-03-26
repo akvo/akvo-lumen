@@ -31,14 +31,14 @@ class Transformation extends Component {
     };
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     this.props.dispatch(ensureLibraryLoaded())
       .then(() => this.setState({ loading: false }));
   }
 
   handleApplyTransformation(transformation) {
     trackEvent(TRANSFORM_DATASET, transformation.op);
-    const { dispatch, datasetId, router } = this.props;
+    const { dispatch, datasetId, history } = this.props;
     this.setState({ transforming: true });
     dispatch(showNotification('info', 'Applying transformation...'));
 
@@ -52,7 +52,7 @@ class Transformation extends Component {
           dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
             this.setState({ transforming: false });
             dispatch(showNotification('info', 'Transformation success', true));
-            router.push(`/dataset/${datasetId}`);
+            history.push(`/dataset/${datasetId}`);
             dispatch(endTx(datasetId));
           }));
         }
@@ -68,8 +68,9 @@ class Transformation extends Component {
     const { loading, transforming } = this.state;
     if (loading) return null;
 
-    const { datasetId, datasets, routeParams, intl } = this.props;
-    const TransformationComponent = transformationComponent[routeParams.transformationType];
+    const { datasetId, datasets, params, intl } = this.props;
+
+    const TransformationComponent = transformationComponent[params.transformationType];
 
     return (
       <div className="Transformation">
@@ -99,8 +100,8 @@ class Transformation extends Component {
 }
 
 Transformation.propTypes = {
-  router: PropTypes.object.isRequired,
-  routeParams: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
   datasets: PropTypes.object,
   datasetId: PropTypes.string.isRequired,
   dispatch: PropTypes.func.isRequired,
