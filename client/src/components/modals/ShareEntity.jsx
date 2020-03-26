@@ -26,12 +26,13 @@ export default class ShareEntity extends Component {
     this.handleFocusPassword = this.handleFocusPassword.bind(this);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (!nextProps.isOpen) {
-      this.setState({ copiedToClipboard: null, showEmbed: false });
+  static getDerivedStateFromProps(props, state) {
+    if (!props.isOpen) {
+      return { copiedToClipboard: null, showEmbed: false };
     }
+    return state;
   }
-
+  
   handleChangePassword(event) {
     this.setState({ password: event.target.value });
   }
