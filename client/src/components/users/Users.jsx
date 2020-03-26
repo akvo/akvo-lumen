@@ -242,7 +242,7 @@ class Users extends Component {
   }
 
   render() {
-    const { profile } = this.props;
+    const { profile, history } = this.props;
     const { admin, email } = profile;
     const {
       invitationMode, isActionModalVisible, isInviteModalVisible, invitations, users, userAction,
@@ -263,6 +263,7 @@ class Users extends Component {
       <div className="UsersContainer">
         <EntityTypeHeader
           title={title}
+          history={history}
           saveStatus={saveStatus}
           actionButtons={actionButtons}
         />
@@ -299,6 +300,7 @@ Users.propTypes = {
     lastName: PropTypes.string.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
 };
 
 export default connect(state => ({

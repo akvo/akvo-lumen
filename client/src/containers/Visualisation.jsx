@@ -60,7 +60,7 @@ class Visualisation extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
+    const initialState = {
       isShareModalVisible: false,
       isUnsavedChanges: false,
       isSavePending: false,
@@ -75,6 +75,12 @@ class Visualisation extends Component {
       timeToNextSave: SAVE_INITIAL_TIMEOUT,
       timeFromPreviousSave: 0,
     };
+    const visualisation = props.library.visualisations[props.params.visualisationId];
+    if (visualisation) {
+      initialState.visualisation = visualisation;
+      initialState.isUnsavedChanges = false;
+    }
+    this.state = initialState;
 
     this.onSave = this.onSave.bind(this);
     this.onSaveFailure = this.onSaveFailure.bind(this);
@@ -89,7 +95,7 @@ class Visualisation extends Component {
     this.handleFetchShareId = this.handleFetchShareId.bind(this);
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     const { params, library, history, dispatch } = this.props;
     const visualisationId = params.visualisationId;
     const isEditingExistingVisualisation = visualisationId != null;
@@ -121,18 +127,10 @@ class Visualisation extends Component {
           datasetsRequired.push(visualisation.datasetId);
         }
         datasetsRequired.forEach(datasetId => this.loadDataset(datasetId));
-
-        this.setState({
-          visualisation,
-          isUnsavedChanges: false,
-        }, () => {
-          this.handleTrackPageView(visualisation);
-        });
+        this.handleTrackPageView(visualisation);
       }
     }
-  }
 
-  componentDidMount() {
     this.isMountedFlag = true;
     this.handleChangeSourceDataset(get(this.props, 'location.state.preselectedDatasetId'));
 
