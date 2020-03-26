@@ -18,8 +18,8 @@ import { getQueryString } from '../utilities/api';
 
 function admin(C) {
   // eslint-disable-next-line react/prop-types
-  return ({ location }) =>
-    <Main location={location} sidebar={<AdminNav />} content={<C />} />;
+  return ({ location, history }) =>
+    <Main location={location} sidebar={<AdminNav />} content={<C history={history} />} />;
 }
 
 function resource(C, componentProps) {
@@ -71,7 +71,7 @@ export default function App({ store, history, query }) {
         <Route
           path="/dataset/:datasetId/transformation/:transformationType"
           exact
-          components={resource(Transformation)}
+          component={resource(Transformation)}
         />
         <Route path="/visualisation//create" exact component={resource(Visualisation)} />
         <Route path="/visualisation/:visualisationId" exact component={resource(Visualisation)} />

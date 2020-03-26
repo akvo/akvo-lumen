@@ -10,19 +10,20 @@ function trim(transformation) {
 }
 
 export default class RenameColumn extends Component {
-
-  UNSAFE_componentWillMount() {
-    const { column } = this.props;
-    this.setState({
+  constructor(props) {
+    super(props);
+    const x = {
       transformation: Immutable.fromJS({
         op: 'core/rename-column',
         args: {
-          columnName: column.get('columnName'),
-          newColumnTitle: column.get('title'),
+          columnName: props.column.get('columnName'),
+          newColumnTitle: props.column.get('title'),
         },
         onError: 'fail',
       }),
-    });
+    };
+    console.log('x', x);
+    this.state = x;
   }
 
   isValidTransformation() {
