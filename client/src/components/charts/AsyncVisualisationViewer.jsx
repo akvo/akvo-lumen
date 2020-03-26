@@ -9,37 +9,27 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export default class AsyncVisualisationViewer extends Component {
 
-  constructor() {
-    super();
-    this.state = {
-      asyncComponents: null,
-    };
-  }
-
-  UNSAFE_componentWillMount() {
-    const { visualisation } = this.props;
+  constructor(props) {
+    super(props);
+    const { visualisation } = props;
     let output;
 
     if (visualisation.visualisationType === 'map') {
       require.ensure(['leaflet'], () => {
-        // eslint-disable-next-line global-require
-        const MapVisualisation = require('./MapVisualisation').default;
-
-        output = MapVisualisation;
-
-        this.setState({
+        this.state = {
           asyncComponents: {
-            output,
+            // eslint-disable-next-line global-require
+            output: require('./MapVisualisation').default,
           },
-        });
+        };
       }, 'leaflet');
     } else if (visualisation.visualisationType === 'pivot table') {
-      this.setState({
+      this.state = {
         asyncComponents: {
           // eslint-disable-next-line global-require
           output: require('./PivotTable').default,
         },
-      });
+      };
     } else {
       require.ensure([
         '@potion/color',
@@ -76,11 +66,11 @@ export default class AsyncVisualisationViewer extends Component {
             throw new Error(`Unknown chart type ${visualisation.visualisationType}
               supplied to AsyncVisualisationViewer`);
         }
-        this.setState({
+        this.state = {
           asyncComponents: {
             output,
           },
-        });
+        };
       });
     }
   }
