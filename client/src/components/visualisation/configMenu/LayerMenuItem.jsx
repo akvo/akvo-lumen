@@ -8,18 +8,13 @@ require('./LayerMenuItem.scss');
 
 class LayerMenuItem extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       showOverflow: false,
       workingTitle: '',
+      workingTitle: props.layer.title,
     };
-  }
-
-  UNSAFE_componentWillMount() {
-    this.setState({
-      workingTitle: this.props.layer.title,
-    });
   }
 
   render() {

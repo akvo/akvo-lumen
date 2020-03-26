@@ -98,15 +98,19 @@ const scrollToItem = (id) => {
 
 class DashboardEditor extends Component {
 
-  constructor() {
-    super();
-    this.state = {
+  constructor(props) {
+    super(props);
+    const initialState = {
       gridWidth: 1024,
       propLayout: [],
       saveError: false,
       focusedItem: null,
       isDragging: false,
     };
+    if (props.dashboard.layout) {      
+      initialState.propLayout= props.dashboard.layout;      
+    }
+    this.state = initialState;
     this.canvasElements = {};
     this.handleLayoutChange = this.handleLayoutChange.bind(this);
     this.handleEntityToggle = this.handleEntityToggle.bind(this);
@@ -114,14 +118,6 @@ class DashboardEditor extends Component {
     this.handleEntityUpdate = this.handleEntityUpdate.bind(this);
     this.handleChangeName = this.handleChangeName.bind(this);
     this.handleSave = this.handleSave.bind(this);
-  }
-
-  UNSAFE_componentWillMount() {
-    if (this.props.dashboard.layout) {
-      this.setState({
-        propLayout: this.props.dashboard.layout,
-      });
-    }
   }
 
   componentDidMount() {

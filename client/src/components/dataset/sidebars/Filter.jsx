@@ -11,25 +11,21 @@ function getExpressionOperatorAndValue(expression) {
 }
 
 export default class Filter extends Component {
-  constructor() {
-    super();
-    this.state = {};
-    this.handleChangeExpressionValue = this.handleChangeExpressionValue.bind(this);
-    this.handleChangeExpressionOperator = this.handleChangeExpressionOperator.bind(this);
-  }
-
-  UNSAFE_componentWillMount() {
-    this.setState({
+  constructor(props) {
+    super(props);
+    this.state = {
       transformation: Immutable.fromJS({
         op: 'core/filter-column',
         args: {
-          columnName: this.props.column.get('columnName'),
-          columnTitle: this.props.column.get('title'),
+          columnName: props.column.get('columnName'),
+          columnTitle: props.column.get('title'),
           expression: { is: '' },
         },
         onError: 'fail',
       }),
-    });
+    };
+    this.handleChangeExpressionValue = this.handleChangeExpressionValue.bind(this);
+    this.handleChangeExpressionOperator = this.handleChangeExpressionOperator.bind(this);
   }
 
   handleChangeExpressionValue(expressionValue) {

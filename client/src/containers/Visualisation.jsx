@@ -89,7 +89,7 @@ class Visualisation extends Component {
     this.handleFetchShareId = this.handleFetchShareId.bind(this);
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     const { params, library, history, dispatch } = this.props;
     const visualisationId = params.visualisationId;
     const isEditingExistingVisualisation = visualisationId != null;
@@ -130,9 +130,7 @@ class Visualisation extends Component {
         });
       }
     }
-  }
 
-  componentDidMount() {
     this.isMountedFlag = true;
     this.handleChangeSourceDataset(get(this.props, 'location.state.preselectedDatasetId'));
 

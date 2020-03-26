@@ -104,7 +104,7 @@ class Dashboard extends Component {
     this.onFilterValueChange = this.onFilterValueChange.bind(this);
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     const isEditingExistingDashboard = getEditingStatus(this.props.location);
     const isLibraryLoaded = !isEmpty(this.props.library.datasets);
 
@@ -152,9 +152,7 @@ class Dashboard extends Component {
         }
       }
     }
-  }
 
-  componentDidMount() {
     this.isMountedFlag = true;
     require.ensure(['../charts/VisualisationViewer'], () => {
       require.ensure([], () => {

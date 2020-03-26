@@ -14,8 +14,8 @@ require('./VisualisationEditor.scss');
 
 class VisualisationEditor extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       visualisation: null,
       metadata: { layerGroupId: '', layerMetadata: [] },
@@ -25,7 +25,7 @@ class VisualisationEditor extends Component {
     window.state = this.state;
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     this.handleProps(this.props);
   }
 
