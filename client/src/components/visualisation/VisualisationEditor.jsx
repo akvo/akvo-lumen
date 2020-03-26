@@ -14,8 +14,8 @@ require('./VisualisationEditor.scss');
 
 class VisualisationEditor extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       visualisation: null,
       metadata: { layerGroupId: '', layerMetadata: [] },
@@ -25,7 +25,7 @@ class VisualisationEditor extends Component {
     window.state = this.state;
   }
 
-  UNSAFE_componentWillMount() {
+  componentDidMount() {
     this.handleProps(this.props);
   }
 
@@ -222,7 +222,7 @@ class VisualisationEditor extends Component {
             loadDataset={props.loadDataset}
           />
         )}
-        <VisualisationPreview
+        { visualisationToRender && <VisualisationPreview
           visualisation={visualisationToRender}
           metadata={metadata}
           datasets={props.datasets}
@@ -230,7 +230,7 @@ class VisualisationEditor extends Component {
           width={props.exporting ? 1000 : undefined}
           height={props.exporting ? 600 : undefined}
           exporting={props.exporting}
-        />
+        />}
       </div>
     );
   }
