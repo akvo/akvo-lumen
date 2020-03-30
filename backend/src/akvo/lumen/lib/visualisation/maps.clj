@@ -92,7 +92,7 @@
         _ (log/debug :map-config map-config)
         layer-group-id (-> (http.client/post* url (merge http-client-req-defaults
                                                          {:body (json/encode map-config)
-                                                          :headers headers
+                                                          :headers headers*
                                                           :content-type :json}))
                            :body json/decode (get "layergroupid"))
         layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil)]
