@@ -173,9 +173,9 @@ class Visualisation extends Component {
 
   componentDidUpdate() {
     if (!this.state.hasTrackedPageView) {
-        trackPageView(`Visualisation: ${
-          this.state.visualisation.name || this.props.intl.formatMessage({ id: 'untitled_visualisation' })
-        }`);
+      trackPageView(`Visualisation: ${
+        this.state.visualisation.name || this.props.intl.formatMessage({ id: 'untitled_visualisation' })
+      }`);
     }
   }
 
