@@ -43,6 +43,7 @@ class IntlWrapper extends Component {
     this.state = {
       abbrNumber: value => numeral(value).format('0.0a'),
       messages: getMessages(props.locale),
+      locale: props.locale,
     };
   }
 
@@ -56,22 +57,25 @@ class IntlWrapper extends Component {
     this.handleChangeLocale(locale);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    const { locale } = this.props;
-    if (locale !== nextProps.locale) {
-      this.handleChangeLocale(nextProps.locale);
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.locale !== this.state.locale) {
+      this.handleChangeLocale(this.state.locale);
     }
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.locale !== prevState.locale) {
+      return {
+        messages: getMessages(nextProps.locale),
+        locale: nextProps.locale,
+      };
+    }
+    return null;
   }
 
   handleChangeLocale(locale) {
     if (!locale) return;
-
     numeral.locale(locale);
-
-    this.setState({
-      messages: getMessages(locale),
-    });
-
     this.props.dispatch(changeLocale(locale));
   }
 

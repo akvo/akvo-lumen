@@ -18,14 +18,8 @@ class Raster extends Component {
 
   constructor() {
     super();
-    this.state = { layerGroupId: null };
+    this.state = { layerGroupId: null, hasTrackedPageView: false };
     this.renderLeafletMap = this.renderLeafletMap.bind(this);
-    // this.state = {
-    //   asyncComponents: null
-    // };
-    // this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
-    // this.transform = this.transform.bind(this);
-    // this.undo = this.undo.bind(this);
   }
 
   componentDidMount() {
@@ -50,8 +44,11 @@ class Raster extends Component {
       });
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.handleTrackPageView(nextProps);
+  // eslint-disable-next-line no-unused-vars
+  componentDidUpdate(prevProps, prevState) {
+    if (!this.state.hasTrackedPageView) {
+      trackPageView(`Raster: ${getTitle(this.props.raster)}`);
+    }
   }
 
   handleTrackPageView(props) {
@@ -129,6 +126,7 @@ class Raster extends Component {
         }}
       >
         <EntityTypeHeader
+          history={this.props.history}
           title={title}
         />
         <div
@@ -146,6 +144,7 @@ class Raster extends Component {
 
 Raster.propTypes = {
   raster: PropTypes.object,
+  history: PropTypes.object.isRequired,
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
