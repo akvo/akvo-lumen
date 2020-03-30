@@ -30,6 +30,7 @@ class Dataset extends Component {
       pendingTransformations: Immutable.OrderedMap(),
       timeToNextSave: SAVE_INITIAL_TIMEOUT,
       timeFromPreviousSave: 0,
+      hasTrackedPageView: false,
     };
     this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
     this.handleNavigateToVisualise = this.handleNavigateToVisualise.bind(this);
@@ -67,8 +68,11 @@ class Dataset extends Component {
     }, 'Dataset');
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.handleTrackPageView(nextProps);
+  // eslint-disable-next-line no-unused-vars
+  componentDidUpdate(prevProps, prevState) {
+    if (!this.state.hasTrackedPageView) {
+      trackPageView(`Dataset: ${getTitle(this.props.dataset)}`);
+    }
   }
 
   componentWillUnmount() {
