@@ -55,6 +55,22 @@ const getSpecFromVisualisationType = (visualisationType) => {
       return {};
   }
 };
+const loadVisIfNextPropsAndNoLoad = (nextProps, stateVisualisation) => {
+  /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
+  /* from nextProps if it exists there */
+  const { visualisationId } = nextProps.params;
+  const isEditingExistingVisualisation = visualisationId != null;
+  const loadedVisualisation = stateVisualisation.id != null;
+  const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
+  if (
+    (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
+      get(stateVisualisation, 'shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
+  ) {
+    const visualisation = nextProps.library.visualisations[visualisationId];
+    return visualisation;
+  }
+  return null;
+};
 
 class Visualisation extends Component {
 
@@ -71,6 +87,7 @@ class Visualisation extends Component {
         datasetId: null,
         spec: {},
       },
+      hasTrackedPageView: false,
       asyncComponents: null,
       timeToNextSave: SAVE_INITIAL_TIMEOUT,
       timeFromPreviousSave: 0,
@@ -154,29 +171,21 @@ class Visualisation extends Component {
     }, 'VisualisationViewerPreload');
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
-    /* from nextProps if it exists there */
-    const { visualisationId } = this.props.params;
-    const isEditingExistingVisualisation = visualisationId != null;
-    const loadedVisualisation = this.state.visualisation.id != null;
-    const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
-
-    if (
-      (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
-      get(this.state, 'visualisation.shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
-    ) {
-      const visualisation = nextProps.library.visualisations[visualisationId];
-      this.setState({ visualisation }, () => {
-        this.handleTrackPageView(visualisation);
-      });
+  componentDidUpdate() {
+    if (!this.state.hasTrackedPageView) {
+        trackPageView(`Visualisation: ${
+          this.state.visualisation.name || this.props.intl.formatMessage({ id: 'untitled_visualisation' })
+        }`);
     }
+  }
 
-    if (!this.props.params.visualisationId && nextProps.params.visualisationId) {
-      this.setState({
-        isSavePending: false,
-      });
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const visualisation =
+          loadVisIfNextPropsAndNoLoad(nextProps, prevState.visualisation);
+    if (visualisation) {
+      return { visualisation };
     }
+    return null;
   }
 
   componentWillUnmount() {
