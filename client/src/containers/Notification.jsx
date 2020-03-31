@@ -26,8 +26,8 @@ class Notification extends Component {
     setTimeout(() => this.setState({ onscreen: true }), 0);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.autohide) {
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.autohide) {
       this.scheduleAutoHide();
     } else {
       clearTimeout(this.timeout);
