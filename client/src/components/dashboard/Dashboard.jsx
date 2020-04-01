@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { isEmpty, cloneDeep } from 'lodash';
+import { isEqual, isEmpty, cloneDeep } from 'lodash';
 import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
@@ -253,7 +253,10 @@ class Dashboard extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     console.log('componentDidUpdate', prevProps, prevState, this.state);
-    loadViz(this.state, prevProps.library, this.state.dashboard, this.onAddVisualisation);
+    if (!isEqual(Object.keys(this.state.aggregatedDatasets).sort(),
+    Object.keys(prevState.aggregatedDatasets).sort())) {
+      loadViz(this.state, prevProps.library, this.state.dashboard, this.onAddVisualisation);
+    }
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -647,11 +650,12 @@ class Dashboard extends Component {
   loadDashboardIntoState(library, dash) {
     /* Put the dashboard into component state so it is fed to the DashboardEditor */
     const dashboard = dashLibModel(dash);
-    this.setState({ dashboard });
+    const newState = this.state;
+    newState.dashboard = dashboard;
+    newState.aggregatedDatasets = loadAggregatedDatasets(this.state, library, dash);
+    loadViz(newState, library, dash, this.onAddVisualisation);
+    this.setState(newState);
     this.handleTrackPageView(dashboard);
-    const aggregatedDatasets = loadAggregatedDatasets(this.state, library, dash);
-    loadViz(this.state, library, dash, this.onAddVisualisation);
-    this.setState({ aggregatedDatasets });
   }
 
   addDataToVisualisations(visualisations) {
