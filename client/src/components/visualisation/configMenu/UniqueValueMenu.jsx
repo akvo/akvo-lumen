@@ -31,7 +31,7 @@ const handleToggleValue = (title, column, dimension, filters, onChangeSpec) => {
 
 export default function UniqueValueMenu(props) {
   const { tableData, dimension, filters, column, onChangeSpec, collapsed, toggleCollapsed } = props;
-  if (!tableData) {
+  if (!tableData || !tableData.columns || tableData.rows) {
     return <div className="UniqueValueMenu" />;
   }
 

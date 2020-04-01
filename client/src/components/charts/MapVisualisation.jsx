@@ -240,6 +240,7 @@ export default class MapVisualisation extends Component {
     this.renderLeafletMap = this.renderLeafletMap.bind(this);
     this.state = {
       hasTrackedLayerTypes: false,
+      hasRendered: false,
     };
     this.hasAddedLayers = false;
   }
@@ -248,8 +249,14 @@ export default class MapVisualisation extends Component {
     this.renderLeafletMap(this.props);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.renderLeafletMap(nextProps);
+  // eslint-disable-next-line no-unused-vars
+  componentDidUpdate(prevProps, prevState) {
+    this.renderLeafletMap(prevProps);
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return { hasRendered: false };
   }
 
   componentWillUnmount() {
@@ -359,11 +366,10 @@ export default class MapVisualisation extends Component {
       map.addLayer(this[`utfGrid${id}`]);
     }
   }
+
   renderLeafletMap(nextProps) {
     const { visualisation, metadata, width, height, exporting } = nextProps;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
-
-    this.setState({ hasRendered: false });
 
     // Windshaft map
     // const tenantDB = visualisation.tenantDB;
