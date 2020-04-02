@@ -12,89 +12,6 @@ import { showNotification } from '../../actions/notification';
 
 require('./VisualisationEditor.scss');
 
-
-const x = (nextProps, prevState) => {
-  const nextPropsVisualisation = nextProps.visualisation;
-  const nextPropsVType = nextPropsVisualisation.visualisationType;
-  const visTypeHasChanged = nextPropsVType !== get(prevState, 'visualisation.visualisationType');
-  let newState = { specValid: null, needNewAggregation: null };
-
-  switch (nextPropsVType) {
-    case null:
-    // Data aggregated client-side
-      newState = { visualisation: nextPropsVisualisation };
-      break;
-    case 'map':
-      newState.specValid = specIsValidForApi(nextPropsVisualisation.spec, nextPropsVType);
-      newState.needNewAggregation =
-        Boolean(
-          nextPropsVisualisation.spec.layers &&
-          nextPropsVisualisation.spec.layers.length &&
-          nextPropsVisualisation.spec.layers.some((layer, idx) =>
-            getNeedNewAggregation(
-              layer,
-              checkUndefined(prevState.lastVisualisationRequested, 'spec', 'layers', idx),
-              'map'
-            )
-          )
-        )
-        ||
-        Boolean(
-          checkUndefined(nextPropsVisualisation, 'spec', 'layers', 'length') !==
-          checkUndefined(prevState.lastVisualisationRequested, 'spec', 'layers', 'length')
-        );
-
-      if (!prevState.visualisation || visTypeHasChanged) {
-        // Update immediately, without waiting for the api call
-        newState.visualisation = nextPropsVisualisation;
-      }
-
-      if (checkUndefined(nextPropsVisualisation, 'spec', 'layers', 'length') === 0) {
-        // Normally, the new metadata api response overwrites the old one, but when length is
-        // zero, there is no new metadata api respnonse. We need to manually set it to empty
-        newState.lastVisualisationRequested = nextPropsVisualisation;
-        newState.visualisation = nextPropsVisualisation;
-        newState.metadata = {};
-      }
-      if (newState.needNewAggregation && newState.specValid) {
-        newState.visualisation = nextPropsVisualisation;
-        newState.lastVisualisationRequested = cloneDeep(nextPropsVisualisation);
-      } else if (newState.specValid) {
-        newState.visualisation = nextPropsVisualisation;
-      }
-
-      break;
-
-    case 'pivot table':
-    case 'pie':
-    case 'polararea':
-    case 'donut':
-    case 'line':
-    case 'area':
-    case 'bubble':
-    case 'bar':
-    case 'scatter': {
-      // Data aggregated on the backend for these types
-      newState.specValid = specIsValidForApi(nextPropsVisualisation.spec, nextPropsVType);
-      newState.needNewAggregation =
-      getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested);
-//      console.log(nextPropsVisualisation,
-// prevState.lastVisualisationRequested,
-// getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested));
-      const currentData = get(prevState, 'visualisation.data');
-      const currentVType = get(prevState, 'visualisation.visualisationType');
-      if (currentData && (nextPropsVType !== 'pivot table' || (currentVType && currentVType === nextPropsVType))) {
-        nextPropsVisualisation.data = currentData;
-      }
-      newState.visualisation = nextPropsVisualisation;
-      newState.lastVisualisationRequested = cloneDeep(nextPropsVisualisation);
-      break;
-    }
-    default: throw new Error(`Unknown visualisation type ${nextPropsVisualisation.visualisationType}`);
-  }
-  return newState;
-};
-
 class VisualisationEditor extends Component {
 
   constructor(props) {
@@ -129,7 +46,85 @@ class VisualisationEditor extends Component {
   }
   static getDerivedStateFromProps(nextProps, prevState) {
     console.log('getDerivedStateFromProps', 'prev', prevState.needNewAggregation, 'next', nextProps.needNewAggregation);
-    return x(nextProps, prevState);
+    const nextPropsVisualisation = nextProps.visualisation;
+    const nextPropsVType = nextPropsVisualisation.visualisationType;
+    const visTypeHasChanged = nextPropsVType !== get(prevState, 'visualisation.visualisationType');
+    let newState = { specValid: null, needNewAggregation: null };
+
+    switch (nextPropsVType) {
+      case null:
+        // Data aggregated client-side
+        newState = { visualisation: nextPropsVisualisation };
+        break;
+      case 'map':
+        newState.specValid = specIsValidForApi(nextPropsVisualisation.spec, nextPropsVType);
+        newState.needNewAggregation =
+          Boolean(
+            nextPropsVisualisation.spec.layers &&
+              nextPropsVisualisation.spec.layers.length &&
+              nextPropsVisualisation.spec.layers.some((layer, idx) =>
+                                                      getNeedNewAggregation(
+                                                        layer,
+                                                        checkUndefined(prevState.lastVisualisationRequested, 'spec', 'layers', idx),
+                                                        'map'
+                                                      )
+                                                    )
+          )
+          ||
+          Boolean(
+            checkUndefined(nextPropsVisualisation, 'spec', 'layers', 'length') !==
+              checkUndefined(prevState.lastVisualisationRequested, 'spec', 'layers', 'length')
+          );
+
+        if (!prevState.visualisation || visTypeHasChanged) {
+          // Update immediately, without waiting for the api call
+          newState.visualisation = nextPropsVisualisation;
+        }
+
+        if (checkUndefined(nextPropsVisualisation, 'spec', 'layers', 'length') === 0) {
+          // Normally, the new metadata api response overwrites the old one, but when length is
+          // zero, there is no new metadata api respnonse. We need to manually set it to empty
+          newState.lastVisualisationRequested = nextPropsVisualisation;
+          newState.visualisation = nextPropsVisualisation;
+          newState.metadata = {};
+        }
+        if (newState.needNewAggregation && newState.specValid) {
+          newState.visualisation = nextPropsVisualisation;
+          newState.lastVisualisationRequested = cloneDeep(nextPropsVisualisation);
+        } else if (newState.specValid) {
+          newState.visualisation = nextPropsVisualisation;
+        }
+
+        break;
+
+      case 'pivot table':
+      case 'pie':
+      case 'polararea':
+      case 'donut':
+      case 'line':
+      case 'area':
+      case 'bubble':
+      case 'bar':
+      case 'scatter': {
+        // Data aggregated on the backend for these types
+        newState.specValid = specIsValidForApi(nextPropsVisualisation.spec, nextPropsVType);
+        newState.needNewAggregation =
+          getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested);
+        //      console.log(nextPropsVisualisation,
+        // prevState.lastVisualisationRequested,
+        // getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested));
+        const currentData = get(prevState, 'visualisation.data');
+        const currentVType = get(prevState, 'visualisation.visualisationType');
+        if (currentData && (nextPropsVType !== 'pivot table' || (currentVType && currentVType === nextPropsVType))) {
+          nextPropsVisualisation.data = currentData;
+        }
+        newState.visualisation = nextPropsVisualisation;
+        newState.lastVisualisationRequested = cloneDeep(nextPropsVisualisation);
+        break;
+      }
+      default: throw new Error(`Unknown visualisation type ${nextPropsVisualisation.visualisationType}`);
+    }
+    return newState;
   }
 
   fetchAggregatedData(visualisation) {
