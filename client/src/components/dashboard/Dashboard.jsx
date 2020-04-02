@@ -6,7 +6,7 @@ import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
 import queryString from 'querystringify';
-
+import log from 'log-with-style';
 import ShareEntity from '../modals/ShareEntity';
 import * as actions from '../../actions/dashboard';
 import * as api from '../../utilities/api';
@@ -53,17 +53,18 @@ const getDashboardFromState = (stateDashboard, isForEditor) => {
   return dashboard;
 };
 
-const isEditingExistingDashboardFn = (props) => {
+const locationHasDatasetId = (props) => {
   const testString = 'create';
   return props.location.pathname.indexOf(testString) === -1;
 };
 
-const isLibraryLoadedFn = library => !isEmpty(library.datasets);
+const isLibraryLoaded = library => !isEmpty(library.datasets);
 
-const existingDashboardLoadedFn = (library, id) => isLibraryLoadedFn(library)
-      && !isEmpty(library.dashboards[id].layout);
+const isLibraryDashboardLoaded = (library, dashboardId) => isLibraryLoaded(library)
+      && !isEmpty(library.dashboards[dashboardId].layout);
 
 const addDataToVisualisations = (aggregatedDatasets, visualisations) => {
+  log('addDataToVisualisations', aggregatedDatasets, visualisations);
   const out = {};
 
   Object.keys(visualisations).filter(key => Boolean(visualisations[key])).forEach((key) => {
@@ -108,6 +109,7 @@ const addDataToVisualisations = (aggregatedDatasets, visualisations) => {
       out[key] = visualisations[key];
     }
   });
+  log('addDataToVisualisations', out);
   return out;
 };
 
@@ -115,16 +117,12 @@ const dashboardLayout = dash =>
       Object.assign({}, dash,
                     { layout: Object.keys(dash.layout).map(key => dash.layout[key]) });
 
-const loadAggregatedDatasets = (state, dash) => {
-  /* Load each unique dataset referenced by visualisations in the dashboard. Note - Even though
-  /* onAddVisualisation also checks to see if a datasetId has already been requested, setState is
-  /* not synchronous and is too slow here, hence the extra check */
+const loadAggregatedDatasets = (state, entities) => {
   const requestedDatasetIds = state.requestedDatasetIds.slice(0);
-  console.log('state.aggregatedDatasets', state.aggregatedDatasets);
+  log('loadAggregatedDatasets');
   const { ...aggregatedDatasets } = state.aggregatedDatasets;
-  console.log('aggregatedDatasets', aggregatedDatasets);
-  Object.keys(dash.entities).filter(key => Boolean(dash.entities[key])).forEach((key) => {
-    const entity = dash.entities[key];
+  Object.keys(entities).filter(key => Boolean(entities[key])).forEach((key) => {
+    const entity = entities[key];
     const isVisualisation = entity.type === 'visualisation';
     if (isVisualisation) {
       const visualisation = entity;
@@ -181,33 +179,32 @@ class Dashboard extends Component {
   constructor(props) {
     super(props);
     const initialState = {
+      aggregatedDatasets: {},
+      asyncComponents: null,
       dashboard: {
-        type: 'dashboard',
-        title: props.intl.formatMessage({ id: 'untitled_dashboard' }),
+        created: null,
         entities: {},
         filter: { datasetId: null, columns: [] },
-        layout: [],
         id: null,
-        created: null,
+        layout: [],
         modified: null,
         shareId: '',
+        title: props.intl.formatMessage({ id: 'untitled_dashboard' }),
+        type: 'dashboard',
       },
       fetchingDashboard: false,
       isSavePending: null,
-      isUnsavedChanges: null,
       isShareModalVisible: false,
+      isUnsavedChanges: null,
       requestedDatasetIds: [],
-      asyncComponents: null,
-      aggregatedDatasets: {},
-      timeToNextSave: SAVE_INITIAL_TIMEOUT,
-      timeFromPreviousSave: 0,
       tabSelected: 'visualisations',
+      timeFromPreviousSave: 0,
+      timeToNextSave: SAVE_INITIAL_TIMEOUT,
     };
-    const isEditingExistingDashboard = isEditingExistingDashboardFn(props);
     const dashboardId = props.params.dashboardId;
-    const libraryDashboard = props.library.dashboards[dashboardId];
-    if (isEditingExistingDashboard) {
-      const existingDashboardLoaded = existingDashboardLoadedFn(props.library, dashboardId);
+    if (locationHasDatasetId(props)) {
+      const existingDashboardLoaded = isLibraryDashboardLoaded(props.library, dashboardId);
+      const libraryDashboard = props.library.dashboards[dashboardId];
       initialState.isUnsavedChanges = false;
       if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
         initialState.fetchingDashboard = true;
@@ -234,45 +231,46 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
-    const isEditingExistingDashboard = isEditingExistingDashboardFn(this.props);
-    const isLibraryLoaded = isLibraryLoadedFn(this.props.library);
-
-    if (!isLibraryLoaded) {
-      this.props.dispatch(fetchLibrary());
+    log('componentDidMount');
+    const { params, library, dispatch, query } = this.props;
+    if (!isLibraryLoaded(library)) {
+      dispatch(fetchLibrary());
     }
     const datasetCallback = d => () => {
+
       if (d.filter.columns.length > 0) {
         const calls = d.filter.columns.map(o =>
-        this.props.dispatch(fetchColumn(d.filter.datasetId, o.column)));
+        dispatch(fetchColumn(d.filter.datasetId, o.column)));
         Promise.all(calls).then(() => this.setState({ fetchingDashboard: false }));
       } else {
         this.setState({ fetchingDashboard: false });
       }
+      this.loadDashboardIntoState(library, d);
     };
-    if (isEditingExistingDashboard) {
-      const dashboardId = this.props.params.dashboardId;
-      const libraryDashboard = this.props.library.dashboards[dashboardId];
-      const existingDashboardLoaded = existingDashboardLoadedFn(this.props.library, dashboardId);
-      if (!existingDashboardLoaded || !libraryDashboard.aggregated) {
-        const filter = (libraryDashboard && libraryDashboard.filter) || {};
-        this.props.dispatch(actions.fetchDashboard(dashboardId,
-          { filter: (this.props.query && this.props.query.filter) || filter },
-          Boolean(this.props.query && this.props.query.filter),
+
+    if (locationHasDatasetId(this.props)) {
+      const dashboardId = params.dashboardId;
+      const libraryDashboard = library.dashboards[dashboardId];
+      if (!isLibraryDashboardLoaded(library, dashboardId)
+          || !libraryDashboard.aggregated) {
+        log('componentDidMount fetching dashboard');
+        dispatch(actions.fetchDashboard(dashboardId,
+          { filter: (query && query.filter)
+            || ((libraryDashboard && libraryDashboard.filter) || {}) },
+          Boolean(query && query.filter),
           (dash) => {
             if (dash.filter.datasetId) {
-              this.props.dispatch(fetchDataset(dash.filter.datasetId, true,
-                datasetCallback(dash)
-                ));
+              dispatch(fetchDataset(dash.filter.datasetId, true, datasetCallback(dash)));
             } else {
               this.setState({ fetchingDashboard: false });
             }
+            
           }));
       } else {
-        this.loadDashboardIntoState(this.props.library, libraryDashboard);
+        this.loadDashboardIntoState(library, libraryDashboard);
         if (libraryDashboard.filter.datasetId) {
-          this.props.dispatch(fetchDataset(libraryDashboard.filter.datasetId, true,
-            datasetCallback(libraryDashboard)
-            ));
+          dispatch(fetchDataset(libraryDashboard.filter.datasetId, true,
+                                datasetCallback(libraryDashboard)));
         }
       }
     }
@@ -296,55 +294,61 @@ class Dashboard extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log('componentDidUpdate', prevProps, prevState);
-    if (!isEqual(Object.keys(this.state.aggregatedDatasets).sort(),
+    const { aggregatedDatasets, requestedDatasetIds, dashboard } = this.state;
+    if (!isEqual(Object.keys(aggregatedDatasets).sort(),
                  Object.keys(prevState.aggregatedDatasets).sort())) {
-      loadVisualisations(this.state.requestedDatasetIds.slice(0),
-      addDataToVisualisations(this.state.aggregatedDatasets, prevProps.library.visualisations),
-      this.state.dashboard, this.onAddVisualisation);
+      loadVisualisations(requestedDatasetIds.slice(0),
+                         addDataToVisualisations(aggregatedDatasets,
+                                                 prevProps.library.visualisations),
+                         dashboard,
+                         this.onAddVisualisation);
     }
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    console.log('getDerivedStateFromProps', nextProps, prevState);
-    const isEditingExistingDashboard = isEditingExistingDashboardFn(nextProps);
+    log('wowo _getDerivedStateFromProps_  h hh h ');
     const dashboardAlreadyLoaded = prevState.dashboard;
     const { dashboardId } = nextProps.params;
     const sharedAction = get(prevState, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`) ||
     get(prevState, 'dashboard.protected') !== get(nextProps, `library.dashboards[${dashboardId}].protected`);
     const newState = { dashboard: prevState.dashboard };
-    if ((isEditingExistingDashboard && !dashboardAlreadyLoaded) || sharedAction) {
+    if ((locationHasDatasetId(nextProps) && !dashboardAlreadyLoaded) || sharedAction) {
       /* We need to load a dashboard, and we haven't loaded it yet. Check if nextProps has both i)
       /* the dashboard and ii) the visualisations the dashboard contains, then load the dashboard
       /* editor if both these conditions are true. */
 
       const dash = nextProps.library.dashboards[dashboardId];
       const haveDashboardData = Boolean(dash && dash.layout);
+      log('getDerivedStateFromProps', '((locationHasDatasetId(nextProps) && !dashboardAlreadyLoaded) || sharedAction)');
 
       if (haveDashboardData) {
+        log('getDerivedStateFromProps', 'haveDashboardData');
+
         const dashboardEntities = Object.keys(dash.entities).map(key => dash.entities[key]);
         const dashboardHasVisualisations =
           dashboardEntities.some(entity => entity.type === 'visualisation');
         const libraryHasVisualisations = !isEmpty(nextProps.library.visualisations);
 
         if (dashboardHasVisualisations && !libraryHasVisualisations) {
+          log('getDerivedStateFromProps', '(dashboardHasVisualisations && !libraryHasVisualisations)');
           /* We don't yet have the visualisations necessary to display this dashboard. Do nothing.
           /* When the library API call returns and the visualisaitons are loaded,
           /* componentWillReceiveProps will be called again. */
           return newState;
         }
         if (dash.aggregated || sharedAction) {
-          const aggregatedDatasets = loadAggregatedDatasets(prevState, dash);
+          log('getDerivedStateFromProps', '(dash.aggregated || sharedAction)');
           newState.dashboard = dashboardLayout(dash);
-          newState.aggregatedDatasets = aggregatedDatasets;
+          newState.aggregatedDatasets = loadAggregatedDatasets(prevState, dash.entities);
           return newState;
         }
       }
     }
-    if (!(prevState.dashboard && prevState.dashboard.id) && dashboardId) {
+    if (!(dashboardAlreadyLoaded && dashboardAlreadyLoaded.id) && dashboardId) {
+      log('getDerivedStateFromProps', '(!(dashboardAlreadyLoaded && dashboardAlreadyLoaded.id) && dashboardId)');
       newState.isSavePending = false;
       newState.isUnsavedChanges = false;
-      newState.dashboard = Object.assign({}, prevState.dashboard, { id: dashboardId });
+      newState.dashboard = Object.assign({}, dashboardAlreadyLoaded, { id: dashboardId });
       return newState;
     }
     return newState;
@@ -354,89 +358,22 @@ class Dashboard extends Component {
     this.isMountedFlag = false;
   }
 
-  onSaveFailure() {
-    this.setState({
-      timeToNextSave: this.state.timeToNextSave * 2,
-      timeFromPreviousSave: 0,
-      savingFailed: true,
-    }, () => {
-      this.saveInterval = setInterval(() => {
-        const { timeFromPreviousSave, timeToNextSave } = this.state;
-        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
-          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
-          return;
-        }
-        clearInterval(this.saveInterval);
-      }, SAVE_COUNTDOWN_INTERVAL);
-      setTimeout(() => {
-        this.onSave();
-      }, this.state.timeToNextSave);
-    });
-  }
-
-  onApplyFilterValue(filter) {
-    const dashboard = getDashboardFromState(this.state.dashboard, false);
-    if (filter) {
-      this.setState({ fetchingDashboard: true });
-      this.props.dispatch(actions.fetchDashboard(dashboard.id,
-        { filter: ((this.props.query && this.props.query.filter) || dashboard.filter) },
-        Boolean(this.props.query && this.props.query.filter),
-        (body) => {
-          const dash = body;
-          dash.filter = dashboard.filter;
-          this.loadDashboardIntoState(this.props.library, dash);
-          this.setState({ fetchingDashboard: false, tabSelected: 'filters' });
-        }));
-    }
-  }
-
-  onSave() {
-    const { dispatch, location } = this.props;
-    const dashboard = getDashboardFromState(this.state.dashboard, false);
-
-    const handleResponse = (error) => {
-      if (!this.isMountedFlag) return;
-      if (error) {
-        this.onSaveFailure();
-        return;
-      }
-      this.setState({
-        isUnsavedChanges: false,
-        isSavePending: false,
-        timeToNextSave: SAVE_INITIAL_TIMEOUT,
-        timeFromPreviousSave: 0,
-        savingFailed: false,
-      });
-    };
-
-    if (isEditingExistingDashboardFn(this.props)) {
-      dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
-    } else if (!this.state.isSavePending) {
-      this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
-        dispatch(actions.createDashboard(this.props.history, dashboard, get(location, 'state.collectionId'), handleResponse));
-      });
-    }
-  }
-
-  onFilterChange(filter, needToAggregate) {
-    const dashboard = this.state.dashboard;
-    if (needToAggregate && dashboard.entities
-      && Object.values(dashboard.entities).length > 0
-      && Object.values(dashboard.entities).find(e => e.filterAffected)) {
-      this.onApplyFilterValue(filter);
-    } else {
-      this.setState({ dashboard });
-      this.onSave();
-    }
-    trackEvent(DASHBOARD_FILTER_CHANGE, window.location.href);
-  }
-
-  onFilterValueChange(filter, needToAggregate) {
-    this.onApplyFilterValue((needToAggregate || filter.columns.length === 0) && filter);
+  loadDashboardIntoState(library, dash) {
+    log('loadDashboardIntoState');
+    /* Put the dashboard into component state so it is fed to the DashboardEditor */
+    const dashboard = dashboardLayout(dash);
+    const newState = this.state;
+    newState.dashboard = dashboard;
+    newState.aggregatedDatasets = loadAggregatedDatasets(this.state, dash.entities);
+    loadVisualisations(newState.requestedDatasetIds.slice(0),
+                       addDataToVisualisations(newState.aggregatedDatasets, library.visualisations),
+                       dash, this.onAddVisualisation);
+    this.setState(newState);
+    this.handleTrackPageView(dashboard);
   }
 
   onAddVisualisation(visualisation) {
-    console.log('onAddVisualisation', visualisation);
+    log('onAddVisualisation');
     const { id, datasetId, spec } = visualisation;
     const vType = visualisation.visualisationType;
 
@@ -535,6 +472,87 @@ class Dashboard extends Component {
     }
   }
 
+  onSaveFailure() {
+    this.setState({
+      timeToNextSave: this.state.timeToNextSave * 2,
+      timeFromPreviousSave: 0,
+      savingFailed: true,
+    }, () => {
+      this.saveInterval = setInterval(() => {
+        const { timeFromPreviousSave, timeToNextSave } = this.state;
+        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
+          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
+          return;
+        }
+        clearInterval(this.saveInterval);
+      }, SAVE_COUNTDOWN_INTERVAL);
+      setTimeout(() => {
+        this.onSave();
+      }, this.state.timeToNextSave);
+    });
+  }
+
+  onApplyFilterValue(filter) {
+    const dashboard = getDashboardFromState(this.state.dashboard, false);
+    if (filter) {
+      this.setState({ fetchingDashboard: true });
+      this.props.dispatch(actions.fetchDashboard(dashboard.id,
+        { filter: ((this.props.query && this.props.query.filter) || dashboard.filter) },
+        Boolean(this.props.query && this.props.query.filter),
+        (body) => {
+          const dash = body;
+          dash.filter = dashboard.filter;
+          this.loadDashboardIntoState(this.props.library, dash);
+          this.setState({ fetchingDashboard: false, tabSelected: 'filters' });
+        }));
+    }
+  }
+
+  onSave() {
+    const { dispatch, location } = this.props;
+    const dashboard = getDashboardFromState(this.state.dashboard, false);
+
+    const handleResponse = (error) => {
+      if (!this.isMountedFlag) return;
+      if (error) {
+        this.onSaveFailure();
+        return;
+      }
+      this.setState({
+        isUnsavedChanges: false,
+        isSavePending: false,
+        timeToNextSave: SAVE_INITIAL_TIMEOUT,
+        timeFromPreviousSave: 0,
+        savingFailed: false,
+      });
+    };
+
+    if (locationHasDatasetId(this.props)) {
+      dispatch(actions.saveDashboardChanges(dashboard, handleResponse));
+    } else if (!this.state.isSavePending) {
+      this.setState({ isSavePending: true, isUnsavedChanges: false }, () => {
+        dispatch(actions.createDashboard(this.props.history, dashboard, get(location, 'state.collectionId'), handleResponse));
+      });
+    }
+  }
+
+  onFilterChange(filter, needToAggregate) {
+    const dashboard = this.state.dashboard;
+    if (needToAggregate && dashboard.entities
+      && Object.values(dashboard.entities).length > 0
+      && Object.values(dashboard.entities).find(e => e.filterAffected)) {
+      this.onApplyFilterValue(filter);
+    } else {
+      this.setState({ dashboard });
+      this.onSave();
+    }
+    trackEvent(DASHBOARD_FILTER_CHANGE, window.location.href);
+  }
+
+  onFilterValueChange(filter, needToAggregate) {
+    this.onApplyFilterValue((needToAggregate || filter.columns.length === 0) && filter);
+  }
+
   onUpdateName(title) {
     const normalizedTitle = title || this.props.intl.formatMessage({ id: 'untitled_dashboard' });
     const dashboard = Object.assign({}, this.state.dashboard, { title: normalizedTitle });
@@ -588,6 +606,7 @@ class Dashboard extends Component {
   }
 
   handleTrackPageView(dashboard) {
+    log('handleTrackPageView');
     if (!this.state.hasTrackedPageView) {
       this.setState({ hasTrackedPageView: true }, () => {
         trackPageView(`Dashboard: ${
@@ -691,28 +710,14 @@ class Dashboard extends Component {
     });
   }
 
-  loadDashboardIntoState(library, dash) {
-    console.log('loadDashboardIntoState', library, dash);
-    /* Put the dashboard into component state so it is fed to the DashboardEditor */
-    const dashboard = dashboardLayout(dash);
-    const newState = this.state;
-    newState.dashboard = dashboard;
-    newState.aggregatedDatasets = loadAggregatedDatasets(this.state, dash);
-    loadVisualisations(newState.requestedDatasetIds.slice(0),
-                       addDataToVisualisations(newState.aggregatedDatasets, library.visualisations),
-                       dash, this.onAddVisualisation);
-    this.setState(newState);
-    this.handleTrackPageView(dashboard);
-  }
-
   render() {
     if (!this.state.asyncComponents || this.state.isSavePending || this.state.fetchingDashboard) {
       return <LoadingSpinner />;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
-    const { aggregatedDatasets } = this.state;
-    const dashboard = getDashboardFromState(this.state.dashboard, true);
     const { exporting, history, library } = this.props;
+    const dashboard = getDashboardFromState(this.state.dashboard, true);
+
     const filteredDashboard = (this.props.filteredDashboard && !filteredDashboardCondition()) ||
     Boolean(this.props.query && this.props.query.filter);
     return (
@@ -742,7 +747,8 @@ class Dashboard extends Component {
               onFilterValueChange={this.onFilterValueChange}
               filteredDashboard={filteredDashboard}
               datasets={library.datasets}
-              visualisations={addDataToVisualisations(aggregatedDatasets, library.visualisations)}
+              visualisations={addDataToVisualisations(this.state.aggregatedDatasets,
+                library.visualisations)}
               metadata={this.state.dashboard.metadata}
               onAddVisualisation={this.onAddVisualisation}
               onSave={this.onSave}
