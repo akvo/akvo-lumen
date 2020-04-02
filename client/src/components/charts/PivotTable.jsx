@@ -190,7 +190,7 @@ export default class PivotTable extends Component {
               </tr>
             }
             <tr className="columnHeader">
-              {data.columns.map((cell, index) =>
+              {data.columns && data.columns.map((cell, index) =>
                 <th
                   key={index}
                   className={getColumnHeaderClassname(cell, index, visualisation.spec)}
@@ -211,7 +211,7 @@ export default class PivotTable extends Component {
             </tr>
           </thead>
           <tbody>
-            {data.rows.map((row, rowIndex) =>
+            {data.rows && data.rows.map((row, rowIndex) =>
               <tr key={rowIndex}>
                 {row.map((cell, cellIndex) =>
                   <td
