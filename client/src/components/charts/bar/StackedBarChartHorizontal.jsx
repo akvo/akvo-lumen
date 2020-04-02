@@ -45,6 +45,39 @@ const getPaddingBottom = (data) => {
   return Math.ceil(longestLabelLength * pixelsPerChar);
 };
 
+
+const getData = (props) => { // eslint-disable-line
+  const { data } = props;
+
+  if (!get(data, 'series[0]')) return false;
+  const values = data.series[0].data
+    .filter(itsSet)
+    .reduce((acc, { value }, i) =>
+      [
+        ...acc,
+        data.series.reduce((acc2, series) => (itsSet(series) ? {
+          ...acc2,
+          values: {
+            ...acc2.values,
+            [series.key]: series.data[i].value,
+          },
+        } : acc2), {}),
+      ]
+    , []);
+
+  const series = merge({}, data.common, { data: values });
+  const combinedData = series.data.sort((a, b) => a.key - b.key);
+
+  return {
+    ...series,
+    data: combinedData,
+    stack: stack()
+      .keys(Object.keys(combinedData[0].values))
+      .value((d, key) => Math.abs(d[key]))(combinedData.map(datum => datum.values)),
+  };
+};
+
+
 export default class StackedBarChart extends Component {
 
   static propTypes = stackedBarPropTypes;
@@ -62,7 +95,7 @@ export default class StackedBarChart extends Component {
     super(props);
     this.state = {
       isPickingColor: false,
-      data: this.getData(props),
+      data: getData(props),
       hasRendered: false,
     };
   }
@@ -71,39 +104,9 @@ export default class StackedBarChart extends Component {
     this.setState({ hasRendered: true }); // eslint-disable-line
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({ data: this.getData(nextProps) });
-  }
-
-  getData(props) { // eslint-disable-line
-    const { data } = props;
-
-    if (!get(data, 'series[0]')) return false;
-    const values = data.series[0].data
-      .filter(itsSet)
-      .reduce((acc, { value }, i) =>
-        [
-          ...acc,
-          data.series.reduce((acc2, series) => (itsSet(series) ? {
-            ...acc2,
-            values: {
-              ...acc2.values,
-              [series.key]: series.data[i].value,
-            },
-          } : acc2), {}),
-        ]
-      , []);
-
-    const series = merge({}, data.common, { data: values });
-    const combinedData = series.data.sort((a, b) => a.key - b.key);
-
-    return {
-      ...series,
-      data: combinedData,
-      stack: stack()
-        .keys(Object.keys(combinedData[0].values))
-        .value((d, key) => Math.abs(d[key]))(combinedData.map(datum => datum.values)),
-    };
+  // eslint-disable-next-line no-unused-vars
+  static getDerivedStateFromProps(props, state) {
+    return { data: getData(props) };
   }
 
   getColor(key, index) {
