@@ -96,7 +96,7 @@ export default function App({ store, history, query }) {
 
         <Route
           path="/dashboard/:dashboardId/export" exact
-          componen={resource(Dashboard, { query: queryParsed, filteredDashboard, exporting: true })}
+          component={resource(Dashboard, { query: queryParsed, filteredDashboard, exporting: true })}
         />
 
         <Route path="/dashboard/:dashboardId" exact component={resource(Dashboard, { filteredDashboard })} />

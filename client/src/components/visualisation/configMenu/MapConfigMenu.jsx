@@ -49,9 +49,9 @@ class MapConfigMenu extends Component {
     this.handleChangeLayerOrder = this.handleChangeLayerOrder.bind(this);
   }
 
-  UNSAFE_componentWillReceiveProps(next) {
-    const prev = this.props;
-
+  componentDidUpdate(prevProps) {
+    const prev = prevProps;
+    const next = this.props;
     /* If only one geopoint column exists in dataset, select it for map.
     ** Complexity here is due to needing to wait until the dataset columns have loaded before
     ** we can check type of each column.
