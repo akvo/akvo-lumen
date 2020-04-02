@@ -21,7 +21,6 @@ class VisualisationEditor extends Component {
       metadata: { layerGroupId: '', layerMetadata: [] },
     };
     this.fetchAggregatedData = this.fetchAggregatedData.bind(this);
-    window.state = this.state;
   }
 
   componentDidMount() {
@@ -31,21 +30,15 @@ class VisualisationEditor extends Component {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState) {
-    console.log('componentDidUpdate');
     const { visualisation, specValid } = this.state;
-    console.log('needNewaggregation', 'this.state', this.state.needNewAggregation, 'prevProps',
-    prevProps.needNewAggregation, 'prevState', prevState.needNewAggregation);
-    // console.log('prevState', prevState.visualisation);
-    // console.log('prevProps', prevProps.visualisation);
-    // console.log('this.state', this.state.visualisation);
     if ((visualisation.datasetId || visualisation.visualisationType === 'map') && specValid && this.state.needNewAggregation) {
-      console.log('CONT::::', visualisation);
       this.fetchAggregatedData(visualisation);
     }
   }
+
   static getDerivedStateFromProps(nextProps, prevState) {
-    console.log('getDerivedStateFromProps', 'prev', prevState.needNewAggregation, 'next', nextProps.needNewAggregation);
     const nextPropsVisualisation = nextProps.visualisation;
     const nextPropsVType = nextPropsVisualisation.visualisationType;
     const visTypeHasChanged = nextPropsVType !== get(prevState, 'visualisation.visualisationType');
@@ -110,9 +103,6 @@ class VisualisationEditor extends Component {
         newState.specValid = specIsValidForApi(nextPropsVisualisation.spec, nextPropsVType);
         newState.needNewAggregation =
           getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested);
-        //      console.log(nextPropsVisualisation,
-        // prevState.lastVisualisationRequested,
-        // getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested));
         const currentData = get(prevState, 'visualisation.data');
         const currentVType = get(prevState, 'visualisation.visualisationType');
         if (currentData && (nextPropsVType !== 'pivot table' || (currentVType && currentVType === nextPropsVType))) {
@@ -200,7 +190,6 @@ class VisualisationEditor extends Component {
         });
     }
   }
-
 
   render() {
     const { props } = this;
