@@ -63,23 +63,34 @@ class Library extends Component {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.collections) {
-      const collectionId = nextProps.params.collectionId;
-      const collection = collectionId ? nextProps.collections[collectionId] : null;
-      if (collection) {
-        if (collection !== this.state.collection) {
-          this.setState({ collection: Object.assign({}, collection) });
-        }
-      } else if (this.state.collection) {
-        this.setState({ collection: null });
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.collections) {
+      const collectionId = this.props.params.collectionId;
+      const collection = collectionId ? this.props.collections[collectionId] : null;
+      if (!collection && prevState.collection) {
         this.props.history.push('/library');
       }
-
       if (collectionId && !collection) {
         this.props.history.push('/library');
       }
     }
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.collections) {
+      const collectionId = nextProps.params.collectionId;
+      const collection = collectionId ? nextProps.collections[collectionId] : null;
+      const newState = {};
+      if (collection) {
+        if (collection !== prevState.collection) {
+          newState.collection = Object.assign({}, collection);
+        }
+      } else if (prevState.collection) {
+        newState.collection = null;
+      }
+      return newState;
+    }
+    return null;
   }
 
   handleCheckEntity(entityId, entityType) {
