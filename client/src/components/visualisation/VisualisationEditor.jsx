@@ -20,76 +20,83 @@ class VisualisationEditor extends Component {
       visualisation: null,
       metadata: { layerGroupId: '', layerMetadata: [] },
     };
-    this.handleProps = this.handleProps.bind(this);
     this.fetchAggregatedData = this.fetchAggregatedData.bind(this);
     window.state = this.state;
   }
 
   componentDidMount() {
-    this.handleProps(this.props);
+    const { visualisation, specValid, needNewAggregation } = this.state;
+    if ((visualisation.datasetId || visualisation.visualisationType === 'map') && specValid && needNewAggregation) {
+      this.fetchAggregatedData(visualisation);
+    }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.handleProps(nextProps);
+  componentDidUpdate(prevProps, prevState) {
+    console.log('componentDidUpdate');
+    const { visualisation, specValid } = this.state;
+    console.log('needNewaggregation', 'this.state', this.state.needNewAggregation, 'prevProps',
+    prevProps.needNewAggregation, 'prevState', prevState.needNewAggregation);
+    // console.log('prevState', prevState.visualisation);
+    // console.log('prevProps', prevProps.visualisation);
+    // console.log('this.state', this.state.visualisation);
+    if ((visualisation.datasetId || visualisation.visualisationType === 'map') && specValid && this.state.needNewAggregation) {
+      console.log('CONT::::', visualisation);
+      this.fetchAggregatedData(visualisation);
+    }
   }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    console.log('getDerivedStateFromProps', 'prev', prevState.needNewAggregation, 'next', nextProps.needNewAggregation);
+    const nextPropsVisualisation = nextProps.visualisation;
+    const nextPropsVType = nextPropsVisualisation.visualisationType;
+    const visTypeHasChanged = nextPropsVType !== get(prevState, 'visualisation.visualisationType');
+    let newState = { specValid: null, needNewAggregation: null };
 
-  handleProps(props) {
-    const { visualisation } = props;
-    const vType = visualisation.visualisationType;
-    let specValid;
-    let needNewAggregation;
-    const visTypeHasChanged = vType !== get(this.state, 'visualisation.visualisationType');
-
-    switch (vType) {
+    switch (nextPropsVType) {
       case null:
         // Data aggregated client-side
-        this.setState({ visualisation });
+        newState = { visualisation: nextPropsVisualisation };
         break;
-
       case 'map':
-        specValid = specIsValidForApi(visualisation.spec, vType);
-        needNewAggregation =
+        newState.specValid = specIsValidForApi(nextPropsVisualisation.spec, nextPropsVType);
+        newState.needNewAggregation =
           Boolean(
-            visualisation.spec.layers &&
-            visualisation.spec.layers.length &&
-            visualisation.spec.layers.some((layer, idx) =>
-              getNeedNewAggregation(
-                layer,
-                checkUndefined(this.lastVisualisationRequested, 'spec', 'layers', idx),
-                'map'
-              )
-            )
+            nextPropsVisualisation.spec.layers &&
+              nextPropsVisualisation.spec.layers.length &&
+              nextPropsVisualisation.spec.layers.some((layer, idx) =>
+                                                      getNeedNewAggregation(
+                                                        layer,
+                                                        checkUndefined(prevState.lastVisualisationRequested, 'spec', 'layers', idx),
+                                                        'map'
+                                                      )
+                                                    )
           )
           ||
           Boolean(
-            checkUndefined(visualisation, 'spec', 'layers', 'length') !==
-            checkUndefined(this.lastVisualisationRequested, 'spec', 'layers', 'length')
+            checkUndefined(nextPropsVisualisation, 'spec', 'layers', 'length') !==
+              checkUndefined(prevState.lastVisualisationRequested, 'spec', 'layers', 'length')
           );
 
-        if (!this.state.visualisation || visTypeHasChanged) {
+        if (!prevState.visualisation || visTypeHasChanged) {
           // Update immediately, without waiting for the api call
-          this.setState({ visualisation: { ...visualisation } });
+          newState.visualisation = nextPropsVisualisation;
         }
 
-        if (checkUndefined(visualisation, 'spec', 'layers', 'length') === 0) {
+        if (checkUndefined(nextPropsVisualisation, 'spec', 'layers', 'length') === 0) {
           // Normally, the new metadata api response overwrites the old one, but when length is
           // zero, there is no new metadata api respnonse. We need to manually set it to empty
-          this.lastVisualisationRequested = null;
-          this.setState({
-            visualisation: { ...visualisation },
-            metadata: {},
-          });
+          newState.lastVisualisationRequested = nextPropsVisualisation;
+          newState.visualisation = nextPropsVisualisation;
+          newState.metadata = {};
         }
-
-        if (needNewAggregation && specValid) {
-          this.fetchAggregatedData(visualisation);
-          this.lastVisualisationRequested = cloneDeep(visualisation);
-        } else if (specValid) {
-          // setState to update non-aggregated properties e.g. baselayer
-          this.setState({ visualisation: { ...visualisation } });
+        if (newState.needNewAggregation && newState.specValid) {
+          newState.visualisation = nextPropsVisualisation;
+          newState.lastVisualisationRequested = cloneDeep(nextPropsVisualisation);
+        } else if (newState.specValid) {
+          newState.visualisation = nextPropsVisualisation;
         }
 
         break;
+
       case 'pivot table':
       case 'pie':
       case 'polararea':
@@ -100,29 +107,24 @@ class VisualisationEditor extends Component {
       case 'bar':
       case 'scatter': {
         // Data aggregated on the backend for these types
-
-        specValid = specIsValidForApi(visualisation.spec, vType);
-        needNewAggregation = getNeedNewAggregation(visualisation, this.lastVisualisationRequested);
-
-        const newVisualisation = { ...visualisation };
-        const data = get(this, 'state.visualisation.data');
-        const currentVType = get(this.props, 'visualisation.visualisationType');
-        if (data && (vType !== 'pivot table' || (currentVType && currentVType === vType))) {
-          newVisualisation.data = data;
+        newState.specValid = specIsValidForApi(nextPropsVisualisation.spec, nextPropsVType);
+        newState.needNewAggregation =
+          getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested);
+        //      console.log(nextPropsVisualisation,
+        // prevState.lastVisualisationRequested,
+        // getNeedNewAggregation(nextPropsVisualisation, prevState.lastVisualisationRequested));
+        const currentData = get(prevState, 'visualisation.data');
+        const currentVType = get(prevState, 'visualisation.visualisationType');
+        if (currentData && (nextPropsVType !== 'pivot table' || (currentVType && currentVType === nextPropsVType))) {
+          nextPropsVisualisation.data = currentData;
         }
-        this.setState({ visualisation: newVisualisation });
-
-        if (visualisation.datasetId && specValid && needNewAggregation) {
-          this.fetchAggregatedData(visualisation);
-          // Store a copy of this visualisation to compare against on next update
-          this.lastVisualisationRequested = cloneDeep(visualisation);
-        }
-
-        this.forceUpdate();
+        newState.visualisation = nextPropsVisualisation;
+        newState.lastVisualisationRequested = cloneDeep(nextPropsVisualisation);
         break;
       }
-      default: throw new Error(`Unknown visualisation type ${visualisation.visualisationType}`);
+      default: throw new Error(`Unknown visualisation type ${nextPropsVisualisation.visualisationType}`);
     }
+    return newState;
   }
 
   fetchAggregatedData(visualisation) {
@@ -198,6 +200,7 @@ class VisualisationEditor extends Component {
         });
     }
   }
+
 
   render() {
     const { props } = this;
