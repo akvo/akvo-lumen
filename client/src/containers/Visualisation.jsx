@@ -55,22 +55,6 @@ const getSpecFromVisualisationType = (visualisationType) => {
       return {};
   }
 };
-const loadVisIfNextPropsAndNoLoad = (nextProps, stateVisualisation) => {
-  /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
-  /* from nextProps if it exists there */
-  const { visualisationId } = nextProps.params;
-  const isEditingExistingVisualisation = visualisationId != null;
-  const loadedVisualisation = stateVisualisation.id != null;
-  const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
-  if (
-    (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
-      get(stateVisualisation, 'shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
-  ) {
-    const visualisation = nextProps.library.visualisations[visualisationId];
-    return visualisation;
-  }
-  return null;
-};
 
 class Visualisation extends Component {
 
@@ -180,10 +164,17 @@ class Visualisation extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const visualisation =
-          loadVisIfNextPropsAndNoLoad(nextProps, prevState.visualisation);
-    if (visualisation) {
-      return { visualisation };
+    /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
+      /* from nextProps if it exists there */
+    const { visualisationId } = nextProps.params;
+    const isEditingExistingVisualisation = visualisationId != null;
+    const loadedVisualisation = prevState.visualisation.id != null;
+    const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
+    if (
+      (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
+        get(prevState.visualisation, 'shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
+    ) {
+      return { visualisation: nextProps.library.visualisations[visualisationId] };
     }
     return null;
   }
