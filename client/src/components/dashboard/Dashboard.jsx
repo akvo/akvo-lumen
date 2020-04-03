@@ -152,7 +152,7 @@ const loadVisualisations = (requestedDatasetIds, visualisations, dash, onAddVisu
   Object.keys(dash.entities).filter(key => Boolean(dash.entities[key])).forEach((key) => {
     const entity = dash.entities[key];
     const isVisualisation = entity.type === 'visualisation';
-    if (isVisualisation) {
+    if (isVisualisation && visualisations[entity.id]) {
       const visualisation = visualisations[entity.id];
       if (aggregationOnlyVisualisationTypes.some(type =>
         type === visualisation.visualisationType)) {
