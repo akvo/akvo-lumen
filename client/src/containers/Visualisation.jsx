@@ -71,6 +71,7 @@ class Visualisation extends Component {
         datasetId: null,
         spec: {},
       },
+      hasTrackedPageView: false,
       asyncComponents: null,
       timeToNextSave: SAVE_INITIAL_TIMEOUT,
       timeFromPreviousSave: 0,
@@ -154,29 +155,28 @@ class Visualisation extends Component {
     }, 'VisualisationViewerPreload');
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
-    /* from nextProps if it exists there */
-    const { visualisationId } = this.props.params;
-    const isEditingExistingVisualisation = visualisationId != null;
-    const loadedVisualisation = this.state.visualisation.id != null;
-    const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
+  componentDidUpdate() {
+    if (!this.state.hasTrackedPageView) {
+      trackPageView(`Visualisation: ${
+        this.state.visualisation.name || this.props.intl.formatMessage({ id: 'untitled_visualisation' })
+      }`);
+    }
+  }
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    /* If there is a visualisation to load from the library, and we haven't loaded it yet, load it
+      /* from nextProps if it exists there */
+    const { visualisationId } = nextProps.params;
+    const isEditingExistingVisualisation = visualisationId != null;
+    const loadedVisualisation = prevState.visualisation.id != null;
+    const nextPropsHasVisualisation = Boolean(nextProps.library.visualisations[visualisationId]);
     if (
       (isEditingExistingVisualisation && !loadedVisualisation && nextPropsHasVisualisation) ||
-      get(this.state, 'visualisation.shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
+        get(prevState.visualisation, 'shareId') !== get(nextProps, `library.visualisations[${visualisationId}].shareId`)
     ) {
-      const visualisation = nextProps.library.visualisations[visualisationId];
-      this.setState({ visualisation }, () => {
-        this.handleTrackPageView(visualisation);
-      });
+      return { visualisation: nextProps.library.visualisations[visualisationId] };
     }
-
-    if (!this.props.params.visualisationId && nextProps.params.visualisationId) {
-      this.setState({
-        isSavePending: false,
-      });
-    }
+    return null;
   }
 
   componentWillUnmount() {

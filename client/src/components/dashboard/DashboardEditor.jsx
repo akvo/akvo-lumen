@@ -125,10 +125,11 @@ class DashboardEditor extends Component {
     window.addEventListener('resize', this.handleResize);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.dashboard.layout.length > this.state.propLayout.length) {
-      this.setState({ propLayout: nextProps.dashboard.layout });
+  static getDerivedStateFromProps(props, state) {
+    if (props.dashboard.layout.length > state.propLayout.length) {
+      return { propLayout: props.dashboard.layout };
     }
+    return state;
   }
 
   componentWillUnmount() {

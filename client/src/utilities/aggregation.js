@@ -79,7 +79,8 @@ export const getNeedNewAggregation = (
 ) => {
   const vType = newV.visualisationType || optionalVizType;
 
-  if ((newV && !oldV) || (vType !== oldV.visualisationType)) {
+  if ((newV && !oldV) || (vType !== (oldV.visualisationType || 'map'))) {
+    console.log('getNeedNewAggregation', newV, oldV, vType, oldV.visualisationType);
     return true;
   }
 
@@ -88,8 +89,8 @@ export const getNeedNewAggregation = (
       return Boolean(
         newV.datasetId !== oldV.datasetId ||
         newV.spec.metricColumnX !== oldV.spec.metricColumnX ||
-        newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
-        newV.spec.metricColumnsY !== oldV.spec.metricColumnsY ||
+          newV.spec.metricColumnY !== oldV.spec.metricColumnY ||
+          !isEqual(newV.spec.metricColumnsY, oldV.spec.metricColumnsY) ||
         newV.spec.metricAggregation !== oldV.spec.metricAggregation ||
         newV.spec.subBucketMethod !== oldV.spec.subBucketMethod ||
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
