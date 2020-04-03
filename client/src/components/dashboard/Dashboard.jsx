@@ -64,7 +64,6 @@ const isLibraryDashboardLoaded = (library, dashboardId) => isLibraryLoaded(libra
       && !isEmpty(library.dashboards[dashboardId].layout);
 
 const addDataToVisualisations = (aggregatedDatasets, visualisations) => {
-  log('addDataToVisualisations', aggregatedDatasets, visualisations);
   const out = {};
 
   Object.keys(visualisations).filter(key => Boolean(visualisations[key])).forEach((key) => {
@@ -109,7 +108,6 @@ const addDataToVisualisations = (aggregatedDatasets, visualisations) => {
       out[key] = visualisations[key];
     }
   });
-  log('addDataToVisualisations', out);
   return out;
 };
 
@@ -119,7 +117,6 @@ const dashboardLayout = dash =>
 
 const loadAggregatedDatasets = (state, entities) => {
   const requestedDatasetIds = state.requestedDatasetIds.slice(0);
-  log('loadAggregatedDatasets');
   const { ...aggregatedDatasets } = state.aggregatedDatasets;
   Object.keys(entities).filter(key => Boolean(entities[key])).forEach((key) => {
     const entity = entities[key];
@@ -231,7 +228,6 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
-    log('componentDidMount');
     const { params, library, dispatch, query } = this.props;
     if (!isLibraryLoaded(library)) {
       dispatch(fetchLibrary());
@@ -252,7 +248,6 @@ class Dashboard extends Component {
       const libraryDashboard = library.dashboards[dashboardId];
       if (!isLibraryDashboardLoaded(library, dashboardId)
           || !libraryDashboard.aggregated) {
-        log('componentDidMount fetching dashboard');
         dispatch(actions.fetchDashboard(dashboardId,
           { filter: (query && query.filter)
             || ((libraryDashboard && libraryDashboard.filter) || {}) },
@@ -304,7 +299,6 @@ class Dashboard extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    log('wowo _getDerivedStateFromProps_  h hh h ');
     const dashboardAlreadyLoaded = prevState.dashboard;
     const { dashboardId } = nextProps.params;
     const sharedAction = get(prevState, 'dashboard.shareId') !== get(nextProps, `library.dashboards[${dashboardId}].shareId`) ||
@@ -317,10 +311,8 @@ class Dashboard extends Component {
 
       const dash = nextProps.library.dashboards[dashboardId];
       const haveDashboardData = Boolean(dash && dash.layout);
-      log('getDerivedStateFromProps', '((locationHasDatasetId(nextProps) && !dashboardAlreadyLoaded) || sharedAction)');
 
       if (haveDashboardData) {
-        log('getDerivedStateFromProps', 'haveDashboardData');
 
         const dashboardEntities = Object.keys(dash.entities).map(key => dash.entities[key]);
         const dashboardHasVisualisations =
@@ -328,14 +320,12 @@ class Dashboard extends Component {
         const libraryHasVisualisations = !isEmpty(nextProps.library.visualisations);
 
         if (dashboardHasVisualisations && !libraryHasVisualisations) {
-          log('getDerivedStateFromProps', '(dashboardHasVisualisations && !libraryHasVisualisations)');
           /* We don't yet have the visualisations necessary to display this dashboard. Do nothing.
           /* When the library API call returns and the visualisaitons are loaded,
           /* componentWillReceiveProps will be called again. */
           return newState;
         }
         if (dash.aggregated || sharedAction) {
-          log('getDerivedStateFromProps', '(dash.aggregated || sharedAction)');
           newState.dashboard = dashboardLayout(dash);
           newState.aggregatedDatasets = loadAggregatedDatasets(prevState, dash.entities);
           return newState;
@@ -343,7 +333,6 @@ class Dashboard extends Component {
       }
     }
     if (!(dashboardAlreadyLoaded && dashboardAlreadyLoaded.id) && dashboardId) {
-      log('getDerivedStateFromProps', '(!(dashboardAlreadyLoaded && dashboardAlreadyLoaded.id) && dashboardId)');
       newState.isSavePending = false;
       newState.isUnsavedChanges = false;
       newState.dashboard = Object.assign({}, dashboardAlreadyLoaded, { id: dashboardId });
@@ -357,7 +346,6 @@ class Dashboard extends Component {
   }
 
   loadDashboardIntoState(library, dash) {
-    log('loadDashboardIntoState');
     /* Put the dashboard into component state so it is fed to the DashboardEditor */
     const dashboard = dashboardLayout(dash);
     const newState = this.state;
@@ -371,7 +359,6 @@ class Dashboard extends Component {
   }
 
   onAddVisualisation(visualisation) {
-    log('onAddVisualisation');
     const { id, datasetId, spec } = visualisation;
     const vType = visualisation.visualisationType;
 
@@ -604,7 +591,6 @@ class Dashboard extends Component {
   }
 
   handleTrackPageView(dashboard) {
-    log('handleTrackPageView');
     if (!this.state.hasTrackedPageView) {
       this.setState({ hasTrackedPageView: true }, () => {
         trackPageView(`Dashboard: ${
