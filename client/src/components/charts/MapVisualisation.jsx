@@ -254,11 +254,6 @@ export default class MapVisualisation extends Component {
     this.renderLeafletMap(prevProps);
   }
 
-  // eslint-disable-next-line no-unused-vars
-  static getDerivedStateFromProps(nextProps, prevState) {
-    return { hasRendered: false };
-  }
-
   componentWillUnmount() {
     clearInterval(this.loadInterval);
   }
