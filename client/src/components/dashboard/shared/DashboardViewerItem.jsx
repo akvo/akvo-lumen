@@ -156,7 +156,7 @@ DashboardViewerItem.propTypes = {
   canvasWidth: PropTypes.number.isRequired,
   viewportType: PropTypes.oneOf(['small', 'medium', 'large']),
   datasets: PropTypes.object,
-  dashFiltered: PropTypes.boolean,
+  dashFiltered: PropTypes.bool,
   metadata: PropTypes.object,
   intl: intlShape,
 };
