@@ -6,7 +6,6 @@ import get from 'lodash/get';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
 import queryString from 'querystringify';
-import log from 'log-with-style';
 import ShareEntity from '../modals/ShareEntity';
 import * as actions from '../../actions/dashboard';
 import * as api from '../../utilities/api';
@@ -313,7 +312,6 @@ class Dashboard extends Component {
       const haveDashboardData = Boolean(dash && dash.layout);
 
       if (haveDashboardData) {
-
         const dashboardEntities = Object.keys(dash.entities).map(key => dash.entities[key]);
         const dashboardHasVisualisations =
           dashboardEntities.some(entity => entity.type === 'visualisation');
