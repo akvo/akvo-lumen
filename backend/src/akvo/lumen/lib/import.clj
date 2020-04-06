@@ -18,12 +18,12 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
-(defn- successful-execution [conn job-execution-id data-source-id table-name columns spec claims]
+(defn- successful-execution [conn job-execution-id data-source-id table-name columns {:keys [spec-name spec-description]} claims]
   (let [dataset-id (util/squuid)
         imported-table-name (util/gen-table-name "imported")]
     (db.dataset/insert-dataset conn {:id dataset-id
-                          :title (get spec "name") ;; TODO Consistent naming. Change on client side?
-                          :description (get spec "description" "")
+                          :title spec-name ;; TODO Consistent naming. Change on client side?
+                          :description spec-description
                           :author claims})
     (db.job-execution/clone-data-table conn
                       {:from-table table-name
@@ -71,7 +71,8 @@
             (postgres/create-dataset-table conn table-name columns)
             (doseq [record (map postgres/coerce-to-sql (p/records importer))]
               (jdbc/insert! conn table-name record))
-            (successful-execution conn job-execution-id  data-source-id table-name columns spec claims)))
+            (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
+                                                                                            :spec-description (get spec "description" "")} claims)))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)
           (log/error e)
@@ -82,9 +83,10 @@
   (let [data-source-id (str (util/squuid))
         job-execution-id (str (util/squuid))]
     (db.job-execution/insert-data-source tenant-conn {:id data-source-id
-                                   :spec (json/generate-string data-source)})
+                                                      :spec (json/generate-string
+                                                             (update data-source "source" dissoc "token"))})
     (db.job-execution/insert-job-execution tenant-conn {:id job-execution-id
-                                       :data-source-id data-source-id})
+                                                        :data-source-id data-source-id})
     (execute tenant-conn import-config error-tracker job-execution-id data-source-id claims data-source)
     (lib/ok {"importId" job-execution-id
              "kind" (get-in data-source ["source" "kind"])})))
