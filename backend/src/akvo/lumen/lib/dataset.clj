@@ -1,5 +1,4 @@
 (ns akvo.lumen.lib.dataset
-  (:refer-clojure :exclude [update])
   (:require [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.db.transformation :as db.transformation]
@@ -15,9 +14,12 @@
             [clojure.string :as str]
             [clojure.set :refer (rename-keys)]))
 
+(defn- remove-token [d]
+  (update d :source dissoc "token"))
+
 (defn all*
   [tenant-conn]
-  (db.dataset/all-datasets tenant-conn))
+  (map remove-token (db.dataset/all-datasets tenant-conn)))
 
 (defn create
   [tenant-conn import-config error-tracker claims data-source]
@@ -74,6 +76,7 @@
 
       
       (-> dataset
+          remove-token
           (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
           (rename-keys {:title :name})
           (assoc :rows data :columns columns :status "OK")))))
@@ -108,7 +111,7 @@
           (let [v (db.visualisation/delete-maps-by-dataset-id tenant-conn {:id id})](lib/ok {:id id})))))
     (lib/not-found {:error "Not found"})))
 
-(defn update
+(defn update*
   [tenant-conn caddisfly import-config error-tracker dataset-id {:strs [token email]}]
   (if-let [{data-source-spec :spec
             data-source-id   :id} (db.dataset/data-source-by-dataset-id tenant-conn {:dataset-id dataset-id})]
