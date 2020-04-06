@@ -70,7 +70,7 @@ class Dataset extends Component {
 
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState) {
-    if (!this.state.hasTrackedPageView) {
+    if (!this.state.hasTrackedPageView && this.props.dataset) {
       trackPageView(`Dataset: ${getTitle(this.props.dataset)}`);
     }
   }
