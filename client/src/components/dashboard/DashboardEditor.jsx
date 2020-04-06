@@ -288,8 +288,10 @@ class DashboardEditor extends Component {
       >
         <span style={{ fontSize: 'medium' }}>&#43; </span><FormattedMessage id={i18nKey} />
       </button>);
+    const entitiesKeysSet = new Set(Object.keys(dashboard.entities));
     const visualisations = getArrayFromObject(this.props.visualisations);
-    const datasetsWithViss = datasetsWithVisualizations(visualisations, datasets);
+    const datasetsWithViss = datasetsWithVisualizations(visualisations
+      .filter(v => entitiesKeysSet.has(v.id)), datasets);
     const selectedDatasetColumns = filter.datasetId && datasets[filter.datasetId] && filterColumns(datasets[filter.datasetId].get('columns'), 'text');
     const newColumnFilterSelect = idx => (options, finder, removeable) =>
     (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px', position: 'relative' }}>
