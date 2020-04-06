@@ -11,7 +11,6 @@ export default class AsyncVisualisationViewer extends Component {
 
   constructor(props) {
     super(props);
-    console.log('props', props);
     const visualisation = props.visualisation;
 
     if (visualisation.visualisationType === 'pivot table') {

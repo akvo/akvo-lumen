@@ -59,10 +59,11 @@ const getViewportType = (width) => {
 };
 
 class DashboardViewer extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       dashFiltered: false,
+      dashboard: props.dashboard,
     };
     this.getItemFromProps = this.getItemFromProps.bind(this);
   }
@@ -94,7 +95,8 @@ class DashboardViewer extends Component {
 
   render() {
     // eslint-disable-next-line max-len
-    const { dashboard, datasets, metadata, windowWidth, filteredDashboard, onFilterValueChange } = this.props;
+    const { datasets, metadata, windowWidth, filteredDashboard, onFilterValueChange } = this.props;
+    const { dashboard } = this.state;
     const layout = dashboard.layout;
     const viewportType = getViewportType(windowWidth);
     // eslint-disable-next-line no-console
@@ -118,7 +120,8 @@ class DashboardViewer extends Component {
               onFilterValueChange={(filter) => {
                 onFilterValueChange(JSON.stringify({ filter }),
               onFilterValueChange, () =>
-              this.setState({ dashFiltered: Boolean(filter.columns.find(c => c.value)) })
+              this.setState({ dashFiltered: Boolean(filter.columns.find(c => c.value)),
+                filter })
               );
               }
             }
