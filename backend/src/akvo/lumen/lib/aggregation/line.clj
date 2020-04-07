@@ -54,11 +54,11 @@
                                     (:metricColumnY spec)]))))
 
 (defmethod commons/spec-columns "line"
-  [visualisation-type spec]
+  [visualisation-type spec dataset-id]
   (spec-columns spec))
 
 
 (defmethod commons/spec-columns "area"
-  [visualisation-type spec]
+  [visualisation-type spec dataset-id]
   (spec-columns spec))
 

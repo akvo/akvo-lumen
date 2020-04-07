@@ -3,19 +3,65 @@
             [clojure.walk :as walk]
             [clojure.test :refer :all]))
 
-(deftest spec-columns-test
-  (let [filters [{"value" "3",
-                  "column" "f1",
-                  "strategy" "isHigher",
-                  "operation" "keep",
-                  "columnType" "number"}
-                 {"value" nil,
-                  "column" "f2",
+(defn popup [prefix] (mapv #(hash-map "column" (str prefix (inc %))) (range 2)) )
+
+(defn filters [prefix]
+  (mapv #(let [d {"value" nil,
                   "strategy" "isEmpty",
                   "operation" "remove",
                   "columnType" "text"}]
-        data
-        [{:id "5e8c447c-41e8-425e-b3f9-bb0c3afa0157",
+           (assoc d  "column" (str prefix (inc %)))) (range 2)))
+
+(def map-spec
+  {"layers"
+   [
+    {
+     ;; geo location layer
+     "layerType" "geo-location", 
+     "popup" (popup "p"),
+     "longitude" nil,
+     "pointSize" 3,
+     "legend" {"title" "Family size", "visible" true},
+     "filters" (filters "f"),
+     "latitude" nil,
+     "visible" true,
+     "aggregationMethod" "avg",
+     "geom" "c1",
+     "pointColorMapping" [],
+     "pointColorColumn" "c2",
+     "datasetId" "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a",
+     "title" "Untitled layer 1",
+     "rasterId" nil}
+    {
+     ;; geo shape layer
+     "layerType" "geo-shape",
+     "popup" (popup "pp")
+     "longitude" nil,
+     "pointSize" 3,
+     "legend" {"title" nil, "visible" true},
+     "aggregationDataset" "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2",
+     "filters" (filters "ff"),
+     "latitude" nil,
+     "visible" true,
+     "aggregationMethod" "avg",
+     "geom" "c3",
+     "pointColorMapping" [],
+     "pointColorColumn" nil, ;; is ok that is nil .. client is sending the nil value
+     "datasetId" "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a",
+     "title" "Untitled layer 1",
+     "aggregationGeomColumn" "c4",
+     "rasterId" nil,
+     "aggregationColumn" "c5"}
+    ],
+   "version" 1,
+   "baseLayer" "street"})
+
+(deftest spec-columns-test
+  (let [data
+        [{:id "5e8c4554-e6ed-4c75-95b1-3d7d4eaea231",
+          :visualisationType "map",
+          :spec map-spec}
+         {:id "5e8c447c-41e8-425e-b3f9-bb0c3afa0157",
           :visualisationType "scatter",
           :spec
           {"bucketColumnCategory" "c1",
@@ -40,7 +86,7 @@
          {:id "5e8b1430-e712-48db-8e42-2f713e3901b2",
           :visualisationType "bar",
           :spec
-          {"filters" filters,
+          {"filters" (filters "f")
            "sort" nil,
            "subBucketColumn" "c1",
            "showLabels" false,
@@ -144,9 +190,10 @@
            "categoryTitle" nil}}]]
     (testing "columns-spec by viz type defmethod"
       (is (= (mapv #(vector (:visualisationType %)
-                            (vec (sort (commons/spec-columns (:visualisationType %) (walk/keywordize-keys (:spec %))))))
+                            (vec (sort (commons/spec-columns (:visualisationType %) (walk/keywordize-keys (:spec %)) "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a"))))
                    data)
-             [["scatter" ["c1" "c2" "c3" "c4" "c5" "c6"]]
+             [["map" ["c1" "c2" "c3" "c4" "c5" "f1" "f2" "ff1" "ff2" "p1" "p2" "pp1" "pp2"]]
+              ["scatter" ["c1" "c2" "c3" "c4" "c5" "c6"]]
               ["bar" ["c1" "c2" "c3" "f1" "f2"]]
               ["bubble" ["c1" "c2"]]
               ["donut" ["c1"]]
