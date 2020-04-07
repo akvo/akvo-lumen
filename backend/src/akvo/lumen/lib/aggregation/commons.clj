@@ -23,3 +23,12 @@
         "distinct" (str "COUNT(DISTINCT " v ")")
         "q1" (str "percentile_cont(0.25) WITHIN GROUP (ORDER BY " v ")")
         "q3" (str "percentile_cont(0.75) WITHIN GROUP (ORDER BY " v ")")))))
+
+(defmulti spec-columns
+  "returns the distinct column names used in the spec"
+  (fn [visualisation-type spec]
+    visualisation-type))
+
+(defmethod spec-columns :default
+  [visualisation-type spec]
+  [])
