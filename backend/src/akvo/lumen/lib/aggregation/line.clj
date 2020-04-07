@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.line
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query)]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
@@ -47,3 +47,18 @@
                :data     (mapv (fn [[x-value y-value]]
                                  {:timestamp x-value})
                                sql-response)}})))
+
+(defn- spec-columns [spec]
+  (distinct (filter some? (flatten [(map :column (:filters spec))
+                                    (:metricColumnX spec)
+                                    (:metricColumnY spec)]))))
+
+(defmethod commons/spec-columns "line"
+  [visualisation-type spec]
+  (spec-columns spec))
+
+
+(defmethod commons/spec-columns "area"
+  [visualisation-type spec]
+  (spec-columns spec))
+

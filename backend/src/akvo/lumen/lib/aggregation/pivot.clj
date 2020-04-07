@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.pivot
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query)]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
@@ -130,3 +130,12 @@
     (lib/ok (merge (apply-query tenant-conn table-name query filter-str)
                    {:metadata
                     {:categoryColumnTitle (get-in query [:category-column :title])}}))))
+
+
+(defmethod commons/spec-columns "pivot table"
+  [visualisation-type spec]
+  (distinct (filter some? (flatten [(map :column (:filters spec))
+                                    (:categoryColumn spec)
+                                    (:rowColumn spec)
+                                    (:valueColumn spec)]))))
+
