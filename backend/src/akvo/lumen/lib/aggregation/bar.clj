@@ -40,7 +40,7 @@
             sort_table
           ON
             sort_table.x = data_table.x
-          ORDER BY %5$s"
+          ORDER BY %5$s, data_table.s"
           (:columnName bucket-column)
           aggregation
           table-name
