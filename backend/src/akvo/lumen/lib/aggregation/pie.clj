@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.pie
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query)]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]))
@@ -32,3 +32,20 @@
                                :label bucket-value})
                             counts)
                  :metadata {:type (:type bucket-column)}}}))))
+
+(defn- spec-columns [spec]
+  (distinct (filter some? (flatten [(map :column (:filters spec))
+                                    (:bucketColumn spec)]))))
+
+(defmethod commons/spec-columns "pie"
+  [visualisation-type spec]
+  (spec-columns spec))
+
+(defmethod commons/spec-columns "polararea"
+  [visualisation-type spec]
+  (spec-columns spec))
+
+(defmethod commons/spec-columns "donut"
+  [visualisation-type spec]
+  (spec-columns spec))
+
