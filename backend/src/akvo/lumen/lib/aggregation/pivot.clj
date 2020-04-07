@@ -133,7 +133,7 @@
 
 
 (defmethod commons/spec-columns "pivot table"
-  [visualisation-type spec]
+  [visualisation-type spec dataset-id]
   (distinct (filter some? (flatten [(map :column (:filters spec))
                                     (:categoryColumn spec)
                                     (:rowColumn spec)

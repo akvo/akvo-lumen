@@ -71,7 +71,7 @@
                 :data (serie-data :label sql-response 4)}})))
 
 (defmethod commons/spec-columns "scatter"
-  [visualisation-type spec]
+  [visualisation-type spec dataset-id]
   (distinct (filter some? (flatten [(map :column (:filters spec))
                                     (:metricColumnSize spec)
                                     (:metricColumnX spec)
