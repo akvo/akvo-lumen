@@ -47,7 +47,3 @@
                                        (:aggregationColumn %)]))))
    flatten
    vec))
-
-
-
-
