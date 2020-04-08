@@ -25,6 +25,12 @@ SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spe
 FROM visualisation
 WHERE id = :id;
 
+-- :name visualisations-by-dataset-id :? :*
+-- :doc all visualisations by dataset-id
+SELECT id, dataset_id as "datasetId", "name", "type" as "visualisationType", spec, created, modified
+FROM visualisation
+WHERE dataset_id = :dataset-id OR spec->'layers' @>  concat ('[{"datasetId": "', :dataset-id, '"}]', '')::jsonb ;
+
 -- :name delete-visualisation-by-id :! :n
 -- :doc delete visualisation by id
 DELETE FROM visualisation WHERE id = :id;

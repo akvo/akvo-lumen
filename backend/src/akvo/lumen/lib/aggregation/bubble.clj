@@ -37,3 +37,9 @@
                 :metadata {:type (:type column-size)}}]
       :common {:metadata {:sampled (= (count sql-response) max-points)}
                :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})))
+
+(defmethod commons/spec-columns "bubble"
+  [visualisation-type spec dataset-id]
+  (distinct (filter some? (flatten [(map :column (:filters spec))
+                                    (:metricColumn spec)
+                                    (:bucketColumn spec)]))))
