@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.scatter
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-aggregation-subquery)]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-aggregation-subquery) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
@@ -69,3 +69,14 @@
        :common {:metadata {:type (:type column-label)
                            :sampled (= (count sql-response) max-points)}
                 :data (serie-data :label sql-response 4)}})))
+
+(defmethod commons/spec-columns "scatter"
+  [visualisation-type spec dataset-id]
+  (distinct (filter some? (flatten [(map :column (:filters spec))
+                                    (:metricColumnSize spec)
+                                    (:metricColumnX spec)
+                                    (:metricColumnY spec)
+                                    (:bucketColumnCategory spec)
+                                    (:datapointLabelColumn spec)
+                                    (:bucketColumn spec)]))))
+

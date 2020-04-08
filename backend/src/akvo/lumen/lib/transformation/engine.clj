@@ -146,10 +146,10 @@
   (let [dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
-    (let [{:keys [success? message columns execution-log]}
+    (let [{:keys [success? message columns execution-log error-data]}
           (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))]
       (when-not success?
-        (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s" message columns execution-log)
+        (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
         (throw (ex-info (or message "") {})))
       (let [new-dataset-version-id (str (util/squuid))]
         (db.transformation/clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
