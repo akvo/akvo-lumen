@@ -70,6 +70,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+(hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
@@ -610,7 +611,21 @@
       (is (= ["c1" "c3" "c4" "c5"] (map #(get % "columnName") columns)))
       (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
         (is (= "c2" (get before "columnName")))
-        (is (nil? after))))))
+        (is (nil? after))))
+
+    (testing "Don't allow delete column transformation if there is a visualization using the column"
+      ;; https://github.com/akvo/akvo-lumen/issues/2634
+      (upsert-visualisation *tenant-conn* {:id   (str (squuid))
+                                           :name "Visualisation",
+                                           :type "bar",
+                                           :spec {:bucketColumn "c1", :filters [], :version 2}, :author {}, :dataset-id dataset-id})
+      (let [[_ _ _ job] (apply-transformation {:type :transformation
+                                               :transformation
+                                               (gen-transformation "core/delete-column"
+                                                                   {::db.dataset-version.column.s/columnName "c1"
+                                                                    :transformation.engine.s/onError         "fail"})})]
+        (is (= (:status job) "FAILED"))
+        (is (= (:error-message job) "Cannot delete column. It is used in the following visalisations: 'Visualisation'"))))))
 
 (deftest ^:functional multiple-column-test
   (let [multiple-column-type       "caddisfly"
