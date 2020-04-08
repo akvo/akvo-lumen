@@ -44,13 +44,9 @@
                                        (:pointColorColumn %)
                                        (:geom %)
                                        (:aggregationGeomColumn %)
-                                       (:aggregationColumn %)
-
-                                       ])))
-    )
+                                       (:aggregationColumn %)]))))
    flatten
-   vec)
-)
+   vec))
 
 
 
