@@ -809,6 +809,7 @@
                                                   ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]
                                                   ::transformation.merge-datasets.target.s/mergeColumn          "c1"}
                                                  [:source :aggregationColumn] nil
+                                                 [:source :mergeColumn] "c1"
                                                  [:source :datasetId] target-dataset-id)
         [tag _ :as res] (apply-transformation {:type           :transformation
                                                :transformation tx})]
