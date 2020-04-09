@@ -1,5 +1,6 @@
 (ns akvo.lumen.specs.visualisation.maps
   (:require [akvo.lumen.lib.visualisation.maps :as lib.vis.maps]
+            [akvo.lumen.specs.postgres]
             [akvo.lumen.postgres.filter :as postgres.filter]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.protocols :as protocols.s]
