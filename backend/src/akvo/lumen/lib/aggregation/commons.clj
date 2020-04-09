@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.aggregation.commons
   (:require [clojure.java.jdbc :as jdbc]
+            [clojure.spec.alpha :as s]
+            [akvo.lumen.specs.db.dataset-version.column :as s.column]
             [clojure.tools.logging :as log]))
 
 (defn run-query [tenant-conn sql]
@@ -23,6 +25,20 @@
         "distinct" (str "COUNT(DISTINCT " v ")")
         "q1" (str "percentile_cont(0.25) WITHIN GROUP (ORDER BY " v ")")
         "q3" (str "percentile_cont(0.75) WITHIN GROUP (ORDER BY " v ")")))))
+
+(defn columns*
+  "returns `#{column-name...}` found in `data` arg. Logic based on clojure.spec/def `spec`
+   Based on dynamic thread binding.
+   Follows same approach of https://github.com/akvo/akvo-lumen/issues/1949"
+  [spec data]
+  (let [column-names  (atom #{})
+        add-column-name (fn [column-name]
+                          (when column-name
+                            (swap! column-names conj column-name)))]
+    (binding [s.column/*columnName?* add-column-name]
+      (assert (= "Success!\n" (s/explain-str spec data)) (s/explain-str spec data))
+      (deref column-names))))
+
 
 (defmulti spec-columns
   "returns the distinct column names used in the spec"

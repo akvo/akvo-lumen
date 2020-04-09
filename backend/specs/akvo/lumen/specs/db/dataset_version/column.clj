@@ -11,8 +11,8 @@
 
 (s/def ::direction (s/nilable string?))
 
-(def columnName? string?)
+(def ^:dynamic *columnName?* string?)
 
-(s/def ::columnName columnName?) ;; TODO improve with gen tuple
+(s/def ::columnName #'*columnName?*) ;; TODO improve with gen tuple
 
 (s/def ::id (s/nilable keyword?))
