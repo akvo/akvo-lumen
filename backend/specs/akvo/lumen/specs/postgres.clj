@@ -1,9 +1,9 @@
 (ns akvo.lumen.specs.postgres
   (:require [akvo.lumen.postgres :as postgres]
             [akvo.lumen.postgres.filter :as postgres.filter]
+            [akvo.lumen.specs.db.dataset-version :as db.dsv]
+            [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column]
             [clojure.spec.alpha :as s]))
-
-(alias 'db.dsv 'akvo.lumen.specs.db.dataset-version)
 
 (s/def ::postgres.filter/strategy #{"isHigher" "isLower" "is" "isEmpty"})
 
@@ -13,9 +13,6 @@
 
 (s/def ::postgres.filter/value (s/nilable (s/or :string string?
                                                 :number number?)))
-
-
-(alias 'db.dsv.column 'akvo.lumen.specs.db.dataset-version.column)
 
 (s/def ::postgres.filter/column ::db.dsv.column/columnName)
 (s/def ::postgres.filter/filter
