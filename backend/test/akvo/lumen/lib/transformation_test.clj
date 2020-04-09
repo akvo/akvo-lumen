@@ -617,7 +617,7 @@
       ;; https://github.com/akvo/akvo-lumen/issues/2634
       (upsert-visualisation *tenant-conn* {:id   (str (squuid))
                                            :name "Visualisation",
-                                           :type "bar",
+                                           :type "pie",
                                            :spec {:bucketColumn "c1", :filters [], :version 2}, :author {}, :dataset-id dataset-id})
       (let [[_ _ _ job] (apply-transformation {:type :transformation
                                                :transformation
