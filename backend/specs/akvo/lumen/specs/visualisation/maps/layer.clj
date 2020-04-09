@@ -42,7 +42,7 @@
 
 (s/def ::layer.point-color-mapping.s/op #{"equals"})
 
-(s/def ::layer.point-color-mapping.s/value (s/or :d double? :s string?))
+(s/def ::layer.point-color-mapping.s/value (s/nilable (s/or :d number? :s string?)))
 
 (defn valid-hex? [s] (try
                        (Color/decode s)
@@ -77,7 +77,7 @@
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.raster)
 (alias 'layer.raster.s 'akvo.lumen.specs.visualisation.maps.layer.raster)
 
-(s/def ::layer.raster.s/datasetId nil?)
+(s/def ::layer.raster.s/datasetId (s/nilable ::datasetId))
 
 (s/def ::layer.raster.s/rasterId ::rasterId)
 
@@ -86,11 +86,11 @@
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-location)
 (alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
 
-(s/def ::layer.geo-location.s/datasetId ::datasetId)
+(s/def ::layer.geo-location.s/datasetId (s/nilable ::datasetId))
 
 (s/def ::layer.geo-location.s/rasterId nil?)
 
-(s/def ::layer.geo-location.s/geom ::db.dsv.column.s/columnName)
+(s/def ::layer.geo-location.s/geom (s/nilable ::db.dsv.column.s/columnName))
 
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-shape)
@@ -98,4 +98,4 @@
 
 
 (s/def ::layer.geo-shape.s/aggregationGeomColumn ::db.dsv.column.s/columnName)
-(s/def ::layer.geo-shape.s/aggregationColumn ::db.dsv.column.s/columnName)
+(s/def ::layer.geo-shape.s/aggregationColumn (s/nilable ::db.dsv.column.s/columnName))

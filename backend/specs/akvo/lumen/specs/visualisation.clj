@@ -39,7 +39,7 @@
 (s/def ::showLegend (s/nilable boolean?))
 (s/def ::showLabels (s/nilable boolean?))
 (s/def ::legendPosition (s/nilable #{"right" "top" "left" "bottom"}))
-(s/def ::legendTitle string?)
+(s/def ::legendTitle (s/nilable string?))
 
 (defmulti vis :visualisationType)
 
@@ -57,19 +57,34 @@
 
 (create-ns  'akvo.lumen.specs.visualisation.pie)
 (alias 'pie.s 'akvo.lumen.specs.visualisation.pie)
-
+(s/def ::pie.s/bucketColumn ::db.dsv.column.s/columnName)
 (s/def ::pie.s/spec (s/merge
-                     (s/keys :req-un [::aggregation.pie/bucketColumn])
+                     (s/keys :req-un [::pie.s/bucketColumn])
                      ::base-spec))
 
 (defmethod vis "pie"  [_]
   (s/merge ::base-viz (s/keys :req-un [::pie.s/spec])))
 
+(create-ns  'akvo.lumen.specs.visualisation.donut)
+(alias 'donut.s 'akvo.lumen.specs.visualisation.donut)
+
+(s/def ::donut.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::donut.s/spec (s/merge
+                     (s/keys :req-un [::donut.s/bucketColumn])
+                     ::base-spec))
+
 (defmethod vis "donut"  [_]
-  (s/merge ::base-viz (s/keys :req-un [::pie.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::donut.s/spec])))
+
+(create-ns  'akvo.lumen.specs.visualisation.polar)
+(alias 'polar.s 'akvo.lumen.specs.visualisation.polar)
+(s/def ::polar.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::polar.s/spec (s/merge
+                     (s/keys :req-un [::polar.s/bucketColumn])
+                     ::base-spec))
 
 (defmethod vis "polararea"  [_]
-  (s/merge ::base-viz (s/keys :req-un [::pie.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::polar.s/spec])))
 
 (create-ns  'akvo.lumen.specs.visualisation.area)
 (alias 'area.s 'akvo.lumen.specs.visualisation.area)
@@ -78,12 +93,12 @@
 (s/def ::axisLabelX (s/nilable string?))
 (s/def ::axisLabelYFromUser boolean?)
 (s/def ::axisLabelY (s/nilable string?))
-(s/def ::metricColumnX ::db.dsv.column.s/columnName)
-(s/def ::metricColumnY ::db.dsv.column.s/columnName)
+(s/def ::area.s/metricColumnX (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::area.s/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::area.s/metricAggregation (s/nilable ::aggregation.s/metricAggregation))
 (s/def ::area.s/spec (s/merge ::base-spec
-                              (s/keys :req-un [::metricColumnY ::metricColumnX
+                              (s/keys :req-un [::area.s/metricColumnY ::area.s/metricColumnX
                                                ::area.s/metricAggregation
                                                ::axisLabelXFromUser ::axisLabelX
                                                ::axisLabelYFromUser ::axisLabelY])))
@@ -106,21 +121,22 @@
 (s/def ::sizeLabel (s/nilable string?))
 (s/def ::categoryLabelFromUser (s/nilable string?))
 (s/def ::sizeLabelFromUser boolean?)
-
+(s/def ::scatter.s/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::scatter.s/metricColumnX (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::scatter.s/spec (s/merge ::base-spec
-                                 (s/keys :req-un [::bucketColumnCategory
-                                                  ::categoryLabel
-                                                  ::datapointLabelColumn
-                                                  ::sizeLabel
-                                                  ::categoryLabelFromUser
-                                                  ::sizeLabelFromUser
-                                                  ::metricColumnSize
-                                                  ::metricColumnY ::metricColumnX
+                                 (s/keys :req-un [::datapointLabelColumn
+                                                  ::scatter.s/metricColumnY ::scatter.s/metricColumnX
                                                   ::bucketColumn
                                                   ::aggregation.s/metricAggregation
                                                   ::axisLabelXFromUser ::axisLabelX
                                                   ::axisLabelYFromUser ::axisLabelY
-                                                  ])))
+                                                  ]
+                                         :opt-un [::metricColumnSize
+                                                  ::bucketColumnCategory
+                                                  ::sizeLabelFromUser
+                                                  ::categoryLabelFromUser
+                                                  ::categoryLabel
+                                                  ::sizeLabel])))
 
 (defmethod vis "scatter"  [_]
   (s/merge ::base-viz (s/keys :req-un [::scatter.s/spec])))
@@ -131,7 +147,7 @@
 (s/def ::metricLabelFromUser boolean?)
 (s/def ::bucketLabel (s/nilable string?))
 (s/def ::metricLabel (s/nilable string?))
-(s/def ::metricColumn ::db.dsv.column.s/columnName)
+(s/def ::metricColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::truncateSize (s/nilable string?))
 
 (s/def ::bubble.s/spec (s/merge ::base-spec
@@ -151,35 +167,36 @@
 
 (s/def ::hideColumnTotals boolean?)
 (s/def ::hideRowTotals boolean?)
-(s/def ::rowColumn ::db.dsv.column.s/columnName)
+(s/def ::rowColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::decimalPlaces pos-int?)
 (s/def ::rowTitle (s/nilable string?))
 (s/def ::valueDisplay (s/nilable string?))
 (s/def ::pivot.s/aggregation ::aggregation.s/metricAggregation)
 (s/def ::valueColumn (s/nilable ::db.dsv.column.s/columnName))
-(s/def ::categoryColumn ::db.dsv.column.s/columnName)
+(s/def ::categoryColumn (s/nilable ::db.dsv.column.s/columnName))
 
 (s/def ::categoryTitle (s/nilable string?))
 (s/def ::pivot.s/spec (s/merge ::base-spec
-                               (s/keys :req-un [::hideColumnTotals
-                                                ::rowColumn
+                               (s/keys :req-un [::rowColumn
                                                 ::decimalPlaces
-                                                ::hideRowTotals
                                                 ::rowTitle
                                                 ::pivot.s/aggregation
                                                 ::valueColumn
                                                 ::valueDisplay
                                                 ::categoryColumn
-                                                ::categoryTitle])))
+                                                ::categoryTitle]
+                                       :opt-un [::hideColumnTotals
+                                                ::hideRowTotals])))
 
 (defmethod vis "pivot table"  [_]
   (s/merge ::base-viz (s/keys :req-un [::pivot.s/spec])))
 
 (create-ns  'akvo.lumen.specs.visualisation.bar)
 (alias 'bar.s 'akvo.lumen.specs.visualisation.bar)
-(s/def ::subBucketColumn ::db.dsv.column.s/columnName)
+(s/def ::subBucketColumn (s/nilable ::db.dsv.column.s/columnName))
 
 (s/def ::metricColumnsY (s/coll-of ::db.dsv.column.s/columnName :distinct true))
+(s/def ::bar.s/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::bar.s/metricColumnX (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::horizontal boolean?)
 (s/def ::showValueLabels boolean?)
@@ -190,15 +207,15 @@
                                               ::aggregation.s/metricAggregation
                                               ::axisLabelXFromUser ::axisLabelX
                                               ::axisLabelYFromUser ::axisLabelY
-                                              ::metricColumnsY
-                                              ::horizontal
                                               ::bar.s/metricColumnX
-                                              ::metricColumnY
+                                              ::bar.s/metricColumnY
                                               ::bucketColumn
-                                              ::showValueLabels
                                               ::subBucketMethod
-                                              ::truncateSize
-])))
+                                              ::truncateSize]
+                                     :opt-un [::showValueLabels
+                                              ::metricColumnsY
+                                              ::horizontal]
+                                     )))
 
 (defmethod vis "bar"  [_]
   (s/merge ::base-viz (s/keys :req-un [::bar.s/spec])))

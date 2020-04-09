@@ -13,10 +13,8 @@
 
 (defmulti layer-type :layerType)
 
-(s/def ::layer-commons (s/keys :req-un [::layer.s/aggregationMethod
-                                        ::layer.s/popup
+(s/def ::layer-commons (s/keys :req-un [::layer.s/popup
                                         ::postgres.filter/filters
-                                        ::layer.s/layerType
                                         ::layer.s/legend
                                         ::layer.s/pointSize
                                         ::layer.s/pointColorMapping
@@ -24,27 +22,32 @@
                                         ::layer.s/longitude
                                         ::layer.s/title
                                         ::layer.s/visible
-                                        ::layer.s/pointColorColumn]))
+                                        ::layer.s/pointColorColumn]
+                               :opt-un [::layer.s/aggregationMethod
+                                        ::layer.s/layerType]))
+
+(defmethod layer-type :default [_]
+  ::layer-commons)
 
 (defmethod layer-type "geo-location" [_]
   (s/merge ::layer-commons
            (s/keys :req-un [::layer.geo-location.s/datasetId
-                            ::layer.geo-location.s/rasterId
-                            ::layer.geo-location.s/geom])))
+                            ::layer.geo-location.s/geom]
+                   :opt-un [::layer.geo-location.s/rasterId])))
 
 (defmethod layer-type "raster" [_]
   (s/merge ::layer-commons
-           (s/keys :req-un [::layer.raster.s/datasetId
-                            ::layer.raster.s/rasterId
-                            ::layer.raster.s/geom])))
+           (s/keys :req-un [::layer.raster.s/datasetId]
+                   :opt-un [::layer.raster.s/geom
+                            ::layer.raster.s/rasterId])))
 
 (defmethod layer-type "geo-shape" [_]
   (s/merge ::layer-commons
            (s/keys :req-un [::layer.geo-location.s/datasetId
                             ::layer.geo-location.s/rasterId
-                            ::layer.geo-location.s/geom
-                            ::layer.geo-shape.s/aggregationColumn
-                            ::layer.geo-shape.s/aggregationGeomColumn])))
+                            ::layer.geo-location.s/geom]
+                   :opt-un [::layer.geo-shape.s/aggregationGeomColumn
+                            ::layer.geo-shape.s/aggregationColumn])))
 
 (s/def ::layer (s/multi-spec layer-type :layerType))
 (s/def ::layers (s/coll-of ::layer :kind vector? :distinct true))
