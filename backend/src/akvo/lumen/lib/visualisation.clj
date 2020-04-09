@@ -46,3 +46,11 @@
   (if (zero? (db.visualisation/delete-visualisation-by-id tenant-conn {:id id}))
     (lib/not-found {:error "Not found"})
     (lib/ok {:id id})))
+
+
+(defn visualisations-by-dataset-id [tenant-conn dataset-id]
+ (vec (db.visualisation/visualisations-by-dataset-id
+   tenant-conn
+   {:dataset-id dataset-id}
+   {}
+   {:identifiers identity})))
