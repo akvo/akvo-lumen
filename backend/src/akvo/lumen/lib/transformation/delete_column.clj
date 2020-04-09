@@ -4,6 +4,7 @@
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.specs.visualisation :as s.visualisation]
             [akvo.lumen.util :as util]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -26,10 +27,8 @@
 
 (defn visualisations-with-dataset-column [tenant-conn dataset-id column-name]
  (->> (visualisation/visualisations-by-dataset-id tenant-conn dataset-id)
-      (map #(let [{:keys [spec visualisationType id name]} %
-                  columns (aggregation.commons/spec-columns visualisationType
-                                                            (walk/keywordize-keys spec)
-                                                            dataset-id)]
+      (map #(let [{:keys [spec visualisationType id name] :as viz} (walk/keywordize-keys %)
+                  columns (aggregation.commons/spec-columns ::s.visualisation/visualisation viz )]
               [id name columns]))
       (filter (fn [[id name columns]]
                 (some #(= % column-name) columns)))))
