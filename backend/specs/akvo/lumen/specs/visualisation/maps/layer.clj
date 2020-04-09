@@ -90,4 +90,12 @@
 
 (s/def ::layer.geo-location.s/rasterId nil?)
 
-(s/def ::layer.geo-location.s/geom string?)  ;; todo derivation columnName
+(s/def ::layer.geo-location.s/geom ::db.dsv.column.s/columnName)
+
+
+(create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-shape)
+(alias 'layer.geo-shape.s 'akvo.lumen.specs.visualisation.maps.layer.geo-shape)
+
+
+(s/def ::layer.geo-shape.s/aggregationGeomColumn ::db.dsv.column.s/columnName)
+(s/def ::layer.geo-shape.s/aggregationColumn ::db.dsv.column.s/columnName)

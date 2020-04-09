@@ -8,6 +8,7 @@
             [clojure.spec.alpha :as s]))
 
 (alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
+(alias 'layer.geo-shape.s 'akvo.lumen.specs.visualisation.maps.layer.geo-shape)
 (alias 'layer.raster.s 'akvo.lumen.specs.visualisation.maps.layer.raster)
 
 (defmulti layer-type :layerType)
@@ -41,7 +42,9 @@
   (s/merge ::layer-commons
            (s/keys :req-un [::layer.geo-location.s/datasetId
                             ::layer.geo-location.s/rasterId
-                            ::layer.geo-location.s/geom])))
+                            ::layer.geo-location.s/geom
+                            ::layer.geo-shape.s/aggregationColumn
+                            ::layer.geo-shape.s/aggregationGeomColumn])))
 
 (s/def ::layer (s/multi-spec layer-type :layerType))
 (s/def ::layers (s/coll-of ::layer :kind vector? :distinct true))

@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.aggregation.commons-test
   (:require [akvo.lumen.lib.aggregation.commons :as commons]
+            [akvo.lumen.specs.visualisation :as s.visualisation]
+            [akvo.lumen.specs]
             [clojure.walk :as walk]
             [clojure.test :refer :all]))
 
@@ -187,7 +189,17 @@
            "version" 1,
            "valueDisplay" "default",
            "categoryColumn" "c2",
-           "categoryTitle" nil}}]]
+           "categoryTitle" nil}}]
+        data (map (partial merge {:datasetId "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a"
+                              :name "name"
+                              :created 1586172976186
+                              :modified 1586250225831}) data)
+        ]
+    (testing "columns* by clojure.spec"
+      (is (= (mapv #(vector (:visualisationType %)
+                            (vec (sort (vec (commons/columns* :akvo.lumen.specs.visualisation/visualisation (walk/keywordize-keys %))))))
+                   data)
+             expectations)))
     (testing "columns-spec by viz type defmethod"
       (is (= (mapv #(vector (:visualisationType %)
                             (vec (sort (commons/spec-columns (:visualisationType %) (walk/keywordize-keys (:spec %)) "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a"))))
