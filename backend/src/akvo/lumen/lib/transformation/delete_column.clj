@@ -28,7 +28,7 @@
 (defn visualisations-with-dataset-column [tenant-conn dataset-id column-name]
  (->> (visualisation/visualisations-by-dataset-id tenant-conn dataset-id)
       (map #(let [{:keys [spec visualisationType id name] :as viz} (walk/keywordize-keys %)
-                  columns (aggregation.commons/columns* ::s.visualisation/visualisation viz )]
+                  columns (aggregation.commons/spec-columns ::s.visualisation/visualisation viz )]
               [id name columns]))
       (filter (fn [[id name columns]]
                 (some #(= % column-name) columns)))))

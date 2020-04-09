@@ -47,18 +47,3 @@
                :data     (mapv (fn [[x-value y-value]]
                                  {:timestamp x-value})
                                sql-response)}})))
-
-(defn- spec-columns [spec]
-  (distinct (filter some? (flatten [(map :column (:filters spec))
-                                    (:metricColumnX spec)
-                                    (:metricColumnY spec)]))))
-
-(defmethod commons/spec-columns "line"
-  [visualisation-type spec dataset-id]
-  (spec-columns spec))
-
-
-(defmethod commons/spec-columns "area"
-  [visualisation-type spec dataset-id]
-  (spec-columns spec))
-

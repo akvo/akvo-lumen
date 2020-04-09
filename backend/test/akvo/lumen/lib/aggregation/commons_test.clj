@@ -206,12 +206,7 @@
                       ["pivot table" ["c1" "c2"]]]]
     (testing "columns* by clojure.spec"
       (is (= (mapv #(vector (:visualisationType %)
-                            (vec (sort (vec (commons/columns* ::s.visualisation/visualisation (walk/keywordize-keys %))))))
-                   data)
-             expectations)))
-    (testing "columns-spec by viz type defmethod"
-      (is (= (mapv #(vector (:visualisationType %)
-                            (vec (sort (commons/spec-columns (:visualisationType %) (walk/keywordize-keys (:spec %)) "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a"))))
+                            (vec (sort (vec (commons/spec-columns ::s.visualisation/visualisation (walk/keywordize-keys %))))))
                    data)
              expectations)))))
 
