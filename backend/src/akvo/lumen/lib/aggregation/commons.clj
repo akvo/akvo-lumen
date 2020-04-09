@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.aggregation.commons
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.spec.alpha :as s]
+            [akvo.lumen.specs.db.dataset-version.column :as s.column]
             [clojure.tools.logging :as log]))
 
 (defn run-query [tenant-conn sql]
@@ -34,7 +35,7 @@
         add-column-name (fn [column-name]
                           (when column-name
                             (swap! column-names conj column-name)))]
-    (binding [akvo.lumen.specs.db.dataset-version.column/*columnName?* add-column-name]
+    (binding [s.column/*columnName?* add-column-name]
       (assert (= "Success!\n" (s/explain-str spec data)) (s/explain-str spec data))
       (deref column-names))))
 
