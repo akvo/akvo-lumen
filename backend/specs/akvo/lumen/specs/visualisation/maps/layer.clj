@@ -30,7 +30,7 @@
 (s/def ::popup (s/coll-of ::popup-item :kind vector? :distinct true)) 
 
 (defn string-pos-int? [s] (try (pos-int? (Integer/parseInt s))
-                          (catch Exception e false)))
+                               (catch Exception e false)))
 
 (s/def ::pointSize  (s/with-gen
                       (s/or :s string-pos-int? :i pos-int?)

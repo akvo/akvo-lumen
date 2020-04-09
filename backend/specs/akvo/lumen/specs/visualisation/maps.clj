@@ -53,8 +53,8 @@
 (s/def ::layers (s/coll-of ::layer :kind vector? :distinct true))
 
 #_(s/fdef lib.vis.maps/create
-  :args (s/cat
-         :db-conn ::db.s/tenant-connection
-	 :windshaft-url string?
-	 :layers ::layers)
-  :ret any?)
+    :args (s/cat
+           :db-conn ::db.s/tenant-connection
+	         :windshaft-url string?
+	         :layers ::layers)
+    :ret any?)

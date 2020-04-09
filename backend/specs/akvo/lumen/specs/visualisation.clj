@@ -70,8 +70,8 @@
 
 (s/def ::donut.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::donut.s/spec (s/merge
-                     (s/keys :req-un [::donut.s/bucketColumn])
-                     ::base-spec))
+                       (s/keys :req-un [::donut.s/bucketColumn])
+                       ::base-spec))
 
 (defmethod vis "donut"  [_]
   (s/merge ::base-viz (s/keys :req-un [::donut.s/spec])))
@@ -80,8 +80,8 @@
 (alias 'polar.s 'akvo.lumen.specs.visualisation.polar)
 (s/def ::polar.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::polar.s/spec (s/merge
-                     (s/keys :req-un [::polar.s/bucketColumn])
-                     ::base-spec))
+                       (s/keys :req-un [::polar.s/bucketColumn])
+                       ::base-spec))
 
 (defmethod vis "polararea"  [_]
   (s/merge ::base-viz (s/keys :req-un [::polar.s/spec])))
@@ -233,15 +233,15 @@
   (s/merge ::base-viz (s/keys :req-un [::map.s/spec])) )
 
 #_(s/fdef visualisation/create
-  :args (s/cat
-         :db-conn ::db.s/tenant-connection
-	 :body ::visualisation
-	 :jwt-claims map?)
-  :ret any?)
+    :args (s/cat
+           :db-conn ::db.s/tenant-connection
+	         :body ::visualisation
+	         :jwt-claims map?)
+    :ret any?)
 
 #_(s/fdef visualisation/upsert
-  :args (s/cat
-         :db-conn ::db.s/tenant-connection
-	 :body ::visualisation
-	 :jwt-claims map?)
-  :ret any?)
+    :args (s/cat
+           :db-conn ::db.s/tenant-connection
+	         :body ::visualisation
+	         :jwt-claims map?)
+    :ret any?)
