@@ -69,14 +69,3 @@
        :common {:metadata {:type (:type column-label)
                            :sampled (= (count sql-response) max-points)}
                 :data (serie-data :label sql-response 4)}})))
-
-(defmethod commons/spec-columns "scatter"
-  [visualisation-type spec dataset-id]
-  (distinct (filter some? (flatten [(map :column (:filters spec))
-                                    (:metricColumnSize spec)
-                                    (:metricColumnX spec)
-                                    (:metricColumnY spec)
-                                    (:bucketColumnCategory spec)
-                                    (:datapointLabelColumn spec)
-                                    (:bucketColumn spec)]))))
-

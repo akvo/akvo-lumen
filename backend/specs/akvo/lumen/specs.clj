@@ -34,12 +34,13 @@
       (uuid? (read-string (format "#uuid \"%s\"" v)))
       (catch Throwable t false))))
 
+(def str-uuid-gen #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100))))
+
 (s/def ::str-uuid
   (s/with-gen
     str-uuid?
-    #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100)))))
+    str-uuid-gen))
 
-(def str-uuid-gen #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100))))
 (def sort? #{"ASC" "DESC"})
 (s/def ::sort sort?)
 
