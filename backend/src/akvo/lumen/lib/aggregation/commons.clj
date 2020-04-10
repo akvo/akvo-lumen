@@ -36,5 +36,12 @@
                           (when column-name
                             (swap! column-names conj column-name)))]
     (binding [s.column/*columnName?* add-column-name]
-      (assert (= "Success!\n" (s/explain-str spec data)) (s/explain-str spec data))
-      (deref column-names))))
+      (let [explain-str (s/explain-str spec data)]
+        (if-not (= "Success!\n" explain-str)
+          (let [ex (ex-info
+                    (format "We can't derive visualisation related columns thus it doesn't conform spec. (Id: %s)" (:id data))
+                    {:data data
+                     :spec-message explain-str})]
+            (log/error ex)
+            (throw ex))
+          (deref column-names))))))
