@@ -247,10 +247,11 @@ class Dashboard extends Component {
       const libraryDashboard = library.dashboards[dashboardId];
       if (!isLibraryDashboardLoaded(library, dashboardId)
           || !libraryDashboard.aggregated) {
+        const q = query && query.query ? JSON.parse(query.query) : {};
         dispatch(actions.fetchDashboard(dashboardId,
-          { filter: (query && query.filter)
+          { filter: (q && q.filter)
             || ((libraryDashboard && libraryDashboard.filter) || {}) },
-          Boolean(query && query.filter),
+          Boolean(q && q.filter),
           (dash) => {
             if (dash.filter.datasetId) {
               dispatch(fetchDataset(dash.filter.datasetId, true, datasetCallback(dash)));
