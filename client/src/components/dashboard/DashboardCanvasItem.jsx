@@ -52,7 +52,8 @@ const getIsDatasetLoaded = (props) => {
   }
 };
 
-export default function DashboardCanvasItem(props) {
+// eslint-disable-next-line no-unused-vars
+const DashboardCanvasItem = React.forwardRef((props, ref) => {
   const el = useRef(null);
   const titleEl = useRef(null);
   const getRenderDimensions = () => {
@@ -70,6 +71,7 @@ export default function DashboardCanvasItem(props) {
   };
 
   const getSubTitle = () => {
+    // eslint-disable-next-line react/prop-types
     const { item, datasets } = props;
     const lastUpdated = getDataLastUpdated({ datasets, visualisation: item.visualisation });
     return lastUpdated ? (
@@ -170,7 +172,7 @@ export default function DashboardCanvasItem(props) {
       </button>
     </div>
   );
-}
+});
 
 DashboardCanvasItem.propTypes = {
   canvasLayout: PropTypes.array.isRequired,
@@ -188,3 +190,5 @@ DashboardCanvasItem.propTypes = {
   exporting: PropTypes.bool,
   intl: intlShape,
 };
+
+export default DashboardCanvasItem;
