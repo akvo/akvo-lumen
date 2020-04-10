@@ -57,7 +57,7 @@
 
 (create-ns  'akvo.lumen.specs.visualisation.pie)
 (alias 'pie.s 'akvo.lumen.specs.visualisation.pie)
-(s/def ::pie.s/bucketColumn ::db.dsv.column.s/columnName)
+(s/def ::pie.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::pie.s/spec (s/merge
                      (s/keys :req-un [::pie.s/bucketColumn])
                      ::base-spec))
@@ -152,12 +152,12 @@
 
 (s/def ::bubble.s/spec (s/merge ::base-spec
                                 (s/keys :req-un [::metricLabelFromUser
-                                                 ::bucketLabel
                                                  ::aggregation.s/metricAggregation
-                                                 ::bucketColumn
                                                  ::metricLabel
                                                  ::metricColumn
-                                                 ::truncateSize])))
+                                                 ::truncateSize]
+                                        :opt-un [::bucketColumn
+                                                 ::bucketLabel])))
 
 (defmethod vis "bubble"  [_]
   (s/merge ::base-viz (s/keys :req-un [::bubble.s/spec])))
