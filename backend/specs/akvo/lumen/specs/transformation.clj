@@ -179,10 +179,11 @@
 (alias 'transformation.merge-datasets.target 'akvo.lumen.specs.transformation.merge-datasets.target)
 
 (s/def ::transformation.merge-datasets.source/datasetId ::db.dsv.s/dataset-id)
-(s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable columnName?))
+(s/def ::transformation.merge-datasets.source/aggregationColumn (s/nilable ::db.dsv.column.s/columnName))
 
 (s/def ::transformation.merge-datasets.source/aggregationDirection lumen.s/sort?)
-(s/def ::transformation.merge-datasets.source/mergeColumn columnName?)
+(s/def ::transformation.merge-datasets.source/mergeColumn ::db.dsv.column.s/columnName)
+
 (s/def ::transformation.merge-datasets.source/mergeColumns (s/coll-of ::db.dsv.column.s/columnName :kind vector? :distinct true))
 
 (s/def ::transformation.merge-datasets/source (s/keys

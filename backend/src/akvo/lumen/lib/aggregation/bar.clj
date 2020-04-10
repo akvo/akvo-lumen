@@ -180,11 +180,3 @@
              (subbucket-column-response sql-response bucket-column)
              (bucket-column-response sql-response bucket-column metric-y-column))))))
     (lib/ok (bucket-column-response nil nil nil))))
-
-(defmethod commons/spec-columns "bar"
-  [visualisation-type spec dataset-id]
-  (distinct (filter some? (flatten [(map :column (:filters spec))
-                                    (:metricColumnsY spec)
-                                    (:metricColumnY spec)
-                                    (:bucketColumn spec)
-                                    (:subBucketColumn spec)]))))
