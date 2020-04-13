@@ -234,6 +234,7 @@ PopupContent.propTypes = {
 
 const MapVisualisation = (props) => {
   const [hasRendered, setHasRendered] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [hasTrackedLayerTypes, setHasTrackedLayerTypes] = useState(false);
   const hasAddedLayers = useRef(false);
   const leafletMapNode = useRef(null);
@@ -331,7 +332,6 @@ const MapVisualisation = (props) => {
   };
 
   const renderLeafletMap = (nodeEl, { visualisation, metadata, width, height, exporting }) => {
-
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
     // Windshaft map
@@ -452,16 +452,16 @@ const MapVisualisation = (props) => {
   }, [leafletMapNode, props]);
 
   useEffect(() => {
-    if(!hasTrackedLayerTypes){
+    if (!hasTrackedLayerTypes) {
       const newSpec = props.visualisation.spec || {};
       if (get(newSpec, 'layers.length')) {
         newSpec.layers.forEach(({ layerType }) => {
           trackEvent(RENDER_MAP_LAYER_TYPE, layerType || 'raster');
         });
       }
-    }   
+    }
   }, [hasTrackedLayerTypes]);
-  
+
   useEffect(() => {
     if (!hasAddedLayers.current) {
       const loadInterval = setInterval(() => {
