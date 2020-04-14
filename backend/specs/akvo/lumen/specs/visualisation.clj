@@ -171,9 +171,9 @@
 (s/def ::rowColumn (s/nilable ::db.dsv.column.s/columnName))
 
 (defn str-nat-int? [v]
-  (when (some? v)
+  (when (and (some? v) (string? v))
     (try
-      (nat-int? (read-string v))
+      (nat-int? (Integer. v))
       (catch Throwable t false))))
 
 (s/def ::decimalPlaces (s/or :str-nat-int str-nat-int? :nat-int nat-int? :empty #(= % "") :nil nil?))
