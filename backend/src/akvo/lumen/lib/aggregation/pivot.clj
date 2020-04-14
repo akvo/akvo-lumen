@@ -130,12 +130,3 @@
     (lib/ok (merge (apply-query tenant-conn table-name query filter-str)
                    {:metadata
                     {:categoryColumnTitle (get-in query [:category-column :title])}}))))
-
-
-(defmethod commons/spec-columns "pivot table"
-  [visualisation-type spec dataset-id]
-  (distinct (filter some? (flatten [(map :column (:filters spec))
-                                    (:categoryColumn spec)
-                                    (:rowColumn spec)
-                                    (:valueColumn spec)]))))
-

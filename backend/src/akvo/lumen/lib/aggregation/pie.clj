@@ -32,20 +32,3 @@
                                :label bucket-value})
                             counts)
                  :metadata {:type (:type bucket-column)}}}))))
-
-(defn- spec-columns [spec]
-  (distinct (filter some? (flatten [(map :column (:filters spec))
-                                    (:bucketColumn spec)]))))
-
-(defmethod commons/spec-columns "pie"
-  [visualisation-type spec dataset-id]
-  (spec-columns spec))
-
-(defmethod commons/spec-columns "polararea"
-  [visualisation-type spec dataset-id]
-  (spec-columns spec))
-
-(defmethod commons/spec-columns "donut"
-  [visualisation-type spec dataset-id]
-  (spec-columns spec))
-

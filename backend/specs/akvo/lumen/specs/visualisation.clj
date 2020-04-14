@@ -39,27 +39,52 @@
 (s/def ::showLegend (s/nilable boolean?))
 (s/def ::showLabels (s/nilable boolean?))
 (s/def ::legendPosition (s/nilable #{"right" "top" "left" "bottom"}))
-(s/def ::legendTitle string?)
+(s/def ::legendTitle (s/nilable string?))
 
 (defmulti vis :visualisationType)
 
 (s/def ::visualisation
   (s/multi-spec vis :visualisationType))
-(s/def ::visualisations (s/coll-of ::visualisation :distinct true))
-(create-ns  'akvo.lumen.specs.visualisation.pie)
-(alias 'pie.s 'akvo.lumen.specs.visualisation.pie)
 
-(s/def ::base-spec (s/keys :req-un [::version ::sort ::showLegend ::legendTitle ::showLabels ::legendPosition]))
+(s/def ::visualisations (s/coll-of ::visualisation :distinct true))
+
+(s/def ::base-spec (s/keys :req-un [::version]
+                           :opt-un [::postgres.filter/filters ::legendTitle ::showLegend ::sort
+                                    ::showLabels ::legendPosition]))
 
 (s/def ::base-viz (s/keys :req-un [::name ::visualisationType ::datasetId]
                           :opt-un [::created ::modified ::id ::type]))
 
+(create-ns  'akvo.lumen.specs.visualisation.pie)
+(alias 'pie.s 'akvo.lumen.specs.visualisation.pie)
+(s/def ::pie.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::pie.s/spec (s/merge
-                     (s/keys :req-un [::postgres.filter/filters ::aggregation.pie/bucketColumn])
+                     (s/keys :req-un [::pie.s/bucketColumn])
                      ::base-spec))
 
 (defmethod vis "pie"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::pie.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::pie.s/spec])))
+
+(create-ns  'akvo.lumen.specs.visualisation.donut)
+(alias 'donut.s 'akvo.lumen.specs.visualisation.donut)
+
+(s/def ::donut.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::donut.s/spec (s/merge
+                       (s/keys :req-un [::donut.s/bucketColumn])
+                       ::base-spec))
+
+(defmethod vis "donut"  [_]
+  (s/merge ::base-viz (s/keys :req-un [::donut.s/spec])))
+
+(create-ns  'akvo.lumen.specs.visualisation.polar)
+(alias 'polar.s 'akvo.lumen.specs.visualisation.polar)
+(s/def ::polar.s/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::polar.s/spec (s/merge
+                       (s/keys :req-un [::polar.s/bucketColumn])
+                       ::base-spec))
+
+(defmethod vis "polararea"  [_]
+  (s/merge ::base-viz (s/keys :req-un [::polar.s/spec])))
 
 (create-ns  'akvo.lumen.specs.visualisation.area)
 (alias 'area.s 'akvo.lumen.specs.visualisation.area)
@@ -68,63 +93,163 @@
 (s/def ::axisLabelX (s/nilable string?))
 (s/def ::axisLabelYFromUser boolean?)
 (s/def ::axisLabelY (s/nilable string?))
-(s/def ::metricColumnX ::db.dsv.column.s/columnName)
-(s/def ::metricColumnY ::db.dsv.column.s/columnName)
+(s/def ::area.s/metricColumnX (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::area.s/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::bucketColumn (s/nilable ::db.dsv.column.s/columnName))
-
-(s/def ::area.s/spec (s/merge (s/keys :req-un [::postgres.filter/filters])
-                              ::base-spec
-                              (s/keys :req-un [::metricColumnY ::metricColumnX ::bucketColumn ::aggregation/metricAggregation
+(s/def ::area.s/metricAggregation (s/nilable ::aggregation.s/metricAggregation))
+(s/def ::area.s/spec (s/merge ::base-spec
+                              (s/keys :req-un [::area.s/metricColumnY ::area.s/metricColumnX
+                                               ::area.s/metricAggregation
                                                ::axisLabelXFromUser ::axisLabelX
-                                               ::axisLabelYFromUser ::axisLabelY])
-                              ))
-
-(s/form ::aggregation.bar/query)
+                                               ::axisLabelYFromUser ::axisLabelY])))
 
 (defmethod vis "area"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
-
-(defmethod vis "bar"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::area.s/spec])))
 
 (defmethod vis "line"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::area.s/spec])))
 
-(defmethod vis "polararea"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+(create-ns  'akvo.lumen.specs.visualisation.scatter)
+(alias 'scatter.s 'akvo.lumen.specs.visualisation.scatter)
 
-(defmethod vis "donut"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+(s/def ::bucketColumnCategory (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::datapointLabelColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::metricColumnSize (s/nilable ::db.dsv.column.s/columnName))
 
-(defmethod vis "pivot table"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+
+(s/def ::categoryLabel (s/nilable string?))
+(s/def ::sizeLabel (s/nilable string?))
+(s/def ::categoryLabelFromUser (s/nilable boolean?))
+(s/def ::sizeLabelFromUser boolean?)
+(s/def ::scatter.s/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::scatter.s/metricColumnX (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::scatter.s/metricAggregation (s/nilable ::aggregation.s/metricAggregation))
+(s/def ::scatter.s/spec (s/merge ::base-spec
+                                 (s/keys :req-un [::datapointLabelColumn
+                                                  ::scatter.s/metricColumnY ::scatter.s/metricColumnX
+                                                  ::bucketColumn
+                                                  ::scatter.s/metricAggregation
+                                                  ::axisLabelXFromUser ::axisLabelX
+                                                  ::axisLabelYFromUser ::axisLabelY
+                                                  ]
+                                         :opt-un [::metricColumnSize
+                                                  ::bucketColumnCategory
+                                                  ::sizeLabelFromUser
+                                                  ::categoryLabelFromUser
+                                                  ::categoryLabel
+                                                  ::sizeLabel])))
 
 (defmethod vis "scatter"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::scatter.s/spec])))
+
+(create-ns  'akvo.lumen.specs.visualisation.bubble)
+(alias 'bubble.s 'akvo.lumen.specs.visualisation.bubble)
+
+(s/def ::metricLabelFromUser boolean?)
+(s/def ::bucketLabel (s/nilable string?))
+(s/def ::metricLabel (s/nilable string?))
+(s/def ::metricColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::truncateSize (s/nilable string?))
+
+(s/def ::bubble.s/spec (s/merge ::base-spec
+                                (s/keys :req-un [::metricLabelFromUser
+                                                 ::aggregation.s/metricAggregation
+                                                 ::metricLabel
+                                                 ::metricColumn
+                                                 ::truncateSize]
+                                        :opt-un [::bucketColumn
+                                                 ::bucketLabel])))
 
 (defmethod vis "bubble"  [_]
-  (s/merge ::base-viz #_(s/keys :req-un [::area.s/spec])))
+  (s/merge ::base-viz (s/keys :req-un [::bubble.s/spec])))
+
+(create-ns  'akvo.lumen.specs.visualisation.pivot)
+(alias 'pivot.s 'akvo.lumen.specs.visualisation.pivot)
+
+(s/def ::hideColumnTotals boolean?)
+(s/def ::hideRowTotals boolean?)
+(s/def ::rowColumn (s/nilable ::db.dsv.column.s/columnName))
+
+(defn str-nat-int? [v]
+  (when (some? v)
+    (try
+      (nat-int? (read-string v))
+      (catch Throwable t false))))
+
+(s/def ::decimalPlaces (s/or :str-nat-int str-nat-int? :nat-int nat-int? :empty #(= % "") :nil nil?))
+(s/def ::rowTitle (s/nilable string?))
+(s/def ::valueDisplay (s/nilable string?))
+(s/def ::pivot.s/aggregation ::aggregation.s/metricAggregation)
+(s/def ::valueColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::categoryColumn (s/nilable ::db.dsv.column.s/columnName))
+
+(s/def ::categoryTitle (s/nilable string?))
+(s/def ::pivot.s/spec (s/merge ::base-spec
+                               (s/keys :req-un [::rowColumn
+                                                ::decimalPlaces
+                                                ::rowTitle
+                                                ::pivot.s/aggregation
+                                                ::valueColumn
+                                                ::valueDisplay
+                                                ::categoryColumn
+                                                ::categoryTitle]
+                                       :opt-un [::hideColumnTotals
+                                                ::hideRowTotals])))
+
+(defmethod vis "pivot table"  [_]
+  (s/merge ::base-viz (s/keys :req-un [::pivot.s/spec])))
+
+(create-ns  'akvo.lumen.specs.visualisation.bar)
+(alias 'bar.s 'akvo.lumen.specs.visualisation.bar)
+(s/def ::subBucketColumn (s/nilable ::db.dsv.column.s/columnName))
+
+(s/def ::metricColumnsY (s/coll-of ::db.dsv.column.s/columnName :distinct true))
+(s/def ::bar.s/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::bar.s/metricColumnX (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::horizontal boolean?)
+(s/def ::showValueLabels boolean?)
+
+(s/def ::subBucketMethod #{"split" "stack" "stack_percentage"})
+(s/def ::bar.s/spec (s/merge ::base-spec
+                             (s/keys :req-un [::subBucketColumn
+                                              ::aggregation.s/metricAggregation
+                                              ::axisLabelXFromUser ::axisLabelX
+                                              ::axisLabelYFromUser ::axisLabelY
+                                              ::bar.s/metricColumnX
+                                              ::bar.s/metricColumnY
+                                              ::bucketColumn
+                                              ::subBucketMethod
+                                              ::truncateSize]
+                                     :opt-un [::showValueLabels
+                                              ::metricColumnsY
+                                              ::horizontal]
+                                     )))
+
+(defmethod vis "bar"  [_]
+  (s/merge ::base-viz (s/keys :req-un [::bar.s/spec])))
+
 
 (create-ns  'akvo.lumen.specs.visualisation.map)
 (alias 'map.s 'akvo.lumen.specs.visualisation.map)
 
 (s/def ::map.s/baseLayer #{"street" "satellite" "terrain"})
 
-(s/def ::map.s/spec (s/keys :req-un [::version ::map.s/baseLayer ::visualisation.maps.s/layers]))
+(s/def ::map.s/spec
+  (s/keys :req-un [::version ::map.s/baseLayer ::visualisation.maps.s/layers]))
 
 (defmethod vis "map"  [_]
   (s/merge ::base-viz (s/keys :req-un [::map.s/spec])) )
 
 #_(s/fdef visualisation/create
-  :args (s/cat
-         :db-conn ::db.s/tenant-connection
-	 :body ::visualisation
-	 :jwt-claims map?)
-  :ret any?)
+    :args (s/cat
+           :db-conn ::db.s/tenant-connection
+	         :body ::visualisation
+	         :jwt-claims map?)
+    :ret any?)
 
 #_(s/fdef visualisation/upsert
-  :args (s/cat
-         :db-conn ::db.s/tenant-connection
-	 :body ::visualisation
-	 :jwt-claims map?)
-  :ret any?)
+    :args (s/cat
+           :db-conn ::db.s/tenant-connection
+	         :body ::visualisation
+	         :jwt-claims map?)
+    :ret any?)
