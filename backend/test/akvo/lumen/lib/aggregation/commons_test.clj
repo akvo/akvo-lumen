@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.aggregation.commons-test
   (:require [akvo.lumen.lib.aggregation.commons :as commons]
+            [akvo.lumen.specs.visualisation :as s.visualisation]
+            [akvo.lumen.specs]
             [clojure.walk :as walk]
             [clojure.test :refer :all]))
 
@@ -187,19 +189,24 @@
            "version" 1,
            "valueDisplay" "default",
            "categoryColumn" "c2",
-           "categoryTitle" nil}}]]
-    (testing "columns-spec by viz type defmethod"
+           "categoryTitle" nil}}]
+        data (map (partial merge {:datasetId "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a"
+                              :name "name"
+                              :created 1586172976186
+                                  :modified 1586250225831}) data)
+        expectations [["map" ["c1" "c2" "c3" "c4" "c5" "f1" "f2" "ff1" "ff2" "p1" "p2" "pp1" "pp2"]]
+                      ["scatter" ["c1" "c2" "c3" "c4" "c5" "c6"]]
+                      ["bar" ["c1" "c2" "c3" "f1" "f2"]]
+                      ["bubble" ["c1" "c2"]]
+                      ["donut" ["c1"]]
+                      ["polararea" ["c1"]]
+                      ["area" ["c1" "c2"]]
+                      ["line" ["c1" "c2"]]
+                      ["pie" ["c1"]]
+                      ["pivot table" ["c1" "c2"]]]]
+    (testing "columns* by clojure.spec"
       (is (= (mapv #(vector (:visualisationType %)
-                            (vec (sort (commons/spec-columns (:visualisationType %) (walk/keywordize-keys (:spec %)) "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a"))))
+                            (vec (sort (vec (commons/spec-columns ::s.visualisation/visualisation (walk/keywordize-keys %))))))
                    data)
-             [["map" ["c1" "c2" "c3" "c4" "c5" "f1" "f2" "ff1" "ff2" "p1" "p2" "pp1" "pp2"]]
-              ["scatter" ["c1" "c2" "c3" "c4" "c5" "c6"]]
-              ["bar" ["c1" "c2" "c3" "f1" "f2"]]
-              ["bubble" ["c1" "c2"]]
-              ["donut" ["c1"]]
-              ["polararea" ["c1"]]
-              ["area" ["c1" "c2"]]
-              ["line" ["c1" "c2"]]
-              ["pie" ["c1"]]
-              ["pivot table" ["c1" "c2"]]])))))
+             expectations)))))
 

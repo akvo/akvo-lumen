@@ -18,7 +18,7 @@
 
 (s/def ::layerType #{"geo-location" "geo-shape" "raster"})
 
-(s/def ::aggregationMethod #{"avg"})
+(s/def ::aggregationMethod #{"avg" "count" "sum" "max" "min"})
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.popup)
 (alias 'layer.popup.s 'akvo.lumen.specs.visualisation.maps.layer.popup)
@@ -30,7 +30,7 @@
 (s/def ::popup (s/coll-of ::popup-item :kind vector? :distinct true)) 
 
 (defn string-pos-int? [s] (try (pos-int? (Integer/parseInt s))
-                          (catch Exception e false)))
+                               (catch Exception e false)))
 
 (s/def ::pointSize  (s/with-gen
                       (s/or :s string-pos-int? :i pos-int?)
@@ -42,7 +42,7 @@
 
 (s/def ::layer.point-color-mapping.s/op #{"equals"})
 
-(s/def ::layer.point-color-mapping.s/value (s/or :d double? :s string?))
+(s/def ::layer.point-color-mapping.s/value (s/nilable (s/or :d number? :s string?)))
 
 (defn valid-hex? [s] (try
                        (Color/decode s)
@@ -77,17 +77,25 @@
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.raster)
 (alias 'layer.raster.s 'akvo.lumen.specs.visualisation.maps.layer.raster)
 
-(s/def ::layer.raster.s/datasetId nil?)
+(s/def ::layer.raster.s/datasetId (s/nilable ::datasetId))
 
-(s/def ::layer.raster.s/rasterId ::rasterId)
+(s/def ::layer.raster.s/rasterId (s/nilable ::rasterId))
 
-(s/def ::layer.raster.s/geom nil?)
+(s/def ::layer.raster.s/geom (s/nilable ::db.dsv.column.s/columnName))
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-location)
 (alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
 
-(s/def ::layer.geo-location.s/datasetId ::datasetId)
+(s/def ::layer.geo-location.s/datasetId (s/nilable ::datasetId))
 
 (s/def ::layer.geo-location.s/rasterId nil?)
 
-(s/def ::layer.geo-location.s/geom string?)  ;; todo derivation columnName
+(s/def ::layer.geo-location.s/geom (s/nilable ::db.dsv.column.s/columnName))
+
+
+(create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-shape)
+(alias 'layer.geo-shape.s 'akvo.lumen.specs.visualisation.maps.layer.geo-shape)
+
+
+(s/def ::layer.geo-shape.s/aggregationGeomColumn (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::layer.geo-shape.s/aggregationColumn (s/nilable ::db.dsv.column.s/columnName))
