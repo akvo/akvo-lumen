@@ -18,7 +18,7 @@
 
 (s/def ::layerType #{"geo-location" "geo-shape" "raster"})
 
-(s/def ::aggregationMethod #{"avg"})
+(s/def ::aggregationMethod #{"avg" "count" "sum" "max" "min"})
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.popup)
 (alias 'layer.popup.s 'akvo.lumen.specs.visualisation.maps.layer.popup)
@@ -79,9 +79,9 @@
 
 (s/def ::layer.raster.s/datasetId (s/nilable ::datasetId))
 
-(s/def ::layer.raster.s/rasterId ::rasterId)
+(s/def ::layer.raster.s/rasterId (s/nilable ::rasterId))
 
-(s/def ::layer.raster.s/geom nil?)
+(s/def ::layer.raster.s/geom (s/nilable ::db.dsv.column.s/columnName))
 
 (create-ns  'akvo.lumen.specs.visualisation.maps.layer.geo-location)
 (alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
@@ -97,5 +97,5 @@
 (alias 'layer.geo-shape.s 'akvo.lumen.specs.visualisation.maps.layer.geo-shape)
 
 
-(s/def ::layer.geo-shape.s/aggregationGeomColumn ::db.dsv.column.s/columnName)
+(s/def ::layer.geo-shape.s/aggregationGeomColumn (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::layer.geo-shape.s/aggregationColumn (s/nilable ::db.dsv.column.s/columnName))

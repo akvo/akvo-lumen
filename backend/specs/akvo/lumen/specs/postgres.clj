@@ -5,9 +5,9 @@
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column]
             [clojure.spec.alpha :as s]))
 
-(s/def ::postgres.filter/strategy #{"isHigher" "isLower" "is" "isEmpty"})
+(s/def ::postgres.filter/strategy (s/nilable #{"isHigher" "isLower" "is" "isEmpty"}))
 
-(s/def ::postgres.filter/operation #{"keep"  "remove"})
+(s/def ::postgres.filter/operation (s/nilable #{"keep"  "remove"}))
 
 (s/def ::postgres.filter/aggregation #{"mean" "sum" "min" "max" "count"})
 

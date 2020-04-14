@@ -119,15 +119,16 @@
 
 (s/def ::categoryLabel (s/nilable string?))
 (s/def ::sizeLabel (s/nilable string?))
-(s/def ::categoryLabelFromUser (s/nilable string?))
+(s/def ::categoryLabelFromUser (s/nilable boolean?))
 (s/def ::sizeLabelFromUser boolean?)
 (s/def ::scatter.s/metricColumnY (s/nilable ::db.dsv.column.s/columnName))
 (s/def ::scatter.s/metricColumnX (s/nilable ::db.dsv.column.s/columnName))
+(s/def ::scatter.s/metricAggregation (s/nilable ::aggregation.s/metricAggregation))
 (s/def ::scatter.s/spec (s/merge ::base-spec
                                  (s/keys :req-un [::datapointLabelColumn
                                                   ::scatter.s/metricColumnY ::scatter.s/metricColumnX
                                                   ::bucketColumn
-                                                  ::aggregation.s/metricAggregation
+                                                  ::scatter.s/metricAggregation
                                                   ::axisLabelXFromUser ::axisLabelX
                                                   ::axisLabelYFromUser ::axisLabelY
                                                   ]
@@ -168,7 +169,14 @@
 (s/def ::hideColumnTotals boolean?)
 (s/def ::hideRowTotals boolean?)
 (s/def ::rowColumn (s/nilable ::db.dsv.column.s/columnName))
-(s/def ::decimalPlaces pos-int?)
+
+(defn str-nat-int? [v]
+  (when (some? v)
+    (try
+      (nat-int? (read-string v))
+      (catch Throwable t false))))
+
+(s/def ::decimalPlaces (s/or :str-nat-int str-nat-int? :nat-int nat-int? :empty #(= % "") :nil nil?))
 (s/def ::rowTitle (s/nilable string?))
 (s/def ::valueDisplay (s/nilable string?))
 (s/def ::pivot.s/aggregation ::aggregation.s/metricAggregation)

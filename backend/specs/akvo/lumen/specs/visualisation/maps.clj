@@ -32,9 +32,9 @@
 
 (defmethod layer-type "geo-location" [_]
   (s/merge ::layer-commons
-           (s/keys :req-un [::layer.geo-location.s/datasetId
-                            ::layer.geo-location.s/geom]
-                   :opt-un [::layer.geo-location.s/rasterId])))
+           (s/keys :req-un [::layer.geo-location.s/datasetId]
+                   :opt-un [::layer.geo-location.s/rasterId
+                            ::layer.geo-location.s/geom])))
 
 (defmethod layer-type "raster" [_]
   (s/merge ::layer-commons
@@ -45,10 +45,11 @@
 (defmethod layer-type "geo-shape" [_]
   (s/merge ::layer-commons
            (s/keys :req-un [::layer.geo-location.s/datasetId
-                            ::layer.geo-location.s/rasterId
+
                             ::layer.geo-location.s/geom]
                    :opt-un [::layer.geo-shape.s/aggregationGeomColumn
-                            ::layer.geo-shape.s/aggregationColumn])))
+                            ::layer.geo-shape.s/aggregationColumn
+                            ::layer.geo-location.s/rasterId])))
 
 (s/def ::layer (s/multi-spec layer-type :layerType))
 (s/def ::layers (s/coll-of ::layer :kind vector? :distinct true))
