@@ -11,8 +11,12 @@
 
 (s/def ::direction (s/nilable string?))
 
-(def columnName? string?)
+(def ^:dynamic *columnName?* string?)
 
-(s/def ::columnName columnName?) ;; TODO improve with gen tuple
+(s/def ::columnName? #'*columnName?*)
+(def column-name-gen #(s/gen (reduce (fn [c i] (conj c (str "c_" i))) #{} (range 100))))
+(s/def ::columnName (s/with-gen
+                      ::columnName?
+                      column-name-gen)) ;; TODO improve with gen tuple
 
 (s/def ::id (s/nilable keyword?))
