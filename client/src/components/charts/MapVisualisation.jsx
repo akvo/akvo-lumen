@@ -274,10 +274,9 @@ const MapVisualisation = (props) => {
     );
     const popupChanged = Boolean(!popups.current[id].current ||
       !isEqual(popup, popups.current[id].current)) || aggregationChanged;
-    const needToAddOrUpdate =
-      havePopupData && (popupChanged || filtersChanged);
-    const windshaftAvailable = Boolean(layerGroupId);
-    const canUpdate = windshaftAvailable || needToRemovePopup;
+    const needToAddOrUpdate = havePopupData && (popupChanged || filtersChanged);
+
+    const canUpdate = Boolean(layerGroupId) || needToRemovePopup;
 
     if ((needToAddOrUpdate || needToRemovePopup) && canUpdate) {
       if (haveUtfGrid) {
@@ -346,7 +345,7 @@ const MapVisualisation = (props) => {
     /* General map stuff - not layer specific */
     if (!storedBaseLayer.current) {
       // Do the same thing for the baselayer
-      storedBaseLayer.current = cloneDeep(props.visualisation.spec.baseLayer);
+      storedBaseLayer.current = cloneDeep(visualisation.spec.baseLayer);
     }
 
 
