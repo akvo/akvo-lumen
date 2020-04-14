@@ -204,7 +204,7 @@
             (db.transformation/touch-dataset tenant-conn {:id dataset-id})
             (db.transformation/drop-table tenant-conn {:table-name previous-table-name})
             (lib/created next-dataset-version)))
-        (let [transformation (first transformations)
+        (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [success? message columns execution-log] :as transformation-result}
               (try-apply-operation deps table-name columns transformation)]
           (if success?
