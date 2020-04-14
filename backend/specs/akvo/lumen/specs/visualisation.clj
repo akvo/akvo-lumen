@@ -173,7 +173,7 @@
 (defn str-nat-int? [v]
   (when (and (some? v) (string? v))
     (try
-      (nat-int? (Integer. v))
+      (nat-int? (Integer/valueOf v))
       (catch Throwable t false))))
 
 (s/def ::decimalPlaces (s/or :str-nat-int str-nat-int? :nat-int nat-int? :empty #(= % "") :nil nil?))
