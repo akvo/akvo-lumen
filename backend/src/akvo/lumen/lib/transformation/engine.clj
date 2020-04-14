@@ -213,7 +213,7 @@
               (log/info (str "Unsuccessful undo of dataset: " dataset-id))
               (log/debug message)
               (log/debug "Job executionid: " job-execution-id)
-              (throw (ex-info (str "Failed to undo transformation index:" tx-index) {:transformation-result transformation-result
+              (throw (ex-info (str "Failed to undo transformation index:" tx-index ". Tx message:" message) {:transformation-result transformation-result
                                                                                      :transformation transformation})))))))))
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
