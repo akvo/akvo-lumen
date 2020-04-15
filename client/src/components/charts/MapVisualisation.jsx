@@ -226,6 +226,12 @@ const PopupContent = ({ data, singleMetadata, onImageLoad }) => {
   );
 };
 
+const initMap = (node, xCenter, xZoom, zoomControl) => {
+  const m = L.map(node, { zoomControl }).setView(xCenter, xZoom);
+  m.scrollWheelZoom.disable();
+  return m;
+};
+
 PopupContent.propTypes = {
   data: PropTypes.object.isRequired,
   onImageLoad: PropTypes.func.isRequired,
@@ -234,15 +240,15 @@ PopupContent.propTypes = {
 
 const MapVisualisation = (props) => {
   const [hasRendered, setHasRendered] = useState(false);
-  // eslint-disable-next-line no-unused-vars
-  const [hasTrackedLayerTypes, setHasTrackedLayerTypes] = useState(false);
-  const hasAddedLayers = useRef(false);
   const leafletMapNode = useRef(null);
+
   const storedBaseLayer = useRef(null);
+  const baseLayer = useRef(null);
+
   const dataLayer = useRef(null);
   const storedBoundingBox = useRef(null);
   const storedLayerGroupId = useRef(null);
-  const baseLayer = useRef(null);
+
   const oldHeight = useRef(null);
   const oldWidth = useRef(null);
   const mapp = useRef(null);
@@ -251,8 +257,11 @@ const MapVisualisation = (props) => {
   const popups = useRef(null);
 
   const popupElement = useRef(null);
+  const baseURL = '/maps/layergroup';
 
-  const renderLeafletLayer = (layer, id, layerGroupId, layerMetadata, baseURL, map) => {
+  
+  const renderLeafletLayer = (layer, id, metadata, map) => {
+    const { layerGroupId, layerMetadata } = metadata;
     if (!storedSpecs.current[id].current) {
       // Store a copy of the layer spec to compare to future changes so we know when to re-render
       storedSpecs.current[id].current = cloneDeep(layer);
@@ -330,30 +339,25 @@ const MapVisualisation = (props) => {
     }
   };
 
-  const renderLeafletMap = (nodeEl, { visualisation, metadata, width, height, exporting }) => {
+  const
+  renderLeafletMap = (nodeEl, propss) => {
+    const { visualisation, metadata, width, height, exporting } = propss;
     const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
 
     // Windshaft map
     // const tenantDB = visualisation.tenantDB;
-    const baseURL = '/maps/layergroup';
-    const layerGroupId = metadata.layerGroupId;
-    const xCenter = [0, 0];
-    const xZoom = 2;
 
-    const node = nodeEl;
+    const layerGroupId = metadata.layerGroupId;
 
     /* General map stuff - not layer specific */
     if (!storedBaseLayer.current) {
       // Do the same thing for the baselayer
       storedBaseLayer.current = cloneDeep(visualisation.spec.baseLayer);
     }
-
-
+    
     if (!mapp.current) {
-      mapp.current = L.map(node, { zoomControl: !exporting }).setView(xCenter, xZoom);
-      mapp.current.scrollWheelZoom.disable();
+      mapp.current = initMap(nodeEl, [0, 0], 2, !exporting);
     }
-
 
     const haveDimensions = Boolean(oldHeight.current && oldWidth.current);
     const dimensionsChanged = Boolean(height !== oldHeight.current || width !== oldWidth.current);
@@ -431,59 +435,57 @@ const MapVisualisation = (props) => {
       }
     }
 
-    if (layerGroupId !== storedLayerGroupId.current) {
-      visualisation.spec.layers.forEach((layer, idx) => {
+    // Add layers
+    if (propss.metadata.layerGroupId !== storedLayerGroupId.current) {
+      propss.visualisation.spec.layers.forEach((layer, idx) => {
         renderLeafletLayer(
-          layer, idx, layerGroupId, metadata.layerMetadata, baseURL, mapp.current
+          layer, idx, propss.metadata, mapp.current
         );
       });
     }
-    storedLayerGroupId.current = layerGroupId;
+    storedLayerGroupId.current = propss.metadata.layerGroupId;
   };
 
+  // run every time leafletMapNode or props changes
   useEffect(() => {
     const specLayers = props.visualisation.spec.layers;
     storedSpecs.current = specLayers.map(() => createRef());
     utfGrids.current = specLayers.map(() => createRef());
     popups.current = specLayers.map(() => createRef());
-    hasAddedLayers.current = false;
     renderLeafletMap(leafletMapNode.current, props);
   }, [leafletMapNode, props]);
 
+  // run only on mount
   useEffect(() => {
-    if (!hasTrackedLayerTypes) {
-      const newSpec = props.visualisation.spec || {};
-      if (get(newSpec, 'layers.length')) {
-        newSpec.layers.forEach(({ layerType }) => {
-          trackEvent(RENDER_MAP_LAYER_TYPE, layerType || 'raster');
-        });
-      }
+    const spec = props.visualisation.spec || {};
+    if (get(spec, 'layers.length')) {
+      spec.layers.forEach(({ layerType }) => {
+        trackEvent(RENDER_MAP_LAYER_TYPE, layerType || 'raster');
+      });
     }
-  }, [hasTrackedLayerTypes]);
+  }, []);
 
+  // run every time mapp changes
   useEffect(() => {
-    if (!hasAddedLayers.current) {
-      const loadInterval = setInterval(() => {
-        const checks = Object.values(mapp.current._layers).map((l) => {
-          try {
-            return l.isLoading();
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.log(l, error);
-            return false;
-          }
-        });
-        const check = checks.filter(o => o).length === 0;
-        if (check) {
-          hasAddedLayers.current = true;
-          setHasRendered(true);
-          clearInterval(loadInterval);
+    setHasRendered(false);
+    const loadInterval = setInterval(() => {
+      const checks = Object.values(mapp.current._layers).map((l) => {
+        try {
+          return l.isLoading();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.log(l, error);
+          return false;
         }
-      }, 1000);
-      return () => clearInterval(loadInterval);
-    }
-    return () => {};
-  }, [hasAddedLayers, mapp]);
+      });
+      const check = checks.filter(o => o).length === 0;
+      if (check) {
+        setHasRendered(true);
+        clearInterval(loadInterval);
+      }
+    }, 1000);
+    return () => clearInterval(loadInterval);
+  }, [mapp]);
 
   const { visualisation, metadata, width, height, showTitle, datasets, exporting } = props;
   const title = visualisation.name || '';
