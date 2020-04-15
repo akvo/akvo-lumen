@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useRef, useEffect, createRef } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
@@ -226,123 +226,98 @@ const PopupContent = ({ data, singleMetadata, onImageLoad }) => {
   );
 };
 
+const initMap = (node, xCenter, xZoom, zoomControl) => {
+  const m = L.map(node, { zoomControl }).setView(xCenter, xZoom);
+  m.scrollWheelZoom.disable();
+  return m;
+};
+
 PopupContent.propTypes = {
   data: PropTypes.object.isRequired,
   onImageLoad: PropTypes.func.isRequired,
   singleMetadata: PropTypes.object,
 };
 
-export default class MapVisualisation extends Component {
+const MapVisualisation = (props) => {
+  const [hasRendered, setHasRendered] = useState(false);
+  const leafletMapNode = useRef(null);
 
-  constructor() {
-    super();
-    this.renderLeafletLayer = this.renderLeafletLayer.bind(this);
-    this.renderLeafletMap = this.renderLeafletMap.bind(this);
-    this.state = {
-      hasTrackedLayerTypes: false,
-      hasRendered: false,
-    };
-    this.hasAddedLayers = false;
-  }
+  const storedBaseLayer = useRef(null);
+  const baseLayer = useRef(null);
 
-  componentDidMount() {
-    this.renderLeafletMap(this.props);
-  }
+  const dataLayer = useRef(null);
 
-  // eslint-disable-next-line no-unused-vars
-  componentDidUpdate(prevProps, prevState) {
-    this.renderLeafletMap(prevProps);
-  }
+  const [layerGroupId, setLayerGroupId] = useState(null);
 
-  componentWillUnmount() {
-    clearInterval(this.loadInterval);
-  }
+  const mapp = useRef(null);
 
-  addLayer(layer, map) {
-    if (!this.hasAddedLayers) {
-      this.loadInterval = setInterval(() => {
-        const checks = Object.values(map._layers).map((l) => {
-          try {
-            return l.isLoading();
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.log(l, error);
-            return false;
-          }
-        });
-        // console.log('layers', map._layers);
-        // console.log('checks', checks);
-        const check = checks.filter(o => o).length === 0;
-//        console.log('check', check);
-        if (check) {
-          this.setState({ hasRendered: true });
-          clearInterval(this.loadInterval);
-        }
-      }, 1000);
-    }
-    this.hasAddedLayers = true;
-    return layer.addTo(map);
-  }
+  const storedSpecs = useRef(null);
+  const utfGrids = useRef(null);
+  const popups = useRef(null);
 
-  renderLeafletLayer(layer, id, layerGroupId, layerMetadata, baseURL, map) {
-    if (!this[`storedSpec${id}`]) {
+  const popupElement = useRef(null);
+  const baseURL = '/maps/layergroup';
+
+  const renderLeafletLayer = (layer, id, metadata, map) => {
+    const { layerMetadata } = metadata;
+    if (!storedSpecs.current[id].current) {
       // Store a copy of the layer spec to compare to future changes so we know when to re-render
-      this[`storedSpec${id}`] = cloneDeep(layer);
+      storedSpecs.current[id].current = cloneDeep(layer);
     }
 
     const newSpec = layer || {};
-    const oldSpec = this[`storedSpec${id}`] || {};
+    const oldSpec = storedSpecs.current[id].current || {};
     const filtersChanged = !isEqual(newSpec.filters, oldSpec.filters);
     const popup = newSpec.popup;
     const haveAggregation = layer.aggregationGeomColumn;
     const havePopupData = Boolean(popup && popup.length > 0) || haveAggregation;
-    const haveUtfGrid = Boolean(this[`utfGrid${id}`]);
-    const needToRemovePopup = this[`utfGrid${id}`] && !havePopupData;
+    const haveUtfGrid = Boolean(utfGrids.current[id].current);
+    const needToRemovePopup = utfGrids.current[id].current && !havePopupData;
     const aggregationChanged = Boolean(
         newSpec.aggregationDataset !== oldSpec.aggregationDataset ||
         newSpec.aggregationColumn !== oldSpec.aggregationColumn ||
         newSpec.aggregationGeomColumn !== oldSpec.aggregationGeomColumn ||
         newSpec.aggregationMethod !== oldSpec.aggregationMethod
     );
-    const popupChanged = Boolean(!this[`popup${id}`] || !isEqual(popup, this[`popup${id}`])) || aggregationChanged;
-    const needToAddOrUpdate =
-      havePopupData && (popupChanged || filtersChanged);
-    const windshaftAvailable = Boolean(layerGroupId);
-    const canUpdate = windshaftAvailable || needToRemovePopup;
+    const popupChanged = Boolean(!popups.current[id].current ||
+      !isEqual(popup, popups.current[id].current)) || aggregationChanged;
+    const needToAddOrUpdate = havePopupData && (popupChanged || filtersChanged);
+
+    const canUpdate = Boolean(metadata.layerGroupId) || needToRemovePopup;
 
     if ((needToAddOrUpdate || needToRemovePopup) && canUpdate) {
       if (haveUtfGrid) {
         // Remove the existing grid
-        this.map.closePopup();
-        map.removeLayer(this[`utfGrid${id}`]);
-        this[`utfGrid${id}`] = null;
-        this[`popup${id}`] = null;
+        map.closePopup();
+        map.removeLayer(utfGrids.current[id].current);
+        utfGrids.current[id].current = null;
+        popups.current[id].current = null;
       }
 
       if (!havePopupData) {
         return;
       }
 
-      this[`popup${id}`] = cloneDeep(popup);
-      this[`utfGrid${id}`] =
+      popups.current[id].current = cloneDeep(popup);
+      utfGrids.current[id].current =
         // eslint-disable-next-line new-cap
-        new L.utfGrid(`${baseURL}/${layerGroupId}/${id}/{z}/{x}/{y}.grid.json?callback={cb}`, {
+        new L.utfGrid(`${baseURL}/${metadata.layerGroupId}/${id}/{z}/{x}/{y}.grid.json?callback={cb}`, {
           resolution: 4,
         });
 
-      this[`utfGrid${id}`].on('click', (e) => {
+      utfGrids.current[id].current.on('click', (e) => {
         if (e.data) {
-          this.popupElement = L.popup()
+          popupElement.current = L.popup()
           .setLatLng(e.latlng)
           .openOn(map);
 
           // Adjust size of popup and map position to make popup contents visible
           const adjustLayoutForPopup = () => {
-            this.popupElement.update();
-            if (this.popupElement._map && this.popupElement._map._panAnim) {
-              this.popupElement._map._panAnim = undefined;
+            popupElement.current.update();
+            if (popupElement.current._map && popupElement.current._map._panAnim) {
+              popupElement.current._map._panAnim = undefined;
             }
-            this.popupElement._adjustPan();
+            popupElement.current._adjustPan();
           };
 
           // Although we use leaflet to create the popup, we can still render the contents
@@ -353,72 +328,119 @@ export default class MapVisualisation extends Component {
               singleMetadata={layerMetadata[id]}
               onImageLoad={adjustLayoutForPopup}
             />,
-            this.popupElement._contentNode,
+            popupElement.current._contentNode,
             adjustLayoutForPopup
           );
         }
       });
-      map.addLayer(this[`utfGrid${id}`]);
+      map.addLayer(utfGrids.current[id].current);
     }
-  }
+  };
 
-  renderLeafletMap(nextProps) {
-    const { visualisation, metadata, width, height, exporting } = nextProps;
-    const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
+  const renderLeafletMap = (nodeEl) => {
+    if (!mapp.current) {
+      mapp.current = initMap(nodeEl, [0, 0], 2, !props.exporting);
+    }
 
-    // Windshaft map
-    // const tenantDB = visualisation.tenantDB;
-    const baseURL = '/maps/layergroup';
-    const layerGroupId = metadata.layerGroupId;
-    const xCenter = [0, 0];
-    const xZoom = 2;
-
-    const node = this.leafletMapNode;
-
-    let map;
+    const visualisation = props.visualisation;
 
     /* General map stuff - not layer specific */
-    if (!this.storedBaseLayer) {
+    if (!storedBaseLayer.current) {
       // Do the same thing for the baselayer
-      this.storedBaseLayer = cloneDeep(this.props.visualisation.spec.baseLayer);
-    }
-
-    if (!this.map) {
-      map = L.map(node, { zoomControl: !exporting }).setView(xCenter, xZoom);
-      map.scrollWheelZoom.disable();
-      this.map = map;
-    } else {
-      map = this.map;
-    }
-
-    const haveDimensions = Boolean(this.oldHeight && this.oldWidth);
-    const dimensionsChanged = Boolean(height !== this.oldHeight || width !== this.oldWidth);
-
-    if (!haveDimensions || dimensionsChanged) {
-      setTimeout(() => {
-        map.invalidateSize(false);
-      }, 300);
-      this.oldHeight = height;
-      this.oldWidth = width;
+      storedBaseLayer.current = cloneDeep(visualisation.spec.baseLayer);
     }
 
     // Display or update the baselayer tiles
-    if (!this.baseLayer) {
-      this.baseLayer = L.tileLayer(tileUrl, { attribution: tileAttribution });
-      this.addLayer(this.baseLayer, map);
+    const { tileUrl, tileAttribution } = getBaseLayerAttributes(visualisation.spec.baseLayer);
+    if (!baseLayer.current) {
+      baseLayer.current = L.tileLayer(tileUrl, { attribution: tileAttribution });
+      baseLayer.current.addTo(mapp.current);
     } else {
-      const oldTileUrl = getBaseLayerAttributes(this.storedBaseLayer).tileUrl;
+      const oldTileUrl = getBaseLayerAttributes(storedBaseLayer.current).tileUrl;
       const newTileUrl = tileUrl;
 
       if (oldTileUrl !== newTileUrl) {
-        this.storedBaseLayer = cloneDeep(nextProps.visualisation.spec.baseLayer);
+        storedBaseLayer.current = cloneDeep(visualisation.spec.baseLayer);
 
-        map.removeLayer(this.baseLayer);
-        this.baseLayer = L.tileLayer(tileUrl, { attribution: tileAttribution });
-        this.addLayer(this.baseLayer, map).bringToBack();
+        mapp.current.removeLayer(baseLayer.current);
+        baseLayer.current = L.tileLayer(tileUrl, { attribution: tileAttribution });
+        baseLayer.current.addTo(mapp.current).bringToBack();
       }
     }
 
+    const metadata = props.metadata;
+
+    const newSpec = visualisation.spec || {};
+
+    // Add or update the windshaft tile layer if necessary
+    if (get(newSpec, 'layers.length') === 0 && dataLayer.current) {
+      mapp.current.removeLayer(dataLayer.current);
+      dataLayer.current = null;
+    } else if (metadata.layerGroupId) {
+      if (!dataLayer.current) {
+        dataLayer.current = L.tileLayer(`${baseURL}/${metadata.layerGroupId}/all/{z}/{x}/{y}.png`);
+        dataLayer.current.addTo(mapp.current);
+      } else {
+        const needToUpdate = Boolean(
+          metadata.layerGroupId !== layerGroupId
+        );
+        if (needToUpdate) {
+          mapp.current.removeLayer(dataLayer.current);
+          dataLayer.current = L.tileLayer(`${baseURL}/${metadata.layerGroupId}/all/{z}/{x}/{y}.png`);
+          dataLayer.current.addTo(mapp.current);
+        }
+      }
+    }
+  };
+
+  // renderleaftlet, run every time leafletMapNode or props changes
+  useEffect(() => {
+    const specLayers = props.visualisation.spec.layers;
+    storedSpecs.current = specLayers.map(() => createRef());
+    utfGrids.current = specLayers.map(() => createRef());
+    popups.current = specLayers.map(() => createRef());
+    renderLeafletMap(leafletMapNode.current);
+  }, [leafletMapNode, props, layerGroupId]);
+
+  // metrics, run only on mount
+  useEffect(() => {
+    const spec = props.visualisation.spec || {};
+    if (get(spec, 'layers.length')) {
+      spec.layers.forEach(({ layerType }) => {
+        trackEvent(RENDER_MAP_LAYER_TYPE, layerType || 'raster');
+      });
+    }
+  }, []);
+
+  // isReadyMap/exporting related, run every time mapp changes
+  useEffect(() => {
+    setHasRendered(false);
+    const loadInterval = setInterval(() => {
+      const checks = Object.values(mapp.current._layers).map((l) => {
+        try {
+          return l.isLoading();
+        } catch (error) {
+          return false;
+        }
+      });
+      const check = checks.filter(o => o).length === 0;
+      if (check) {
+        setHasRendered(true);
+        clearInterval(loadInterval);
+      }
+    }, 1000);
+    return () => clearInterval(loadInterval);
+  }, [mapp]);
+
+  // fired in DashboardEditor, when changing map dimension
+  useEffect(() => {
+    mapp.current.invalidateSize(false);
+  }, [mapp, props.width, props.height]);
+
+  // Fit map bounds, when metadata/layers changes
+  const storedBoundingBox = useRef(null);
+  useEffect(() => {
+    const metadata = props.metadata;
     if (metadata && metadata.layerMetadata && metadata.layerMetadata.length) {
       const mergedBoundingBox = [[90, 180], [-90, -180]];
 
@@ -439,147 +461,119 @@ export default class MapVisualisation extends Component {
         }
       });
 
-      if (!isEqual(mergedBoundingBox, this.storedBoundingBox)) {
-        this.storedBoundingBox = mergedBoundingBox;
-        map.fitBounds(mergedBoundingBox, { maxZoom: 12, minZoom: 1 });
+      if (!isEqual(mergedBoundingBox, storedBoundingBox.current)) {
+        storedBoundingBox.current = mergedBoundingBox;
+        mapp.current.fitBounds(mergedBoundingBox, { maxZoom: 12, minZoom: 1 });
       }
     }
+  }, [props.metadata, mapp]);
 
-    const newSpec = nextProps.visualisation.spec || {};
-
-    if (get(newSpec, 'layers.length') && !this.state.hasTrackedLayerTypes) {
-      this.setState({
-        hasTrackedLayerTypes: true,
-      }, () => {
-        newSpec.layers.forEach(({ layerType }) => {
-          trackEvent(RENDER_MAP_LAYER_TYPE, layerType || 'raster');
+  // Add layers on change props.metadata.layerGroupId
+  useEffect(
+    () => {
+      if (props.metadata.layerGroupId !== layerGroupId) {
+        props.visualisation.spec.layers.forEach((layer, idx) => {
+          renderLeafletLayer(
+            layer, idx, props.metadata, mapp.current
+          );
         });
-      });
-    }
-
-    // Add or update the windshaft tile layer if necessary
-    if (get(newSpec, 'layers.length') === 0 && this.dataLayer) {
-      map.removeLayer(this.dataLayer);
-      this.dataLayer = null;
-    } else if (layerGroupId) {
-      if (!this.dataLayer) {
-        this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/all/{z}/{x}/{y}.png`);
-        this.addLayer(this.dataLayer, map);
-      } else {
-        const needToUpdate = Boolean(
-          layerGroupId !== this.storedLayerGroupId
-        );
-        if (needToUpdate) {
-          map.removeLayer(this.dataLayer);
-          this.dataLayer = L.tileLayer(`${baseURL}/${layerGroupId}/all/{z}/{x}/{y}.png`);
-          this.addLayer(this.dataLayer, map);
-        }
       }
-    }
+      setLayerGroupId(props.metadata.layerGroupId);
+    }, [props.metadata.layerGroupId, layerGroupId]
+  );
 
-    if (layerGroupId !== this.storedLayerGroupId) {
-      visualisation.spec.layers.forEach((layer, idx) => {
-        this.renderLeafletLayer(
-          layer, idx, layerGroupId, metadata.layerMetadata, baseURL, map
-        );
-      });
-    }
-    this.storedLayerGroupId = layerGroupId;
+  const { visualisation, metadata, width, height, showTitle, datasets, exporting } = props;
+  const title = visualisation.name || '';
+  const titleLength = title.toString().length;
+  const titleHeight = titleLength > 48 ? 56 : 36;
+  const mapWidth = width || '100%';
+  let mapHeight;
+  if (showTitle) {
+    mapHeight = height ?
+      height - (titleHeight * (1 + META_SCALE)) :
+      `calc(100% - ${(titleHeight * (1 + META_SCALE))}px)`;
+  } else {
+    mapHeight = height || '100%';
   }
-
-  render() {
-    const { visualisation, metadata, width, height, showTitle, datasets, exporting } = this.props;
-    const title = visualisation.name || '';
-    const titleLength = title.toString().length;
-    const titleHeight = titleLength > 48 ? 56 : 36;
-    const mapWidth = width || '100%';
-    let mapHeight;
-    if (showTitle) {
-      mapHeight = height ?
-        height - (titleHeight * (1 + META_SCALE)) :
-        `calc(100% - ${(titleHeight * (1 + META_SCALE))}px)`;
-    } else {
-      mapHeight = height || '100%';
-    }
-    const needLegend = Boolean(
-      visualisation.spec.layers &&
+  const needLegend = Boolean(
+    visualisation.spec.layers &&
       visualisation.spec.layers.filter(l => l.legend.visible).length &&
       metadata &&
       metadata.layerMetadata &&
       metadata.layerMetadata.length
-    );
-    const lastUpdated = chart.getDataLastUpdated({ visualisation, datasets });
-    return (
-      <div
-        className="MapVisualisation dashChart"
-        style={{
-          width,
-          height,
-        }}
-      >
-        {this.state.hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
-        {showTitle && (
-          <div>
-            <h2
+  );
+  const lastUpdated = chart.getDataLastUpdated({ visualisation, datasets });
+
+  return (
+    <div
+      className="MapVisualisation dashChart"
+      style={{
+        width,
+        height,
+      }}
+    >
+      {hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
+      {showTitle && (
+        <div>
+          <h2
+            style={{
+              height: titleHeight,
+              lineHeight: titleLength > 96 ? '16px' : '20px',
+              fontSize: titleLength > 96 ? '14px' : '16px',
+            }}
+          >
+            <span>
+              {chart.getTitle(visualisation)}
+            </span>
+          </h2>
+          {lastUpdated && (
+            <p
+              className="chartMeta"
               style={{
-                height: titleHeight,
-                lineHeight: titleLength > 96 ? '16px' : '20px',
-                fontSize: titleLength > 96 ? '14px' : '16px',
+                height: titleHeight * META_SCALE,
+                lineHeight: titleLength > 96 ? '12px' : '16px',
+                fontSize: titleLength > 96 ? '10px' : '12px',
               }}
             >
-              <span>
-                {chart.getTitle(visualisation)}
-              </span>
-            </h2>
-            {lastUpdated && (
-              <p
-                className="chartMeta"
-                style={{
-                  height: titleHeight * META_SCALE,
-                  lineHeight: titleLength > 96 ? '12px' : '16px',
-                  fontSize: titleLength > 96 ? '10px' : '12px',
-                }}
-              >
-                <span className="capitalize">
-                  <FormattedMessage id="data_last_updated" />
-                </span>: {lastUpdated}
-              </p>
-            )}
-          </div>
-        )}
-        <div
-          className="mapContainer"
-          style={{
-            height: mapHeight,
-            width: mapWidth,
-          }}
-        >
-          <div
-            style={{
-              height: `${height}px`,
-              width: `${width}px`,
-            }}
-            className="leafletMap" id="leafletMap"
-            ref={(ref) => { this.leafletMapNode = ref; }}
-          />
-          {needLegend &&
-            <Legend
-              layers={visualisation.spec.layers}
-              layerMetadata={metadata.layerMetadata}
-            />
-          }
-          {visualisation.awaitingResponse && !exporting && (
-            <Spinner />
+              <span className="capitalize">
+                <FormattedMessage id="data_last_updated" />
+              </span>: {lastUpdated}
+            </p>
           )}
-          {
-            visualisation.failedToLoad &&
-            <div className="failedIndicator" />
-          }
         </div>
+      )}
+      <div
+        className="mapContainer"
+        style={{
+          height: mapHeight,
+          width: mapWidth,
+        }}
+      >
+        <div
+          style={{
+            height: `${height}px`,
+            width: `${width}px`,
+          }}
+          className="leafletMap" id="leafletMap"
+          ref={leafletMapNode}
+        />
+        {needLegend &&
+        <Legend
+          layers={visualisation.spec.layers}
+          layerMetadata={metadata.layerMetadata}
+        />
+        }
+        {visualisation.awaitingResponse && !exporting && (
+          <Spinner />
+        )}
+        {
+          visualisation.failedToLoad &&
+            <div className="failedIndicator" />
+        }
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 MapVisualisation.propTypes = {
   visualisation: PropTypes.object.isRequired,
@@ -594,3 +588,5 @@ MapVisualisation.propTypes = {
 MapVisualisation.defaultProps = {
   showTitle: true,
 };
+
+export default MapVisualisation;
