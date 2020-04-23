@@ -8,4 +8,10 @@
                                      :database #duct/env "PG_DATABASE"
                                      :user #duct/env "PG_USER" 
                                      :host #duct/env "PG_HOST"}
-                              :lumen {:password #duct/env "PG_PASSWORD"}}}
+                              :lumen {:password #duct/env "PG_PASSWORD"}}
+
+ :akvo.lumen.component.error-tracker/config {:dsn "admin-sentry-client-dsn"
+                                             :opts {:environment  "LUMEN_SENTRY_ENVIRONMENT"
+                                                    :release  "ADMIN_LUMEN_SENTRY_RELEASE"
+                                                    :server-name  "ADMIN_LUMEN_SENTRY_SERVER_NAME"}}
+ }
