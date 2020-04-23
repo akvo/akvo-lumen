@@ -6,7 +6,8 @@
   (vec (flatten (apply conj [:akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.admin.db/config] more))))
 
 (defn ig-derives []
-  (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer))
+  (derive :akvo.lumen.component.emailer/mailjet-v3-emailer :akvo.lumen.component.emailer/emailer)
+  (derive :akvo.lumen.component.error-tracker/prod :akvo.lumen.component.error-tracker/error-tracker))
 
 (defn new-config [& paths]
   (apply config/construct (flatten ["akvo/lumen/config.edn" "akvo/lumen/admin.edn" paths])))
