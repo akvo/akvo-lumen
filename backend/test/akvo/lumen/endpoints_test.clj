@@ -180,6 +180,9 @@
               (is (= '([3 "B"]) dataset-sort)))
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text")))
                                    body-kw)]
+              (is (= '([3 "B"] [2 "A"]) dataset-sort)))
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"order" "value"}))
+                                 body-kw)]
               (is (= '([2 "A"] [3 "B"]) dataset-sort)))
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c2" "number")))
                                    body-kw)]
