@@ -87,7 +87,8 @@
     (->> (merge {:column-name column-name :table-name (:table-name dataset)}
                 (when limit {:limit limit}))
          (db.dataset/count-vals-by-column-name tenant-conn)
-         (map (juxt :counter :coincidence)))))
+         (map (juxt :counter :coincidence))
+         (sort-by second))))
 
 (defn sort-number
   [tenant-conn id column-name]
