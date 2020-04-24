@@ -154,7 +154,8 @@
                     [["Bob" 22.0 2.0 4.0 7.0 "A"]
                      ["Jane" 34.0 4.0 8.0 2.0 "B"]
                      ["Frank" 55.0 3.0 3.0 6.0 "A"]
-                     ["Lisa" 72.0 5.0 1.0 1.0 "B"]]
+                     ["Lisa" 72.0 5.0 1.0 1.0 "B"]
+                     ["Joe" 72.0 5.0 1.0 1.0 "B"]]
                     :status "OK"
                     :id dataset-id}
                    (select-keys dataset [:transformations :columns :name :rows :status :id])))
@@ -176,13 +177,16 @@
           (testing "sort"
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"limit" "1"}))
                                    body-kw)]
-              (is (= '([2 "B"]) dataset-sort)))
+              (is (= '([3 "B"]) dataset-sort)))
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text")))
                                    body-kw)]
-              (is (= '([2 "B"] [2 "A"]) dataset-sort)))
+              (is (= '([3 "B"] [2 "A"]) dataset-sort)))
+            (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"order" "value"}))
+                                 body-kw)]
+              (is (= '([2 "A"] [3 "B"]) dataset-sort)))
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c2" "number")))
                                    body-kw)]
-              (is (= {:all 4, :max 72.0, :min 22.0 :uniques 4} dataset-sort))))
+              (is (= {:all 5, :max 72.0, :min 22.0 :uniques 4} dataset-sort))))
 
           (is (= title (-> (h (get* (api-url "/library")))
                            body-kw :datasets first :name)))
@@ -273,7 +277,7 @@
                  (-> (h (get* (api-url "/aggregation" dataset-id (:visualisationType vis-detail))
                               {"query" (json/encode (:spec vis-detail))}))
                      body-kw :series first :data)))
-          (is (= [{:value 1} {:value 1} {:value 1} {:value 1}]
+          (is (= [{:value 1} {:value 1} {:value 1} {:value 2}]
                  (-> (h (get* (api-url "/aggregation" dataset-id (:visualisationType vis-detail))
                               {"query" (json/encode (assoc (:spec vis-detail)
                                                            :axisLabelX "Age"

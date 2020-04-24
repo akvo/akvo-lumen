@@ -73,7 +73,7 @@
                                     :handler (fn [{tenant :tenant
                                                    {:keys [id column-name]} :path-params
                                                    query-params :query-params}]
-                                               (lib/ok (dataset/sort-text (p/connection tenant-manager tenant) id column-name (get query-params "limit"))))}}]]
+                                               (lib/ok (dataset/sort-text (p/connection tenant-manager tenant) id column-name (get query-params "limit") (get query-params "order"))))}}]]
       [["/:column-name/number" {:get {:parameters {:path-params {:id string?
                                                                  :column-name string?}}
                                       :handler (fn [{tenant :tenant
