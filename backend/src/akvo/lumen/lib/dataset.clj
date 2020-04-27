@@ -88,9 +88,8 @@
                         (when limit {:limit limit}))
                    (db.dataset/count-vals-by-column-name tenant-conn)
                    (map (juxt :counter :coincidence)))]
-      (cond
-        (= "value" order) (sort-by second result)
-        :else result))))
+      (cond-> result
+        (= "value" order) (sort-by second result)))))
 
 (defn sort-number
   [tenant-conn id column-name]
