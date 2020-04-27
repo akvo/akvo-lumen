@@ -82,12 +82,14 @@
           (assoc :rows data :columns columns :status "OK")))))
 
 (defn sort-text
-  [tenant-conn id column-name limit]
+  [tenant-conn id column-name limit order]
   (when-let [dataset (db.dataset/table-name-by-dataset-id tenant-conn {:id id})]
-    (->> (merge {:column-name column-name :table-name (:table-name dataset)}
-                (when limit {:limit limit}))
-         (db.dataset/count-vals-by-column-name tenant-conn)
-         (map (juxt :counter :coincidence)))))
+    (let [result (->> (merge {:column-name column-name :table-name (:table-name dataset)}
+                        (when limit {:limit limit}))
+                   (db.dataset/count-vals-by-column-name tenant-conn)
+                   (map (juxt :counter :coincidence)))]
+      (cond->> result
+        (= "value" order) (sort-by second)))))
 
 (defn sort-number
   [tenant-conn id column-name]

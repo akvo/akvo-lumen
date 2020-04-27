@@ -94,7 +94,7 @@ const shareId = pathMatch != null ? pathMatch[1] : null;
 let hasSubmitted = false;
 
 const fetchFilterColumn = (datasetId, columnName, columnType, password, callback) =>
-fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}`, { headers: { 'X-Password': password } })
+fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}?order=value`, { headers: { 'X-Password': password } })
 .then((response) => {
   if (response.status === 403) {
     renderPrivacyGate(); // eslint-disable-line
