@@ -89,7 +89,7 @@ export function fetchColumn(datasetId, columnName, type) {
   const t = type || 'text';
   return (dispatch) => {
     dispatch(fetchColumnDatasetRequest(datasetId, columnName));
-    return api.get(`/api/datasets/${datasetId}/sort/${columnName}/${t}`)
+    return api.get(`/api/datasets/${datasetId}/sort/${columnName}/${t}?order=value`)
       .then(({ body }) => {
         const column = body.map(o => o[1]);
         dispatch(fetchColumnDatasetSuccess(datasetId, columnName, column));
