@@ -58,7 +58,7 @@
                                                    query-params :query-params}]
                                                (let [tenant-conn (p/connection tenant-manager tenant)]
                                                  (lib/ok
-                                                  (dataset/sort-text tenant-conn dataset-id column-name (get query-params "limit")))))}}]]]])
+                                                  (dataset/sort-text tenant-conn dataset-id column-name (get query-params "limit") (get query-params "order")))))}}]]]])
 
 (defmethod ig/init-key :akvo.lumen.endpoint.public/public  [_ opts]
   (routes opts))
