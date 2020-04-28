@@ -16,6 +16,14 @@
      :data (serie-data :value sql-data index)
      :metadata {:type (:type column)}}))
 
+(defn estimate-count [tenant-conn table-name]
+  (let [n (ffirst (run-query tenant-conn
+                             (format
+                              "SELECT n_live_tup as estimate FROM pg_stat_all_tables WHERE relname = '%s'",
+                              table-name)))]
+    (log/debug :estimate n)
+    n))
+
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql (sql-str columns (:filters query))
