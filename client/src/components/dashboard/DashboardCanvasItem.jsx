@@ -109,7 +109,7 @@ const DashboardCanvasItem = React.forwardRef((props, ref) => {
       ref={el}
       style={{ marginTop }}
     >
-      {item.type === 'visualisation' && (
+      {item.type === 'visualisation' && item.visualisation (
         <div className={`itemContainerWrap ${!exporting && !filterAffected && dashFiltered ? 'unFiltered' : ''}`}>
           <div
             className="itemTitle"
