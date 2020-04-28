@@ -251,7 +251,7 @@ export default class MapVisualisation extends Component {
 
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState) {
-    this.renderLeafletMap(prevProps);
+    this.renderLeafletMap(this.props);
   }
 
   componentWillUnmount() {
@@ -380,7 +380,7 @@ export default class MapVisualisation extends Component {
     /* General map stuff - not layer specific */
     if (!this.storedBaseLayer) {
       // Do the same thing for the baselayer
-      this.storedBaseLayer = cloneDeep(this.props.visualisation.spec.baseLayer);
+      this.storedBaseLayer = cloneDeep(nextProps.visualisation.spec.baseLayer);
     }
 
     if (!this.map) {
