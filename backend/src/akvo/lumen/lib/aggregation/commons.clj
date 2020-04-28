@@ -4,6 +4,8 @@
             [akvo.lumen.specs.db.dataset-version.column :as s.column]
             [clojure.tools.logging :as log]))
 
+(def default-max-points 500000)
+
 (defn run-query [tenant-conn sql]
   (log/debug :run-query sql)
   (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
