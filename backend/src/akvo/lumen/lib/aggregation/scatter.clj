@@ -16,14 +16,6 @@
      :data (serie-data :value sql-data index)
      :metadata {:type (:type column)}}))
 
-(defn estimate-count [tenant-conn table-name]
-  (let [n (ffirst (run-query tenant-conn
-                             (format
-                              "SELECT n_live_tup as estimate FROM pg_stat_all_tables WHERE relname = '%s'",
-                              table-name)))]
-    (log/debug :estimate n)
-    n))
-
 (defn query
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql (sql-str columns (:filters query))
@@ -33,7 +25,7 @@
         column-category (find-column columns (:bucketColumnCategory query))
         column-label (find-column columns (:datapointLabelColumn query))
         column-bucket (find-column columns (:bucketColumn query))
-        random-and-limit (if (> (estimate-count tenant-conn table-name) commons/default-max-points)
+        random-and-limit (if (> (commons/estimate-count tenant-conn table-name) commons/default-max-points)
                            (format "ORDER BY random() LIMIT %s" commons/default-max-points)
                            "")
         aggregation (partial sql-aggregation-subquery (:metricAggregation query))

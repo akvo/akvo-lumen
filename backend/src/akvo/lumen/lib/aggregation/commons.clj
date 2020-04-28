@@ -4,11 +4,21 @@
             [akvo.lumen.specs.db.dataset-version.column :as s.column]
             [clojure.tools.logging :as log]))
 
-(def default-max-points 500000)
-
 (defn run-query [tenant-conn sql]
   (log/debug :run-query sql)
   (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
+
+(def default-max-points 500000)
+
+(defn estimate-count
+  "faster count impl from https://www.citusdata.com/blog/2016/10/12/count-performance/#dup_counts_estimated"
+  [tenant-conn table-name]
+  (let [n (ffirst (run-query tenant-conn
+                             (format
+                              "SELECT n_live_tup as estimate FROM pg_stat_all_tables WHERE relname = '%s'",
+                              table-name)))]
+    (log/debug :estimate n)
+    n))
 
 (defn cast-to-decimal [column]
   (case (:type column)
