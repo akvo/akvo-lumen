@@ -25,12 +25,11 @@
         column-category (find-column columns (:bucketColumnCategory query))
         column-label (find-column columns (:datapointLabelColumn query))
         column-bucket (find-column columns (:bucketColumn query))
-        max-points 2500
-
+        random-and-limit (commons/random-and-limit-sql tenant-conn table-name) 
         aggregation (partial sql-aggregation-subquery (:metricAggregation query))
 
-        subquery (format "(SELECT * FROM %1$s WHERE %2$s ORDER BY random() LIMIT %3$s)z"
-                         table-name filter-sql max-points)
+        subquery (format "(SELECT * FROM %1$s WHERE %2$s %3$s)z"
+                         table-name filter-sql random-and-limit)
 
         sql-text-with-aggregation
         (format "SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
@@ -47,8 +46,7 @@
                                                  (SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
                                                   FROM %6$s 
                                                   WHERE %7$s)z
-                                                ORDER BY random() 
-                                                LIMIT %8$s)zz
+                                                  %8$s)zz
                                               ORDER BY zz.x"
                          (:columnName column-x)
                          (:columnName column-y)
@@ -57,7 +55,7 @@
                          (:columnName column-label)
                          table-name
                          filter-sql
-                         max-points)
+                         random-and-limit)
 
         sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)
         sql-response (run-query tenant-conn sql-text)]
@@ -67,5 +65,5 @@
                    (serie sql-response column idx))
                  [column-x column-y column-size column-category])
        :common {:metadata {:type (:type column-label)
-                           :sampled (= (count sql-response) max-points)}
+                           :sampled (= (count sql-response) commons/default-max-points)}
                 :data (serie-data :label sql-response 4)}})))

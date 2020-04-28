@@ -17,12 +17,12 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [column-size  (find-column columns (:metricColumn query))
         column-bucket (find-column columns (:bucketColumn query))
-        max-points 2500
+        random-and-limit (commons/random-and-limit-sql tenant-conn table-name)
         aggregation-method (if column-size (:metricAggregation query) "count")
-        subquery (format "(SELECT * FROM %1$s WHERE %2$s ORDER BY random() LIMIT %3$s)z "
+        subquery (format "(SELECT * FROM %1$s WHERE %2$s %3$s)z "
                          table-name
                          (sql-str columns (:filters query))
-                         max-points)
+                         random-and-limit)
         sql-text (format "SELECT %1$s AS size, %2$s AS label 
                           FROM %3$s 
                           GROUP BY %2$s"
@@ -35,5 +35,5 @@
                 :label    (:title column-size)
                 :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
                 :metadata {:type (:type column-size)}}]
-      :common {:metadata {:sampled (= (count sql-response) max-points)}
+      :common {:metadata {:sampled (= (count sql-response) commons/default-max-points)}
                :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})))

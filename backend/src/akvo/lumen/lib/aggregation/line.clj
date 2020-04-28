@@ -21,20 +21,20 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [column-x      (find-column columns (:metricColumnX query))
         column-y      (find-column columns (:metricColumnY query))
-        max-points    2500
+
         aggregation (aggregation* (:metricAggregation query) column-y)
+        random-and-limit (commons/random-and-limit-sql tenant-conn table-name) 
         sql-text (format "SELECT * FROM 
                                 (SELECT * 
                                  FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s %5$s )z 
-                                 ORDER BY random() 
-                                 LIMIT %6$s)zz 
+                                  %6$s)zz 
                                ORDER BY zz.x"
                               (:columnName column-x)
                               (or aggregation (:columnName column-y))
                               table-name
                               (sql-str columns (:filters query))
                               (if aggregation (format  "GROUP BY %s" (:columnName column-x)) "")
-                              max-points)
+                              random-and-limit)
         sql-response  (run-query tenant-conn sql-text)]
     (lib/ok
      {:series [{:key   (column-y :title)
@@ -43,7 +43,7 @@
                                {:value y-value})
                              sql-response)}]
       :common {:metadata {:type    (:type column-x)
-                          :sampled (= (count sql-response) max-points)}
+                          :sampled (= (count sql-response) commons/default-max-points)}
                :data     (mapv (fn [[x-value y-value]]
                                  {:timestamp x-value})
                                sql-response)}})))
