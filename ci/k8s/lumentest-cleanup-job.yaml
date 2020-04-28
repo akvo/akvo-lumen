@@ -1,0 +1,49 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: lumen-citest-cleanup
+spec:
+  schedule: "0 0 * * *"
+  startingDeadlineSeconds: 600
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        cronjob: lumen-citest-cleanup
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 900
+      template:
+        metadata:
+          labels:
+            cronjob: lumen-citest-cleanup
+        spec:
+          containers:
+          - name: pg-client
+            image: postgres:11-alpine
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                export PGPORT=5432
+                export PGHOST="$(echo "$LUMEN_DB_URL" | sed -n 's|.*postgresql://\(.*\):.*|\1|p')"
+                export PGUSER="$(echo "$LUMEN_DB_URL" | sed -n 's|.*user=\(.*\)&password.*|\1|p')"
+                export PGPASSWORD="$(echo "$LUMEN_DB_URL" | sed -n 's|.*password=\(.*\)&.*|\1|p')"
+                export PGSSLMODE=require
+                export PGDATABASE=tenant_lumencitest
+                psql -c "DELETE FROM dataset"
+            resources:
+              requests:
+                cpu: "50m"
+                memory: "256Mi"
+              limits:
+                cpu: "1000m"
+                memory: "256Mi"
+            env:
+            - name: LUMEN_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lumen
+                  key: lumen_db_url
+          restartPolicy: Never
