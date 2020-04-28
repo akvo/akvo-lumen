@@ -10,7 +10,7 @@
 
 (def default-max-points 500000)
 
-(defn estimate-count
+(defn- estimate-count
   "faster count impl from https://www.citusdata.com/blog/2016/10/12/count-performance/#dup_counts_estimated"
   [tenant-conn table-name]
   (let [n (ffirst (run-query tenant-conn
@@ -19,6 +19,11 @@
                               table-name)))]
     (log/debug :estimate n)
     n))
+
+(defn random-and-limit-sql [tenant-conn table-name]
+  (if (> (estimate-count tenant-conn table-name) default-max-points)
+    (format "ORDER BY random() LIMIT %s" default-max-points)
+    ""))
 
 (defn cast-to-decimal [column]
   (case (:type column)

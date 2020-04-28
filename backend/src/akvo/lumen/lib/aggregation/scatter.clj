@@ -25,9 +25,7 @@
         column-category (find-column columns (:bucketColumnCategory query))
         column-label (find-column columns (:datapointLabelColumn query))
         column-bucket (find-column columns (:bucketColumn query))
-        random-and-limit (if (> (commons/estimate-count tenant-conn table-name) commons/default-max-points)
-                           (format "ORDER BY random() LIMIT %s" commons/default-max-points)
-                           "")
+        random-and-limit (commons/random-and-limit-sql tenant-conn table-name) 
         aggregation (partial sql-aggregation-subquery (:metricAggregation query))
 
         subquery (format "(SELECT * FROM %1$s WHERE %2$s %3$s)z"
