@@ -25,11 +25,10 @@
         column-category (find-column columns (:bucketColumnCategory query))
         column-label (find-column columns (:datapointLabelColumn query))
         column-bucket (find-column columns (:bucketColumn query))
-        random-and-limit (commons/random-and-limit-sql tenant-conn table-name) 
         aggregation (partial sql-aggregation-subquery (:metricAggregation query))
 
-        subquery (format "(SELECT * FROM %1$s WHERE %2$s %3$s)z"
-                         table-name filter-sql random-and-limit)
+        subquery (format "(SELECT * FROM %1$s WHERE %2$s)z"
+                         table-name filter-sql)
 
         sql-text-with-aggregation
         (format "SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
@@ -46,7 +45,7 @@
                                                  (SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
                                                   FROM %6$s 
                                                   WHERE %7$s)z
-                                                  %8$s)zz
+                                                  )zz
                                               ORDER BY zz.x"
                          (:columnName column-x)
                          (:columnName column-y)
@@ -54,8 +53,7 @@
                          (:columnName column-category)
                          (:columnName column-label)
                          table-name
-                         filter-sql
-                         random-and-limit)
+                         filter-sql)
 
         sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)
         sql-response (run-query tenant-conn sql-text)]

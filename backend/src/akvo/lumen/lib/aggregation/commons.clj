@@ -8,15 +8,6 @@
   (log/debug :run-query sql)
   (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
 
-(def default-max-points 500000)
-
-(defn random-and-limit-sql [tenant-conn table-name]
-  (if (> (ffirst (run-query tenant-conn
-                            (format "SELECT count(*) FROM %s"  table-name)))
-         default-max-points)
-    (format "ORDER BY random() LIMIT %s" default-max-points)
-    ""))
-
 (defn cast-to-decimal [column]
   (case (:type column)
     "number" (:columnName column)

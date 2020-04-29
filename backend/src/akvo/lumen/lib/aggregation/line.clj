@@ -23,18 +23,16 @@
         column-y      (find-column columns (:metricColumnY query))
 
         aggregation (aggregation* (:metricAggregation query) column-y)
-        random-and-limit (commons/random-and-limit-sql tenant-conn table-name) 
         sql-text (format "SELECT * FROM 
                                 (SELECT * 
                                  FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s %5$s )z 
-                                  %6$s)zz 
+                                  )zz 
                                ORDER BY zz.x"
                               (:columnName column-x)
                               (or aggregation (:columnName column-y))
                               table-name
                               (sql-str columns (:filters query))
-                              (if aggregation (format  "GROUP BY %s" (:columnName column-x)) "")
-                              random-and-limit)
+                              (if aggregation (format  "GROUP BY %s" (:columnName column-x)) ""))
         sql-response  (run-query tenant-conn sql-text)]
     (lib/ok
      {:series [{:key   (column-y :title)

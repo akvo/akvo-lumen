@@ -17,12 +17,10 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [column-size  (find-column columns (:metricColumn query))
         column-bucket (find-column columns (:bucketColumn query))
-        random-and-limit (commons/random-and-limit-sql tenant-conn table-name)
         aggregation-method (if column-size (:metricAggregation query) "count")
-        subquery (format "(SELECT * FROM %1$s WHERE %2$s %3$s)z "
+        subquery (format "(SELECT * FROM %1$s WHERE %2$s)z "
                          table-name
-                         (sql-str columns (:filters query))
-                         random-and-limit)
+                         (sql-str columns (:filters query)))
         sql-text (format "SELECT %1$s AS size, %2$s AS label 
                           FROM %3$s 
                           GROUP BY %2$s"
