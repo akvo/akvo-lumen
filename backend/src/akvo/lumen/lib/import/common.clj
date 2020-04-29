@@ -3,6 +3,8 @@
             [akvo.lumen.protocols :as p]
             [org.akvo.resumed :as resumed]))
 
+(def rows-limit 500000)
+
 (defn importer-type [spec]
   (get spec "kind"))
 
