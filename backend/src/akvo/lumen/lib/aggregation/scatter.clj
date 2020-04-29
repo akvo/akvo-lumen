@@ -63,5 +63,5 @@
                    (serie sql-response column idx))
                  [column-x column-y column-size column-category])
        :common {:metadata {:type (:type column-label)
-                           :sampled (= (count sql-response) commons/default-max-points)}
+                           :sampled false}
                 :data (serie-data :label sql-response 4)}})))

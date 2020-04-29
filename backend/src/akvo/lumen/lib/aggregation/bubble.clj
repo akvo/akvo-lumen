@@ -33,5 +33,5 @@
                 :label    (:title column-size)
                 :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
                 :metadata {:type (:type column-size)}}]
-      :common {:metadata {:sampled (= (count sql-response) commons/default-max-points)}
+      :common {:metadata {:sampled false}
                :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})))

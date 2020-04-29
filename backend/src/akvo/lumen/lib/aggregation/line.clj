@@ -41,7 +41,7 @@
                                {:value y-value})
                              sql-response)}]
       :common {:metadata {:type    (:type column-x)
-                          :sampled (= (count sql-response) commons/default-max-points)}
+                          :sampled false}
                :data     (mapv (fn [[x-value y-value]]
                                  {:timestamp x-value})
                                sql-response)}})))
