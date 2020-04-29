@@ -69,7 +69,7 @@
         (with-open [importer (common/dataset-importer (get spec "source") import-config)]
           (let [columns (p/columns importer)]
             (postgres/create-dataset-table conn table-name columns)
-            (doseq [record (map postgres/coerce-to-sql (p/records importer))]
+            (doseq [record (map postgres/coerce-to-sql (take common/rows-limit (p/records importer)))]
               (jdbc/insert! conn table-name record))
             (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
                                                                                             :spec-description (get spec "description" "")} claims)))
