@@ -92,7 +92,7 @@
       p/DatasetImporter
       (columns [this] column-spec)
       (records [this]
-        (data-records column-spec rows))
+        (data-records column-spec (take import/rows-limit rows)))
       java.io.Closeable
       (close [this]
         (.close reader)))))
