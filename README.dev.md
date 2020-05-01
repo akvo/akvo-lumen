@@ -122,6 +122,12 @@ To connect to the postgres server connect using something like:
 docker-compose exec backend psql --host=akvo-lumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
 ```
 
+To enable postgres SQL statement logging execute:
+
+```sh
+./backend/dev_helpers/enable-pg-logging.sh
+```
+
 ## Windshaft
 
 This container has a development version of the Windshaft container, with plenty of hardcoded assumptions.
