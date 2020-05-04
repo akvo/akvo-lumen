@@ -29,10 +29,14 @@
                          (:columnName column-bucket) ;; maybe we need to use => (or c-size c-bucket)
                          subquery)
         sql-response (run-query tenant-conn sql-text)]
-    (lib/ok
-     {:series [{:key      (:title column-size)
-                :label    (:title column-size)
-                :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
-                :metadata {:type (:type column-size)}}]
-      :common {:metadata {:sampled (= (count sql-response) max-points)}
-               :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})))
+    (if (< (count sql-response) max-points)
+      (lib/ok
+       {:series [{:key      (:title column-size)
+                  :label    (:title column-size)
+                  :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
+                  :metadata {:type (:type column-size)}}]
+        :common {:metadata {}
+                 :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})
+      (lib/bad-request
+       {:message (format "Results are more than %d. Please select another column or use a different aggregation."
+                         max-points)}))))

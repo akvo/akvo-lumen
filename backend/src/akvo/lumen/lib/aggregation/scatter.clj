@@ -55,11 +55,14 @@
 
         sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)
         sql-response (run-query tenant-conn sql-text)]
-    (lib/ok
-      {:series (map-indexed
+    (if (< (count sql-response) max-points)
+      (lib/ok
+       {:series (map-indexed
                  (fn [idx column]
                    (serie sql-response column idx))
                  [column-x column-y column-size column-category])
-       :common {:metadata {:type (:type column-label)
-                           :sampled (= (count sql-response) max-points)}
-                :data (serie-data :label sql-response 4)}})))
+        :common {:metadata {:type (:type column-label)}
+                 :data (serie-data :label sql-response 4)}})
+      (lib/bad-request
+       {:message (format "Results are more than %d. Please select another column or use a different aggregation."
+                         max-points)}))))
