@@ -30,14 +30,17 @@
                               (sql-str columns (:filters query))
                               (if aggregation (format  "GROUP BY %s" (:columnName column-x)) ""))
         sql-response  (run-query tenant-conn sql-text)]
-    (lib/ok
-     {:series [{:key   (column-y :title)
-                :label (column-y :title)
-                :data  (mapv (fn [[x-value y-value]]
-                               {:value y-value})
-                             sql-response)}]
-      :common {:metadata {:type    (:type column-x)
-                          :sampled (= (count sql-response) max-points)}
-               :data     (mapv (fn [[x-value y-value]]
-                                 {:timestamp x-value})
-                               sql-response)}})))
+    (if (< (count sql-response) max-points)
+      (lib/ok
+       {:series [{:key   (column-y :title)
+                  :label (column-y :title)
+                  :data  (mapv (fn [[x-value y-value]]
+                                 {:value y-value})
+                               sql-response)}]
+        :common {:metadata {:type    (:type column-x)}
+                 :data     (mapv (fn [[x-value y-value]]
+                                   {:timestamp x-value})
+                                 sql-response)}})
+      (lib/bad-request
+       {:message (format "Results are more than %d. Please select another column or use a different aggregation." max-points)
+        :level :info}))))
