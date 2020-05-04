@@ -23,27 +23,24 @@
         column-y      (find-column columns (:metricColumnY query))
         max-points    2500
         aggregation (aggregation* (:metricAggregation query) column-y)
-        sql-text (format "SELECT * FROM 
-                                (SELECT * 
-                                 FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s %5$s )z 
-                                 ORDER BY random() 
-                                 LIMIT %6$s)zz 
-                               ORDER BY zz.x"
+        sql-text (format "SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s %5$s ORDER BY x"
                               (:columnName column-x)
                               (or aggregation (:columnName column-y))
                               table-name
                               (sql-str columns (:filters query))
-                              (if aggregation (format  "GROUP BY %s" (:columnName column-x)) "")
-                              max-points)
+                              (if aggregation (format  "GROUP BY %s" (:columnName column-x)) ""))
         sql-response  (run-query tenant-conn sql-text)]
-    (lib/ok
-     {:series [{:key   (column-y :title)
-                :label (column-y :title)
-                :data  (mapv (fn [[x-value y-value]]
-                               {:value y-value})
-                             sql-response)}]
-      :common {:metadata {:type    (:type column-x)
-                          :sampled (= (count sql-response) max-points)}
-               :data     (mapv (fn [[x-value y-value]]
-                                 {:timestamp x-value})
-                               sql-response)}})))
+    (if (< (count sql-response) max-points)
+      (lib/ok
+       {:series [{:key   (column-y :title)
+                  :label (column-y :title)
+                  :data  (mapv (fn [[x-value y-value]]
+                                 {:value y-value})
+                               sql-response)}]
+        :common {:metadata {:type    (:type column-x)}
+                 :data     (mapv (fn [[x-value y-value]]
+                                   {:timestamp x-value})
+                                 sql-response)}})
+      (lib/bad-request
+       {:message (format "Results are more than %d. Please select another column or use a different aggregation." max-points)
+        :level :info}))))
