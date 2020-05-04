@@ -291,7 +291,7 @@
                   :label "B",
                   :data [{:value 1.0} {:value 2.0} {:value 3.0} {:value 4.0}]}],
                 :common
-                {:metadata {:type "date", :sampled false},
+                {:metadata {:type "date"},
                  :data
                  [{:timestamp 1548979200000}
                   {:timestamp 1549065600000}
@@ -306,7 +306,7 @@
                     :label "A",
                     :data [{:value 1} {:value 1} {:value 1} {:value 1}]}],
                   :common
-                  {:metadata {:type "date", :sampled false},
+                  {:metadata {:type "date"},
                    :data
                    [{:timestamp 1548979200000}
                     {:timestamp 1549065600000}
@@ -347,7 +347,7 @@
                  nil
                  nil],
                 :common
-                {:metadata {:type nil, :sampled false},
+                {:metadata {:type nil},
                  :data [{:label nil} {:label nil} {:label nil} {:label nil}]}}))))))
 
 (deftest bubble-tests
@@ -374,7 +374,7 @@
                   :data [{:value 2} {:value 1} {:value 1}],
                   :metadata {:type nil}}],
                 :common
-                {:metadata {:sampled false},
+                {:metadata {},
                  :data [{:label "c"} {:label "b"} {:label "a"}]}}))))
     (testing "Metric queries"
       (let [[tag query-result] (query {:bucketColumn "c1"
@@ -387,5 +387,5 @@
                   :data [{:value 4M} {:value 2M} {:value 1M}],
                   :metadata {:type "number"}}],
                 :common
-                {:metadata {:sampled false},
+                {:metadata {},
                  :data [{:label "c"} {:label "b"} {:label "a"}]}}))))))
