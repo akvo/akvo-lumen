@@ -27,10 +27,6 @@
             (log/error e)
             (http/bad-request
              {:message (format "JSON parse exception: %s" (.getMessage e))}))
-          (catch java.sql.SQLException e
-            (log/error e)
-            (http/bad-request
-             {:message  (format "Database query exception: %s" (.getMessage e))}))
           (catch Exception e
             (log/error e)
             (http/internal-server-error {:message (.getMessage e)})))
