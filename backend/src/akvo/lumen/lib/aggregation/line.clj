@@ -23,18 +23,12 @@
         column-y      (find-column columns (:metricColumnY query))
         max-points    2500
         aggregation (aggregation* (:metricAggregation query) column-y)
-        sql-text (format "SELECT * FROM 
-                                (SELECT * 
-                                 FROM (SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s %5$s )z 
-                                 ORDER BY random() 
-                                 LIMIT %6$s)zz 
-                               ORDER BY zz.x"
+        sql-text (format "SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s %5$s ORDER BY x"
                               (:columnName column-x)
                               (or aggregation (:columnName column-y))
                               table-name
                               (sql-str columns (:filters query))
-                              (if aggregation (format  "GROUP BY %s" (:columnName column-x)) "")
-                              max-points)
+                              (if aggregation (format  "GROUP BY %s" (:columnName column-x)) ""))
         sql-response  (run-query tenant-conn sql-text)]
     (lib/ok
      {:series [{:key   (column-y :title)

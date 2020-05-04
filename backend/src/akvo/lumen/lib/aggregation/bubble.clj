@@ -19,10 +19,9 @@
         column-bucket (find-column columns (:bucketColumn query))
         max-points 2500
         aggregation-method (if column-size (:metricAggregation query) "count")
-        subquery (format "(SELECT * FROM %1$s WHERE %2$s ORDER BY random() LIMIT %3$s)z "
+        subquery (format "(SELECT * FROM %1$s WHERE %2$s)z "
                          table-name
-                         (sql-str columns (:filters query))
-                         max-points)
+                         (sql-str columns (:filters query)))
         sql-text (format "SELECT %1$s AS size, %2$s AS label 
                           FROM %3$s 
                           GROUP BY %2$s"
