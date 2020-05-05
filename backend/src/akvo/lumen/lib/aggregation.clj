@@ -172,3 +172,5 @@
 (defmethod query* "bubble"
   [tenant-conn dataset _ query]
   (bubble/query tenant-conn dataset query))
+
+
