@@ -13,8 +13,8 @@
       (format "count(%1$s%2$s)" (:columnName column) sql-type))
     (commons/sql-aggregation-subquery aggregation-method column)))
 
-(defn ^:deprecated query-v1
-  "version 1 works with sampling data, only current vizs without further modifications will use this version,
+(defn query-v1
+  "DEPRECATED: version 1 works with sampling data, only current vizs without further modifications will use this version,
    following modifications will use version 2 and user will be prompt to use aggregation facilities if sql results are
    higher than 2.5K rows"
   [tenant-conn {:keys [columns table-name]} query]
