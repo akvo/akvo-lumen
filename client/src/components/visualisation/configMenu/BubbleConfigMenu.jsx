@@ -71,15 +71,18 @@ const handleChangeSpec = (change, oldSpec, onChangeSpec, columnOptions) => {
   onChangeSpec(finalSpec);
 };
 
-function BarConfigMenu(props) {
+function BubbleConfigMenu(props) {
   const {
     visualisation,
-    onChangeSpec,
     columnOptions,
     aggregationOptions,
     intl,
   } = props;
   const spec = visualisation.spec;
+
+  const onChangeSpec = (data) => {
+    props.onChangeSpec({ ...data, version: 2 });
+  };
 
   return (
     <div>
@@ -265,7 +268,7 @@ function BarConfigMenu(props) {
   );
 }
 
-BarConfigMenu.propTypes = {
+BubbleConfigMenu.propTypes = {
   intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
@@ -274,4 +277,4 @@ BarConfigMenu.propTypes = {
   aggregationOptions: PropTypes.array.isRequired,
 };
 
-export default injectIntl(BarConfigMenu);
+export default injectIntl(BubbleConfigMenu);

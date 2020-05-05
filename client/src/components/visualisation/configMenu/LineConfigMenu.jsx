@@ -36,11 +36,14 @@ const getAxisLabel = (axis, spec, columnOptions) => {
 export default function LineConfigMenu(props) {
   const {
     visualisation,
-    onChangeSpec,
     columnOptions,
     aggregationOptions,
   } = props;
   const spec = visualisation.spec;
+
+  const onChangeSpec = (data) => {
+    props.onChangeSpec({ ...data, version: 2 });
+  };
 
   return (
     <div>

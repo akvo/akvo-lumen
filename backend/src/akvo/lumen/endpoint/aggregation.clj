@@ -3,6 +3,7 @@
             [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.aggregation :as aggregation]
             [cheshire.core :as json]
+            [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
             [akvo.lumen.component.tenant-manager :as tenant-manager]
             [integrant.core :as ig])
@@ -23,7 +24,12 @@
                              visualisation-type
                              (json/parse-string query keyword))
           (catch JsonParseException e
-            (http/bad-request {:message (.getMessage e)})))
+            (log/error e)
+            (http/bad-request
+             {:message (format "JSON parse exception: %s" (.getMessage e))}))
+          (catch Exception e
+            (log/error e)
+            (http/internal-server-error {:message (.getMessage e)})))
         (http/bad-request {:message "No query supplied"})))))
 
 (defn routes [{:keys [tenant-manager] :as opts}]

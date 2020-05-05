@@ -166,9 +166,11 @@
   (bar/query tenant-conn dataset query))
 
 (defmethod query* "scatter"
-  [tenant-conn dataset _ query]
+  [tenant-conn dataset v-type query]
   (scatter/query tenant-conn dataset query))
 
 (defmethod query* "bubble"
-  [tenant-conn dataset _ query]
+  [tenant-conn dataset v-type query]
   (bubble/query tenant-conn dataset query))
+
+
