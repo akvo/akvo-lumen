@@ -29,7 +29,7 @@
              {:message (format "JSON parse exception: %s" (.getMessage e))}))
           (catch Exception e
             (log/error e)
-            (http/internal-server-error {:message (.getMessage e)})))
+            (http/bad-request {:message (.getMessage e)})))
         (http/bad-request {:message "No query supplied"})))))
 
 (defn routes [{:keys [tenant-manager] :as opts}]
