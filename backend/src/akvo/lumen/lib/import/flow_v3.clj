@@ -12,13 +12,13 @@
 
 (defn question-type->lumen-type
   [question]
-  (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
-    "GEO" "geopoint"
-    "GEOSHAPE" "geoshape"
-    "GEO-SHAPE-FEATURES" "multiple"
-    "CADDISFLY" "multiple"
+  (condp = [(:type question) (:repeatable question)]
+    ["NUMBER" false] "number"
+    ["DATE" false] "date"
+    ["GEO" false] "geopoint"
+    ["GEOSHAPE" false] "geoshape"
+    ["GEO-SHAPE-FEATURES" false] "multiple"
+    ["CADDISFLY" false] "multiple"
     "text"))
 
 (defn flow-questions [form]

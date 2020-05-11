@@ -70,9 +70,13 @@
   "Get the list of questions from a form"
   [form]
   (->> (:questionGroups form)
-       (reduce #(into % (map (fn [q* [group-id group-name]]
-                               (assoc q* :groupId group-id :groupName group-name))
-                             (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) [])))
+       (reduce #(into %
+                      (map
+                       (fn [q* [group-id group-name repeatable]]
+                         ;; depending repeatable adapt q-type
+                         (assoc q* :groupId group-id :groupName group-name :repeatable repeatable))
+                       (:questions %2)
+                       (repeat [(:id %2) (str/trim (:name %2)) (:repeatable %2)]))) [])))
 
 (defn form
   "Get a form by id from a survey"

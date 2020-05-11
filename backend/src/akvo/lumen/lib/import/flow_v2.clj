@@ -11,9 +11,9 @@
 
 (defn question-type->lumen-type
   [question]
-  (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
+  (condp = [(:type question) (:repeatable question)]
+    ["NUMBER" false] "number"
+    ["DATE" false] "date"
     "text"))
 
 (defn dataset-columns
