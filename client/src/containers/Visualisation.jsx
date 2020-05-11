@@ -232,7 +232,7 @@ class Visualisation extends Component {
       visualisationType: this.state.visualisation.visualisationType,
     };
 
-    if (vizObject.id) {
+    if (visualisation.id) {
       dispatch(actions.saveVisualisationChanges(visualisation, handleResponse));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
