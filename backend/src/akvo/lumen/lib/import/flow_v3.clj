@@ -14,6 +14,9 @@
   [question]
   (condp = [(:type question) (:repeatable question)]
     ["NUMBER" false] "number"
+    ["NUMBER" true] "multiplenumber"
+    ["FREE_TEXT" true] "multipletext"
+    ["DATE" true] "multipledate"
     ["DATE" false] "date"
     ["GEO" false] "geopoint"
     ["GEOSHAPE" false] "geoshape"

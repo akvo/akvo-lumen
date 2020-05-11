@@ -1,6 +1,7 @@
 (ns akvo.lumen.postgres
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
+            [cheshire.core :as json]
             [clojure.tools.logging :as log]
             [akvo.lumen.protocols :as p])
   (:import [org.postgis Polygon MultiPolygon PGgeometry LineString MultiPoint]
@@ -23,6 +24,11 @@
     (.setValue (.toString v))))
 
 (extend-protocol jdbc/ISQLValue
+  PersistentVector
+  (sql-value [v]
+    (doto (PGobject.)
+      (.setType "json")
+      (.setValue (json/generate-string v))))
   org.postgis.Polygon
   (sql-value [v] (val->geometry-pgobj v))
   org.postgis.MultiPolygon
@@ -75,6 +81,9 @@
     "geoline" "geometry(LINE, 4326)"
     "geopoint" "geometry(POINT, 4326)"
     "multiple" "text"
+    "multipletext" "jsonb"
+    "multiplenumber" "jsonb"
+    "multipledate" "jsonb"
     "text" "text"))
 
 (defn- column-type-fn [{:keys [id type]}]
@@ -122,9 +131,7 @@
   (coerce [value]
     (java.sql.Timestamp. (.toEpochMilli value)))
   PersistentVector
-  (coerce [value]
-    (str value)
-    )
+  (coerce [value] value)
   Geoshape
   (coerce [value]
     (let [geom (PGgeometry/geomFromString (:wkt-string value))]
