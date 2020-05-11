@@ -1,9 +1,11 @@
 (ns akvo.lumen.endpoint.env
   (:require [akvo.lumen.component.authentication]
             [akvo.lumen.component.keycloak]
+            [akvo.lumen.lib.env :as env]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
             [integrant.core :as ig]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.specs :as lumen.s]
             [ring.util.response :as response]))
 
@@ -13,7 +15,8 @@
 
 (defn handler
   [{:keys [public-client flow-api lumen-deployment-color lumen-deployment-environment
-           lumen-deployment-version piwik-site-id sentry-client-dsn]}]
+           lumen-deployment-version piwik-site-id sentry-client-dsn
+           tenant-manager]}]
   (fn [{tenant :tenant
         :as request}]
     (let [{:keys [url client-id end-session-endpoint-suffix open-id-config]} public-client]
@@ -31,7 +34,8 @@
                 "lumenDeploymentEnvironment" lumen-deployment-environment
                 "lumenDeploymentVersion" lumen-deployment-version
                 "piwikSiteId" piwik-site-id
-                "tenant" (:tenant request)}
+                "tenant" (:tenant request)
+                "environment" (env/all (p/connection tenant-manager (:tenant request)))}
          (string? sentry-client-dsn)
          (assoc "sentryDSN" sentry-client-dsn))))))
 
