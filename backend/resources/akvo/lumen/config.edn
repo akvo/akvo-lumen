@@ -160,7 +160,8 @@
                                                      #ig/ref :akvo.lumen.endpoint.share/share
                                                      #ig/ref :akvo.lumen.endpoint.transformation/transformation
                                                      #ig/ref :akvo.lumen.endpoint.user/user
-                                                     #ig/ref :akvo.lumen.endpoint.visualisation/visualisation]}
+                                                     #ig/ref :akvo.lumen.endpoint.visualisation/visualisation
+                                                     #ig/ref :akvo.lumen.endpoint.env/env]}
 
  :akvo.lumen.component.handler/handler-verify {:path "/verify"
                                                :middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
