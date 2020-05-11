@@ -223,14 +223,23 @@ class Visualisation extends Component {
       });
     };
 
-    if (this.state.visualisation.id) {
-      dispatch(actions.saveVisualisationChanges(this.state.visualisation, handleResponse));
+    // create a new visualisation object with data needed for the backend
+    const visualisation = {
+      id: this.state.visualisation.id || null,
+      datasetId: this.state.visualisation.datasetId,
+      name: this.state.visualisation.name,
+      spec: this.state.visualisation.spec,
+      visualisationType: this.state.visualisation.visualisationType,
+    };
+
+    if (vizObject.id) {
+      dispatch(actions.saveVisualisationChanges(visualisation, handleResponse));
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
       dispatch(
         actions.createVisualisation(
           this.props.history,
-          this.state.visualisation,
+          visualisation,
           get(location, 'state.collectionId'),
           handleResponse
         )
