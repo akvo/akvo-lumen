@@ -4,7 +4,8 @@
             [clojure.tools.logging :as log]
             [akvo.lumen.protocols :as p])
   (:import [org.postgis Polygon MultiPolygon PGgeometry LineString MultiPoint]
-           [org.postgresql.util PGobject]))
+           [org.postgresql.util PGobject]
+           [clojure.lang PersistentVector]))
 
 (defn escape-string [s]
   (when-not (nil? s)
@@ -120,6 +121,10 @@
   java.time.Instant
   (coerce [value]
     (java.sql.Timestamp. (.toEpochMilli value)))
+  PersistentVector
+  (coerce [value]
+    (str value)
+    )
   Geoshape
   (coerce [value]
     (let [geom (PGgeometry/geomFromString (:wkt-string value))]
