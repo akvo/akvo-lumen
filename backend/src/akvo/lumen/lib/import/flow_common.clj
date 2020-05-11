@@ -84,6 +84,17 @@
     (assoc form
            :registration-form? (= form-id (:registrationFormId survey)))))
 
+(defn rqg-responses [rqg]
+  (->> rqg
+       (reduce (fn [c i]
+                 (reduce (fn [x [k v]]
+                           (update x k conj v)) c i)) {})
+       ;; we need to reverse the values thus conj includes, and also convert to vector so collection was more json-friendly
+       (reduce (fn [c [k v]] (assoc c k (vec (reverse v))) ) {})))
+
+(defn not-rqg? [row-group-data]
+  (= 1 (count row-group-data)))
+
 ;; Transforms the structure
 ;; {question-group-id -> [{question-id -> response}]
 ;; to
@@ -92,7 +103,9 @@
   "Returns a map from question-id to the first response iteration"
   [responses]
   (->> (vals responses)
-       (map first)
+       (map #(if (not-rqg? %)
+               (first %)
+               (rqg-responses %)))
        (apply merge)))
 
 (defn commons-columns [form]
