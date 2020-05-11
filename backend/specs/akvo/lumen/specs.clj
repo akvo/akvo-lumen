@@ -4,7 +4,8 @@
             [integrant.core :as ig]
             [clojure.string :as string]
             [akvo.lumen.util :refer (squuid)]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log])
+  (:import java.util.UUID))
 
 (defn keyname [key] (str (namespace key) "/" (name key)))
 
@@ -31,7 +32,7 @@
 (defn str-uuid? [v]
   (when (some? v)
     (try
-      (uuid? (read-string (format "#uuid \"%s\"" v)))
+      (uuid? (UUID/fromString v))
       (catch Throwable t false))))
 
 (def str-uuid-gen #(s/gen (reduce (fn [c _] (conj c (str (squuid)))) #{} (range 100))))
