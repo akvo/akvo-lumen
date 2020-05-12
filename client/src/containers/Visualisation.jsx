@@ -223,8 +223,14 @@ class Visualisation extends Component {
       });
     };
 
+    // create a new visualisation object with data needed for the backend
     if (this.state.visualisation.id) {
-      dispatch(actions.saveVisualisationChanges(this.state.visualisation, handleResponse));
+      dispatch(
+        actions.saveVisualisationChanges(
+          this.state.visualisation,
+          handleResponse
+        )
+      );
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
       dispatch(
