@@ -2,12 +2,20 @@
 
  :akvo.lumen.component.http/http {:port 3000}
  :dev.endpoints.transit/middleware {}
+ :dev.endpoints.feature-flags/endpoint {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
+
+                                        :routes-opts {:middleware [#ig/ref :akvo.lumen.component.tenant-manager/wrap-label-tenant
+                                                                   #ig/ref :akvo.lumen.component.handler/wrap-defaults
+                                                                   #ig/ref :akvo.lumen.component.handler/wrap-json-body
+                                                                   #ig/ref :akvo.lumen.component.handler/wrap-json-response
+                                                                   #ig/ref :akvo.lumen.component.handler/variant]}}
  :dev.endpoints/spec {}
  :dev.endpoints/spec-api {:path "/spec"
                           :middleware [#ig/ref :dev.endpoints.transit/middleware]
                           :routes [#ig/ref :dev.endpoints/spec]}
 
  :akvo.lumen.component.handler/handler {:endpoints [["/local-development" [#ig/ref :akvo.lumen.utils.local-server/endpoint]]
+                                                    ["/local-env" [#ig/ref :dev.endpoints.feature-flags/endpoint]]
                                                     #ig/ref :dev.endpoints/spec-api]}
 
  :akvo.lumen.endpoint.env/env {:lumen-deployment-color "Local dev"

@@ -7,3 +7,10 @@
     (reduce (fn [acc {:keys [id value]}]
               (assoc acc id value))
             {} config)))
+
+(defn upsert
+  "use example (db.env/upsert-env conn {:id 'hola' :value [true]})
+  pay attention, value is represented in env table as jsonb
+  "
+  [tenant-conn id value]
+  (db.env/upsert-env tenant-conn {:id id :value value}))
