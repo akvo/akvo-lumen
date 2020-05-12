@@ -15,30 +15,27 @@
 
 (defn handler
   [{:keys [public-client flow-api lumen-deployment-color lumen-deployment-environment
-           lumen-deployment-version piwik-site-id sentry-client-dsn
-           tenant-manager]}]
+           lumen-deployment-version piwik-site-id sentry-client-dsn]}]
   (fn [{tenant :tenant
         :as request}]
     (let [{:keys [url client-id end-session-endpoint-suffix open-id-config]} public-client]
       (response/response
-       (if (get-in request [:jwt-claims "sub"])
-         {"environment" (env/all (p/connection tenant-manager (:tenant request)))}
-         (cond-> {"auth" {"clientId" client-id
-                          "url" url
-                          "domain" (:issuer open-id-config)
-                          "endpoints" {"issuer" (:issuer open-id-config)
-                                       "authorization" (:authorization_endpoint open-id-config)
-                                       "userinfo" (:userinfo_endpoint open-id-config)
-                                       "endSession" (:end_session_endpoint open-id-config (str (:issuer open-id-config) end-session-endpoint-suffix))
-                                       "jwksUri" (:jwks_uri open-id-config)}}
-                  "flowApiUrl" (:url flow-api)
-                  "lumenDeploymentColor" lumen-deployment-color
-                  "lumenDeploymentEnvironment" lumen-deployment-environment
-                  "lumenDeploymentVersion" lumen-deployment-version
-                  "piwikSiteId" piwik-site-id
-                  "tenant" (:tenant request)}
-           (string? sentry-client-dsn)
-           (assoc "sentryDSN" sentry-client-dsn)))))))
+       (cond-> {"auth" {"clientId" client-id
+                        "url" url
+                        "domain" (:issuer open-id-config)
+                        "endpoints" {"issuer" (:issuer open-id-config)
+                                     "authorization" (:authorization_endpoint open-id-config)
+                                     "userinfo" (:userinfo_endpoint open-id-config)
+                                     "endSession" (:end_session_endpoint open-id-config (str (:issuer open-id-config) end-session-endpoint-suffix))
+                                     "jwksUri" (:jwks_uri open-id-config)}}
+                "flowApiUrl" (:url flow-api)
+                "lumenDeploymentColor" lumen-deployment-color
+                "lumenDeploymentEnvironment" lumen-deployment-environment
+                "lumenDeploymentVersion" lumen-deployment-version
+                "piwikSiteId" piwik-site-id
+                "tenant" (:tenant request)}
+         (string? sentry-client-dsn)
+         (assoc "sentryDSN" sentry-client-dsn))))))
 
 (defn routes [{:keys [routes-opts] :as opts}]
   ["/env" (merge {:get {:handler (handler opts)}}

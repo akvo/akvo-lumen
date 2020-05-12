@@ -95,12 +95,13 @@ function feedUserProfile(user, env, token) {
     fn().then((response) => {
       try {
         const {
-          admin, firstName, id, lastName,
+          admin, firstName, id, lastName, environment
         } = response.body;
         userProfile.admin = admin;
         userProfile.firstName = firstName;
         userProfile.keycloakId = id;
         userProfile.lastName = lastName;
+        userProgile.environment = environment;
       } catch (e) {
         userProfile.admin = false;
         Raven.captureException(e, {
