@@ -19,6 +19,7 @@
     "GEOSHAPE" "geoshape"
     "GEO-SHAPE-FEATURES" "multiple"
     "CADDISFLY" "multiple"
+    "RQG" "multiplejson"
     "text"))
 
 (defn flow-questions [form]
@@ -78,15 +79,18 @@
 
 (defn response-data
   [form responses]
-  (let [responses (flow-common/question-responses responses)]
-    (reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
+  
+  (let [questions (flow-questions form)
+        responses (flow-common/question-responses questions responses)]
+    (reduce (fn [response-data {:keys [type id repeatable derived-id derived-fn]}]
               (if-let [response ((or derived-fn identity) (get responses (or derived-id id)))]
+                
                 (assoc response-data
                        (format "c%s" id)
                        (render-response type response))
                 response-data))
             {}
-            (flow-questions form))))
+            questions)))
 
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
