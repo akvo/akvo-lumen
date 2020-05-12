@@ -115,6 +115,12 @@ function feedUserProfile(user, env, token) {
     }));
 }
 
+function dynamicEnv(res) {
+  return Promise.resolve(
+    get('/api/env').then(envresp => ({ profile: res.profile, env: Object.assign(res.env, envresp.body) }))
+  );
+}
+
 function dispatchOnMode() {
   const queryParams = queryString.parse(location.search);
   const accessToken = queryParams.access_token;
@@ -139,6 +145,7 @@ function dispatchOnMode() {
             return feedUserProfile(user, body);
           }
         })
+        .then(res => dynamicEnv(res))
         .then((res) => {
           if (res) {
             initAuthenticated(res.profile, res.env);
