@@ -80,7 +80,7 @@ git log --oneline $NEWEST_VERSION_IN_PROD..$TEST_LIVE_VERSION | grep -v "Merge p
 TAG_NAME="promote-$(TZ=UTC date +"%Y%m%d-%H%M%S")"
 
 echo ""
-read -r -e -p "Does this deployment contain a hotfix, rollback or fix-forward for a previous deployment? [yn] " FIX
+read -r -e -p "Does this deployment contain a hotfix, rollback or fix-forward for a previous deployment? [Y/n] " FIX
 if [ "${FIX}" != "n" ] || [ "${FIX}" != "N" ]; then
    PROMOTION_REASON="FIX_RELEASE"
 else
