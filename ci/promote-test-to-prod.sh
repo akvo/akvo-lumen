@@ -81,7 +81,7 @@ TAG_NAME="promote-$(date +"%Y%m%d-%H%M%S")"
 
 echo ""
 read -r -e -p "Does this deployment contain a hotfix, rollback or fix-forward for a previous deployment? [yn] " FIX
-if [ "${FIX}" != "n" ]; then
+if [ "${FIX}" != "n" ] || [ "${FIX}" != "N" ]; then
    PROMOTION_REASON="FIX_RELEASE"
 else
    PROMOTION_REASON="REGULAR_RELEASE"
