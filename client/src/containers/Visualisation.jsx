@@ -224,22 +224,19 @@ class Visualisation extends Component {
     };
 
     // create a new visualisation object with data needed for the backend
-    const visualisation = {
-      id: this.state.visualisation.id || null,
-      datasetId: this.state.visualisation.datasetId,
-      name: this.state.visualisation.name,
-      spec: this.state.visualisation.spec,
-      visualisationType: this.state.visualisation.visualisationType,
-    };
-
-    if (visualisation.id) {
-      dispatch(actions.saveVisualisationChanges(visualisation, handleResponse));
+    if (this.state.visualisation.id) {
+      dispatch(
+        actions.saveVisualisationChanges(
+          this.state.visualisation,
+          handleResponse
+        )
+      );
     } else if (!this.state.isSavePending) {
       this.setState({ isSavePending: true });
       dispatch(
         actions.createVisualisation(
           this.props.history,
-          visualisation,
+          this.state.visualisation,
           get(location, 'state.collectionId'),
           handleResponse
         )

@@ -100,8 +100,17 @@ export function saveVisualisationChanges(visualisation, callback = () => {}) {
         })
       )
     );
+
+    const vizObject = {
+      id: visualisation.id,
+      datasetId: visualisation.datasetId,
+      name: visualisation.name,
+      spec: visualisation.spec,
+      visualisationType: visualisation.visualisationType,
+    };
+
     api
-      .put(`/api/visualisations/${visualisation.id}`, visualisation)
+      .put(`/api/visualisations/${visualisation.id}`, vizObject)
       .then(() => {
         dispatch(
           saveVisualisationChangesSuccess(
