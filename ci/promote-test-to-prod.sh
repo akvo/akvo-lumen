@@ -77,7 +77,7 @@ git log --oneline $NEWEST_VERSION_IN_PROD..$TEST_LIVE_VERSION | grep -v "Merge p
 
 "${DIR}"/helpers/generate-slack-notification.sh "${NEWEST_VERSION_IN_PROD}" "${TEST_LIVE_VERSION}" "Promoting Lumen to dark prod cluster" "good"
 
-TAG_NAME="promote-$(date +"%Y%m%d-%H%M%S")"
+TAG_NAME="promote-$(TZ=UTC date +"%Y%m%d-%H%M%S")"
 
 echo ""
 read -r -e -p "Does this deployment contain a hotfix, rollback or fix-forward for a previous deployment? [yn] " FIX
