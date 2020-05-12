@@ -2,6 +2,7 @@
   (:require [akvo.lumen.endpoint.commons.http :as http]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.env :as env]
             [akvo.lumen.protocols :as p]
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
@@ -19,7 +20,7 @@
 (defn- change-name? [body]
   (contains? body "name"))
 
-(defn routes [{:keys [authorizer] :as opts}]
+(defn routes [{:keys [authorizer tenant-manager] :as opts}]
   [["/user"
     ["/me" {:patch {:parameters {:body map?}
                     :handler (fn [{tenant :tenant
@@ -29,9 +30,15 @@
                                (user/change-names authorizer tenant jwt-claims id
                                                   firstName lastName))}}]
     ["/profile" {:get {:handler (fn [{tenant :tenant
-                                    query-params :query-params}]
-                                (let [u (user/user authorizer tenant (get query-params "email"))]
-                                  (lib/ok (select-keys u [:admin :email :firstName :id :lastName]))))}}]]
+                                      query-params :query-params}]
+                                  (let [u (user/user authorizer tenant (get query-params "email"))
+                                        environment (env/all (p/connection tenant-manager tenant))
+                                        ]
+                                    
+                                    (lib/ok (-> u
+                                                (select-keys [:admin :email :firstName :id :lastName])
+                                                (assoc :environment environment)
+                                                ))))}}]]
    ["/admin/users"
     ["" {:get {:handler (fn [{tenant :tenant}]
                           (user/users authorizer tenant))}}]

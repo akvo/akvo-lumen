@@ -88,8 +88,7 @@
                                :piwik-site-id #duct/env "LUMEN_PIWIK_SITE_ID"
                                :lumen-deployment-color #duct/env "LUMEN_DEPLOYMENT_COLOR"
                                :lumen-deployment-environment #duct/env "LUMEN_DEPLOYMENT_ENVIRONMENT"
-                               :lumen-deployment-version #duct/env "LUMEN_DEPLOYMENT_VERSION"
-                               :tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
+                               :lumen-deployment-version #duct/env "LUMEN_DEPLOYMENT_VERSION"}
 
  :akvo.lumen.endpoint.export/export {:exporter-api-url #duct/env [ "EXPORTER_API_URL" :or "http://localhost:3001" ]}
 
@@ -129,7 +128,8 @@
  :akvo.lumen.endpoint.transformation/transformation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                      :caddisfly #ig/ref :akvo.lumen.component.caddisfly/caddisfly}
 
- :akvo.lumen.endpoint.user/user {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service}
+ :akvo.lumen.endpoint.user/user {:authorizer #ig/ref :akvo.lumen.component.keycloak/authorization-service
+                                 :tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager}
 
  :akvo.lumen.endpoint.visualisation/visualisation {:tenant-manager #ig/ref :akvo.lumen.component.tenant-manager/tenant-manager
                                                    :windshaft-url "http://localhost:4000"}
