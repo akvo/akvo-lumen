@@ -134,6 +134,7 @@ const dataTypeOptions = ({
   date: [],
   geopoint: [],
   multiple: [],
+  rqg: [],
 });
 
 export default function ColumnContextMenu({

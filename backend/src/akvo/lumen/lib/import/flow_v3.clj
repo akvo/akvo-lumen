@@ -9,19 +9,7 @@
             [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
 
-
-(defn question-type->lumen-type
-  [question]
-  (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
-    "GEO" "geopoint"
-    "GEOSHAPE" "geoshape"
-    "GEO-SHAPE-FEATURES" "multiple"
-    "CADDISFLY" "multiple"
-    "text"))
-
-(defn flow-questions [form]
+(defn flow-questions [environment form]
   (reduce
    (fn [c  i]
      (if (= "GEOSHAPE" (:type i))
@@ -34,16 +22,16 @@
                                              (assoc :derived-fn (fn [x] (-> x (w/keywordize-keys) :features first :properties)))
                                              (update :name (fn [o] (str o " Features" )))
                                              (assoc :id id)))) [i] (range 1)))
-       (conj c i))) [] (flow-common/questions form)))
+       (conj c i))) [] (flow-common/questions environment form)))
 
 (defn dataset-columns
   "returns a vector of [{:title :type :id :key}]
   `:key` is optional"
-  [form]
-  (let [questions (flow-questions form)]
+  [environment form]
+  (let [questions (flow-questions environment form)]
     (into (flow-common/commons-columns form)
           (into [{:title "Device Id" :type "text" :id "device_id"}]
-                (common/coerce question-type->lumen-type questions)))))
+                (common/coerce flow-common/question-type->lumen-type questions)))))
 
 (defn render-response
   [type response]
@@ -77,16 +65,19 @@
     (v2/render-response type response)))
 
 (defn response-data
-  [form responses]
-  (let [responses (flow-common/question-responses responses)]
-    (reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
+  [environment form responses]
+  
+  (let [questions (flow-questions environment form)
+        responses (flow-common/question-responses questions responses)]
+    (reduce (fn [response-data {:keys [type id repeatable derived-id derived-fn]}]
               (if-let [response ((or derived-fn identity) (get responses (or derived-id id)))]
+                
                 (assoc response-data
                        (format "c%s" id)
                        (render-response type response))
                 response-data))
             {}
-            (flow-questions form))))
+            questions)))
 
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
