@@ -145,6 +145,7 @@
 (defmulti column-body (fn[{:keys [type] :as o}] type))
 
 (s/def ::c.text/body (s/keys :req-un [::c.text/type ::c.text/value]))
+(s/def ::c.text/body (s/keys :req-un [::c.rqg/type ::c.rqg/value]))
 (s/def ::c.number/body (s/keys :req-un [::c.number/type ::c.number/value]))
 (s/def ::c.date/body (s/keys :req-un [::c.date/type ::c.date/value]))
 (s/def ::c.multiple/body (s/keys :req-un [::c.multiple/type ::c.multiple/value]))
@@ -152,6 +153,7 @@
 (s/def ::c.geopoint/body (s/keys :req-un [::c.geopoint/type ::c.geopoint/value]))
 
 (defmethod column-body "text" [_] ::c.text/body)
+(defmethod column-body "rqg" [_] ::c.rqg/body)
 (defmethod column-body "number" [_] ::c.number/body)
 (defmethod column-body "date" [_] ::c.date/body)
 (defmethod column-body "multiple" [_] ::c.multiple/body)
@@ -164,6 +166,8 @@
 
 (defmethod column "text" [_]
   (s/keys :req-un [::c.text/header ::c.text/body]))
+(defmethod column "rqg" [_]
+  (s/keys :req-un [::c.rqg/header ::c.text/body]))
 (defmethod column "number" [_]
   (s/keys :req-un [::c.number/header ::c.number/body]))
 (defmethod column "date" [_]
