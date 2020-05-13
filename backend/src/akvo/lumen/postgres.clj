@@ -4,7 +4,8 @@
             [clojure.tools.logging :as log]
             [akvo.lumen.protocols :as p])
   (:import [org.postgis Polygon MultiPolygon PGgeometry LineString MultiPoint]
-           [org.postgresql.util PGobject]))
+           [org.postgresql.util PGobject]
+           [clojure.lang PersistentVector]))
 
 (defn escape-string [s]
   (when-not (nil? s)
@@ -74,6 +75,7 @@
     "geoline" "geometry(LINE, 4326)"
     "geopoint" "geometry(POINT, 4326)"
     "multiple" "text"
+    "rqg" "text"
     "text" "text"))
 
 (defn- column-type-fn [{:keys [id type]}]
@@ -120,6 +122,9 @@
   java.time.Instant
   (coerce [value]
     (java.sql.Timestamp. (.toEpochMilli value)))
+  PersistentVector
+  (coerce [value]
+    value)
   Geoshape
   (coerce [value]
     (let [geom (PGgeometry/geomFromString (:wkt-string value))]
