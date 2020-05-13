@@ -63,7 +63,7 @@
 
 (defn- js-factory [] (NashornScriptEngineFactory.))
 
-(defn nashorn-depreciated? []
+(defn nashorn-deprecated? []
   (>= (-> (System/getProperty "java.version")
           (string/split #"\.")
           first
@@ -73,7 +73,7 @@
 (defn script-engine [factory]
   (if (nashorn-depreciated?)
     (.getScriptEngine factory
-                      (into-array String ["--no-deprecation-warning"])
+                      (into-array String ["--no-deprecation-warning" "--language=es6"])
                       nil class-filter)
     (.getScriptEngine factory class-filter)))
 
@@ -110,7 +110,7 @@
 (defn evaluable? [code]
   (and (not (str/includes? code "function"))
        (not (str/includes? code "=>"))
-       (let [try-code (column-function "try_js_sintax" code)]
+       (let [try-code (column-function "try_js_syntax" code)]
          (try
            (eval* (js-engine) try-code)
            true
