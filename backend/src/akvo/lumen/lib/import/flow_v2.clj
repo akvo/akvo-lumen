@@ -77,6 +77,10 @@
   [_ response]
   (json/generate-string response))
 
+(defmethod render-response "RQG"
+  [_ response]
+  response)
+
 (defmethod render-response "GEO-SHAPE-FEATURES"
   [_ response]
   (json/generate-string response))
@@ -87,7 +91,8 @@
 
 (defn response-data
   [form responses]
-  (let [responses (flow-common/question-responses responses)]
+  (let [questions (flow-common/questions form)
+        responses (flow-common/question-responses questions responses)]
     (reduce (fn [response-data {:keys [type id]}]
               (if-let [response (get responses id)]
                 (assoc response-data
@@ -95,7 +100,7 @@
                        (render-response type response))
                 response-data))
             {}
-            (flow-common/questions form))))
+            questions)))
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
