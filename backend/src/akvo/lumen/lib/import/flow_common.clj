@@ -4,6 +4,7 @@
    [akvo.lumen.http.client :as http.client]
    [cheshire.core :as json]
    [clojure.java.jdbc :as jdbc]
+   [clojure.set :as set]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [diehard.core :as dh])
@@ -105,7 +106,7 @@
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
   [questions responses]
-  (let [ids-to-adapt (clojure.set/intersection
+  (let [ids-to-adapt (set/intersection
                       (set (map :id (filter :repeatable questions)))
                       (set (keys responses)))
         adapted-responses (reduce
