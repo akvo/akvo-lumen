@@ -80,7 +80,8 @@
     "RQG" "rqg"
     "text"))
 
-(defn questions
+
+(defn questions-v2
   "Get the list of questions from a form"
   [form]
   (->> (:questionGroups form)
@@ -102,6 +103,19 @@
                              (repeat [(:id %2)
                                       (str/trim (:name %2))
                                       (:repeatable %2)]))) [])))
+
+(defn questions-v1 [form]
+  (->> (:questionGroups form)
+       (reduce #(into % (map (fn [q* [group-id group-name]]
+                               (assoc q* :groupId group-id :groupName group-name))
+                             (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) [])))
+
+(defn questions
+  "Get the list of questions from a form"
+  [environment form]
+  (if (first (get environment "rqg"))
+    (questions-v2 form)
+    (questions-v1 form)))
 
 (defn form
   "Get a form by id from a survey"

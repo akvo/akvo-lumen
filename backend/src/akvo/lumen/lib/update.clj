@@ -3,6 +3,7 @@
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.env :as env]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
@@ -115,7 +116,9 @@
 
 (defn- do-update [tenant-conn caddisfly import-config dataset-id data-source-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
-    (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
+    (with-open [importer (import/dataset-importer (get data-source-spec "source")
+                                                  (assoc import-config
+                                                         :environment (env/all conn)))]
       (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)

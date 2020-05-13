@@ -14,7 +14,7 @@
 
 (defmethod import/dataset-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId token email version] :as spec}
-   {:keys [flow-api] :as config}]
+   {:keys [flow-api environment] :as config}]
   (let [version (if version version 1)
         headers-fn #((:internal-api-headers flow-api) {:email email :token token})
         survey (delay (flow-common/survey-definition (:internal-url flow-api)
@@ -28,8 +28,8 @@
       (columns [this]
         (try
           (cond
-            (<= version 2) (v2/dataset-columns (flow-common/form @survey formId))
-            (<= version 3) (v3/dataset-columns (flow-common/form @survey formId)))
+            (<= version 2) (v2/dataset-columns environment (flow-common/form @survey formId))
+            (<= version 3) (v3/dataset-columns environment (flow-common/form @survey formId)))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (do
@@ -42,8 +42,8 @@
       (records [this]
         (try
           (cond
-            (<= version 2) (v2/form-data headers-fn @survey formId)
-            (<= version 3) (v3/form-data headers-fn instance @survey formId))
+            (<= version 2) (v2/form-data environment headers-fn @survey formId)
+            (<= version 3) (v3/form-data environment headers-fn instance @survey formId))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
