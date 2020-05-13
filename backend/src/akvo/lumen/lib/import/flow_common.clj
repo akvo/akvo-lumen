@@ -1,9 +1,11 @@
 (ns akvo.lumen.lib.import.flow-common
   (:require
    [akvo.commons.psql-util :as pg]
+   [akvo.lumen.lib.import.common :as common]
    [akvo.lumen.http.client :as http.client]
    [cheshire.core :as json]
    [clojure.java.jdbc :as jdbc]
+   [clojure.set :as set]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [diehard.core :as dh])
@@ -66,13 +68,54 @@
              (data-points* headers-fn url))
       (into all-data-points (get response "dataPoints")))))
 
-(defn questions
+(defn question-type->lumen-type
+  [question]
+  (condp = (:type question)
+    "NUMBER" "number"
+    "DATE" "date"
+    "GEO" "geopoint"
+    "GEOSHAPE" "geoshape"
+    "GEO-SHAPE-FEATURES" "multiple"
+    "CADDISFLY" "multiple"
+    "RQG" "rqg"
+    "text"))
+
+
+(defn questions-v2
   "Get the list of questions from a form"
   [form]
+  (->> (:questionGroups form)
+       (reduce #(into % (map (fn [q* [group-id group-name repeatable]]
+                               (assoc q*
+                                      :groupId group-id
+                                      :groupName group-name
+                                      :repeatable repeatable
+                                      ))
+                             (if (:repeatable %2)
+                               (let [rqg (-> (:questions %2) 
+                                             first ;; we take the first repeatable question of this QG and adapt its props
+                                             (assoc :id (:id %2))
+                                             (assoc :name (str (:name %2) "_Q"))
+                                             (assoc :metadata (common/coerce question-type->lumen-type (:questions %2)))
+                                             (assoc :type "RQG"))]
+                                 [rqg])
+                               (:questions %2))
+                             (repeat [(:id %2)
+                                      (str/trim (:name %2))
+                                      (:repeatable %2)]))) [])))
+
+(defn questions-v1 [form]
   (->> (:questionGroups form)
        (reduce #(into % (map (fn [q* [group-id group-name]]
                                (assoc q* :groupId group-id :groupName group-name))
                              (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) [])))
+
+(defn questions
+  "Get the list of questions from a form"
+  [environment form]
+  (if (first (get environment "rqg"))
+    (questions-v2 form)
+    (questions-v1 form)))
 
 (defn form
   "Get a form by id from a survey"
@@ -90,10 +133,18 @@
 ;; {question-id -> first-response}
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
-  [responses]
-  (->> (vals responses)
-       (map first)
-       (apply merge)))
+  [questions responses]
+  (let [ids-to-adapt (set/intersection
+                      (set (map :id (filter :repeatable questions)))
+                      (set (keys responses)))
+        adapted-responses (reduce
+                           (fn [c id]
+                             (assoc c id [{id (get c id)}]))
+                           responses
+                           ids-to-adapt)]
+    (->> (vals adapted-responses)
+         (map first)
+         (apply merge))))
 
 (defn commons-columns [form]
   [(cond-> {:title "Identifier" :type "text" :id "identifier"}

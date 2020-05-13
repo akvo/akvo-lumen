@@ -38,6 +38,7 @@
             {:title (:name q)
              :type t
              :groupId (:groupId q)
+             :metadata (:metadata q)
              :groupName (:groupName q)
              :id (format "c%s" (:id q))}
             (when (= t "multiple")
