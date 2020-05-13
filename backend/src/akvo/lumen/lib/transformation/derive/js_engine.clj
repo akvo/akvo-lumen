@@ -108,13 +108,11 @@
           res)))))
 
 (defn evaluable? [code]
-  (and (not (str/includes? code "function"))
-       (not (str/includes? code "=>"))
-       (let [try-code (column-function "try_js_syntax" code)]
-         (try
-           (eval* (js-engine) try-code)
-           true
-           ;; Catches syntax errors
-           (catch Exception e
-             (log/warn :not-valid-js try-code)
-             false)))))
+  (let [try-code (column-function "try_js_syntax" code)]
+    (try
+      (eval* (js-engine) try-code)
+      true
+      ;; Catches syntax errors
+      (catch Exception e
+        (log/warn :not-valid-js try-code)
+        false))))
