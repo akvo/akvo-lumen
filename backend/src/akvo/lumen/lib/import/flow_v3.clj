@@ -9,18 +9,6 @@
             [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
 
-
-(defn question-type->lumen-type
-  [question]
-  (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
-    "GEO" "geopoint"
-    "GEOSHAPE" "geoshape"
-    "GEO-SHAPE-FEATURES" "multiple"
-    "CADDISFLY" "multiple"
-    "text"))
-
 (defn flow-questions [form]
   (reduce
    (fn [c  i]
@@ -43,7 +31,7 @@
   (let [questions (flow-questions form)]
     (into (flow-common/commons-columns form)
           (into [{:title "Device Id" :type "text" :id "device_id"}]
-                (common/coerce question-type->lumen-type questions)))))
+                (common/coerce flow-common/question-type->lumen-type questions)))))
 
 (defn render-response
   [type response]
@@ -78,15 +66,18 @@
 
 (defn response-data
   [form responses]
-  (let [responses (flow-common/question-responses responses)]
-    (reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
+  
+  (let [questions (flow-questions form)
+        responses (flow-common/question-responses questions responses)]
+    (reduce (fn [response-data {:keys [type id repeatable derived-id derived-fn]}]
               (if-let [response ((or derived-fn identity) (get responses (or derived-id id)))]
+                
                 (assoc response-data
                        (format "c%s" id)
                        (render-response type response))
                 response-data))
             {}
-            (flow-questions form))))
+            questions)))
 
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
