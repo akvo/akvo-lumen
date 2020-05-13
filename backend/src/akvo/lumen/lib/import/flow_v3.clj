@@ -9,19 +9,6 @@
             [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
 
-
-(defn question-type->lumen-type
-  [question]
-  (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
-    "GEO" "geopoint"
-    "GEOSHAPE" "geoshape"
-    "GEO-SHAPE-FEATURES" "multiple"
-    "CADDISFLY" "multiple"
-    "RQG" "rqg"
-    "text"))
-
 (defn flow-questions [form]
   (reduce
    (fn [c  i]
@@ -44,7 +31,7 @@
   (let [questions (flow-questions form)]
     (into (flow-common/commons-columns form)
           (into [{:title "Device Id" :type "text" :id "device_id"}]
-                (common/coerce question-type->lumen-type questions)))))
+                (common/coerce flow-common/question-type->lumen-type questions)))))
 
 (defn render-response
   [type response]

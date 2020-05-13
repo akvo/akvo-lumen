@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.flow-common
   (:require
    [akvo.commons.psql-util :as pg]
+   [akvo.lumen.lib.import.common :as common]
    [akvo.lumen.http.client :as http.client]
    [cheshire.core :as json]
    [clojure.java.jdbc :as jdbc]
@@ -66,6 +67,18 @@
       (recur (into all-data-points (get response "dataPoints"))
              (data-points* headers-fn url))
       (into all-data-points (get response "dataPoints")))))
+
+(defn question-type->lumen-type
+  [question]
+  (condp = (:type question)
+    "NUMBER" "number"
+    "DATE" "date"
+    "GEO" "geopoint"
+    "GEOSHAPE" "geoshape"
+    "GEO-SHAPE-FEATURES" "multiple"
+    "CADDISFLY" "multiple"
+    "RQG" "rqg"
+    "text"))
 
 (defn questions
   "Get the list of questions from a form"
