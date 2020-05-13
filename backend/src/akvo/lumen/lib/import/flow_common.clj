@@ -4,6 +4,7 @@
    [akvo.lumen.http.client :as http.client]
    [cheshire.core :as json]
    [clojure.java.jdbc :as jdbc]
+   [clojure.set :as set]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [diehard.core :as dh])
@@ -70,9 +71,23 @@
   "Get the list of questions from a form"
   [form]
   (->> (:questionGroups form)
-       (reduce #(into % (map (fn [q* [group-id group-name]]
-                               (assoc q* :groupId group-id :groupName group-name))
-                             (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) [])))
+       (reduce #(into % (map (fn [q* [group-id group-name repeatable]]
+                               (assoc q*
+                                      :groupId group-id
+                                      :groupName group-name
+                                      :repeatable repeatable
+                                      ))
+                             (if (:repeatable %2)
+                               (do
+                                 ;; we take the first repeatable question of this QG and adapt its props
+                                 [(-> (:questions %2)
+                                     first
+                                     (assoc :id (:id %2))
+                                     (assoc :name (str (:name %2) "_Q"))
+                                     (assoc :type "RQG"))])
+                                 (:questions %2)) (repeat [(:id %2)
+                                                        (str/trim (:name %2))
+                                                        (:repeatable %2)]))) [])))
 
 (defn form
   "Get a form by id from a survey"
@@ -90,10 +105,18 @@
 ;; {question-id -> first-response}
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
-  [responses]
-  (->> (vals responses)
-       (map first)
-       (apply merge)))
+  [questions responses]
+  (let [ids-to-adapt (set/intersection
+                      (set (map :id (filter :repeatable questions)))
+                      (set (keys responses)))
+        adapted-responses (reduce
+                           (fn [c id]
+                             (assoc c id [{id (get c id)}]))
+                           responses
+                           ids-to-adapt)]
+    (->> (vals adapted-responses)
+         (map first)
+         (apply merge))))
 
 (defn commons-columns [form]
   [(cond-> {:title "Identifier" :type "text" :id "identifier"}
