@@ -20,8 +20,6 @@ function formatCellValue(type, value) {
       return value == null ? null : moment(value).format();
     case 'geoshape':
       return '<geoshape>';
-    case 'rqg':
-      return JSON.stringify(value);
     default:
       return value;
   }
