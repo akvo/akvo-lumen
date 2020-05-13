@@ -71,7 +71,7 @@
       11))
 
 (defn script-engine [factory]
-  (if (nashorn-depreciated?)
+  (if (nashorn-deprecated?)
     (.getScriptEngine factory
                       (into-array String ["--no-deprecation-warning" "--language=es6"])
                       nil class-filter)
