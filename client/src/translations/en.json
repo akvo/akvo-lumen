@@ -169,7 +169,7 @@
   "is_less_or_equal_to": "is less than or equal to",
   "is_greater_or_equal_to": "is greater than or equal to",
   "javascript_code": "Javascript code",
-  "js_helptext": "Derived columns are formulas written using a subset of Javascript where a single expression is allowed and columns are referenced as {columnSyntax} or alternatively if the title is a valid javascript identifier: {title}. Javascript code can't contain the word {funct} nor the sign {arrowFunct}",
+  "js_helptext": "Derived columns are formulas written using a subset of Javascript where a single expression is allowed and columns are referenced as {columnSyntax} or alternatively if the title is a valid javascript identifier: {title}.",
   "keep_rows_in_which": "keep rows in which",
   "label": "Label",
   "last_modified": "Last modified",

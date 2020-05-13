@@ -41,15 +41,22 @@ const errorStrategies = [
 
 function isValidCode(code) {
   try {
-    const ast = esprima.parse(code);
+    const statements = [];
+    const ast = esprima.parse(code, {}, (node) => {
+      if (node.type.indexOf('Statement') !== -1) {
+        statements.push(node.type);
+      }
+    });
+
+    if (statements.length === 1 && statements[0] !== 'ExpressionStatement') {
+      return false;
+    }
+
     if (ast.body.length !== 1) {
       return false;
     }
     const expressionStatement = ast.body[0];
     if (expressionStatement.type !== 'ExpressionStatement') {
-      return false;
-    }
-    if (code.indexOf('function') !== -1 || code.indexOf('=>') !== -1) {
       return false;
     }
     return true;
