@@ -145,7 +145,7 @@
 (defmulti column-body (fn[{:keys [type] :as o}] type))
 
 (s/def ::c.text/body (s/keys :req-un [::c.text/type ::c.text/value]))
-(s/def ::c.text/body (s/keys :req-un [::c.rqg/type ::c.rqg/value]))
+(s/def ::c.rqg/body (s/keys :req-un [::c.rqg/type ::c.rqg/value]))
 (s/def ::c.number/body (s/keys :req-un [::c.number/type ::c.number/value]))
 (s/def ::c.date/body (s/keys :req-un [::c.date/type ::c.date/value]))
 (s/def ::c.multiple/body (s/keys :req-un [::c.multiple/type ::c.multiple/value]))
