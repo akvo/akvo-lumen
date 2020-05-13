@@ -19,7 +19,7 @@
     "GEOSHAPE" "geoshape"
     "GEO-SHAPE-FEATURES" "multiple"
     "CADDISFLY" "multiple"
-    "RQG" "multiplejson"
+    "RQG" "rqg"
     "text"))
 
 (defn flow-questions [form]

@@ -81,7 +81,7 @@
     "geoline" "geometry(LINE, 4326)"
     "geopoint" "geometry(POINT, 4326)"
     "multiple" "text"
-    "multiplejson" "jsonb"
+    "rqg" "jsonb"
     "text" "text"))
 
 (defn- column-type-fn [{:keys [id type]}]
