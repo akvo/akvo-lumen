@@ -91,16 +91,17 @@
                                       :repeatable repeatable
                                       ))
                              (if (:repeatable %2)
-                               (do
-                                 ;; we take the first repeatable question of this QG and adapt its props
-                                 [(-> (:questions %2)
-                                     first
-                                     (assoc :id (:id %2))
-                                     (assoc :name (str (:name %2) "_Q"))
-                                     (assoc :type "RQG"))])
-                                 (:questions %2)) (repeat [(:id %2)
-                                                        (str/trim (:name %2))
-                                                        (:repeatable %2)]))) [])))
+                               (let [rqg (-> (:questions %2) 
+                                             first ;; we take the first repeatable question of this QG and adapt its props
+                                             (assoc :id (:id %2))
+                                             (assoc :name (str (:name %2) "_Q"))
+                                             (assoc :metadata (common/coerce question-type->lumen-type (:questions %2)))
+                                             (assoc :type "RQG"))]
+                                 [rqg])
+                               (:questions %2))
+                             (repeat [(:id %2)
+                                      (str/trim (:name %2))
+                                      (:repeatable %2)]))) [])))
 
 (defn form
   "Get a form by id from a survey"
