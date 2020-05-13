@@ -17,10 +17,12 @@
 (create-ns  'akvo.lumen.specs.import.column.date)
 (create-ns  'akvo.lumen.specs.import.column.geoshape)
 (create-ns  'akvo.lumen.specs.import.column.geopoint)
+(create-ns  'akvo.lumen.specs.import.column.rqg)
 (create-ns  'akvo.lumen.specs.import.column.multiple)
 (create-ns  'akvo.lumen.specs.import.column.multiple.caddisfly)
 (create-ns 'akvo.lumen.specs.import.column.multiple.geo-shape-features)
 
+(alias 'c.rqg 'akvo.lumen.specs.import.column.rqg)
 (alias 'c.text 'akvo.lumen.specs.import.column.text)
 (alias 'c.number 'akvo.lumen.specs.import.column.number)
 (alias 'c.date 'akvo.lumen.specs.import.column.date)
@@ -38,12 +40,16 @@
 (s/def ::c.geoshape/type #{"geoshape"})
 (s/def ::c.geopoint/type #{"geopoint"})
 (s/def ::c.multiple/type #{"multiple"})
+(s/def ::c.rqg/type #{"rqg"})
 
 (s/def ::column-header (s/keys :req-un [::v/title]
                                :opt-un [::v/id]))
 
 (s/def ::c.text/header* (s/keys :req-un [::c.text/type] :opt-un [::v/key]))
 (s/def ::c.text/header (s/merge ::column-header ::c.text/header*))
+
+(s/def ::c.rqg/header* (s/keys :req-un [::c.rqg/type] :opt-un [::v/key]))
+(s/def ::c.rqg/header (s/merge ::column-header ::c.rqg/header*))
 
 (s/def ::c.number/header* (s/keys :req-un [::c.number/type]))
 (s/def ::c.number/header (s/merge ::column-header ::c.number/header*))
@@ -77,6 +83,7 @@
 (s/def ::c.multiple/header (s/merge ::column-header ::c.multiple/header*))
 
 (defmulti column-header :type)
+(defmethod column-header "rqg" [_] ::c.rqg/header)
 (defmethod column-header "text" [_] ::c.text/header)
 (defmethod column-header "date" [_] ::c.date/header)
 (defmethod column-header "number" [_] ::c.number/header)
@@ -87,6 +94,8 @@
 (s/def ::header (s/multi-spec column-header :type))
 
 (s/def ::c.text/value string?)
+
+(s/def ::c.rqg/value any?)
 
 (s/def ::c.number/value double?)
 
