@@ -82,14 +82,14 @@
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
   instances and pulls additional data-point data using the forms data-point-id."
-  [headers-fn instance survey form-id]
+  [environment headers-fn instance survey form-id]
   (let [form (flow-common/form survey form-id)
         data-points (util/index-by
                      "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")]
              (if-let [data-point (get data-points data-point-id)]
-               (merge (response-data form (get form-instance "responses"))
+               (merge (response-data environment form (get form-instance "responses"))
                       (flow-common/common-records form-instance data-point)
                       {:device_id (get form-instance "deviceIdentifier")})
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"

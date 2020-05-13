@@ -96,13 +96,13 @@
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
-  [_ headers-fn survey form-id]
+  [environment headers-fn survey form-id]
   (let [form (flow-common/form survey form-id)
         data-points (util/index-by "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")
                  data-point (get data-points data-point-id)]
-             (merge (response-data form (get form-instance "responses"))
+             (merge (response-data environment form (get form-instance "responses"))
                     (flow-common/common-records form-instance data-point)
                     {:latitude (get-in data-points [data-point-id "latitude"])
                      :longitude (get-in data-points [data-point-id "longitude"])})))
