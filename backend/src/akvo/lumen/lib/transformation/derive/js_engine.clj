@@ -9,7 +9,7 @@
    [clojure.string :as string]
    [clojure.tools.logging :as log])
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
-           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]
+           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter ScriptObjectMirror]
            [java.lang Double]))
 
 (defn- throw-invalid-return-type [value]
@@ -18,7 +18,7 @@
                    :type (type value)})))
 
 (defn- column-function [fun code]
-  (format "var %s = function(row) {  return %s; }" fun code))
+  (format "var %s = function(row) { return %s; }" fun code))
 
 (defn- valid-type? [value t]
   (when-not (nil? value)
@@ -104,15 +104,21 @@
                      (adapter)
                      (invoke* engine fun-name))]
         (if (some? column-type)
-          (valid-type? res column-type)
-          res)))))
+            (valid-type? res column-type)
+            res)))))
+
+(defn- parse [^String code]
+  (let [factory (js-factory)
+        engine (script-engine factory)]
+    (eval* engine "load('nashorn:parser.js')")
+    (.put engine "source_code" code)
+    (.values ^ScriptObjectMirror (eval* engine "const sts=[]; parse(source_code, {}, (node) => { if(node.type.indexOf('Statement') !== -1) {sts.push(node.type)}}); sts"))))
+
 
 (defn evaluable? [code]
-  (let [try-code (column-function "try_js_syntax" code)]
-    (try
-      (eval* (js-engine) try-code)
-      true
-      ;; Catches syntax errors
-      (catch Exception e
-        (log/warn :not-valid-js try-code)
-        false))))
+  (try
+    (let [parsed (parse code)]
+      (= parsed ["ExpressionStatement"]))
+    (catch Exception e
+      (log/warn :not-valid-js code)
+      false)))
