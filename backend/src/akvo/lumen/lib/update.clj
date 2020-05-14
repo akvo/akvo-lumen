@@ -131,7 +131,18 @@
             columns-used-in-vizs (map (fn [[id name columns]]
                                         [id name (map load-column columns)])
                                       (visualisation/visualisations-dataset-columns tenant-conn dataset-id))
-
+            imported-dataset-columns-names  (set (map #(get % "columnName") imported-dataset-columns))
+            conflict-viz-errors (->> columns-used-in-vizs
+                                     (map (fn [[id name columns]]
+                                            (if-let [conflict-columns (seq (reduce (fn [c column]
+                                                                                     (if-not (contains? imported-dataset-columns-names (:columnName column))
+                                                                                       (conj c (:title c))
+                                                                                       c)) [] columns))]
+                                              [id name conflict-columns]
+                                              nil)))
+                                     (filter some?)
+                                     seq)
+            _ (log/error :conflict-viz-errors conflict-viz-errors)
             imported-dataset-columns-checked (reduce (fn [c co]
                                                        (if (contains? columns-used-in-txs (get co "columnName"))
                                                          (conj c co)
