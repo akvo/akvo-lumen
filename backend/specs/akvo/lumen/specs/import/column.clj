@@ -20,6 +20,7 @@
 (create-ns  'akvo.lumen.specs.import.column.multiple)
 (create-ns  'akvo.lumen.specs.import.column.multiple.caddisfly)
 (create-ns 'akvo.lumen.specs.import.column.multiple.geo-shape-features)
+(create-ns  'akvo.lumen.specs.import.column.rqg)
 
 (alias 'c.text 'akvo.lumen.specs.import.column.text)
 (alias 'c.number 'akvo.lumen.specs.import.column.number)
@@ -29,8 +30,9 @@
 (alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
 (alias 'c.multiple.caddisfly 'akvo.lumen.specs.import.column.multiple.caddisfly)
 (alias 'c.multiple.geo-shape-features 'akvo.lumen.specs.import.column.multiple.geo-shape-features)
+(alias 'c.rqg 'akvo.lumen.specs.import.column.rqg)
 
-(s/def ::type #{"text" "number" "date" "geoshape" "geopoint" "multiple"})
+(s/def ::type #{"text" "number" "date" "geoshape" "geopoint" "multiple" "rqg"})
 
 (s/def ::c.text/type #{"text"})
 (s/def ::c.number/type #{"number"})
@@ -38,6 +40,7 @@
 (s/def ::c.geoshape/type #{"geoshape"})
 (s/def ::c.geopoint/type #{"geopoint"})
 (s/def ::c.multiple/type #{"multiple"})
+(s/def ::c.rqg/type #{"rqg"})
 
 (s/def ::column-header (s/keys :req-un [::v/title]
                                :opt-un [::v/id]))
@@ -76,6 +79,9 @@
 
 (s/def ::c.multiple/header (s/merge ::column-header ::c.multiple/header*))
 
+(s/def ::c.rqg/header* (s/keys :req-un [::c.rqg/type] :opt-un [::v/key]))
+(s/def ::c.rqg/header (s/merge ::column-header ::c.rqg/header*))
+
 (defmulti column-header :type)
 (defmethod column-header "text" [_] ::c.text/header)
 (defmethod column-header "date" [_] ::c.date/header)
@@ -83,6 +89,7 @@
 (defmethod column-header "geoshape" [_] ::c.geoshape/header)
 (defmethod column-header "geopoint" [_] ::c.geopoint/header)
 (defmethod column-header "multiple" [_] ::c.multiple/header)
+(defmethod column-header "rqg" [_] ::c.rqg/header)
 
 (s/def ::header (s/multi-spec column-header :type))
 
@@ -132,6 +139,7 @@
                             #(instance? Geopoint %)
                             #(s/gen #{(Geopoint. v/point)})))
 
+(s/def ::c.rqg/value (s/coll-of map? :kind vector?))
 
 (defmulti column-body (fn[{:keys [type] :as o}] type))
 
@@ -141,6 +149,7 @@
 (s/def ::c.multiple/body (s/keys :req-un [::c.multiple/type ::c.multiple/value]))
 (s/def ::c.geoshape/body (s/keys :req-un [::c.geoshape/type ::c.geoshape/value]))
 (s/def ::c.geopoint/body (s/keys :req-un [::c.geopoint/type ::c.geopoint/value]))
+(s/def ::c.rqg/body (s/keys :req-un [::c.rqg/type ::c.rqg/value]))
 
 (defmethod column-body "text" [_] ::c.text/body)
 (defmethod column-body "number" [_] ::c.number/body)
@@ -148,6 +157,7 @@
 (defmethod column-body "multiple" [_] ::c.multiple/body)
 (defmethod column-body "geoshape" [_] ::c.geoshape/body)
 (defmethod column-body "geopoint" [_] ::c.geopoint/body)
+(defmethod column-body "rqg" [_] ::c.rqg/body)
 
 (s/def ::body  (s/multi-spec column-body (fn [a b] a)))
 
@@ -165,5 +175,7 @@
   (s/keys :req-un [::c.geoshape/header ::c.geoshape/body]))
 (defmethod column "geopoint" [_]
   (s/keys :req-un [::c.geopoint/header ::c.geopoint/body]))
+(defmethod column "rqg" [_]
+  (s/keys :req-un [::c.rqg/header ::c.rqg/body]))
 
 (s/def ::column (s/multi-spec column (fn [a b] a)))
