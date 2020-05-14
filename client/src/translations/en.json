@@ -249,6 +249,7 @@
   "prefix": "New column prefix",
   "previous": "Previous",
   "raster": "Raster",
+  "rqg": "Multiple",
   "remove_collection": "Remove from {title}",
   "remove_double_space": "Remove double space",
   "remove_leading_and_trailing_whitespace": "Remove leading and trailing whitespace",
