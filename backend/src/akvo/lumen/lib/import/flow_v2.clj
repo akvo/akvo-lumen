@@ -69,6 +69,10 @@
   [_ response]
   (json/generate-string response))
 
+(defmethod render-response "RQG"
+  [_ response]
+  response)
+
 (defmethod render-response "GEO-SHAPE-FEATURES"
   [_ response]
   (json/generate-string response))
