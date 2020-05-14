@@ -4,6 +4,7 @@
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
@@ -125,6 +126,12 @@
                                   (import/importer-type (get data-source-spec "source"))
                                   initial-dataset-version
                                   latest-dataset-version)
+
+            columns-used-in-vizs (seq (visualisation/visualisations-dataset-columns tenant-conn dataset-id))
+
+
+            _ (log/error :importer-columns importer-columns)
+            _ (log/error :viz-columns-used columns-used-in-vizs)
 
             imported-dataset-columns-checked (reduce (fn [c co]
                                                        (if (contains? columns-used-in-txs (get co "columnName"))
