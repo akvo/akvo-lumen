@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.visualisation
   (:require [akvo.lumen.db.visualisation :as db.visualisation]
+            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
+            [clojure.walk :as walk]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.util :refer [squuid]])
   (:import [java.sql SQLException]))
@@ -54,3 +56,9 @@
    {:dataset-id dataset-id}
    {}
    {:identifiers identity})))
+
+(defn visualisations-dataset-columns [tenant-conn dataset-id]
+ (->> (visualisations-by-dataset-id tenant-conn dataset-id)
+      (map #(let [{:keys [spec visualisationType id name] :as viz} (walk/keywordize-keys %)
+                  columns (aggregation.commons/spec-columns :akvo.lumen.specs.visualisation/visualisation viz )]
+              [id name columns]))))

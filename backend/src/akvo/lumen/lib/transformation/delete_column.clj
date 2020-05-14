@@ -1,10 +1,8 @@
 (ns akvo.lumen.lib.transformation.delete-column
   (:require [akvo.lumen.db.transformation.engine :as db.tx.engine]
-            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]
             [akvo.lumen.lib.visualisation :as visualisation]
-            [akvo.lumen.specs.visualisation :as s.visualisation]
             [akvo.lumen.util :as util]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -25,20 +23,14 @@
        (filter (fn [[distinct-columns _]]
                  (not-empty (filter #(= % column-name) distinct-columns))))))
 
-(defn visualisations-with-dataset-column [tenant-conn dataset-id column-name]
- (->> (visualisation/visualisations-by-dataset-id tenant-conn dataset-id)
-      (map #(let [{:keys [spec visualisationType id name] :as viz} (walk/keywordize-keys %)
-                  columns (aggregation.commons/spec-columns ::s.visualisation/visualisation viz )]
-              [id name columns]))
-      (filter (fn [[id name columns]]
-                (some #(= % column-name) columns)))))
-
 (defmethod engine/apply-operation "core/delete-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [column-name (col-name op-spec)
         merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]
     (if (empty? merged-sources)
-      (if-let [existent-viss (seq (visualisations-with-dataset-column tenant-conn (:dataset-id op-spec) column-name))]        
+      (if-let [existent-viss (seq (->> (visualisation/visualisations-dataset-columns tenant-conn (:dataset-id op-spec))
+                                       (filter (fn [[id name columns]]
+                                                 (some #(= % column-name) columns)))))]
         {:success? false
          :message  (format "Cannot delete column. It is used in the following visalisations: %s"
                            (str/join ", " (map #(format "'%s'" (second %))  existent-viss)))
