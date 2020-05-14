@@ -7,7 +7,8 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.string :as string]
-   [clojure.tools.logging :as log])
+   [clojure.tools.logging :as log]
+   [cheshire.core :as json])
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
            [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter ScriptObjectMirror]
            [java.lang Double]))
@@ -70,6 +71,7 @@
           edn/read-string)
       11))
 
+
 (defn script-engine [factory]
   (if (nashorn-deprecated?)
     (.getScriptEngine factory
@@ -109,16 +111,22 @@
 
 (defn- parse [^String code]
   (let [factory (js-factory)
-        engine (script-engine factory)]
+        engine (.getScriptEngine factory (into-array String ["--no-deprecation-warning" "--language=es6"]))]
     (eval* engine "load('nashorn:parser.js')")
     (.put engine "source_code" code)
-    (.values ^ScriptObjectMirror (eval* engine "const sts=[]; parse(source_code, {}, (node) => { if(node.type.indexOf('Statement') !== -1) {sts.push(node.type)}}); sts"))))
+    (json/parse-string
+     (eval* engine "JSON.stringify(parse(source_code))"))))
 
-
-(defn evaluable? [code]
+(defn evaluable? [^String code]
   (try
-    (let [parsed (parse code)]
-      (= parsed ["ExpressionStatement"]))
+    (let [modified (.replaceAll code " " "")]
+      (and (not (.contains modified "while(true)"))
+           (not (.contains modified "for(;;)"))
+           (= "ExpressionStatement"
+              (-> (parse code)
+                  (get "body")
+                  (nth 0)
+                  (get "type")))))
     (catch Exception e
       (log/warn :not-valid-js code)
       false)))

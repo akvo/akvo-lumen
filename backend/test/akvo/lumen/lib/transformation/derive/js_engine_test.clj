@@ -17,4 +17,6 @@
   (is (true? (js-engine/evaluable? "row[\"age\"].reduce((a,b) => (a+b))")))
   (is (true? (js-engine/evaluable? "row[\"group\"][\"column\"].filter(a => a.prop === 1)")))
   (is (false? (js-engine/evaluable? "(function(){while(true);})()")))
-  (is (false? (js-engine/evaluable? "for(;;);"))))
+  (is (false? (js-engine/evaluable? "while(true);")))
+  (is (false? (js-engine/evaluable? "for(;;);")))
+  (is (false? (js-engine/evaluable? "(function(){for(;;);})()"))))
