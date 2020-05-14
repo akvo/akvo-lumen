@@ -91,9 +91,11 @@
                                "569489117" 5.0}]
             rqg-responses [{"565649136" 54.0, "587209169" "zave", "569709126" 9.86584572E8}
                            {"565649136" 54.0, "587209169" "kween", "569709126" 6.9566324846E10}]
+            rqg-responses* [{"Age repeated" 54.0, "Name" "zave", "ID number" 9.86584572E8}
+                            {"Age repeated" 54.0, "Name" "kween", "ID number" 6.9566324846E10}]
             responses {"559609117" no-rqg-responses
                        "567919211" rqg-responses}
             res       (flow-common/questions-responses-with-rqg-in-one-column questions responses)]
         (is (= res {"559609117" no-rqg-responses
-                    "567919211" [{"567919211" rqg-responses}]}))))))
+                    "567919211" [{"567919211" rqg-responses*}]}))))))
 
