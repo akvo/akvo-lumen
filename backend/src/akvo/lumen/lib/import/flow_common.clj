@@ -130,16 +130,26 @@
 ;;                                 {question-id1:response, question-id2:response }]
 ;; to
 ;; {repeated-question-group-id -> [repeated-question-group-id {
-;;                                     [{question-id1:response, question-id2:response }
-;;                                      {question-id1:response, question-id2:response }]}]
+;;                                     [{question-title1:response, question-title2:response }
+;;                                      {question-title1:response, question-title2:response }]}]
 (defn questions-responses-with-rqg-in-one-column
   [questions responses]
-  (let [ids-to-adapt (set/intersection
+  (let [question-title-by-id (fn [q-id rqg-metadata]
+                               (->> rqg-metadata
+                                    (filter #(= (str "c" q-id) (:id %)) )
+                                    first
+                                    :title))
+        ids-to-adapt (set/intersection
                       (set (map :id (filter :repeatable questions)))
                       (set (keys responses)))]
     (reduce
      (fn [c id]
-       (assoc c id [{id (get c id)}]))
+       (let [rqg (first (filter #(= id (:id %)) questions))
+             repeated-questions (map
+                                 #(reduce (fn [x [k v]]
+                                            (assoc x (question-title-by-id k (:metadata rqg)) v)) {} %)
+                                     (get c id))]
+         (assoc c id [{id repeated-questions}])))
      responses
      ids-to-adapt)))
 
