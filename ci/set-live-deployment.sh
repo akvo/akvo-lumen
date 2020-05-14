@@ -12,11 +12,9 @@ COLOR=${1}
 DARK_COLOR=$("${DIR}"/helpers/dark-color.sh "${COLOR}")
 
 log Setting "${COLOR}" as LIVE
-FLIP_DATE=$(echo -n $(date -u +'%Y-%m-%dT%H:%M:%SZ'))
-ACCOUNT=$(echo -n $(gcloud config get-value core/account))
+FLIP_DATE=${2:-$(echo -n "$(TZ=UTC date +"%Y%m%d-%H%M%S")")}
 sed -e "s/\${LIVE_COLOR}/${COLOR}/" -e "s/\${DARK_COLOR}/${DARK_COLOR}/" \
   -e "s/\${UTCDATE}/${FLIP_DATE}/" \
-  -e "s/\${ACCOUNT}/${ACCOUNT}/" \
   "${DIR}"/k8s/service.yaml > "${DIR}"/flipped.service.yaml
 
 kubectl apply -f "${DIR}"/flipped.service.yaml
