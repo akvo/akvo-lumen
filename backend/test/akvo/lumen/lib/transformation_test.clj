@@ -113,7 +113,7 @@
         args (if (and kvs (not-empty kvs) (even? (count kvs)))
                (reduce #((if (vector? (first %2))  assoc-in assoc) % (first %2) (last %2)) args (partition 2 kvs))
                args)
-        
+
 ]
     (conform ::transformation.engine.s/op-spec (assoc s :op op-name :args args))
 
@@ -281,7 +281,7 @@
         years               (map (comp :value second) (:rows data))
         years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
         years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
-        dataset-id          (import-file *tenant-conn* *error-tracker* 
+        dataset-id          (import-file *tenant-conn* *error-tracker*
                                          {:dataset-name "date-parsing-test-bis"
                                           :kind         "clj"
                                           :data         data})
@@ -460,7 +460,7 @@
                                                                   ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d5 (latest-data dataset-id))))))
-  
+
     (testing "Valid type check"
       (let [[tag _ status] (apply-transformation {:type :transformation
                                                   :transformation
@@ -506,26 +506,7 @@
                                            :transformation
                                            (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                ::transformation.derive.s/code "while(true) {}"
-                                                                ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/bad-request))))
-
-    (testing "Disallow anonymous functions"
-      (let [[tag _] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                ::transformation.derive.s/code "(function() {})()"
-                                                                ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
-        (is (= tag ::lib/bad-request)))
-
-      (let [[tag _] (apply-transformation {:type :transformation
-                                           :transformation
-                                           (gen-transformation "core/derive"
-                                                               {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                ::transformation.derive.s/code "(() => 'foo')()"
+                                                                ::transformation.derive.s/code "for(;;);"
                                                                 ::transformation.derive.s/newColumnType "text"
                                                                 ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/bad-request))))))
@@ -666,7 +647,7 @@
                                 (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
-        
+
         (is (= (apply conj ["c1" "c2"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (inc (count new-columns))))))
                (map #(get % "columnName") columns)))
         (is (= ["https://akvoflow-uat1.s3.amazonaws.com/images/b1961e99-bc1c-477c-9309-ae5e8d2374e8.png"
@@ -793,7 +774,7 @@
 
 (deftest ^:functional merge-datasets-test
   (let [origin-data          (import.s/sample-imported-dataset [:text :date] 2)
-        target-data          (replace-column origin-data (import.s/sample-imported-dataset [:text :number :number :text] 2) 0) 
+        target-data          (replace-column origin-data (import.s/sample-imported-dataset [:text :number :number :text] 2) 0)
         origin-dataset-id    (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
                                            :kind         "clj"
@@ -909,5 +890,3 @@
       (is (= 4 (count columns)))
       (is (= "geopoint" (get (last columns) "type")))
       (is (= "d1" (get (last columns) "columnName"))))))
-
-
