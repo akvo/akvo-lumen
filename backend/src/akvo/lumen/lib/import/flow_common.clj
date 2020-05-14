@@ -93,7 +93,7 @@
                                (let [base-question (first (:questions %2))
                                      rqg (-> base-question
                                              (assoc :id (:id %2))
-                                             (assoc :name (str (:name %2) "_Q"))
+                                             (assoc :name (:name %2) )
                                              (assoc :metadata (common/coerce question-type->lumen-type (:questions %2)))
                                              (assoc :type "RQG"))]
                                  [rqg])
