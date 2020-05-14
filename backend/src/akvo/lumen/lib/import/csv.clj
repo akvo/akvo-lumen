@@ -56,6 +56,7 @@
   (mapv (fn [idx title type]
           {:id (str "c" (inc idx))
            :title title
+           :metadata nil
            :type type})
         (range)
         column-titles
