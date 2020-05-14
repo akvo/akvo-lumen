@@ -67,6 +67,17 @@
       (into all-data-points (get response "dataPoints")))))
 
 (defn questions
+(defn question-type->lumen-type
+  [question]
+  (condp = (:type question)
+    "NUMBER" "number"
+    "DATE" "date"
+    "GEO" "geopoint"
+    "GEOSHAPE" "geoshape"
+    "GEO-SHAPE-FEATURES" "multiple"
+    "CADDISFLY" "multiple"
+    "RQG" "rqg"
+    "text"))
   "Get the list of questions from a form"
   [form]
   (->> (:questionGroups form)
