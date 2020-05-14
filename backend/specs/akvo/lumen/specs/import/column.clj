@@ -40,7 +40,8 @@
 (s/def ::c.multiple/type #{"multiple"})
 
 (s/def ::column-header (s/keys :req-un [::v/title]
-                               :opt-un [::v/id]))
+                               :opt-un [::v/id
+                                        ::v/metadata]))
 
 (s/def ::c.text/header* (s/keys :req-un [::c.text/type] :opt-un [::v/key]))
 (s/def ::c.text/header (s/merge ::column-header ::c.text/header*))

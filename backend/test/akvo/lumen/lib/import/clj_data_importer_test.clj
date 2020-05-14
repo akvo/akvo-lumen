@@ -36,25 +36,27 @@
       (is (= (map keys (:columns dataset)) '(("groupId"
                                               "key"
                                               "groupName"
-	                                      "sort"
-	                                      "direction"
-	                                      "title"
-	                                      "type"
-	                                      "multipleType"
-	                                      "hidden"
-	                                      "multipleId"
-	                                      "columnName")
+                                              "sort"
+                                              "direction"
+                                              "metadata"
+                                              "title"
+                                              "type"
+                                              "multipleType"
+                                              "hidden"
+                                              "multipleId"
+                                              "columnName")
                                              ("groupId"
                                               "key"
                                               "groupName"
-	                                      "sort"
-	                                      "direction"
-	                                      "title"
-	                                      "type"
-	                                      "multipleType"
-	                                      "hidden"
-	                                      "multipleId"
-	                                      "columnName"))))
+                                              "sort"
+                                              "direction"
+                                              "metadata"
+                                              "title"
+                                              "type"
+                                              "multipleType"
+                                              "hidden"
+                                              "multipleId"
+                                              "columnName"))))
 
       (is (= (map #(select-keys % ["type" "columnName"]) (:columns dataset))
              '({"type" "text", "columnName" "c1"}
