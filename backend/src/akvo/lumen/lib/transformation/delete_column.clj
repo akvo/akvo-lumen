@@ -30,7 +30,7 @@
     (if (empty? merged-sources)
       (if-let [existent-viss (seq (->> (visualisation/visualisations-dataset-columns tenant-conn (:dataset-id op-spec))
                                        (filter (fn [[id name columns]]
-                                                 (some #(= % column-name))))))]
+                                                 (some #(= % column-name) columns)))))]
         {:success? false
          :message  (format "Cannot delete column. It is used in the following visalisations: %s"
                            (str/join ", " (map #(format "'%s'" (second %))  existent-viss)))
