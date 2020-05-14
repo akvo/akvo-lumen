@@ -27,7 +27,7 @@
 (defn dataset-columns
   "returns a vector of [{:title :type :id :key}]
   `:key` is optional"
-  [form]
+  [environment form]
   (let [questions (flow-questions form)]
     (into (flow-common/commons-columns form)
           (into [{:title "Device Id" :type "text" :id "device_id"}]
@@ -79,7 +79,7 @@
 (defn form-data
   "First pulls all data-points belonging to the survey. Then map over all form
   instances and pulls additional data-point data using the forms data-point-id."
-  [headers-fn instance survey form-id]
+  [environment headers-fn instance survey form-id]
   (let [form (flow-common/form survey form-id)
         data-points (util/index-by
                      "id" (flow-common/data-points headers-fn survey))]
