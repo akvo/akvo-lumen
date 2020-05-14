@@ -75,6 +75,7 @@
     "GEOSHAPE" "geoshape"
     "GEO-SHAPE-FEATURES" "multiple"
     "CADDISFLY" "multiple"
+    "RQG" "rqg"
     "text"))
 
 (defn questions
