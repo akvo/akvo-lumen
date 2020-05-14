@@ -4,6 +4,7 @@
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
@@ -119,13 +120,21 @@
       (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)
+            latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
 
-            columns-used (columns-used-in-txs
-                          (import/importer-type (get data-source-spec "source"))
-                          initial-dataset-version
-                          (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+            columns-used-in-txs  (columns-used-in-txs
+                                  (import/importer-type (get data-source-spec "source"))
+                                  initial-dataset-version
+                                  latest-dataset-version)
+
+            columns-used-in-vizs (seq (visualisation/visualisations-dataset-columns tenant-conn dataset-id))
+
+
+            _ (log/error :importer-columns importer-columns)
+            _ (log/error :viz-columns-used columns-used-in-vizs)
+
             imported-dataset-columns-checked (reduce (fn [c co]
-                                                       (if (contains? columns-used (get co "columnName"))
+                                                       (if (contains? columns-used-in-txs (get co "columnName"))
                                                          (conj c co)
                                                          c)) [] imported-dataset-columns)]
         (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
