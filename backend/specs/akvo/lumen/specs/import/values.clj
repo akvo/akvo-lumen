@@ -37,6 +37,8 @@
                      string?
                      #(s/gen #{"c1" "c2" "c3"})))
 
+(s/def ::metadata (s/nilable (s/or :m map? :v vector?)))
+
 (s/def ::title (s/with-gen
                         string?
                         #(s/gen #{"Column 1" "Column 2" "Column 3"})))

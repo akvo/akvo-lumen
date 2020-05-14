@@ -388,27 +388,29 @@
                             body-kw)]
             (is (= {:transformations []
                     :columns [{:key false,
-	                       :type "text",
-	                       :title "one",
-	                       :multipleId nil,
-	                       :hidden false,
-	                       :multipleType nil,
-	                       :columnName "c1",
+                               :type "text",
+                               :title "one",
+                               :multipleId nil,
+                               :hidden false,
+                               :multipleType nil,
+                               :columnName "c1",
+                               :metadata nil,
                                :groupId nil
                                :groupName nil
-	                       :direction nil,
-	                       :sort nil}
-	                      {:key false,
-	                       :type "text",
-	                       :title "two",
-	                       :multipleId nil,
-	                       :hidden false,
+                               :direction nil,
+                               :sort nil}
+                              {:key false,
+                               :type "text",
+                               :title "two",
+                               :multipleId nil,
+                               :hidden false,
                                :groupId nil
                                :groupName nil
-	                       :multipleType nil,
-	                       :columnName "c2",
-	                       :direction nil,
-	                       :sort nil}]
+                               :multipleType nil,
+                               :columnName "c2",
+                               :metadata nil,
+                               :direction nil,
+                               :sort nil}]
                     :name title
                     ;;:author nil,
                     :rows
