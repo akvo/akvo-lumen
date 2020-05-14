@@ -4,6 +4,7 @@
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
@@ -119,13 +120,31 @@
       (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)
+            latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
 
-            columns-used (columns-used-in-txs
-                          (import/importer-type (get data-source-spec "source"))
-                          initial-dataset-version
-                          (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+            columns-used-in-txs  (columns-used-in-txs
+                                  (import/importer-type (get data-source-spec "source"))
+                                  initial-dataset-version
+                                  latest-dataset-version)
+
+            load-column (fn [x] (walk/keywordize-keys (first (filter #(= x (get % "columnName")) (:columns latest-dataset-version)))))
+            columns-used-in-vizs (map (fn [[id name columns]]
+                                        [id name (map load-column columns)])
+                                      (visualisation/visualisations-dataset-columns tenant-conn dataset-id))
+            imported-dataset-columns-names  (set (map #(get % "columnName") imported-dataset-columns))
+            conflict-viz-errors (->> columns-used-in-vizs
+                                     (map (fn [[id name columns]]
+                                            (if-let [conflict-columns (seq (reduce (fn [c column]
+                                                                                     (if-not (contains? imported-dataset-columns-names (:columnName column))
+                                                                                       (conj c (:title c))
+                                                                                       c)) [] columns))]
+                                              [id name conflict-columns]
+                                              nil)))
+                                     (filter some?)
+                                     seq)
+            _ (log/error :conflict-viz-errors conflict-viz-errors)
             imported-dataset-columns-checked (reduce (fn [c co]
-                                                       (if (contains? columns-used (get co "columnName"))
+                                                       (if (contains? columns-used-in-txs (get co "columnName"))
                                                          (conj c co)
                                                          c)) [] imported-dataset-columns)]
         (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
