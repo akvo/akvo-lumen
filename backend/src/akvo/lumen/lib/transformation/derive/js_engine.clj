@@ -7,9 +7,10 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.string :as string]
-   [clojure.tools.logging :as log])
+   [clojure.tools.logging :as log]
+   [cheshire.core :as json])
   (:import [javax.script ScriptEngineManager ScriptEngine Invocable ScriptContext Bindings]
-           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter]
+           [jdk.nashorn.api.scripting NashornScriptEngineFactory ClassFilter ScriptObjectMirror]
            [java.lang Double]))
 
 (defn- throw-invalid-return-type [value]
@@ -18,7 +19,7 @@
                    :type (type value)})))
 
 (defn- column-function [fun code]
-  (format "var %s = function(row) {  return %s; }" fun code))
+  (format "var %s = function(row) { return %s; }" fun code))
 
 (defn- valid-type? [value t]
   (when-not (nil? value)
@@ -63,17 +64,18 @@
 
 (defn- js-factory [] (NashornScriptEngineFactory.))
 
-(defn nashorn-depreciated? []
+(defn nashorn-deprecated? []
   (>= (-> (System/getProperty "java.version")
           (string/split #"\.")
           first
           edn/read-string)
       11))
 
+
 (defn script-engine [factory]
-  (if (nashorn-depreciated?)
+  (if (nashorn-deprecated?)
     (.getScriptEngine factory
-                      (into-array String ["--no-deprecation-warning"])
+                      (into-array String ["--no-deprecation-warning" "--language=es6"])
                       nil class-filter)
     (.getScriptEngine factory class-filter)))
 
@@ -104,17 +106,27 @@
                      (adapter)
                      (invoke* engine fun-name))]
         (if (some? column-type)
-          (valid-type? res column-type)
-          res)))))
+            (valid-type? res column-type)
+            res)))))
 
-(defn evaluable? [code]
-  (and (not (str/includes? code "function"))
-       (not (str/includes? code "=>"))
-       (let [try-code (column-function "try_js_sintax" code)]
-         (try
-           (eval* (js-engine) try-code)
-           true
-           ;; Catches syntax errors
-           (catch Exception e
-             (log/warn :not-valid-js try-code)
-             false)))))
+(defn- parse [^String code]
+  (let [factory (js-factory)
+        engine (.getScriptEngine factory (into-array String ["--no-deprecation-warning" "--language=es6"]))]
+    (eval* engine "load('nashorn:parser.js')")
+    (.put engine "source_code" code)
+    (json/parse-string
+     (eval* engine "JSON.stringify(parse(source_code))"))))
+
+(defn evaluable? [^String code]
+  (try
+    (let [modified (.replaceAll code " " "")]
+      (and (not (.contains modified "while(true)"))
+           (not (.contains modified "for(;;)"))
+           (= "ExpressionStatement"
+              (-> (parse code)
+                  (get "body")
+                  (nth 0)
+                  (get "type")))))
+    (catch Exception e
+      (log/warn :not-valid-js code)
+      false)))
