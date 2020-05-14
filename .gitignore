@@ -185,3 +185,4 @@ Session.vim
 /deployment.yaml
 /service.yaml
 /flipped.service.yaml
+/ci/helpers/flip.record.yaml

@@ -1,0 +1,11 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: akvo-lumen-flip-${UTCDATE}
+  namespace: default
+data:
+  by: ${ACCOUNT}
+  when: ${UTCDATE}
+  new-live-version: ${NEW_LUMEN_VERSION}
+  previous-live-version: ${OLD_LUMEN_VERSION}
+  new-live-color: ${COLOR}

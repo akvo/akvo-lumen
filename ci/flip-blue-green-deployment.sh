@@ -61,7 +61,9 @@ if [ "${CLUSTER}" == "production" ]; then
  fi
 fi
 
-if ! "${DIR}"/set-live-deployment.sh "${NEW_LIVE_COLOR}"; then
+FLIP_DATE=$(echo -n "$(TZ=UTC date +"%Y%m%d-%H%M%S")")
+
+if ! "${DIR}"/set-live-deployment.sh "${NEW_LIVE_COLOR}" "${FLIP_DATE}"; then
     log "Something went wrong with applying the switch."
     log "PLEASE CHECK WHAT HAPPEN!!!!!!!!!!!!!"
     switch_back
@@ -69,6 +71,7 @@ if ! "${DIR}"/set-live-deployment.sh "${NEW_LIVE_COLOR}"; then
 fi
 
 if [ "${CLUSTER}" == "production" ]; then
+  "${DIR}"/helpers/record-flip.sh "${NEW_LIVE_COLOR}" "${PROD_DARK_VERSION}" "${PROD_LIVE_VERSION}" "${FLIP_DATE}"
   "${DIR}"/helpers/generate-slack-notification.sh "${PROD_LIVE_VERSION}" "${PROD_DARK_VERSION}" "Flipping *PROD!!!*" "warning"
   log "Notifying the team about the changes deployed"
   ./notify.slack.sh
