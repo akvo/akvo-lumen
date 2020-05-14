@@ -9,18 +9,6 @@
             [akvo.lumen.lib.import.flow-v2 :as v2])
   (:import [java.time Instant]))
 
-
-(defn question-type->lumen-type
-  [question]
-  (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
-    "GEO" "geopoint"
-    "GEOSHAPE" "geoshape"
-    "GEO-SHAPE-FEATURES" "multiple"
-    "CADDISFLY" "multiple"
-    "text"))
-
 (defn flow-questions [form]
   (reduce
    (fn [c  i]
