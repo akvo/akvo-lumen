@@ -12,7 +12,7 @@ COLOR=${1}
 NEW_LUMEN_VERSION=${2}
 OLD_LUMEN_VERSION=${3}
 FLIP_DATE=${4}
-ACCOUNT=$(echo -n "$(gcloud config get-value core/account)")
+ACCOUNT=$(echo -n "$(gcloud auth list --filter=status:ACTIVE --format="value(account)")")
 
 sed -e "s/\${COLOR}/${COLOR}/" \
   -e "s/\${UTCDATE}/${FLIP_DATE}/" \
