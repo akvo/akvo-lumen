@@ -74,6 +74,7 @@
     "geoline" "geometry(LINE, 4326)"
     "geopoint" "geometry(POINT, 4326)"
     "multiple" "text"
+    "rqg" "text"
     "text" "text"))
 
 (defn- column-type-fn [{:keys [id type]}]

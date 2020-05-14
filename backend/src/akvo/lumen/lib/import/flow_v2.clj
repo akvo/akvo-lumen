@@ -9,12 +9,12 @@
   (:import [java.time Instant]))
 
 (defn dataset-columns
-  [form]
+  [environment form]
   (into (flow-common/commons-columns form)
         (into
          [{:title "Latitude" :type "number" :id "latitude"}
           {:title "Longitude" :type "number" :id "longitude"}]
-         (common/coerce flow-common/question-type->lumen-type (flow-common/questions form)))))
+         (common/coerce flow-common/question-type->lumen-type (flow-common/questions environment form)))))
 
 (defmulti render-response
   (fn [type response]
@@ -69,6 +69,10 @@
   [_ response]
   (json/generate-string response))
 
+(defmethod render-response "RQG"
+  [_ response]
+  response)
+
 (defmethod render-response "GEO-SHAPE-FEATURES"
   [_ response]
   (json/generate-string response))
@@ -78,8 +82,9 @@
   nil)
 
 (defn response-data
-  [form responses]
-  (let [responses (flow-common/question-responses responses)]
+  [environment form responses]
+  (let [questions (flow-common/questions environment form)
+        responses (flow-common/question-responses environment questions responses)]
     (reduce (fn [response-data {:keys [type id]}]
               (if-let [response (get responses id)]
                 (assoc response-data
@@ -87,17 +92,17 @@
                        (render-response type response))
                 response-data))
             {}
-            (flow-common/questions form))))
+            questions)))
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
-  [headers-fn survey form-id]
+  [environment headers-fn survey form-id]
   (let [form (flow-common/form survey form-id)
         data-points (util/index-by "id" (flow-common/data-points headers-fn survey))]
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")
                  data-point (get data-points data-point-id)]
-             (merge (response-data form (get form-instance "responses"))
+             (merge (response-data environment form (get form-instance "responses"))
                     (flow-common/common-records form-instance data-point)
                     {:latitude (get-in data-points [data-point-id "latitude"])
                      :longitude (get-in data-points [data-point-id "longitude"])})))

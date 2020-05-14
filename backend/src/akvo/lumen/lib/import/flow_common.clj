@@ -75,11 +75,12 @@
     "GEOSHAPE" "geoshape"
     "GEO-SHAPE-FEATURES" "multiple"
     "CADDISFLY" "multiple"
+    "RQG" "rqg"
     "text"))
 
 (defn questions
   "Get the list of questions from a form"
-  [form]
+  [environment form]
   (->> (:questionGroups form)
        (reduce #(into % (map (fn [q* [group-id group-name]]
                                (assoc q* :groupId group-id :groupName group-name))
@@ -101,7 +102,7 @@
 ;; {question-id -> first-response}
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
-  [responses]
+  [environment questions responses]
   (->> (vals responses)
        (map first)
        (apply merge)))
