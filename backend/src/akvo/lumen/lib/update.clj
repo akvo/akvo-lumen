@@ -119,13 +119,15 @@
       (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
             imported-dataset-columns (vec (:columns initial-dataset-version))
             importer-columns         (p/columns importer)
+            latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
 
-            columns-used (columns-used-in-txs
-                          (import/importer-type (get data-source-spec "source"))
-                          initial-dataset-version
-                          (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+            columns-used-in-txs  (columns-used-in-txs
+                                  (import/importer-type (get data-source-spec "source"))
+                                  initial-dataset-version
+                                  latest-dataset-version)
+
             imported-dataset-columns-checked (reduce (fn [c co]
-                                                       (if (contains? columns-used (get co "columnName"))
+                                                       (if (contains? columns-used-in-txs (get co "columnName"))
                                                          (conj c co)
                                                          c)) [] imported-dataset-columns)]
         (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
