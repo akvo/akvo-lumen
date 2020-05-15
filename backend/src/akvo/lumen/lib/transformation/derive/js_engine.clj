@@ -19,7 +19,7 @@
                    :type (type value)})))
 
 (defn- column-function [fun code]
-  (format "var %s = function(row) { return %s; }" fun code))
+  (format "var %s = function(row) {if (row.__rqg__) { row.__rqg__.forEach((e) => { row[e] = JSON.parse(row[e]); })}; return %s; }" fun code))
 
 (defn- valid-type? [value t]
   (when-not (nil? value)
@@ -62,6 +62,14 @@
                              (into {}))]
     #(clojure.set/rename-keys % key-translation)))
 
+(defn rqg
+  [columns]
+  (fn [row]
+    (let [cols (->> columns
+                    (filter #(= (get % "type") "rqg"))
+                    (mapv #(get % "title")))]
+      (assoc row "__rqg__" cols))))
+
 (defn- js-factory [] (NashornScriptEngineFactory.))
 
 (defn nashorn-deprecated? []
@@ -96,6 +104,7 @@
 (defn- invoke* [^Invocable engine ^String fun & args]
   (.invokeFunction engine fun (object-array args)))
 
+
 (defn row-transform-fn
   [{:keys [adapter code column-type]}]
   (let [engine (js-engine)
@@ -104,6 +113,7 @@
     (fn [row]
       (let [res (->> row
                      (adapter)
+                     (java.util.HashMap.)
                      (invoke* engine fun-name))]
         (if (some? column-type)
             (valid-type? res column-type)
