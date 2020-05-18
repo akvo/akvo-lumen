@@ -111,7 +111,7 @@
   (let [{:keys [::code
                 ::column-title
                 ::column-type]} (args op-spec)]
-    (and (string? column-title) 
+    (and (string? column-title)
          (util/valid-type? column-type)
          (#{"fail" "leave-empty" "delete-row"} (engine/error-strategy op-spec))
          (js-engine/evaluable? code))))
@@ -164,7 +164,8 @@
                         ::column-type]} (args op-spec)
                 new-column-name         (engine/next-column-name columns)
                 columns-groups*         (columns-groups (walk/keywordize-keys columns))
-                adapter                 (js-engine/column-name->column-title columns)
+                adapter                 (comp (js-engine/rqg columns)
+                                              (js-engine/column-name->column-title columns))
                 row-fn                  (js-engine/row-transform-fn {:adapter     adapter
                                                                      :code        code
                                                                      :column-type column-type})
@@ -185,7 +186,7 @@
                                            :column-type             (lumen->pg-type column-type)
                                            :new-column-name         new-column-name})
             (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
-            (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))      
+            (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))
             {:success?      true
              :execution-log [(format "Derived columns using '%s'" code)]
              :columns       (conj columns {"title"      column-title
