@@ -111,7 +111,7 @@
 (defn questions
   "Get the list of questions from a form"
   [environment form]
-  (if (first (get environment "rqg"))
+  (if (get environment "rqg")
     (questions-with-rqg-in-one-column form)
     (questions-current-implementation form)))
 
@@ -154,7 +154,7 @@
      ids-to-adapt)))
 
 (defn- questions-responses-adapter [environment questions responses]
-  (if (first (get environment "rqg"))
+  (if (get environment "rqg")
     (questions-responses-with-rqg-in-one-column questions responses)
     responses))
 
@@ -167,7 +167,7 @@
   [environment questions responses]
   (->> responses
        (questions-responses-adapter environment questions)
-       vals 
+       vals
        (map first)
        (apply merge)))
 
