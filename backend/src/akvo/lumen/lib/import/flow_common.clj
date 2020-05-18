@@ -94,7 +94,7 @@
                                      rqg (-> base-question
                                              (assoc :id (:id %2))
                                              (assoc :name (:name %2) )
-                                             (assoc :metadata (common/coerce question-type->lumen-type (:questions %2)))
+                                             (assoc :metadata {:columns (common/coerce question-type->lumen-type (:questions %2))})
                                              (assoc :type "RQG"))]
                                  [rqg])
                                (:questions %2))
@@ -147,7 +147,7 @@
        (let [rqg (first (filter #(= id (:id %)) questions))
              repeated-questions (mapv
                                  #(reduce (fn [x [k v]]
-                                            (assoc x (question-title-by-id k (:metadata rqg)) v)) {} %)
+                                            (assoc x (question-title-by-id k (-> rqg :metadata :columns)) v)) {} %)
                                      (get c id))]
          (assoc c id [{id repeated-questions}])))
      responses
