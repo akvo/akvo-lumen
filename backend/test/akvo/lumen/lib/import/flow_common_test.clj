@@ -83,7 +83,7 @@
         (is (= "RQG" (:type rqg)))
         (is (= rqg-name (:name rqg)))
         (is (= rqg-id (:id rqg)))
-        (is (= (:metadata rqg) (common/coerce flow-common/question-type->lumen-type rqs)))))
+        (is (= (-> rqg :metadata :columns) (common/coerce flow-common/question-type->lumen-type rqs)))))
 
     (testing "questions-responses-with-rqg-in-one-column"
       (let [questions (flow-common/questions-with-rqg-in-one-column form)
