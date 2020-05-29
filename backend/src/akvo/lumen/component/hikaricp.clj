@@ -8,7 +8,7 @@
   (:import [duct.database.sql Boundary]))
 
 (defn ssl-url [u]
-  (let [postgres-arg "sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory"]
+  (let [postgres-arg "cloudSqlInstance=akvo-lumen:europe-west1:dan-testing-dev-learning-session&socketFactory=com.google.cloud.sql.postgres.SocketFactory"]
     (if (str/includes? u postgres-arg)
       u
       (if (str/includes? u "?")

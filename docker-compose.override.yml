@@ -1,13 +1,15 @@
 version: "3"
 services:
- postgres:
-   ports:
-    - "5432:5432"
+# postgres:
+#   ports:
+#    - "5432:5432"
  keycloak:
    ports:
     - "8080:8080"
  backend:
    image: akvo/akvo-lumen-backend-dev:20191001.144150.7c1e95e
+   environment:
+     - GOOGLE_APPLICATION_CREDENTIALS=/app/cloud-database-service-account.json
    volumes:
       - ./backend:/app
       - ~/.m2:/home/akvo/.m2

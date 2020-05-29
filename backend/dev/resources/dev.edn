@@ -1,4 +1,4 @@
-{:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true"}
+{:akvo.lumen.component.hikaricp/hikaricp {:uri "jdbc:postgresql://not_used/lumen?user=lumen&password=password&ssl=false&cloudSqlInstance=akvo-lumen:europe-west1:dan-testing-dev-learning-session&socketFactory=com.google.cloud.sql.postgres.SocketFactory"}
 
  :akvo.lumen.component.http/http {:port 3000}
  :dev.endpoints.transit/middleware {}
@@ -16,11 +16,11 @@
 
  :akvo.lumen.migrate/migrate {:seed
                               ^:replace {:tenants
-                                         [{:db_uri "jdbc:postgresql://postgres/lumen_tenant_1?user=lumen&password=password&ssl=true"
+                                         [{:db_uri "jdbc:postgresql://not_used/lumen_tenant_1?user=lumen&password=password&ssl=false&cloudSqlInstance=akvo-lumen:europe-west1:dan-testing-dev-learning-session&socketFactory=com.google.cloud.sql.postgres.SocketFactory"
                                            :label "t1"
                                            :title "Tenant 1"
                                            :plan "standard"}
-                                          {:db_uri "jdbc:postgresql://postgres/lumen_tenant_2?user=lumen&password=password&ssl=true"
+                                          {:db_uri "jdbc:postgresql://not_used/lumen_tenant_2?user=lumen&password=password&ssl=false&cloudSqlInstance=akvo-lumen:europe-west1:dan-testing-dev-learning-session&socketFactory=com.google.cloud.sql.postgres.SocketFactory"
                                            :label "t2"
                                            :title "Tenant 2"
                                            :plan "pro"}]}}}

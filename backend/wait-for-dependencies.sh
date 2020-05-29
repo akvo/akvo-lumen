@@ -29,49 +29,49 @@ echo "Waiting for PostgreSQL ..."
 cacerts_file=""
 # JDK-8189131 : Open-source the Oracle JDK Root Certificates
 # https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8189131
-if [ "${JAVA_HOME}" == "/docker-java-home" ];
-then
-    cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
-elif [ "${JAVA_HOME}" == "/usr/local/openjdk-8" ]; then
-    cacerts_file="${JAVA_HOME}/jre/lib/security/cacerts"
-    if ! [ -f "$cacerts_file" ]; then
-        cacerts_file="${JAVA_HOME}/lib/security/cacerts"
-    fi
-else
-    cacerts_file="${JAVA_HOME%jre}/lib/security/cacerts"
-fi
+#if [ "${JAVA_HOME}" == "/docker-java-home" ];
+#then
+#    cacerts_file="${JAVA_HOME%jre}/jre/lib/security/cacerts"
+#elif [ "${JAVA_HOME}" == "/usr/local/openjdk-8" ]; then
+#    cacerts_file="${JAVA_HOME}/jre/lib/security/cacerts"
+#    if ! [ -f "$cacerts_file" ]; then
+#        cacerts_file="${JAVA_HOME}/lib/security/cacerts"
+#    fi
+#else
+#    cacerts_file="${JAVA_HOME%jre}/lib/security/cacerts"
+#fi
+#
+#ATTEMPTS=0
+#CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${cacerts_file}" -storepass changeit | grep postgrescert) || echo "not found")
 
-ATTEMPTS=0
-CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${cacerts_file}" -storepass changeit | grep postgrescert) || echo "not found")
+#while [[ "${CERT_INSTALLED}" == "not found" && "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]]; do
+#    if [[ -f "${PGSSLROOTCERT}" ]]; then
+#	keytool -import -trustcacerts -keystore "${cacerts_file}" -storepass changeit -noprompt -alias postgrescert -file "${PGSSLROOTCERT}" || true
+#	CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${cacerts_file}" -storepass changeit | grep postgrescert) || echo "not found")
+#    fi
+#    sleep 1
+#    let ATTEMPTS+=1
+#done
 
-while [[ "${CERT_INSTALLED}" == "not found" && "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]]; do
-    if [[ -f "${PGSSLROOTCERT}" ]]; then
-	keytool -import -trustcacerts -keystore "${cacerts_file}" -storepass changeit -noprompt -alias postgrescert -file "${PGSSLROOTCERT}" || true
-	CERT_INSTALLED=$( (keytool -list -trustcacerts -keystore "${cacerts_file}" -storepass changeit | grep postgrescert) || echo "not found")
-    fi
-    sleep 1
-    let ATTEMPTS+=1
-done
-
-if [[ "${CERT_INSTALLED}" == "not found" ]]; then
-    echo "PostgreSQL SSL certificate is not available"
-    exit 1
-fi
-
-ATTEMPTS=0
-PG=""
-SQL="SELECT ST_AsText(ST_MakeLine(ST_MakePoint(1,2), ST_MakePoint(3,4)))" # Verify that *PostGIS* is available
+#if [[ "${CERT_INSTALLED}" == "not found" ]]; then
+#    echo "PostgreSQL SSL certificate is not available"
+#    exit 1
+#fi
+#
+#ATTEMPTS=0
+#PG=""
+#SQL="SELECT ST_AsText(ST_MakeLine(ST_MakePoint(1,2), ST_MakePoint(3,4)))" # Verify that *PostGIS* is available
 
 
-while [[ -z "${PG}" && "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]]; do
-    sleep 1
-    PG=$( (psql --username=lumen --host=postgres --dbname=lumen_tenant_1 --no-password --command "${SQL}" 2>&1 | grep "LINESTRING(1 2,3 4)") || echo "")
-    let ATTEMPTS+=1
-done
+#while [[ -z "${PG}" && "${ATTEMPTS}" -lt "${MAX_ATTEMPTS}" ]]; do
+#    sleep 1
+#    PG=$( (psql --username=lumen --host=postgres --dbname=lumen_tenant_1 --no-password --command "${SQL}" 2>&1 | grep "LINESTRING(1 2,3 4)") || echo "")
+#    let ATTEMPTS+=1
+#done
 
-if [[ -z "${PG}" ]]; then
-    echo "PostgreSQL is not available"
-    exit 1
-fi
+#if [[ -z "${PG}" ]]; then
+#    echo "PostgreSQL is not available"
+#    exit 1
+#fi
 
 echo "PostgreSQL is ready!"
