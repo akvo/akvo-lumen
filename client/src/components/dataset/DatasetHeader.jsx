@@ -23,7 +23,77 @@ export default class DatasetHeader extends Component {
       customClass: 'notImplemented',
     };
 
-    const result = [settings];
+    const transform = {
+      buttonText: <FormattedMessage id="transform" />,
+      customClass: this.props.isLockedFromTransformations
+        ? "disabled"
+        : "clickable",
+      onOptionSelected: item => {
+        this.props.onClickTransformMenuItem(item)
+      },
+      subActions: [
+        {
+          label: <FormattedMessage id="bulk_row_editor" />,
+          value: "bulk-row-editor",
+          customClass: "notImplemented"
+        },
+        {
+          label: <FormattedMessage id="bulk_column_editor" />,
+          value: "bulk-column-editor",
+          customClass: "notImplemented"
+        },
+        {
+          label: <FormattedMessage id="combine_columns" />,
+          value: "combineColumns"
+        },
+        {
+          label: <FormattedMessage id="extract_multiple" />,
+          value: "extractMultiple"
+        },
+        {
+          label: <FormattedMessage id="split_column" />,
+          value: "splitColumn"
+        },
+        {
+          label: <FormattedMessage id="derive_column" />,
+          value: "deriveColumn",
+          subMenu: [
+            {
+              label: <FormattedMessage id="derive_column_category" />,
+              value: "deriveColumnCategory"
+            },
+            {
+              label: <FormattedMessage id="derive_column_javascript" />,
+              value: "deriveColumnJavascript"
+            }
+          ]
+        },
+        {
+          label: <FormattedMessage id="merge_datasets" />,
+          value: "mergeDatasets"
+        },
+        {
+          label: <FormattedMessage id="generate_geopoints" />,
+          value: "generateGeopoints"
+        },
+        {
+          label: <FormattedMessage id="reverse_geocode" />,
+          value: "reverseGeocode"
+        }
+      ]
+    };
+
+    const transformationLog = {
+      icon: <i className="fa fa-list-ol" aria-hidden="true" />,
+      onClick: this.props.onToggleTransformationLog
+    };
+
+    const visualize = {
+      buttonText: <FormattedMessage id="visualize" />,
+      onClick: this.props.onNavigateToVisualise
+    };
+
+    const result = [settings, transform, transformationLog, visualize];
 
     if (this.props.savingFailed) result.unshift(save);
 
@@ -74,4 +144,8 @@ DatasetHeader.propTypes = {
   isUnsavedChanges: PropTypes.bool,
   onChangeTitle: PropTypes.func,
   onBeginEditTitle: PropTypes.func,
+  onNavigateToVisualise: PropTypes.func.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
+  onClickTransformMenuItem: PropTypes.func,
+  onToggleTransformationLog: PropTypes.func
 };

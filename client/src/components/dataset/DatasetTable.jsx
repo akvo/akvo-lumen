@@ -7,10 +7,10 @@ import { injectIntl, intlShape } from 'react-intl';
 import ColumnHeader from './ColumnHeader';
 import ColumnGroupHeader from './ColumnGroupHeader';
 import DataTableSidebar from './DataTableSidebar';
-import DatasetControls from './DatasetControls';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
 import { reducerGroup, datasetHasQuestionGroups } from './../../utilities/column';
+import LoadingSpinner from "../common/LoadingSpinner";
 
 require('./DatasetTable.scss');
 
@@ -399,11 +399,15 @@ class DatasetTable extends Component {
     const {
       rows,
       columns,
+      history,
       pendingTransformations,
       transformations,
       onNavigateToVisualise,
       datasetId,
       isLockedFromTransformations,
+      Header: DatasetHeader,
+      headerProps,
+      datasetRowAvailable
     } = this.props;
 
     const {
@@ -473,68 +477,93 @@ class DatasetTable extends Component {
       cols = columns.map(createColumn);
     }
     return (
-      <div className="DatasetTable">
-        <DatasetControls
-          columns={columns}
-          rowsCount={rows.size}
-          onToggleTransformationLog={this.handleToggleTransformationLog}
+      <React.Fragment>
+        <DatasetHeader
+          {...headerProps}
+          history={history}
           isLockedFromTransformations={isLockedFromTransformations}
           onNavigateToVisualise={onNavigateToVisualise}
-          pendingTransformationsCount={pendingTransformations.size}
-          onClickMenuItem={this.handleClickDatasetControlItem}
+          onClickTransformMenuItem={this.handleClickDatasetControlItem}
+          onToggleTransformationLog={this.handleToggleTransformationLog}
         />
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: sidebarProps && sidebarProps.displayRight ? 'row-reverse' : 'row',
-          }}
-        >
-          <div className={`sidebarWrapper ${sidebarProps ? 'expanded' : 'collapsed'}`}>
-            {sidebarProps &&
-              <DataTableSidebar
-                {...sidebarProps}
-                intl={this.props.intl}
-                transformations={transformations}
-                isLockedFromTransformations={isLockedFromTransformations}
-                datasetId={datasetId}
-                pendingTransformations={pendingTransformations}
-              />
-            }
-          </div>
-          <div
-            className={`wrapper ${sidebarProps ? 'hasSidebar' : 'noSidebar'}`}
-            ref={(ref) => { this.wrappingDiv = ref; }}
-          >
-            {activeDataTypeContextMenu != null &&
-              <DataTypeContextMenu
-                column={activeDataTypeContextMenu.column}
-                dimensions={activeDataTypeContextMenu.dimensions}
-                onContextMenuItemSelected={this.handleDataTypeContextMenuClicked}
-                onWindowClick={this.dismissDataTypeContextMenu}
-              />}
-            {activeColumnContextMenu && !isLockedFromTransformations && (
-              <ColumnContextMenu
-                column={activeColumnContextMenu.column}
-                dimensions={activeColumnContextMenu.dimensions}
-                onContextMenuItemSelected={this.handleColumnContextMenuClicked}
-                onWindowClick={this.dismissColumnContextMenu}
-                left={columns.last().get('title') === activeColumnContextMenu.column.get('title')}
-              />
-            )}
-            <Table
-              groupHeaderHeight={30}
-              headerHeight={60}
-              rowHeight={30}
-              rowsCount={rows.size}
-              width={width}
-              height={height}
-              onScrollStart={() => this.handleScroll()}
+
+        {datasetRowAvailable ? (
+          <div className="DatasetTable">
+            <div
+              style={{
+                display: "flex",
+                flexDirection:
+                  sidebarProps && sidebarProps.displayRight
+                    ? "row-reverse"
+                    : "row"
+              }}
             >
-              {cols}
-            </Table>
+              <div
+                className={`sidebarWrapper ${
+                  sidebarProps ? "expanded" : "collapsed"
+                }`}
+              >
+                {sidebarProps && (
+                  <DataTableSidebar
+                    {...sidebarProps}
+                    intl={this.props.intl}
+                    transformations={transformations}
+                    isLockedFromTransformations={isLockedFromTransformations}
+                    datasetId={datasetId}
+                    pendingTransformations={pendingTransformations}
+                  />
+                )}
+              </div>
+              <div
+                className={`wrapper ${
+                  sidebarProps ? "hasSidebar" : "noSidebar"
+                }`}
+                ref={ref => {
+                  this.wrappingDiv = ref;
+                }}
+              >
+                {activeDataTypeContextMenu != null && (
+                  <DataTypeContextMenu
+                    column={activeDataTypeContextMenu.column}
+                    dimensions={activeDataTypeContextMenu.dimensions}
+                    onContextMenuItemSelected={
+                      this.handleDataTypeContextMenuClicked
+                    }
+                    onWindowClick={this.dismissDataTypeContextMenu}
+                  />
+                )}
+                {activeColumnContextMenu && !isLockedFromTransformations && (
+                  <ColumnContextMenu
+                    column={activeColumnContextMenu.column}
+                    dimensions={activeColumnContextMenu.dimensions}
+                    onContextMenuItemSelected={
+                      this.handleColumnContextMenuClicked
+                    }
+                    onWindowClick={this.dismissColumnContextMenu}
+                    left={
+                      columns.last().get("title") ===
+                      activeColumnContextMenu.column.get("title")
+                    }
+                  />
+                )}
+                <Table
+                  groupHeaderHeight={30}
+                  headerHeight={60}
+                  rowHeight={30}
+                  rowsCount={rows.size}
+                  width={width}
+                  height={height}
+                  onScrollStart={() => this.handleScroll()}
+                >
+                  {cols}
+                </Table>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        ) : (
+          <LoadingSpinner />
+        )}
+      </React.Fragment>
     );
   }
 }
@@ -552,6 +581,9 @@ DatasetTable.propTypes = {
   isLockedFromTransformations: PropTypes.bool,
   intl: intlShape,
   history: PropTypes.object.isRequired,
+  Header: PropTypes.any,
+  headerProps: PropTypes.object,
+  datasetRowAvailable: PropTypes.bool
 };
 
 export default withRouter(injectIntl(DatasetTable));
