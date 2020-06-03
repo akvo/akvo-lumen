@@ -88,12 +88,12 @@ export default class DatasetHeader extends Component {
       onClick: this.props.onToggleTransformationLog
     };
 
-    const visualize = {
-      buttonText: <FormattedMessage id="visualize" />,
+    const visualise = {
+      buttonText: <FormattedMessage id="visualise" />,
       onClick: this.props.onNavigateToVisualise
     };
 
-    const result = [settings, transform, transformationLog, visualize];
+    const result = [settings, transform, transformationLog, visualise];
 
     if (this.props.savingFailed) result.unshift(save);
 
