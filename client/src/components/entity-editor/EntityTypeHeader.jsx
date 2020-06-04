@@ -56,7 +56,7 @@ class EntityTypeHeader extends Component {
                       style={{
                         left: 0,
                         width: '16rem',
-                        textAlign: 'left'
+                        textAlign: 'left',
                       }}
                     />
                   )}
@@ -88,6 +88,7 @@ class EntityTypeHeader extends Component {
       onBeginEditTitle,
       timeToNextSave,
       savingFailed,
+      saveAction,
     } = this.props;
 
     return (
@@ -105,7 +106,7 @@ class EntityTypeHeader extends Component {
           />
 
           {/* hide status when editing */}
-          {saveStatusId && saveStatusId !== "unsaved_changes" && (
+          {saveStatusId && saveStatusId !== 'unsaved_changes' && (
             <div className="saveStatus">
               {saveStatusId && <FormattedMessage id={saveStatusId} />}
               {timeToNextSave && savingFailed && (
@@ -113,7 +114,14 @@ class EntityTypeHeader extends Component {
                   <FormattedRelative
                     value={new Date().getTime() + timeToNextSave}
                   />
-                  ...
+
+                  <span
+                    data-test-id="save-changes"
+                    className="clickable"
+                    onClick={saveAction}
+                  >
+                    . <FormattedMessage id="retry" />
+                  </span>
                 </span>
               )}
             </div>
@@ -134,6 +142,7 @@ EntityTypeHeader.propTypes = {
   timeToNextSave: PropTypes.number,
   savingFailed: PropTypes.bool,
   history: PropTypes.object.isRequired,
+  saveAction: PropTypes.func.isRequired,
 };
 
 export default injectIntl(EntityTypeHeader);

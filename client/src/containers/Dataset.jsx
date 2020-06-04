@@ -253,7 +253,7 @@ class Dataset extends Component {
               savingFailed: this.state.savingFailed,
               timeToNextSave:
                 this.state.timeToNextSave - this.state.timeFromPreviousSave,
-              onSaveDataset: this.handleSave
+              onSaveDataset: this.handleSave,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(

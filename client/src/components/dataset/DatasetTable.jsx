@@ -10,7 +10,7 @@ import DataTableSidebar from './DataTableSidebar';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
 import { reducerGroup, datasetHasQuestionGroups } from './../../utilities/column';
-import LoadingSpinner from "../common/LoadingSpinner";
+import LoadingSpinner from '../common/LoadingSpinner';
 
 require('./DatasetTable.scss');
 
@@ -407,7 +407,7 @@ class DatasetTable extends Component {
       isLockedFromTransformations,
       Header: DatasetHeader,
       headerProps,
-      datasetRowAvailable
+      datasetRowAvailable,
     } = this.props;
 
     const {
@@ -458,24 +458,32 @@ class DatasetTable extends Component {
     };
 
     let cols;
-    if (datasetHasQuestionGroups(columns)) {
-      const groups = columns.reduce(reducerGroup('Metadata', 'Transformations'), {});
-      const reducer2 = (accumulator, k, idx) => {
-        const columnsGroup = groups[k];
-        accumulator.push(
-          <ColumnGroup
-            header={<ColumnGroupHeader groupName={k} />}
-            key={`gr-${idx}`}
-          >
-            {columnsGroup.map(createColumn)}
-          </ColumnGroup>
+    if (datasetRowAvailable) {
+      if (datasetHasQuestionGroups(columns)) {
+        const groups = columns.reduce(
+          reducerGroup('Metadata', 'Transformations'),
+          {}
         );
-        return accumulator;
-      };
-      cols = Object.keys(groups).reduce(reducer2, []);
-    } else {
-      cols = columns.map(createColumn);
+
+        const reducer2 = (accumulator, k, idx) => {
+          const columnsGroup = groups[k];
+          accumulator.push(
+            <ColumnGroup
+              header={<ColumnGroupHeader groupName={k} />}
+              key={`gr-${idx}`}
+            >
+              {columnsGroup.map(createColumn)}
+            </ColumnGroup>
+          );
+          return accumulator;
+        };
+
+        cols = Object.keys(groups).reduce(reducer2, []);
+      } else {
+        cols = columns.map(createColumn);
+      }
     }
+
     return (
       <React.Fragment>
         <DatasetHeader
@@ -491,16 +499,16 @@ class DatasetTable extends Component {
           <div className="DatasetTable">
             <div
               style={{
-                display: "flex",
+                display: 'flex',
                 flexDirection:
                   sidebarProps && sidebarProps.displayRight
-                    ? "row-reverse"
-                    : "row"
+                    ? 'row-reverse'
+                    : 'row',
               }}
             >
               <div
                 className={`sidebarWrapper ${
-                  sidebarProps ? "expanded" : "collapsed"
+                  sidebarProps ? 'expanded' : 'collapsed'
                 }`}
               >
                 {sidebarProps && (
@@ -516,9 +524,9 @@ class DatasetTable extends Component {
               </div>
               <div
                 className={`wrapper ${
-                  sidebarProps ? "hasSidebar" : "noSidebar"
+                  sidebarProps ? 'hasSidebar' : 'noSidebar'
                 }`}
-                ref={ref => {
+                ref={(ref) => {
                   this.wrappingDiv = ref;
                 }}
               >
@@ -541,8 +549,8 @@ class DatasetTable extends Component {
                     }
                     onWindowClick={this.dismissColumnContextMenu}
                     left={
-                      columns.last().get("title") ===
-                      activeColumnContextMenu.column.get("title")
+                      columns.last().get('title') ===
+                      activeColumnContextMenu.column.get('title')
                     }
                   />
                 )}
@@ -570,8 +578,8 @@ class DatasetTable extends Component {
 
 DatasetTable.propTypes = {
   datasetId: PropTypes.string.isRequired,
-  columns: PropTypes.object.isRequired,
-  rows: PropTypes.object.isRequired,
+  columns: PropTypes.object,
+  rows: PropTypes.object,
   transformations: PropTypes.object,
   pendingTransformations: PropTypes.object.isRequired,
   onTransform: PropTypes.func.isRequired,
@@ -583,7 +591,7 @@ DatasetTable.propTypes = {
   history: PropTypes.object.isRequired,
   Header: PropTypes.any,
   headerProps: PropTypes.object,
-  datasetRowAvailable: PropTypes.bool
+  datasetRowAvailable: PropTypes.bool,
 };
 
 export default withRouter(injectIntl(DatasetTable));

@@ -5,18 +5,6 @@ import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default class DatasetHeader extends Component {
   getActionButtions() {
-    const save = {
-      buttonText: <FormattedMessage id="save" />,
-      primary: true,
-      onClick: () => {
-        this.props.onSaveDataset();
-      },
-      customClass: 'primaryButton',
-      props: {
-        'data-test-id': 'save-changes',
-      },
-    };
-
     const settings = {
       buttonText: <FormattedMessage id="settings" />,
       onClick: this.props.onShowDatasetSettings,
@@ -26,76 +14,74 @@ export default class DatasetHeader extends Component {
     const transform = {
       buttonText: <FormattedMessage id="transform" />,
       customClass: this.props.isLockedFromTransformations
-        ? "disabled"
-        : "clickable",
-      onOptionSelected: item => {
-        this.props.onClickTransformMenuItem(item)
+        ? 'disabled'
+        : 'clickable',
+      onOptionSelected: (item) => {
+        this.props.onClickTransformMenuItem(item);
       },
       subActions: [
         {
           label: <FormattedMessage id="bulk_row_editor" />,
-          value: "bulk-row-editor",
-          customClass: "notImplemented"
+          value: 'bulk-row-editor',
+          customClass: 'notImplemented',
         },
         {
           label: <FormattedMessage id="bulk_column_editor" />,
-          value: "bulk-column-editor",
-          customClass: "notImplemented"
+          value: 'bulk-column-editor',
+          customClass: 'notImplemented',
         },
         {
           label: <FormattedMessage id="combine_columns" />,
-          value: "combineColumns"
+          value: 'combineColumns',
         },
         {
           label: <FormattedMessage id="extract_multiple" />,
-          value: "extractMultiple"
+          value: 'extractMultiple',
         },
         {
           label: <FormattedMessage id="split_column" />,
-          value: "splitColumn"
+          value: 'splitColumn',
         },
         {
           label: <FormattedMessage id="derive_column" />,
-          value: "deriveColumn",
+          value: 'deriveColumn',
           subMenu: [
             {
               label: <FormattedMessage id="derive_column_category" />,
-              value: "deriveColumnCategory"
+              value: 'deriveColumnCategory',
             },
             {
               label: <FormattedMessage id="derive_column_javascript" />,
-              value: "deriveColumnJavascript"
-            }
-          ]
+              value: 'deriveColumnJavascript',
+            },
+          ],
         },
         {
           label: <FormattedMessage id="merge_datasets" />,
-          value: "mergeDatasets"
+          value: 'mergeDatasets',
         },
         {
           label: <FormattedMessage id="generate_geopoints" />,
-          value: "generateGeopoints"
+          value: 'generateGeopoints',
         },
         {
           label: <FormattedMessage id="reverse_geocode" />,
-          value: "reverseGeocode"
-        }
-      ]
+          value: 'reverseGeocode',
+        },
+      ],
     };
 
     const transformationLog = {
       icon: <i className="fa fa-list-ol" aria-hidden="true" />,
-      onClick: this.props.onToggleTransformationLog
+      onClick: this.props.onToggleTransformationLog,
     };
 
     const visualise = {
       buttonText: <FormattedMessage id="visualise" />,
-      onClick: this.props.onNavigateToVisualise
+      onClick: this.props.onNavigateToVisualise,
     };
 
     const result = [settings, transform, transformationLog, visualise];
-
-    if (this.props.savingFailed) result.unshift(save);
 
     return result;
   }
@@ -108,6 +94,7 @@ export default class DatasetHeader extends Component {
       savingFailed,
       timeToNextSave,
       history,
+      onSaveDataset,
     } = this.props;
 
     let saveStatusId = ({
@@ -124,6 +111,7 @@ export default class DatasetHeader extends Component {
         history={history}
         title={this.props.name}
         actionButtons={this.getActionButtions()}
+        saveAction={onSaveDataset}
         onChangeTitle={onChangeTitle}
         onBeginEditTitle={onBeginEditTitle}
         saveStatusId={saveStatusId}
@@ -147,5 +135,5 @@ DatasetHeader.propTypes = {
   onNavigateToVisualise: PropTypes.func.isRequired,
   isLockedFromTransformations: PropTypes.bool,
   onClickTransformMenuItem: PropTypes.func,
-  onToggleTransformationLog: PropTypes.func
+  onToggleTransformationLog: PropTypes.func,
 };

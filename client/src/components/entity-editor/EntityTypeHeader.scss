@@ -67,6 +67,13 @@
         color: $textSecondary;
         font-size: 14px;
         padding: 0px 4px;
+
+        .clickable {
+            text-decoration: none;
+            text-transform: uppercase;
+            color: $lumenGreen;
+            font-size: 12px;
+        }
     }
 
     .overflow {
