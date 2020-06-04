@@ -12,21 +12,8 @@ class DashboardHeader extends Component {
     this.getActionButtons = this.getActionButtons.bind(this);
   }
 
-  getActionButtons(isUnsavedChanges, haveTitle) {
+  getActionButtons(isUnsavedChanges) {
     const { onDashboardAction, isExporting } = this.props;
-
-    const save = {
-      buttonText: <FormattedMessage id="save" />,
-      primary: true,
-      onClick: () => {
-        this.props.onSaveDashboard();
-      },
-      customClass: `primaryButton ${haveTitle ? '' : 'disabled'}`,
-      disabled: !haveTitle,
-      props: {
-        'data-test-id': 'save-changes',
-      },
-    };
 
     const user = {
       buttonText: <FormattedMessage id="user" />,
@@ -75,16 +62,20 @@ class DashboardHeader extends Component {
       overflow,
     ];
 
-    if (this.props.savingFailed) result.unshift(save);
-
     return result;
   }
 
   render() {
-    const { isUnsavedChanges, savingFailed, timeToNextSave, intl, history } = this.props;
-    const haveTitle = Boolean(this.props.title);
+    const {
+      isUnsavedChanges,
+      savingFailed,
+      timeToNextSave,
+      intl,
+      history,
+      onSaveDashboard,
+    } = this.props;
 
-    const actionButtons = this.getActionButtons(isUnsavedChanges, haveTitle);
+    const actionButtons = this.getActionButtons(isUnsavedChanges);
     let saveStatusId;
 
     switch (isUnsavedChanges) {
@@ -104,11 +95,14 @@ class DashboardHeader extends Component {
 
     return (
       <EntityTypeHeader
-        title={this.props.title || intl.formatMessage({ id: 'untitled_dashboard' })}
+        title={
+          this.props.title || intl.formatMessage({ id: 'untitled_dashboard' })
+        }
         onChangeTitle={this.props.onChangeTitle}
         onBeginEditTitle={this.props.onBeginEditTitle}
         saveStatusId={saveStatusId}
         actionButtons={actionButtons}
+        saveAction={onSaveDashboard}
         savingFailed={savingFailed}
         timeToNextSave={timeToNextSave}
         history={history}
