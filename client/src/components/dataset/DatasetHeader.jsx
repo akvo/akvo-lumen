@@ -80,8 +80,8 @@ export default class DatasetHeader extends Component {
       buttonText: <FormattedMessage id="visualise" />,
       onClick: this.props.onNavigateToVisualise,
       props: {
-        'data-test-id': 'visualise'
-      }
+        'data-test-id': 'visualise',
+      },
     };
 
     const result = [settings, transform, transformationLog, visualise];
