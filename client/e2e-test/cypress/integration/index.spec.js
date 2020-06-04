@@ -103,12 +103,12 @@ context("Akvo Lumen", () => {
       cy.get(`[data-test-name="${datasetName}"]:not(.PENDING)`).should("exist");
       cy.get(`[data-test-name="${datasetName}"] > a`).click({ force: true });
       // see if metadata is correct
-      cy.get(".columnCount")
-        .contains("6 Columns")
-        .should("exist");
-      cy.get(".rowCount")
-        .contains("4 Rows")
-        .should("exist");
+      // cy.get(".columnCount")
+      //   .contains("6 Columns")
+      //   .should("exist");
+      // cy.get(".rowCount")
+      //   .contains("4 Rows")
+      //   .should("exist");
       // see if table cells exist
       cy.get(".fixedDataTableCellLayout_main").should(
         "have.length.of.at.least",
