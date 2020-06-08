@@ -38,7 +38,7 @@ class EntityTypeHeader extends Component {
               {button.subActions ? (
                 <span>
                   <button
-                    className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
+                    className={`overflow sub-action link-button clickable  ${button.customClass ? button.customClass : ''}`}
                     onClick={() => this.handleToggleContextMenu(index)}
                     title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
                     disabled={button.disabled}
@@ -52,12 +52,18 @@ class EntityTypeHeader extends Component {
                       options={button.subActions}
                       onOptionSelected={button.onOptionSelected}
                       onWindowClick={this.handleToggleContextMenu}
+                      subMenuSide="left"
+                      style={{
+                        left: 0,
+                        width: '16rem',
+                        textAlign: 'left',
+                      }}
                     />
                   )}
                 </span>
               ) : (
                 <button
-                  className={`overflow clickable ${button.customClass ? button.customClass : ''}`}
+                  className={`overflow clickable link-button ${button.customClass ? button.customClass : ''}`}
                   onClick={button.onClick}
                   title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
                   disabled={button.disabled}
@@ -82,6 +88,7 @@ class EntityTypeHeader extends Component {
       onBeginEditTitle,
       timeToNextSave,
       savingFailed,
+      saveAction,
     } = this.props;
 
     return (
@@ -91,19 +98,33 @@ class EntityTypeHeader extends Component {
         history={this.props.history}
         primaryActions={this.actionButtons(IS_PRIMARY)}
       >
-        <EntityTitleInput
-          title={title}
-          onBeginEditTitle={onBeginEditTitle}
-          onChangeTitle={onChangeTitle}
-        />
-        <div className="saveStatus">
-          {saveStatusId && (
-            <FormattedMessage id={saveStatusId} />
-          )}
-          {timeToNextSave && savingFailed && (
-            <span>
-              <FormattedRelative value={new Date().getTime() + timeToNextSave} />...
-            </span>
+        <div className="EntityTypeHeaderContainer">
+          <EntityTitleInput
+            title={title}
+            onBeginEditTitle={onBeginEditTitle}
+            onChangeTitle={onChangeTitle}
+          />
+
+          {/* hide status when editing */}
+          {saveStatusId && saveStatusId !== 'unsaved_changes' && (
+            <div className="saveStatus">
+              {saveStatusId && <FormattedMessage id={saveStatusId} />}
+              {timeToNextSave && savingFailed && (
+                <span>
+                  <FormattedRelative
+                    value={new Date().getTime() + timeToNextSave}
+                  />
+
+                  <span
+                    data-test-id="save-changes"
+                    className="clickable"
+                    onClick={saveAction}
+                  >
+                    . <FormattedMessage id="retry" />
+                  </span>
+                </span>
+              )}
+            </div>
           )}
         </div>
       </Header>
@@ -121,6 +142,7 @@ EntityTypeHeader.propTypes = {
   timeToNextSave: PropTypes.number,
   savingFailed: PropTypes.bool,
   history: PropTypes.object.isRequired,
+  saveAction: PropTypes.func.isRequired,
 };
 
 export default injectIntl(EntityTypeHeader);

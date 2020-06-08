@@ -1,8 +1,10 @@
 @import "../../styles/modules/importAll";
 
 .DatasetTable {
+    margin-top: 4rem;
+
     .wrapper {
-        height: calc(100vh - 8rem);
+        height: calc(100vh - 4rem);
 
         &.noSidebar {
             width: 100%;
