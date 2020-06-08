@@ -14,17 +14,6 @@ class VisualisationHeader extends Component {
 
   getActionButtons(isUnsavedChanges) {
     const { onVisualisationAction, isExporting } = this.props;
-    const save = {
-      buttonText: <FormattedMessage id="save" />,
-      primary: true,
-      onClick: () => {
-        this.props.onSaveVisualisation();
-      },
-      customClass: 'primaryButton',
-      props: {
-        'data-test-id': 'save-changes',
-      },
-    };
     const user = {
       buttonText: <FormattedMessage id="user" />,
       customClass: 'notImplemented',
@@ -71,8 +60,6 @@ class VisualisationHeader extends Component {
       overflow,
     ];
 
-    if (this.props.savingFailed) result.unshift(save);
-
     return result;
   }
 
@@ -85,6 +72,7 @@ class VisualisationHeader extends Component {
       savingFailed,
       timeToNextSave,
       intl,
+      onSaveVisualisation,
     } = this.props;
 
     const actionButtons = this.getActionButtons(isUnsavedChanges);
@@ -107,11 +95,15 @@ class VisualisationHeader extends Component {
 
     return (
       <EntityTypeHeader
-        title={visualisation.name || intl.formatMessage({ id: 'untitled_visualisation' })}
+        title={
+          visualisation.name ||
+          intl.formatMessage({ id: 'untitled_visualisation' })
+        }
         onChangeTitle={onChangeTitle}
         onBeginEditTitle={onBeginEditTitle}
         saveStatusId={saveStatusId}
         actionButtons={actionButtons}
+        saveAction={onSaveVisualisation}
         history={this.props.history}
         savingFailed={savingFailed}
         timeToNextSave={timeToNextSave}

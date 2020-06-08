@@ -11,18 +11,17 @@
 
     .backButton {
         cursor: pointer;
-        background-color: $black;
+        background-color: white;
         width: 4rem;
         height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
         text-decoration: none;
-        margin-right: 0.5em;
 
         i {
-            color: $white;
-            font-size: 2rem;
+            color: $black;
+            font-size: 1.5rem;
             text-decoration: none;
             border: 0;
         }
@@ -41,7 +40,6 @@
         height: 100%;
         vertical-align: top;
         padding: 0.5rem;
-        text-align: right;
         line-height: 3rem;
         flex-shrink: 1;
 
@@ -81,10 +79,6 @@
     
     .primary-actions {
         margin-left: 20px;
-    }
-    
-    .actions {
-        border-left: 0.1rem solid $lightBlueGrey;
     }
 
     ul,

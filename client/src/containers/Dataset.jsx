@@ -232,36 +232,39 @@ class Dataset extends Component {
     const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
 
     return (
-      <NavigationPrompt shouldPrompt={this.state.savingFailed} history={history}>
+      <NavigationPrompt
+        shouldPrompt={this.state.savingFailed}
+        history={history}
+      >
         <div className="Dataset">
-          <DatasetHeader
+          <DatasetTable
             history={history}
-            onShowDatasetSettings={this.handleShowDatasetSettings}
-            name={getTitle(dataset)}
-            id={getId(dataset)}
-            isUnsavedChanges={this.state.isUnsavedChanges}
-            onChangeTitle={this.handleChangeDatasetTitle}
-            onBeginEditTitle={() => this.setState({ isUnsavedChanges: true })}
-            savingFailed={this.state.savingFailed}
-            timeToNextSave={this.state.timeToNextSave - this.state.timeFromPreviousSave}
-            onSaveDataset={this.handleSave}
+            datasetId={datasetId}
+            columns={getColumns(dataset)}
+            rows={getRows(dataset)}
+            Header={DatasetHeader}
+            headerProps={{
+              onShowDatasetSettings: this.handleShowDatasetSettings,
+              name: getTitle(dataset),
+              id: getId(dataset),
+              isUnsavedChanges: this.state.isUnsavedChanges,
+              onChangeTitle: this.handleChangeDatasetTitle,
+              onBeginEditTitle: () => this.setState({ isUnsavedChanges: true }),
+              savingFailed: this.state.savingFailed,
+              timeToNextSave:
+                this.state.timeToNextSave - this.state.timeFromPreviousSave,
+              onSaveDataset: this.handleSave,
+            }}
+            transformations={getTransformations(dataset)}
+            isLockedFromTransformations={getIsLockedFromTransformations(
+              dataset
+            )}
+            pendingTransformations={pendingTransformations.valueSeq()}
+            onTransform={transformation => this.transform(transformation)}
+            onUndoTransformation={() => this.undo()}
+            onNavigateToVisualise={this.handleNavigateToVisualise}
+            datasetRowAvailable={getRows(dataset) != null}
           />
-          {getRows(dataset) != null ? (
-            <DatasetTable
-              history={history}
-              datasetId={datasetId}
-              columns={getColumns(dataset)}
-              rows={getRows(dataset)}
-              transformations={getTransformations(dataset)}
-              isLockedFromTransformations={getIsLockedFromTransformations(dataset)}
-              pendingTransformations={pendingTransformations.valueSeq()}
-              onTransform={transformation => this.transform(transformation)}
-              onUndoTransformation={() => this.undo()}
-              onNavigateToVisualise={this.handleNavigateToVisualise}
-            />
-          ) : (
-            <LoadingSpinner />
-          )}
         </div>
       </NavigationPrompt>
     );
