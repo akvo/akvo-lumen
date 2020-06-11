@@ -14,6 +14,8 @@ import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time
 import { TRANSFORM_DATASET } from '../constants/analytics';
 import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
+import DatasetHeader from '../components/dataset/DatasetHeader';
+import DatasetTable from '../components/dataset/DatasetTable';
 
 require('../components/dataset/Dataset.scss');
 
@@ -23,7 +25,6 @@ class Dataset extends Component {
   constructor() {
     super();
     this.state = {
-      asyncComponents: null,
       isUnsavedChanges: false,
       // Pending transformations are represented as
       // an oredered map from timestamp to transformation
@@ -52,20 +53,6 @@ class Dataset extends Component {
     if (dataset == null || dataset.get('rows') == null) {
       dispatch(fetchDataset(datasetId));
     }
-
-    require.ensure([], () => {
-      /* eslint-disable global-require */
-      const DatasetHeader = require('../components/dataset/DatasetHeader').default;
-      const DatasetTable = require('../components/dataset/DatasetTable').default;
-      /* eslint-enable global-require */
-
-      this.setState({
-        asyncComponents: {
-          DatasetHeader,
-          DatasetTable,
-        },
-      });
-    }, 'Dataset');
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -226,10 +213,9 @@ class Dataset extends Component {
     const { pendingTransformations } = this.state;
     const { dataset, params, history } = this.props;
     const { datasetId } = params;
-    if (dataset == null || !this.state.asyncComponents) {
+    if (dataset == null) {
       return <LoadingSpinner />;
     }
-    const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
 
     return (
       <NavigationPrompt
