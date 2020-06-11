@@ -1,23 +1,23 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
-export default class DatasetHeader extends Component {
-  getActionButtions() {
+export default function DatasetHeader(props) {
+  const getActionButtions = () => {
     const settings = {
       buttonText: <FormattedMessage id="settings" />,
-      onClick: this.props.onShowDatasetSettings,
+      onClick: props.onShowDatasetSettings,
       customClass: 'notImplemented',
     };
 
     const transform = {
       buttonText: <FormattedMessage id="transform" />,
-      customClass: this.props.isLockedFromTransformations
+      customClass: props.isLockedFromTransformations
         ? 'disabled'
         : 'clickable',
       onOptionSelected: (item) => {
-        this.props.onClickTransformMenuItem(item);
+        props.onClickTransformMenuItem(item);
       },
       subActions: [
         {
@@ -73,12 +73,12 @@ export default class DatasetHeader extends Component {
 
     const transformationLog = {
       icon: <i className="fa fa-list-ol" aria-hidden="true" />,
-      onClick: this.props.onToggleTransformationLog,
+      onClick: props.onToggleTransformationLog,
     };
 
     const visualise = {
       buttonText: <FormattedMessage id="visualise" />,
-      onClick: this.props.onNavigateToVisualise,
+      onClick: props.onNavigateToVisualise,
       props: {
         'data-test-id': 'visualise',
       },
@@ -87,42 +87,40 @@ export default class DatasetHeader extends Component {
     const result = [settings, transform, transformationLog, visualise];
 
     return result;
+  };
+
+  const {
+    onChangeTitle,
+    onBeginEditTitle,
+    isUnsavedChanges,
+    savingFailed,
+    timeToNextSave,
+    history,
+    onSaveDataset,
+  } = props;
+
+  let saveStatusId = ({
+    false: 'all_changes_saved',
+    true: 'unsaved_changes',
+  })[isUnsavedChanges] || null;
+
+  if (savingFailed && timeToNextSave) {
+    saveStatusId = 'saving_failed_countdown';
   }
 
-  render() {
-    const {
-      onChangeTitle,
-      onBeginEditTitle,
-      isUnsavedChanges,
-      savingFailed,
-      timeToNextSave,
-      history,
-      onSaveDataset,
-    } = this.props;
-
-    let saveStatusId = ({
-      false: 'all_changes_saved',
-      true: 'unsaved_changes',
-    })[isUnsavedChanges] || null;
-
-    if (savingFailed && timeToNextSave) {
-      saveStatusId = 'saving_failed_countdown';
-    }
-
-    return (
-      <EntityTypeHeader
-        history={history}
-        title={this.props.name}
-        actionButtons={this.getActionButtions()}
-        saveAction={onSaveDataset}
-        onChangeTitle={onChangeTitle}
-        onBeginEditTitle={onBeginEditTitle}
-        saveStatusId={saveStatusId}
-        savingFailed={savingFailed}
-        timeToNextSave={timeToNextSave}
-      />
-    );
-  }
+  return (
+    <EntityTypeHeader
+      history={history}
+      title={props.name}
+      actionButtons={getActionButtions()}
+      saveAction={onSaveDataset}
+      onChangeTitle={onChangeTitle}
+      onBeginEditTitle={onBeginEditTitle}
+      saveStatusId={saveStatusId}
+      savingFailed={savingFailed}
+      timeToNextSave={timeToNextSave}
+    />
+  );
 }
 
 DatasetHeader.propTypes = {
