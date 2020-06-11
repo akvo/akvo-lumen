@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { withRouter } from 'react-router';
 import { showModal } from '../actions/activeModal';
 import { fetchDataset, updateDatasetMeta, pollTxImportStatus, startTx, undoTx, endTx } from '../actions/dataset';
@@ -14,105 +14,63 @@ import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time
 import { TRANSFORM_DATASET } from '../constants/analytics';
 import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
+import DatasetHeader from '../components/dataset/DatasetHeader';
+import DatasetTable from '../components/dataset/DatasetTable';
 
 require('../components/dataset/Dataset.scss');
 
+function Dataset(props) {
+  const isMountedFlag = useRef(false);
 
-class Dataset extends Component {
+  const dataset = useSelector(state => state.library.datasets[props.params.datasetId]);
 
-  constructor() {
-    super();
-    this.state = {
-      asyncComponents: null,
-      isUnsavedChanges: false,
-      // Pending transformations are represented as
-      // an oredered map from timestamp to transformation
-      pendingTransformations: Immutable.OrderedMap(),
-      timeToNextSave: SAVE_INITIAL_TIMEOUT,
-      timeFromPreviousSave: 0,
-      hasTrackedPageView: false,
-    };
-    this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
-    this.handleNavigateToVisualise = this.handleNavigateToVisualise.bind(this);
-    this.handleChangeDatasetTitle = this.handleChangeDatasetTitle.bind(this);
-    this.handleSave = this.handleSave.bind(this);
-    this.handleSaveFailure = this.handleSaveFailure.bind(this);
-    this.transform = this.transform.bind(this);
-    this.undo = this.undo.bind(this);
-  }
+  const [title, setTitle] = useState(dataset ? getTitle(dataset) : '');
 
-  componentDidMount() {
-    const { params, dataset, dispatch } = this.props;
-    const { datasetId } = params;
+  const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
 
-    this.isMountedFlag = true;
+  // Pending transformations are represented as
+  // an oredered map from timestamp to transformation
+  const [pendingTransformations, setPendingTransformations] = useState(Immutable.OrderedMap());
 
-    this.handleTrackPageView(this.props);
+  const [timeToNextSave, setTimeToNextSave] = useState(SAVE_INITIAL_TIMEOUT);
 
-    if (dataset == null || dataset.get('rows') == null) {
-      dispatch(fetchDataset(datasetId));
+  const [timeFromPreviousSave, setTimeFromPreviousSave] = useState(0);
+
+  const [hasTrackedPageView, setHasTrackedPageView] = useState(false);
+
+  const [savingFailed, setSavingFailed] = useState(false);
+
+  const handleTrackPageView = () => {
+    if (dataset && !hasTrackedPageView) {
+      setHasTrackedPageView(true);
     }
+  };
 
-    require.ensure([], () => {
-      /* eslint-disable global-require */
-      const DatasetHeader = require('../components/dataset/DatasetHeader').default;
-      const DatasetTable = require('../components/dataset/DatasetTable').default;
-      /* eslint-enable global-require */
+  const setPendingTransformation = (timestamp, transformation) => {
+    setPendingTransformations(x => x.set(timestamp, transformation));
+  };
 
-      this.setState({
-        asyncComponents: {
-          DatasetHeader,
-          DatasetTable,
-        },
-      });
-    }, 'Dataset');
-  }
+  const setPendingUndo = timestamp =>
+        setPendingTransformations(x => x.set(timestamp, Immutable.Map({ op: 'undo' })));
 
-  // eslint-disable-next-line no-unused-vars
-  componentDidUpdate(prevProps, prevState) {
-    if (!this.state.hasTrackedPageView && this.props.dataset) {
-      trackPageView(`Dataset: ${getTitle(this.props.dataset)}`);
-    }
-  }
+  const removePending = timestamp => setPendingTransformations(x => x.delete(timestamp));
 
-  componentWillUnmount() {
-    this.isMountedFlag = false;
-  }
-
-  setPendingTransformation(timestamp, transformation) {
-    const { pendingTransformations } = this.state;
-    this.setState({
-      pendingTransformations: pendingTransformations.set(timestamp, transformation),
-    });
-  }
-
-  setPendingUndo(timestamp) {
-    const { pendingTransformations } = this.state;
-    this.setState({
-      pendingTransformations: pendingTransformations.set(timestamp, Immutable.Map({ op: 'undo' })),
-    });
-  }
-
-  removePending(timestamp) {
-    const { pendingTransformations } = this.state;
-    this.setState({ pendingTransformations: pendingTransformations.delete(timestamp) });
-  }
-
-  transform(transformation) {
-    const { dataset, dispatch } = this.props;
+  const transform = (transformation) => {
+    const { dispatch } = props;
     const id = dataset.get('id');
     const now = Date.now();
     const transformationJs = transformation.toJS();
 
     trackEvent(TRANSFORM_DATASET, transformationJs.op);
 
-    this.setPendingTransformation(now, transformation);
+    setPendingTransformation(now, transformation);
+
     dispatch(startTx(id));
 
     return api.post(`/api/transformations/${id}/transform/${transformationJs.op}`, transformationJs)
       .then((response) => {
         if (!response.ok) {
-          this.removePending(now);
+          removePending(now);
           throw new Error(response.body.message);
         } else {
           dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
@@ -120,27 +78,27 @@ class Dataset extends Component {
           }));
         }
       })
-      .then(() => this.removePending(now))
+      .then(() => removePending(now))
       .catch((error) => {
         dispatch(showNotification('error', error.message));
         dispatch(endTx(id, false));
         throw error;
       });
-  }
+  };
 
-  undo() {
-    const { dataset, dispatch } = this.props;
+  const undo = () => {
+    const { dispatch } = props;
     const id = dataset.get('id');
     const now = Date.now();
 
-    this.setPendingUndo(now);
+    setPendingUndo(now);
 
     dispatch(undoTx(id));
 
     api.post(`/api/transformations/${id}/undo`)
       .then((response) => {
         if (!response.ok) {
-          this.removePending(now);
+          removePending(now);
           throw new Error(response.body.message);
         } else {
           dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
@@ -148,127 +106,137 @@ class Dataset extends Component {
           }));
         }
       })
-      .then(() => this.removePending(now))
+      .then(() => removePending(now))
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to undo.'));
+        dispatch(showNotification('error', 'Failed to undo.'));
       });
-  }
+  };
 
-  handleTrackPageView(props) {
-    const { dataset } = props;
-    if (dataset && !this.state.hasTrackedPageView) {
-      this.setState({ hasTrackedPageView: true }, () => {
-        trackPageView(`Dataset: ${getTitle(dataset)}`);
-      });
-    }
-  }
+  const handleSaveFailure = () => {
+    setTimeToNextSave(x => x * 2);
+    setTimeFromPreviousSave(0);
+    setSavingFailed(true);
+  };
 
-  handleChangeDatasetTitle(name) {
-    this.setState({ title: name }, () => {
-      this.handleSave();
-    });
-  }
-
-  handleSaveFailure() {
-    this.setState({
-      timeToNextSave: this.state.timeToNextSave * 2,
-      timeFromPreviousSave: 0,
-      savingFailed: true,
-    }, () => {
-      this.saveInterval = setInterval(() => {
-        const { timeFromPreviousSave, timeToNextSave } = this.state;
-        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
-          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
-          return;
-        }
-        clearInterval(this.saveInterval);
-      }, SAVE_COUNTDOWN_INTERVAL);
-      setTimeout(() => {
-        this.handleSave();
-      }, this.state.timeToNextSave);
-    });
-  }
-
-  handleSave() {
-    const { dispatch, params } = this.props;
-    dispatch(updateDatasetMeta(params.datasetId, { name: this.state.title }, (error) => {
-      if (!this.isMountedFlag) return;
+  const handleSave = () => {
+    const { dispatch, params } = props;
+    dispatch(updateDatasetMeta(params.datasetId, { name: title }, (error) => {
+      if (!isMountedFlag.current) return;
       if (error) {
-        this.handleSaveFailure();
+        handleSaveFailure();
         return;
       }
-      this.setState({
-        isUnsavedChanges: false,
-        timeToNextSave: SAVE_INITIAL_TIMEOUT,
-        timeFromPreviousSave: 0,
-        savingFailed: false,
-      });
+      setIsUnsavedChanges(false);
+      setTimeToNextSave(SAVE_INITIAL_TIMEOUT);
+      setTimeToNextSave(0);
+      setSavingFailed(false);
     }));
-  }
+  };
 
-  handleShowDatasetSettings() {
-    this.props.dispatch(showModal('dataset-settings', {
-      id: getId(this.state.dataset),
+  const handleShowDatasetSettings = () => {
+    props.dispatch(showModal('dataset-settings', {
+      id: getId(dataset),
     }));
-  }
+  };
 
-  handleNavigateToVisualise() {
-    this.props.history.push({
+  const handleNavigateToVisualise = () => {
+    props.history.push({
       pathname: '/visualisation//create',
       state: {
-        preselectedDatasetId: this.props.params.datasetId,
+        preselectedDatasetId: props.params.datasetId,
         from: 'dataset',
       },
     });
-  }
+  };
 
-  render() {
-    const { pendingTransformations } = this.state;
-    const { dataset, params, history } = this.props;
+  useEffect(() => {
+    // previous componentDidMount code
+    // runs only once thus if has an empty array dependency list
+    const { params, dispatch } = props;
     const { datasetId } = params;
-    if (dataset == null || !this.state.asyncComponents) {
-      return <LoadingSpinner />;
+    isMountedFlag.current = true;
+    if (dataset == null || dataset.get('rows') == null) {
+      dispatch(fetchDataset(datasetId, null, () => setHasTrackedPageView(true)));
+    } else {
+      handleTrackPageView(props);
     }
-    const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
+    return () => {
+      // code from componentWillUnMount
+      isMountedFlag.current = false;
+    };
+  }, []);
 
-    return (
-      <NavigationPrompt
-        shouldPrompt={this.state.savingFailed}
-        history={history}
-      >
-        <div className="Dataset">
-          <DatasetTable
-            history={history}
-            datasetId={datasetId}
-            columns={getColumns(dataset)}
-            rows={getRows(dataset)}
-            Header={DatasetHeader}
-            headerProps={{
-              onShowDatasetSettings: this.handleShowDatasetSettings,
-              name: getTitle(dataset),
-              id: getId(dataset),
-              isUnsavedChanges: this.state.isUnsavedChanges,
-              onChangeTitle: this.handleChangeDatasetTitle,
-              onBeginEditTitle: () => this.setState({ isUnsavedChanges: true }),
-              savingFailed: this.state.savingFailed,
-              timeToNextSave:
-                this.state.timeToNextSave - this.state.timeFromPreviousSave,
-              onSaveDataset: this.handleSave,
-            }}
-            transformations={getTransformations(dataset)}
-            isLockedFromTransformations={getIsLockedFromTransformations(
-              dataset
-            )}
-            pendingTransformations={pendingTransformations.valueSeq()}
-            onTransform={transformation => this.transform(transformation)}
-            onUndoTransformation={() => this.undo()}
-            onNavigateToVisualise={this.handleNavigateToVisualise}
-            datasetRowAvailable={getRows(dataset) != null}
-          />
-        </div>
-      </NavigationPrompt>
-    );
+  useEffect(() => {
+    if (hasTrackedPageView && dataset) {
+      // eslint-disable-next-line no-console
+      console.log('tracking', `Dataset: ${getTitle(dataset)}`);
+      trackPageView(`Dataset: ${getTitle(dataset)}`);
+    }
+  }, [hasTrackedPageView]);
+
+  useEffect(() => {
+    if (dataset && title !== getTitle(dataset)) {
+      handleSave();
+    }
+  }, [title]);
+
+  useEffect(() => {
+    if (savingFailed) {
+      const saveInterval = setInterval(() => {
+        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
+          setTimeFromPreviousSave(x => x + SAVE_COUNTDOWN_INTERVAL);
+          return;
+        }
+        clearInterval(saveInterval);
+      }, SAVE_COUNTDOWN_INTERVAL);
+      setTimeout(() => {
+        handleSave();
+      }, timeToNextSave);
+    }
+  }, [savingFailed]);
+
+  const { params, history } = props;
+  const { datasetId } = params;
+  if (dataset == null) {
+    return <LoadingSpinner />;
   }
+
+  return (
+    <NavigationPrompt
+      shouldPrompt={savingFailed}
+      history={history}
+    >
+      <div className="Dataset">
+        <DatasetTable
+          history={history}
+          datasetId={datasetId}
+          columns={getColumns(dataset)}
+          rows={getRows(dataset)}
+          Header={DatasetHeader}
+          headerProps={{
+            onShowDatasetSettings: handleShowDatasetSettings,
+            name: getTitle(dataset),
+            id: getId(dataset),
+            isUnsavedChanges,
+            onChangeTitle: setTitle,
+            onBeginEditTitle: () => setIsUnsavedChanges(true),
+            savingFailed,
+            timeToNextSave: timeToNextSave - timeFromPreviousSave,
+            onSaveDataset: handleSave,
+          }}
+          transformations={getTransformations(dataset)}
+          isLockedFromTransformations={getIsLockedFromTransformations(
+            dataset
+          )}
+          pendingTransformations={pendingTransformations.valueSeq()}
+          onTransform={transformation => transform(transformation)}
+          onUndoTransformation={undo}
+          onNavigateToVisualise={handleNavigateToVisualise}
+          datasetRowAvailable={getRows(dataset) != null}
+        />
+      </div>
+    </NavigationPrompt>
+  );
 }
 
 Dataset.propTypes = {
@@ -278,7 +246,5 @@ Dataset.propTypes = {
   history: PropTypes.object.isRequired,
 };
 
-// Just inject `dispatch`
-export default withRouter(connect((state, props) => ({
-  dataset: state.library.datasets[props.params.datasetId],
-}))(Dataset));
+// // Just inject `dispatch`
+export default withRouter(connect()(Dataset));
