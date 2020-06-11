@@ -126,17 +126,17 @@ export default class DatasetHeader extends Component {
 }
 
 DatasetHeader.propTypes = {
+  history: PropTypes.object.isRequired,
+  isLockedFromTransformations: PropTypes.bool,
+  isUnsavedChanges: PropTypes.bool,
+  name: PropTypes.string.isRequired,
+  onBeginEditTitle: PropTypes.func,
+  onChangeTitle: PropTypes.func,
+  onClickTransformMenuItem: PropTypes.func,
+  onNavigateToVisualise: PropTypes.func.isRequired,
+  onSaveDataset: PropTypes.func.isRequired,
+  onShowDatasetSettings: PropTypes.func.isRequired,
+  onToggleTransformationLog: PropTypes.func,
   savingFailed: PropTypes.bool,
   timeToNextSave: PropTypes.number,
-  name: PropTypes.string.isRequired,
-  onShowDatasetSettings: PropTypes.func.isRequired,
-  history: PropTypes.object.isRequired,
-  onSaveDataset: PropTypes.func.isRequired,
-  isUnsavedChanges: PropTypes.bool,
-  onChangeTitle: PropTypes.func,
-  onBeginEditTitle: PropTypes.func,
-  onNavigateToVisualise: PropTypes.func.isRequired,
-  isLockedFromTransformations: PropTypes.bool,
-  onClickTransformMenuItem: PropTypes.func,
-  onToggleTransformationLog: PropTypes.func,
 };
