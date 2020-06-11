@@ -40,22 +40,9 @@ function Dataset(props) {
 
   const [savingFailed, setSavingFailed] = useState(false);
 
-  const handleTrackPageView = () => {
-    if (dataset && !hasTrackedPageView) {
-      setHasTrackedPageView(true);
-    }
-  };
-
-  const setPendingTransformation = (timestamp, transformation) => {
-    setPendingTransformations(x => x.set(timestamp, transformation));
-  };
-
-  const setPendingUndo = timestamp =>
-        setPendingTransformations(x => x.set(timestamp, Immutable.Map({ op: 'undo' })));
-
   const removePending = timestamp => setPendingTransformations(x => x.delete(timestamp));
 
-  const transform = (transformation) => {
+  const onTransform = (transformation) => {
     const { dispatch } = props;
     const id = dataset.get('id');
     const now = Date.now();
@@ -63,7 +50,7 @@ function Dataset(props) {
 
     trackEvent(TRANSFORM_DATASET, transformationJs.op);
 
-    setPendingTransformation(now, transformation);
+    setPendingTransformations(x => x.set(now, transformation));
 
     dispatch(startTx(id));
 
@@ -86,12 +73,12 @@ function Dataset(props) {
       });
   };
 
-  const undo = () => {
+  const onUndoTransformation = () => {
     const { dispatch } = props;
     const id = dataset.get('id');
     const now = Date.now();
 
-    setPendingUndo(now);
+    setPendingTransformations(x => x.set(now, Immutable.Map({ op: 'undo' })));
 
     dispatch(undoTx(id));
 
@@ -133,13 +120,13 @@ function Dataset(props) {
     }));
   };
 
-  const handleShowDatasetSettings = () => {
+  const onShowDatasetSettings = () => {
     props.dispatch(showModal('dataset-settings', {
       id: getId(dataset),
     }));
   };
 
-  const handleNavigateToVisualise = () => {
+  const onNavigateToVisualise = () => {
     props.history.push({
       pathname: '/visualisation//create',
       state: {
@@ -157,8 +144,8 @@ function Dataset(props) {
     isMountedFlag.current = true;
     if (dataset == null || dataset.get('rows') == null) {
       dispatch(fetchDataset(datasetId, null, () => setHasTrackedPageView(true)));
-    } else {
-      handleTrackPageView(props);
+    } else if (dataset && !hasTrackedPageView) {
+      setHasTrackedPageView(true);
     }
     return () => {
       // code from componentWillUnMount
@@ -214,7 +201,7 @@ function Dataset(props) {
           rows={getRows(dataset)}
           Header={DatasetHeader}
           headerProps={{
-            onShowDatasetSettings: handleShowDatasetSettings,
+            onShowDatasetSettings,
             name: getTitle(dataset),
             id: getId(dataset),
             isUnsavedChanges,
@@ -229,9 +216,9 @@ function Dataset(props) {
             dataset
           )}
           pendingTransformations={pendingTransformations.valueSeq()}
-          onTransform={transformation => transform(transformation)}
-          onUndoTransformation={undo}
-          onNavigateToVisualise={handleNavigateToVisualise}
+          onTransform={onTransform}
+          onUndoTransformation={onUndoTransformation}
+          onNavigateToVisualise={onNavigateToVisualise}
           datasetRowAvailable={getRows(dataset) != null}
         />
       </div>
