@@ -81,6 +81,18 @@
           (rename-keys {:title :name})
           (assoc :rows data :columns columns :status "OK")))))
 
+
+(defn fetch-group
+  [tenant-conn id group-id]
+  (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
+    (let [columns (remove #(or (get % "hidden") (not= group-id (get % "groupId"))) (:columns dataset))
+          data (rest (jdbc/query tenant-conn
+                                 [(select-data-sql (:table-name dataset) columns)]
+                                 {:as-arrays? true}))]
+      (-> (select-keys dataset [:updated :created :modified])
+          remove-token
+          (assoc :rows data :columns columns :status "OK" :datasetId id :groupId group-id)))))
+
 (defn sort-text
   [tenant-conn id column-name limit order]
   (when-let [dataset (db.dataset/table-name-by-dataset-id tenant-conn {:id id})]
