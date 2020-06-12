@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, FormattedRelative, injectIntl, intlShape } from 'react-intl';
 
@@ -10,22 +10,11 @@ require('./EntityTypeHeader.scss');
 
 const IS_PRIMARY = true;
 
-class EntityTypeHeader extends Component {
+function EntityTypeHeader(props) {
+  const [menuActive, setMenuActive] = useState(null);
 
-  constructor() {
-    super();
-    this.state = {
-      titleEditModeActive: false,
-    };
-    this.handleToggleContextMenu = this.handleToggleContextMenu.bind(this);
-  }
-
-  handleToggleContextMenu(menuActive) {
-    this.setState({ menuActive });
-  }
-
-  actionButtons(isPrimary = false) {
-    const { actionButtons, intl } = this.props;
+  const actionButtonsFun = (isPrimary = false) => {
+    const { actionButtons, intl } = props;
 
     if (actionButtons == null) return null;
 
@@ -39,7 +28,7 @@ class EntityTypeHeader extends Component {
                 <span>
                   <button
                     className={`overflow sub-action link-button clickable  ${button.customClass ? button.customClass : ''}`}
-                    onClick={() => this.handleToggleContextMenu(index)}
+                    onClick={() => setMenuActive(index)}
                     title={button.tooltipId && intl.formatMessage({ id: button.tooltipId })}
                     disabled={button.disabled}
                     {...(button.props || {})}
@@ -47,11 +36,11 @@ class EntityTypeHeader extends Component {
                     {button.icon || null}
                     {button.buttonText}
                   </button>
-                  {this.state.menuActive === index && (
+                  {menuActive === index && (
                     <ContextMenu
                       options={button.subActions}
                       onOptionSelected={button.onOptionSelected}
-                      onWindowClick={this.handleToggleContextMenu}
+                      onWindowClick={setMenuActive}
                       subMenuSide="left"
                       style={{
                         left: 0,
@@ -78,58 +67,56 @@ class EntityTypeHeader extends Component {
         }
       </ul>
     );
-  }
+  };
 
-  render() {
-    const {
-      title,
-      saveStatusId,
-      onChangeTitle,
-      onBeginEditTitle,
-      timeToNextSave,
-      savingFailed,
-      saveAction,
-    } = this.props;
+  const {
+    title,
+    saveStatusId,
+    onChangeTitle,
+    onBeginEditTitle,
+    timeToNextSave,
+    savingFailed,
+    saveAction,
+  } = props;
 
-    return (
-      <Header
-        className="EntityTypeHeader"
-        actions={this.actionButtons()}
-        history={this.props.history}
-        primaryActions={this.actionButtons(IS_PRIMARY)}
-      >
-        <div className="EntityTypeHeaderContainer">
-          <EntityTitleInput
-            title={title}
-            onBeginEditTitle={onBeginEditTitle}
-            onChangeTitle={onChangeTitle}
-          />
+  return (
+    <Header
+      className="EntityTypeHeader"
+      actions={actionButtonsFun()}
+      history={props.history}
+      primaryActions={actionButtonsFun(IS_PRIMARY)}
+    >
+      <div className="EntityTypeHeaderContainer">
+        <EntityTitleInput
+          title={title}
+          onBeginEditTitle={onBeginEditTitle}
+          onChangeTitle={onChangeTitle}
+        />
 
-          {/* hide status when editing */}
-          {saveStatusId && saveStatusId !== 'unsaved_changes' && (
-            <div className="saveStatus">
-              {saveStatusId && <FormattedMessage id={saveStatusId} />}
-              {timeToNextSave && savingFailed && (
-                <span>
-                  <FormattedRelative
-                    value={new Date().getTime() + timeToNextSave}
-                  />
+        {/* hide status when editing */}
+        {saveStatusId && saveStatusId !== 'unsaved_changes' && (
+          <div className="saveStatus">
+            {saveStatusId && <FormattedMessage id={saveStatusId} />}
+            {timeToNextSave && savingFailed && (
+              <span>
+                <FormattedRelative
+                  value={new Date().getTime() + timeToNextSave}
+                />
 
-                  <span
-                    data-test-id="save-changes"
-                    className="clickable"
-                    onClick={saveAction}
-                  >
-                    . <FormattedMessage id="retry" />
-                  </span>
+                <span
+                  data-test-id="save-changes"
+                  className="clickable"
+                  onClick={saveAction}
+                >
+                  . <FormattedMessage id="retry" />
                 </span>
-              )}
-            </div>
-          )}
-        </div>
-      </Header>
-    );
-  }
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </Header>
+  );
 }
 
 EntityTypeHeader.propTypes = {
