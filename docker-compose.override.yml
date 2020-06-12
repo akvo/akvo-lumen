@@ -24,11 +24,9 @@ services:
    ports:
       - "3030:3030"
  windshaft:
-   build: windshaft
-   environment:
-     - NODE_ENV=development
+   image: akvo/akvo-maps:beaf5cf8
    volumes:
-      - ./windshaft/config/dev:/config
+     - ./windshaft/config/dev:/config
  exporter:
    build: exporter
    ports:
