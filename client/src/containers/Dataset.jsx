@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { withRouter } from 'react-router';
 import { showModal } from '../actions/activeModal';
 import { fetchDataset, updateDatasetMeta, pollTxImportStatus, startTx, undoTx, endTx } from '../actions/dataset';
@@ -10,109 +10,44 @@ import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns, getIsLockedFromTransformations } from '../domain/dataset';
 import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import { TRANSFORM_DATASET } from '../constants/analytics';
 import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
+import DatasetHeader from '../components/dataset/DatasetHeader';
+import DatasetTable from '../components/dataset/DatasetTable';
+import PendingSaving from '../components/common/PendingSaving';
 
 require('../components/dataset/Dataset.scss');
 
+function Dataset(props) {
+  const dataset = useSelector(state => state.library.datasets[props.params.datasetId]);
 
-class Dataset extends Component {
+  const [title, setTitle] = useState(dataset ? getTitle(dataset) : '');
 
-  constructor() {
-    super();
-    this.state = {
-      asyncComponents: null,
-      isUnsavedChanges: false,
-      // Pending transformations are represented as
-      // an oredered map from timestamp to transformation
-      pendingTransformations: Immutable.OrderedMap(),
-      timeToNextSave: SAVE_INITIAL_TIMEOUT,
-      timeFromPreviousSave: 0,
-      hasTrackedPageView: false,
-    };
-    this.handleShowDatasetSettings = this.handleShowDatasetSettings.bind(this);
-    this.handleNavigateToVisualise = this.handleNavigateToVisualise.bind(this);
-    this.handleChangeDatasetTitle = this.handleChangeDatasetTitle.bind(this);
-    this.handleSave = this.handleSave.bind(this);
-    this.handleSaveFailure = this.handleSaveFailure.bind(this);
-    this.transform = this.transform.bind(this);
-    this.undo = this.undo.bind(this);
-  }
+  // Pending transformations are represented as
+  // an oredered map from timestamp to transformation
+  const [pendingTransformations, setPendingTransformations] = useState(Immutable.OrderedMap());
 
-  componentDidMount() {
-    const { params, dataset, dispatch } = this.props;
-    const { datasetId } = params;
+  const [hasTrackedPageView, setHasTrackedPageView] = useState(false);
 
-    this.isMountedFlag = true;
+  const removePending = timestamp => setPendingTransformations(x => x.delete(timestamp));
 
-    this.handleTrackPageView(this.props);
-
-    if (dataset == null || dataset.get('rows') == null) {
-      dispatch(fetchDataset(datasetId));
-    }
-
-    require.ensure([], () => {
-      /* eslint-disable global-require */
-      const DatasetHeader = require('../components/dataset/DatasetHeader').default;
-      const DatasetTable = require('../components/dataset/DatasetTable').default;
-      /* eslint-enable global-require */
-
-      this.setState({
-        asyncComponents: {
-          DatasetHeader,
-          DatasetTable,
-        },
-      });
-    }, 'Dataset');
-  }
-
-  // eslint-disable-next-line no-unused-vars
-  componentDidUpdate(prevProps, prevState) {
-    if (!this.state.hasTrackedPageView && this.props.dataset) {
-      trackPageView(`Dataset: ${getTitle(this.props.dataset)}`);
-    }
-  }
-
-  componentWillUnmount() {
-    this.isMountedFlag = false;
-  }
-
-  setPendingTransformation(timestamp, transformation) {
-    const { pendingTransformations } = this.state;
-    this.setState({
-      pendingTransformations: pendingTransformations.set(timestamp, transformation),
-    });
-  }
-
-  setPendingUndo(timestamp) {
-    const { pendingTransformations } = this.state;
-    this.setState({
-      pendingTransformations: pendingTransformations.set(timestamp, Immutable.Map({ op: 'undo' })),
-    });
-  }
-
-  removePending(timestamp) {
-    const { pendingTransformations } = this.state;
-    this.setState({ pendingTransformations: pendingTransformations.delete(timestamp) });
-  }
-
-  transform(transformation) {
-    const { dataset, dispatch } = this.props;
+  const onTransform = (transformation) => {
+    const { dispatch } = props;
     const id = dataset.get('id');
     const now = Date.now();
     const transformationJs = transformation.toJS();
 
     trackEvent(TRANSFORM_DATASET, transformationJs.op);
 
-    this.setPendingTransformation(now, transformation);
+    setPendingTransformations(x => x.set(now, transformation));
+
     dispatch(startTx(id));
 
     return api.post(`/api/transformations/${id}/transform/${transformationJs.op}`, transformationJs)
       .then((response) => {
         if (!response.ok) {
-          this.removePending(now);
+          removePending(now);
           throw new Error(response.body.message);
         } else {
           dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
@@ -120,27 +55,27 @@ class Dataset extends Component {
           }));
         }
       })
-      .then(() => this.removePending(now))
+      .then(() => removePending(now))
       .catch((error) => {
         dispatch(showNotification('error', error.message));
         dispatch(endTx(id, false));
         throw error;
       });
-  }
+  };
 
-  undo() {
-    const { dataset, dispatch } = this.props;
+  const onUndoTransformation = () => {
+    const { dispatch } = props;
     const id = dataset.get('id');
     const now = Date.now();
 
-    this.setPendingUndo(now);
+    setPendingTransformations(x => x.set(now, Immutable.Map({ op: 'undo' })));
 
     dispatch(undoTx(id));
 
     api.post(`/api/transformations/${id}/undo`)
       .then((response) => {
         if (!response.ok) {
-          this.removePending(now);
+          removePending(now);
           throw new Error(response.body.message);
         } else {
           dispatch(pollTxImportStatus(response.body.jobExecutionId, () => {
@@ -148,127 +83,104 @@ class Dataset extends Component {
           }));
         }
       })
-      .then(() => this.removePending(now))
+      .then(() => removePending(now))
       .catch(() => {
-        this.props.dispatch(showNotification('error', 'Failed to undo.'));
+        dispatch(showNotification('error', 'Failed to undo.'));
       });
-  }
+  };
 
-  handleTrackPageView(props) {
-    const { dataset } = props;
-    if (dataset && !this.state.hasTrackedPageView) {
-      this.setState({ hasTrackedPageView: true }, () => {
-        trackPageView(`Dataset: ${getTitle(dataset)}`);
-      });
-    }
-  }
+  const handleSave = (onError) => {
+    const { dispatch, params } = props;
+    dispatch(updateDatasetMeta(params.datasetId, { name: title }, onError));
+  };
 
-  handleChangeDatasetTitle(name) {
-    this.setState({ title: name }, () => {
-      this.handleSave();
-    });
-  }
+  // eslint-disable-next-line new-cap
+  const pendingSaving = PendingSaving({ handleSave });
 
-  handleSaveFailure() {
-    this.setState({
-      timeToNextSave: this.state.timeToNextSave * 2,
-      timeFromPreviousSave: 0,
-      savingFailed: true,
-    }, () => {
-      this.saveInterval = setInterval(() => {
-        const { timeFromPreviousSave, timeToNextSave } = this.state;
-        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
-          this.setState({ timeFromPreviousSave: timeFromPreviousSave + SAVE_COUNTDOWN_INTERVAL });
-          return;
-        }
-        clearInterval(this.saveInterval);
-      }, SAVE_COUNTDOWN_INTERVAL);
-      setTimeout(() => {
-        this.handleSave();
-      }, this.state.timeToNextSave);
-    });
-  }
-
-  handleSave() {
-    const { dispatch, params } = this.props;
-    dispatch(updateDatasetMeta(params.datasetId, { name: this.state.title }, (error) => {
-      if (!this.isMountedFlag) return;
-      if (error) {
-        this.handleSaveFailure();
-        return;
-      }
-      this.setState({
-        isUnsavedChanges: false,
-        timeToNextSave: SAVE_INITIAL_TIMEOUT,
-        timeFromPreviousSave: 0,
-        savingFailed: false,
-      });
+  const onShowDatasetSettings = () => {
+    props.dispatch(showModal('dataset-settings', {
+      id: getId(dataset),
     }));
-  }
+  };
 
-  handleShowDatasetSettings() {
-    this.props.dispatch(showModal('dataset-settings', {
-      id: getId(this.state.dataset),
-    }));
-  }
-
-  handleNavigateToVisualise() {
-    this.props.history.push({
+  const onNavigateToVisualise = () => {
+    props.history.push({
       pathname: '/visualisation//create',
       state: {
-        preselectedDatasetId: this.props.params.datasetId,
+        preselectedDatasetId: props.params.datasetId,
         from: 'dataset',
       },
     });
-  }
+  };
 
-  render() {
-    const { pendingTransformations } = this.state;
-    const { dataset, params, history } = this.props;
+  useEffect(() => {
+    // previous componentDidMount code
+    // runs only once thus if has an empty array dependency list
+    const { params, dispatch } = props;
     const { datasetId } = params;
-    if (dataset == null || !this.state.asyncComponents) {
-      return <LoadingSpinner />;
+    if (dataset == null || dataset.get('rows') == null) {
+      dispatch(fetchDataset(datasetId, null, () => setHasTrackedPageView(true)));
+    } else if (dataset && !hasTrackedPageView) {
+      setHasTrackedPageView(true);
     }
-    const { DatasetHeader, DatasetTable } = this.state.asyncComponents;
+  }, []);
 
-    return (
-      <NavigationPrompt
-        shouldPrompt={this.state.savingFailed}
-        history={history}
-      >
-        <div className="Dataset">
-          <DatasetTable
-            history={history}
-            datasetId={datasetId}
-            columns={getColumns(dataset)}
-            rows={getRows(dataset)}
-            Header={DatasetHeader}
-            headerProps={{
-              onShowDatasetSettings: this.handleShowDatasetSettings,
-              name: getTitle(dataset),
-              id: getId(dataset),
-              isUnsavedChanges: this.state.isUnsavedChanges,
-              onChangeTitle: this.handleChangeDatasetTitle,
-              onBeginEditTitle: () => this.setState({ isUnsavedChanges: true }),
-              savingFailed: this.state.savingFailed,
-              timeToNextSave:
-                this.state.timeToNextSave - this.state.timeFromPreviousSave,
-              onSaveDataset: this.handleSave,
-            }}
-            transformations={getTransformations(dataset)}
-            isLockedFromTransformations={getIsLockedFromTransformations(
-              dataset
-            )}
-            pendingTransformations={pendingTransformations.valueSeq()}
-            onTransform={transformation => this.transform(transformation)}
-            onUndoTransformation={() => this.undo()}
-            onNavigateToVisualise={this.handleNavigateToVisualise}
-            datasetRowAvailable={getRows(dataset) != null}
-          />
-        </div>
-      </NavigationPrompt>
-    );
+  useEffect(() => {
+    if (hasTrackedPageView && dataset) {
+      // eslint-disable-next-line no-console
+      console.log('tracking', `Dataset: ${getTitle(dataset)}`);
+      trackPageView(`Dataset: ${getTitle(dataset)}`);
+    }
+  }, [hasTrackedPageView]);
+
+  useEffect(() => {
+    if (dataset && title !== getTitle(dataset)) {
+      handleSave();
+    }
+  }, [title]);
+
+  const { params, history } = props;
+  const { datasetId } = params;
+  if (dataset == null) {
+    return <LoadingSpinner />;
   }
+
+  return (
+    <NavigationPrompt
+      shouldPrompt={pendingSaving.savingFailed}
+      history={history}
+    >
+      <div className="Dataset">
+        <DatasetTable
+          history={history}
+          datasetId={datasetId}
+          columns={getColumns(dataset)}
+          rows={getRows(dataset)}
+          Header={DatasetHeader}
+          headerProps={{
+            onShowDatasetSettings,
+            name: getTitle(dataset),
+            id: getId(dataset),
+            isUnsavedChanges: pendingSaving.isUnsavedChanges,
+            onBeginEditTitle: pendingSaving.onBeginEdit,
+            savingFailed: pendingSaving.savingFailed,
+            timeToNextSave: pendingSaving.timeToNextSave,
+            onChangeTitle: setTitle,
+            onSaveDataset: handleSave,
+          }}
+          transformations={getTransformations(dataset)}
+          isLockedFromTransformations={getIsLockedFromTransformations(
+            dataset
+          )}
+          pendingTransformations={pendingTransformations.valueSeq()}
+          onTransform={onTransform}
+          onUndoTransformation={onUndoTransformation}
+          onNavigateToVisualise={onNavigateToVisualise}
+          datasetRowAvailable={getRows(dataset) != null}
+        />
+      </div>
+    </NavigationPrompt>
+  );
 }
 
 Dataset.propTypes = {
@@ -278,7 +190,5 @@ Dataset.propTypes = {
   history: PropTypes.object.isRequired,
 };
 
-// Just inject `dispatch`
-export default withRouter(connect((state, props) => ({
-  dataset: state.library.datasets[props.params.datasetId],
-}))(Dataset));
+// // Just inject `dispatch`
+export default withRouter(connect()(Dataset));
