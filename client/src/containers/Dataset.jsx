@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { connect, useSelector } from 'react-redux';
@@ -10,35 +10,25 @@ import { getId, getTitle } from '../domain/entity';
 import { getTransformations, getRows, getColumns, getIsLockedFromTransformations } from '../domain/dataset';
 import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../constants/time';
 import { TRANSFORM_DATASET } from '../constants/analytics';
 import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
+import PendingSaving from '../components/common/PendingSaving';
 
 require('../components/dataset/Dataset.scss');
 
 function Dataset(props) {
-  const isMountedFlag = useRef(false);
-
   const dataset = useSelector(state => state.library.datasets[props.params.datasetId]);
 
   const [title, setTitle] = useState(dataset ? getTitle(dataset) : '');
-
-  const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
 
   // Pending transformations are represented as
   // an oredered map from timestamp to transformation
   const [pendingTransformations, setPendingTransformations] = useState(Immutable.OrderedMap());
 
-  const [timeToNextSave, setTimeToNextSave] = useState(SAVE_INITIAL_TIMEOUT);
-
-  const [timeFromPreviousSave, setTimeFromPreviousSave] = useState(0);
-
   const [hasTrackedPageView, setHasTrackedPageView] = useState(false);
-
-  const [savingFailed, setSavingFailed] = useState(false);
 
   const removePending = timestamp => setPendingTransformations(x => x.delete(timestamp));
 
@@ -99,26 +89,13 @@ function Dataset(props) {
       });
   };
 
-  const handleSaveFailure = () => {
-    setTimeToNextSave(x => x * 2);
-    setTimeFromPreviousSave(0);
-    setSavingFailed(true);
+  const handleSave = (onError) => {
+    const { dispatch, params } = props;
+    dispatch(updateDatasetMeta(params.datasetId, { name: title }, onError));
   };
 
-  const handleSave = () => {
-    const { dispatch, params } = props;
-    dispatch(updateDatasetMeta(params.datasetId, { name: title }, (error) => {
-      if (!isMountedFlag.current) return;
-      if (error) {
-        handleSaveFailure();
-        return;
-      }
-      setIsUnsavedChanges(false);
-      setTimeToNextSave(SAVE_INITIAL_TIMEOUT);
-      setTimeToNextSave(0);
-      setSavingFailed(false);
-    }));
-  };
+  // eslint-disable-next-line new-cap
+  const pendingSaving = PendingSaving({ handleSave });
 
   const onShowDatasetSettings = () => {
     props.dispatch(showModal('dataset-settings', {
@@ -141,16 +118,11 @@ function Dataset(props) {
     // runs only once thus if has an empty array dependency list
     const { params, dispatch } = props;
     const { datasetId } = params;
-    isMountedFlag.current = true;
     if (dataset == null || dataset.get('rows') == null) {
       dispatch(fetchDataset(datasetId, null, () => setHasTrackedPageView(true)));
     } else if (dataset && !hasTrackedPageView) {
       setHasTrackedPageView(true);
     }
-    return () => {
-      // code from componentWillUnMount
-      isMountedFlag.current = false;
-    };
   }, []);
 
   useEffect(() => {
@@ -167,21 +139,6 @@ function Dataset(props) {
     }
   }, [title]);
 
-  useEffect(() => {
-    if (savingFailed) {
-      const saveInterval = setInterval(() => {
-        if (timeToNextSave - timeFromPreviousSave > SAVE_COUNTDOWN_INTERVAL) {
-          setTimeFromPreviousSave(x => x + SAVE_COUNTDOWN_INTERVAL);
-          return;
-        }
-        clearInterval(saveInterval);
-      }, SAVE_COUNTDOWN_INTERVAL);
-      setTimeout(() => {
-        handleSave();
-      }, timeToNextSave);
-    }
-  }, [savingFailed]);
-
   const { params, history } = props;
   const { datasetId } = params;
   if (dataset == null) {
@@ -190,7 +147,7 @@ function Dataset(props) {
 
   return (
     <NavigationPrompt
-      shouldPrompt={savingFailed}
+      shouldPrompt={pendingSaving.savingFailed}
       history={history}
     >
       <div className="Dataset">
@@ -204,11 +161,11 @@ function Dataset(props) {
             onShowDatasetSettings,
             name: getTitle(dataset),
             id: getId(dataset),
-            isUnsavedChanges,
+            isUnsavedChanges: pendingSaving.isUnsavedChanges,
+            onBeginEditTitle: pendingSaving.onBeginEdit,
+            savingFailed: pendingSaving.savingFailed,
+            timeToNextSave: pendingSaving.timeToNextSave,
             onChangeTitle: setTitle,
-            onBeginEditTitle: () => setIsUnsavedChanges(true),
-            savingFailed,
-            timeToNextSave: timeToNextSave - timeFromPreviousSave,
             onSaveDataset: handleSave,
           }}
           transformations={getTransformations(dataset)}
