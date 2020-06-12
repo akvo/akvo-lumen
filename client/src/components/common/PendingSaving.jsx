@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
 import { SAVE_COUNTDOWN_INTERVAL, SAVE_INITIAL_TIMEOUT } from '../../constants/time';
 
-export default function PendingSaving(props) {
+export default function usePendingSaving(handleSave) {
   const isMountedFlag = useRef(false);
 
   const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
@@ -51,15 +50,10 @@ export default function PendingSaving(props) {
         clearInterval(saveInterval);
       }, SAVE_COUNTDOWN_INTERVAL);
       setTimeout(() => {
-        props.handleSave(handleSaveOnError);
+        handleSave(handleSaveOnError);
       }, timeToNextSave);
     }
   }, [savingFailed]);
 
   return { savingFailed, isUnsavedChanges, timeToNextSave, onBeginEdit };
 }
-
-PendingSaving.propTypes = {
-  handleSave: PropTypes.func.isRequired,
-};
-

@@ -15,7 +15,7 @@ import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 import DatasetHeader from '../components/dataset/DatasetHeader';
 import DatasetTable from '../components/dataset/DatasetTable';
-import PendingSaving from '../components/common/PendingSaving';
+import usePendingSaving from '../components/common/PendingSaving';
 
 require('../components/dataset/Dataset.scss');
 
@@ -95,7 +95,7 @@ function Dataset(props) {
   };
 
   // eslint-disable-next-line new-cap
-  const pendingSaving = PendingSaving({ handleSave });
+  const pendingSaving = usePendingSaving(handleSave);
 
   const onShowDatasetSettings = () => {
     props.dispatch(showModal('dataset-settings', {
