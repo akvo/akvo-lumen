@@ -135,7 +135,7 @@ function Dataset(props) {
 
   useEffect(() => {
     if (dataset && title !== getTitle(dataset)) {
-      handleSave();
+      pendingSaving.onHandleSave();
     }
   }, [title]);
 
@@ -166,7 +166,7 @@ function Dataset(props) {
             savingFailed: pendingSaving.savingFailed,
             timeToNextSave: pendingSaving.timeToNextSave,
             onChangeTitle: setTitle,
-            onSaveDataset: handleSave,
+            onSaveDataset: pendingSaving.onHandleSave,
           }}
           transformations={getTransformations(dataset)}
           isLockedFromTransformations={getIsLockedFromTransformations(
