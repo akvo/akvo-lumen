@@ -32,6 +32,11 @@ export default function usePendingSaving(handleSave) {
 
   const onBeginEdit = () => setIsUnsavedChanges(true);
 
+  const onHandleSave = () => {
+    handleSave();
+    setIsUnsavedChanges(false);
+  };
+
   useEffect(() => {
     isMountedFlag.current = true;
     return () => {
@@ -55,5 +60,5 @@ export default function usePendingSaving(handleSave) {
     }
   }, [savingFailed]);
 
-  return { savingFailed, isUnsavedChanges, timeToNextSave, onBeginEdit };
+  return { savingFailed, isUnsavedChanges, timeToNextSave, onBeginEdit, onHandleSave };
 }
