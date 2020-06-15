@@ -68,6 +68,11 @@
                    :handler (fn [{tenant :tenant
                                   {:keys [id]} :path-params}]
                               (dataset/delete (p/connection tenant-manager tenant) id))}}]
+     ;; get meta organised by groups
+     ["/groups" {:get {:parameters {:path-params {:id string?}}
+                       :handler (fn [{tenant :tenant
+                                      {:keys [id]} :path-params}]
+                                  (dataset/fetch-groups-metadata (p/connection tenant-manager tenant) id))}}]
      ["/group"
       [["/:group-id" {:get {:parameters {:path-params {:id string?
                                                         :group-id string?}}
