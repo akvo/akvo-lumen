@@ -119,11 +119,22 @@
           (rename-keys {:title :name})
           (assoc :rows data :columns columns :status "OK")))))
 
-
 (defn fetch-group
   [tenant-conn id group-id]
   (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [columns (remove #(or (get % "hidden") (not= group-id (get % "groupId"))) (:columns dataset))
+    (let [column-condition (condp = group-id
+                             "metadata" #((complement contains?) flow-common/metadata-keys (get % "columnName"))
+                             "transformations" #(or
+                                                 (contains? flow-common/metadata-keys (get % "columnName"))
+                                                 (not= \d (first (get % "columnName"))))
+                             "main" #(or
+                                      (contains? flow-common/metadata-keys (get % "columnName"))
+                                      (= \d (first (get % "columnName"))))
+                             #(not= group-id (get % "groupId"))
+                             )
+
+
+          columns (remove #(or (get % "hidden") (column-condition %)) (:columns dataset))
           data (rest (jdbc/query tenant-conn
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
