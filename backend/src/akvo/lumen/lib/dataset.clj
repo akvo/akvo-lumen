@@ -135,7 +135,13 @@
                                  {:as-arrays? true}))]
       (-> (select-keys dataset [:updated :created :modified])
           remove-token
-          (assoc :rows data :columns columns :status "OK" :datasetId id :groupId group-id)))))
+          (assoc :rows data
+                 :columns (map (fn [col]
+                                 (cond-> col
+                                   true (assoc "groupId" group-id)
+                                   (contains? #{"main" "transformations" "metadata"} group-id)
+                                   (assoc "groupName" group-id))) columns)
+                 :status "OK" :datasetId id :groupId group-id)))))
 
 (defn sort-text
   [tenant-conn id column-name limit order]
