@@ -63,7 +63,7 @@
         column-types))
 
 (defn valid-column-name? [column-name]
-  (boolean (re-find #"^c\d+$" column-name)))
+  (boolean (re-matches #"c\d+$" column-name)))
 
 (defn data-records [column-spec rows]
   (for [row rows]
