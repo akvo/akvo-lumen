@@ -171,6 +171,8 @@
        (map first)
        (apply merge)))
 
+(def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
+
 (defn commons-columns [form]
   [(cond-> {:title "Identifier" :type "text" :id "identifier"}
      (:registration-form? form) (assoc :key true))
