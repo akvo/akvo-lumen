@@ -53,10 +53,7 @@
                                auth-service :auth-service
                                {:keys [id]} :path-params}]
                            (if-let [res (dataset/fetch (p/connection tenant-manager tenant) id)]
-                             (let [ids (l.auth/ids ::dataset.s/dataset res)]
-                               (if (p/allow? auth-service ids)
-                                 (lib/ok res)
-                                 (lib/not-authorized ids)))
+                             (lib/ok res)
                              (lib/not-found {:error "Not found"})))}
           :put {:parameters {:body map?
                              :path-params {:id string?}}
@@ -75,18 +72,12 @@
                                   (dataset/fetch-groups-metadata (p/connection tenant-manager tenant) id))}}]
      ["/group"
       [["/:group-id" {:get {:parameters {:path-params {:id string?
-                                                        :group-id string?}}
-                             :handler (fn [{tenant :tenant
-
-                                            {:keys [id group-id]} :path-params}]
-                                        (if-let [res (dataset/fetch-group (p/connection tenant-manager tenant) id group-id)]
-                                          (lib/ok res)
-                                          ;; TODO implement auth
-                                          #_(let [ids (l.auth/ids ::dataset.s/dataset res)]
-                                              (if (p/allow? auth-service ids)
-                                                (lib/ok res)
-                                                (lib/not-authorized ids)))
-                                          (lib/not-found {:error "Not found"})))}}]]]
+                                                       :group-id string?}}
+                            :handler (fn [{tenant :tenant
+                                           {:keys [id group-id]} :path-params}]
+                                       (if-let [res (dataset/fetch-group (p/connection tenant-manager tenant) id group-id)]
+                                         (lib/ok res)
+                                         (lib/not-found {:error "Not found"})))}}]]]
      ["/sort"
       [["/:column-name/text" {:get {:parameters fetch-column-params
                                     :handler (fn [{tenant :tenant
