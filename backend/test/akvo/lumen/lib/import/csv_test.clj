@@ -9,6 +9,7 @@
             [akvo.lumen.utils.logging-config :refer [with-no-logs]]
             [clojure.string :as string]
             [akvo.lumen.test-utils :as tu]
+            [akvo.lumen.lib.import.csv :as csv]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql])
   (:import [java.util.concurrent ExecutionException]))
@@ -68,3 +69,10 @@
           trimmable? #(or (string/starts-with? " " %) (string/ends-with? " " %))]
       (is (every? trimmable? titles)))))
 
+
+(deftest valid-column-name
+  (testing "valid column name"
+    (is (not (csv/valid-column-name? "d123123")))
+    (is (not (csv/valid-column-name? "c")))
+    (is (not (csv/valid-column-name? "ca1")))
+    (is (csv/valid-column-name? "c123123"))))
