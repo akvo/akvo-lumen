@@ -109,7 +109,7 @@
   (format "d%s" i))
 
 (defn is-derived? [column-name]
-  (boolean (re-find #"^d\d+$" column-name)))
+  (boolean (re-matches #"d\d+$" column-name)))
 
 (defn next-column-index [columns]
   (let [nums (->> columns
