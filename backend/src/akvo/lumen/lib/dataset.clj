@@ -6,7 +6,9 @@
             [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.import :as import]
+            [akvo.lumen.lib.import.csv :as i.csv]
             [akvo.lumen.lib.import.flow-common :as flow-common]
+            [akvo.lumen.lib.transformation.engine :as tx.engine]
             [akvo.lumen.lib.transformation.merge-datasets :as transformation.merge-datasets]
             [akvo.lumen.lib.update :as update]
             [akvo.lumen.protocols :as p]
@@ -78,30 +80,30 @@
   [tenant-conn id]
   (if-let [dataset (w/keywordize-keys (db.dataset/dataset-by-id tenant-conn {:id id}))]
     (let [columns (remove #(get % :hidden) (:columns dataset))
-          groups (if (= "AKVO_FLOW" (-> dataset :source :kind))
-                   (let [columns-by-group (group-by :groupId columns)
-                         groups (dissoc columns-by-group nil)
-                         nil-group (get columns-by-group nil)]
-                     (merge groups
-                            (reduce (fn [c col]
-                                      (let [k (if (contains? flow-common/metadata-keys (:columnName col))
-                                                :metadata :transformations)]
-                                        (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                                    {:metadata [] :transformations []}  nil-group)))
-                   (reduce (fn [c col]
-                             (let [k (if (= \c  (first (:columnName col)))
-                                       :main :transformations)]
-                               (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                           {:main [] :transformations []}  columns))]
+          groups  (if (= "AKVO_FLOW" (-> dataset :source :kind))
+                    (let [columns-by-group (group-by :groupId columns)
+                          groups           (dissoc columns-by-group nil)
+                          nil-group        (get columns-by-group nil)]
+                      (merge groups
+                             (reduce (fn [c col]
+                                       (let [k (if (contains? flow-common/metadata-keys (:columnName col))
+                                                 :metadata :transformations)]
+                                         (update c k #(conj % (assoc col :groupId k :groupName k)))))
+                                     {:metadata [] :transformations []}  nil-group)))
+                    (reduce (fn [c col]
+                              (let [k (if (i.csv/valid-column-name? (:columnName col))
+                                        :main :transformations)]
+                                (update c k #(conj % (assoc col :groupId k :groupName k)))))
+                            {:main [] :transformations []}  columns))]
       (lib/ok
-       {:id id
-        :name (:title dataset)
-        :modified (:modified dataset)
-        :created (:created dataset)
-        :updated (:updated dataset)
-        :status "OK"
+       {:id              id
+        :name            (:title dataset)
+        :modified        (:modified dataset)
+        :created         (:created dataset)
+        :updated         (:updated dataset)
+        :status          "OK"
         :transformations (:transformations dataset)
-        :groups groups}))
+        :groups          groups}))
     (lib/not-found {:error "Not found"})))
 
 (defn fetch
@@ -122,19 +124,12 @@
 (defn fetch-group
   [tenant-conn id group-id]
   (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [column-condition (condp = group-id
-                             "metadata" #((complement contains?) flow-common/metadata-keys (get % "columnName"))
-                             "transformations" #(or
-                                                 (contains? flow-common/metadata-keys (get % "columnName"))
-                                                 (not= \d (first (get % "columnName"))))
-                             "main" #(or
-                                      (contains? flow-common/metadata-keys (get % "columnName"))
-                                      (= \d (first (get % "columnName"))))
-                             #(not= group-id (get % "groupId"))
-                             )
-
-
-          columns (remove #(or (get % "hidden") (column-condition %)) (:columns dataset))
+    (let [column-remove-condition (condp = group-id
+                                    "metadata" #(not (contains? flow-common/metadata-keys (get % "columnName")))
+                                    "transformations" #(not (tx.engine/derivation-column-name (get % "columnName")))
+                                    "main" #(not (i.csv/valid-column-name? (get % "columnName")))
+                                    #(not (= group-id (get % "groupId"))))
+          columns (remove #(or (get % "hidden") (column-remove-condition %)) (:columns dataset))
           data (rest (jdbc/query tenant-conn
                                  [(select-data-sql (:table-name dataset) columns)]
                                  {:as-arrays? true}))]
