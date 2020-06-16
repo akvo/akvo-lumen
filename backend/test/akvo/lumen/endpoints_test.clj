@@ -172,7 +172,26 @@
                       :status "OK"
                       :transformations []
                       :columns commons/dataset-link-columns}
-                     (select-keys meta-dataset [:id :name :status :transformations :columns])))))
+                     (select-keys meta-dataset [:id :name :status :transformations :columns]))))
+
+            (let [meta-group-dataset (-> (h (get* (api-url "/datasets" dataset-id "groups")))
+                                   body-kw)]
+              (is (= {:id dataset-id
+                      :name title
+                      :status "OK"
+                      :transformations []
+                      :groups {:transformations []
+                               :main (map #(assoc % :groupName "main" :groupId "main") commons/dataset-link-columns)}}
+                     (select-keys meta-group-dataset [:id :name :status :transformations :groups]))))
+
+            (let [meta-group-dataset (-> (h (get* (api-url "/datasets" dataset-id "group" "main")))
+                                   body-kw)]
+              (is (= {:id dataset-id
+                      :name title
+                      :status "OK"
+                      :transformations []
+                      :columns (map #(assoc % :groupName "main" :groupId "main") commons/dataset-link-columns)}
+                     (select-keys meta-group-dataset [:id :name :status :transformations :columns])))))
 
           (testing "sort"
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"limit" "1"}))
