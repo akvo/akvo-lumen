@@ -115,6 +115,8 @@
   (.write writer "#<Multipoint>"))
 
 (extend-protocol p/CoerceToSql
+  java.lang.Boolean
+  (coerce [value] value)
   java.lang.String
   (coerce [value] value)
   java.lang.Number
