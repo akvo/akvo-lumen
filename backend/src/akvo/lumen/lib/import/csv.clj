@@ -57,6 +57,7 @@
           {:id (str "c" (inc idx))
            :title title
            :metadata nil
+           :ns "main"
            :type type})
         (range)
         column-titles
@@ -69,7 +70,7 @@
   (for [row rows]
     (apply merge
            (map (fn [{:keys [id type]} value]
-                  {id (transform-value value type)})
+                  {(keyword "main" (name id)) (transform-value value type)})
                 column-spec
                 row))))
 
