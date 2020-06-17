@@ -146,7 +146,7 @@
             (successful-execution conn job-execution-id data-source-id columns-by-ns {:spec-name (get spec "name")
                                                                                       :spec-description (get spec "description" "")} claims)))
         (catch Throwable e
-          (failed-execution conn job-execution-id (.getMessage e) table-name)
+          (failed-execution conn job-execution-id (.getMessage e))
           (log/error e)
           (p/track error-tracker e)
           (throw e))))))
