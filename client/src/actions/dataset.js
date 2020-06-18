@@ -85,6 +85,26 @@ export function fetchDataset(id, metaOnly, callback) {
   };
 }
 
+export function fetchDatasetGroups(id, callback) {
+  return (dispatch) => {
+    dispatch(fetchDatasetRequest(id));
+    return api.get(`/api/datasets/${id}/groups`)
+      .then(({ body }) => {
+        const immutableDataset = Immutable.fromJS(body);
+        dispatch(fetchDatasetSuccess(immutableDataset));
+        // eslint-disable-next-line no-unused-expressions
+        callback && callback();
+        return immutableDataset;
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log(error);
+        dispatch(showNotification('error', 'Failed to fetch dataset groups.'));
+        dispatch(fetchDatasetFailure(error, id));
+      });
+  };
+}
+
 export function fetchColumn(datasetId, columnName, type) {
   const t = type || 'text';
   return (dispatch) => {
@@ -718,7 +738,7 @@ export function endTx(datasetId, showSuccessNotif = true) {
   };
 }
 
-export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
+export function pollTxImportStatus(jobExecutionId, callback = () => {}, isFeatureFlag = false) {
   return (dispatch) => {
     dispatch(txDatasetPending(jobExecutionId, name));
     api
@@ -726,7 +746,7 @@ export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
       .then(({ body: { status, reason, datasetId } }) => {
         if (status === 'PENDING') {
           setTimeout(
-            () => dispatch(pollTxImportStatus(jobExecutionId, callback)),
+            () => dispatch(pollTxImportStatus(jobExecutionId, callback, isFeatureFlag)),
             constants.POLL_INTERVAL
           );
         } else if (status === 'FAILED') {
@@ -736,7 +756,7 @@ export function pollTxImportStatus(jobExecutionId, callback = () => {}) {
           dispatch(endTx(datasetId, DONT_SHOW_SUCCESS_NOTIF));
         } else if (status === 'OK') {
           dispatch(txDatasetSuccess(datasetId, jobExecutionId));
-          dispatch(fetchDataset(datasetId));
+          dispatch(isFeatureFlag ? fetchDatasetGroups(datasetId) : fetchDataset(datasetId));
           callback();
         }
       })
