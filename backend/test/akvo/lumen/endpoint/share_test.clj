@@ -67,9 +67,9 @@
                           "i" "text-2"}}}))
 
 (defn seed* [conn vis-spec]
-  (let [data {:columns [{:id "c1", :title "A", :type "text"}
-                        {:id "c2", :title "B", :type "number"}
-                        {:id "c3", :title "C", :type "date"}]
+  (let [data {:columns [{:id "c1", :title "A", :type "text" :groupId "main" :groupName "main"}
+                        {:id "c2", :title "B", :type "number" :groupId "main" :groupName "main"}
+                        {:id "c3", :title "C", :type "date" :groupId "main" :groupName "main"}]
               :rows    [[{:value "a"} {:value 1} {:value (tu/instant-date "01/02/2019")}]
                         [{:value "b"} {:value 2} {:value (tu/instant-date "02/02/2019")}]
                         [{:value "c"} {:value 3} {:value (tu/instant-date "03/02/2019")}]
