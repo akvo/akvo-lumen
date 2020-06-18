@@ -1,0 +1,30 @@
+.DataTableSidebar.GroupsList {
+  border-right: 1px solid rgba(32, 32, 34, 0.05);
+
+  .SidebarHeader .fa {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #e6e6e6;
+    border-radius: 5px;
+  }
+
+  .inputs {
+    padding: 0px;
+
+    .groupItem {
+      display: flex;
+      padding: 15px 1rem;
+      justify-content: space-between;
+      text-transform: capitalize;
+
+      &:hover,
+      &.active {
+        background-color: rgba(32, 32, 34, 0.05);
+      }
+
+      .fa {
+        font-size: 1.5em;
+      }
+    }
+  }
+}

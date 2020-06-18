@@ -19,7 +19,10 @@ export function isTransformationColumn(cName, cValue) {
 
 export function datasetHasQuestionGroups(columns) {
   // eslint-disable-next-line max-len
-  return collectionSize(columns.filter(c => (columnGroupName(c) !== null && columnGroupName(c) !== undefined) || isTransformationColumn(columnName(c), columnValue(c)))) > 0;
+  return collectionSize(columns.filter((c) => {
+    const columnGroupIsNotNull = columnGroupName(c) !== null && columnGroupName(c) !== undefined;
+    return columnGroupIsNotNull || isTransformationColumn(columnName(c), columnValue(c));
+  })) > 0;
 }
 
 export const flowCommonColumnNames = new Set(['identifier', 'instance_id', 'display_name', 'submitter', 'submitted_at', 'surveyal_time', 'device_id']);
