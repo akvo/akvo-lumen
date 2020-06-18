@@ -17,6 +17,8 @@ import { showNotification } from '../actions/notification';
 import { getId, getTitle } from '../domain/entity';
 import {
   getTransformations,
+  getRows,
+  getColumns,
   getIsLockedFromTransformations,
 } from '../domain/dataset';
 import * as api from '../utilities/api';
@@ -25,7 +27,8 @@ import { TRANSFORM_DATASET } from '../constants/analytics';
 import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 import DatasetHeader from '../components/dataset/DatasetHeader';
-import DatasetTable from '../components/dataset/DatasetTableV2';
+import DatasetTableV2 from '../components/dataset/DatasetTableV2';
+import DatasetTableV1 from '../components/dataset/DatasetTable';
 import usePendingSaving from '../components/common/PendingSaving';
 
 require('../components/dataset/Dataset.scss');
@@ -188,36 +191,38 @@ function Dataset(props) {
   }, []);
 
   useEffect(() => {
-    const { datasetId } = props.params;
+    if (isFeatureFlag) {
+      const { datasetId } = props.params;
 
-    if (dataset && dataset.get('groups')) {
-      const groups = dataset.get('groups');
+      if (dataset && dataset.get('groups')) {
+        const groups = dataset.get('groups');
 
-      // if there's no question group
-      if (groups.get('main')) {
-        api.get(`/api/datasets/${datasetId}/group/main`).then((response) => {
-          if (!response.ok) {
-            throw new Error(response.body.message);
-          }
+        // if there's no question group
+        if (groups.get('main')) {
+          api.get(`/api/datasets/${datasetId}/group/main`).then((response) => {
+            if (!response.ok) {
+              throw new Error(response.body.message);
+            }
 
-          changeCurrentGroup(Immutable.fromJS(response.body));
-        })
-        .catch((error) => {
-          dispatch(showNotification('error getting group'));
-          throw error;
-        });
-      } else if (groups.get('metadata')) {
-        api.get(`/api/datasets/${datasetId}/group/metadata`).then((response) => {
-          if (!response.ok) {
-            throw new Error(response.body.message);
-          }
+            changeCurrentGroup(Immutable.fromJS(response.body));
+          })
+          .catch((error) => {
+            dispatch(showNotification('error getting group'));
+            throw error;
+          });
+        } else if (groups.get('metadata')) {
+          api.get(`/api/datasets/${datasetId}/group/metadata`).then((response) => {
+            if (!response.ok) {
+              throw new Error(response.body.message);
+            }
 
-          changeCurrentGroup(Immutable.fromJS(response.body));
-        })
-        .catch((error) => {
-          dispatch(showNotification('error getting group'));
-          throw error;
-        });
+            changeCurrentGroup(Immutable.fromJS(response.body));
+          })
+          .catch((error) => {
+            dispatch(showNotification('error getting group'));
+            throw error;
+          });
+        }
       }
     }
   }, [dataset]);
@@ -249,7 +254,7 @@ function Dataset(props) {
       history={history}
     >
       <div className="Dataset">
-        <DatasetTable
+        {isFeatureFlag ? (<DatasetTableV2
           history={history}
           datasetId={datasetId}
           group={currentGroup}
@@ -277,7 +282,35 @@ function Dataset(props) {
           datasetGroupsAvailable={dataset.get('groups') != null}
           groupAvailable={!!currentGroup}
           handleChangeQuestionGroup={onChangeQuestionGroup}
-        />
+        />) : (
+          <DatasetTableV1
+            history={history}
+            datasetId={datasetId}
+            columns={getColumns(dataset)}
+            rows={getRows(dataset)}
+            Header={DatasetHeader}
+            headerProps={{
+              onShowDatasetSettings,
+              name: getTitle(dataset),
+              id: getId(dataset),
+              isUnsavedChanges: pendingSaving.isUnsavedChanges,
+              onBeginEditTitle: pendingSaving.onBeginEdit,
+              savingFailed: pendingSaving.savingFailed,
+              timeToNextSave: pendingSaving.timeToNextSave,
+              onChangeTitle: setTitle,
+              onSaveDataset: pendingSaving.onHandleSave,
+            }}
+            transformations={getTransformations(dataset)}
+            isLockedFromTransformations={getIsLockedFromTransformations(
+            dataset
+          )}
+            pendingTransformations={pendingTransformations.valueSeq()}
+            onTransform={onTransform}
+            onUndoTransformation={onUndoTransformation}
+            onNavigateToVisualise={onNavigateToVisualise}
+            datasetRowAvailable={getRows(dataset) != null}
+          />
+        ) }
       </div>
     </NavigationPrompt>
   );
