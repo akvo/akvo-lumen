@@ -57,6 +57,8 @@
           {:id (str "c" (inc idx))
            :title title
            :metadata nil
+           :groupId "main"
+           :groupName "main"
            :type type})
         (range)
         column-titles
