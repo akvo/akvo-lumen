@@ -186,12 +186,9 @@
 
             (let [meta-group-dataset (-> (h (get* (api-url "/datasets" dataset-id "group" "main")))
                                    body-kw)]
-              (is (= {:id dataset-id
-                      :name title
-                      :status "OK"
-                      :transformations []
+              (is (= {:status "OK"
                       :columns (map #(assoc % :groupName "main" :groupId "main") commons/dataset-link-columns)}
-                     (select-keys meta-group-dataset [:id :name :status :transformations :columns])))))
+                     (select-keys meta-group-dataset [:status :columns])))))
 
           (testing "sort"
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"limit" "1"}))
