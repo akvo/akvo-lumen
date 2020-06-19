@@ -1,13 +1,15 @@
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Column, Cell } from 'fixed-data-table-2';
+import { Column, Cell, Table } from 'fixed-data-table-2';
 import moment from 'moment';
 import { withRouter } from 'react-router';
 import { injectIntl, intlShape } from 'react-intl';
 import ColumnHeader from './ColumnHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
-import NewDatasetWrapper from './wrappers/NewDatasetWrapper';
 import { getDatasetGroups } from '../../utilities/dataset';
+import DataTableSidebar from './DataTableSidebar';
+import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
+import ColumnContextMenu from './context-menus/ColumnContextMenu';
 
 require('./DatasetTable.scss');
 
@@ -403,34 +405,87 @@ function DatasetTable(props) {
             style={{
               display: 'flex',
               flexDirection:
-              sidebarProps && sidebarProps.displayRight
-                ? 'row-reverse'
-                : 'row',
+                sidebarProps && sidebarProps.displayRight
+                  ? 'row-reverse'
+                  : 'row',
             }}
           >
-            <NewDatasetWrapper
-              sidebarProps={sidebarProps}
-              selectedGroup={props.group ? props.group.get('groupId') : 'metadata'}
-              datasetId={props.datasetId}
-              pendingTransformations={props.pendingTransformations}
-              wrapperDivRef={wrappingDiv}
-              transformations={props.transformations}
-              activeDataTypeContextMenu={activeDataTypeContextMenu}
-              handleGroupsSidebar={handleGroupsSidebar}
-              handleDataTypeContextMenuClicked={handleDataTypeContextMenuClicked}
-              dismissDataTypeContextMenu={() => setActiveDataTypeContextMenu(null)}
-              activeColumnContextMenu={activeColumnContextMenu}
-              handleColumnContextMenuClicked={handleColumnContextMenuClicked}
-              dismissColumnContextMenu={() => setActiveColumnContextMenu(null)}
-              handleScroll={handleScroll}
-              width={width}
-              height={height}
-              cols={getColumns()}
-              rows={props.rows}
-              columns={props.columns}
-              datasetHasQuestionGroups={!props.groups.get('main')}
-              groupAvailable={props.groupAvailable}
-            />
+            <div
+              className={`sidebarWrapper ${
+                sidebarProps ? 'expanded' : 'collapsed'
+              }`}
+            >
+              {sidebarProps && (
+                <DataTableSidebar
+                  {...sidebarProps}
+                  selectedGroup={
+                    props.group ? props.group.get('groupId') : 'metadata'
+                  }
+                  intl={props.intl}
+                  transformations={props.transformations}
+                  isLockedFromTransformations={
+                    props.isLockedFromTransformations
+                  }
+                  datasetId={props.datasetId}
+                  pendingTransformations={props.pendingTransformations}
+                />
+              )}
+            </div>
+
+            {!sidebarProps && !props.groups.get('main') && (
+              <div className="toggle-groups">
+                <span
+                  onClick={() => handleGroupsSidebar()}
+                  className="clickable"
+                >
+                  <i className="fa fa-angle-right" />
+                </span>
+              </div>
+            )}
+
+            {props.groupAvailable ? (
+              <div
+                ref={wrappingDiv}
+                className={`wrapper ${
+                  sidebarProps ? 'hasSidebar' : 'noSidebar'
+                }`}
+              >
+                {activeDataTypeContextMenu != null && (
+                  <DataTypeContextMenu
+                    column={activeDataTypeContextMenu.column}
+                    dimensions={activeDataTypeContextMenu.dimensions}
+                    onContextMenuItemSelected={handleDataTypeContextMenuClicked}
+                    onWindowClick={() => setActiveDataTypeContextMenu(null)}
+                  />
+                )}
+
+                {activeColumnContextMenu && !props.isLockedFromTransformations && (
+                  <ColumnContextMenu
+                    column={activeColumnContextMenu.column}
+                    dimensions={activeColumnContextMenu.dimensions}
+                    onContextMenuItemSelected={handleColumnContextMenuClicked}
+                    onWindowClick={() => setActiveDataTypeContextMenu(null)}
+                    left={
+                      prop.columns.last().get('title') ===
+                      activeColumnContextMenu.column.get('title')
+                    }
+                  />
+                )}
+                <Table
+                  groupHeaderHeight={30}
+                  headerHeight={60}
+                  rowHeight={30}
+                  rowsCount={props.rows.size}
+                  width={width}
+                  height={height}
+                  onScrollStart={handleScroll}
+                >
+                  {getColumns()}
+                </Table>
+              </div>
+            ) : (
+              <LoadingSpinner />
+            )}
           </div>
         </div>
       ) : (
