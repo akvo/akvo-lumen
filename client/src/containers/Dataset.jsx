@@ -150,7 +150,7 @@ function Dataset(props) {
     const { datasetId } = props.params;
 
     return new Promise((resolve) => {
-      if (currentGroup.get('groupId') === groupId) {
+      if (currentGroup && currentGroup.get('groupId') === groupId) {
         resolve();
       } else {
         changeCurrentGroup(null);
