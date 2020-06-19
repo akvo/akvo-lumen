@@ -65,8 +65,10 @@ function DatasetTable(props) {
   };
 
   const handleResize = () => {
-    setWidth(wrappingDiv.current.clientWidth);
-    setHeight(wrappingDiv.current.clientHeight);
+    if (wrappingDiv.current) {
+      setWidth(wrappingDiv.current.clientWidth);
+      setHeight(wrappingDiv.current.clientHeight);
+    }
   };
 
   const getDatasetGroups = () => {
