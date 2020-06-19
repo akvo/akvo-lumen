@@ -34,9 +34,12 @@ import usePendingSaving from '../components/common/PendingSaving';
 require('../components/dataset/Dataset.scss');
 
 function Dataset(props) {
-  const [isFeatureFlag] = useSelector(
-    state => state.env.environment.rqg
+  const env = useSelector(
+    state => state.env.environment
   );
+
+  const isFeatureFlag = env.rqg ? env.rqg[0] : false;
+
   const dataset = useSelector(
     state => state.library.datasets[props.params.datasetId]
   );
