@@ -38,7 +38,7 @@ function Dataset(props) {
     state => state.env.environment
   );
 
-  const isFeatureFlag = env.rqg ? env.rqg[0] : false;
+  const isFeatureFlag = env.rqg;
 
   const dataset = useSelector(
     state => state.library.datasets[props.params.datasetId]
