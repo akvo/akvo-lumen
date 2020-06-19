@@ -169,6 +169,7 @@ function dispatchOnMode() {
           return feedUserProfile(x, body, accessToken);
         }
       )
+      .then(res => dynamicEnv(res))
       .then((res) => {
         auth.initExport(accessToken).then(initAuthenticated(res.profile, res.env));
       });
