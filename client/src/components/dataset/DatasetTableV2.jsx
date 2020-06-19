@@ -168,166 +168,27 @@ function DatasetTable(props) {
     }
   };
 
-  const handleToggleTransformationLog = () => {
+  const genericHandle = sbProps => () => {
     if (
       sidebarProps &&
-      sidebarProps.type === 'transformationLog'
+      sidebarProps.type === sbProps.type
     ) {
       hideSidebar();
     } else {
       setActiveDataTypeContextMenu(null);
       setActiveColumnContextMenu(null);
-
-      showSidebar({
-        type: 'transformationLog',
-        displayRight: true,
-        onClose: hideSidebar,
-        onUndo: props.onUndoTransformation,
-        columns: props.columns,
-      });
+      showSidebar(sbProps);
     }
   };
 
-  const handleToggleCombineColumnSidebar = () => {
-    if (
-      sidebarProps &&
-      sidebarProps.type === 'combineColumns'
-    ) {
-      hideSidebar();
-    } else {
-      setActiveDataTypeContextMenu(null);
-      setActiveColumnContextMenu(null);
-
-      showSidebar({
-        type: 'combineColumns',
-        displayRight: false,
-        onClose: hideSidebar,
-        onApply: (transformation) => {
-          props.onTransform(transformation).then(() => {
-            hideSidebar();
-          });
-        },
-        columns: props.columns,
-      });
-    }
-  };
-
-  const handleToggleExtractMultipleColumnSidebar = () => {
-    if (
-      sidebarProps &&
-      sidebarProps.type === 'extractMultiple'
-    ) {
-      hideSidebar();
-    } else {
-      setActiveDataTypeContextMenu(null);
-      setActiveColumnContextMenu(null);
-
-      showSidebar({
-        type: 'extractMultiple',
-        displayRight: false,
-        onClose: hideSidebar,
-        onApply: (transformation) => {
-          props.onTransform(transformation).then(() => {
-            hideSidebar();
-          });
-        },
-        columns: props.columns,
-      });
-    }
-  };
-
-  const handleToggleSplitColumnSidebar = () => {
-    if (
-      sidebarProps &&
-      sidebarProps.type === 'splitColumn'
-    ) {
-      hideSidebar();
-    } else {
-      setActiveDataTypeContextMenu(null);
-      setActiveColumnContextMenu(null);
-      showSidebar({
-        type: 'splitColumn',
-        displayRight: false,
-        onClose: hideSidebar,
-        onApply: (transformation) => {
-          props.onTransform(transformation).then(() => {
-            hideSidebar();
-          });
-        },
-        columns: props.columns,
-      });
-    }
-  };
-
-  const handleToggleGeoColumnSidebar = () => {
-    if (
-      sidebarProps &&
-      sidebarProps.type === 'generateGeopoints'
-    ) {
-      hideSidebar();
-    } else {
-      setActiveDataTypeContextMenu(null);
-      setActiveColumnContextMenu(null);
-      showSidebar({
-        type: 'generateGeopoints',
-        displayRight: false,
-        onClose: hideSidebar,
-        onApply: (transformation) => {
-          props.onTransform(transformation).then(() => {
-            hideSidebar();
-          });
-        },
-        columns: props.columns,
-      });
-    }
-  };
-
-  const handleToggleDeriveColumnJavascriptSidebar = () => {
-    if (
-      sidebarProps &&
-      sidebarProps.type === 'deriveColumnJavascript'
-    ) {
-      hideSidebar();
-    } else {
-      setActiveDataTypeContextMenu(null);
-      setActiveColumnContextMenu(null);
-      showSidebar({
-        type: 'deriveColumnJavascript',
-        displayRight: false,
-        onClose: hideSidebar,
-        onApply: (transformation) => {
-          props
-            .onTransform(transformation)
-            .then(() => {
-              hideSidebar();
-            })
-            .catch((error) => {
-              // eslint-disable-next-line no-console
-              console.log(error);
-            });
-        },
-        columns: props.columns,
-      });
-    }
-  };
-
-
-  // Redirect to merge transform page
-  const handleMergeDataset = () => {
-    const { location, history } = props;
-    history.push(`${location.pathname}/transformation/merge`);
-  };
-
-  // Redirect to derive column transform page: category
-  const handleDeriveColumnCategory = () => {
-    const { location, history } = props;
-    history.push(`${location.pathname}/transformation/derive-category`);
-  };
-
-  const handleReverseGeocode = () => {
-    const { location, history } = props;
-    history.push(`${location.pathname}/transformation/reverse-geocode`);
-  };
+  const handleToggleTransformationLog = () =>
+    genericHandle({
+      type: 'transformationLog',
+      displayRight: true,
+      onClose: hideSidebar,
+      onUndo: props.onUndoTransformation,
+      columns: props.columns,
+    });
 
   const handleDataTypeContextMenuClicked = ({ column, dataTypeOptions, newColumnType }) => {
     setActiveDataTypeContextMenu(null);
@@ -385,23 +246,80 @@ function DatasetTable(props) {
     setActiveDataTypeContextMenu(null);
   };
 
+  // eslint-disable-next-line consistent-return
   const handleClickDatasetControlItem = (menuItem) => {
     if (menuItem === 'combineColumns') {
-      handleToggleCombineColumnSidebar();
+      return genericHandle({
+        type: 'combineColumns',
+        displayRight: false,
+        onClose: hideSidebar,
+        onApply: (transformation) => {
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
+          });
+        },
+        columns: props.columns,
+      });
     } else if (menuItem === 'extractMultiple') {
-      handleToggleExtractMultipleColumnSidebar();
+      return genericHandle({
+        type: 'extractMultiple',
+        displayRight: false,
+        onClose: hideSidebar,
+        onApply: (transformation) => {
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
+          });
+        },
+        columns: props.columns,
+      });
     } else if (menuItem === 'splitColumn') {
-      handleToggleSplitColumnSidebar();
+      return genericHandle({
+        type: 'splitColumn',
+        displayRight: false,
+        onClose: hideSidebar,
+        onApply: (transformation) => {
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
+          });
+        },
+        columns: props.columns,
+      });
     } else if (menuItem === 'deriveColumnJavascript') {
-      handleToggleDeriveColumnJavascriptSidebar();
+      return genericHandle({
+        type: 'deriveColumnJavascript',
+        displayRight: false,
+        onClose: hideSidebar,
+        onApply: (transformation) => {
+          props
+            .onTransform(transformation)
+            .then(() => {
+              hideSidebar();
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.log(error);
+            });
+        },
+        columns: props.columns,
+      });
     } else if (menuItem === 'deriveColumnCategory') {
-      handleDeriveColumnCategory();
+      props.history.push(`${props.location.pathname}/transformation/derive-category`);
     } else if (menuItem === 'generateGeopoints') {
-      handleToggleGeoColumnSidebar();
+      return genericHandle({
+        type: 'generateGeopoints',
+        displayRight: false,
+        onClose: hideSidebar,
+        onApply: (transformation) => {
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
+          });
+        },
+        columns: props.columns,
+      });
     } else if (menuItem === 'mergeDatasets') {
-      handleMergeDataset();
+      props.history.push(`${props.location.pathname}/transformation/merge`);
     } else if (menuItem === 'reverseGeocode') {
-      handleReverseGeocode();
+      props.history.push(`${props.location.pathname}/transformation/reverse-geocode`);
     } else {
       throw new Error(`Not yet implemented: ${menuItem}`);
     }
@@ -475,7 +393,6 @@ function DatasetTable(props) {
 
     return cols;
   };
-
 
   // renders
   const renderHeader = () => {

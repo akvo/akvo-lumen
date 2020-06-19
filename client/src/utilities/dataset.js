@@ -16,7 +16,6 @@ export const datasetsWithVisualizations = (visualisations, datasets) => {
 };
 
 export const getDatasetGroups = (groups, datasetGroupsAvailable) => {
-
   if (!datasetGroupsAvailable) {
     return [];
   }
