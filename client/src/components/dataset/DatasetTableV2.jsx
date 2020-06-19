@@ -33,16 +33,15 @@ function usePrevious(value) {
 
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
-
   const [width, setWidth] = useState(1024);
   const [height, setHeight] = useState(800);
   const [activeDataTypeContextMenu, setActiveDataTypeContextMenu] = useState(null);
   const [activeColumnContextMenu, setActiveColumnContextMenu] = useState(null);
   const [sidebarProps, setSidebarProps] = useState(null);
+  const prevDatasetGroupsAvailable = usePrevious(props.datasetGroupsAvailable);
 
   const hideSidebar = () => {
     if (sidebarProps) {
-    // TODO review following line!
       setSidebarProps(null);
       setWidth(width + 300);
     // TODO review following line!
@@ -57,7 +56,6 @@ function DatasetTable(props) {
 
     setSidebarProps(sbProps);
     setWidth(sbProps ? width : width - 300);
-
     // TODO review following line!
     setHeight(height);
   };
@@ -69,26 +67,29 @@ function DatasetTable(props) {
     }
   };
 
-  const handleGroupsSidebar = () => {
+  const handleSidebarProps = (sbProps) => {
     if (
       sidebarProps &&
-      sidebarProps.type === 'groupsList'
+      sidebarProps.type === sbProps.type
     ) {
       hideSidebar();
     } else {
       setActiveDataTypeContextMenu(null);
       setActiveColumnContextMenu(null);
-
-      showSidebar({
-        type: 'groupsList',
-        displayRight: false,
-        onClose: hideSidebar,
-        groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
-        onSelectGroup: (group) => {
-          props.handleChangeQuestionGroup(group.id).then(hideSidebar);
-        },
-      });
+      showSidebar(sbProps);
     }
+  };
+
+  const handleGroupsSidebar = () => {
+    handleSidebarProps({
+      type: 'groupsList',
+      displayRight: false,
+      onClose: hideSidebar,
+      groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
+      onSelectGroup: (group) => {
+        props.handleChangeQuestionGroup(group.id).then(hideSidebar);
+      },
+    });
   };
 
   useEffect(() => {
@@ -107,8 +108,6 @@ function DatasetTable(props) {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
-  const prevDatasetGroupsAvailable = usePrevious(props.datasetGroupsAvailable);
 
   useEffect(() => {
     const datasetGroupsAvailableChanged =
@@ -165,21 +164,8 @@ function DatasetTable(props) {
     }
   };
 
-  const genericHandle = (sbProps) => {
-    if (
-      sidebarProps &&
-      sidebarProps.type === sbProps.type
-    ) {
-      hideSidebar();
-    } else {
-      setActiveDataTypeContextMenu(null);
-      setActiveColumnContextMenu(null);
-      showSidebar(sbProps);
-    }
-  };
-
   const handleToggleTransformationLog = () =>
-    genericHandle({
+    handleSidebarProps({
       type: 'transformationLog',
       displayRight: true,
       onClose: hideSidebar,
@@ -246,7 +232,7 @@ function DatasetTable(props) {
   // eslint-disable-next-line consistent-return
   const handleClickDatasetControlItem = (menuItem) => {
     if (menuItem === 'combineColumns') {
-      genericHandle({
+      handleSidebarProps({
         type: 'combineColumns',
         displayRight: false,
         onClose: hideSidebar,
@@ -258,7 +244,7 @@ function DatasetTable(props) {
         columns: props.columns,
       });
     } else if (menuItem === 'extractMultiple') {
-      genericHandle({
+      handleSidebarProps({
         type: 'extractMultiple',
         displayRight: false,
         onClose: hideSidebar,
@@ -270,7 +256,7 @@ function DatasetTable(props) {
         columns: props.columns,
       });
     } else if (menuItem === 'splitColumn') {
-      genericHandle({
+      handleSidebarProps({
         type: 'splitColumn',
         displayRight: false,
         onClose: hideSidebar,
@@ -282,7 +268,7 @@ function DatasetTable(props) {
         columns: props.columns,
       });
     } else if (menuItem === 'deriveColumnJavascript') {
-      genericHandle({
+      handleSidebarProps({
         type: 'deriveColumnJavascript',
         displayRight: false,
         onClose: hideSidebar,
@@ -302,7 +288,7 @@ function DatasetTable(props) {
     } else if (menuItem === 'deriveColumnCategory') {
       props.history.push(`${props.location.pathname}/transformation/derive-category`);
     } else if (menuItem === 'generateGeopoints') {
-      genericHandle({
+      handleSidebarProps({
         type: 'generateGeopoints',
         displayRight: false,
         onClose: hideSidebar,
@@ -407,23 +393,21 @@ function DatasetTable(props) {
     );
   };
 
-
-  const cols = getColumns();
-  const sidebarStyle = {
-    display: 'flex',
-    flexDirection:
-    sidebarProps && sidebarProps.displayRight
-        ? 'row-reverse'
-        : 'row',
-  };
-
   return (
     <React.Fragment>
       {renderHeader()}
 
       {props.datasetGroupsAvailable ? (
         <div className="DatasetTable">
-          <div style={sidebarStyle}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection:
+              sidebarProps && sidebarProps.displayRight
+                ? 'row-reverse'
+                : 'row',
+            }}
+          >
             <NewDatasetWrapper
               sidebarProps={sidebarProps}
               selectedGroup={props.group ? props.group.get('groupId') : 'metadata'}
@@ -441,7 +425,7 @@ function DatasetTable(props) {
               handleScroll={handleScroll}
               width={width}
               height={height}
-              cols={cols}
+              cols={getColumns()}
               rows={props.rows}
               columns={props.columns}
               datasetHasQuestionGroups={!props.groups.get('main')}
