@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Column, Cell } from 'fixed-data-table-2';
 import moment from 'moment';
@@ -7,6 +7,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import ColumnHeader from './ColumnHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 import NewDatasetWrapper from './wrappers/NewDatasetWrapper';
+import { getDatasetGroups } from '../../utilities/dataset';
 
 require('./DatasetTable.scss');
 
@@ -21,46 +22,105 @@ function formatCellValue(type, value) {
   }
 }
 
-class DatasetTable extends Component {
-  wrappingDiv = React.createRef();
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
 
-  state = {
-    width: 1024,
-    height: 800,
-    activeDataTypeContextMenu: null,
-    activeColumnContextMenu: null,
-    sidebarProps: null,
+
+function DatasetTable(props) {
+  const wrappingDiv = useRef(null);
+
+  const [width, setWidth] = useState(1024);
+  const [height, setHeight] = useState(800);
+  const [activeDataTypeContextMenu, setActiveDataTypeContextMenu] = useState(null);
+  const [activeColumnContextMenu, setActiveColumnContextMenu] = useState(null);
+  const [sidebarProps, setSidebarProps] = useState(null);
+
+  const hideSidebar = () => {
+    if (sidebarProps) {
+    // TODO review following line!
+      setSidebarProps(null);
+      setWidth(width + 300);
+    // TODO review following line!
+      setHeight(height);
+    }
   };
 
-  componentDidMount = () => {
-    const datasetHasQuestionGroups = this.props.groups && !this.props.groups.get('main');
-    if (this.props.datasetGroupsAvailable && datasetHasQuestionGroups) {
-      this.handleGroupsSidebar();
+  const showSidebar = (sbProps) => {
+    /* Manually subtract the sidebar width from the datatable width -
+    using refs to measure the new width of the parent container grabs
+    old width before the DOM updates */
+
+    setSidebarProps(sbProps);
+    setWidth(sbProps ? width : width - 300);
+
+    // TODO review following line!
+    setHeight(height);
+  };
+
+  const handleResize = () => {
+    if (wrappingDiv.current) {
+      setWidth(wrappingDiv.current.clientWidth);
+      setHeight(wrappingDiv.current.clientHeight);
+    }
+  };
+
+  const handleGroupsSidebar = () => {
+    if (
+      sidebarProps &&
+      sidebarProps.type === 'groupsList'
+    ) {
+      hideSidebar();
+    } else {
+      setActiveDataTypeContextMenu(null);
+      setActiveColumnContextMenu(null);
+
+      showSidebar({
+        type: 'groupsList',
+        displayRight: false,
+        onClose: hideSidebar,
+        groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
+        onSelectGroup: (group) => {
+          props.handleChangeQuestionGroup(group.id).then(hideSidebar);
+        },
+      });
+    }
+  };
+
+  useEffect(() => {
+    const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
+    if (props.datasetGroupsAvailable && datasetHasQuestionGroups) {
+      handleGroupsSidebar();
     }
 
-    this.resizeTimeout = setTimeout(() => {
-      this.handleResize();
+    const resizeTimeout = setTimeout(() => {
+      handleResize();
     }, 500);
-    window.addEventListener('resize', this.handleResize);
-  }
+    window.addEventListener('resize', handleResize);
 
-  componentWillUnmount = () => {
-    clearTimeout(this.resizeTimeout);
-    window.removeEventListener('resize', this.handleResize);
-  }
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
-  componentDidUpdate(prevProps) {
+  const prevDatasetGroupsAvailable = usePrevious(props.datasetGroupsAvailable);
+
+  useEffect(() => {
     const datasetGroupsAvailableChanged =
-      prevProps.datasetGroupsAvailable !== this.props.datasetGroupsAvailable;
-    const datasetHasQuestionGroups = this.props.groups && !this.props.groups.get('main');
+      prevDatasetGroupsAvailable !== props.datasetGroupsAvailable;
+    const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
 
     if (datasetGroupsAvailableChanged && datasetHasQuestionGroups) {
-      this.handleGroupsSidebar();
+      handleGroupsSidebar();
     }
-  }
+  }, [props.datasetGroupsAvailable, props.groups]);
 
-  getCellClassName = (columnTitle) => {
-    const { sidebarProps } = this.state;
+  const getCellClassName = (columnTitle) => {
     if (
       sidebarProps != null &&
       sidebarProps.column &&
@@ -69,387 +129,224 @@ class DatasetTable extends Component {
       return 'sidebarTargetingColumn';
     }
     return '';
-  }
+  };
 
-  handleToggleDataTypeContextMenu = ({ column, dimensions }) => {
-    const { activeDataTypeContextMenu } = this.state;
-
+  const handleToggleDataTypeContextMenu = ({ column, dimensions }) => {
     if (
       activeDataTypeContextMenu != null &&
       column.get('title') === activeDataTypeContextMenu.column.get('title')
     ) {
-      this.setState({ activeDataTypeContextMenu: null });
+      setActiveDataTypeContextMenu(null);
     } else {
-      this.setState({
-        activeDataTypeContextMenu: {
-          column,
-          dimensions,
-        },
-        activeColumnContextMenu: null,
+      setActiveDataTypeContextMenu({
+        column,
+        dimensions,
       });
+      setActiveColumnContextMenu(null);
     }
-  }
+  };
 
-  handleToggleColumnContextMenu = ({ column, dimensions }) => {
-    const { isLockedFromTransformations } = this.props;
+  const handleToggleColumnContextMenu = ({ column, dimensions }) => {
+    const { isLockedFromTransformations } = props;
 
     if (isLockedFromTransformations) return;
-
-    const { activeColumnContextMenu } = this.state;
 
     if (
       activeColumnContextMenu != null &&
       column.get('title') === activeColumnContextMenu.column.get('title')
     ) {
-      this.setState({ activeColumnContextMenu: null });
+      setActiveColumnContextMenu(null);
     } else {
-      this.setState({
-        activeColumnContextMenu: {
-          column,
-          dimensions,
+      setActiveDataTypeContextMenu(null);
+      setActiveColumnContextMenu({
+        column,
+        dimensions,
+      });
+    }
+  };
+
+  const genericHandle = (sbProps) => {
+    if (
+      sidebarProps &&
+      sidebarProps.type === sbProps.type
+    ) {
+      hideSidebar();
+    } else {
+      setActiveDataTypeContextMenu(null);
+      setActiveColumnContextMenu(null);
+      showSidebar(sbProps);
+    }
+  };
+
+  const handleToggleTransformationLog = () =>
+    genericHandle({
+      type: 'transformationLog',
+      displayRight: true,
+      onClose: hideSidebar,
+      onUndo: props.onUndoTransformation,
+      columns: props.columns,
+    });
+
+  const handleDataTypeContextMenuClicked = ({ column, dataTypeOptions, newColumnType }) => {
+    setActiveDataTypeContextMenu(null);
+    if (newColumnType !== column.get('type')) {
+      showSidebar({
+        type: 'edit',
+        column,
+        dataTypeOptions,
+        newColumnType,
+        onClose: hideSidebar,
+        onApply: (transformation) => {
+          hideSidebar();
+          props.onTransform(transformation);
         },
-        activeDataTypeContextMenu: null,
       });
     }
-  }
+  };
 
-  handleToggleTransformationLog = () => {
-    if (
-      this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'transformationLog'
-    ) {
-      this.hideSidebar();
-    } else {
-      this.setState({
-        activeDataTypeContextMenu: null,
-        activeColumnContextMenu: null,
-      });
-      this.showSidebar({
-        type: 'transformationLog',
-        displayRight: true,
-        onClose: this.hideSidebar,
-        onUndo: this.props.onUndoTransformation,
-        columns: this.props.columns,
-      });
+  const handleColumnContextMenuClicked = ({ column, action }) => {
+    setActiveColumnContextMenu(null);
+    switch (action.get('op')) {
+      case 'core/filter-column':
+        showSidebar({
+          type: 'filter',
+          column,
+          onClose: () => hideSidebar(),
+          onApply: (transformation) => {
+            hideSidebar();
+            props.onTransform(transformation);
+          },
+        });
+        break;
+      case 'core/rename-column':
+        showSidebar({
+          type: 'renameColumn',
+          column,
+          onClose: () => hideSidebar(),
+          onApply: (transformation) => {
+            hideSidebar();
+            props.onTransform(transformation);
+          },
+        });
+        break;
+      default:
+        props.onTransform(action);
     }
-  }
+  };
 
-  handleToggleCombineColumnSidebar = () => {
-    if (
-      this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'combineColumns'
-    ) {
-      this.hideSidebar();
-    } else {
-      this.setState({
-        activeDataTypeContextMenu: null,
-        activeColumnContextMenu: null,
-      });
-      this.showSidebar({
+  const handleScroll = () => {
+    /* Close any active context menu when the datatable scrolls.
+    Ideally, we would dynamically adjust the position of the context menu
+    so this would not be necessary, but the dataTable component does
+    not have an "onScroll" event, only onScrollEnd, which is too slow. */
+    setActiveColumnContextMenu(null);
+    setActiveDataTypeContextMenu(null);
+  };
+
+  // eslint-disable-next-line consistent-return
+  const handleClickDatasetControlItem = (menuItem) => {
+    if (menuItem === 'combineColumns') {
+      genericHandle({
         type: 'combineColumns',
         displayRight: false,
-        onClose: this.hideSidebar,
+        onClose: hideSidebar,
         onApply: (transformation) => {
-          this.props.onTransform(transformation).then(() => {
-            this.hideSidebar();
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
           });
         },
-        columns: this.props.columns,
+        columns: props.columns,
       });
-    }
-  }
-
-  handleToggleExtractMultipleColumnSidebar = () => {
-    if (
-      this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'extractMultiple'
-    ) {
-      this.hideSidebar();
-    } else {
-      this.setState({
-        activeDataTypeContextMenu: null,
-        activeColumnContextMenu: null,
-      });
-      this.showSidebar({
+    } else if (menuItem === 'extractMultiple') {
+      genericHandle({
         type: 'extractMultiple',
         displayRight: false,
-        onClose: this.hideSidebar,
+        onClose: hideSidebar,
         onApply: (transformation) => {
-          this.props.onTransform(transformation).then(() => {
-            this.hideSidebar();
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
           });
         },
-        columns: this.props.columns,
+        columns: props.columns,
       });
-    }
-  }
-
-  handleToggleSplitColumnSidebar = () => {
-    if (
-      this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'splitColumn'
-    ) {
-      this.hideSidebar();
-    } else {
-      this.setState({
-        activeDataTypeContextMenu: null,
-        activeColumnContextMenu: null,
-      });
-      this.showSidebar({
+    } else if (menuItem === 'splitColumn') {
+      genericHandle({
         type: 'splitColumn',
         displayRight: false,
-        onClose: this.hideSidebar,
+        onClose: hideSidebar,
         onApply: (transformation) => {
-          this.props.onTransform(transformation).then(() => {
-            this.hideSidebar();
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
           });
         },
-        columns: this.props.columns,
+        columns: props.columns,
       });
-    }
-  }
-
-  handleToggleGeoColumnSidebar = () => {
-    if (
-      this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'generateGeopoints'
-    ) {
-      this.hideSidebar();
-    } else {
-      this.setState({
-        activeDataTypeContextMenu: null,
-        activeColumnContextMenu: null,
-      });
-      this.showSidebar({
-        type: 'generateGeopoints',
-        displayRight: false,
-        onClose: this.hideSidebar,
-        onApply: (transformation) => {
-          this.props.onTransform(transformation).then(() => {
-            this.hideSidebar();
-          });
-        },
-        columns: this.props.columns,
-      });
-    }
-  }
-
-  handleToggleDeriveColumnJavascriptSidebar = () => {
-    if (
-      this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'deriveColumnJavascript'
-    ) {
-      this.hideSidebar();
-    } else {
-      this.setState({
-        activeDataTypeContextMenu: null,
-        activeColumnContextMenu: null,
-      });
-      this.showSidebar({
+    } else if (menuItem === 'deriveColumnJavascript') {
+      genericHandle({
         type: 'deriveColumnJavascript',
         displayRight: false,
-        onClose: this.hideSidebar,
+        onClose: hideSidebar,
         onApply: (transformation) => {
-          this.props
+          props
             .onTransform(transformation)
             .then(() => {
-              this.hideSidebar();
+              hideSidebar();
             })
             .catch((error) => {
               // eslint-disable-next-line no-console
               console.log(error);
             });
         },
-        columns: this.props.columns,
+        columns: props.columns,
       });
-    }
-  }
-
-  handleGroupsSidebar = () => {
-    if (
-      this.state.sidebarProps &&
-      this.state.sidebarProps.type === 'groupsList'
-    ) {
-      this.hideSidebar();
-    } else {
-      this.setState({
-        activeDataTypeContextMenu: null,
-        activeColumnContextMenu: null,
-      });
-
-      this.showSidebar({
-        type: 'groupsList',
-        displayRight: false,
-        onClose: this.hideSidebar,
-        groups: this.getDatasetGroups(),
-        selectedGroup: this.props.group ? this.props.group.get('groupId') : 'metadata',
-        onSelectGroup: (group) => {
-          this.props.handleChangeQuestionGroup(group.id).then(this.hideSidebar);
-        },
-      });
-    }
-  };
-
-  // Redirect to merge transform page
-  handleMergeDataset = () => {
-    const { location, history } = this.props;
-    history.push(`${location.pathname}/transformation/merge`);
-  }
-
-  // Redirect to derive column transform page: category
-  handleDeriveColumnCategory = () => {
-    const { location, history } = this.props;
-    history.push(`${location.pathname}/transformation/derive-category`);
-  }
-
-  handleReverseGeocode = () => {
-    const { location, history } = this.props;
-    history.push(`${location.pathname}/transformation/reverse-geocode`);
-  }
-
-  handleDataTypeContextMenuClicked = ({ column, dataTypeOptions, newColumnType }) => {
-    this.setState({ activeDataTypeContextMenu: null });
-    if (newColumnType !== column.get('type')) {
-      this.showSidebar({
-        type: 'edit',
-        column,
-        dataTypeOptions,
-        newColumnType,
-        onClose: this.hideSidebar,
-        onApply: (transformation) => {
-          this.hideSidebar();
-          this.props.onTransform(transformation);
-        },
-      });
-    }
-  }
-
-  handleColumnContextMenuClicked = ({ column, action }) => {
-    this.setState({ activeColumnContextMenu: null });
-    switch (action.get('op')) {
-      case 'core/filter-column':
-        this.showSidebar({
-          type: 'filter',
-          column,
-          onClose: () => this.hideSidebar(),
-          onApply: (transformation) => {
-            this.hideSidebar();
-            this.props.onTransform(transformation);
-          },
-        });
-        break;
-      case 'core/rename-column':
-        this.showSidebar({
-          type: 'renameColumn',
-          column,
-          onClose: () => this.hideSidebar(),
-          onApply: (transformation) => {
-            this.hideSidebar();
-            this.props.onTransform(transformation);
-          },
-        });
-        break;
-      default:
-        this.props.onTransform(action);
-    }
-  }
-
-  showSidebar = (sidebarProps) => {
-    /* Manually subtract the sidebar width from the datatable width -
-    using refs to measure the new width of the parent container grabs
-    old width before the DOM updates */
-    this.setState({
-      sidebarProps,
-      width: this.state.sidebarProps
-        ? this.state.width
-        : this.state.width - 300,
-      height: this.state.height,
-    });
-  }
-
-  hideSidebar = () => {
-    if (this.state.sidebarProps) {
-      this.setState({
-        width: this.state.width + 300,
-        height: this.state.height,
-        sidebarProps: null,
-      });
-    }
-  }
-
-  handleResize = () => {
-    this.setState({
-      width: this.wrappingDiv.current.clientWidth,
-      height: this.wrappingDiv.current.clientHeight,
-    });
-  }
-
-  handleScroll = () => {
-    /* Close any active context menu when the datatable scrolls.
-    Ideally, we would dynamically adjust the position of the context menu
-    so this would not be necessary, but the dataTable component does
-    not have an "onScroll" event, only onScrollEnd, which is too slow. */
-    this.setState({
-      activeDataTypeContextMenu: null,
-      activeColumnContextMenu: null,
-    });
-  }
-
-  handleClickDatasetControlItem = (menuItem) => {
-    if (menuItem === 'combineColumns') {
-      this.handleToggleCombineColumnSidebar();
-    } else if (menuItem === 'extractMultiple') {
-      this.handleToggleExtractMultipleColumnSidebar();
-    } else if (menuItem === 'splitColumn') {
-      this.handleToggleSplitColumnSidebar();
-    } else if (menuItem === 'deriveColumnJavascript') {
-      this.handleToggleDeriveColumnJavascriptSidebar();
     } else if (menuItem === 'deriveColumnCategory') {
-      this.handleDeriveColumnCategory();
+      props.history.push(`${props.location.pathname}/transformation/derive-category`);
     } else if (menuItem === 'generateGeopoints') {
-      this.handleToggleGeoColumnSidebar();
+      genericHandle({
+        type: 'generateGeopoints',
+        displayRight: false,
+        onClose: hideSidebar,
+        onApply: (transformation) => {
+          props.onTransform(transformation).then(() => {
+            hideSidebar();
+          });
+        },
+        columns: props.columns,
+      });
     } else if (menuItem === 'mergeDatasets') {
-      this.handleMergeDataset();
+      props.history.push(`${props.location.pathname}/transformation/merge`);
     } else if (menuItem === 'reverseGeocode') {
-      this.handleReverseGeocode();
+      props.history.push(`${props.location.pathname}/transformation/reverse-geocode`);
     } else {
       throw new Error(`Not yet implemented: ${menuItem}`);
     }
-  }
+  };
 
-  dismissDataTypeContextMenu = () => {
-    this.setState({ activeDataTypeContextMenu: null });
-  }
+  const createColumn = (column, columnIndex) => {
+    const { isLockedFromTransformations, rows } = props;
 
-  dismissColumnContextMenu = () => {
-    this.setState({ activeColumnContextMenu: null });
-  }
-
-  createColumn = (column, columnIndex) => {
-    const { isLockedFromTransformations, rows } = this.props;
-    const { activeColumnContextMenu } = this.state;
     const index = columnIndex;
 
     const columnHeader = (
       <ColumnHeader
         key={index}
         column={column}
-        onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
-        onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
+        onToggleDataTypeContextMenu={handleToggleDataTypeContextMenu}
+        onToggleColumnContextMenu={handleToggleColumnContextMenu}
         disabled={isLockedFromTransformations}
         columnMenuActive={
           activeColumnContextMenu != null &&
           !isLockedFromTransformations &&
           activeColumnContextMenu.column.get('title') === column.get('title')
         }
-        onRemoveSort={transformation => this.props.onTransform(transformation)}
+        onRemoveSort={transformation => props.onTransform(transformation)}
       />
     );
 
-    const formatCell = idx => (props) => {
+    const formatCell = idx => (propsData) => {
       const formattedCellValue = formatCellValue(
         column.get('type'),
-        rows.getIn([props.rowIndex, idx])
+        rows.getIn([propsData.rowIndex, idx])
       );
 
       const cellStyle =
@@ -466,7 +363,7 @@ class DatasetTable extends Component {
 
     return (
       <Column
-        cellClassName={this.getCellClassName(column.get('title'))}
+        cellClassName={getCellClassName(column.get('title'))}
         key={column.get('idx') || index}
         header={columnHeader}
         cell={formatCell(column.get('idx') || index)}
@@ -475,8 +372,8 @@ class DatasetTable extends Component {
     );
   };
 
-  getColumns = () => {
-    const { columns, groupAvailable } = this.props;
+  const getColumns = () => {
+    const { columns, groupAvailable } = props;
 
     let cols;
     let columnIndex = 0;
@@ -484,7 +381,7 @@ class DatasetTable extends Component {
     const columnMap = (column) => {
       const argIndex = columnIndex;
       columnIndex += 1;
-      return this.createColumn(column, argIndex);
+      return createColumn(column, argIndex);
     };
 
     if (groupAvailable) {
@@ -494,129 +391,92 @@ class DatasetTable extends Component {
     return cols;
   };
 
-  getDatasetGroups = () => {
-    const { groups, datasetGroupsAvailable } = this.props;
-
-    if (!datasetGroupsAvailable) {
-      return [];
-    }
-
-    const groupsObject = groups.toJS();
-    let groupNames = [];
-
-    // trying to keep metadata at the top
-    // refactor if you can think of a better implementation
-    const withoutMetadata = Object.keys(groupsObject).filter(group => group !== 'metadata');
-
-    groupNames = withoutMetadata
-      .reduce((acc, curr) => {
-        const column = groups.toJS()[curr][0];
-
-        if (column) {
-          acc.push({ id: column.groupId, name: column.groupName });
-        }
-
-        return acc;
-      }, []);
-
-    groupNames.unshift({ id: 'metadata', name: 'metadata' });
-
-
-    return groupNames;
-  }
-
   // renders
-  renderHeader = () => {
-    const { Header: DatasetHeader } = this.props;
+  const renderHeader = () => {
+    const { Header: DatasetHeader } = props;
 
     return (
       <DatasetHeader
-        {...this.props.headerProps}
-        history={this.props.history}
-        isLockedFromTransformations={this.props.isLockedFromTransformations}
-        onNavigateToVisualise={this.props.onNavigateToVisualise}
-        onClickTransformMenuItem={this.handleClickDatasetControlItem}
-        onToggleTransformationLog={this.handleToggleTransformationLog}
+        {...props.headerProps}
+        history={props.history}
+        isLockedFromTransformations={props.isLockedFromTransformations}
+        onNavigateToVisualise={props.onNavigateToVisualise}
+        onClickTransformMenuItem={handleClickDatasetControlItem}
+        onToggleTransformationLog={handleToggleTransformationLog}
       />
-    )
-;
-  }
-
-  render() {
-    const cols = this.getColumns();
-    const sidebarStyle = {
-      display: 'flex',
-      flexDirection:
-      this.state.sidebarProps && this.state.sidebarProps.displayRight
-          ? 'row-reverse'
-          : 'row',
-    };
-
-    return (
-      <React.Fragment>
-        {this.renderHeader()}
-
-        {this.props.datasetGroupsAvailable ? (
-          <div className="DatasetTable">
-            <div style={sidebarStyle}>
-              <NewDatasetWrapper
-                sidebarProps={this.state.sidebarProps}
-                datasetId={this.props.datasetId}
-                pendingTransformations={this.props.pendingTransformations}
-                wrapperDivRef={this.wrappingDiv}
-                transformations={this.props.transformations}
-                activeDataTypeContextMenu={this.state.activeDataTypeContextMenu}
-                handleGroupsSidebar={this.handleGroupsSidebar}
-                handleDataTypeContextMenuClicked={
-                    this.handleDataTypeContextMenuClicked
-                  }
-                dismissDataTypeContextMenu={this.dismissDataTypeContextMenu}
-                activeColumnContextMenu={this.state.activeColumnContextMenu}
-                handleColumnContextMenuClicked={
-                    this.handleColumnContextMenuClicked
-                  }
-                dismissColumnContextMenu={this.dismissColumnContextMenu}
-                handleScroll={this.handleScroll}
-                width={this.state.width}
-                height={this.state.height}
-                cols={cols}
-                rows={this.props.rows}
-                columns={this.props.columns}
-                groupInView={this.state.groupInView}
-                datasetHasQuestionGroups={!this.props.groups.get('main')}
-                groupAvailable={this.props.groupAvailable}
-              />
-            </div>
-          </div>
-        ) : (
-          <LoadingSpinner />
-        )}
-      </React.Fragment>
     );
-  }
+  };
+
+
+  const cols = getColumns();
+  const sidebarStyle = {
+    display: 'flex',
+    flexDirection:
+    sidebarProps && sidebarProps.displayRight
+        ? 'row-reverse'
+        : 'row',
+  };
+
+  return (
+    <React.Fragment>
+      {renderHeader()}
+
+      {props.datasetGroupsAvailable ? (
+        <div className="DatasetTable">
+          <div style={sidebarStyle}>
+            <NewDatasetWrapper
+              sidebarProps={sidebarProps}
+              selectedGroup={props.group ? props.group.get('groupId') : 'metadata'}
+              datasetId={props.datasetId}
+              pendingTransformations={props.pendingTransformations}
+              wrapperDivRef={wrappingDiv}
+              transformations={props.transformations}
+              activeDataTypeContextMenu={activeDataTypeContextMenu}
+              handleGroupsSidebar={handleGroupsSidebar}
+              handleDataTypeContextMenuClicked={handleDataTypeContextMenuClicked}
+              dismissDataTypeContextMenu={() => setActiveDataTypeContextMenu(null)}
+              activeColumnContextMenu={activeColumnContextMenu}
+              handleColumnContextMenuClicked={handleColumnContextMenuClicked}
+              dismissColumnContextMenu={() => setActiveColumnContextMenu(null)}
+              handleScroll={handleScroll}
+              width={width}
+              height={height}
+              cols={cols}
+              rows={props.rows}
+              columns={props.columns}
+              datasetHasQuestionGroups={!props.groups.get('main')}
+              groupAvailable={props.groupAvailable}
+            />
+          </div>
+        </div>
+      ) : (
+        <LoadingSpinner />
+      )}
+    </React.Fragment>
+  );
 }
 
 DatasetTable.propTypes = {
-  datasetId: PropTypes.string.isRequired,
+  Header: PropTypes.any,
   columns: PropTypes.object,
+  currentGroup: PropTypes.object,
+  datasetGroupsAvailable: PropTypes.bool,
+  datasetId: PropTypes.string.isRequired,
   group: PropTypes.object,
-  rows: PropTypes.object,
+  groupAvailable: PropTypes.bool,
   groups: PropTypes.object,
-  transformations: PropTypes.object,
-  pendingTransformations: PropTypes.object.isRequired,
-  onTransform: PropTypes.func.isRequired,
-  onUndoTransformation: PropTypes.func.isRequired,
+  handleChangeQuestionGroup: PropTypes.func,
+  headerProps: PropTypes.object,
+  history: PropTypes.object.isRequired,
+  intl: intlShape,
+  isLockedFromTransformations: PropTypes.bool,
   location: PropTypes.object.isRequired,
   onNavigateToVisualise: PropTypes.func.isRequired,
-  isLockedFromTransformations: PropTypes.bool,
-  intl: intlShape,
-  history: PropTypes.object.isRequired,
-  Header: PropTypes.any,
-  headerProps: PropTypes.object,
-  groupAvailable: PropTypes.bool,
-  datasetGroupsAvailable: PropTypes.bool,
-  handleChangeQuestionGroup: PropTypes.func,
-  currentGroup: PropTypes.object,
+  onTransform: PropTypes.func.isRequired,
+  onUndoTransformation: PropTypes.func.isRequired,
+  pendingTransformations: PropTypes.object.isRequired,
+  rows: PropTypes.object,
+  transformations: PropTypes.object,
 };
 
 export default withRouter(injectIntl(DatasetTable));
