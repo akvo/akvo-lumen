@@ -165,7 +165,7 @@ function DatasetTable(props) {
     }
   };
 
-  const genericHandle = sbProps => () => {
+  const genericHandle = (sbProps) => {
     if (
       sidebarProps &&
       sidebarProps.type === sbProps.type
@@ -246,7 +246,7 @@ function DatasetTable(props) {
   // eslint-disable-next-line consistent-return
   const handleClickDatasetControlItem = (menuItem) => {
     if (menuItem === 'combineColumns') {
-      return genericHandle({
+      genericHandle({
         type: 'combineColumns',
         displayRight: false,
         onClose: hideSidebar,
@@ -258,7 +258,7 @@ function DatasetTable(props) {
         columns: props.columns,
       });
     } else if (menuItem === 'extractMultiple') {
-      return genericHandle({
+      genericHandle({
         type: 'extractMultiple',
         displayRight: false,
         onClose: hideSidebar,
@@ -270,7 +270,7 @@ function DatasetTable(props) {
         columns: props.columns,
       });
     } else if (menuItem === 'splitColumn') {
-      return genericHandle({
+      genericHandle({
         type: 'splitColumn',
         displayRight: false,
         onClose: hideSidebar,
@@ -282,7 +282,7 @@ function DatasetTable(props) {
         columns: props.columns,
       });
     } else if (menuItem === 'deriveColumnJavascript') {
-      return genericHandle({
+      genericHandle({
         type: 'deriveColumnJavascript',
         displayRight: false,
         onClose: hideSidebar,
@@ -302,7 +302,7 @@ function DatasetTable(props) {
     } else if (menuItem === 'deriveColumnCategory') {
       props.history.push(`${props.location.pathname}/transformation/derive-category`);
     } else if (menuItem === 'generateGeopoints') {
-      return genericHandle({
+      genericHandle({
         type: 'generateGeopoints',
         displayRight: false,
         onClose: hideSidebar,
