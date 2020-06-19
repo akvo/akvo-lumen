@@ -42,6 +42,64 @@ function DatasetTable(props) {
   const [activeColumnContextMenu, setActiveColumnContextMenu] = useState(null);
   const [sidebarProps, setSidebarProps] = useState(null);
 
+  const hideSidebar = () => {
+    if (sidebarProps) {
+    // TODO review following line!
+      setSidebarProps(null);
+      setWidth(width + 300);
+    // TODO review following line!
+      setHeight(height);
+    }
+  };
+
+  const showSidebar = (sbProps) => {
+    /* Manually subtract the sidebar width from the datatable width -
+    using refs to measure the new width of the parent container grabs
+    old width before the DOM updates */
+
+    setSidebarProps(sbProps);
+    setWidth(sbProps ? width : width - 300);
+
+    // TODO review following line!
+    setHeight(height);
+  };
+
+  const handleResize = () => {
+    setWidth(wrappingDiv.current.clientWidth);
+    setHeight(wrappingDiv.current.clientHeight);
+  };
+
+  const getDatasetGroups = () => {
+    const { groups, datasetGroupsAvailable } = props;
+
+    if (!datasetGroupsAvailable) {
+      return [];
+    }
+
+    const groupsObject = groups.toJS();
+    let groupNames = [];
+
+    // trying to keep metadata at the top
+    // refactor if you can think of a better implementation
+    const withoutMetadata = Object.keys(groupsObject).filter(group => group !== 'metadata');
+
+    groupNames = withoutMetadata
+      .reduce((acc, curr) => {
+        const column = groups.toJS()[curr][0];
+
+        if (column) {
+          acc.push({ id: column.groupId, name: column.groupName });
+        }
+
+        return acc;
+      }, []);
+
+    groupNames.unshift({ id: 'metadata', name: 'metadata' });
+
+
+    return groupNames;
+  };
+
   const handleGroupsSidebar = () => {
     if (
       sidebarProps &&
@@ -74,13 +132,13 @@ function DatasetTable(props) {
       handleResize();
     }, 500);
     window.addEventListener('resize', handleResize);
-    
+
     return () => {
       clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-  
+
   const prevDatasetGroupsAvailable = usePrevious(props.datasetGroupsAvailable);
 
   useEffect(() => {
@@ -91,9 +149,8 @@ function DatasetTable(props) {
     if (datasetGroupsAvailableChanged && datasetHasQuestionGroups) {
       handleGroupsSidebar();
     }
-
   }, [props.datasetGroupsAvailable, props.groups]);
-   
+
   const getCellClassName = (columnTitle) => {
     if (
       sidebarProps != null &&
@@ -347,34 +404,6 @@ function DatasetTable(props) {
     }
   };
 
-  const showSidebar = (sidebarProps) => {
-    /* Manually subtract the sidebar width from the datatable width -
-    using refs to measure the new width of the parent container grabs
-    old width before the DOM updates */
-
-    setSidebarProps(sidebarProps);
-    setWidth(sidebarProps ? width : width - 300);
-
-    // TODO review following line!
-    setHeight(height);
-
-  };
-
-  const hideSidebar = () => {
-    if (sidebarProps) {
-    // TODO review following line!
-      setSidebarProps(null);
-      setWidth(width + 300);
-    // TODO review following line!
-      setHeight(height);
-    }
-  };
-
-  const handleResize = () => {
-    setWidth(wrappingDiv.current.clientWidth);
-    setHeight(wrappingDiv.current.clientHeight);
-  };
-
   const handleScroll = () => {
     /* Close any active context menu when the datatable scrolls.
     Ideally, we would dynamically adjust the position of the context menu
@@ -427,10 +456,10 @@ function DatasetTable(props) {
       />
     );
 
-    const formatCell = idx => (props) => {
+    const formatCell = idx => (propsData) => {
       const formattedCellValue = formatCellValue(
         column.get('type'),
-        rows.getIn([props.rowIndex, idx])
+        rows.getIn([propsData.rowIndex, idx])
       );
 
       const cellStyle =
@@ -475,36 +504,6 @@ function DatasetTable(props) {
     return cols;
   };
 
-  const getDatasetGroups = () => {
-    const { groups, datasetGroupsAvailable } = props;
-
-    if (!datasetGroupsAvailable) {
-      return [];
-    }
-
-    const groupsObject = groups.toJS();
-    let groupNames = [];
-
-    // trying to keep metadata at the top
-    // refactor if you can think of a better implementation
-    const withoutMetadata = Object.keys(groupsObject).filter(group => group !== 'metadata');
-
-    groupNames = withoutMetadata
-      .reduce((acc, curr) => {
-        const column = groups.toJS()[curr][0];
-
-        if (column) {
-          acc.push({ id: column.groupId, name: column.groupName });
-        }
-
-        return acc;
-      }, []);
-
-    groupNames.unshift({ id: 'metadata', name: 'metadata' });
-
-
-    return groupNames;
-  };
 
   // renders
   const renderHeader = () => {
@@ -542,7 +541,7 @@ function DatasetTable(props) {
           <div style={sidebarStyle}>
             <NewDatasetWrapper
               sidebarProps={sidebarProps}
-              selectedGroup={ props.group ? props.group.get('groupId') : 'metadata'}
+              selectedGroup={props.group ? props.group.get('groupId') : 'metadata'}
               datasetId={props.datasetId}
               pendingTransformations={props.pendingTransformations}
               wrapperDivRef={wrappingDiv}
@@ -571,7 +570,6 @@ function DatasetTable(props) {
       )}
     </React.Fragment>
   );
-
 }
 
 DatasetTable.propTypes = {
