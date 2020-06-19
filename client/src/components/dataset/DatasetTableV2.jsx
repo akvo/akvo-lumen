@@ -7,6 +7,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import ColumnHeader from './ColumnHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 import NewDatasetWrapper from './wrappers/NewDatasetWrapper';
+import { getDatasetGroups } from '../../utilities/dataset';
 
 require('./DatasetTable.scss');
 
@@ -71,37 +72,6 @@ function DatasetTable(props) {
     }
   };
 
-  const getDatasetGroups = () => {
-    const { groups, datasetGroupsAvailable } = props;
-
-    if (!datasetGroupsAvailable) {
-      return [];
-    }
-
-    const groupsObject = groups.toJS();
-    let groupNames = [];
-
-    // trying to keep metadata at the top
-    // refactor if you can think of a better implementation
-    const withoutMetadata = Object.keys(groupsObject).filter(group => group !== 'metadata');
-
-    groupNames = withoutMetadata
-      .reduce((acc, curr) => {
-        const column = groups.toJS()[curr][0];
-
-        if (column) {
-          acc.push({ id: column.groupId, name: column.groupName });
-        }
-
-        return acc;
-      }, []);
-
-    groupNames.unshift({ id: 'metadata', name: 'metadata' });
-
-
-    return groupNames;
-  };
-
   const handleGroupsSidebar = () => {
     if (
       sidebarProps &&
@@ -116,7 +86,7 @@ function DatasetTable(props) {
         type: 'groupsList',
         displayRight: false,
         onClose: hideSidebar,
-        groups: getDatasetGroups(),
+        groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
         onSelectGroup: (group) => {
           props.handleChangeQuestionGroup(group.id).then(hideSidebar);
         },
