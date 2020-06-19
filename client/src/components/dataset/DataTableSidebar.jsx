@@ -10,6 +10,7 @@ import SplitColumn from './sidebars/SplitColumn';
 import DeriveColumnJavascript from './sidebars/DeriveColumnJavascript';
 import RenameColumn from './sidebars/RenameColumn';
 import GenerateGeopoints from './sidebars/GenerateGeopoints';
+import GroupsList from './sidebars/GroupsList';
 
 require('./DataTableSidebar.scss');
 
@@ -33,6 +34,8 @@ export default function DataTableSidebar(props) {
       return <RenameColumn {...props} />;
     case 'generateGeopoints':
       return <GenerateGeopoints {...props} />;
+    case 'groupsList':
+      return <GroupsList {...props} />;
     default:
       throw new Error(`Unknown sidebar type ${props.type}`);
   }
@@ -50,6 +53,7 @@ DataTableSidebar.propTypes = {
       'deriveColumnJavascript',
       'renameColumn',
       'generateGeopoints',
+      'groupsList',
     ]
   ).isRequired,
   onClose: PropTypes.func.isRequired,
