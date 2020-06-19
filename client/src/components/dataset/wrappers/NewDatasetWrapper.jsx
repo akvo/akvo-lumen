@@ -9,6 +9,7 @@ import LoadingSpinner from '../../common/LoadingSpinner';
 
 function NewDatasetWrapper(props) {
   const {
+    selectedGroup,
     sidebarProps,
     intl,
     transformations,
@@ -41,6 +42,7 @@ function NewDatasetWrapper(props) {
         {sidebarProps && (
           <DataTableSidebar
             {...sidebarProps}
+            selectedGroup={selectedGroup}
             intl={intl}
             transformations={transformations}
             isLockedFromTransformations={isLockedFromTransformations}
@@ -123,5 +125,6 @@ NewDatasetWrapper.propTypes = {
   handleGroupsSidebar: PropTypes.func,
   datasetHasQuestionGroups: PropTypes.bool,
   groupAvailable: PropTypes.bool,
+  selectedGroup: PropTypes.string,
 };
 export default injectIntl(NewDatasetWrapper);

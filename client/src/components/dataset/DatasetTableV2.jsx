@@ -57,7 +57,6 @@ function DatasetTable(props) {
         displayRight: false,
         onClose: hideSidebar,
         groups: getDatasetGroups(),
-        selectedGroup: props.group ? props.group.get('groupId') : 'metadata',
         onSelectGroup: (group) => {
           props.handleChangeQuestionGroup(group.id).then(hideSidebar);
         },
@@ -543,6 +542,7 @@ function DatasetTable(props) {
           <div style={sidebarStyle}>
             <NewDatasetWrapper
               sidebarProps={sidebarProps}
+              selectedGroup={ props.group ? props.group.get('groupId') : 'metadata'}
               datasetId={props.datasetId}
               pendingTransformations={props.pendingTransformations}
               wrapperDivRef={wrappingDiv}
