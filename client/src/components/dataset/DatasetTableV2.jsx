@@ -34,9 +34,6 @@ function usePrevious(value) {
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
 
-  // todo: review groupInView state prop
-  const [groupInView] = useState(null);
-
   const [width, setWidth] = useState(1024);
   const [height, setHeight] = useState(800);
   const [activeDataTypeContextMenu, setActiveDataTypeContextMenu] = useState(null);
@@ -407,8 +404,7 @@ function DatasetTable(props) {
         onClickTransformMenuItem={handleClickDatasetControlItem}
         onToggleTransformationLog={handleToggleTransformationLog}
       />
-    )
-;
+    );
   };
 
 
@@ -448,7 +444,6 @@ function DatasetTable(props) {
               cols={cols}
               rows={props.rows}
               columns={props.columns}
-              groupInView={groupInView}
               datasetHasQuestionGroups={!props.groups.get('main')}
               groupAvailable={props.groupAvailable}
             />
