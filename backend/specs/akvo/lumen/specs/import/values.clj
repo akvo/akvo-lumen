@@ -43,6 +43,10 @@
                         string?
                         #(s/gen #{"Column 1" "Column 2" "Column 3"})))
 
+(s/def ::groupId string?)
+
+(s/def ::groupName string?)
+
 (s/def ::key boolean?)
 
 ;; alias and custom generator doesn't work so far
