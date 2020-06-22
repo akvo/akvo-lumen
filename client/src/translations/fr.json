@@ -355,7 +355,7 @@
   "type_javascript_expression_here": "Taper une expression javascript",
   "uncategorized": "Non classé",
   "uncategorized_values": "Valeurs non classées",
-  "undo": "Annuler",
+  "undo": "Défaire",
   "unique_values_count": "{count} {count, plural, one {valeur unique} other {valeurs uniques}}",
   "unsaved_changes": "Changements non sauvegardés",
   "untitled_collection": "Collection sans titre",
