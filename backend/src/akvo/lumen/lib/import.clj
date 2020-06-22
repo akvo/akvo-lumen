@@ -133,8 +133,7 @@
   (future
     (let [table-name (util/gen-table-name "ds")]
       (try
-        (with-open [importer (common/dataset-importer (get spec "source")
-                                                      (assoc import-config :environment (env/all conn)))]
+        (with-open [importer (common/dataset-importer (get spec "source") import-config)]
           (let [all-columns (p/columns importer)
                 columns-by-ns (group-columns-by-ns all-columns)]
             (doseq [[_ {:keys [table-name columns]}] columns-by-ns]
