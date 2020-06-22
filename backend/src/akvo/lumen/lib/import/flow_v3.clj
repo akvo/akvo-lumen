@@ -31,7 +31,7 @@
   [form]
   (let [questions (flow-questions form)]
     (into (flow-common/commons-columns form)
-          (into [{:title "Device Id" :type "text" :id "device_id" :groupName "metadata" :groupId "metadata"}]
+          (into [{:title "Device Id" :type "text" :id "device_id" :groupName "metadata" :groupId "metadata" :ns "main"}]
                 (common/coerce flow-common/question-type->lumen-type questions)))))
 
 (defn render-response

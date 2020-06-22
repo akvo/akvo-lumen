@@ -73,12 +73,12 @@
        {:id :b :type \"number\" :title \"B\" :groupId \"main\" :groupName \"main\" :ns \"main\"}
        {:id :c :type \"date\" :title \"C\" :groupId \"main\" :groupName \"main\" :ns \"main\"}])
     (records [this]
-      [{:main/a \"foo\"
-        :main/b 42
-        :main/c (Instant/now)}
-       {:main/a \"bar\"
-        :main/b 3.14
-        :main/c (Instant/now)}
+      [{:a \"foo\"
+        :b 42
+        :c (Instant/now)}
+       {:a \"bar\"
+        :b 3.14
+        :c (Instant/now)}
   "
 
   (columns [this]
@@ -98,8 +98,6 @@
        :key - True if this column is required to be non-null and unique")
   (records [this]
     "Returns a sequence of record data. A record is a map of column ids to values.
-     Column ids are namespaced, e.g. :main/a references the :a
-     column in \"main\" ns
      The type of the value depends on the type of the column where
 
        text - java.lang.String
