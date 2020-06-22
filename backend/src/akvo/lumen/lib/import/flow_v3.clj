@@ -25,12 +25,12 @@
        (conj c i))) [] (flow-common/questions environment form)))
 
 (defn dataset-columns
-  "returns a vector of [{:title :type :id :key}]
+  "returns a vector of [{:title :type :id :key :groupName :groupId}]
   `:key` is optional"
   [environment form]
   (let [questions (flow-questions environment form)]
     (into (flow-common/commons-columns form)
-          (into [{:title "Device Id" :type "text" :id "device_id"}]
+          (into [{:title "Device Id" :type "text" :id "device_id" :groupName "metadata" :groupId "metadata"}]
                 (common/coerce flow-common/question-type->lumen-type questions)))))
 
 (defn render-response
