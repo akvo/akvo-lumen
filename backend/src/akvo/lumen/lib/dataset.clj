@@ -126,7 +126,7 @@
   (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
     (let [column-remove-condition (condp = group-id
                                     "metadata" #(not (contains? flow-common/metadata-keys (get % "columnName")))
-                                    "transformations" #(not (tx.engine/derivation-column-name (get % "columnName")))
+                                    "transformations" #(not (tx.engine/is-derived? (get % "columnName")))
                                     "main" #(not (i.csv/valid-column-name? (get % "columnName")))
                                     #(not (= group-id (get % "groupId"))))
           columns (remove #(or (get % "hidden") (column-remove-condition %)) (:columns dataset))
