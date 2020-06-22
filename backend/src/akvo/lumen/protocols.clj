@@ -69,9 +69,9 @@
 
     DatasetImporter
     (columns [this]
-      [{:id :a :type \"text\" :title \"A\"}
-       {:id :b :type \"number\" :title \"B\"}
-       {:id :c :type \"date\" :title \"C\"}])
+      [{:id :a :type \"text\" :title \"A\" :groupId \"main\" :groupName \"main\"}
+       {:id :b :type \"number\" :title \"B\" :groupId \"main\" :groupName \"main\"}
+       {:id :c :type \"date\" :title \"C\" :groupId \"main\" :groupName \"main\"}])
     (records [this]
       [{:a \"foo\"
         :b 42
@@ -90,6 +90,8 @@
        :title - The title of the column
        :id - The internal id of the column (as a keyword). The id must be
              lowercase alphanumeric ([a-z][a-z0-9]*)
+       :groupId - String value that represent a group id, e.g. \"main\"
+       :groupName - String value that represent a group name, e.g. \"main\"
 
      Optional:
        :key - True if this column is required to be non-null and unique")

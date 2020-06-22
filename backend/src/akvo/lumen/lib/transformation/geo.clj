@@ -47,6 +47,8 @@
                                     "sort" nil
                                     "hidden" false
                                     "direction" nil
+                                    "groupName" "transformations"
+                                    "groupId" "transformations"
                                     "columnName" column-name-geo})})
          (catch Exception e
            (log/debug e)
