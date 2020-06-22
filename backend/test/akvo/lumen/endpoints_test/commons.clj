@@ -6,7 +6,9 @@
             [clojure.java.io :as io])
   (:import [java.io ByteArrayInputStream]))
 
-(def dataset-link-columns [{:key false,
+(def dataset-link-columns [{:groupId "main",
+                            :key false,
+                            :groupName "main",
                             :type "text",
                             :title "Name",
                             :multipleId nil,
@@ -14,47 +16,47 @@
                             :multipleType nil,
                             :columnName "c1",
                             :metadata nil,
-                            :groupId nil
-                            :groupName nil
                             :direction nil,
                             :sort nil}
-                           {:key false,
+                           {:groupId "main",
+                            :key false,
+                            :groupName "main",
                             :type "number",
                             :title "Age",
                             :multipleId nil,
                             :hidden false,
                             :multipleType nil,
-                            :groupId nil
-                            :groupName nil
                             :columnName "c2",
                             :metadata nil,
                             :direction nil,
                             :sort nil}
-                           {:key false,
+                           {:groupId "main",
+                            :key false,
+                            :groupName "main",
                             :type "number",
                             :title "Score",
                             :multipleId nil,
                             :hidden false,
                             :multipleType nil,
-                            :groupId nil
-                            :groupName nil
                             :columnName "c3",
                             :metadata nil,
                             :direction nil,
                             :sort nil}
-                           {:key false,
+                           {:groupId "main",
+                            :key false,
+                            :groupName "main",
                             :type "number",
                             :title "Temperature",
                             :multipleId nil,
                             :hidden false,
-                            :groupId nil
-                            :groupName nil
                             :multipleType nil,
                             :columnName "c4",
                             :metadata nil,
                             :direction nil,
                             :sort nil}
-                           {:key false,
+                           {:groupId "main",
+                            :key false,
+                            :groupName "main",
                             :type "number",
                             :title "Humidity",
                             :multipleId nil,
@@ -62,17 +64,15 @@
                             :multipleType nil,
                             :columnName "c5",
                             :metadata nil,
-                            :groupId nil
-                            :groupName nil
                             :direction nil,
                             :sort nil}
-                           {:key false,
+                           {:groupId "main",
+                            :key false,
+                            :groupName "main",
                             :type "text",
                             :title "Cat",
                             :multipleId nil,
                             :hidden false,
-                            :groupId nil
-                            :groupName nil
                             :multipleType nil,
                             :columnName "c6",
                             :metadata nil,

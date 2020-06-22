@@ -89,7 +89,7 @@
                                        (let [k (if (contains? flow-common/metadata-keys (:columnName col))
                                                  :metadata :transformations)]
                                          (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                                     {:metadata [] :transformations []}  nil-group)))
+                                     {:metadata [] :transformations (get groups "transformations" [])}  nil-group)))
                     (reduce (fn [c col]
                               (let [k (if (i.csv/valid-column-name? (:columnName col))
                                         :main :transformations)]
