@@ -146,8 +146,11 @@
                                                        source-dataset)
         column-names-translation (merge-column-names-map columns
                                                          source-merge-columns)
-        target-merge-columns (get-target-merge-columns source-merge-columns
-                                                       column-names-translation)
+        target-merge-columns (->> (get-target-merge-columns source-merge-columns
+                                                            column-names-translation)
+                                  (map #(assoc %
+                                               "groupName" "transformations"
+                                               "groupId" "transformations")))
         data (fetch-data conn
                          source-table-name
                          target-merge-columns
