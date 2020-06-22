@@ -75,7 +75,6 @@
     "geoline" "geometry(LINE, 4326)"
     "geopoint" "geometry(POINT, 4326)"
     "multiple" "text"
-    "rqg" "text"
     "text" "text"))
 
 (defn- column-type-fn [{:keys [id type]}]
@@ -143,9 +142,7 @@
   (coerce [value]
     (let [geom (PGgeometry/geomFromString (:wkt-string value))]
       (.setSrid geom 4326)
-      geom))
-  PersistentVector
-  (coerce [value] value))
+      geom)))
 
 (defn coerce-to-sql [record]
   (reduce-kv
