@@ -39,6 +39,7 @@
              :type t
              :groupId (:groupId q)
              :metadata (:metadata q)
+             :ns (:ns q)
              :groupName (:groupName q)
              :id (format "c%s" (:id q))}
             (when (= t "multiple")
