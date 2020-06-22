@@ -32,7 +32,8 @@
 (s/def ::version int?)
 
 (s/def ::column* (s/keys :req-un [::db.dsv.column/hidden ::db.dsv.column/direction
-                                  ::db.dsv.column/sort ::db.dsv.column/columnName]))
+                                  ::db.dsv.column/sort ::db.dsv.column/columnName]
+                         :opt-un [::db.dsv.column/groupName ::db.dsv.column/groupId]))
 
 (s/def ::column (s/merge ::import.column.s/header ::column*))
 
