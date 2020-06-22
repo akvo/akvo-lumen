@@ -14,7 +14,7 @@
         (into
          (->> [{:title "Latitude" :type "number" :id "latitude"}
                {:title "Longitude" :type "number" :id "longitude"}]
-              (mapv #(assoc % :groupName "metadata" :groupId "metadata")))
+              (mapv #(assoc % :groupName "metadata" :groupId "metadata" :ns "main")))
          (common/coerce flow-common/question-type->lumen-type (flow-common/questions form)))))
 
 (defmulti render-response
