@@ -69,16 +69,16 @@
 
     DatasetImporter
     (columns [this]
-      [{:id :a :type \"text\" :title \"A\"}
-       {:id :b :type \"number\" :title \"B\"}
-       {:id :c :type \"date\" :title \"C\"}])
+      [{:id :a :type \"text\" :title \"A\" :groupId \"main\" :groupName \"main\" :ns \"main\"}
+       {:id :b :type \"number\" :title \"B\" :groupId \"main\" :groupName \"main\" :ns \"main\"}
+       {:id :c :type \"date\" :title \"C\" :groupId \"main\" :groupName \"main\" :ns \"main\"}])
     (records [this]
-      [{:a \"foo\"
-        :b 42
-        :c (Instant/now)}
-       {:a \"bar\"
-        :b 3.14
-        :c (Instant/now)}
+      [{:main/a \"foo\"
+        :main/b 42
+        :main/c (Instant/now)}
+       {:main/a \"bar\"
+        :main/b 3.14
+        :main/c (Instant/now)}
   "
 
   (columns [this]
@@ -90,11 +90,16 @@
        :title - The title of the column
        :id - The internal id of the column (as a keyword). The id must be
              lowercase alphanumeric ([a-z][a-z0-9]*)
+       :groupId - String value that represent a group id, e.g. \"main\"
+       :groupName - String value that represent a group name, e.g. \"main\"
+       :ns - String value that represent a namespace, e.g. \"main\"
 
      Optional:
        :key - True if this column is required to be non-null and unique")
   (records [this]
     "Returns a sequence of record data. A record is a map of column ids to values.
+     Column ids are namespaced, e.g. :main/a references the :a
+     column in \"main\" ns
      The type of the value depends on the type of the column where
 
        text - java.lang.String

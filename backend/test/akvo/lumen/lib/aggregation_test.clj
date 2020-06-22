@@ -25,9 +25,9 @@
       res)))
 
 (deftest pivot-tests
-  (let [columns [{:id "c1", :title "A", :type "text"}
-                 {:id "c2", :title "B", :type "text"}
-                 {:id "c3", :title "C", :type "number"}]
+  (let [columns [{:id "c1", :title "A", :type "text" :groupName "main" :groupId "main"}
+                 {:id "c2", :title "B", :type "text" :groupName "main" :groupId "main"}
+                 {:id "c3", :title "C", :type "number" :groupName "main" :groupId "main"}]
         rows [[{:value "a1"} {:value "b1"} {:value 10}]
               [{:value "a1"} {:value "b1"} {:value 11}]
               [{:value "a1"} {:value "b2"} {:value 9}]
@@ -139,8 +139,8 @@
 
 (deftest pie-tests
   (let [data {:columns
-              [{:id "c1", :title "A", :type "text"}
-               {:id "c2", :title "B", :type "text"}],
+              [{:id "c1", :title "A", :type "text" :groupName "main" :groupId "main"}
+               {:id "c2", :title "B", :type "text" :groupName "main" :groupId "main"}],
               :rows
               [[{:value "a1"} {:value "b1"}]
                [{:value "a1"} {:value "b1"}]
@@ -170,11 +170,11 @@
                  :metadata {:type "text"}}}))))))
 
 (deftest bar-tests
-  (let [data       {:columns [{:id "c1", :title "A", :type "text"}
-                              {:id "c2", :title "B", :type "number"}
-                              {:id "c3", :title "C", :type "number"}
-                              {:id "c4", :title "D", :type "number"}
-                              {:id "c5", :title "E", :type "number"}]
+  (let [data       {:columns [{:id "c1", :title "A", :type "text" :groupName "main" :groupId "main"}
+                              {:id "c2", :title "B", :type "number" :groupName "main" :groupId "main"}
+                              {:id "c3", :title "C", :type "number" :groupName "main" :groupId "main"}
+                              {:id "c4", :title "D", :type "number" :groupName "main" :groupId "main"}
+                              {:id "c5", :title "E", :type "number" :groupName "main" :groupId "main"}]
                     :rows    [[{:value "a"} {:value 1} {:value 1} {:value 10} {:value 100}]
                               [{:value "b"} {:value 1} {:value 2} {:value 20} {:value 200}]
                               [{:value "c"} {:value 1} {:value 3} {:value 30} {:value 300}]
@@ -270,9 +270,9 @@
                   {:label "c", :key "c"}]}}))))))
 
 (deftest line-tests
-  (let [data {:columns [{:id "c1", :title "A", :type "text"}
-                        {:id "c2", :title "B", :type "number"}
-                        {:id "c3", :title "C", :type "date"}]
+  (let [data {:columns [{:id "c1", :title "A", :type "text" :groupName "main" :groupId "main"}
+                        {:id "c2", :title "B", :type "number" :groupName "main" :groupId "main"}
+                        {:id "c3", :title "C", :type "date" :groupName "main" :groupId "main"}]
               :rows    [[{:value "a"} {:value 1} {:value (tu/instant-date "01/02/2019")}]
                         [{:value "b"} {:value 2} {:value (tu/instant-date "02/02/2019")}]
                         [{:value "c"} {:value 3} {:value (tu/instant-date "03/02/2019")}]
@@ -314,9 +314,9 @@
                     {:timestamp 1549238400000}]}})))))))
 
 (deftest scatter-tests
-  (let [data {:columns [{:id "c1", :title "A", :type "text"}
-                        {:id "c2", :title "B", :type "number"}
-                        {:id "c3", :title "C", :type "date"}]
+  (let [data {:columns [{:id "c1", :title "A", :type "text" :groupName "main" :groupId "main"}
+                        {:id "c2", :title "B", :type "number" :groupName "main" :groupId "main"}
+                        {:id "c3", :title "C", :type "date" :groupName "main" :groupId "main"}]
               :rows    [[{:value "a"} {:value 1} {:value (tu/instant-date "01/02/2019")}]
                         [{:value "b"} {:value 2} {:value (tu/instant-date "02/02/2019")}]
                         [{:value "c"} {:value 3} {:value (tu/instant-date "03/02/2019")}]
@@ -351,9 +351,9 @@
                  :data [{:label nil} {:label nil} {:label nil} {:label nil}]}}))))))
 
 (deftest bubble-tests
-  (let [data {:columns [{:id "c1", :title "A", :type "text"}
-                        {:id "c2", :title "B", :type "number"}
-                        {:id "c3", :title "C", :type "number"}]
+  (let [data {:columns [{:id "c1", :title "A", :type "text" :groupName "main" :groupId "main"}
+                        {:id "c2", :title "B", :type "number" :groupName "main" :groupId "main"}
+                        {:id "c3", :title "C", :type "number" :groupName "main" :groupId "main"}]
               :rows    [[{:value "a"} {:value 1} {:value 1}]
                         [{:value "b"} {:value 2} {:value 2}]
                         [{:value "c"} {:value 3} {:value 2}]
