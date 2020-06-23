@@ -79,7 +79,7 @@
   always we'll use 'transformations' groupId to include all generated transformations"
   [tenant-conn id]
   (if-let [dataset (w/keywordize-keys (db.dataset/dataset-by-id-v2 tenant-conn {:id id}))]
-    (let [columns (remove #(get % :hidden) (reduce #(into % %2) [] (map :columns (vals (:group-ds dataset)))) )
+    (let [columns (remove #(get % :hidden) (reduce #(into % %2) [] (map :columns (vals (:groups dataset)))) )
           groups  (if (= "AKVO_FLOW" (-> dataset :source :kind))
                     (let [columns-by-group (group-by :groupId columns)
                           groups           (dissoc columns-by-group nil)
@@ -124,7 +124,7 @@
 (defn fetch-group
   [tenant-conn id group-id]
   (when-let [dataset (db.dataset/dataset-by-id-v2 tenant-conn {:id id})]
-    (let [group-dataset (get (:group-ds dataset) group-id)
+    (let [group-dataset (get (:groups dataset) group-id)
           column-remove-condition (condp = group-id
                                     "metadata" #(not (contains? flow-common/metadata-keys (get % "columnName")))
                                     "transformations" #(not (tx.engine/is-derived? (get % "columnName")))
