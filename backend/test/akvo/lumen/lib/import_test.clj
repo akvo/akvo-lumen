@@ -51,5 +51,7 @@
 (deftest import-test
   (testing "group-record-by-table-test"
     (is (= (import/group-record-by-table columns record)
-           {"table_1"{:display_name "User1", :submitter "User1 ", :c617309149 "Foo"},
-            "table_2" {:c583119147 "Bar", :c594979148 30.0}}))))
+           {"table_1" {:display_name "User1", :submitter "User1 ", :c617309149 "Foo"},
+            "table_2" {:c583119147 "Bar", :c594979148 30.0}}))
+    (is (= (mapv meta (vals (import/group-record-by-table columns record)))
+           [{:repeatable false} {:repeatable true}]))))

@@ -77,7 +77,7 @@
   (get-in columns [ns :table-name]))
 
 (defn group-record-by-table
-  [columns  record]
+  [columns record]
   (let [dict (w/keywordize-keys
               (reduce-kv (fn [c k v]
                            (apply assoc c (flatten (map (juxt :id :ns) (:columns v))))) {} columns))
@@ -85,9 +85,11 @@
                             (assoc c (keyword (get dict  (keyword k)) (name k)) v)) {} record)]
    (reduce-kv (fn [m k v]
                 (let [table (get-table columns k)
+                      metadata (if (= k "main") {:repeatable false} {:repeatable true})
                       current (into {} (map (fn [[k v]]
                                               [(keyword (name k)) v])) v)]
-                  (assoc m table current)))
+
+                  (assoc m table (with-meta current metadata))))
               {}
               (group-by (comp namespace first) ns-record))))
 
@@ -105,9 +107,12 @@
             (doseq [[_ {:keys [table-name columns]}] columns-by-ns]
               (postgres/create-dataset-table conn table-name columns))
             (doseq [table-name-record-col (map #(group-record-by-table columns-by-ns %)
-                                               (map postgres/coerce-to-sql (take common/rows-limit (p/records importer))))]
+                                               (take common/rows-limit (p/records importer)))]
               (doseq [[table-name record] table-name-record-col]
-                (jdbc/insert! conn table-name record)))
+                (if (-> record meta :repeatable)
+                  (log/error :YAY table-name)
+                  (jdbc/insert! conn table-name (postgres/coerce-to-sql record))
+                  )))
             (successful-execution conn job-execution-id data-source-id columns-by-ns {:spec-name (get spec "name")
                                                                                       :spec-description (get spec "description" "")} claims)))
         (catch Throwable e
