@@ -76,7 +76,7 @@
   [columns ns]
   (get-in columns [ns :table-name]))
 
-(defn- group-record-by-table
+(defn group-record-by-table
   [columns  record]
   (let [dict (w/keywordize-keys
               (reduce-kv (fn [c k v]
