@@ -98,16 +98,24 @@
     (assoc form
            :registration-form? (= form-id (:registrationFormId survey)))))
 
+(defn analyse [r]
+  (if (> (count r) 1)
+    (reduce  (fn [c [k v]]
+               (assoc c k (mapv last v)))
+             {}
+             (group-by first (reduce into [] (map seq r))))
+    (first r)))
+
 ;; Transforms the structure
 ;; {question-group-id -> [{question-id -> response}]
 ;; to
-;; {question-id -> first-response}
+;; {question-id -> first-response || [response-1 response2 response3]}
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
   [questions responses]
   (->> responses
        vals
-       (map first)
+       (map analyse)
        (apply merge)))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
