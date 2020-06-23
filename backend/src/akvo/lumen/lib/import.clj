@@ -17,50 +17,83 @@
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w]))
 
-(defn- successful-execution [conn job-execution-id data-source-id table-name columns {:keys [spec-name spec-description]} claims]
-  (let [dataset-id (util/squuid)
-        imported-table-name (util/gen-table-name "imported")]
+(defn- successful-execution [conn job-execution-id data-source-id columns-by-ns {:keys [spec-name spec-description]} claims]
+  (let [dataset-id (util/squuid)]
     (db.dataset/insert-dataset conn {:id dataset-id
-                          :title spec-name ;; TODO Consistent naming. Change on client side?
-                          :description spec-description
-                          :author claims})
-    (db.job-execution/clone-data-table conn
-                      {:from-table table-name
-                       :to-table imported-table-name}
-                      {}
-                      {:transaction? false})
-    (db.dataset-version/new-dataset-version conn {:id (util/squuid)
-                               :dataset-id dataset-id
-                               :job-execution-id job-execution-id
-                               :table-name table-name
-                               :imported-table-name imported-table-name
-                               :version 1
-                               :columns (mapv (fn [{:keys [metadata title id type key multipleType multipleId groupName groupId]}]
-                                                {:columnName id
-                                                 :direction nil
-                                                 :hidden false
-                                                 :key (boolean key)
-                                                 :multipleId multipleId
-                                                 :multipleType multipleType
-                                                 :metadata metadata
-                                                 :groupName groupName
-                                                 :groupId groupId
-                                                 :sort nil
-                                                 :title (string/trim title)
-                                                 :type type})
-                                              columns)
-                               :transformations []})
-    (db.job-execution/update-job-execution conn {:id             job-execution-id
-                                :status         "OK"
-                                :dataset-id     dataset-id})))
+                                     :title spec-name ;; TODO Consistent naming. Change on client side?
+                                     :description spec-description
+                                     :author claims})
 
-(defn- failed-execution [conn job-execution-id reason table-name]
+   (doseq [[_ {:keys [table-name columns]}] columns-by-ns]
+     (let [imported-table-name (util/gen-table-name "imported")]
+       (db.job-execution/clone-data-table conn
+                                          {:from-table table-name
+                                           :to-table imported-table-name}
+                                          {}
+                                          {:transaction? false})
+       (db.dataset-version/new-dataset-version conn {:id (util/squuid)
+                                                     :dataset-id dataset-id
+                                                     :job-execution-id job-execution-id
+                                                     :table-name table-name
+                                                     :imported-table-name imported-table-name
+                                                     :version 1
+                                                     :columns (mapv (fn [{:keys [metadata title id type key multipleType multipleId groupName groupId]}]
+                                                                      {:columnName id
+                                                                       :direction nil
+                                                                       :hidden false
+                                                                       :key (boolean key)
+                                                                       :multipleId multipleId
+                                                                       :multipleType multipleType
+                                                                       :metadata metadata
+                                                                       :groupName groupName
+                                                                       :groupId groupId
+                                                                       :sort nil
+                                                                       :title (string/trim title)
+                                                                       :type type})
+                                                                    columns)
+                                                     :transformations []})
+       (db.job-execution/update-job-execution conn {:id         job-execution-id
+                                                    :status     "OK"
+                                                    :dataset-id dataset-id})))))
+
+(defn- failed-execution [conn job-execution-id reason]
   (db.job-execution/update-failed-job-execution conn {:id job-execution-id
-                                     :reason [reason]})
-  (db.transformation/drop-table conn {:table-name table-name}))
+                                                      :reason [reason]}))
 
+(defn- group-columns-by-ns
+  [columns]
+  (reduce-kv (fn [m k v]
+               (-> m
+                   (assoc-in [k :columns] v)
+                   (assoc-in [k :table-name] (util/gen-table-name "ds"))))
+             {}
+             (group-by :ns columns)))
+
+(defn- get-table
+  [columns ns]
+  (get-in columns [ns :table-name]))
+
+(defn group-record-by-table
+  [columns record]
+  (let [dict (w/keywordize-keys
+              (reduce-kv (fn [c k v]
+                           (apply assoc c (flatten (map (juxt :id :ns) (:columns v))))) {} columns))
+        ns-record (reduce (fn [c [k v]]
+                            (assoc c (keyword (get dict  (keyword k)) (name k)) v)) {} record)]
+   (reduce-kv (fn [m k v]
+                (let [table (get-table columns k)
+                      metadata (if (= k "main") {:repeatable false} {:repeatable true})
+                      current (into {} (map (fn [[k v]]
+                                              [(keyword (name k)) v])) v)]
+
+                  (assoc m table (with-meta current metadata))))
+              {}
+              (group-by (comp namespace first) ns-record))))
+
+;; (:rqg (env/all conn)
 (defn- execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
@@ -68,16 +101,22 @@
   (future
     (let [table-name (util/gen-table-name "ds")]
       (try
-        (with-open [importer (common/dataset-importer (get spec "source")
-                                                      (assoc import-config :environment (env/all conn)))]
-          (let [columns (p/columns importer)]
-            (postgres/create-dataset-table conn table-name columns)
-            (doseq [record (map postgres/coerce-to-sql (take common/rows-limit (p/records importer)))]
-              (jdbc/insert! conn table-name record))
-            (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
-                                                                                            :spec-description (get spec "description" "")} claims)))
+        (with-open [importer (common/dataset-importer (get spec "source") import-config)]
+          (let [all-columns (p/columns importer)
+                columns-by-ns (group-columns-by-ns all-columns)]
+            (doseq [[_ {:keys [table-name columns]}] columns-by-ns]
+              (postgres/create-dataset-table conn table-name columns))
+            (doseq [table-name-record-col (map #(group-record-by-table columns-by-ns %)
+                                               (take common/rows-limit (p/records importer)))]
+              (doseq [[table-name record] table-name-record-col]
+                (if (-> record meta :repeatable)
+                  (log/error :YAY table-name)
+                  (jdbc/insert! conn table-name (postgres/coerce-to-sql record))
+                  )))
+            (successful-execution conn job-execution-id data-source-id columns-by-ns {:spec-name (get spec "name")
+                                                                                      :spec-description (get spec "description" "")} claims)))
         (catch Throwable e
-          (failed-execution conn job-execution-id (.getMessage e) table-name)
+          (failed-execution conn job-execution-id (.getMessage e))
           (log/error e)
           (p/track error-tracker e)
           (throw e))))))
