@@ -34,46 +34,52 @@
           (into [{:title "Device Id" :type "text" :id "device_id" :groupName "metadata" :groupId "metadata" :ns "main"}]
                 (common/coerce flow-common/question-type->lumen-type questions)))))
 
+(defn extract-geo [response]
+  (let [{:strs [long lat]} response]
+    (when (and long lat)
+      (postgres/->Geopoint
+       (format "POINT (%s %s)" long lat)))))
+
+(defn extract-geoshape [response]
+  (let [feature (-> (w/keywordize-keys response) :features first)
+        geom-type (-> feature :geometry :type)
+        points (-> feature :geometry :coordinates)]
+    (log/debug :geom-type geom-type :points points )
+    (if points
+      (condp = geom-type
+        "LineString" (when (> (count points) 1)
+                       (postgres/->Geoline
+                        (format "LINESTRING (%s)" (->> points
+                                                       (map (partial string/join " " ))
+                                                       (string/join ", " )))))
+        "Polygon"    (let [points (->> (first points)
+                                       (map (partial string/join " " )))]
+                       (when (> (count points) 3)
+                         (postgres/->Geoshape
+                          (format "POLYGON ((%s))" (->> points                                                                                                           (string/join ", " ))))))
+        "MultiPoint" (postgres/->Multipoint
+                      (format "MULTIPOINT (%s)" (->> points
+                                                     (map (partial string/join " " ))
+                                                     (string/join ", " ))))
+        
+        (log/warn :unmapped-geoshape! geom-type)))))
+
 (defn render-response
-  [type response]
+  [repeatable type response]
   (condp = type
-    "GEO" (let [{:strs [long lat]} response]
-            (when (and long lat)
-              (postgres/->Geopoint
-               (format "POINT (%s %s)" long lat))))
-    "GEOSHAPE" (let [feature (-> (w/keywordize-keys response) :features first)
-                     geom-type (-> feature :geometry :type)
-                     points (-> feature :geometry :coordinates)]
-                 (log/debug :geom-type geom-type :points points )
-                 (if points
-                   (condp = geom-type
-                     "LineString" (when (> (count points) 1)
-                                    (postgres/->Geoline
-                                     (format "LINESTRING (%s)" (->> points
-                                                                    (map (partial string/join " " ))
-                                                                    (string/join ", " )))))
-                     "Polygon"    (let [points (->> (first points)
-                                                    (map (partial string/join " " )))]
-                                    (when (> (count points) 3)
-                                      (postgres/->Geoshape
-                                       (format "POLYGON ((%s))" (->> points                                                                                                           (string/join ", " ))))))
-                     "MultiPoint" (postgres/->Multipoint
-                                   (format "MULTIPOINT (%s)" (->> points
-                                                                  (map (partial string/join " " ))
-                                                                  (string/join ", " ))))
-                     
-                     (log/warn :unmapped-geoshape! geom-type))))
-    (v2/render-response type response)))
+    "GEO" (if repeatable (map extract-geo response) (extract-geo response))
+    "GEOSHAPE" (if repeatable (map extract-geoshape response) (extract-geoshape response))
+    (v2/render-response repeatable type response)))
 
 (defn response-data
   [form responses]
   (let [questions (flow-questions form)
         responses (flow-common/question-responses questions responses)]
-    (reduce (fn [response-data {:keys [type id repeatable derived-id derived-fn]}]
+    (reduce (fn [response-data {:keys [type id ns derived-id derived-fn]}]
               (if-let [response ((or derived-fn identity) (get responses (or derived-id id)))]
                 (assoc response-data
                        (format "c%s" id)
-                       (render-response type response))
+                       (render-response (and ns (not= ns "main")) type response))
                 response-data))
             {}
             questions)))
