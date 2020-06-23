@@ -5,6 +5,7 @@
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
             [clojure.string :as str])
   (:import [java.time Instant]))
 
@@ -17,80 +18,84 @@
               (mapv #(assoc % :groupName "metadata" :groupId "metadata" :ns "main")))
          (common/coerce flow-common/question-type->lumen-type (flow-common/questions form)))))
 
+(defn- col-adapter [repeatable fun response]
+  (if repeatable
+    (map fun response)
+    (fun response)))
+
 (defmulti render-response
-  (fn [type response]
+  (fn [repeatable type response]
     type))
 
 (defmethod render-response "DATE"
-  [_ response]
-  (Instant/parse response))
+  [repeatable _ response]
+  (col-adapter repeatable #(Instant/parse %) response))
 
 (defmethod render-response "FREE_TEXT"
-  [_ response]
-  response)
+  [repeatable _ response]
+  (col-adapter repeatable identity response))
 
 (defmethod render-response "NUMBER"
-  [_ response]
-  response)
+  [repeatable _ response]
+  (col-adapter repeatable identity response))
 
 (defmethod render-response "SCAN"
-  [_ response]
-  response)
+  [repeatable _ response]
+  (col-adapter repeatable identity response))
 
 (defmethod render-response "OPTION"
-  [_ response]
-  (str/join "|" (map (fn [{:strs [text code]}]
-                       (if code
-                         (str/join ":" [code text])
-                         text))
-                     response)))
+  [repeatable _ response]
+  (let [fun #(str/join "|" (map (fn [{:strs [text code]}]
+                                  (if code
+                                    (str/join ":" [code text])
+                                    text))
+                                %))]
+   (col-adapter repeatable fun response)))
 
 (defmethod render-response "GEO"
-  [_ response]
-  (condp = (get-in response ["geometry" "type"])
-    "Point" (let [coords (get-in response ["geometry" "coordinates"])]
+  [repeatable _ response]
+  (let [fun #(condp = (get-in response ["geometry" "type"])
+    "Point" (let [coords (get-in % ["geometry" "coordinates"])]
               (str/join "," coords))
-    nil))
+    nil)]
+    (col-adapter repeatable fun response)))
 
 (defmethod render-response "CASCADE"
-  [_ response]
-  (str/join "|" (map (fn [item]
-                       (get item "name"))
-                     response)))
+  [repeatable _ response]
+  (let [fun #(str/join "|" (map (fn [item]
+                                  (get item "name"))
+                                %))]
+    (col-adapter repeatable fun response)))
 
 (defmethod render-response "PHOTO"
-  [_ response]
-  (get response "filename"))
+  [repeatable _ response]
+  (col-adapter repeatable #(get % "filename") response))
 
 (defmethod render-response "VIDEO"
-  [_ response]
-  (get response "filename"))
+  [repeatable _ response]
+  (col-adapter repeatable #(get % "filename") response))
 
 (defmethod render-response "CADDISFLY"
-  [_ response]
-  (json/generate-string response))
-
-(defmethod render-response "RQG"
-  [_ response]
-  response)
+  [repeatable _ response]
+  (col-adapter repeatable json/generate-string response))
 
 (defmethod render-response "GEO-SHAPE-FEATURES"
-  [_ response]
-  (json/generate-string response))
+  [repeatable _ response]
+  (col-adapter repeatable json/generate-string response))
 
 (defmethod render-response :default
-  [type response]
-  nil)
+  [repeatable type response]
+  (col-adapter repeatable (constantly nil) response))
 
 (defn response-data
   [form responses]
   (let [questions (flow-common/questions form)
         responses (flow-common/question-responses questions responses)]
-    (reduce (fn [response-data {:keys [type id]}]
+    (reduce (fn [response-data {:keys [type id ns]}]
               (if-let [response (get responses id)]
                 (assoc response-data
                        (format "c%s" id)
-                       (render-response type response))
+                       (render-response (and ns (not= ns "main")) type response))
                 response-data))
             {}
             questions)))
