@@ -182,10 +182,12 @@ function Dataset(props) {
     const { params, dispatch } = props;
     const { datasetId } = params;
 
-    if (isFeatureFlag && (dataset == null || dataset.get('groups') == null)) {
-      dispatch(
-        fetchDatasetGroups(datasetId, null, () => setHasTrackedPageView(true))
-      );
+    if (isFeatureFlag) {
+      if (dataset == null || dataset.get('groups') == null) {
+        dispatch(
+          fetchDatasetGroups(datasetId, null, () => setHasTrackedPageView(true))
+        );
+      }
     } else if (dataset == null || dataset.get('rows') == null) {
       dispatch(
         fetchDataset(datasetId, null, () => setHasTrackedPageView(true))
@@ -241,6 +243,7 @@ function Dataset(props) {
   }, [hasTrackedPageView]);
 
   useEffect(() => {
+    pendingSaving.onStopEdit();
     if (dataset && title !== getTitle(dataset)) {
       pendingSaving.onHandleSave();
     }

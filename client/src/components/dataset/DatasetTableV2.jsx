@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Column, Cell, Table } from 'fixed-data-table-2';
 import moment from 'moment';
@@ -24,29 +24,20 @@ function formatCellValue(type, value) {
   }
 }
 
-function usePrevious(value) {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
-
-
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
+  const isMounted = useRef(false);
   const [width, setWidth] = useState(1024);
   const [height, setHeight] = useState(800);
   const [activeDataTypeContextMenu, setActiveDataTypeContextMenu] = useState(null);
   const [activeColumnContextMenu, setActiveColumnContextMenu] = useState(null);
-  const [sidebarProps, setSidebarProps] = useState(null);
-  const prevDatasetGroupsAvailable = usePrevious(props.datasetGroupsAvailable);
+  const sidebarProps = useRef(null);
 
   const hideSidebar = () => {
-    if (sidebarProps) {
-      setSidebarProps(null);
+    if (sidebarProps.current) {
+      sidebarProps.current = null;
       setWidth(width + 300);
-    // TODO review following line!
+      // TODO review following line!
       setHeight(height);
     }
   };
@@ -55,8 +46,7 @@ function DatasetTable(props) {
     /* Manually subtract the sidebar width from the datatable width -
     using refs to measure the new width of the parent container grabs
     old width before the DOM updates */
-
-    setSidebarProps(sbProps);
+    sidebarProps.current = sbProps;
     setWidth(sbProps ? width : width - 300);
     // TODO review following line!
     setHeight(height);
@@ -71,8 +61,8 @@ function DatasetTable(props) {
 
   const handleSidebarProps = (sbProps) => {
     if (
-      sidebarProps &&
-      sidebarProps.type === sbProps.type
+      sidebarProps.current &&
+      sidebarProps.current.type === sbProps.type
     ) {
       hideSidebar();
     } else {
@@ -112,20 +102,22 @@ function DatasetTable(props) {
   }, []);
 
   useEffect(() => {
-    const datasetGroupsAvailableChanged =
-      prevDatasetGroupsAvailable !== props.datasetGroupsAvailable;
-    const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
+    if (isMounted.current) {
+      const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
 
-    if (datasetGroupsAvailableChanged && datasetHasQuestionGroups) {
-      handleGroupsSidebar();
+      if (props.datasetGroupsAvailable && datasetHasQuestionGroups) {
+        handleGroupsSidebar();
+      }
+    } else {
+      isMounted.current = true;
     }
   }, [props.datasetGroupsAvailable, props.groups]);
 
   const getCellClassName = (columnTitle) => {
     if (
-      sidebarProps != null &&
-      sidebarProps.column &&
-      sidebarProps.column.get('title') === columnTitle
+      sidebarProps.current != null &&
+      sidebarProps.current.column &&
+      sidebarProps.current.column.get('title') === columnTitle
     ) {
       return 'sidebarTargetingColumn';
     }
@@ -405,19 +397,19 @@ function DatasetTable(props) {
             style={{
               display: 'flex',
               flexDirection:
-                sidebarProps && sidebarProps.displayRight
+                sidebarProps.current && sidebarProps.current.displayRight
                   ? 'row-reverse'
                   : 'row',
             }}
           >
             <div
               className={`sidebarWrapper ${
-                sidebarProps ? 'expanded' : 'collapsed'
+                sidebarProps.current ? 'expanded' : 'collapsed'
               }`}
             >
-              {sidebarProps && (
+              {sidebarProps.current && (
                 <DataTableSidebar
-                  {...sidebarProps}
+                  {...sidebarProps.current}
                   selectedGroup={
                     props.group ? props.group.get('groupId') : 'metadata'
                   }
@@ -432,7 +424,7 @@ function DatasetTable(props) {
               )}
             </div>
 
-            {!sidebarProps && !props.groups.get('main') && (
+            {!sidebarProps.current && !props.groups.get('main') && (
               <div className="toggle-groups">
                 <span
                   onClick={() => handleGroupsSidebar()}
@@ -447,7 +439,7 @@ function DatasetTable(props) {
               <div
                 ref={wrappingDiv}
                 className={`wrapper ${
-                  sidebarProps ? 'hasSidebar' : 'noSidebar'
+                  sidebarProps.current ? 'hasSidebar' : 'noSidebar'
                 }`}
               >
                 {activeDataTypeContextMenu != null && (
@@ -466,7 +458,7 @@ function DatasetTable(props) {
                     onContextMenuItemSelected={handleColumnContextMenuClicked}
                     onWindowClick={() => setActiveDataTypeContextMenu(null)}
                     left={
-                      prop.columns.last().get('title') ===
+                      props.columns.last().get('title') ===
                       activeColumnContextMenu.column.get('title')
                     }
                   />

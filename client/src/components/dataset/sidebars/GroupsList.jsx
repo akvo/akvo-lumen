@@ -12,7 +12,7 @@ function GroupsList(props) {
     <div className="DataTableSidebar GroupsList">
       <SidebarHeader
         onClose={onClose}
-        closeButton={<i className="fa fa-angle-left" />}
+        closeButton={<i onClick={onClose} className="fa fa-angle-left clickable" />}
       >
         <FormattedMessage id="data_groups" />
       </SidebarHeader>
@@ -24,7 +24,6 @@ function GroupsList(props) {
           return (
             <div onClick={() => onSelectGroup(group)} key={id} className={className}>
               <p>{group.name}</p>
-              <i className="fa fa-angle-right" />
             </div>
           );
         })}
