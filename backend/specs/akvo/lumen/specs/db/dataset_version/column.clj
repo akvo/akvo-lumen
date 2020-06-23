@@ -11,6 +11,10 @@
 
 (s/def ::direction (s/nilable string?))
 
+(s/def ::groupName string?)
+
+(s/def ::groupId string?)
+
 (def ^:dynamic *columnName?* string?)
 
 (s/def ::columnName? #'*columnName?*)
