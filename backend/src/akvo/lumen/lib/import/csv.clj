@@ -69,7 +69,7 @@
   (for [row rows]
     (apply merge
            (map (fn [{:keys [id type]} value]
-                  {id (transform-value value type)})
+                  {id [(transform-value value type)]})
                 column-spec
                 row))))
 

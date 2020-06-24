@@ -89,7 +89,7 @@
               (if-let [response (get responses id)]
                 (assoc response-data
                        (format "c%s" id)
-                       (render-response type response))
+                       (map (partial render-response type) response))
                 response-data))
             {}
             questions)))

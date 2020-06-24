@@ -36,33 +36,34 @@
 (defn render-response
   [type response]
   (condp = type
-    "GEO" (let [{:strs [long lat]} response]
-            (when (and long lat)
-              (postgres/->Geopoint
-               (format "POINT (%s %s)" long lat))))
-    "GEOSHAPE" (let [feature (-> (w/keywordize-keys response) :features first)
-                     geom-type (-> feature :geometry :type)
-                     points (-> feature :geometry :coordinates)]
-                 (log/debug :geom-type geom-type :points points )
-                 (if points
-                   (condp = geom-type
-                     "LineString" (when (> (count points) 1)
-                                    (postgres/->Geoline
-                                     (format "LINESTRING (%s)" (->> points
-                                                                    (map (partial string/join " " ))
-                                                                    (string/join ", " )))))
-                     "Polygon"    (let [points (->> (first points)
-                                                    (map (partial string/join " " )))]
-                                    (when (> (count points) 3)
-                                      (postgres/->Geoshape
-                                       (format "POLYGON ((%s))" (->> points                                                                                                           (string/join ", " ))))))
-                     "MultiPoint" (postgres/->Multipoint
-                                   (format "MULTIPOINT (%s)" (->> points
-                                                                  (map (partial string/join " " ))
-                                                                  (string/join ", " ))))
-                     
-                     (log/warn :unmapped-geoshape! geom-type))))
-    (v2/render-response type response)))
+    "GEO" (->> response
+               (map #(let [{:strs [long lat]} %]
+                       (when (and long lat)
+                         (postgres/->Geopoint
+                          (format "POINT (%s %s)" long lat))))))
+    "GEOSHAPE" (->> response
+                    (map #(let [feature (-> (w/keywordize-keys %) :features first)
+                                geom-type (-> feature :geometry :type)
+                                points (-> feature :geometry :coordinates)]
+                            (log/debug :geom-type geom-type :points points )
+                            (if points
+                              (condp = geom-type
+                                "LineString" (when (> (count points) 1)
+                                               (postgres/->Geoline
+                                                (format "LINESTRING (%s)" (->> points
+                                                                               (map (partial string/join " " ))
+                                                                               (string/join ", " )))))
+                                "Polygon"    (let [points (->> (first points)
+                                                               (map (partial string/join " " )))]
+                                               (when (> (count points) 3)
+                                                 (postgres/->Geoshape
+                                                  (format "POLYGON ((%s))" (->> points                                                                                                           (string/join ", " ))))))
+                                "MultiPoint" (postgres/->Multipoint
+                                              (format "MULTIPOINT (%s)" (->> points
+                                                                             (map (partial string/join " " ))
+                                                                             (string/join ", " ))))
+                                (log/warn :unmapped-geoshape! geom-type))))))
+    (map (partial v2/render-response type) response)))
 
 (defn response-data
   [environment form responses]
@@ -89,7 +90,7 @@
              (if-let [data-point (get data-points data-point-id)]
                (merge (response-data environment form (get form-instance "responses"))
                       (flow-common/common-records form-instance data-point)
-                      {:device_id (get form-instance "deviceIdentifier")})
+                      {:device_id [(get form-instance "deviceIdentifier")]})
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
                                {:form-instance-id (get form-instance "id")
                                 :data-point-id data-point-id
