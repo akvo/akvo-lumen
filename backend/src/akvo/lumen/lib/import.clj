@@ -113,10 +113,9 @@
             (doseq [table-name-record-col (map #(group-record-by-table columns-by-ns %)
                                                (take common/rows-limit (p/records importer)))]
               (doseq [[table-name record] table-name-record-col]
-                (if (-> record meta :repeatable)
                   (doseq [i (range (count (last (first record))))]
-                    (jdbc/insert! conn table-name (postgres/coerce-to-sql (take-pos record i))))
-                  (jdbc/insert! conn table-name (postgres/coerce-to-sql record)))))
+                  (jdbc/insert! conn table-name (postgres/coerce-to-sql (take-pos record i))))
+))
             (successful-execution conn job-execution-id data-source-id columns-by-ns {:spec-name (get spec "name")
                                                                                       :spec-description (get spec "description" "")} claims)))
         (catch Throwable e

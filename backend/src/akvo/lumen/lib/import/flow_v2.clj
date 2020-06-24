@@ -18,74 +18,70 @@
               (mapv #(assoc % :groupName "metadata" :groupId "metadata" :ns "main")))
          (common/coerce flow-common/question-type->lumen-type (flow-common/questions form)))))
 
-(defn- col-adapter [repeatable fun response]
-  (if repeatable
-    (map fun response)
-    (fun response)))
-
 (defmulti render-response
-  (fn [repeatable type response]
+  (fn [type response]
     type))
 
 (defmethod render-response "DATE"
-  [repeatable _ response]
-  (col-adapter repeatable #(Instant/parse %) response))
+  [_ response]
+  (Instant/parse response))
 
 (defmethod render-response "FREE_TEXT"
-  [repeatable _ response]
-  (col-adapter repeatable identity response))
+  [_ response]
+  response)
 
 (defmethod render-response "NUMBER"
-  [repeatable _ response]
-  (col-adapter repeatable identity response))
+  [_ response]
+  response)
 
 (defmethod render-response "SCAN"
-  [repeatable _ response]
-  (col-adapter repeatable identity response))
+  [_ response]
+  response)
 
 (defmethod render-response "OPTION"
-  [repeatable _ response]
-  (let [fun #(str/join "|" (map (fn [{:strs [text code]}]
-                                  (if code
-                                    (str/join ":" [code text])
-                                    text))
-                                %))]
-   (col-adapter repeatable fun response)))
+  [_ response]
+  (str/join "|" (map (fn [{:strs [text code]}]
+                       (if code
+                         (str/join ":" [code text])
+                         text))
+                     response)))
 
 (defmethod render-response "GEO"
-  [repeatable _ response]
-  (let [fun #(condp = (get-in response ["geometry" "type"])
-    "Point" (let [coords (get-in % ["geometry" "coordinates"])]
+  [_ response]
+  (condp = (get-in response ["geometry" "type"])
+    "Point" (let [coords (get-in response ["geometry" "coordinates"])]
               (str/join "," coords))
-    nil)]
-    (col-adapter repeatable fun response)))
+    nil))
 
 (defmethod render-response "CASCADE"
-  [repeatable _ response]
-  (let [fun #(str/join "|" (map (fn [item]
-                                  (get item "name"))
-                                %))]
-    (col-adapter repeatable fun response)))
+  [_ response]
+  (str/join "|" (map (fn [item]
+                       (get item "name"))
+                     response)))
 
 (defmethod render-response "PHOTO"
-  [repeatable _ response]
-  (col-adapter repeatable #(get % "filename") response))
+  [_ response]
+  (get response "filename"))
 
 (defmethod render-response "VIDEO"
-  [repeatable _ response]
-  (col-adapter repeatable #(get % "filename") response))
+  [_ response]
+  (get response "filename"))
 
 (defmethod render-response "CADDISFLY"
-  [repeatable _ response]
-  (col-adapter repeatable json/generate-string response))
+  [_ response]
+  (json/generate-string response))
+
+(defmethod render-response "RQG"
+  [_ response]
+  response)
 
 (defmethod render-response "GEO-SHAPE-FEATURES"
-  [repeatable _ response]
-  (col-adapter repeatable json/generate-string response))
+  [_ response]
+  (json/generate-string response))
 
 (defmethod render-response :default
-  [repeatable type response]
-  (col-adapter repeatable (constantly nil) response))
+  [type response]
+  nil)
 
 (defn response-data
   [form responses]
@@ -95,7 +91,7 @@
               (if-let [response (get responses id)]
                 (assoc response-data
                        (format "c%s" id)
-                       (render-response (and ns (not= ns "main")) type response))
+                       (map (partial render-response type) response))
                 response-data))
             {}
             questions)))
