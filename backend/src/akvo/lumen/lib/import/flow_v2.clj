@@ -14,7 +14,7 @@
         (into
          [{:title "Latitude" :type "number" :id "latitude"}
           {:title "Longitude" :type "number" :id "longitude"}]
-         (common/coerce flow-common/question-type->lumen-type (flow-common/questions environment form)))))
+         (common/coerce flow-common/question-type->lumen-type (flow-common/questions form)))))
 
 (defmulti render-response
   (fn [type response]
