@@ -125,6 +125,12 @@
     (assoc form
            :registration-form? (= form-id (:registrationFormId survey)))))
 
+(defn adapt [r]
+  (reduce (fn [c [k v]]
+            (assoc c k (mapv last v)))
+          {}
+          (group-by first (reduce into [] (map seq r)))))
+
 ;; Transforms the structure
 ;; {repeated-question-group-id -> [{question-id1:response, question-id2:response }
 ;;                                 {question-id1:response, question-id2:response }]
@@ -161,14 +167,14 @@
 ;; Transforms the structure
 ;; {question-group-id -> [{question-id -> response}]
 ;; to
-;; {question-id -> first-response}
+;; {question-id -> [response-1 response2 response3]}
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
   [environment questions responses]
   (->> responses
        (questions-responses-adapter environment questions)
        vals
-       (map first)
+       (map adapt)
        (apply merge)))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
@@ -183,9 +189,9 @@
    {:title "Surveyal time" :type "number" :id "surveyal_time"}])
 
 (defn common-records [form-instance data-point]
-  {:instance_id   (get form-instance "id")
-   :display_name  (get data-point "displayName")
-   :identifier    (get data-point "identifier")
-   :submitter     (get form-instance "submitter")
-   :submitted_at  (some-> (get form-instance "submissionDate") Instant/parse)
-   :surveyal_time (get form-instance "surveyalTime")})
+  {:instance_id   [(get form-instance "id")]
+   :display_name  [(get data-point "displayName")]
+   :identifier    [(get data-point "identifier")]
+   :submitter     [(get form-instance "submitter")]
+   :submitted_at  [(some-> (get form-instance "submissionDate") Instant/parse)]
+   :surveyal_time [(get form-instance "surveyalTime")]})
