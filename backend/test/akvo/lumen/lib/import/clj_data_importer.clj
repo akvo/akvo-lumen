@@ -10,14 +10,15 @@
   (for [row rows]
     (apply merge
            (map (fn [{:keys [id type]} {:keys [value]}]
-                  {id value})
+                  {id [value]})
                 columns
                 row))))
 
 (defn clj-data-importer [{:keys [columns rows] :as data} headers? guess-types?]
   (reify
     p/DatasetImporter
-    (columns [this] columns)
+    (columns [this]
+      (mapv #(assoc % :ns "main") columns))
     (records [this]
       (data-records data))
     java.io.Closeable
