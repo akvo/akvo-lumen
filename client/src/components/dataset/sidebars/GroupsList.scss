@@ -1,12 +1,15 @@
 .DataTableSidebar.GroupsList {
-  border-right: 1px solid rgba(32, 32, 34, 0.05);
-
-  .SidebarHeader .fa {
+  .SidebarHeader {
+    h3 {
+      font-size: 16px;
+    }
+  
+    .fa {
     display: inline-block;
     padding: 5px 10px;
     background: #e6e6e6;
     border-radius: 5px;
-  }
+  }}
 
   .inputs {
     padding: 0px;
@@ -20,6 +23,10 @@
       &:hover,
       &.active {
         background-color: rgba(32, 32, 34, 0.05);
+      }
+
+      p {
+        font-size: 14px;
       }
 
       .fa {
