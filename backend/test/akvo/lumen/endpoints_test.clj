@@ -410,7 +410,6 @@
                                :hidden false,
                                :multipleType nil,
                                :columnName "c1",
-                               :metadata nil,
                                :groupId nil
                                :groupName nil
                                :direction nil,
@@ -424,7 +423,6 @@
                                :groupName nil
                                :multipleType nil,
                                :columnName "c2",
-                               :metadata nil,
                                :direction nil,
                                :sort nil}]
                     :name title
