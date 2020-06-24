@@ -146,13 +146,12 @@
                               {}
                               {:transaction? false})
             (let [dataset-version  (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
-                  coerce-column-fn (fn [{:keys [metadata title id type key multipleId multipleType groupName groupId] :as column}]
+                  coerce-column-fn (fn [{:keys [title id type key multipleId multipleType groupName groupId] :as column}]
                                      (cond-> {"type" type
                                               "title" title
                                               "columnName" id
                                               "groupName" groupName
                                               "groupId" groupId
-                                              "metadata" metadata
                                               "sort" nil
                                               "direction" nil
                                               "hidden" false}
