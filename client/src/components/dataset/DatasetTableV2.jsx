@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Column, Cell, Table } from 'fixed-data-table-2';
 import moment from 'moment';
@@ -24,29 +24,20 @@ function formatCellValue(type, value) {
   }
 }
 
-function usePrevious(value) {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
-
-
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
+  const isMounted = useRef(false);
   const [width, setWidth] = useState(1024);
   const [height, setHeight] = useState(800);
   const [activeDataTypeContextMenu, setActiveDataTypeContextMenu] = useState(null);
   const [activeColumnContextMenu, setActiveColumnContextMenu] = useState(null);
   const [sidebarProps, setSidebarProps] = useState(null);
-  const prevDatasetGroupsAvailable = usePrevious(props.datasetGroupsAvailable);
 
   const hideSidebar = () => {
     if (sidebarProps) {
       setSidebarProps(null);
       setWidth(width + 300);
-    // TODO review following line!
+      // TODO review following line!
       setHeight(height);
     }
   };
@@ -55,7 +46,6 @@ function DatasetTable(props) {
     /* Manually subtract the sidebar width from the datatable width -
     using refs to measure the new width of the parent container grabs
     old width before the DOM updates */
-
     setSidebarProps(sbProps);
     setWidth(sbProps ? width : width - 300);
     // TODO review following line!
@@ -86,7 +76,6 @@ function DatasetTable(props) {
     handleSidebarProps({
       type: 'groupsList',
       displayRight: false,
-      onClose: hideSidebar,
       groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
       onSelectGroup: (group) => {
         props.handleChangeQuestionGroup(group.id).then(hideSidebar);
@@ -112,12 +101,14 @@ function DatasetTable(props) {
   }, []);
 
   useEffect(() => {
-    const datasetGroupsAvailableChanged =
-      prevDatasetGroupsAvailable !== props.datasetGroupsAvailable;
-    const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
+    if (isMounted.current) {
+      const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
 
-    if (datasetGroupsAvailableChanged && datasetHasQuestionGroups) {
-      handleGroupsSidebar();
+      if (props.datasetGroupsAvailable && datasetHasQuestionGroups) {
+        handleGroupsSidebar();
+      }
+    } else {
+      isMounted.current = true;
     }
   }, [props.datasetGroupsAvailable, props.groups]);
 
@@ -170,7 +161,6 @@ function DatasetTable(props) {
     handleSidebarProps({
       type: 'transformationLog',
       displayRight: true,
-      onClose: hideSidebar,
       onUndo: props.onUndoTransformation,
       columns: props.columns,
     });
@@ -183,7 +173,7 @@ function DatasetTable(props) {
         column,
         dataTypeOptions,
         newColumnType,
-        onClose: hideSidebar,
+
         onApply: (transformation) => {
           hideSidebar();
           props.onTransform(transformation);
@@ -199,7 +189,6 @@ function DatasetTable(props) {
         showSidebar({
           type: 'filter',
           column,
-          onClose: () => hideSidebar(),
           onApply: (transformation) => {
             hideSidebar();
             props.onTransform(transformation);
@@ -210,7 +199,6 @@ function DatasetTable(props) {
         showSidebar({
           type: 'renameColumn',
           column,
-          onClose: () => hideSidebar(),
           onApply: (transformation) => {
             hideSidebar();
             props.onTransform(transformation);
@@ -237,7 +225,6 @@ function DatasetTable(props) {
       handleSidebarProps({
         type: 'combineColumns',
         displayRight: false,
-        onClose: hideSidebar,
         onApply: (transformation) => {
           props.onTransform(transformation).then(() => {
             hideSidebar();
@@ -249,7 +236,6 @@ function DatasetTable(props) {
       handleSidebarProps({
         type: 'extractMultiple',
         displayRight: false,
-        onClose: hideSidebar,
         onApply: (transformation) => {
           props.onTransform(transformation).then(() => {
             hideSidebar();
@@ -261,7 +247,6 @@ function DatasetTable(props) {
       handleSidebarProps({
         type: 'splitColumn',
         displayRight: false,
-        onClose: hideSidebar,
         onApply: (transformation) => {
           props.onTransform(transformation).then(() => {
             hideSidebar();
@@ -273,7 +258,6 @@ function DatasetTable(props) {
       handleSidebarProps({
         type: 'deriveColumnJavascript',
         displayRight: false,
-        onClose: hideSidebar,
         onApply: (transformation) => {
           props
             .onTransform(transformation)
@@ -293,7 +277,6 @@ function DatasetTable(props) {
       handleSidebarProps({
         type: 'generateGeopoints',
         displayRight: false,
-        onClose: hideSidebar,
         onApply: (transformation) => {
           props.onTransform(transformation).then(() => {
             hideSidebar();
@@ -418,6 +401,7 @@ function DatasetTable(props) {
               {sidebarProps && (
                 <DataTableSidebar
                   {...sidebarProps}
+                  onClose={hideSidebar}
                   selectedGroup={
                     props.group ? props.group.get('groupId') : 'metadata'
                   }
@@ -466,7 +450,7 @@ function DatasetTable(props) {
                     onContextMenuItemSelected={handleColumnContextMenuClicked}
                     onWindowClick={() => setActiveDataTypeContextMenu(null)}
                     left={
-                      prop.columns.last().get('title') ===
+                      props.columns.last().get('title') ===
                       activeColumnContextMenu.column.get('title')
                     }
                   />
