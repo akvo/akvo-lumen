@@ -13,7 +13,6 @@
                             :hidden false,
                             :multipleType nil,
                             :columnName "c1",
-                            :metadata nil,
                             :groupId nil
                             :groupName nil
                             :direction nil,
@@ -27,7 +26,6 @@
                             :groupId nil
                             :groupName nil
                             :columnName "c2",
-                            :metadata nil,
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -39,7 +37,6 @@
                             :groupId nil
                             :groupName nil
                             :columnName "c3",
-                            :metadata nil,
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -51,7 +48,6 @@
                             :groupName nil
                             :multipleType nil,
                             :columnName "c4",
-                            :metadata nil,
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -61,7 +57,6 @@
                             :hidden false,
                             :multipleType nil,
                             :columnName "c5",
-                            :metadata nil,
                             :groupId nil
                             :groupName nil
                             :direction nil,
@@ -75,7 +70,6 @@
                             :groupName nil
                             :multipleType nil,
                             :columnName "c6",
-                            :metadata nil,
                             :direction nil,
                             :sort nil}])
 

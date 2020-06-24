@@ -37,14 +37,13 @@
                                :table-name table-name
                                :imported-table-name imported-table-name
                                :version 1
-                               :columns (mapv (fn [{:keys [metadata title id type key multipleType multipleId groupName groupId]}]
+                               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId]}]
                                                 {:columnName id
                                                  :direction nil
                                                  :hidden false
                                                  :key (boolean key)
                                                  :multipleId multipleId
                                                  :multipleType multipleType
-                                                 :metadata metadata
                                                  :groupName groupName
                                                  :groupId groupId
                                                  :sort nil
