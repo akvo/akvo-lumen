@@ -77,43 +77,16 @@
     "GEOSHAPE" "geoshape"
     "GEO-SHAPE-FEATURES" "multiple"
     "CADDISFLY" "multiple"
-    "RQG" "rqg"
     "text"))
 
-(defn questions-with-rqg-in-one-column
+(defn questions
   "Get the list of questions from a form"
   [form]
   (->> (:questionGroups form)
        (reduce #(into % (map (fn [q* [group-id group-name repeatable]]
-                               (assoc q*
-                                      :groupId group-id
-                                      :groupName group-name
-                                      :repeatable repeatable))
-                             (if (:repeatable %2)
-                               (let [base-question (first (:questions %2))
-                                     rqg (-> base-question
-                                             (assoc :id (:id %2))
-                                             (assoc :name (:name %2) )
-                                             (assoc :metadata {:columns (common/coerce question-type->lumen-type (:questions %2))})
-                                             (assoc :type "RQG"))]
-                                 [rqg])
-                               (:questions %2))
-                             (repeat [(:id %2)
-                                      (str/trim (:name %2))
-                                      (:repeatable %2)]))) [])))
-
-(defn questions-current-implementation [form]
-  (->> (:questionGroups form)
-       (reduce #(into % (map (fn [q* [group-id group-name]]
-                               (assoc q* :groupId group-id :groupName group-name))
-                             (:questions %2) (repeat [(:id %2) (str/trim (:name %2))]))) [])))
-
-(defn questions
-  "Get the list of questions from a form"
-  [environment form]
-  (if (get environment "rqg")
-    (questions-with-rqg-in-one-column form)
-    (questions-current-implementation form)))
+                               (let [ns (if repeatable group-id "main")]
+                                 (assoc q* :groupId group-id :groupName group-name :ns ns)))
+                             (:questions %2) (repeat [(:id %2) (str/trim (:name %2)) (:repeatable %2)]))) [])))
 
 (defn form
   "Get a form by id from a survey"
@@ -126,47 +99,13 @@
            :registration-form? (= form-id (:registrationFormId survey)))))
 
 ;; Transforms the structure
-;; {repeated-question-group-id -> [{question-id1:response, question-id2:response }
-;;                                 {question-id1:response, question-id2:response }]
-;; to
-;; {repeated-question-group-id -> [repeated-question-group-id {
-;;                                     [{question-title1:response, question-title2:response }
-;;                                      {question-title1:response, question-title2:response }]}]
-(defn questions-responses-with-rqg-in-one-column
-  [questions responses]
-  (let [question-title-by-id (fn [q-id rqg-metadata]
-                               (->> rqg-metadata
-                                    (filter #(= (str "c" q-id) (:id %)) )
-                                    first
-                                    :title))
-        ids-to-adapt (set/intersection
-                      (set (map :id (filter :repeatable questions)))
-                      (set (keys responses)))]
-    (reduce
-     (fn [c id]
-       (let [rqg (first (filter #(= id (:id %)) questions))
-             repeated-questions (mapv
-                                 #(reduce (fn [x [k v]]
-                                            (assoc x (question-title-by-id k (-> rqg :metadata :columns)) v)) {} %)
-                                     (get c id))]
-         (assoc c id [{id repeated-questions}])))
-     responses
-     ids-to-adapt)))
-
-(defn- questions-responses-adapter [environment questions responses]
-  (if (get environment "rqg")
-    (questions-responses-with-rqg-in-one-column questions responses)
-    responses))
-
-;; Transforms the structure
 ;; {question-group-id -> [{question-id -> response}]
 ;; to
 ;; {question-id -> first-response}
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
-  [environment questions responses]
+  [questions responses]
   (->> responses
-       (questions-responses-adapter environment questions)
        vals
        (map first)
        (apply merge)))
