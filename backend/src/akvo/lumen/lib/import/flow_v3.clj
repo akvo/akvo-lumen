@@ -65,11 +65,11 @@
         (log/warn :unmapped-geoshape! geom-type)))))
 
 (defn render-response
-  [repeatable type response]
+  [type response]
   (condp = type
-    "GEO" (if repeatable (map extract-geo response) (extract-geo response))
-    "GEOSHAPE" (if repeatable (map extract-geoshape response) (extract-geoshape response))
-    (v2/render-response repeatable type response)))
+    "GEO" (map extract-geo response)
+    "GEOSHAPE" (map extract-geoshape response)
+    (map (partial v2/render-response type) response)))
 
 (defn response-data
   [form responses]
@@ -79,7 +79,7 @@
               (if-let [response ((or derived-fn identity) (get responses (or derived-id id)))]
                 (assoc response-data
                        (format "c%s" id)
-                       (render-response (and ns (not= ns "main")) type response))
+                       (render-response type response))
                 response-data))
             {}
             questions)))
@@ -96,7 +96,7 @@
              (if-let [data-point (get data-points data-point-id)]
                (merge (response-data form (get form-instance "responses"))
                       (flow-common/common-records form-instance data-point)
-                      {:device_id (get form-instance "deviceIdentifier")})
+                      {:device_id [(get form-instance "deviceIdentifier")]})
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
                                {:form-instance-id (get form-instance "id")
                                 :data-point-id data-point-id

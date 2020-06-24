@@ -10,7 +10,7 @@
   (for [row rows]
     (apply merge
            (map (fn [{:keys [id type]} {:keys [value]}]
-                  {id value})
+                  {id [value]})
                 columns
                 row))))
 
