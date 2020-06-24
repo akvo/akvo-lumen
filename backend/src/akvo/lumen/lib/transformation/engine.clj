@@ -1,6 +1,5 @@
 (ns akvo.lumen.lib.transformation.engine
-  (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.util :as util]
+  (:require [akvo.lumen.util :as util]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [clojure.set :as set]
@@ -166,8 +165,7 @@
                                                                                                   columns))))
                                     :columns (w/keywordize-keys columns)}]
           (db.dataset-version/new-dataset-version tenant-conn next-dataset-version)
-          (db.transformation/touch-dataset tenant-conn {:id dataset-id})
-          (lib/created next-dataset-version))))))
+          (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
 
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
@@ -202,8 +200,7 @@
             (db.dataset-version/new-dataset-version tenant-conn
                                  next-dataset-version)
             (db.transformation/touch-dataset tenant-conn {:id dataset-id})
-            (db.transformation/drop-table tenant-conn {:table-name previous-table-name})
-            (lib/created next-dataset-version)))
+            (db.transformation/drop-table tenant-conn {:table-name previous-table-name})))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [success? message columns execution-log] :as transformation-result}
               (try-apply-operation deps table-name columns transformation)]
@@ -218,10 +215,8 @@
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
   (let [current-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
-                                                                      {:dataset-id dataset-id})
-        current-version (:version current-dataset-version)]
-    (if (= current-version 1)
-      (lib/created (assoc current-dataset-version :dataset-id dataset-id))
+                                                                      {:dataset-id dataset-id})]
+    (when (not= (:version current-dataset-version) 1)
       (apply-undo deps
                   dataset-id
                   job-execution-id
