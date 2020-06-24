@@ -77,9 +77,6 @@ function DatasetTable(props) {
       type: 'groupsList',
       displayRight: false,
       groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
-      onSelectGroup: (group) => {
-        props.handleChangeQuestionGroup(group.id).then(hideSidebar);
-      },
     });
   };
 
@@ -402,6 +399,9 @@ function DatasetTable(props) {
                 <DataTableSidebar
                   {...sidebarProps}
                   onClose={hideSidebar}
+                  onSelectGroup={group =>
+                    props.handleChangeQuestionGroup(group.id).then(hideSidebar)}
+
                   selectedGroup={
                     props.group ? props.group.get('groupId') : 'metadata'
                   }
