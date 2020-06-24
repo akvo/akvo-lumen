@@ -23,7 +23,7 @@
         display: flex;
 
         &.noSidebar {
-            width: 100%;
+            width: calc(100% - 50px);
         }
 
         &.hasSidebar {

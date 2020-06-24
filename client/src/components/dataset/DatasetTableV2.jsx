@@ -24,19 +24,6 @@ function formatCellValue(type, value) {
   }
 }
 
-function useRefState(defaultValue) {
-  const [state, changeState] = useState(defaultValue);
-  const ref = useRef(state);
-
-
-  const setState = (newState) => {
-    ref.current = newState;
-    changeState(newState);
-  };
-
-  return [ref.current, setState];
-}
-
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
   const isMounted = useRef(false);
@@ -60,7 +47,7 @@ function DatasetTable(props) {
     using refs to measure the new width of the parent container grabs
     old width before the DOM updates */
     setSidebarProps(sbProps);
-    setWidth(sbProps ? width : width - 300);
+    setWidth(width - 300);
     // TODO review following line!
     setHeight(height);
   }
