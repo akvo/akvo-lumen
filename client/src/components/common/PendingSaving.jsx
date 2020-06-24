@@ -31,6 +31,7 @@ export default function usePendingSaving(handleSave) {
   };
 
   const onBeginEdit = () => setIsUnsavedChanges(true);
+  const onStopEdit = () => setIsUnsavedChanges(false);
 
   const onHandleSave = () => {
     handleSave();
@@ -60,5 +61,12 @@ export default function usePendingSaving(handleSave) {
     }
   }, [savingFailed]);
 
-  return { savingFailed, isUnsavedChanges, timeToNextSave, onBeginEdit, onHandleSave };
+  return {
+    savingFailed,
+    isUnsavedChanges,
+    timeToNextSave,
+    onBeginEdit,
+    onStopEdit,
+    onHandleSave,
+  };
 }

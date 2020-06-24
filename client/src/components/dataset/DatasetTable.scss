@@ -23,7 +23,7 @@
         display: flex;
 
         &.noSidebar {
-            width: 100%;
+            width: calc(100% - 50px);
         }
 
         &.hasSidebar {
@@ -34,6 +34,10 @@
             max-width: 200px;
             white-space: nowrap;
             overflow: hidden;
+        }
+
+        .public_fixedDataTable_header .public_fixedDataTableCell_main {
+            background-image:  #efefef;
         }
     }
 
