@@ -43,10 +43,12 @@ function SelectMenu(props) {
       ...styles,
       fontSize: '1em',
       fontWeight: 'normal',
+      textTransform: 'capitalize',
     }),
 
     groupHeading: styles => ({
       ...styles,
+      textTransform: 'capitalize',
       backgroundColor: '#E6E9ED',
       fontSize: '1em',
       padding: '10px',
