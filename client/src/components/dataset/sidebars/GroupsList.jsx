@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, FormattedMessage, intlShape } from 'react-intl';
+import { MdRepeat } from 'react-icons/md';
 import SidebarHeader from './SidebarHeader';
 
 require('./GroupsList.scss');
@@ -24,6 +25,7 @@ function GroupsList(props) {
           return (
             <div onClick={() => onSelectGroup(group)} key={id} className={className}>
               <p>{group.name}</p>
+              {group.isRqg && <MdRepeat className="icon" />}
             </div>
           );
         })}

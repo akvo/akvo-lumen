@@ -43,13 +43,16 @@ function DatasetTable(props) {
   };
 
   function showSidebar(sbProps) {
+    if (sidebarProps === null) {
+      setWidth(width - 300);
+      // TODO review following line!
+      setHeight(height);
+    }
+
     /* Manually subtract the sidebar width from the datatable width -
     using refs to measure the new width of the parent container grabs
     old width before the DOM updates */
     setSidebarProps(sbProps);
-    setWidth(width - 300);
-    // TODO review following line!
-    setHeight(height);
   }
 
   const handleResize = () => {
@@ -400,7 +403,7 @@ function DatasetTable(props) {
                   {...sidebarProps}
                   onClose={hideSidebar}
                   onSelectGroup={group =>
-                    props.handleChangeQuestionGroup(group.id).then(hideSidebar)}
+                    props.handleChangeQuestionGroup(group.id)}
                   selectedGroup={
                     props.group ? props.group.get('groupId') : 'metadata'
                   }
