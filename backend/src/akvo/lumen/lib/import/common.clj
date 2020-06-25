@@ -48,3 +48,9 @@
                 {:multipleType (:multipleType q)
                  :multipleId (:multipleId q)})))))
        questions))
+
+(defn extract-question-response
+  "based on position"
+  [r idx]
+  (reduce (fn [c [k v]]
+            (assoc c k (nth v idx))) {} (seq r)))
