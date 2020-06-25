@@ -48,3 +48,17 @@
                 {:multipleType (:multipleType q)
                  :multipleId (:multipleId q)})))))
        questions))
+
+(defn extract-question-response
+  "`record` is a map with collection values
+  e.g: {:a [\"1\" \"2\"] :b [\"3\" \"4\"]}
+  depending on idx return same map structure but with one value per key
+  e.g: using idx=0: {:a \"1\" :b \"3\"}"
+  [record idx]
+  (reduce (fn [c [k v]] (assoc c k (nth v idx))) {} (seq record)))
+
+
+(defn responses-count
+  "e.g: `record` {:a [\"1\" \"2\"] :b [\"3\" \"4\"]} will return 2"
+  [record]
+  (count (first (vals record))))
