@@ -30,15 +30,16 @@ export const getDatasetGroups = (groups, datasetGroupsAvailable) => {
   groupNames = withoutMetadata
     .reduce((acc, curr) => {
       const column = groups.toJS()[curr][0];
+      const isRqg = groups.toJS()[curr].some(col => col.type === 'rqg');
 
       if (column) {
-        acc.push({ id: column.groupId, name: column.groupName });
+        acc.push({ id: column.groupId, name: column.groupName, isRqg });
       }
 
       return acc;
     }, []);
 
-  groupNames.unshift({ id: 'metadata', name: 'metadata' });
+  groupNames.unshift({ id: 'metadata', name: 'metadata', isRqg: false });
 
   return groupNames;
 };
