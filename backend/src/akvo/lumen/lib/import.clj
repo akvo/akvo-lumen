@@ -72,7 +72,7 @@
           (let [columns (p/columns importer)]
             (postgres/create-dataset-table conn table-name columns)
             (doseq [record (take common/rows-limit (p/records importer))]
-              (doseq [i (range (count (last (first record))))]
+              (doseq [i (range (common/responses-count record))]
                   (jdbc/insert! conn table-name (postgres/coerce-to-sql (common/extract-question-response record i)))))
             (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
                                                                                             :spec-description (get spec "description" "")} claims)))

@@ -140,7 +140,7 @@
                 imported-table-name (util/gen-table-name "imported")]
             (postgres/create-dataset-table conn table-name importer-columns)
             (doseq [record (p/records importer)]
-              (doseq [i (range (count (last (first record))))]
+              (doseq [i (range (import/responses-count record))]
                (jdbc/insert! conn table-name (postgres/coerce-to-sql (import/extract-question-response record i)))))
             (db.job-execution/clone-data-table conn {:from-table table-name
                                     :to-table   imported-table-name}

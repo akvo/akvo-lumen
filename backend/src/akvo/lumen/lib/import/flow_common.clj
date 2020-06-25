@@ -98,14 +98,13 @@
     (assoc form
            :registration-form? (= form-id (:registrationFormId survey)))))
 
-(defn adapt [r]
-  (reduce (fn [c [k v]]
-            (assoc c k [(first (mapv last v))])
-            ;; TODO: use this impl when we could process all responses
-            ;; (assoc c k (mapv last v))
-            )
-          {}
-          (group-by first (reduce into [] (map seq r)))))
+(defn- adapt-response-values [response]
+  (->> (group-by first (reduce into [] (map seq response)))
+       (reduce (fn [c [k v]]
+             (assoc c k [(first (mapv last v))])
+             ;; TODO: use this impl when we could process all responses
+             ;; (assoc c k (mapv last v))
+             ) {})))
 
 ;; Transforms the structure
 ;; {question-group-id -> [{question-id -> response}]
@@ -116,7 +115,7 @@
   [questions responses]
   (->> responses
        vals
-       (map adapt)
+       (map adapt-response-values)
        (apply merge)))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
