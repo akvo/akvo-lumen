@@ -60,13 +60,6 @@
                                      :reason [reason]})
   (db.transformation/drop-table conn {:table-name table-name}))
 
-
-(defn take-pos [r idx]
-  (reduce (fn [c [k v]]
-            (assoc c k (nth v idx))
-            ) {} (seq r)))
-
-
 (defn- execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
@@ -80,7 +73,7 @@
             (postgres/create-dataset-table conn table-name columns)
             (doseq [record (take common/rows-limit (p/records importer))]
               (doseq [i (range (count (last (first record))))]
-                  (jdbc/insert! conn table-name (postgres/coerce-to-sql (take-pos record i)))))
+                  (jdbc/insert! conn table-name (postgres/coerce-to-sql (common/extract-question-response record i)))))
             (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
                                                                                             :spec-description (get spec "description" "")} claims)))
         (catch Throwable e
