@@ -41,7 +41,8 @@
 
 (s/def ::column-header (s/keys :req-un [::v/title]
                                :opt-un [::v/id
-                                        ::v/metadata]))
+                                        ::v/groupId
+                                        ::v/groupName]))
 
 (s/def ::c.text/header* (s/keys :req-un [::c.text/type] :opt-un [::v/key]))
 (s/def ::c.text/header (s/merge ::column-header ::c.text/header*))
