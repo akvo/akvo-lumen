@@ -100,7 +100,10 @@
 
 (defn adapt [r]
   (reduce (fn [c [k v]]
-            (assoc c k (mapv last v)))
+            (assoc c k [(first (mapv last v))])
+            ;; TODO: use this impl when we could process all responses
+            ;; (assoc c k (mapv last v))
+            )
           {}
           (group-by first (reduce into [] (map seq r)))))
 
