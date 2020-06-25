@@ -71,8 +71,9 @@
                                                       (assoc import-config :environment (env/all conn)))]
           (let [columns (p/columns importer)]
             (postgres/create-dataset-table conn table-name columns)
-            (doseq [record (map postgres/coerce-to-sql (take common/rows-limit (p/records importer)))]
-              (jdbc/insert! conn table-name record))
+            (doseq [record (take common/rows-limit (p/records importer))]
+              (doseq [i (range (count (last (first record))))]
+                  (jdbc/insert! conn table-name (postgres/coerce-to-sql (common/extract-question-response record i)))))
             (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
                                                                                             :spec-description (get spec "description" "")} claims)))
         (catch Throwable e
