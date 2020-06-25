@@ -17,7 +17,8 @@
 (defn clj-data-importer [{:keys [columns rows] :as data} headers? guess-types?]
   (reify
     p/DatasetImporter
-    (columns [this] columns)
+    (columns [this]
+      (mapv #(assoc % :ns "main") columns))
     (records [this]
       (data-records data))
     java.io.Closeable

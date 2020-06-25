@@ -18,7 +18,6 @@
                                              (assoc :type "GEO-SHAPE-FEATURES")
                                              (assoc :multipleType "geo-shape-features")
                                              (assoc :multipleId (:id i))
-                                             (assoc :ns (:ns i))
                                              (assoc :derived-id (:id i))
                                              (assoc :derived-fn (fn [x] (-> x (w/keywordize-keys) :features first :properties)))
                                              (update :name (fn [o] (str o " Features" )))
@@ -26,12 +25,12 @@
        (conj c i))) [] (flow-common/questions form)))
 
 (defn dataset-columns
-  "returns a vector of [{:title :type :id :key}]
+  "returns a vector of [{:title :type :id :key :groupName :groupId}]
   `:key` is optional"
   [form]
   (let [questions (flow-questions form)]
     (into (flow-common/commons-columns form)
-          (into [{:title "Device Id" :type "text" :id "device_id"}]
+          (into [{:title "Device Id" :type "text" :id "device_id" :groupName "metadata" :groupId "metadata"}]
                 (common/coerce flow-common/question-type->lumen-type questions)))))
 
 (defn render-response

@@ -56,6 +56,8 @@
   (mapv (fn [idx title type]
           {:id (str "c" (inc idx))
            :title title
+           :groupId "main"
+           :groupName "main"
            :type type})
         (range)
         column-titles

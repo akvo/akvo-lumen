@@ -37,11 +37,13 @@
                      string?
                      #(s/gen #{"c1" "c2" "c3"})))
 
-(s/def ::metadata (s/nilable map?))
-
 (s/def ::title (s/with-gen
                         string?
                         #(s/gen #{"Column 1" "Column 2" "Column 3"})))
+
+(s/def ::groupId string?)
+
+(s/def ::groupName string?)
 
 (s/def ::key boolean?)
 
