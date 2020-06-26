@@ -65,5 +65,5 @@
           {:success?      true
            :execution-log [(format "Extract caddisfly column %s" (:columnName selected-column))]
            :columns       (into current-columns (vec (map #(assoc %
-                                                                  "groupName" "transformations"
-                                                                  "groupId" "transformations") new-columns)))})))))
+                                                                  "groupName" "main"
+                                                                  "groupId" "main") new-columns)))})))))

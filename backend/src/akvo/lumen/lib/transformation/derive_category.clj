@@ -84,8 +84,8 @@
                                          "type"       "text"
                                          "sort"       nil
                                          "hidden"     false
-                                         "groupName" "transformations"
-                                         "groupId" "transformations"
+                                         "groupName" "main"
+                                         "groupId" "main"
                                          "direction"  nil
                                          "columnName" new-column-name})})))))
 

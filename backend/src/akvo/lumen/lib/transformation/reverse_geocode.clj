@@ -49,8 +49,8 @@
                          "sort" nil
                          "hidden" false
                          "direction" nil
-                         "groupName" "transformations"
-                         "groupId" "transformations"
+                         "groupName" "main"
+                         "groupId" "main"
                          "columnName" column-name})}))))
 
 (defmethod engine/columns-used "core/reverse-geocode"

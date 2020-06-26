@@ -149,8 +149,8 @@
         target-merge-columns (->> (get-target-merge-columns source-merge-columns
                                                             column-names-translation)
                                   (map #(assoc %
-                                               "groupName" "transformations"
-                                               "groupId" "transformations")))
+                                               "groupName" "main"
+                                               "groupId" "main")))
         data (fetch-data conn
                          source-table-name
                          target-merge-columns

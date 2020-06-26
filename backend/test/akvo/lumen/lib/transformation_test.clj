@@ -700,8 +700,8 @@
                               :type       "text",
                               :title      new-column-name
                               :hidden     false,
-                              :groupId "transformations"
-                              :groupName "transformations"
+                              :groupId "main"
+                              :groupName "main"
                               :direction  nil,
                               :columnName "d1"}
         mappings*            [[[">=" 0] ["<=" 1] "one"]
@@ -745,8 +745,8 @@
                               :type       "text"
                               :title      new-column-name
                               :hidden     false
-                              :groupId "transformations"
-                              :groupName "transformations"
+                              :groupId "main"
+                              :groupName "main"
                               :direction  nil
                               :columnName "d1"}
         mappings*            [[["v2" "v3"] "mapped-1"]
