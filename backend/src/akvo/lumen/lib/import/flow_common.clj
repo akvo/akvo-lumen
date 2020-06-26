@@ -98,13 +98,23 @@
     (assoc form
            :registration-form? (= form-id (:registrationFormId survey)))))
 
-(defn- adapt-response-values [response]
+(defn adapt-response-values
+  "`extract-multiple-responses?` in RQG we can have multiple responses"
+  [extract-multiple-responses? response]
   (->> (group-by first (reduce into [] (map seq response)))
        (reduce (fn [c [k v]]
-             (assoc c k [(first (mapv last v))])
-             ;; TODO: use this impl when we could process all responses
-             ;; (assoc c k (mapv last v))
-             ) {})))
+                 (if extract-multiple-responses?
+                   (assoc c k (mapv last v))
+                   (assoc c k (take 1 (mapv last v))))) {})))
+
+(defn ensure-response-value
+  "all questions should exist in every response, by default if no value we use a nil-value"
+  [questions responses nil-value]
+  (reduce-kv
+   (fn [c k v]
+     (let [questionIds (reduce #(assoc % %2 nil-value) {} (map :id (filter #(= k (:groupId %)) questions)))]
+       (assoc c k (map (partial merge questionIds) v)))
+     ) {} responses))
 
 ;; Transforms the structure
 ;; {question-group-id -> [{question-id -> response}]
@@ -113,9 +123,9 @@
 (defn question-responses
   "Returns a map from question-id to the first response iteration"
   [questions responses]
-  (->> responses
+  (->> (ensure-response-value questions responses ::missing)
        vals
-       (map adapt-response-values)
+       (map (partial adapt-response-values false))
        (apply merge)))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
