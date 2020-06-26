@@ -41,6 +41,8 @@
                                  "sort" nil
                                  "hidden" false
                                  "direction" nil
+                                 "groupName" "main"
+                                 "groupId" "main"
                                  "columnName" new-column-name})}))))
 
 (defmethod engine/columns-used "core/combine"

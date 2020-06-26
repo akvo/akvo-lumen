@@ -697,11 +697,13 @@
         new-column-name      "Derived column name"
         uncategorized-value  "Uncategorised value"
         new-derived-column   {:sort       nil,
-	                      :type       "text",
-	                      :title      new-column-name
-	                      :hidden     false,
-	                      :direction  nil,
-	                      :columnName "d1"}
+                              :type       "text",
+                              :title      new-column-name
+                              :hidden     false,
+                              :groupId "main"
+                              :groupName "main"
+                              :direction  nil,
+                              :columnName "d1"}
         mappings*            [[[">=" 0] ["<=" 1] "one"]
                               [["=" 2] nil "two"]]
         tx                   (gen-transformation "core/derive-category"
@@ -739,12 +741,14 @@
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
         new-column-name      "Derived column name"
         uncategorized-value  "Uncategorised value"
-        new-derived-column   {:sort       nil,
-	                      :type       "text",
-	                      :title      new-column-name
-	                      :hidden     false,
-	                      :direction  nil,
-	                      :columnName "d1"}
+        new-derived-column   {:sort       nil
+                              :type       "text"
+                              :title      new-column-name
+                              :hidden     false
+                              :groupId "main"
+                              :groupName "main"
+                              :direction  nil
+                              :columnName "d1"}
         mappings*            [[["v2" "v3"] "mapped-1"]
                               [["v4"] "mapped-2"]]
         tx                   (gen-transformation "core/derive-category"

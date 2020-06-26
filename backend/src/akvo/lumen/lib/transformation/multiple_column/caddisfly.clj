@@ -76,4 +76,6 @@
          (log/debug :db-txs selected-column add-db-columns update-db-columns)
          {:success?      true
           :execution-log [(format "Extract caddisfly column %s" (:columnName selected-column))]
-          :columns       (into current-columns (vec new-columns))})))))
+          :columns       (into current-columns (vec (map #(assoc %
+                                                                 "groupName" "main"
+                                                                 "groupId" "main") new-columns)))})))))

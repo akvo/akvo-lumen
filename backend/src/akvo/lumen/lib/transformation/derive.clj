@@ -193,6 +193,8 @@
                                            "type"       column-type
                                            "sort"       nil
                                            "hidden"     false
+                                           "groupName" "main"
+                                           "groupId" "main"
                                            "direction"  nil
                                            "columnName" new-column-name})})))))
 

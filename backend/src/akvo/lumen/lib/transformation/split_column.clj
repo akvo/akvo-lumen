@@ -105,7 +105,9 @@
                                    (update-row tenant-conn table-name (:rnum row))))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
-           :columns       (into columns (walk/stringify-keys (vec new-columns)))})
+           :columns       (into columns (walk/stringify-keys (vec (map #(assoc %
+                                                                               "groupName" "main"
+                                                                               "groupId" "main") new-columns))))})
         {:success? false
          :message  (format "No results trying to split column '%s' with pattern '%s'"
                            (:title (selected-column args)) (pattern* args))}))))
