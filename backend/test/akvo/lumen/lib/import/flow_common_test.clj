@@ -2,48 +2,40 @@
   (:require [akvo.lumen.lib.import.flow-common :as flow-common]
             [clojure.test :refer :all]))
 
-(def form-submission {:surveyalTime 88,
-                      :dataPointId "598359137",
-                      :deviceIdentifier "s7",
-                      :displayName "Ivan",
-                      :createdAt "2020-06-25T13:28:51.099Z",
-                      :formId "633209136",
-                      :submissionDate "2020-06-25T13:28:45Z",
-                      :id "602269126",
-                      :responses
-                      {:619429141
-                       [{:600019131 "Ivan",
-                         :619419129 41,
-                         :629229127
-                         [{:name "France"}
-                          {:name "Île-de-France"}
-                          {:name "Paris"}
-                          {:name "Paris, 16e arrondissement"}
-                          {:name "Paris, 16e arrondissement"}
-                          {:name "Paris, 16e arrondissement"}]}
-                        {:619419129 3}
-                        {:600019131 "Foo", :619419129 15}
-                        {:629229127
-                         [{:name "France"}
-                          {:name "Île-de-France"}
-                          {:name "Paris"}
-                          {:name "Paris, 18e arrondissement"}
-                          {:name "Paris, 18e arrondissement"}
-                          {:name "Paris, 18e arrondissement"}]}]},
-                      :identifier "fkrw-tcaf-8mt0",
-                      :modifiedAt "2020-06-25T13:28:54.697Z",
-                      :submitter "iperdomo"})
-
-
-(let [data (-> form-submission :responses vals)
-      responses-count (count (first data))]
-
-  
-  )
-
 (deftest take-pos-test
   (testing "extract responses count"
-    (let [vals-responses (-> form-submission :responses vals)]
+    (let [form-submission {:surveyalTime 88,
+                           :dataPointId "598359137",
+                           :deviceIdentifier "s7",
+                           :displayName "Ivan",
+                           :createdAt "2020-06-25T13:28:51.099Z",
+                           :formId "633209136",
+                           :submissionDate "2020-06-25T13:28:45Z",
+                           :id "602269126",
+                           :responses
+                           {:619429141
+                            [{:600019131 "Ivan",
+                              :619419129 41,
+                              :629229127
+                              [{:name "France"}
+                               {:name "Île-de-France"}
+                               {:name "Paris"}
+                               {:name "Paris, 16e arrondissement"}
+                               {:name "Paris, 16e arrondissement"}
+                               {:name "Paris, 16e arrondissement"}]}
+                             {:619419129 3}
+                             {:600019131 "Foo", :619419129 15}
+                             {:629229127
+                              [{:name "France"}
+                               {:name "Île-de-France"}
+                               {:name "Paris"}
+                               {:name "Paris, 18e arrondissement"}
+                               {:name "Paris, 18e arrondissement"}
+                               {:name "Paris, 18e arrondissement"}]}]},
+                           :identifier "fkrw-tcaf-8mt0",
+                           :modifiedAt "2020-06-25T13:28:54.697Z",
+                           :submitter "iperdomo"}
+          vals-responses (-> form-submission :responses vals)]
       (is (= (flow-common/adapt-response-values false (first vals-responses))
              {:600019131 ["Ivan"],          
               :619419129 [41],
