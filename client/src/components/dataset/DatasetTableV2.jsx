@@ -4,6 +4,7 @@ import { Column, Cell, Table } from 'fixed-data-table-2';
 import moment from 'moment';
 import { withRouter } from 'react-router';
 import { injectIntl, intlShape } from 'react-intl';
+import Immutable from 'immutable';
 import ColumnHeader from './ColumnHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { getDatasetGroups } from '../../utilities/dataset';
@@ -157,13 +158,15 @@ function DatasetTable(props) {
     }
   };
 
-  const handleToggleTransformationLog = () =>
+  const handleToggleTransformationLog = () => {
     handleSidebarProps({
       type: 'transformationLog',
       displayRight: true,
       onUndo: props.onUndoTransformation,
-      columns: props.columns,
+      columns: Immutable.fromJS(props.groups.reduce((total, group) => total.concat(...group), [])),
     });
+  };
+
 
   const handleDataTypeContextMenuClicked = ({ column, dataTypeOptions, newColumnType }) => {
     setActiveDataTypeContextMenu(null);
