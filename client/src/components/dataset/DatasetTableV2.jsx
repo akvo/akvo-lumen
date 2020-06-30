@@ -224,6 +224,10 @@ function DatasetTable(props) {
 
   // eslint-disable-next-line consistent-return
   const handleClickDatasetControlItem = (menuItem) => {
+    const columns = Immutable.fromJS(props.groups.reduce(
+      (total, group) => total.concat(...group), []
+    ));
+
     if (menuItem === 'combineColumns') {
       handleSidebarProps({
         type: 'combineColumns',
@@ -244,7 +248,7 @@ function DatasetTable(props) {
             hideSidebar();
           });
         },
-        columns: props.columns,
+        columns,
       });
     } else if (menuItem === 'splitColumn') {
       handleSidebarProps({
@@ -255,7 +259,7 @@ function DatasetTable(props) {
             hideSidebar();
           });
         },
-        columns: props.columns,
+        columns,
       });
     } else if (menuItem === 'deriveColumnJavascript') {
       handleSidebarProps({
@@ -272,7 +276,7 @@ function DatasetTable(props) {
               console.log(error);
             });
         },
-        columns: props.columns,
+        columns,
       });
     } else if (menuItem === 'deriveColumnCategory') {
       props.history.push(`${props.location.pathname}/transformation/derive-category`);
