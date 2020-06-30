@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { FormattedMessage } from 'react-intl';
+import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 
 require('./ColumnHeader.scss');
 
@@ -107,6 +108,12 @@ export default class ColumnHeader extends Component {
           }
           {column.get('title')}
         </span>
+
+        {this.props.columnMenuActive ? (
+          <MdExpandLess className="icon" />
+        ) : (
+          <MdExpandMore className="icon" />
+        )}
       </div>
     );
   }

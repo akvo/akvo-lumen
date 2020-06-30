@@ -1,61 +1,18 @@
 @import "../../styles/modules/importAll";
 
 .ColumnHeader {
-    vertical-align: top;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 8px;
 
     * {
         vertical-align: top;
-    }
-
-    &.clickable:after {
-        content: '';
-        display: block;
-        width: 0;
-        height: 0;
-        border-right: 10px solid transparent;
-        border-left: 10px solid transparent;
-        border-top: 10px solid $black;
-        border-bottom: none;
-        position: absolute;
-        right: 0.5rem;
-        top: 25px;
+        line-height: 70px;
     }
 
     &.columnMenuActive {
-        background-color: rgba(0, 0, 0, 0.125);
-
-        &:after {
-            border-top: none;
-            border-bottom: 10px solid $black;
-        }
-    }
-
-    * {
-        line-height: 60px;
-    }
-
-    .columnKey {
-      margin-left: 0.5rem;
-      margin-right: 0.5rem;
-      color: $black;
-    }
-
-    .columnType {
-        margin: 0 0.5rem;
-        color: $black;
-        font-weight: 400;
-    }
-
-    .columnType, .columnTypeToggle {
-        display: inline-block;
-    }
-
-    .columnTitleText {
-        max-width: calc(100% - 30px);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        display: inline-block;
+        background-color: #f2f2f2;
     }
 
     .sortLabel {
@@ -78,5 +35,34 @@
             float: right;
             margin-right: -0.25rem;
         }
+    }
+
+    .columnTitleText {
+        max-width: calc(100% - 30px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+
+
+        .columnKey {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+            color: $black;
+        }
+
+        .columnType {
+            margin: 0 0.5rem;
+            color: $black;
+            font-weight: 400;
+
+            &, .columnTypeToggle {
+                display: inline-block;
+            }
+        }
+    }
+
+    .icon {
+        font-size: 1.8em;
     }
 }
