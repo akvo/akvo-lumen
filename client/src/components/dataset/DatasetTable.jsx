@@ -555,9 +555,9 @@ class DatasetTable extends Component {
                   />
                 )}
                 <Table
-                  groupHeaderHeight={50}
-                  headerHeight={100}
-                  rowHeight={50}
+                  groupHeaderHeight={60}
+                  headerHeight={60}
+                  rowHeight={60}
                   rowsCount={rows.size}
                   width={width}
                   height={height}
