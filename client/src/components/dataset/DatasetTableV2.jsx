@@ -465,9 +465,9 @@ function DatasetTable(props) {
                   />
                 )}
                 <Table
-                  groupHeaderHeight={60}
-                  headerHeight={60}
-                  rowHeight={60}
+                  groupHeaderHeight={40}
+                  headerHeight={40}
+                  rowHeight={40}
                   rowsCount={props.rows.size}
                   width={width}
                   height={height}
