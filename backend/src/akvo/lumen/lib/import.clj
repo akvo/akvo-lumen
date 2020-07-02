@@ -21,7 +21,8 @@
 
 (defn- successful-execution [conn job-execution-id data-source-id table-name columns {:keys [spec-name spec-description]} claims]
   (let [dataset-id (util/squuid)
-        imported-table-name (util/gen-table-name "imported")]
+        imported-table-name (util/gen-table-name "imported")
+        {:strs [rqg]} (env/all conn)]
     (db.dataset/insert-dataset conn {:id dataset-id
                           :title spec-name ;; TODO Consistent naming. Change on client side?
                           :description spec-description
@@ -37,18 +38,21 @@
                                :table-name table-name
                                :imported-table-name imported-table-name
                                :version 1
-                               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId]}]
-                                                {:columnName id
-                                                 :direction nil
-                                                 :hidden false
-                                                 :key (boolean key)
-                                                 :multipleId multipleId
-                                                 :multipleType multipleType
-                                                 :groupName groupName
-                                                 :groupId groupId
-                                                 :sort nil
-                                                 :title (string/trim title)
-                                                 :type type})
+                               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId ns]}]
+                                                (let [column-def {:columnName id
+                                                                  :direction nil
+                                                                  :hidden false
+                                                                  :key (boolean key)
+                                                                  :multipleId multipleId
+                                                                  :multipleType multipleType
+                                                                  :groupName groupName
+                                                                  :groupId groupId
+                                                                  :sort nil
+                                                                  :title (string/trim title)
+                                                                  :type type}]
+                                                  (if rqg
+                                                    (assoc column-def :ns ns :repeatable (= groupId ns))
+                                                    column-def)))
                                               columns)
                                :transformations []})
     (db.job-execution/update-job-execution conn {:id             job-execution-id
