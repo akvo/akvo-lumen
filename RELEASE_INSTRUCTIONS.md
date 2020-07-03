@@ -1,15 +1,14 @@
 # Release instructions
 
-## 1 Merge PR to master
+## 1 Merge PR to `master`
 This will cause CI to run tests, build containers and if successful deploy
 to dark-test.
-develop.
 
 ## 2 Autoflip test
-If the end to end tests (Cypress) are successful we autoflip test. This means
-test (https://lumen.akvotest.org) will closely run what's in develop.
+If the end to end tests (Cypress) are successful we _autoflip_ test. This means
+test (https://lumen.akvotest.org) will closely run what's in `master`.
 
-# 3 Promote to production
+## 3 Promote to production
 ```
 $ ./ci/promote-test-to-prod.sh
 ```
