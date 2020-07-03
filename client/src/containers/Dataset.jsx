@@ -266,6 +266,8 @@ function Dataset(props) {
           throw error;
         });
     }
+
+    return undefined; // exit
   }, [dataset]);
 
   useEffect(() => {
