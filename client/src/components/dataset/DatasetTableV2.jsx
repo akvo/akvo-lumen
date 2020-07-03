@@ -64,16 +64,9 @@ function DatasetTable(props) {
   };
 
   const handleSidebarProps = (sbProps) => {
-    if (
-      sidebarProps &&
-      sidebarProps.type === sbProps.type
-    ) {
-      hideSidebar();
-    } else {
-      setActiveDataTypeContextMenu(null);
-      setActiveColumnContextMenu(null);
-      showSidebar(sbProps);
-    }
+    setActiveDataTypeContextMenu(null);
+    setActiveColumnContextMenu(null);
+    showSidebar(sbProps);
   };
 
   const handleGroupsSidebar = () => {
