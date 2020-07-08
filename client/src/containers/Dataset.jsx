@@ -34,9 +34,7 @@ import usePendingSaving from '../components/common/PendingSaving';
 require('../components/dataset/Dataset.scss');
 
 function Dataset(props) {
-  const env = useSelector(
-    state => state.env.environment
-  );
+  const env = useSelector(state => state.env.environment);
 
   const isFeatureFlag = env.rqg;
 
@@ -82,9 +80,13 @@ function Dataset(props) {
           throw new Error(response.body.message);
         } else {
           dispatch(
-            pollTxImportStatus(response.body.jobExecutionId, () => {
-              dispatch(endTx(id));
-            }, isFeatureFlag)
+            pollTxImportStatus(
+              response.body.jobExecutionId,
+              () => {
+                dispatch(endTx(id));
+              },
+              isFeatureFlag
+            )
           );
         }
       })
@@ -113,9 +115,13 @@ function Dataset(props) {
           throw new Error(response.body.message);
         } else {
           dispatch(
-            pollTxImportStatus(response.body.jobExecutionId, () => {
-              dispatch(endTx(id));
-            }, isFeatureFlag)
+            pollTxImportStatus(
+              response.body.jobExecutionId,
+              () => {
+                dispatch(endTx(id));
+              },
+              isFeatureFlag
+            )
           );
         }
       })
@@ -160,18 +166,20 @@ function Dataset(props) {
       } else {
         changeCurrentGroup(null);
 
-        api.get(`/api/datasets/${datasetId}/group/${groupId}`).then((response) => {
-          if (!response.ok) {
-            throw new Error(response.body.message);
-          }
+        api
+          .get(`/api/datasets/${datasetId}/group/${groupId}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(response.body.message);
+            }
 
-          changeCurrentGroup(Immutable.fromJS(response.body));
-          resolve();
-        })
-      .catch((error) => {
-        dispatch(showNotification('error getting group'));
-        throw error;
-      });
+            changeCurrentGroup(Immutable.fromJS(response.body));
+            resolve();
+          })
+          .catch((error) => {
+            dispatch(showNotification('error getting group'));
+            throw error;
+          });
       }
     });
   };
@@ -198,40 +206,68 @@ function Dataset(props) {
   }, []);
 
   useEffect(() => {
-    if (isFeatureFlag) {
-      const { datasetId } = props.params;
-
-      if (dataset && dataset.get('groups')) {
-        const groups = dataset.get('groups');
-
-        // if there's no question group
-        if (groups.get('main')) {
-          api.get(`/api/datasets/${datasetId}/group/main`).then((response) => {
-            if (!response.ok) {
-              throw new Error(response.body.message);
-            }
-
-            changeCurrentGroup(Immutable.fromJS(response.body));
-          })
-          .catch((error) => {
-            dispatch(showNotification('error getting group'));
-            throw error;
-          });
-        } else if (groups.get('metadata')) {
-          api.get(`/api/datasets/${datasetId}/group/metadata`).then((response) => {
-            if (!response.ok) {
-              throw new Error(response.body.message);
-            }
-
-            changeCurrentGroup(Immutable.fromJS(response.body));
-          })
-          .catch((error) => {
-            dispatch(showNotification('error getting group'));
-            throw error;
-          });
-        }
-      }
+    if (!isFeatureFlag) {
+      return undefined; // exit early
     }
+
+    const { datasetId } = props.params;
+
+    if (!dataset || !dataset.get('groups')) {
+      return undefined; // exit early
+    }
+
+    const groups = dataset.get('groups');
+
+    // if there's no question group
+    if (groups.get('main')) {
+      api
+        .get(`/api/datasets/${datasetId}/group/main`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(response.body.message);
+          }
+
+          changeCurrentGroup(Immutable.fromJS(response.body));
+        })
+        .catch((error) => {
+          dispatch(showNotification('error getting group'));
+          throw error;
+        });
+
+      return undefined; // exit early
+    }
+
+    if (currentGroup) {
+      api
+        .get(`/api/datasets/${datasetId}/group/${currentGroup.get('groupId')}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(response.body.message);
+          }
+
+          changeCurrentGroup(Immutable.fromJS(response.body));
+        })
+        .catch((error) => {
+          dispatch(showNotification('error getting group'));
+          throw error;
+        });
+    } else {
+      api
+        .get(`/api/datasets/${datasetId}/group/metadata`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(response.body.message);
+          }
+
+          changeCurrentGroup(Immutable.fromJS(response.body));
+        })
+        .catch((error) => {
+          dispatch(showNotification('error getting group'));
+          throw error;
+        });
+    }
+
+    return undefined; // exit
   }, [dataset]);
 
   useEffect(() => {
@@ -249,7 +285,6 @@ function Dataset(props) {
     }
   }, [title]);
 
-
   const { params, history } = props;
   const { datasetId } = params;
   if (dataset == null) {
@@ -262,35 +297,39 @@ function Dataset(props) {
       history={history}
     >
       <div className="Dataset">
-        {isFeatureFlag ? (<DatasetTableV2
-          history={history}
-          datasetId={datasetId}
-          group={currentGroup}
-          columns={currentGroup ? currentGroup.get('columns') : null}
-          rows={currentGroup ? currentGroup.get('rows') : null}
-          groups={dataset.get('groups')}
-          Header={DatasetHeader}
-          headerProps={{
-            onShowDatasetSettings,
-            name: getTitle(dataset),
-            id: getId(dataset),
-            isUnsavedChanges: pendingSaving.isUnsavedChanges,
-            onBeginEditTitle: pendingSaving.onBeginEdit,
-            savingFailed: pendingSaving.savingFailed,
-            timeToNextSave: pendingSaving.timeToNextSave,
-            onChangeTitle: setTitle,
-            onSaveDataset: pendingSaving.onHandleSave,
-          }}
-          transformations={getTransformations(dataset)}
-          isLockedFromTransformations={getIsLockedFromTransformations(dataset)}
-          pendingTransformations={pendingTransformations.valueSeq()}
-          onTransform={onTransform}
-          onUndoTransformation={onUndoTransformation}
-          onNavigateToVisualise={onNavigateToVisualise}
-          datasetGroupsAvailable={dataset.get('groups') != null}
-          groupAvailable={!!currentGroup}
-          handleChangeQuestionGroup={onChangeQuestionGroup}
-        />) : (
+        {isFeatureFlag ? (
+          <DatasetTableV2
+            history={history}
+            datasetId={datasetId}
+            group={currentGroup}
+            columns={currentGroup ? currentGroup.get('columns') : null}
+            rows={currentGroup ? currentGroup.get('rows') : null}
+            groups={dataset.get('groups')}
+            Header={DatasetHeader}
+            headerProps={{
+              onShowDatasetSettings,
+              name: getTitle(dataset),
+              id: getId(dataset),
+              isUnsavedChanges: pendingSaving.isUnsavedChanges,
+              onBeginEditTitle: pendingSaving.onBeginEdit,
+              savingFailed: pendingSaving.savingFailed,
+              timeToNextSave: pendingSaving.timeToNextSave,
+              onChangeTitle: setTitle,
+              onSaveDataset: pendingSaving.onHandleSave,
+            }}
+            transformations={getTransformations(dataset)}
+            isLockedFromTransformations={getIsLockedFromTransformations(
+              dataset
+            )}
+            pendingTransformations={pendingTransformations.valueSeq()}
+            onTransform={onTransform}
+            onUndoTransformation={onUndoTransformation}
+            onNavigateToVisualise={onNavigateToVisualise}
+            datasetGroupsAvailable={dataset.get('groups') != null}
+            groupAvailable={!!currentGroup}
+            handleChangeQuestionGroup={onChangeQuestionGroup}
+          />
+        ) : (
           <DatasetTableV1
             history={history}
             datasetId={datasetId}
@@ -310,15 +349,15 @@ function Dataset(props) {
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
-            dataset
-          )}
+              dataset
+            )}
             pendingTransformations={pendingTransformations.valueSeq()}
             onTransform={onTransform}
             onUndoTransformation={onUndoTransformation}
             onNavigateToVisualise={onNavigateToVisualise}
             datasetRowAvailable={getRows(dataset) != null}
           />
-        ) }
+        )}
       </div>
     </NavigationPrompt>
   );
