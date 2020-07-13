@@ -145,3 +145,42 @@ code {
         border-color: $errorRed;
     }
 }
+
+.introjs-tooltip {
+    width: 322px;
+    background-color: #1B1F23;
+    padding: 20px;
+
+    .introjs-arrow.left {
+        border-right-color: #1B1F23;
+    }
+
+    .introjs-tooltiptext {
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .introjs-button {
+        background: #2C3136;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 13px;
+        text-shadow: none;
+        border: none;
+        font-weight: 500;
+        padding: 7px 14px;
+
+        &:hover {
+            box-shadow: none;
+        }
+
+        &.introjs-disabled,
+        &.introjs-prevbutton {
+            display: none;
+        }
+
+        &.introjs-skipbutton:not(.introjs-donebutton) {
+            background: #1B1F23;
+        }
+    }
+}
+
+
