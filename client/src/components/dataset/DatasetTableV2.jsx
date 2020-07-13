@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Column, Cell, Table } from 'fixed-data-table-2';
@@ -5,12 +6,14 @@ import moment from 'moment';
 import { withRouter } from 'react-router';
 import { injectIntl, intlShape } from 'react-intl';
 import Immutable from 'immutable';
+import introJs from 'intro.js';
 import ColumnHeader from './ColumnHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { getDatasetGroups } from '../../utilities/dataset';
 import DataTableSidebar from './DataTableSidebar';
 import DataTypeContextMenu from './context-menus/DataTypeContextMenu';
 import ColumnContextMenu from './context-menus/ColumnContextMenu';
+
 
 require('./DatasetTable.scss');
 
@@ -76,6 +79,61 @@ function DatasetTable(props) {
       groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
     });
   };
+
+  useEffect(() => {
+    const intro = introJs();
+
+    intro.onbeforechange(() => {
+      const currentStepIdx = intro._currentStep;
+      const currentStepDynamic = !!intro._options.steps[currentStepIdx].dynamic;
+
+      if (currentStepDynamic) {
+        const step = intro._options.steps[currentStepIdx];
+        const element = document.querySelector(step.element);
+
+        if (element) {
+          const introItem = intro._introItems[currentStepIdx];
+          introItem.element = element;
+          introItem.position = step.position;
+        }
+      }
+    });
+
+    intro.setOptions({
+      nextLabel: 'Next',
+      prevLabel: 'Back',
+      hidePrev: true,
+      skipLabel: 'Skip',
+      doneLabel: 'Got it',
+      showStepNumbers: false,
+      steps: [
+        {
+          element: '#GroupsList',
+          intro: 'Data groups are based on Flow form question groups and submission metadata',
+          dynamic: true,
+          position: 'right',
+        },
+        {
+          element: '.fixedDataTableLayout_main',
+          intro: "A selected data group's data os shown on the grid",
+          dynamic: true,
+          position: 'left',
+        },
+      ],
+    });
+
+    const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
+    if (
+      isMounted.current &&
+      (props.datasetGroupsAvailable && datasetHasQuestionGroups) &&
+      (sidebarProps || {}).type === 'groupsList') {
+      intro.start();
+    }
+
+    return () => {
+      intro.exit();
+    };
+  }, [props.datasetGroupsAvailable, props.groups, isMounted.current, sidebarProps]);
 
   useEffect(() => {
     const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
