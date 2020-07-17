@@ -15,7 +15,7 @@
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
 
-(def http-client-req-defaults (http.client/req-opts 5000))
+(def http-client-req-defaults (http.client/req-opts 10000))
 
 (defn- headers [tenant-conn]
   (let [db-uri (-> ^HikariDataSource (:datasource tenant-conn)
