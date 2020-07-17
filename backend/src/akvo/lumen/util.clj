@@ -91,3 +91,10 @@
   (fn [handler]
     (fn [request]
       (f handler request opts))))
+
+(defmacro time-with-log
+  [data expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     (log/info ~data (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " msecs"))
+     ret#))

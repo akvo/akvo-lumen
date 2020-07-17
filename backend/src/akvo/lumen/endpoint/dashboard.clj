@@ -1,5 +1,6 @@
 (ns akvo.lumen.endpoint.dashboard
   (:require [akvo.lumen.component.tenant-manager :as tenant-manager]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.dashboard :as dashboard]
@@ -65,8 +66,10 @@
                               (prometheus/inc
                                (registry/get collector :app/dashboard-apply-filter {"tenant" tenant
                                                                                     "dashboard" id})))
-                            (if-let [d (dashboard/fetch-aggregated
-                                        (p/connection tenant-manager tenant) id windshaft-url filters)]
+                            (if-let [d (util/time-with-log
+                                        (format "Dash id: %s" id)
+                                        (dashboard/fetch-aggregated
+                                         (p/connection tenant-manager tenant) id windshaft-url filters))]
                               (lib/ok d)
                               (lib/not-found {:error "Not found"}))))}
          :put {:parameters {:body map?
