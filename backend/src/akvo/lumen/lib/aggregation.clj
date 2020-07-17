@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.aggregation
   (:require [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.util :as util]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
@@ -123,26 +124,31 @@
     (assoc visualisation :filterAffected false)
     (merge-dashboard-filters visualisation filters)))
 
-(defn visualisation-response-data [tenant-conn id windshaft-url filters]
-  (try
-    (when-let [vis (-> (visualisation/fetch tenant-conn id)
-                       (dashboard-filters filters))]
-      (condp contains? (:visualisationType vis)
-        #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
-        (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
-        (run-unknown-type-visualisation tenant-conn vis)))
-    (catch Exception e
-      (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id)))))
+(defn visualisation-response-data [tenant-conn id windshaft-url filters counter]
+  (log/info (format "Before! Counter %s - Vis id: %s" @counter id ))
+  (swap! counter inc)
+  (util/time-with-log
+   (format "Vis id: %s" id)
+   (try
+     (when-let [vis (-> (visualisation/fetch tenant-conn id)
+                        (dashboard-filters filters))]
+       (condp contains? (:visualisationType vis)
+         #{"map"} (run-map-visualisation tenant-conn vis windshaft-url)
+         (set (keys vis-aggregation-mapper)) (run-visualisation tenant-conn vis)
+         (run-unknown-type-visualisation tenant-conn vis)))
+     (catch Exception e
+       (log/warn e ::visualisation-response-data (str "problems fetching this vis-id: " id))))))
 
 (defn aggregate-dashboard-viss [dashboard tenant-conn windshaft-url filters]
-  (->> dashboard
-       :entities
-       vals
-       (filter #(= "visualisation" (:type %)))
-       (map :id)
-       (map #(visualisation-response-data tenant-conn % windshaft-url filters))
-       (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
-       (apply merge-with merge)))
+  (let [counter (atom 0)]
+    (->> dashboard
+         :entities
+         vals
+         (filter #(= "visualisation" (:type %)))
+         (map :id)
+         (map #(visualisation-response-data tenant-conn % windshaft-url filters counter))
+         (sort-by #(-> % (get "datasets") vals first (get :rows) boolean))
+         (apply merge-with merge))))
 
 
 (defmethod query* "pivot"

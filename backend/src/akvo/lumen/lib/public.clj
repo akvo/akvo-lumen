@@ -28,7 +28,7 @@
     (assoc (dashboard-response-data tenant-conn dashboard-id windshaft-url dashboard-filter)
            :dashboardId dashboard-id)
     (let [visualisation-id (:visualisation-id share)]
-      (assoc (aggregation/visualisation-response-data tenant-conn visualisation-id windshaft-url {})
+      (assoc (aggregation/visualisation-response-data tenant-conn visualisation-id windshaft-url {} (atom 0))
              :visualisationId visualisation-id))))
 
 (defn share* [tenant-conn id]
