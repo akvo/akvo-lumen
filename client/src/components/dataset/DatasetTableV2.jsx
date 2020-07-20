@@ -106,18 +106,19 @@ function DatasetTable(props) {
       skipLabel: 'Skip',
       doneLabel: 'Got it',
       showStepNumbers: false,
+      showBullets: false,
       steps: [
         {
           element: '#GroupsList',
-          intro: 'Data groups are based on Flow form question groups and submission metadata',
+          intro: props.intl.formatMessage({ id: 'data_group_intro_1' }),
           dynamic: true,
           position: 'right',
         },
         {
-          element: '.fixedDataTableLayout_main',
-          intro: "A selected data group's data os shown on the grid",
+          element: '#GroupsList .groupItem:first-child',
+          intro: props.intl.formatMessage({ id: 'data_group_intro_2' }),
           dynamic: true,
-          position: 'left',
+          position: 'right',
         },
       ],
     });

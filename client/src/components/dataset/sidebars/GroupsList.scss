@@ -20,9 +20,12 @@
       justify-content: space-between;
       text-transform: capitalize;
 
-      &:hover,
-      &.active {
+      &:hover {
         background-color: rgba(32, 32, 34, 0.05);
+      }
+
+      &.active p {
+        color: rgba(0, 122, 255, 0.87);
       }
 
       p {
