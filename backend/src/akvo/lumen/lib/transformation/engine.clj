@@ -233,10 +233,19 @@
 (defn apply-transformation-log [conn caddisfly table-name imported-table-name
                                 new-columns old-columns dataset-id job-execution-id
                                 {:keys [transformations version] :as dataset-version}]
-  (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
-                                :version         version
-                                :columns         new-columns
-                                :transformations []})
+  (try
+    (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
+                                                   :version         version
+                                                   :columns         new-columns
+                                                    :transformations []})
+    (catch Exception e
+      (do
+        (log/error e ::db.transformation/update-dataset-version {:dataset-id      dataset-id
+                                                                 :version         version
+                                                                 :columns         new-columns
+                                                                 :transformations []})
+        (throw
+         (ex-info (format "Database problem updating dataset. (%s)" dataset-id) {})))))
   (loop [transformations transformations
          columns         new-columns
          version         (inc version)
