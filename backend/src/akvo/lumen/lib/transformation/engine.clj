@@ -203,7 +203,7 @@
             (db.transformation/drop-table tenant-conn {:table-name previous-table-name})))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [success? message columns execution-log] :as transformation-result}
-              (try-apply-operation deps table-name columns transformation)]
+              (try-apply-operation deps table-name columns (assoc transformation :dataset-id dataset-id))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log) (inc tx-index))
             (do
@@ -233,10 +233,19 @@
 (defn apply-transformation-log [conn caddisfly table-name imported-table-name
                                 new-columns old-columns dataset-id job-execution-id
                                 {:keys [transformations version] :as dataset-version}]
-  (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
-                                :version         version
-                                :columns         new-columns
-                                :transformations []})
+  (try
+    (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
+                                                   :version         version
+                                                   :columns         new-columns
+                                                    :transformations []})
+    (catch Exception e
+      (do
+        (log/error e ::db.transformation/update-dataset-version {:dataset-id      dataset-id
+                                                                 :version         version
+                                                                 :columns         new-columns
+                                                                 :transformations []})
+        (throw
+         (ex-info (format "Problem updating dataset. (%s)" (.getMessage e)) {})))))
   (loop [transformations transformations
          columns         new-columns
          version         (inc version)
@@ -251,7 +260,7 @@
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
           (recur (rest transformations) columns version applied-txs)
-          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns transformation)]
+          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns (assoc transformation :dataset-id dataset-id))]
             (when-not (:success? op)
               (throw
                (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
