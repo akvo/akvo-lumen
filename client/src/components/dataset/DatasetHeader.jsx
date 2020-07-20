@@ -72,7 +72,7 @@ export default function DatasetHeader(props) {
     };
 
     const transformationLog = {
-      icon: <i className="fa fa-list-ol" aria-hidden="true" />,
+      icon: <i title="View transformation log" className="fa fa-list-ol" aria-hidden="true" />,
       onClick: props.onToggleTransformationLog,
     };
 
