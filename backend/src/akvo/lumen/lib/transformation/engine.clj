@@ -203,7 +203,7 @@
             (db.transformation/drop-table tenant-conn {:table-name previous-table-name})))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [success? message columns execution-log] :as transformation-result}
-              (try-apply-operation deps table-name columns transformation)]
+              (try-apply-operation deps table-name columns (assoc transformation :dataset-id dataset-id))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log) (inc tx-index))
             (do
@@ -251,7 +251,7 @@
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
           (recur (rest transformations) columns version applied-txs)
-          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns transformation)]
+          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns (assoc transformation :dataset-id dataset-id))]
             (when-not (:success? op)
               (throw
                (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
