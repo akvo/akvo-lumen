@@ -10,7 +10,7 @@ function GroupsList(props) {
   const { onClose, groups, selectedGroup, onSelectGroup } = props;
 
   return (
-    <div className="DataTableSidebar GroupsList">
+    <div className="DataTableSidebar GroupsList" id="GroupsList">
       <SidebarHeader
         onClose={onClose}
         closeButton={<i onClick={onClose} className="fa fa-angle-left clickable" />}
