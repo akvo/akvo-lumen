@@ -75,6 +75,7 @@
     "immutability-helper": "^3.0.1",
     "immutable": "^4.0.0-rc.12",
     "intl": "^1.2.5",
+    "intro.js": "2.9.3",
     "invariant": "^2.2.2",
     "isomorphic-fetch": "^2.2.1",
     "its-set": "^1.2.3",

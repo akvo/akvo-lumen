@@ -76,6 +76,8 @@
   "data_file": "Archivo de datos",
   "data_has_column_headers": "Los datos tienen encabezados de columna",
   "data_groups": "Grupos de datos",
+  "data_group_intro_1": "Los grupos de datos están basados en los grupos de preguntas de los formularios de Flow y en los envíos de meta información. Lumen mantiene todos las relaciones y las provee en las visualizaciones de datos",
+  "data_group_intro_2": "Una selección de grupo de datos es mostrado en la cuadrícula",
   "data_last_updated": "Última actualización de los datos",
   "dataset": "Set de datos",
   "dataset_filters": "Filtros de set de datos",

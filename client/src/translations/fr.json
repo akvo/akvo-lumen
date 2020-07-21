@@ -77,6 +77,8 @@
   "data_file": "fichiers de donnée",
   "data_has_column_headers": "Données ",
   "data_groups": "Groupes de Données",
+  "data_group_intro_1": "Les ensembles de données sont basés sur des ensembles de questions des formulaires Flow et les soumissions de méta-informations. Lumen maintient toutes les relations et les fournit dans les visualisations de données",
+  "data_group_intro_2": "Une sélection de groupe de données est affichée dans la grille",
   "data_last_updated": "Données mises à jour à",
   "dataset": "Source de données",
   "dataset_filters": "Filtres de données",
