@@ -81,6 +81,10 @@ function DatasetTable(props) {
   };
 
   useEffect(() => {
+    if (window.localStorage.getItem('done-intro')) {
+      return undefined;
+    }
+
     const intro = introJs();
 
     intro.onbeforechange(() => {
@@ -97,6 +101,10 @@ function DatasetTable(props) {
           introItem.position = step.position;
         }
       }
+    });
+
+    intro.oncomplete(() => {
+      window.localStorage.setItem('done-intro', true);
     });
 
     intro.setOptions({
