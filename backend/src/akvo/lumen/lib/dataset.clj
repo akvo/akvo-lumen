@@ -102,7 +102,6 @@
         :created         (:created dataset)
         :updated         (:updated dataset)
         :status          "OK"
-        :transformations (:transformations dataset)
         :groups          groups}))
     (lib/not-found {:error "Not found"})))
 
@@ -124,7 +123,7 @@
 (defn fetch-group
   [tenant-conn id group-id]
   (when-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
-    (let [group-dataset (get (:groups dataset) group-id)
+    (let [group-dataset (get (:groups dataset) (if (= "main" group-id) nil group-id))
           column-remove-condition (condp = group-id
                                     "metadata" #(not (contains? flow-common/metadata-keys (get % "columnName")))
                                     "transformations" #(not (tx.engine/is-derived? (get % "columnName")))
