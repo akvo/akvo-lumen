@@ -69,14 +69,14 @@
   [form responses]
   (let [questions (flow-questions form)
         responses-col (flow-common/question-responses (:questionGroups form) questions responses)]
-    (mapv #(reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
-                    (if-let [response ((or derived-fn identity) (get % (or derived-id id)))]
-                      (assoc response-data
-                             (format "c%s" id)
-                             (render-response type response))
-                      response-data))
-                  {}
-                  questions)
+    (mapv #(with-meta (reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
+                                (if-let [response ((or derived-fn identity) (get % (or derived-id id)))]
+                                  (assoc response-data
+                                         (format "c%s" id)
+                                         (render-response type response))
+                                  response-data))
+                              {}
+                              questions) (meta %))
           responses-col)))
 
 (defn form-data
@@ -90,9 +90,11 @@
            (let [data-point-id (get form-instance "dataPointId")]
              (if-let [data-point (get data-points data-point-id)]
                (let [[main-group & more-groups] (response-data form (get form-instance "responses"))]
-                 (into [(merge main-group
-                                (flow-common/common-records form-instance data-point)
-                                {:device_id (get form-instance "deviceIdentifier")})]
+                 (into [(with-meta
+                          (merge main-group
+                                 (flow-common/common-records form-instance data-point)
+                                 {:device_id (get form-instance "deviceIdentifier")})
+                          (meta main-group))]
                        more-groups))
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
                                {:form-instance-id (get form-instance "id")
