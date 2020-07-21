@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.common
   (:require [clojure.java.io :as io]
             [akvo.lumen.protocols :as p]
+            [clojure.tools.logging :as log]
             [org.akvo.resumed :as resumed]))
 
 (def rows-limit 500000)
@@ -49,3 +50,13 @@
                 {:multipleType (:multipleType q)
                  :multipleId (:multipleId q)})))))
        questions))
+
+(defn extract-first-and-merge
+  "provisional adapter to store all records in one `main` table"
+  [records]
+  (log/error :metas (map meta records))
+  (let [res (map first (vals (group-by #(:ns (meta %)) records)))
+        rez (reduce #(merge % %2) {} res)]
+    (log/error :rez rez)
+    rez
+    ))
