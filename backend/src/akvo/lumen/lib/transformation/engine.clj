@@ -142,7 +142,8 @@
 
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
-  (let [dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+  (let [version (:version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+        dataset-version (first (db.transformation/latest-dataset-versions-by-dataset-id tenant-conn {:dataset-id dataset-id :version version}))
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
     (let [{:keys [success? message columns execution-log error-data]}
@@ -170,9 +171,12 @@
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
         previous-table-name (:table-name current-dataset-version)
-        initial-columns (vec (:columns (db.transformation/initial-dataset-version-to-update-by-dataset-id
+        initial-version (:version (db.transformation/initial-dataset-version-to-update-by-dataset-id
                                         tenant-conn
-                                        {:dataset-id dataset-id})))
+                                        {:dataset-id dataset-id}))
+        initial-columns (vec (:columns (first (db.transformation/initial-dataset-versions-to-update-by-dataset-id
+                                               tenant-conn
+                                               {:dataset-id dataset-id :version initial-version}))))
         table-name (util/gen-table-name "ds")]
     (db.transformation/copy-table tenant-conn
                 {:source-table imported-table-name
@@ -214,8 +218,10 @@
                                                                                      :transformation transformation})))))))))
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
-  (let [current-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
-                                                                      {:dataset-id dataset-id})]
+  (let [version (:version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
+                                                                         {:dataset-id dataset-id}))
+        current-dataset-version (first (db.transformation/latest-dataset-versions-by-dataset-id tenant-conn
+                                                                                          {:dataset-id dataset-id :version version}))]
     (when (not= (:version current-dataset-version) 1)
       (apply-undo deps
                   dataset-id

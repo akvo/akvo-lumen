@@ -4,7 +4,6 @@
             [akvo.lumen.lib.transformation.engine :as tx.engine]
             [clojure.tools.logging :as log]))
 
-
 (hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 
 (defn dataset-by-id [conn opts]
@@ -23,7 +22,6 @@
 (defn dataset-in-groups-by-id
   "dataset arranged in groups"
   [conn opts]
-  (log/error :opts opts)
   (let [dataset-col (map (fn [ds]
                            (update ds :columns (fn [cols]
                                                  (mapv adapt-group cols)))) (dataset-by-id* conn opts))
