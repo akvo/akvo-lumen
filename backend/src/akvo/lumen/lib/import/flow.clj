@@ -2,7 +2,6 @@
   (:require [akvo.commons.psql-util :as pg]
             [akvo.lumen.lib.import.common :as import]
             [akvo.lumen.component.flow :as c.flow]
-            [cheshire.core :as json]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2]
@@ -36,9 +35,7 @@
               (do
                 (log/error e)
                 (let [message (if (= 403 (:status ex-d))
-                                (format "Unauthorized flow user: %s"
-                                        (let [body (json/parse-string (:body ex-d) keyword)]
-                                          (:email  body "User doesn't exist in flow")))
+                                (str "You don't have access to instance: " instance)
                                 (or (:cause e) (str "Null cause from instance: " instance)))]
                   (throw (ex-info message
                                   (assoc ex-d
