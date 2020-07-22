@@ -94,7 +94,7 @@
                               (let [k (if (i.csv/valid-column-name? (:columnName col))
                                         :main :transformations)]
                                 (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                            {:main [] :transformations []}  columns))]
+                            {:main [] :transformations (:transformations (get (:groups dataset) nil))}  columns))]
       (lib/ok
        {:id              id
         :name            (:title dataset)
@@ -102,6 +102,7 @@
         :created         (:created dataset)
         :updated         (:updated dataset)
         :status          "OK"
+
         :transformations (:transformations dataset)
         :source          (:source dataset)
         :groups          groups}))

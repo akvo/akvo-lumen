@@ -146,8 +146,8 @@
     multipleId   (assoc "multipleId" multipleId)))
 
 (defn dict-dsv [initial-dataset-version-col latest-dataset-version-col]
-  (let [res (reduce (fn [c ds] (update c (get (first (:columns ds)) "ns") conj ds)) {} latest-dataset-version-col)
-        res1 (reduce (fn [c ds] (update c (get (first (:columns ds)) "ns") conj ds)) res initial-dataset-version-col)]
+  (let [res (reduce (fn [c ds] (update c (get (first (:columns ds)) "ns" "main") conj ds)) {} latest-dataset-version-col)
+        res1 (reduce (fn [c ds] (update c (get (first (:columns ds)) "ns" "main") conj ds)) res initial-dataset-version-col)]
     res1))
 
 (defn- do-update [tenant-conn caddisfly import-config dataset-id data-source-id job-execution-id data-source-spec]
