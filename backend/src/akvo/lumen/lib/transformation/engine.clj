@@ -142,7 +142,7 @@
 
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
-  (let [dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+  (let [dataset-version (db.transformation/get-latest-dataset-versions-by-dataset-id tenant-conn {:dataset-id dataset-id})
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
     (let [{:keys [success? message columns execution-log error-data]}
@@ -170,9 +170,12 @@
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
         previous-table-name (:table-name current-dataset-version)
-        initial-columns (vec (:columns (db.transformation/initial-dataset-version-to-update-by-dataset-id
+        initial-version (:version (db.transformation/initial-dataset-version-to-update-by-dataset-id
                                         tenant-conn
-                                        {:dataset-id dataset-id})))
+                                        {:dataset-id dataset-id}))
+        initial-columns (vec (:columns (first (db.transformation/initial-dataset-versions-to-update-by-dataset-id
+                                               tenant-conn
+                                               {:dataset-id dataset-id :version initial-version}))))
         table-name (util/gen-table-name "ds")]
     (db.transformation/copy-table tenant-conn
                 {:source-table imported-table-name
@@ -215,7 +218,7 @@
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
   (let [current-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
-                                                                      {:dataset-id dataset-id})]
+                                                                                            {:dataset-id dataset-id})]
     (when (not= (:version current-dataset-version) 1)
       (apply-undo deps
                   dataset-id
@@ -232,23 +235,24 @@
 
 (defn apply-transformation-log [conn caddisfly table-name imported-table-name
                                 new-columns old-columns dataset-id job-execution-id
-                                {:keys [transformations version] :as dataset-version}]
+                                initial-dataset-version last-dataset-version]
   (try
     (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
-                                                   :version         version
-                                                   :columns         new-columns
+                                                    :version         (:version last-dataset-version)
+                                                    :id (:id initial-dataset-version)
+                                                    :columns         new-columns
                                                     :transformations []})
     (catch Exception e
       (do
         (log/error e ::db.transformation/update-dataset-version {:dataset-id      dataset-id
-                                                                 :version         version
+                                                                 :version         (:version last-dataset-version)
                                                                  :columns         new-columns
                                                                  :transformations []})
         (throw
          (ex-info (format "Database problem updating dataset. (%s)" dataset-id) {})))))
-  (loop [transformations transformations
+  (loop [transformations (:transformations last-dataset-version)
          columns         new-columns
-         version         (inc version)
+         version         (inc (:version last-dataset-version))
          applied-txs     []]
     (if-let [transformation (first transformations)]
       (let [transformation       (adapt-transformation transformation old-columns columns)
@@ -268,18 +272,19 @@
                                     (assoc transformation "changedColumns"
                                            (diff-columns columns (:columns op))))]
               (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
-                                            :version         version
-                                            :columns         (:columns op)
-                                            :transformations applied-txs})
+                                                              :version         version
+                                                              :id (:id initial-dataset-version)
+                                                              :columns         (:columns op)
+                                                              :transformations applied-txs})
               (recur (rest transformations) (:columns op) (inc version) applied-txs)))))
       (db.dataset-version/new-dataset-version conn {:id                  (str (util/squuid))
-                                 :dataset-id          dataset-id
-                                 :job-execution-id    job-execution-id
-                                 :table-name          table-name
-                                 :imported-table-name imported-table-name
-                                 :version             (inc (:version dataset-version))
-                                 :columns             (w/keywordize-keys columns)
-                                 :transformations     (w/keywordize-keys (vec applied-txs))}))))
+                                                    :dataset-id          dataset-id
+                                                    :job-execution-id    job-execution-id
+                                                    :table-name          table-name
+                                                    :imported-table-name imported-table-name
+                                                    :version             (inc (:version last-dataset-version))
+                                                    :columns             (w/keywordize-keys columns)
+                                                    :transformations     (w/keywordize-keys (vec applied-txs))}))))
 
 (defn column-title-error? [column-title columns]
   (when (not-empty (filter #(= column-title (get % "title")) columns))
