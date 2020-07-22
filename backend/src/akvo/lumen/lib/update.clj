@@ -145,7 +145,8 @@
                                     :to-table   imported-table-name}
                               {}
                               {:transaction? false})
-            (let [dataset-version  (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
+            (let [dataset-version (let [v (:version (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id}))]
+                                    (first (db.transformation/latest-dataset-versions-by-dataset-id conn {:dataset-id dataset-id :version v})))
                   coerce-column-fn (fn [{:keys [title id type key multipleId multipleType groupName groupId] :as column}]
                                      (cond-> {"type" type
                                               "title" title
@@ -167,6 +168,7 @@
                                                imported-dataset-columns
                                                dataset-id
                                                job-execution-id
+                                               dataset-version
                                                dataset-version)
               (successful-update conn
                                  job-execution-id

@@ -1,40 +1,41 @@
 (ns akvo.lumen.lib.transformation-test
-  {:functional true}
-  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         *system*
-                                         tenant-conn-fixture
-                                         system-fixture
-                                         *error-tracker*
-                                         error-tracker-fixture
-                                         summarise-transformation-logs-fixture
-                                         *caddisfly*
-                                         caddisfly-fixture]]
-            [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.multiple-column :as multiple-column]
-            [akvo.lumen.lib.transformation :as transformation]
-            [akvo.lumen.lib.transformation.derive-category :as derive-category]
-            [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.postgres :as postgres]
-            [akvo.lumen.specs :as lumen.s]
-            [akvo.lumen.specs.import :as import.s]
-            [akvo.lumen.specs.import.column :as import.column.s]
-            [akvo.lumen.specs.import.values :as import.values.s]
-            [akvo.lumen.specs.transformation :as transformation.s]
-            [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
-            [akvo.lumen.util :refer [conform squuid]]
-            [cheshire.core :as json]
-            [clj-time.coerce :as tcc]
-            [clj-time.core :as tc]
-            [clj-time.format :as timef]
-            [clojure.java.io :as io]
-            [clojure.set :as set]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as string]
-            [clojure.test :refer :all]
-            [clojure.tools.logging :as log]
-            [clojure.walk :refer (stringify-keys keywordize-keys)]
-            [hugsql.core :as hugsql])
-  (:import [akvo.lumen.postgres Geoshape Geopoint]))
+     {:functional true}
+     (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                            *system*
+                                            tenant-conn-fixture
+                                            system-fixture
+                                            *error-tracker*
+                                            error-tracker-fixture
+                                            summarise-transformation-logs-fixture
+                                            *caddisfly*
+                                            caddisfly-fixture]]
+               [akvo.lumen.lib :as lib]
+               [akvo.lumen.lib.multiple-column :as multiple-column]
+               [akvo.lumen.lib.transformation :as transformation]
+               [akvo.lumen.lib.transformation.derive-category :as derive-category]
+               [akvo.lumen.lib.transformation.engine :as engine]
+               [akvo.lumen.db.transformation :as db.transformation]
+               [akvo.lumen.postgres :as postgres]
+               [akvo.lumen.specs :as lumen.s]
+               [akvo.lumen.specs.import :as import.s]
+               [akvo.lumen.specs.import.column :as import.column.s]
+               [akvo.lumen.specs.import.values :as import.values.s]
+               [akvo.lumen.specs.transformation :as transformation.s]
+               [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
+               [akvo.lumen.util :refer [conform squuid]]
+               [cheshire.core :as json]
+               [clj-time.coerce :as tcc]
+               [clj-time.core :as tc]
+               [clj-time.format :as timef]
+               [clojure.java.io :as io]
+               [clojure.set :as set]
+               [clojure.spec.alpha :as s]
+               [clojure.string :as string]
+               [clojure.test :refer :all]
+               [clojure.tools.logging :as log]
+               [clojure.walk :refer (stringify-keys keywordize-keys)]
+               [hugsql.core :as hugsql])
+     (:import [akvo.lumen.postgres Geoshape Geopoint]))
 
 (alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
 (alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
@@ -69,13 +70,17 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
     (conj res (:status job) job)))
+
+(defn latest-dataset-version-by-dataset-id [con opts]
+  (let [v (:version (db.transformation/latest-dataset-version-by-dataset-id con opts))]
+    (first (db.transformation/latest-dataset-versions-by-dataset-id con (assoc opts :version v)))))
 
 (defn latest-data [dataset-id]
   (let [table-name (:table-name
@@ -194,7 +199,7 @@
                       (apply-transformation {:type :undo}))]
       (is (= ::lib/ok tag))
       (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
-      (is (= (:columns (dataset-version-by-dataset-id *tenant-conn*
+      (is (= (:columns (db.transformation/dataset-version-by-dataset-id *tenant-conn*
                                                       {:dataset-id dataset-id :version 2}))
              (:columns (latest-dataset-version-by-dataset-id *tenant-conn*
                                                              {:dataset-id dataset-id}))))
@@ -309,7 +314,7 @@
                                       :with-job? true})
           dataset-id (:dataset_id dataset)
           apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+          dataset (db.transformation/dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
