@@ -9,6 +9,7 @@
                                          summarise-transformation-logs-fixture
                                          *caddisfly*
                                          caddisfly-fixture]]
+            [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
@@ -35,6 +36,7 @@
             [clojure.walk :refer (stringify-keys keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [akvo.lumen.postgres Geoshape Geopoint]))
+
 
 (alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
 (alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
@@ -69,13 +71,17 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
     (conj res (:status job) job)))
+
+(defn latest-dataset-version-by-dataset-id [con opts]
+  (let [v (:version (db.transformation/latest-dataset-version-by-dataset-id con opts))]
+    (first (db.transformation/latest-dataset-versions-by-dataset-id con (assoc opts :version v)))))
 
 (defn latest-data [dataset-id]
   (let [table-name (:table-name
@@ -194,7 +200,7 @@
                       (apply-transformation {:type :undo}))]
       (is (= ::lib/ok tag))
       (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
-      (is (= (:columns (dataset-version-by-dataset-id *tenant-conn*
+      (is (= (:columns (db.transformation/dataset-version-by-dataset-id *tenant-conn*
                                                       {:dataset-id dataset-id :version 2}))
              (:columns (latest-dataset-version-by-dataset-id *tenant-conn*
                                                              {:dataset-id dataset-id}))))
@@ -309,7 +315,7 @@
                                       :with-job? true})
           dataset-id (:dataset_id dataset)
           apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+          dataset (db.transformation/dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
