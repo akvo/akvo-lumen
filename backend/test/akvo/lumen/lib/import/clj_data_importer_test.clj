@@ -8,6 +8,7 @@
                                          error-tracker-fixture]]
             [clojure.tools.logging :as log]
             [akvo.lumen.specs.import :as i-c]
+            [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.lib.import.clj-data-importer :as i]
             [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
             [akvo.lumen.utils.logging-config :refer [with-no-logs]]
@@ -18,7 +19,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+
 
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
@@ -30,9 +31,8 @@
                                    :data (i-c/sample-imported-dataset [:text :number] 2) })
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                 {:dataset-id dataset-id})
-                           (get-data *tenant-conn*))]
+          stored-data (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                     {:dataset-id dataset-id})]
       (is (= (map keys (:columns dataset)) '(("groupId"
                                               "key"
                                               "groupName"
@@ -72,9 +72,8 @@
           dataset-id (:dataset_id dataset)
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                 {:dataset-id dataset-id})
-                           (get-data *tenant-conn*))
+          stored-data (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                     {:dataset-id dataset-id})
           updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                    *error-tracker* (:dataset-id job) (:data-source-id job)
                         {:kind "clj"
