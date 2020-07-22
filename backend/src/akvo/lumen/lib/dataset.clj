@@ -103,6 +103,7 @@
         :updated         (:updated dataset)
         :status          "OK"
         :transformations (:transformations dataset)
+        :source          (:source dataset)
         :groups          groups}))
     (lib/not-found {:error "Not found"})))
 
