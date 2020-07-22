@@ -9,6 +9,7 @@
                                          summarise-transformation-logs-fixture
                                          *caddisfly*
                                          caddisfly-fixture]]
+            [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
@@ -35,6 +36,7 @@
             [clojure.walk :refer (stringify-keys keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [akvo.lumen.postgres Geoshape Geopoint]))
+
 
 (alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
 (alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
@@ -69,7 +71,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
@@ -77,9 +79,10 @@
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
     (conj res (:status job) job)))
 
+
 (defn latest-data [dataset-id]
   (let [table-name (:table-name
-                    (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))]
+                    (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))]
     (get-data *tenant-conn* {:table-name table-name})))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
@@ -163,7 +166,7 @@
 
         (is (= ::lib/ok tag))
 
-        (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
+        (let [table-name (:table-name (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                             {:dataset-id datasetId}))]
           (is (zero? (:c5 (get-val-from-table *tenant-conn*
                                               {:rnum        196
@@ -177,7 +180,7 @@
 (deftest ^:functional test-undo
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "GDP Undo Test"
                                                                :file "GDP.csv"})
-        {previous-table-name :table-name} (latest-dataset-version-by-dataset-id *tenant-conn*
+        {previous-table-name :table-name} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                 {:dataset-id dataset-id})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
     (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
@@ -194,12 +197,12 @@
                       (apply-transformation {:type :undo}))]
       (is (= ::lib/ok tag))
       (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
-      (is (= (:columns (dataset-version-by-dataset-id *tenant-conn*
+      (is (= (:columns (db.transformation/dataset-version-by-dataset-id *tenant-conn*
                                                       {:dataset-id dataset-id :version 2}))
-             (:columns (latest-dataset-version-by-dataset-id *tenant-conn*
+             (:columns (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                              {:dataset-id dataset-id}))))
       (let [table-name (:table-name
-                        (latest-dataset-version-by-dataset-id *tenant-conn*
+                        (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                               {:dataset-id dataset-id}))]
         (is (= "usa"
                (:c1 (get-val-from-table *tenant-conn*
@@ -208,7 +211,7 @@
                                          :table-name table-name})))))
       (apply-transformation {:type :undo})
       (let [table-name (:table-name
-                        (latest-dataset-version-by-dataset-id *tenant-conn*
+                        (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                               {:dataset-id dataset-id}))]
         (is (= "USA"
                (:c1 (get-val-from-table *tenant-conn*
@@ -228,7 +231,7 @@
                                                                             ::transformation.combine.s/separator " "})})]
     (is (= ::lib/ok tag))
     (let [table-name (:table-name
-                      (latest-dataset-version-by-dataset-id *tenant-conn*
+                      (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                             {:dataset-id dataset-id}))]
       (is (= "bob hope"
              (:d1 (get-val-from-table *tenant-conn*
@@ -246,7 +249,7 @@
                                                               :akvo.lumen.specs.transformation.combine/separator " "})})]
         (is (= ::lib/ok tag))
         (let [table-name (:table-name
-                          (latest-dataset-version-by-dataset-id *tenant-conn*
+                          (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                 {:dataset-id dataset-id}))]
           (is (= "hope "
                  (:d2 (get-val-from-table *tenant-conn*
@@ -291,7 +294,7 @@
                                         (apply-transformation (date-transformation "c3" "DD/MM/YYYY"))
                                         (apply-transformation (date-transformation "c4" "YYYY-MM-DD")))]
       (is (= ::lib/ok tag))
-      (let [table-name (:table-name (latest-dataset-version-by-dataset-id *tenant-conn*
+      (let [table-name (:table-name (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                           {:dataset-id datasetId}))
             table-data (get-data *tenant-conn* {:table-name table-name})]
         (is (= years (map (comp str tc/year tcc/from-long :c2) table-data)))
@@ -309,9 +312,9 @@
                                       :with-job? true})
           dataset-id (:dataset_id dataset)
           apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+          dataset (db.transformation/dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
+          stored-data (->> (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))]
       (testing "Testing columns are removed without tx"
@@ -526,7 +529,7 @@
         [tag _ :as all]      (apply-transformation {:type           :transformation
                                                     :transformation transformation})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+    (let [{:keys [columns transformations]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                   {:dataset-id dataset-id})]
       (is (= ["c1" "c2" "d1" "d2" "d3"] (map #(get % "columnName") columns)))
       (let [data (latest-data dataset-id)]
@@ -553,7 +556,7 @@
         [tag _]              (apply-transformation {:type           :transformation
                                                     :transformation transformation})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+    (let [{:keys [columns transformations]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                   {:dataset-id dataset-id})]
       (is (= ["c1" "c2" "d1" "d2"] (map #(get % "columnName") columns)))
       (let [data (latest-data dataset-id)]
@@ -568,7 +571,7 @@
     (let [[tag _] (apply-transformation {:type           :transformation
                                          :transformation c2-tx})]
       (is (= ::lib/ok tag))
-      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+      (let [{:keys [columns transformations]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                     {:dataset-id dataset-id})]
         (is (= ["c1" "c2" "d1" "d2"] (map #(get % "columnName") columns)))
         (let [data (latest-data dataset-id)]
@@ -587,7 +590,7 @@
                                                                         {::db.dataset-version.column.s/columnName "c2"
                                                                          :transformation.engine.s/onError         "fail"})})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+    (let [{:keys [columns transformations]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                   {:dataset-id dataset-id})]
       (is (= ["c1" "c3" "c4" "c5"] (map #(get % "columnName") columns)))
       (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
@@ -646,7 +649,7 @@
                                 (update-in ["args" "extractImage"] (constantly true))
                                 (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
-      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+      (let [{:keys [columns transformations table-name]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
 
         (is (= (apply conj ["c1" "c2"] (mapv (fn [idx] (str "d" idx)) (range 1 (inc (inc (count new-columns))))))
                (map #(get % "columnName") columns)))
@@ -676,7 +679,7 @@
                                 (update-in ["args" "extractImage"] (constantly true))
                                 (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
-      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+      (let [{:keys [columns transformations table-name]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
         (is (= [nil nil] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
 
 (defn- replace-column
@@ -717,7 +720,7 @@
     (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
 
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+    (let [{:keys [columns transformations table-name]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
       (is (every? #(= (:d1 %) (derive-category/find-number-cat mappings* (:c1 %) uncategorized-value)) data-db))
       (is (= new-derived-column
@@ -760,7 +763,7 @@
     (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
 
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+    (let [{:keys [columns transformations table-name]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
       (is (every? #(= (:d1 %) (derive-category/find-text-cat (derive-category/mappings-dict mappings*) (:c1 %) uncategorized-value)) data-db))
       (is (= new-derived-column
@@ -795,7 +798,7 @@
         [tag _ :as res] (apply-transformation {:type           :transformation
                                                :transformation tx})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
+    (let [{:keys [columns transformations table-name]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
       (is (=  (map (comp name :type) (apply conj
                                             (:columns origin-data)
@@ -847,7 +850,7 @@
                                                                          ::transformation.rename-column.s/columnName "c2"
                                                                          ::transformation.engine.s/onError           "fail"})})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+    (let [{:keys [columns transformations]} (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                   {:dataset-id dataset-id})]
       (is (= "New Title" (get-in (vec columns) [1 "title"])))
       (let [{:strs [before after]} (get-in (last transformations) ["changedColumns" "c2"])]
@@ -885,7 +888,7 @@
                                                                          ::transformation.generate-geopoints.s/columnNameLat  "c2"
                                                                          ::transformation.engine.s/onError                    "fail"})})]
     (is (= ::lib/ok tag))
-    (let [dataset             (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+    (let [dataset             (db.transformation/latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           {:keys [columns _]} dataset]
       (is (= 4 (count columns)))
       (is (= "geopoint" (get (last columns) "type")))
