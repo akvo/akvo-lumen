@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.update
   (:require [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.env :as env]
@@ -51,10 +52,8 @@
   pointing to the new table-name, imported-table-name and columns. We
   also delete the previous table-name and imported-table-name so we
   don't accumulate unused datasets on each update."
-  [conn job-execution-id dataset-id table-name imported-table-name dataset-version]
+  [conn job-execution-id dataset-id]
   (db.transformation/touch-dataset conn {:id dataset-id})
-  (db.transformation/drop-table conn {:table-name (:imported-table-name dataset-version)})
-  (db.transformation/drop-table conn {:table-name (:table-name dataset-version)})
   (db.job-execution/update-successful-job-execution conn {:id job-execution-id}))
 
 (defn- failed-update [conn job-execution-id reason]
@@ -114,66 +113,91 @@
                                    columns))
       nil)))
 
+(defn- compatible-errors-logic [tenant-conn data-source-spec dataset-id initial-dataset-version-col importer-columns]
+  (first
+   (filter some? (map #(let [imported-dataset-columns (vec (:columns %))
+
+                             columns-used (columns-used-in-txs
+                                           (import/importer-type (get data-source-spec "source"))
+                                           %
+                                           (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+
+                             imported-dataset-columns-checked (reduce (fn [c co]
+                                                                        (if (contains? columns-used (get co "columnName"))
+                                                                          (conj c co)
+                                                                          c)) [] imported-dataset-columns)
+                             ]
+                         (compatible-columns-error? imported-dataset-columns-checked importer-columns))
+                      initial-dataset-version-col)))
+  )
+
+(defn- coerce-column [{:keys [title id type key multipleId multipleType groupName groupId ns] :as column}]
+  (cond-> {"type" type
+           "title" title
+           "columnName" id
+           "groupName" groupName
+           "groupId" groupId
+           "ns" ns
+           "sort" nil
+           "direction" nil
+           "hidden" false}
+    key           (assoc "key" (boolean key))
+    multipleType (assoc "multipleType" multipleType)
+    multipleId   (assoc "multipleId" multipleId)))
+
+(defn dict-dsv [initial-dataset-version-col latest-dataset-version-col]
+  (let [res (reduce (fn [c ds] (update c (get (first (:columns ds)) "ns" "main") conj ds)) {} latest-dataset-version-col)
+        res1 (reduce (fn [c ds] (update c (get (first (:columns ds)) "ns" "main") conj ds)) res initial-dataset-version-col)]
+    res1))
+
 (defn- do-update [tenant-conn caddisfly import-config dataset-id data-source-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
-      (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
-            imported-dataset-columns (vec (:columns initial-dataset-version))
+      (let [version (:version (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id}))
+            initial-dataset-version-col  (db.transformation/initial-dataset-versions-to-update-by-dataset-id conn {:dataset-id dataset-id :version version})
             importer-columns         (p/columns importer)
-
-            columns-used (columns-used-in-txs
-                          (import/importer-type (get data-source-spec "source"))
-                          initial-dataset-version
-                          (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))
-            imported-dataset-columns-checked (reduce (fn [c co]
-                                                       (if (contains? columns-used (get co "columnName"))
-                                                         (conj c co)
-                                                         c)) [] imported-dataset-columns)]
-        (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
+            columns-by-ns (map  (fn [c] (update c :ns (fn [ns] (or ns "main")))) (p/columns importer))
+            grouped-columns-by-ns (group-by :ns columns-by-ns)
+            ns-table-names (reduce #(assoc % %2 (util/gen-table-name "ds")) {} (distinct (map :ns columns-by-ns)))]
+        (if-let [compatible-errors (compatible-errors-logic tenant-conn data-source-spec dataset-id initial-dataset-version-col importer-columns)]
           (failed-update conn job-execution-id
                          (cond-> "Column mismatch"
                            (seq (:missed-columns compatible-errors))
                            (str ".\n Following columns are missed in new data version: " (:missed-columns compatible-errors))
                            (seq (:wrong-types compatible-errors))
                            (str ".\n Following columns have changed the column type in new data version: " (:wrong-types compatible-errors))))
-          (let [table-name          (util/gen-table-name "ds")
-                imported-table-name (util/gen-table-name "imported")]
-            (postgres/create-dataset-table conn table-name importer-columns)
-            (doseq [record (map postgres/coerce-to-sql (p/records importer))]
-              (jdbc/insert! conn table-name record))
-            (db.job-execution/clone-data-table conn {:from-table table-name
-                                    :to-table   imported-table-name}
-                              {}
-                              {:transaction? false})
-            (let [dataset-version  (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
-                  coerce-column-fn (fn [{:keys [title id type key multipleId multipleType groupName groupId] :as column}]
-                                     (cond-> {"type" type
-                                              "title" title
-                                              "columnName" id
-                                              "groupName" groupName
-                                              "groupId" groupId
-                                              "sort" nil
-                                              "direction" nil
-                                              "hidden" false}
-                                       key           (assoc "key" (boolean key))
-                                       multipleType (assoc "multipleType" multipleType)
-                                       multipleId   (assoc "multipleId" multipleId)))
-                  importer-columns (mapv coerce-column-fn importer-columns)]
-              (engine/apply-transformation-log conn
-                                               caddisfly
-                                               table-name
-                                               imported-table-name
-                                               importer-columns
-                                               imported-dataset-columns
-                                               dataset-id
-                                               job-execution-id
-                                               dataset-version)
-              (successful-update conn
-                                 job-execution-id
-                                 dataset-id
-                                 table-name
-                                 imported-table-name
-                                 dataset-version))))))))
+          (let [latest-version  (:version (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id}))
+                latest-dataset-version-col (db.transformation/latest-dataset-versions-by-dataset-id conn {:dataset-id dataset-id :version latest-version})
+                dataset-version-col-by-ns (dict-dsv initial-dataset-version-col latest-dataset-version-col)]
+            (doseq [[ns* cols] grouped-columns-by-ns]
+             ;; todo foreign references????
+              (postgres/create-dataset-table conn (get ns-table-names ns*) cols))
+
+            (doseq [record-groups (take common/rows-limit (p/records importer))]
+              (doseq [record record-groups]
+                (jdbc/insert! conn (get ns-table-names (:ns (meta record) "main"))
+                              (postgres/coerce-to-sql record))))
+            
+            (doseq [[ns* [initial-dataset-version latest-dataset-version]] dataset-version-col-by-ns]
+              (let [imported-table-name (util/gen-table-name "imported")
+                    table-name (get ns-table-names ns*)]
+                (db.job-execution/clone-data-table conn {:from-table table-name
+                                                         :to-table   imported-table-name}
+                                                   {}
+                                                   {:transaction? false})
+                (engine/apply-transformation-log conn
+                                                 caddisfly
+                                                 table-name
+                                                 imported-table-name
+                                                 (mapv coerce-column (get grouped-columns-by-ns ns*))
+                                                 (vec (:columns initial-dataset-version))
+                                                 dataset-id
+                                                 job-execution-id
+                                                 initial-dataset-version
+                                                 latest-dataset-version)
+                (db.transformation/drop-table conn {:table-name (:imported-table-name latest-dataset-version)})
+                (db.transformation/drop-table conn {:table-name (:table-name latest-dataset-version)})))
+            (successful-update conn job-execution-id dataset-id)))))))
 
 (defn update-dataset [tenant-conn caddisfly import-config error-tracker dataset-id data-source-id data-source-spec]
   (if-let [current-tx-job (db.transformation/pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
