@@ -12,8 +12,9 @@
   [form]
   (into (flow-common/commons-columns form)
         (into
-         [{:title "Latitude" :type "number" :id "latitude"}
-          {:title "Longitude" :type "number" :id "longitude"}]
+         (->> [{:title "Latitude" :type "number" :id "latitude"}
+               {:title "Longitude" :type "number" :id "longitude"}]
+              (mapv #(assoc % :groupName "metadata" :groupId "metadata")))
          (common/coerce flow-common/question-type->lumen-type (flow-common/questions form)))))
 
 (defmulti render-response
@@ -84,7 +85,7 @@
 (defn response-data
   [form responses]
   (let [questions (flow-common/questions form)
-        responses (flow-common/question-responses questions responses)]
+        responses (flow-common/question-responses (:questionGroups form) questions responses)]
     (reduce (fn [response-data {:keys [type id]}]
               (if-let [response (get responses id)]
                 (assoc response-data
