@@ -78,8 +78,8 @@
 
   always we'll use 'transformations' groupId to include all generated transformations"
   [tenant-conn id]
-  (if-let [dataset (w/keywordize-keys (db.dataset/dataset-by-id tenant-conn {:id id}))]
-    (let [columns (remove #(get % :hidden) (:columns dataset))
+  (if-let [dataset (w/keywordize-keys (db.dataset/dataset-in-groups-by-id tenant-conn {:id id}))]
+    (let [columns (remove #(get % :hidden) (reduce #(into % %2) [] (map :columns (vals (:groups dataset)))) )
           groups  (if (= "AKVO_FLOW" (-> dataset :source :kind))
                     (let [columns-by-group (group-by :groupId columns)
                           groups           (dissoc columns-by-group nil)
@@ -89,12 +89,12 @@
                                        (let [k (if (contains? flow-common/metadata-keys (:columnName col))
                                                  :metadata :transformations)]
                                          (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                                     {:metadata [] :transformations []}  nil-group)))
+                                     {:metadata [] :transformations (get groups "transformations" [])}  nil-group)))
                     (reduce (fn [c col]
                               (let [k (if (i.csv/valid-column-name? (:columnName col))
                                         :main :transformations)]
                                 (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                            {:main [] :transformations []}  columns))]
+                            {:main [] :transformations (:transformations (get (:groups dataset) nil))}  columns))]
       (lib/ok
        {:id              id
         :name            (:title dataset)
@@ -102,8 +102,8 @@
         :created         (:created dataset)
         :updated         (:updated dataset)
         :status          "OK"
-        :transformations (:transformations dataset)
-        :groups          groups}))
+        :groups          groups
+        :transformations (:transformations groups)}))
     (lib/not-found {:error "Not found"})))
 
 (defn fetch
@@ -123,15 +123,16 @@
 
 (defn fetch-group
   [tenant-conn id group-id]
-  (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [column-remove-condition (condp = group-id
+  (when-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
+    (let [group-dataset (get (:groups dataset) (if (= "main" group-id) nil group-id))
+          column-remove-condition (condp = group-id
                                     "metadata" #(not (contains? flow-common/metadata-keys (get % "columnName")))
                                     "transformations" #(not (tx.engine/is-derived? (get % "columnName")))
                                     "main" #(not (i.csv/valid-column-name? (get % "columnName")))
                                     #(not (= group-id (get % "groupId"))))
-          columns (remove #(or (get % "hidden") (column-remove-condition %)) (:columns dataset))
+          columns (remove #(or (get % "hidden") (column-remove-condition %)) (:columns group-dataset))
           data (rest (jdbc/query tenant-conn
-                                 [(select-data-sql (:table-name dataset) columns)]
+                                 [(select-data-sql (:table-name group-dataset) columns)]
                                  {:as-arrays? true}))]
       (-> (select-keys dataset [:updated :created :modified])
           remove-token
