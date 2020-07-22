@@ -115,7 +115,8 @@
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
-    (if-let [source-dataset (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
+    (if-let [source-dataset (let [v (:version (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id}))]
+                              (first (db.transformation/latest-dataset-versions-by-dataset-id conn {:dataset-id source-dataset-id :version v})))]
       source-dataset
       (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
                       {:source source})))))
