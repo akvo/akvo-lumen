@@ -179,7 +179,7 @@
               (is (= {:id dataset-id
                       :name title
                       :status "OK"
-                      :transformations []
+                      :transformations nil
                       :groups {:transformations []
                                :main (map #(assoc % :groupName "main" :groupId "main") commons/dataset-link-columns)}}
                      (select-keys meta-group-dataset [:id :name :status :transformations :groups]))))
