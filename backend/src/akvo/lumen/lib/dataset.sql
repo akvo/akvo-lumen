@@ -60,7 +60,7 @@ SELECT * from dataset WHERE id IN (:v*:ids);
 -- :doc update dataset meta
 UPDATE dataset SET title = :title WHERE id = :id;
 
--- :name dataset-by-id :? :1
+-- :name dataset-by-id* :? :*
 WITH
 source_data AS (
 SELECT (spec->'source')::jsonb - 'refreshToken' as source
