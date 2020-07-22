@@ -66,11 +66,11 @@
 
 (defn data-records [column-spec rows]
   (for [row rows]
-    (apply merge
-           (map (fn [{:keys [id type]} value]
-                  {id (transform-value value type)})
-                column-spec
-                row))))
+    [(apply merge
+             (map (fn [{:keys [id type]} value]
+                    {id (transform-value value type)})
+                  column-spec
+                  row))]))
 
 (defn get-column-count [data]
   (let [counts (distinct (map count data))]
