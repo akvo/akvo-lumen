@@ -145,20 +145,21 @@ function DatasetTable(props) {
   }, [props.datasetGroupsAvailable, props.groups, isMounted.current, sidebarProps]);
 
   useEffect(() => {
+    if (isMounted.current) {
+      handleResize();
+    }
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMounted.current, props.groupAvailable]);
+
+  useEffect(() => {
     const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
     if (props.datasetGroupsAvailable && datasetHasQuestionGroups) {
       handleGroupsSidebar();
     }
-
-    const resizeTimeout = setTimeout(() => {
-      handleResize();
-    }, 500);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      clearTimeout(resizeTimeout);
-      window.removeEventListener('resize', handleResize);
-    };
   }, []);
 
   useEffect(() => {
