@@ -30,9 +30,11 @@
                                    :data (i-c/sample-imported-dataset [:text :number] 2) })
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                 {:dataset-id dataset-id})
-                           (get-data *tenant-conn*))]
+          stored-data (let [v (:version (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                     {:dataset-id dataset-id}))]
+                        (->> (first (latest-dataset-versions-by-dataset-id *tenant-conn*
+                                                                     {:dataset-id dataset-id :version v}))
+                             (get-data *tenant-conn*)))]
       (is (= (map keys (:columns dataset)) '(("groupId"
                                               "key"
                                               "groupName"
@@ -72,9 +74,11 @@
           dataset-id (:dataset_id dataset)
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                 {:dataset-id dataset-id})
-                           (get-data *tenant-conn*))
+          stored-data (let [v (:version (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                     {:dataset-id dataset-id}))]
+                        (->> (first (latest-dataset-versions-by-dataset-id *tenant-conn*
+                                                                     {:dataset-id dataset-id :version v}))
+                             (get-data *tenant-conn*)))
           updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                    *error-tracker* (:dataset-id job) (:data-source-id job)
                         {:kind "clj"

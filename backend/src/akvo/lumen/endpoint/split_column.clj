@@ -20,7 +20,8 @@
         tenant :tenant}]
     (let [query           (json/parse-string (get query-params "query") keyword)
           tenant-conn     (p/connection tenant-manager tenant)
-          dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+          dataset-version (let [v (:version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))]
+                            (first (db.transformation/latest-dataset-versions-by-dataset-id tenant-conn {:dataset-id dataset-id :version v})))
           sql-query       {:table-name  (:table-name dataset-version)
                            :column-name (:columnName query)
                            :limit       (str (:limit query "200"))}
