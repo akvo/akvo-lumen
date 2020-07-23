@@ -8,11 +8,11 @@
 
 (defn data-records [{:keys [columns rows]}]
   (for [row rows]
-    (apply merge
-           (map (fn [{:keys [id type]} {:keys [value]}]
-                  {id value})
-                columns
-                row))))
+    [(apply merge
+             (map (fn [{:keys [id type]} {:keys [value]}]
+                    {id value})
+                  columns
+                  row))]))
 
 (defn clj-data-importer [{:keys [columns rows] :as data} headers? guess-types?]
   (reify
