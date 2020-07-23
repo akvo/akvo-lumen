@@ -44,10 +44,12 @@ where dataset.id=dataset_id
 AND dataset_version.ns = :ns
 order by dataset_id, version desc;
 
--- :name update-dataset-version :! :n
+-- :name db-update-dataset-version :! :n
 -- :doc Update dataset version
 UPDATE dataset_version SET columns= :columns,  transformations= :transformations
-where dataset_id= :dataset-id and version= :version;
+where dataset_id= :dataset-id
+AND version= :version
+AND ns = :ns;
 
 -- :name initial-dataset-version-to-update-by-dataset-id :? :1
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
