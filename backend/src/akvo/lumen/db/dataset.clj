@@ -20,3 +20,5 @@
 (defn imported-dataset-columns-by-dataset-id [conn opts]
   (db-imported-dataset-columns-by-dataset-id conn (merge defaults opts)))
 
+(defn data-source-by-dataset-id [conn opts]
+  (db-data-source-by-dataset-id conn (merge defaults opts)))

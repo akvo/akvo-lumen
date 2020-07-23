@@ -118,10 +118,11 @@ SELECT dataset_version.columns
    AND ns = :ns
    AND version = 1;
 
--- :name data-source-by-dataset-id :? :1
+-- :name db-data-source-by-dataset-id :? :1
 SELECT data_source.*
   FROM data_source, dataset_version, job_execution
  WHERE dataset_version.dataset_id = :dataset-id
+   AND dataset_version.ns = :ns
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.type = 'IMPORT'
    AND job_execution.status = 'OK'
