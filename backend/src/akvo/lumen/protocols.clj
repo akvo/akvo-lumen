@@ -92,7 +92,8 @@
              lowercase alphanumeric ([a-z][a-z0-9]*)
 
      Optional:
-       :key - True if this column is required to be non-null and unique")
+       :key - True if this column is required to be non-null and unique
+       :ns - nil means `main` else the table-dataset_version ns value")
   (records [this]
     "Returns a sequence of record data. A record is a map of column ids to values.
      The type of the value depends on the type of the column where
