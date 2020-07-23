@@ -139,7 +139,7 @@
           (let [table-name          (util/gen-table-name "ds")
                 imported-table-name (util/gen-table-name "imported")]
             (postgres/create-dataset-table conn table-name importer-columns)
-            (doseq [record (map postgres/coerce-to-sql (p/records importer))]
+            (doseq [record (map (comp postgres/coerce-to-sql import/extract-first-and-merge) (p/records importer))]
               (jdbc/insert! conn table-name record))
             (db.job-execution/clone-data-table conn {:from-table table-name
                                     :to-table   imported-table-name}
