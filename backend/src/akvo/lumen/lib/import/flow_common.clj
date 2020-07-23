@@ -102,13 +102,30 @@
 ;; {question-group-id -> [{question-id -> response}]
 ;; to
 ;; {question-id -> first-response}
-(defn question-responses
-  "Returns a map from question-id to the first response iteration"
-  [questions responses]
+(defn- question-responses-base [questions responses]
   (->> responses
        vals
        (map first)
        (apply merge)))
+
+;; Transforms the structure
+;; {question-group-id -> [{question-id -> response}]
+;; to
+;; [(with-meta
+;;          {question-id -> first-response}
+;;          {:ns xxx})]
+(defn question-responses
+  "Returns a list of maps with meta from question-id to the first response iteration"
+  [groups questions responses]
+  (let [dict (let [[rep-col non-rep-col] (split-with :repeatable groups)]
+               {:rqg-ns (set (map :id rep-col)) :main-ns (set (map :id non-rep-col))})]
+    (into [(with-meta
+             (question-responses-base questions (select-keys responses (:main-ns dict)))
+             {:ns "main"})]
+          (mapv #(with-meta
+                   (question-responses-base questions {% (get responses %)})
+                   {:ns %})
+                (:rqg-ns dict)))))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
 
