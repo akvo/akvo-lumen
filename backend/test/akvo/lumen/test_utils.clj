@@ -4,6 +4,7 @@
             [akvo.lumen.lib.auth :as l.auth]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.lib.import :as import]
+            [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.config :as config]
             [akvo.lumen.lib.import.clj-data-importer]
             [akvo.lumen.lib.update :as update]
@@ -29,7 +30,6 @@
            [org.postgresql.util PSQLException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
@@ -174,7 +174,7 @@
           :as req}]
       (let [tenant-conn (p/connection tenant-manager tenant)]
         (handler (assoc req :auth-service
-                        (l.auth/new-auth-service {:auth-datasets       (map :id (all-datasets tenant-conn))
+                        (l.auth/new-auth-service {:auth-datasets       (map :id (db.dataset/all-datasets tenant-conn))
                                                   :auth-visualisations (mapv :id (all-visualisations tenant-conn))
                                                   :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
                                                   :auth-collections    (mapv :id (all-collections tenant-conn))
