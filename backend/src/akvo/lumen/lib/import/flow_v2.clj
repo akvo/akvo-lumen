@@ -84,7 +84,7 @@
 (defn response-data
   [form responses]
   (let [questions (flow-common/questions form)
-        responses (flow-common/question-responses questions responses)]
+        responses (flow-common/question-responses (:questionGroups form) questions responses)]
     (reduce (fn [response-data {:keys [type id]}]
               (if-let [response (get responses id)]
                 (assoc response-data
