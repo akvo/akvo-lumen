@@ -111,10 +111,11 @@ SELECT dataset_version.table_name AS "table-name"
                        FROM dataset_version
                        WHERE dataset_version.dataset_id=:id);
 
--- :name imported-dataset-columns-by-dataset-id :? :1
+-- :name db-imported-dataset-columns-by-dataset-id :? :1
 SELECT dataset_version.columns
   FROM dataset_version
  WHERE dataset_id = :dataset-id
+   AND ns = :ns
    AND version = 1;
 
 -- :name data-source-by-dataset-id :? :1

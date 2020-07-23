@@ -15,5 +15,8 @@
   (db-table-name-and-columns-by-dataset-id conn (merge defaults opts)))
 
 (defn table-name-by-dataset-id [conn opts]
-  (db-table-name-by-dataset-id conn (merge defaults opts))
-  )
+  (db-table-name-by-dataset-id conn (merge defaults opts)))
+
+(defn imported-dataset-columns-by-dataset-id [conn opts]
+  (db-imported-dataset-columns-by-dataset-id conn (merge defaults opts)))
+
