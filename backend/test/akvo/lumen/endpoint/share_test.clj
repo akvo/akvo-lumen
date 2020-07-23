@@ -20,7 +20,6 @@
 ;;; Helpers
 ;;;
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 

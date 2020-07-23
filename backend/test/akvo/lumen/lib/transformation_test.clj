@@ -12,6 +12,9 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
             [akvo.lumen.lib.multiple-column :as multiple-column]
+            [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
+            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
+
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
             [akvo.lumen.lib.transformation.engine :as engine]
@@ -69,7 +72,6 @@
 (use-fixtures :once tu/spec-instrument caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation_test.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
