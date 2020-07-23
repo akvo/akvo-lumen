@@ -19,19 +19,24 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
-(defn- successful-execution [conn job-execution-id data-source-id table-name columns {:keys [spec-name spec-description]} claims]
-  (let [dataset-id (util/squuid)
-        imported-table-name (util/gen-table-name "imported")
-        {:strs [rqg]} (env/all conn)]
-    (db.dataset/insert-dataset conn {:id dataset-id
-                          :title spec-name ;; TODO Consistent naming. Change on client side?
-                          :description spec-description
-                          :author claims})
+(defn- insert-dataset [conn dataset-id {:keys [spec-name spec-description]} claims]
+  (db.dataset/insert-dataset conn {:id dataset-id
+                                   :title spec-name ;; TODO Consistent naming. Change on client side?
+                                   :description spec-description
+                                   :author claims}))
+
+(defn- update-job-execution [conn job-execution-id dataset-id]
+  (db.job-execution/update-job-execution conn {:id             job-execution-id
+                                               :status         "OK"
+                                               :dataset-id     dataset-id}))
+
+(defn- new-dataset-version [conn dataset-id job-execution-id data-source-id table-name columns {:strs [rqg rqg-dsv]}]
+  (let [imported-table-name (util/gen-table-name "imported")]
     (db.job-execution/clone-data-table conn
-                      {:from-table table-name
-                       :to-table imported-table-name}
-                      {}
-                      {:transaction? false})
+                                       {:from-table table-name
+                                        :to-table imported-table-name}
+                                       {}
+                                       {:transaction? false})
     (db.dataset-version/new-dataset-version conn {:id (util/squuid)
                                :dataset-id dataset-id
                                :job-execution-id job-execution-id
@@ -54,34 +59,57 @@
                                                     (assoc column-def :ns ns :repeatable (= groupId ns))
                                                     column-def)))
                                               columns)
-                               :transformations []})
-    (db.job-execution/update-job-execution conn {:id             job-execution-id
-                                :status         "OK"
-                                :dataset-id     dataset-id})))
+                               :transformations []})))
 
 (defn- failed-execution [conn job-execution-id reason table-name]
   (db.job-execution/update-failed-job-execution conn {:id job-execution-id
                                      :reason [reason]})
   (db.transformation/drop-table conn {:table-name table-name}))
 
+(defn- ns-tables-cols* [columns rqg-dsv]
+  (if rqg-dsv
+    (let [columns        (map  (fn [c] (update c :ns (fn [ns] (or ns "main")))) columns)
+          ns-table-names (reduce #(assoc % %2 {:table-name (util/gen-table-name "ds")}) {} (distinct (map :ns columns)))]
+      (reduce (fn [c [k cols]] (assoc-in c [k :cols] cols)) ns-table-names #(group-by :ns columns)))
+    {"main" {:table-name (util/gen-table-name "ds") :cols "columns"}}))
+
+(comment
+  "to test"
+  (reduce (fn [c [k cols]] (assoc-in c [k :colums] cols)) {:a {:table-name "x"}
+                                                          :b {:table-name "y"}}
+          {:a [1 2 3] :b [4 5 6]})
+
+  (doseq [[ns* {:keys [table-name columns]}] {:a {:table-name "x", :columns [1 2 3]},
+                                              :b {:table-name "y", :columns [4 5 6]}}]
+    (println ns* table-name columns)))
+
 (defn- execute
   "Import runs within a future and since this is not taking part of ring
   request / response cycle we need to make sure to capture errors."
   [conn import-config error-tracker job-execution-id data-source-id claims spec]
   (future
-    (let [table-name (util/gen-table-name "ds")]
+    (let [{:strs [rqg rqg-dsv] :as environment} (env/all conn)
+          dataset-id (util/squuid)
+          dataset-spec {:spec-name        (get spec "name")
+                        :spec-description (get spec "description" "")}]
       (try
         (with-open [importer (common/dataset-importer (get spec "source")
-                                                      (assoc import-config :environment (env/all conn)))]
-          (let [columns (p/columns importer)]
-            (postgres/create-dataset-table conn table-name columns)
-            (doseq [record (map (comp postgres/coerce-to-sql common/extract-first-and-merge)
-                                (take common/rows-limit (p/records importer)))]
-              (jdbc/insert! conn table-name record))
-            (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
-                                                                                            :spec-description (get spec "description" "")} claims)))
+                                                      (assoc import-config :environment environment))]
+          (let [ns-tables-cols (ns-tables-cols* (p/columns importer) rqg-dsv)]
+            (doseq [[ns* {:keys [table-name cols]}] ns-tables-cols]
+              ;; todo foreign references????
+              (postgres/create-dataset-table conn (:table-name (get ns-tables-cols ns*)) cols))
+            (doseq [record-groups (take common/rows-limit (p/records importer))]
+              (doseq [record record-groups]
+                (jdbc/insert! conn (:table-name (get ns-tables-cols (:ns (meta record) "main")))
+                              (postgres/coerce-to-sql record))))
+            (insert-dataset conn dataset-id dataset-spec claims)
+            (doseq [[ns* {:keys [table-name cols]}] ns-tables-cols]
+              (new-dataset-version conn job-execution-id data-source-id table-name cols environment))
+            (update-job-execution conn job-execution-id dataset-id)))
         (catch Throwable e
-          (failed-execution conn job-execution-id (.getMessage e) table-name)
+          ;; TODO :: adapt
+          (failed-execution conn job-execution-id (.getMessage e) "TODO: table-name(s)")
           (log/error e)
           (p/track error-tracker e)
           (throw e))))))
