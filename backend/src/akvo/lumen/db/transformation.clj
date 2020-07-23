@@ -15,3 +15,6 @@
 
 (defn update-dataset-version [conn opts]
   (db-update-dataset-version conn (merge dv/defaults opts)))
+
+(defn initial-dataset-version-to-update-by-dataset-id [conn opts]
+  (db-initial-dataset-version-to-update-by-dataset-id conn (merge dv/defaults opts)))

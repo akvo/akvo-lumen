@@ -51,10 +51,11 @@ where dataset_id= :dataset-id
 AND version= :version
 AND ns = :ns;
 
--- :name initial-dataset-version-to-update-by-dataset-id :? :1
+-- :name db-initial-dataset-version-to-update-by-dataset-id :? :1
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
   FROM  dataset_version
   WHERE dataset_id= :dataset-id AND transformations='[]'
+  AND ns = :ns
   ORDER BY version DESC LIMIT 1;
 
 -- :name dataset-version-by-dataset-id :? :1
