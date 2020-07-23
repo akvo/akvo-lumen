@@ -18,33 +18,38 @@ UPDATE dataset
 -- :doc Checks the existence of a dataset for a given id
 SELECT id FROM dataset WHERE id = :id
 
--- :name latest-dataset-version-by-dataset-id :? :1
+-- :name db-latest-dataset-version-by-dataset-id :? :1
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
   FROM dataset_version
  WHERE dataset_id = :dataset-id
+   AND ns = :ns
    AND version = (SELECT MAX(v.version)
                     FROM dataset_version v
                    WHERE v.dataset_id = :dataset-id);
 
--- :name latest-dataset-versions-by-dataset-ids :? :*
--- :doc Returns the most recent dataset version for a given dataset id
+-- :name db-latest-dataset-versions-by-dataset-ids :? :*
+-- :doc Returns the most recent dataset version for a given dataset ids
 select DISTINCT ON (dataset_id) dataset_id, id, version, transformations, columns
 FROM dataset_version
 WHERE dataset_id IN (:v*:dataset-ids)
+AND dataset_version.ns = :ns
 order by dataset_id, version desc;
 
--- :name latest-dataset-versions :? :*
+-- :name db-latest-dataset-versions :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 select DISTINCT ON (dataset_id) dataset_id, dataset_version.id as id, version, title, transformations
 FROM dataset_version, dataset
 where dataset.id=dataset_id
+AND dataset_version.ns = :ns
 order by dataset_id, version desc;
 
--- :name update-dataset-version :! :n
+-- :name db-update-dataset-version :! :n
 -- :doc Update dataset version
 UPDATE dataset_version SET columns= :columns,  transformations= :transformations
-where dataset_id= :dataset-id and version= :version;
+where dataset_id= :dataset-id
+AND version= :version
+AND ns = :ns;
 
 -- :name initial-dataset-version-to-update-by-dataset-id :? :1
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations

@@ -10,6 +10,7 @@
                                          *caddisfly*
                                          caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
