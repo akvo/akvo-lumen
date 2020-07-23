@@ -10,3 +10,6 @@
 
 (defn dataset-by-id [conn opts]
   (db-dataset-by-id conn (merge defaults opts)))
+
+(defn table-name-and-columns-by-dataset-id [conn opts]
+  (db-table-name-and-columns-by-dataset-id conn (merge defaults opts)))
