@@ -1,4 +1,4 @@
--- :name all-datasets :? :*
+-- :name db-all-datasets :? :*
 -- :doc All datasets. Including pending datasets and datasets that failed to import
 WITH
 source_data AS (
@@ -6,6 +6,7 @@ source_data AS (
    FROM data_source, dataset_version, job_execution, dataset
   WHERE dataset_version.dataset_id = dataset.id
     AND dataset_version.version = 1
+    AND dataset_version.ns = :ns
     AND dataset_version.job_execution_id = job_execution.id
     AND job_execution.data_source_id = data_source.id
 ),
@@ -60,7 +61,7 @@ SELECT * from dataset WHERE id IN (:v*:ids);
 -- :doc update dataset meta
 UPDATE dataset SET title = :title WHERE id = :id;
 
--- :name dataset-by-id :? :1
+-- :name db-dataset-by-id :? :1
 WITH
 source_data AS (
 SELECT (spec->'source')::jsonb - 'refreshToken' as source
