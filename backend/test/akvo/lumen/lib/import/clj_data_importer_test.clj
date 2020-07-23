@@ -7,6 +7,7 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [clojure.tools.logging :as log]
+            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
             [akvo.lumen.specs.import :as i-c]
             [akvo.lumen.lib.import.clj-data-importer :as i]
             [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
