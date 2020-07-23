@@ -1,4 +1,4 @@
--- :name all-datasets :? :*
+-- :name db-all-datasets :? :*
 -- :doc All datasets. Including pending datasets and datasets that failed to import
 WITH
 source_data AS (
@@ -6,6 +6,7 @@ source_data AS (
    FROM data_source, dataset_version, job_execution, dataset
   WHERE dataset_version.dataset_id = dataset.id
     AND dataset_version.version = 1
+    AND dataset_version.ns = :ns
     AND dataset_version.job_execution_id = job_execution.id
     AND job_execution.data_source_id = data_source.id
 ),
@@ -60,13 +61,14 @@ SELECT * from dataset WHERE id IN (:v*:ids);
 -- :doc update dataset meta
 UPDATE dataset SET title = :title WHERE id = :id;
 
--- :name dataset-by-id :? :1
+-- :name db-dataset-by-id :? :1
 WITH
 source_data AS (
 SELECT (spec->'source')::jsonb - 'refreshToken' as source
   FROM data_source, dataset_version, job_execution, dataset
  WHERE dataset_version.dataset_id = dataset.id
    AND dataset_version.version = 1
+   AND dataset_version.ns = :ns
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.data_source_id = data_source.id
    AND dataset_version.dataset_id=:id
@@ -88,35 +90,39 @@ SELECT dataset_version.table_name AS "table-name",
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
 
--- :name table-name-and-columns-by-dataset-id :? :1
+-- :name db-table-name-and-columns-by-dataset-id :? :1
 SELECT dataset_version.table_name AS "table-name",
        dataset_version.columns
   FROM dataset_version, dataset
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
+   AND dataset_version.ns = :ns
    AND version=(SELECT max(version)
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
 
--- :name table-name-by-dataset-id :? :1
+-- :name db-table-name-by-dataset-id :? :1
 SELECT dataset_version.table_name AS "table-name"
   FROM dataset_version, dataset
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
+   AND dataset_version.ns = :ns
    AND version=(SELECT max(version)
-                  FROM dataset_version
-                 WHERE dataset_version.dataset_id=:id);
+                       FROM dataset_version
+                       WHERE dataset_version.dataset_id=:id);
 
--- :name imported-dataset-columns-by-dataset-id :? :1
+-- :name db-imported-dataset-columns-by-dataset-id :? :1
 SELECT dataset_version.columns
   FROM dataset_version
  WHERE dataset_id = :dataset-id
+   AND ns = :ns
    AND version = 1;
 
--- :name data-source-by-dataset-id :? :1
+-- :name db-data-source-by-dataset-id :? :1
 SELECT data_source.*
   FROM data_source, dataset_version, job_execution
  WHERE dataset_version.dataset_id = :dataset-id
+   AND dataset_version.ns = :ns
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.type = 'IMPORT'
    AND job_execution.status = 'OK'
