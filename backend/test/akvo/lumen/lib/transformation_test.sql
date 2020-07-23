@@ -1,7 +1,8 @@
--- :name get-table-name :? :1
+-- :name db-get-table-name :? :1
 SELECT table_name AS "table-name"
   FROM dataset_version
  WHERE job_execution_id = :job-id
+ AND ns = :ns
 
 -- :name get-val-from-table :? :1
 SELECT :i:column-name

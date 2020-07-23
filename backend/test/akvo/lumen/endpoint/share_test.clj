@@ -5,6 +5,7 @@
                                          tenant-conn-fixture
                                          system-fixture]]
             [akvo.lumen.lib.dashboard :as dashboard]
+            [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.lib.dataset :as ds]
             [akvo.lumen.lib.share :as share]
             [akvo.lumen.test-utils :as tu]
@@ -19,8 +20,6 @@
 ;;; Helpers
 ;;;
 
-(hugsql/def-db-fns "akvo/lumen/lib/dataset.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/dataset_version.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
