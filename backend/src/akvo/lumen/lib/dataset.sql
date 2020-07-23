@@ -101,14 +101,15 @@ SELECT dataset_version.table_name AS "table-name",
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
 
--- :name table-name-by-dataset-id :? :1
+-- :name db-table-name-by-dataset-id :? :1
 SELECT dataset_version.table_name AS "table-name"
   FROM dataset_version, dataset
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
+   AND dataset_version.ns = :ns
    AND version=(SELECT max(version)
-                  FROM dataset_version
-                 WHERE dataset_version.dataset_id=:id);
+                       FROM dataset_version
+                       WHERE dataset_version.dataset_id=:id);
 
 -- :name imported-dataset-columns-by-dataset-id :? :1
 SELECT dataset_version.columns
