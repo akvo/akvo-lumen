@@ -271,7 +271,7 @@ context('Akvo Lumen', () => {
           .then(() => {
             // open x axis menu
             cy.get('[data-test-id="x-axis-select"] .SelectMenu input')
-              .first()
+              .eq(2)
               .click({ force: true })
               .type(`${COLUMNS.NUMBER_1}{enter}`, { force: true });
 
