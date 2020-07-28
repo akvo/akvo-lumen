@@ -317,6 +317,7 @@ class BarConfigMenu extends Component {
               />
               <ConfigMenuSectionOptionSelect
                 id="metric_column"
+                clearable
                 placeholderId="select_a_metric_column"
                 labelTextId={metricColumnsY.length === 0 ? 'metric_column' : 'metric_columns'}
                 // eslint-disable-next-line max-len
@@ -325,6 +326,7 @@ class BarConfigMenu extends Component {
                 options={columnSelectOptions(this.props.intl, columnsMetricColumn)}
                 onChange={value => handleChangeSpec({
                   metricColumnY: value,
+                  ...(value === null && { metricAggregation: 'count' }),
                 }, spec, onChangeSpec, columnOptions)}
               />
               {splitColumn === false ? <SeriesMenu
