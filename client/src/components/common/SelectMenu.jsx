@@ -70,7 +70,7 @@ function SelectMenu(props) {
           }
         }}
         isClearable={props.clearable || false}
-        isSearchable={props.searchable || false}
+        isSearchable={props.searchable || true}
         placeholder={placeholder}
         inputProps={props.inputProps}
         className="TheSelect"

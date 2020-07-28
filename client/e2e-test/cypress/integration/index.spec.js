@@ -276,7 +276,7 @@ context('Akvo Lumen', () => {
               .type(`${COLUMNS.NUMBER_1}{enter}`, { force: true });
 
             cy.get('[data-test-id="y-axis-select"] .SelectMenu input')
-              .first()
+              .eq(0)
               .click({ force: true })
               .type(`${COLUMNS.NUMBER_2}{enter}`, { force: true });
 
@@ -308,12 +308,12 @@ context('Akvo Lumen', () => {
 
             // open bucket menu
             cy.get('[data-test-id="category-select"] .SelectMenu input')
-              .first()
+              .eq(0)
               .click({ force: true })
               .type(`${COLUMNS.TEXT_1}{enter}`, { force: true });
             // open size menu
             cy.get('[data-test-id="size-select"] .SelectMenu input')
-              .first()
+              .eq(0)
               .click({ force: true })
               .type(`${COLUMNS.NUMBER_3}{enter}`, { force: true });
 
