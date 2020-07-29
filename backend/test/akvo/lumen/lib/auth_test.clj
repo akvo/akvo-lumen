@@ -140,9 +140,10 @@
              :collection-ids #{}}))
      (is (s/valid? ::visualisation.maps.s/layers data)))))
 
-(def author {:given_name "Jerome$auth$",
+(def author {:given_name "Jerome",
              :email "jerome@t1.akvolumen.org",
              :aud ["akvo-lumen"],
+             "https://akvo.org/user_metadata" {"new_authz_flag" "true"}
              :allowed-origins
              ["http://t1.lumen.local:8081"
               "http://t1.lumen.local:3030"
@@ -152,7 +153,7 @@
              :session_state "1d91e2e6-3266-49a7-9d4e-d9dd90a1b8e4",
              :sub "343ef061-25ca-4808-841b-7218f8a26b7f",
              :iss "http://auth.lumen.local:8080/auth/realms/akvo",
-             :name "Jerome$auth$ Eginla",
+             :name "Jerome Eginla",
              :exp "2019-04-08T07:38:37Z",
              :azp "akvo-lumen",
              :realm_access

@@ -165,7 +165,7 @@
   (fn [handler]
     (fn [req]
       (handler (assoc req :jwt-claims {"typ" "Bearer"
-                                       "given_name" "User$auth$"})))))
+                                       "https://akvo.org/user_metadata" {"new_authz_flag" "true"}})))))
 
 (defmethod ig/init-key :akvo.lumen.test-utils/wrap-auth-datasets  [_ {:keys [tenant-manager] :as opts}]
   (fn [handler]

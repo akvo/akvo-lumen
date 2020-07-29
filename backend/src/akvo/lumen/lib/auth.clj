@@ -63,7 +63,7 @@
   "Feature flag condition based on `First Name` jwt-claims
   To match just add `$auth` to your `First Name` in your related auth system user profile"
   [request]
-  (str/includes? (get (:jwt-claims request) "given_name" "") "$auth$"))
+  (str/includes? (get-in (:jwt-claims request) ["https://akvo.org/user_metadata" "new_authz_flag"] "") "true"))
 
 (defn match-by-template-and-method?
   "`data` is a map following this structure {\"/api/library\" {:methods #{:get}}}
