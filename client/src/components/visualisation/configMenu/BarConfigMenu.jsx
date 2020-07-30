@@ -175,7 +175,6 @@ class BarConfigMenu extends Component {
                   value={columnSelectSelectedOption(spec.bucketColumn, columnsBucketColumn)}
                   name="xGroupColumnMenu"
                   options={columnSelectOptions(this.props.intl, columnsBucketColumn)}
-                  clearable
                   onChange={value => handleChangeSpec({
                     bucketColumn: value,
                   }, spec, onChangeSpec, columnOptions)}

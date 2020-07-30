@@ -154,7 +154,7 @@ class SeriesMenu extends Component {
                         placeholderId="select_a_metric_column"
                         value={columnSelectSelectedOption(metricColumnY, columns)}
                         name="metricColumnYInput"
-                        isClearable
+                        clearable
                         onChange={choice => this.updateSeries(choice, index)}
                         options={columnSelectOptions(this.props.intl, columns)}
                       />
