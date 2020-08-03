@@ -85,15 +85,17 @@
 (defn response-data
   [form responses]
   (let [questions (flow-common/questions form)
-        responses (flow-common/question-responses questions responses)]
-    (reduce (fn [response-data {:keys [type id]}]
-              (if-let [response (get responses id)]
-                (assoc response-data
-                       (format "c%s" id)
-                       (render-response type response))
-                response-data))
-            {}
-            questions)))
+        responses-col (flow-common/question-responses (:questionGroups form) questions responses)]
+    (mapv #(with-meta
+             (reduce (fn [response-data {:keys [type id]}]
+                       (if-let [response (get % id)]
+                         (assoc response-data
+                                (format "c%s" id)
+                                (render-response type response))
+                         response-data))
+                     {}
+                     questions) (meta %))
+          responses-col)))
 
 (defn form-data
   "Returns a lazy sequence of form data, ready to be inserted as a lumen dataset"
@@ -103,8 +105,10 @@
     (map (fn [form-instance]
            (let [data-point-id (get form-instance "dataPointId")
                  data-point (get data-points data-point-id)]
-             (merge (response-data form (get form-instance "responses"))
-                    (flow-common/common-records form-instance data-point)
-                    {:latitude (get-in data-points [data-point-id "latitude"])
-                     :longitude (get-in data-points [data-point-id "longitude"])})))
+             (let [[main-group & more-groups] (response-data form (get form-instance "responses"))]
+               (into [(merge main-group
+                             (flow-common/common-records form-instance data-point)
+                             {:latitude (get-in data-points [data-point-id "latitude"])
+                              :longitude (get-in data-points [data-point-id "longitude"])})]
+                     more-groups))))
          (flow-common/form-instances headers-fn form))))
