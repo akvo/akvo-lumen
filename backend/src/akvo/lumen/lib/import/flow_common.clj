@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.flow-common
   (:require
    [akvo.commons.psql-util :as pg]
+   [akvo.lumen.util :as u]
    [akvo.lumen.lib.import.common :as common]
    [akvo.lumen.http.client :as http.client]
    [cheshire.core :as json]
@@ -102,13 +103,30 @@
 ;; {question-group-id -> [{question-id -> response}]
 ;; to
 ;; {question-id -> first-response}
-(defn question-responses
-  "Returns a map from question-id to the first response iteration"
-  [questions responses]
+(defn- question-responses-base [responses]
   (->> responses
        vals
        (map first)
        (apply merge)))
+
+;; Transforms the structure
+;; {question-group-id -> [{question-id -> response}]
+;; to
+;; [(with-meta
+;;          {question-id -> first-response}
+;;          {:ns xxx})]
+(defn question-responses
+  "Returns a list of maps with meta from question-id to the first response iteration"
+  [groups responses]
+  (let [dict (let [[rep-col non-rep-col] (u/split-with-non-stop :repeatable groups)]
+               {:rqg-ns (set (map :id rep-col)) :main-ns (set (map :id non-rep-col))})]
+    (into [(with-meta
+             (question-responses-base (select-keys responses (:main-ns dict)))
+             {:ns "main"})]
+          (mapv #(with-meta
+                   (question-responses-base {% (get responses %)})
+                   {:ns %})
+                (:rqg-ns dict)))))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
 
