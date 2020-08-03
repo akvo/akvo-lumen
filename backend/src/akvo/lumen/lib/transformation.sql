@@ -23,7 +23,7 @@ SELECT id FROM dataset WHERE id = :id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
   FROM dataset_version
  WHERE dataset_id = :dataset-id
-   AND ns = :ns
+   AND namespace = :namespace
    AND version = (SELECT MAX(v.version)
                     FROM dataset_version v
                    WHERE v.dataset_id = :dataset-id);
@@ -33,7 +33,7 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
 select DISTINCT ON (dataset_id) dataset_id, id, version, transformations, columns
 FROM dataset_version
 WHERE dataset_id IN (:v*:dataset-ids)
-AND dataset_version.ns = :ns
+AND dataset_version.namespace = :namespace
 order by dataset_id, version desc;
 
 -- :name db-latest-dataset-versions :? :*
@@ -41,7 +41,7 @@ order by dataset_id, version desc;
 select DISTINCT ON (dataset_id) dataset_id, dataset_version.id as id, version, title, transformations
 FROM dataset_version, dataset
 where dataset.id=dataset_id
-AND dataset_version.ns = :ns
+AND dataset_version.namespace = :namespace
 order by dataset_id, version desc;
 
 -- :name db-update-dataset-version :! :n
@@ -49,13 +49,13 @@ order by dataset_id, version desc;
 UPDATE dataset_version SET columns= :columns,  transformations= :transformations
 where dataset_id= :dataset-id
 AND version= :version
-AND ns = :ns;
+AND namespace = :namespace;
 
 -- :name db-initial-dataset-version-to-update-by-dataset-id :? :1
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
   FROM  dataset_version
   WHERE dataset_id= :dataset-id AND transformations='[]'
-  AND ns = :ns
+  AND namespace = :namespace
   ORDER BY version DESC LIMIT 1;
 
 -- :name db-dataset-version-by-dataset-id :? :1
@@ -63,7 +63,7 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
   FROM dataset_version
  WHERE dataset_id = :dataset-id
-   AND ns = :ns
+   AND namespace = :namespace
    AND version = :version;
 
 -- :name clear-dataset-version-data-table :! :n
