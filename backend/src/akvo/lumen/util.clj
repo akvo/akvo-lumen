@@ -98,3 +98,12 @@
          ret# ~expr]
      (log/info ~data (str "Elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " msecs"))
      ret#))
+
+(defn split-with-non-stop
+  "similar as split-with but doesn't stop the condition on first true.
+  not lazy, returns 2 vectors"
+  [pred col]
+  (reduce
+   (fn [c x]
+     (update c (if (pred x) 0 1) conj x))
+   [[] []] col))

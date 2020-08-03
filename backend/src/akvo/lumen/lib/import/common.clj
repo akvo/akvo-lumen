@@ -49,3 +49,12 @@
                 {:multipleType (:multipleType q)
                  :multipleId (:multipleId q)})))))
        questions))
+
+(defn extract-first-and-merge
+  "extract every first group-responses into one `main` response"
+  [ns-responses]
+  (->> ns-responses
+       (group-by #(:ns (meta %)))
+       vals
+       (map first)
+       (reduce merge {})))
