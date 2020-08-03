@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.import.flow-common
   (:require
    [akvo.commons.psql-util :as pg]
+   [akvo.lumen.util :as u]
    [akvo.lumen.lib.import.common :as common]
    [akvo.lumen.http.client :as http.client]
    [cheshire.core :as json]
@@ -117,7 +118,7 @@
 (defn question-responses
   "Returns a list of maps with meta from question-id to the first response iteration"
   [groups questions responses]
-  (let [dict (let [[rep-col non-rep-col] (split-with :repeatable groups)]
+  (let [dict (let [[rep-col non-rep-col] (u/split-with-non-stop :repeatable groups)]
                {:rqg-ns (set (map :id rep-col)) :main-ns (set (map :id non-rep-col))})]
     (into [(with-meta
              (question-responses-base (select-keys responses (:main-ns dict)))
