@@ -72,7 +72,7 @@
                 {"583119147" "Mary",
                  "609479145" [{"text" "yes", "code" "1"}],
                  "594979148" 36.0}]
-               (flow-common/question-responses groups questions responses))))
+               (flow-common/question-responses groups responses))))
       (let [responses {"597899156" [{"609479145" [{"text" "yes", "code" "1"}],
                                      "594979148" 36.0}
                                     {"583119147" "Pol",
@@ -82,7 +82,7 @@
                                      "617309149" "Poppins"}]}]
         (is (= [{"588869155" "Sevilla", "617309149" "Poppins"}          
                 {"609479145" [{"text" "yes", "code" "1"}], "594979148" 36.0}]
-               (flow-common/question-responses groups questions responses))))
+               (flow-common/question-responses groups responses))))
       (let [responses {"597899156" [{"609479145" [{"text" "yes", "code" "1"}],
                                      "594979148" 36.0}
                                     {"583119147" "Pol",
@@ -91,9 +91,9 @@
                                      "617309149" "Poppins"}]}]
         (is (= [{"588869155" "Sevilla", "617309149" "Poppins"}          
                 {"609479145" [{"text" "yes", "code" "1"}], "594979148" 36.0}]
-               (flow-common/question-responses groups questions responses))))
+               (flow-common/question-responses groups responses))))
       (let [responses {"597899156" [{}
                                     {}],
                        "617319144" [{"617309149" "Poppins"}]}]
         (is (= [{"617309149" "Poppins"} {}]
-               (flow-common/question-responses groups questions responses)))))))
+               (flow-common/question-responses groups responses)))))))

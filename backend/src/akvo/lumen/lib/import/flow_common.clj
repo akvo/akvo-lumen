@@ -117,7 +117,7 @@
 ;;          {:ns xxx})]
 (defn question-responses
   "Returns a list of maps with meta from question-id to the first response iteration"
-  [groups questions responses]
+  [groups responses]
   (let [dict (let [[rep-col non-rep-col] (u/split-with-non-stop :repeatable groups)]
                {:rqg-ns (set (map :id rep-col)) :main-ns (set (map :id non-rep-col))})]
     (into [(with-meta

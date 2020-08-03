@@ -68,7 +68,7 @@
 (defn response-data
   [form responses]
   (let [questions (flow-questions form)
-        responses-col (flow-common/question-responses (:questionGroups form) questions responses)]
+        responses-col (flow-common/question-responses (:questionGroups form) responses)]
     (mapv #(with-meta
              (reduce (fn [response-data {:keys [type id derived-id derived-fn]}]
                        (if-let [response ((or derived-fn identity) (get % (or derived-id id)))]
