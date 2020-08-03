@@ -102,7 +102,7 @@
 ;; {question-group-id -> [{question-id -> response}]
 ;; to
 ;; {question-id -> first-response}
-(defn- question-responses-base [questions responses]
+(defn- question-responses-base [responses]
   (->> responses
        vals
        (map first)
@@ -120,10 +120,10 @@
   (let [dict (let [[rep-col non-rep-col] (split-with :repeatable groups)]
                {:rqg-ns (set (map :id rep-col)) :main-ns (set (map :id non-rep-col))})]
     (into [(with-meta
-             (question-responses-base questions (select-keys responses (:main-ns dict)))
+             (question-responses-base (select-keys responses (:main-ns dict)))
              {:ns "main"})]
           (mapv #(with-meta
-                   (question-responses-base questions {% (get responses %)})
+                   (question-responses-base {% (get responses %)})
                    {:ns %})
                 (:rqg-ns dict)))))
 

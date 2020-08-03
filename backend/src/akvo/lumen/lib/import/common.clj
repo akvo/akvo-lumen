@@ -57,4 +57,4 @@
        (group-by #(:ns (meta %)))
        vals
        (map first)
-       (reduce #(merge % %2) {})))
+       (reduce merge {})))
