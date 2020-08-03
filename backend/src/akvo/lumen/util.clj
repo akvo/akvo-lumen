@@ -105,5 +105,5 @@
   [pred col]
   (reduce
    (fn [c x]
-     (update c (if (pred x) 0 1) conj x)
-     ) [[] []] col))
+     (update c (if (pred x) 0 1) conj x))
+   [[] []] col))
