@@ -109,7 +109,7 @@
       (parse-box st-extent))))
 
 (defn get-column-titles [tenant-conn selector-name selector-value dataset-version-ns]
-  (let [sql-str "SELECT columns, modified FROM dataset_version WHERE %s='%s' AND ns='%s' ORDER BY version DESC LIMIT 1"]
+  (let [sql-str "SELECT columns, modified FROM dataset_version WHERE %s='%s' AND namespace='%s' ORDER BY version DESC LIMIT 1"]
     (map (fn [{:strs [columnName title]}]
            {:columnName columnName
             :title title})

@@ -2,7 +2,7 @@
 SELECT table_name AS "table-name"
   FROM dataset_version
  WHERE job_execution_id = :job-id
- AND ns = :ns
+ AND namespace = :namespace
 
 -- :name get-val-from-table :? :1
 SELECT :i:column-name
