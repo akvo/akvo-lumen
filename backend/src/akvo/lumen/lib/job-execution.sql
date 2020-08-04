@@ -26,20 +26,23 @@ SELECT spec
 -- :doc Update failed job execution
 UPDATE job_execution
    SET error_log = :reason,
-       status = 'FAILED'
+       status = 'FAILED',
+       modified=current_timestamp
  WHERE id = :id;
 
 -- :name update-successful-job-execution :! :n
 -- :doc Update successful job execution
 UPDATE job_execution
-   SET status = 'OK'
+   SET status = 'OK',
+       modified=current_timestamp
  WHERE id = :id;
 
 -- :name update-job-execution :! :n
 -- :doc Update successful job execution
 UPDATE job_execution
    SET status = :status,
-       dataset_id = :dataset-id
+       dataset_id = :dataset-id,
+       modified=current_timestamp
  WHERE id = :id;
 
 
