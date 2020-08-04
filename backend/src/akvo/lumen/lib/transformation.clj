@@ -51,6 +51,9 @@
             :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
         (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
+      (let [table-name (:table-name (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
+                                                                     {:dataset-id dataset-id}))]
+       (db.job-execution/vacuum-table tenant-conn {:table-name table-name}))
       (catch Exception e
         (let [msg (.getMessage e)]
           (engine/log-ex e)
