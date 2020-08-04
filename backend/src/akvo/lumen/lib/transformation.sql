@@ -7,6 +7,10 @@ VALUES (:id, :dataset-id, 'TRANSFORMATION')
 SELECT * from job_execution
 WHERE dataset_id=:dataset-id AND status='PENDING' AND type='TRANSFORMATION'
 
+-- :name pending-tx-or-update-job-execution :? :1
+SELECT * from job_execution
+WHERE dataset_id=:dataset-id AND status='PENDING' AND (type='UPDATE' OR type='TRANSFORMATION')
+
 
 -- :name touch-dataset :! :n
 -- :doc Updates the dataset's modified value to current_timestamp
