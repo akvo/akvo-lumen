@@ -15,6 +15,11 @@ INSERT INTO job_execution(id, data_source_id, dataset_id, type)
 CREATE TABLE :i:to-table (LIKE :i:from-table INCLUDING ALL);
 INSERT INTO :i:to-table SELECT * FROM :i:from-table;
 
+
+-- :name vacuum-table* :! :n
+-- :doc Vacuum a data table
+VACUUM (VERBOSE, ANALYZE, FULL) :i:table-name;
+
 -- :name data-source-spec-by-job-execution-id :? :1
 -- :doc Get the data source spec by job execution id
 SELECT spec

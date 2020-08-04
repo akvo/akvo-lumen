@@ -173,7 +173,9 @@
                                  dataset-id
                                  table-name
                                  imported-table-name
-                                 dataset-version))))))))
+                                 dataset-version)))))))
+  (let [dsv (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+    (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name]))))
 
 (defn update-dataset [tenant-conn caddisfly import-config error-tracker dataset-id data-source-id data-source-spec]
   (if-let [current-tx-job (db.transformation/pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
