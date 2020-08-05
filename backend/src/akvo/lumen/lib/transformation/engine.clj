@@ -231,9 +231,9 @@
   [op-spec older-columns new-columns]
   op-spec)
 
-(defn apply-transformation-log [conn caddisfly table-name imported-table-name
-                                new-columns old-columns dataset-id transformations]
-
+(defn apply-dataset-transformations-on-table
+  "no transactional thus we can discard the temporary table we are working with"
+  [conn caddisfly dataset-id transformations table-name new-columns old-columns]
   (loop [transformations transformations
          columns         new-columns
          applied-txs     []]
