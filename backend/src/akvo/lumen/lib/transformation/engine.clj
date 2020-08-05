@@ -2,6 +2,7 @@
   (:require [akvo.lumen.util :as util]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.db.job-execution :as db.job-execution]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -231,24 +232,10 @@
   op-spec)
 
 (defn apply-transformation-log [conn caddisfly table-name imported-table-name
-                                new-columns old-columns dataset-id job-execution-id
-                                {:keys [transformations version] :as dataset-version}]
-  (try
-    (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
-                                                   :version         version
-                                                   :columns         new-columns
-                                                    :transformations []})
-    (catch Exception e
-      (do
-        (log/error e ::db.transformation/update-dataset-version {:dataset-id      dataset-id
-                                                                 :version         version
-                                                                 :columns         new-columns
-                                                                 :transformations []})
-        (throw
-         (ex-info (format "Database problem updating dataset. (%s)" dataset-id) {})))))
+                                new-columns old-columns dataset-id transformations]
+
   (loop [transformations transformations
          columns         new-columns
-         version         (inc version)
          applied-txs     []]
     (if-let [transformation (first transformations)]
       (let [transformation       (adapt-transformation transformation old-columns columns)
@@ -259,7 +246,7 @@
                                      (set (columns-used t columns))
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
-          (recur (rest transformations) columns version applied-txs)
+          (recur (rest transformations) columns  applied-txs)
           (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns (assoc transformation :dataset-id dataset-id))]
             (when-not (:success? op)
               (throw
@@ -267,19 +254,10 @@
             (let [applied-txs (conj applied-txs
                                     (assoc transformation "changedColumns"
                                            (diff-columns columns (:columns op))))]
-              (db.transformation/update-dataset-version conn {:dataset-id      dataset-id
-                                            :version         version
-                                            :columns         (:columns op)
-                                            :transformations applied-txs})
-              (recur (rest transformations) (:columns op) (inc version) applied-txs)))))
-      (db.dataset-version/new-dataset-version conn {:id                  (str (util/squuid))
-                                 :dataset-id          dataset-id
-                                 :job-execution-id    job-execution-id
-                                 :table-name          table-name
-                                 :imported-table-name imported-table-name
-                                 :version             (inc (:version dataset-version))
-                                 :columns             (w/keywordize-keys columns)
-                                 :transformations     (w/keywordize-keys (vec applied-txs))}))))
+              (db.job-execution/vacuum-table conn {:table-name table-name})
+              (recur (rest transformations) (:columns op)  applied-txs)))))
+      {:columns             (w/keywordize-keys columns)
+       :transformations     (w/keywordize-keys (vec applied-txs))})))
 
 (defn column-title-error? [column-title columns]
   (when (not-empty (filter #(= column-title (get % "title")) columns))
