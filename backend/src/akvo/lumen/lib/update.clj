@@ -52,11 +52,20 @@
   pointing to the new table-name, imported-table-name and columns. We
   also delete the previous table-name and imported-table-name so we
   don't accumulate unused datasets on each update."
-  [conn job-execution-id dataset-id table-name imported-table-name dataset-version]
-  (db.transformation/touch-dataset conn {:id dataset-id})
-  (db.transformation/drop-table conn {:table-name (:imported-table-name dataset-version)})
-  (db.transformation/drop-table conn {:table-name (:table-name dataset-version)})
-  (db.job-execution/update-successful-job-execution conn {:id job-execution-id}))
+  [tenant-conn job-execution-id dataset-id table-name imported-table-name old-dataset-version columns transformations]
+  (jdbc/with-db-transaction [conn tenant-conn]
+    (db.dataset-version/new-dataset-version conn {:id                  (str (util/squuid))
+                                                  :dataset-id          dataset-id
+                                                  :job-execution-id    job-execution-id
+                                                  :table-name          table-name
+                                                  :imported-table-name imported-table-name
+                                                  :version             (inc (:version old-dataset-version))
+                                                  :columns             columns
+                                                  :transformations     transformations})
+    (db.transformation/touch-dataset conn {:id dataset-id})
+    (db.transformation/drop-table conn {:table-name (:imported-table-name old-dataset-version)})
+    (db.transformation/drop-table conn {:table-name (:table-name old-dataset-version)})
+    (db.job-execution/update-successful-job-execution conn {:id job-execution-id})))
 
 (defn- failed-update [conn job-execution-id reason]
   (db.job-execution/update-failed-job-execution conn {:id job-execution-id
@@ -174,7 +183,7 @@
        (try
          (let [{:keys [table-name imported-table-name
                        importer-columns imported-dataset-columns
-                       latest-dataset-version]} (import-data-to-table tenant-conn
+                       latest-dataset-version]}  (import-data-to-table tenant-conn
                                                                        caddisfly
                                                                        import-config
                                                                        dataset-id
@@ -187,22 +196,7 @@
                                                                                                 table-name
                                                                                                 importer-columns
                                                                                                 imported-dataset-columns)]
-           
-           (jdbc/with-db-transaction [conn tenant-conn]
-             (db.dataset-version/new-dataset-version conn {:id                  (str (util/squuid))
-                                                           :dataset-id          dataset-id
-                                                           :job-execution-id    job-execution-id
-                                                           :table-name          table-name
-                                                           :imported-table-name imported-table-name
-                                                           :version             (inc (:version latest-dataset-version))
-                                                           :columns             columns
-                                                           :transformations     transformations})
-             (successful-update conn
-                                job-execution-id
-                                dataset-id
-                                table-name
-                                imported-table-name
-                                latest-dataset-version)))
+           (successful-update tenant-conn job-execution-id dataset-id table-name imported-table-name latest-dataset-version columns transformations))
          (catch Exception e
            (failed-update tenant-conn job-execution-id (.getMessage e))
            (p/track error-tracker e)
