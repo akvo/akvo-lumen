@@ -10,12 +10,13 @@
             [clojure.string :as string]
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.lib.import.csv :as csv]
+            [akvo.lumen.db.transformation :refer [dataset-version-by-dataset-id]]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql])
   (:import [java.util.concurrent ExecutionException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
-(hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
+
 
 
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
