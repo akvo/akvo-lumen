@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
@@ -21,7 +21,12 @@ function PieConfigMenu(props) {
   } = props;
   const spec = visualisation.spec;
 
-  const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6']);
+  const specLegends = checkUndefined(spec, 'legend', 'order', 'list');
+
+  const visLegends = checkUndefined(visualisation, 'data', 'common', 'data') || [];
+
+  const legends = _.isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
+  specLegends : visLegends.map(l => l.key);
 
   const DragHandle = sortableHandle(() => <span>::</span>);
 
@@ -30,17 +35,27 @@ function PieConfigMenu(props) {
   const SortableList = sortableContainer(() =>
     (
       <ul>
-        {items.map((value, index) => (
+        {legends.map((value, index) => (
           <SortableItem key={`item-${value}`} index={index} value={value} />
         ))}
       </ul>
     )
   );
 
-  const onSortEnd = ({ oldIndex, newIndex }) => {
-    setItems(arrayMove(items, oldIndex, newIndex));
+  // ensure spec legend has order object
+  const getSpecLegend = () => {
+    const legend = { ...spec.legend };
+    const order = { ...spec.legend.order };
+    legend.order = order;
+    return legend;
   };
 
+  const onSortEnd = ({ oldIndex, newIndex }) => {
+    const currentItems = arrayMove(legends, oldIndex, newIndex);
+    const legend = getSpecLegend();
+    legend.order.list = currentItems;
+    onChangeSpec({ legend });
+  };
 
   return (
     <div className="PieConfigMenu">
@@ -82,11 +97,13 @@ function PieConfigMenu(props) {
                       labelId="legend_category_order"
                       className="InputGroup"
                       checked={Boolean(checkUndefined(spec, 'legend', 'order', 'mode') === 'custom')}
-                      onChange={val => onChangeSpec({
-                        legend: { order: { mode: val ? 'custom' : 'auto' } },
-                      })}
+                      onChange={(val) => {
+                        const legend = getSpecLegend();
+                        legend.order.mode = val ? 'custom' : 'auto';
+                        onChangeSpec({ legend });
+                      }}
                     />
-                    <SortableList items={items} onSortEnd={onSortEnd} />
+                    <SortableList items={legends} onSortEnd={onSortEnd} />
                   </div>)}
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
