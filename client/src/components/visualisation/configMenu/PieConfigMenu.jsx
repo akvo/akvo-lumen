@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
+import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
+import arrayMove from 'array-move';
 
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
+import { checkUndefined } from '../../../utilities/utils';
+
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
+
 
 function PieConfigMenu(props) {
   const {
@@ -15,6 +20,27 @@ function PieConfigMenu(props) {
     columnOptions,
   } = props;
   const spec = visualisation.spec;
+
+  const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6']);
+
+  const DragHandle = sortableHandle(() => <span>::</span>);
+
+  const SortableItem = sortableElement(({ value }) => <li><DragHandle />{value}</li>);
+
+  const SortableList = sortableContainer(() =>
+    (
+      <ul>
+        {items.map((value, index) => (
+          <SortableItem key={`item-${value}`} index={index} value={value} />
+        ))}
+      </ul>
+    )
+  );
+
+  const onSortEnd = ({ oldIndex, newIndex }) => {
+    setItems(arrayMove(items, oldIndex, newIndex));
+  };
+
 
   return (
     <div className="PieConfigMenu">
@@ -48,6 +74,20 @@ function PieConfigMenu(props) {
             />
             {Boolean(spec.showLegend) && (
               <div>
+                {Boolean(props.env.environment.orderedLegend) && (
+                  <div>
+                    <ToggleInput
+                      name="orderLegend"
+                      type="checkbox"
+                      labelId="legend_category_order"
+                      className="InputGroup"
+                      checked={Boolean(checkUndefined(spec, 'legend', 'order', 'mode') === 'custom')}
+                      onChange={val => onChangeSpec({
+                        legend: { order: { mode: val ? 'custom' : 'auto' } },
+                      })}
+                    />
+                    <SortableList items={items} onSortEnd={onSortEnd} />
+                  </div>)}
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
                   placeholderId="legend_title"
