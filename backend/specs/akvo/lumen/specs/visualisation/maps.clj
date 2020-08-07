@@ -6,6 +6,7 @@
             [akvo.lumen.specs.protocols :as protocols.s]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.visualisation.maps.layer :as layer.s]
+            [akvo.lumen.specs.visualisation.legend :as legend.s]
             [clojure.spec.alpha :as s]))
 
 (alias 'layer.geo-location.s 'akvo.lumen.specs.visualisation.maps.layer.geo-location)
@@ -14,9 +15,10 @@
 
 (defmulti layer-type :layerType)
 
+(s/def ::legend (s/keys :req-un [::legend.s/title ::legend.s/visible]))
 (s/def ::layer-commons (s/keys :req-un [::layer.s/popup
                                         ::postgres.filter/filters
-                                        ::layer.s/legend
+                                        ::legend.s/legend
                                         ::layer.s/pointSize
                                         ::layer.s/pointColorMapping
                                         ::layer.s/latitude

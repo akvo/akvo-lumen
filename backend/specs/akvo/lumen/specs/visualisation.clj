@@ -15,6 +15,7 @@
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
             [akvo.lumen.specs.protocols :as protocols.s]
             [akvo.lumen.specs.visualisation.maps :as visualisation.maps.s]
+            [akvo.lumen.specs.visualisation.legend :as legend.s]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]))
 
@@ -36,10 +37,10 @@
 
 (s/def ::version int?)
 (s/def ::sort any?)
-(s/def ::showLegend (s/nilable boolean?))
 (s/def ::showLabels (s/nilable boolean?))
-(s/def ::legendPosition (s/nilable #{"right" "top" "left" "bottom"}))
-(s/def ::legendTitle (s/nilable string?))
+(s/def ::showLegend (s/nilable ::legend.s/visible))
+(s/def ::legendPosition (s/nilable ::legend.s/position))
+(s/def ::legendTitle (s/nilable ::legend.s/title))
 
 (defmulti vis :visualisationType)
 
@@ -49,8 +50,8 @@
 (s/def ::visualisations (s/coll-of ::visualisation :distinct true))
 
 (s/def ::base-spec (s/keys :req-un [::version]
-                           :opt-un [::postgres.filter/filters ::legendTitle ::showLegend ::sort
-                                    ::showLabels ::legendPosition]))
+                           :opt-un [::postgres.filter/filters ::sort ::showLabels
+                                    ::showLegend ::legendTitle ::legendPosition]))
 
 (s/def ::base-viz (s/keys :req-un [::name ::visualisationType ::datasetId]
                           :opt-un [::created ::modified ::id ::type]))
