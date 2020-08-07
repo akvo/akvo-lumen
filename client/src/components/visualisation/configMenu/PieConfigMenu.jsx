@@ -108,6 +108,7 @@ function PieConfigMenu(props) {
 PieConfigMenu.propTypes = {
   intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
