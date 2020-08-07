@@ -116,6 +116,7 @@ function ConfigMenu(props) {
     return (
       <the.component
         visualisation={props.visualisation}
+        env={props.env}
         onChangeSpec={props.onChangeVisualisationSpec}
         datasets={props.datasets}
         columnOptions={columnOptions}
@@ -179,6 +180,7 @@ Subtitle.propTypes = {
 ConfigMenu.propTypes = {
   intl: intlShape,
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   rasters: PropTypes.object.isRequired,
