@@ -52,7 +52,7 @@
 (s/def ::base-spec (s/keys :req-un [::version]
                            :opt-un [::postgres.filter/filters ::sort ::showLabels
                                     ::showLegend ::legendTitle ::legendPosition
-                                    ::legend.s/ordered ::legend.s/orderedList]))
+                                    ::legend.s/legend]))
 
 (s/def ::base-viz (s/keys :req-un [::name ::visualisationType ::datasetId]
                           :opt-un [::created ::modified ::id ::type]))

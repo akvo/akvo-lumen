@@ -16,7 +16,7 @@
 (defmulti layer-type :layerType)
 
 (s/def ::legend (s/keys :req-un [::legend.s/title ::legend.s/visible]
-                        :opt-un [::legend.s/ordered ::legend.s/orderedList]))
+                        :opt-un [::legend.s/order]))
 
 (s/def ::layer-commons (s/keys :req-un [::layer.s/popup
                                         ::postgres.filter/filters
