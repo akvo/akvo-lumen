@@ -8,3 +8,9 @@
 (s/def ::visible boolean?)
 
 (s/def ::position #{"right" "top" "left" "bottom"})
+
+(s/def ::ordered boolean?)
+
+(s/def ::orderedValue string?)
+
+(s/def ::orderedList (s/coll-of ::orderedValue :distinct true))

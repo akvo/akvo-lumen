@@ -15,10 +15,12 @@
 
 (defmulti layer-type :layerType)
 
-(s/def ::legend (s/keys :req-un [::legend.s/title ::legend.s/visible]))
+(s/def ::legend (s/keys :req-un [::legend.s/title ::legend.s/visible]
+                        :opt-un [::legend.s/ordered ::legend.s/orderedList]))
+
 (s/def ::layer-commons (s/keys :req-un [::layer.s/popup
                                         ::postgres.filter/filters
-                                        ::legend.s/legend
+                                        ::legend
                                         ::layer.s/pointSize
                                         ::layer.s/pointColorMapping
                                         ::layer.s/latitude
