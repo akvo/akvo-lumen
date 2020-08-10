@@ -46,6 +46,7 @@ export default class PieChart extends Component {
     style: PropTypes.object,
     labelsVisible: PropTypes.bool,
     visualisation: PropTypes.object,
+    env: PropTypes.object,
   }
 
   static defaultProps = {
@@ -68,7 +69,7 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    const { data } = this.props;
+    const { data, env } = this.props;
     if (!get(data, 'series[0]')) return false;
     const series = merge({}, data.common, data.series[0]);
     const specLegend = this.props.visualisation.spec.legend || {};
@@ -76,7 +77,7 @@ export default class PieChart extends Component {
     const sortFunctionFactory = get(data, 'series.common.metadata.type') === 'text' ?
           sortAlphabetically : sortChronologically;
     let sortList;
-    if (specLegendOrder.mode === 'custom') {
+    if (env.environment.orderedLegend && specLegendOrder.mode === 'custom') {
       sortList = (list) => {
         if (isEqual(new Set(specLegendOrder.list), new Set(list.map(({ key }) => key)))) {
           // if bucket column changes we need to get the new spec api call returned
