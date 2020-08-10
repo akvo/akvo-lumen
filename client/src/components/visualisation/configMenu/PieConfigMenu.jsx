@@ -1,12 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
+import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
+import arrayMove from 'array-move';
+import { isEqual } from 'lodash';
 
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
+import { checkUndefined } from '../../../utilities/utils';
+
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
+
 
 function PieConfigMenu(props) {
   const {
@@ -15,6 +21,42 @@ function PieConfigMenu(props) {
     columnOptions,
   } = props;
   const spec = visualisation.spec;
+
+  const specLegends = checkUndefined(spec, 'legend', 'order', 'list');
+
+  const visLegends = checkUndefined(visualisation, 'data', 'common', 'data') || [];
+
+  const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
+  specLegends : visLegends.map(l => l.key);
+
+  const DragHandle = sortableHandle(() => <span>::</span>);
+
+  const SortableItem = sortableElement(({ value }) => <li><DragHandle />{value}</li>);
+
+  const SortableList = sortableContainer(() =>
+    (
+      <ul>
+        {legends.map((value, index) => (
+          <SortableItem key={`item-${value}`} index={index} value={value} />
+        ))}
+      </ul>
+    )
+  );
+
+  // ensure spec legend has order object
+  const getSpecLegend = () => {
+    const legend = { ...spec.legend };
+    const order = { ...spec.legend.order };
+    legend.order = order;
+    return legend;
+  };
+
+  const onSortEnd = ({ oldIndex, newIndex }) => {
+    const currentItems = arrayMove(legends, oldIndex, newIndex);
+    const legend = getSpecLegend();
+    legend.order.list = currentItems;
+    onChangeSpec({ legend });
+  };
 
   return (
     <div className="PieConfigMenu">
@@ -48,6 +90,22 @@ function PieConfigMenu(props) {
             />
             {Boolean(spec.showLegend) && (
               <div>
+                {Boolean(props.env.environment.orderedLegend) && (
+                  <div>
+                    <ToggleInput
+                      name="orderLegend"
+                      type="checkbox"
+                      labelId="legend_category_order"
+                      className="InputGroup"
+                      checked={Boolean(checkUndefined(spec, 'legend', 'order', 'mode') === 'custom')}
+                      onChange={(val) => {
+                        const legend = getSpecLegend();
+                        legend.order.mode = val ? 'custom' : 'auto';
+                        onChangeSpec({ legend });
+                      }}
+                    />
+                    <SortableList items={legends} onSortEnd={onSortEnd} />
+                  </div>)}
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
                   placeholderId="legend_title"
@@ -108,6 +166,7 @@ function PieConfigMenu(props) {
 PieConfigMenu.propTypes = {
   intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
