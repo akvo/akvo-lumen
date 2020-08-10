@@ -1,4 +1,5 @@
 import { isEqual } from 'lodash';
+import { checkUndefined } from './utils';
 
 export const specIsValidForApi = (spec, vType) => {
   let anyLayerInvalid;
@@ -83,6 +84,8 @@ export const getNeedNewAggregation = (
     console.log('getNeedNewAggregation', newV, oldV, vType, oldV.visualisationType);
     return true;
   }
+  const newLegendOrder = checkUndefined(newV, 'spec', 'legend', 'order') || {};
+  const oldLegendOrder = checkUndefined(oldV, 'spec', 'legend', 'order') || {};
 
   switch (vType) {
     case 'bar':
@@ -123,7 +126,9 @@ export const getNeedNewAggregation = (
         newV.datasetId !== oldV.datasetId ||
         newV.spec.bucketColumn !== oldV.spec.bucketColumn ||
         newV.spec.sort !== oldV.spec.sort ||
-        !isEqual(newV.spec.filters, oldV.spec.filters)
+        !isEqual(newV.spec.filters, oldV.spec.filters) ||
+        newLegendOrder.mode !== oldLegendOrder.mode ||
+        !isEqual(newLegendOrder.list, oldLegendOrder.list)
       );
     case 'line':
     case 'area':

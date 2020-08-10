@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
 import arrayMove from 'array-move';
+import { isEqual } from 'lodash';
 
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
@@ -25,7 +26,7 @@ function PieConfigMenu(props) {
 
   const visLegends = checkUndefined(visualisation, 'data', 'common', 'data') || [];
 
-  const legends = _.isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
+  const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
   specLegends : visLegends.map(l => l.key);
 
   const DragHandle = sortableHandle(() => <span>::</span>);
