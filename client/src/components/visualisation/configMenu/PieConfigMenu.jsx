@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl, intlShape } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
 import arrayMove from 'array-move';
 import { isEqual } from 'lodash';
 
+import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
 import { checkUndefined } from '../../../utilities/utils';
@@ -19,6 +20,7 @@ function PieConfigMenu(props) {
     visualisation,
     onChangeSpec,
     columnOptions,
+    intl,
   } = props;
   const spec = visualisation.spec;
 
@@ -45,8 +47,8 @@ function PieConfigMenu(props) {
 
   // ensure spec legend has order object
   const getSpecLegend = () => {
-    const legend = { ...spec.legend };
-    const order = { ...spec.legend.order };
+    const legend = { ...spec.legend } || {};
+    const order = { ...legend.order } || {};
     legend.order = order;
     return legend;
   };
@@ -92,17 +94,22 @@ function PieConfigMenu(props) {
               <div>
                 {Boolean(props.env.environment.orderedLegend) && (
                   <div>
-                    <ToggleInput
-                      name="orderLegend"
-                      type="checkbox"
-                      labelId="legend_category_order"
-                      className="InputGroup"
-                      checked={Boolean(checkUndefined(spec, 'legend', 'order', 'mode') === 'custom')}
+                    <ButtonRowInput
+                      options={[{
+                        label: <FormattedMessage id="legend_order_auto_mode" />,
+                        value: 'auto',
+                      }, {
+                        label: <FormattedMessage id="legend_order_custom_mode" />,
+                        value: 'custom',
+                      }]}
+                      selected={checkUndefined(spec, 'legend', 'order', 'mode') || 'auto'}
+                      label={intl.formatMessage({ id: 'legend_category_order' })}
                       onChange={(val) => {
                         const legend = getSpecLegend();
-                        legend.order.mode = val ? 'custom' : 'auto';
+                        legend.order.mode = val;
                         onChangeSpec({ legend });
                       }}
+                      buttonSpacing="0"
                     />
                     <SortableList items={legends} onSortEnd={onSortEnd} />
                   </div>)}

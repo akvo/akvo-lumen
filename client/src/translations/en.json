@@ -184,6 +184,8 @@
   "left": "Left",
   "legend": "Legend",
   "legend_category_order": "Category order",
+  "legend_order_auto_mode": "Auto",
+  "legend_order_custom_mode": "Custom",
   "legend_position": "Legend position",
   "legend_position_auto": "Auto",
   "legend_position_bottom": "Bottom",
