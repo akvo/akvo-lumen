@@ -111,6 +111,7 @@ export default class Chart extends Component {
       height,
       onChangeVisualisationSpec,
       showTitle,
+      env
     } = this.props;
 
     if (!visualisation.data) {
@@ -156,6 +157,7 @@ export default class Chart extends Component {
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
+            env={env}
           />
         );
       case 'polararea':
