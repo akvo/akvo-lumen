@@ -13,7 +13,8 @@ import { checkUndefined } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
-
+import { palette } from '../../../utilities/visualisationColors';
+import LegendShape from '../../charts/LegendShape';
 
 function PieConfigMenu(props) {
   const {
@@ -31,9 +32,15 @@ function PieConfigMenu(props) {
   const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
   specLegends : visLegends.map(l => l.key);
 
+  const getColor = (key, index) => (spec.colors && spec.colors[key]) || palette[index];
+
   const DragHandle = sortableHandle(() => <span>::</span>);
 
-  const SortableItem = sortableElement(({ value }) => <li><DragHandle />{value}</li>);
+  const SortableItem = sortableElement(({ value }) => {
+    const index = legends.indexOf(value);
+    return (<li><DragHandle index={index} key={value} />
+      <LegendShape fill={getColor(value, index)} />{value}</li>);
+  });
 
   const SortableList = sortableContainer(() =>
     (
