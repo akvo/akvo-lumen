@@ -212,6 +212,7 @@ class VisualisationEditor extends Component {
             onChangeVisualisationSpec={props.onChangeVisualisationSpec}
             onSaveVisualisation={props.onSaveVisualisation}
             loadDataset={props.loadDataset}
+            env={props.env}
           />
         )}
         { visualisationToRender && <VisualisationPreview
@@ -222,6 +223,7 @@ class VisualisationEditor extends Component {
           width={props.exporting ? 1000 : undefined}
           height={props.exporting ? 600 : undefined}
           exporting={props.exporting}
+          env={props.env}
         />}
       </div>
     );
@@ -230,6 +232,7 @@ class VisualisationEditor extends Component {
 
 VisualisationEditor.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeVisualisationType: PropTypes.func.isRequired,
   onChangeSourceDataset: PropTypes.func.isRequired,
