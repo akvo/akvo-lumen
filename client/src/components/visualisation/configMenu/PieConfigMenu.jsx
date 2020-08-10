@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
 import arrayMove from 'array-move';
-import { isEqual } from 'lodash';
-
+import isEqual from 'lodash/isEqual';
+import get from 'lodash/get';
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
-import { checkUndefined } from '../../../utilities/utils';
-
+import { sortAlphabetically, sortChronologically } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
@@ -25,16 +24,19 @@ function PieConfigMenu(props) {
   } = props;
   const spec = visualisation.spec;
 
-  const specLegends = checkUndefined(spec, 'legend', 'order', 'list');
+  const specLegends = get(spec, 'legend.order.list');
 
-  const visLegends = checkUndefined(visualisation, 'data', 'common', 'data') || [];
+  const visLegends = get(visualisation, 'data.common.data') || [];
+
+  const sortFunctionFactory = get(visualisation, 'data.common.metadata.type') === 'text' ?
+        sortAlphabetically : sortChronologically;
 
   const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
-  specLegends : visLegends.map(l => l.key);
+        specLegends : visLegends.map(l => l.key).sort(sortFunctionFactory);
 
   const getColor = (key, index) => (spec.colors && spec.colors[key]) || palette[index];
 
-  const sortable = (checkUndefined(spec, 'legend', 'order', 'mode') || 'auto') !== 'auto';
+  const sortable = (get(spec, 'legend.order.mode') || 'auto') !== 'auto';
 
   const DragHandle = sortableHandle(() => <div style={{ marginRight: '4px' }}><span>::</span></div>);
 
@@ -85,11 +87,17 @@ function PieConfigMenu(props) {
             name="xGroupColumnMenu"
             options={filterColumns(columnOptions, ['number', 'date', 'text'])}
             clearable
-            onChange={value => onChangeSpec({
-              bucketColumn: value,
-              legendTitle: columnOptions.find(item => item.value === value) ?
-                columnOptions.find(item => item.value === value).title : null,
-            })}
+            onChange={(value) => {
+              const legend = getSpecLegend();
+              legend.order.mode = 'auto';
+              legend.order.list = legends.sort(sortFunctionFactory);
+              onChangeSpec({
+                bucketColumn: value,
+                legendTitle: columnOptions.find(item => item.value === value) ?
+                  columnOptions.find(item => item.value === value).title : null,
+                legend,
+              });
+            }}
           />
         )}
         advancedOptions={(
@@ -117,11 +125,14 @@ function PieConfigMenu(props) {
                         label: <FormattedMessage id="legend_order_custom_mode" />,
                         value: 'custom',
                       }]}
-                      selected={checkUndefined(spec, 'legend', 'order', 'mode') || 'auto'}
+                      selected={get(spec, 'legend.order.mode') || 'auto'}
                       label={intl.formatMessage({ id: 'legend_category_order' })}
                       onChange={(val) => {
                         const legend = getSpecLegend();
                         legend.order.mode = val;
+                        if (val === 'auto') {
+                          legend.order.list = legends.sort(sortFunctionFactory);
+                        }
                         onChangeSpec({ legend });
                       }}
                       buttonSpacing="0"
