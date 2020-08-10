@@ -20,6 +20,7 @@ export default function VisualisationConfig(props) {
         onChangeVisualisationType={props.onChangeVisualisationType}
         onSaveVisualisation={props.onSaveVisualisation}
         loadDataset={props.loadDataset}
+        env={props.env}
       />
     </div>
   );
@@ -27,6 +28,7 @@ export default function VisualisationConfig(props) {
 
 VisualisationConfig.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   metadata: PropTypes.object,
   datasets: PropTypes.object.isRequired,
   rasters: PropTypes.object.isRequired,
