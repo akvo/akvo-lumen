@@ -271,6 +271,7 @@ function BubbleConfigMenu(props) {
 BubbleConfigMenu.propTypes = {
   intl: intlShape,
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,

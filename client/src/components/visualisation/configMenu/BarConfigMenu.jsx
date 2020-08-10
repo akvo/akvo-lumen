@@ -373,6 +373,7 @@ class BarConfigMenu extends Component {
 BarConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,

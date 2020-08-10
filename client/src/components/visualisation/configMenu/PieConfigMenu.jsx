@@ -1,20 +1,78 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl, intlShape } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
+import arrayMove from 'array-move';
+import { isEqual } from 'lodash';
 
+import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
+import { checkUndefined } from '../../../utilities/utils';
+
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
+import { palette } from '../../../utilities/visualisationColors';
+import LegendShape from '../../charts/LegendShape';
 
 function PieConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
     columnOptions,
+    intl,
   } = props;
   const spec = visualisation.spec;
+
+  const specLegends = checkUndefined(spec, 'legend', 'order', 'list');
+
+  const visLegends = checkUndefined(visualisation, 'data', 'common', 'data') || [];
+
+  const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
+  specLegends : visLegends.map(l => l.key);
+
+  const getColor = (key, index) => (spec.colors && spec.colors[key]) || palette[index];
+
+  const sortable = (checkUndefined(spec, 'legend', 'order', 'mode') || 'auto') !== 'auto';
+
+  const DragHandle = sortableHandle(() => <div style={{ marginRight: '4px' }}><span>::</span></div>);
+
+  const sortableItemStyle = { display: 'flex', alignItems: 'center', flexDirection: 'row', margin: '5px 0px 5px 5px' };
+
+  const SortableItem = sortableElement(({ value }) => {
+    const index = legends.indexOf(value);
+    return (<div style={sortableItemStyle}>
+      <DragHandle index={index} key={value} />
+      <LegendShape fill={getColor(value, index)} /> <div style={{ marginLeft: '4px' }}>{value}</div>
+    </div>);
+  });
+
+  const SortableList = sortableContainer(() =>
+    (
+      <div style={{ marginBottom: '5px' }}>
+        {legends.map((value, index) =>
+          (sortable ? <SortableItem key={`item-${value}`} index={index} value={value} /> :
+          <div style={sortableItemStyle} key={`item-${value}`} ><LegendShape fill={getColor(value, index)} /><div style={{ marginLeft: '4px' }}>{value}</div></div>)
+        )}
+      </div>
+    )
+  );
+
+  // ensure spec legend has order object
+  const getSpecLegend = () => {
+    const legend = { ...spec.legend } || {};
+    const order = { ...legend.order } || {};
+    legend.order = order;
+    return legend;
+  };
+
+  const onSortEnd = ({ oldIndex, newIndex }) => {
+    const currentItems = arrayMove(legends, oldIndex, newIndex);
+    const legend = getSpecLegend();
+    legend.order.list = currentItems;
+    onChangeSpec({ legend });
+  };
 
   return (
     <div className="PieConfigMenu">
@@ -48,6 +106,28 @@ function PieConfigMenu(props) {
             />
             {Boolean(spec.showLegend) && (
               <div>
+                {Boolean(props.env.environment.orderedLegend) && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <ButtonRowInput
+                      labelClass="label"
+                      options={[{
+                        label: <FormattedMessage id="legend_order_auto_mode" />,
+                        value: 'auto',
+                      }, {
+                        label: <FormattedMessage id="legend_order_custom_mode" />,
+                        value: 'custom',
+                      }]}
+                      selected={checkUndefined(spec, 'legend', 'order', 'mode') || 'auto'}
+                      label={intl.formatMessage({ id: 'legend_category_order' })}
+                      onChange={(val) => {
+                        const legend = getSpecLegend();
+                        legend.order.mode = val;
+                        onChangeSpec({ legend });
+                      }}
+                      buttonSpacing="0"
+                    />
+                    <SortableList items={legends} onSortEnd={onSortEnd} />
+                  </div>)}
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
                   placeholderId="legend_title"
@@ -108,6 +188,7 @@ function PieConfigMenu(props) {
 PieConfigMenu.propTypes = {
   intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
