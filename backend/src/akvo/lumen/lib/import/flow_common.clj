@@ -78,6 +78,7 @@
     "GEOSHAPE" "geoshape"
     "GEO-SHAPE-FEATURES" "multiple"
     "CADDISFLY" "multiple"
+    "OPTION" "option"
     "text"))
 
 (defn questions
