@@ -9,13 +9,13 @@
   (:import [java.time Instant]))
 
 (defn dataset-columns
-  [form]
+  [form environment]
   (into (flow-common/commons-columns form)
         (into
          (->> [{:title "Latitude" :type "number" :id "latitude"}
                {:title "Longitude" :type "number" :id "longitude"}]
               (mapv #(assoc % :groupName "metadata" :groupId "metadata")))
-         (common/coerce flow-common/question-type->lumen-type (flow-common/questions form)))))
+         (common/coerce (partial flow-common/question-type->lumen-type environment) (flow-common/questions form)))))
 
 (defmulti render-response
   (fn [type response]

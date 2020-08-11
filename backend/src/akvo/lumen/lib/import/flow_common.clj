@@ -70,16 +70,21 @@
       (into all-data-points (get response "dataPoints")))))
 
 (defn question-type->lumen-type
-  [question]
-  (condp = (:type question)
-    "NUMBER" "number"
-    "DATE" "date"
-    "GEO" "geopoint"
-    "GEOSHAPE" "geoshape"
-    "GEO-SHAPE-FEATURES" "multiple"
-    "CADDISFLY" "multiple"
-    "OPTION" "option"
-    "text"))
+  [environment question]
+  (let [res (condp = (:type question)
+              "NUMBER" "number"
+              "DATE" "date"
+              "GEO" "geopoint"
+              "GEOSHAPE" "geoshape"
+              "GEO-SHAPE-FEATURES" "multiple"
+              "CADDISFLY" "multiple"
+              "OPTION" "option"
+              "text")]
+    (if (= res "option")
+      (if (get environment "optionColumnType")
+        "option"
+        "text")
+      res)))
 
 (defn questions
   "Get the list of questions from a form"
