@@ -403,6 +403,7 @@ class Visualisation extends Component {
               onSaveVisualisation={this.onSave}
               loadDataset={this.loadDataset}
               exporting={exporting}
+              env={this.props.env}
             />
             {!exporting && (
               <ShareEntity
@@ -425,6 +426,7 @@ Visualisation.propTypes = {
   intl: intlShape,
   dispatch: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   library: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   params: PropTypes.object,
