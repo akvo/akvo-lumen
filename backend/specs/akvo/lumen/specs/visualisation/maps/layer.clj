@@ -7,15 +7,6 @@
             [clojure.string :as str])
   (:import [java.awt Color]))
 
-(create-ns  'akvo.lumen.specs.visualisation.maps.layer.legend)
-(alias 'layer.legend.s 'akvo.lumen.specs.visualisation.maps.layer.legend)
-
-(s/def ::layer.legend.s/title (s/nilable string?))
-
-(s/def ::layer.legend.s/visible boolean?)
-
-(s/def ::legend (s/keys :req-un [::layer.legend.s/title ::layer.legend.s/visible]))
-
 (s/def ::layerType #{"geo-location" "geo-shape" "raster"})
 
 (s/def ::aggregationMethod #{"avg" "count" "sum" "max" "min"})
