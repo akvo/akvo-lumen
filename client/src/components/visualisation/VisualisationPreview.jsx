@@ -73,6 +73,7 @@ class VisualisationPreview extends Component {
       width,
       height,
       exporting,
+      env,
     } = this.props;
 
     return (
@@ -84,6 +85,7 @@ class VisualisationPreview extends Component {
             datasets={datasets}
             context="editor"
             exporting={exporting}
+            env={env}
             height={
               height ||
               (
@@ -108,6 +110,7 @@ VisualisationPreview.propTypes = {
   onChangeVisualisationSpec: PropTypes.func,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  env: PropTypes.object.isRequired,
   exporting: PropTypes.bool,
 };
 

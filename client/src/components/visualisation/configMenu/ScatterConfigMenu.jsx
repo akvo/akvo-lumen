@@ -340,6 +340,7 @@ export default injectIntl(ScatterConfigMenu);
 ScatterConfigMenu.propTypes = {
   intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
