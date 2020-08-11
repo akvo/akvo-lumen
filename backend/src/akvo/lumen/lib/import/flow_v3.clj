@@ -28,11 +28,11 @@
 (defn dataset-columns
   "returns a vector of [{:title :type :id :key :groupName :groupId}]
   `:key` is optional"
-  [form]
+  [form environment]
   (let [questions (flow-questions form)]
     (into (flow-common/commons-columns form)
           (into [{:title "Device Id" :type "text" :id "device_id" :groupName "metadata" :groupId "metadata"}]
-                (common/coerce flow-common/question-type->lumen-type questions)))))
+                (common/coerce (partial flow-common/question-type->lumen-type environment) questions)))))
 
 (defn render-response
   [type response]

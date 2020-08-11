@@ -14,6 +14,11 @@
     "asc" (format "%s ASC NULLS FIRST" column)
     "dsc" (format "%s DESC NULLS LAST" column)))
 
+(defn- sql-option-bucket-column [bucket-column]
+  (if (= "option" (:type bucket-column))
+    (format "unnest(regexp_split_to_array(%1$s,'\\|'))" (:columnName bucket-column))
+    (:columnName bucket-column)))
+
 (defn- subbucket-sql [table-name bucket-column subbucket-column aggregation filter-sql sort-sql truncate-size]
   (format "
           WITH
@@ -21,14 +26,14 @@
             (SELECT %1$s AS x, %2$s AS sort_value
              FROM %3$s 
              WHERE %4$s 
-             GROUP BY %1$s 
+             GROUP BY x
              ORDER BY %5$s 
              LIMIT %6$s), 
           data_table AS
             (SELECT %1$s as x, %2$s as y, %7$s as s
              FROM %3$s
              WHERE %4$s
-             GROUP BY %1$s, %7$s) 
+             GROUP BY x, %7$s)
           SELECT
             data_table.x AS x,
             data_table.y,
@@ -41,7 +46,7 @@
           ON
             sort_table.x = data_table.x
           ORDER BY %5$s, data_table.s"
-          (:columnName bucket-column)
+          (sql-option-bucket-column bucket-column)
           aggregation
           table-name
           filter-sql
@@ -51,10 +56,10 @@
 
 (defn- bucket-sql [table-name bucket-column aggregation filter-sql sort-sql truncate-size]
   (format "SELECT * 
-           FROM (SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY %1$s)z 
+           FROM (SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY x)z
            ORDER BY %5$s 
            LIMIT %6$s"
-          (:columnName bucket-column)
+          (sql-option-bucket-column bucket-column)
           aggregation
           table-name
           filter-sql

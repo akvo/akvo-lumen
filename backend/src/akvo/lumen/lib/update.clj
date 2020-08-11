@@ -126,7 +126,8 @@
 
 (defn- import-data-to-table [tenant-conn import-config dataset-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
-    (with-open [importer (import/dataset-importer (get data-source-spec "source") import-config)]
+    (with-open [importer (import/dataset-importer (get data-source-spec "source")
+                                                  (assoc import-config :environment (env/all conn)))]
      (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
            latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
            imported-dataset-columns (vec (:columns initial-dataset-version))
