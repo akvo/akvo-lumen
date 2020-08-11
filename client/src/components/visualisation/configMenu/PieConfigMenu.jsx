@@ -1,21 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl, intlShape } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import get from 'lodash/get';
 
+import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
+import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
 
 function PieConfigMenu(props) {
   const {
     visualisation,
     onChangeSpec,
     columnOptions,
+    intl,
   } = props;
   const spec = visualisation.spec;
-
+  const specLegend = spec.legend || {};
   return (
     <div className="PieConfigMenu">
       <ConfigMenuSection
@@ -27,11 +31,15 @@ function PieConfigMenu(props) {
             name="xGroupColumnMenu"
             options={filterColumns(columnOptions, ['number', 'date', 'text'])}
             clearable
-            onChange={value => onChangeSpec({
-              bucketColumn: value,
-              legendTitle: columnOptions.find(item => item.value === value) ?
-                columnOptions.find(item => item.value === value).title : null,
-            })}
+            onChange={(value) => {
+              const legend = resetLegend(specLegend, visualisation);
+              onChangeSpec({
+                bucketColumn: value,
+                legendTitle: columnOptions.find(item => item.value === value) ?
+                  columnOptions.find(item => item.value === value).title : null,
+                legend,
+              });
+            }}
           />
         )}
         advancedOptions={(
@@ -48,6 +56,32 @@ function PieConfigMenu(props) {
             />
             {Boolean(spec.showLegend) && (
               <div>
+                {Boolean(props.env.environment.orderedLegend) && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <ButtonRowInput
+                      labelClass="label"
+                      options={[{
+                        label: <FormattedMessage id="legend_order_auto_mode" />,
+                        value: 'auto',
+                      }, {
+                        label: <FormattedMessage id="legend_order_custom_mode" />,
+                        value: 'custom',
+                      }]}
+                      selected={get(spec, 'legend.order.mode') || 'auto'}
+                      label={intl.formatMessage({ id: 'legend_category_order' })}
+                      onChange={(val) => {
+                        const legend = resetLegend(specLegend, visualisation, val);
+                        onChangeSpec({ legend });
+                      }}
+                      buttonSpacing="0"
+                    />
+                    <LegendsSortable
+                      onChangeSpec={onChangeSpec}
+                      visualisation={visualisation}
+                      colors={spec.colors}
+                      specLegend={specLegend}
+                    />
+                  </div>)}
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
                   placeholderId="legend_title"
@@ -108,6 +142,7 @@ function PieConfigMenu(props) {
 PieConfigMenu.propTypes = {
   intl: intlShape.isRequired,
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
