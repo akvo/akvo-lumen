@@ -1,17 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import arrayMove from 'array-move';
-import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
+
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
-import { sortAlphabetically, sortChronologically } from '../../../utilities/utils';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
-import LegendsSortable from '../../charts/LegendsSortable';
+import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
 
 function PieConfigMenu(props) {
   const {
@@ -21,32 +19,7 @@ function PieConfigMenu(props) {
     intl,
   } = props;
   const spec = visualisation.spec;
-
-  const specLegends = get(spec, 'legend.order.list');
-
-  const visLegends = get(visualisation, 'data.common.data') || [];
-
-  const sortLegendsFunctionFactory = get(visualisation, 'data.common.metadata.type') === 'text' ?
-        sortAlphabetically : sortChronologically;
-
-  const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
-        specLegends : visLegends.map(l => l.key).sort(sortLegendsFunctionFactory);
-
-  // ensure spec legend has order object
-  const getSpecLegend = () => {
-    const legend = { ...spec.legend } || {};
-    const order = { ...legend.order } || {};
-    legend.order = order;
-    return legend;
-  };
-
-  const onSortEnd = ({ oldIndex, newIndex }) => {
-    const currentItems = arrayMove(legends, oldIndex, newIndex);
-    const legend = getSpecLegend();
-    legend.order.list = currentItems;
-    onChangeSpec({ legend });
-  };
-
+  const specLegend = spec.legend || {};
   return (
     <div className="PieConfigMenu">
       <ConfigMenuSection
@@ -59,9 +32,7 @@ function PieConfigMenu(props) {
             options={filterColumns(columnOptions, ['number', 'date', 'text'])}
             clearable
             onChange={(value) => {
-              const legend = getSpecLegend();
-              legend.order.mode = 'auto';
-              legend.order.list = legends.sort(sortLegendsFunctionFactory);
+              const legend = resetLegend(specLegend, visualisation);
               onChangeSpec({
                 bucketColumn: value,
                 legendTitle: columnOptions.find(item => item.value === value) ?
@@ -99,19 +70,16 @@ function PieConfigMenu(props) {
                       selected={get(spec, 'legend.order.mode') || 'auto'}
                       label={intl.formatMessage({ id: 'legend_category_order' })}
                       onChange={(val) => {
-                        const legend = getSpecLegend();
-                        legend.order.mode = val;
-                        if (val === 'auto') {
-                          legend.order.list = legends.sort(sortLegendsFunctionFactory);
-                        }
+                        const legend = resetLegend(specLegend, visualisation, val);
                         onChangeSpec({ legend });
                       }}
                       buttonSpacing="0"
                     />
                     <LegendsSortable
-                      onSortEnd={onSortEnd} legends={legends}
+                      onChangeSpec={onChangeSpec}
+                      visualisation={visualisation}
                       colors={spec.colors}
-                      sortable={(get(spec, 'legend.order.mode') || 'auto') !== 'auto'}
+                      specLegend={specLegend}
                     />
                   </div>)}
                 <ConfigMenuSectionOptionText
