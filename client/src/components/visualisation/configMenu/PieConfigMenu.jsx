@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import { sortableContainer, sortableElement, sortableHandle } from 'react-sortable-hoc';
 import arrayMove from 'array-move';
 import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
@@ -12,8 +11,7 @@ import { sortAlphabetically, sortChronologically } from '../../../utilities/util
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
-import { palette } from '../../../utilities/visualisationColors';
-import LegendShape from '../../charts/LegendShape';
+import LegendsSortable from '../../charts/LegendsSortable';
 
 function PieConfigMenu(props) {
   const {
@@ -33,33 +31,6 @@ function PieConfigMenu(props) {
 
   const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
         specLegends : visLegends.map(l => l.key).sort(sortFunctionFactory);
-
-  const getColor = (key, index) => (spec.colors && spec.colors[key]) || palette[index];
-
-  const sortable = (get(spec, 'legend.order.mode') || 'auto') !== 'auto';
-
-  const DragHandle = sortableHandle(() => <div style={{ marginRight: '4px' }}><span>::</span></div>);
-
-  const sortableItemStyle = { display: 'flex', alignItems: 'center', flexDirection: 'row', margin: '5px 0px 5px 5px' };
-
-  const SortableItem = sortableElement(({ value }) => {
-    const index = legends.indexOf(value);
-    return (<div style={sortableItemStyle}>
-      <DragHandle index={index} key={value} />
-      <LegendShape fill={getColor(value, index)} /> <div style={{ marginLeft: '4px' }}>{value}</div>
-    </div>);
-  });
-
-  const SortableList = sortableContainer(() =>
-    (
-      <div style={{ marginBottom: '5px' }}>
-        {legends.map((value, index) =>
-          (sortable ? <SortableItem key={`item-${value}`} index={index} value={value} /> :
-          <div style={sortableItemStyle} key={`item-${value}`} ><LegendShape fill={getColor(value, index)} /><div style={{ marginLeft: '4px' }}>{value}</div></div>)
-        )}
-      </div>
-    )
-  );
 
   // ensure spec legend has order object
   const getSpecLegend = () => {
@@ -137,7 +108,11 @@ function PieConfigMenu(props) {
                       }}
                       buttonSpacing="0"
                     />
-                    <SortableList items={legends} onSortEnd={onSortEnd} />
+                    <LegendsSortable
+                      onSortEnd={onSortEnd} legends={legends}
+                      colors={spec.colors}
+                      sortable={(get(spec, 'legend.order.mode') || 'auto') !== 'auto'}
+                    />
                   </div>)}
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
