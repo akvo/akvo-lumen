@@ -26,11 +26,11 @@ function PieConfigMenu(props) {
 
   const visLegends = get(visualisation, 'data.common.data') || [];
 
-  const sortFunctionFactory = get(visualisation, 'data.common.metadata.type') === 'text' ?
+  const sortLegendsFunctionFactory = get(visualisation, 'data.common.metadata.type') === 'text' ?
         sortAlphabetically : sortChronologically;
 
   const legends = isEqual(new Set(specLegends), new Set(visLegends.map(l => l.key))) ?
-        specLegends : visLegends.map(l => l.key).sort(sortFunctionFactory);
+        specLegends : visLegends.map(l => l.key).sort(sortLegendsFunctionFactory);
 
   // ensure spec legend has order object
   const getSpecLegend = () => {
@@ -61,7 +61,7 @@ function PieConfigMenu(props) {
             onChange={(value) => {
               const legend = getSpecLegend();
               legend.order.mode = 'auto';
-              legend.order.list = legends.sort(sortFunctionFactory);
+              legend.order.list = legends.sort(sortLegendsFunctionFactory);
               onChangeSpec({
                 bucketColumn: value,
                 legendTitle: columnOptions.find(item => item.value === value) ?
@@ -102,7 +102,7 @@ function PieConfigMenu(props) {
                         const legend = getSpecLegend();
                         legend.order.mode = val;
                         if (val === 'auto') {
-                          legend.order.list = legends.sort(sortFunctionFactory);
+                          legend.order.list = legends.sort(sortLegendsFunctionFactory);
                         }
                         onChangeSpec({ legend });
                       }}
