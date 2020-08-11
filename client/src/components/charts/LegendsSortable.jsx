@@ -77,12 +77,12 @@ export const LegendsSortable = ({
   const SortableList = SortableContainer(({ legendItems }) =>
   (
     <div style={{ marginBottom: '5px' }}>
-      {legendItems.map((value, index) =>
-        (sortable ?
-          <SortableItem key={`item-${value}`} value={value} index={legends.indexOf(value)} color={getColor(value, index)} /> :
-          <NoSortableItem value={value} key={`item-${value}`} color={getColor(value, index)} />
-          )
-      )}
+      {sortable ?
+      legendItems.map((value, index) =>
+        <SortableItem key={`item-${value}`} value={value} index={legends.indexOf(value)} color={getColor(value, index)} />) :
+      legendItems.map((value, index) =>
+        <NoSortableItem value={value} key={`item-${value}`} color={getColor(value, index)} />)
+      }
     </div>
   )
 );
