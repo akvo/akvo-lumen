@@ -7,7 +7,7 @@ import get from 'lodash/get';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import itsSet from 'its-set';
-
+import { isEqual } from 'lodash';
 import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
 import { round, replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
@@ -46,6 +46,7 @@ export default class PieChart extends Component {
     style: PropTypes.object,
     labelsVisible: PropTypes.bool,
     visualisation: PropTypes.object,
+    env: PropTypes.object,
   }
 
   static defaultProps = {
@@ -68,19 +69,30 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    const { data } = this.props;
+    const { data, env } = this.props;
     if (!get(data, 'series[0]')) return false;
-
     const series = merge({}, data.common, data.series[0]);
+    const specLegend = this.props.visualisation.spec.legend || {};
+    const specLegendOrder = specLegend.order || {};
     const sortFunctionFactory = get(data, 'series.common.metadata.type') === 'text' ?
-      sortAlphabetically :
-      sortChronologically;
-
+          sortAlphabetically : sortChronologically;
+    let sortList;
+    if (env.environment.orderedLegend && specLegendOrder.mode === 'custom') {
+      sortList = (list) => {
+        if (isEqual(new Set(specLegendOrder.list), new Set(list.map(({ key }) => key)))) {
+          // if bucket column changes we need to get the new spec api call returned
+          // before sorting new values
+          return specLegendOrder.list.map(k => list.find(({ key }) => k === key));
+        }
+        return list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+      };
+    } else {
+      sortList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+    }
     return {
       ...series,
-      data: series.data
-        .filter(itsSet)
-        .sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key))
+      data: sortList(series.data
+        .filter(itsSet))
         .map(datum => ({
           ...datum,
           value: Math.abs(datum.value),
