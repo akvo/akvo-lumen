@@ -61,7 +61,7 @@ export const LegendsSortable = ({
   specLegend,
   visualisation,
 }) => {
-  const sortable = (get(specLegend, 'order.mode') || 'auto') !== 'auto';
+  const sortable = (get(specLegend, 'order.mode') || 'auto') === 'custom';
   const legends = getLegends(specLegend, visualisation);
 
   const onSortEnd = ({ oldIndex, newIndex }) => {
