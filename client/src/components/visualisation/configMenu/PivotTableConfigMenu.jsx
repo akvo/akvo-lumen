@@ -311,6 +311,7 @@ export default class PivotTableConfigMenu extends Component {
 
 PivotTableConfigMenu.propTypes = {
   visualisation: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
   onChangeSpec: PropTypes.func.isRequired,
   columnOptions: PropTypes.array.isRequired,
