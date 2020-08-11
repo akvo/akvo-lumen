@@ -21,14 +21,14 @@
             (SELECT %1$s AS x, %2$s AS sort_value
              FROM %3$s 
              WHERE %4$s 
-             GROUP BY %1$s 
+             GROUP BY x
              ORDER BY %5$s 
              LIMIT %6$s), 
           data_table AS
             (SELECT %1$s as x, %2$s as y, %7$s as s
              FROM %3$s
              WHERE %4$s
-             GROUP BY %1$s, %7$s) 
+             GROUP BY x, %7$s)
           SELECT
             data_table.x AS x,
             data_table.y,
@@ -51,7 +51,7 @@
 
 (defn- bucket-sql [table-name bucket-column aggregation filter-sql sort-sql truncate-size]
   (format "SELECT * 
-           FROM (SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY %1$s)z 
+           FROM (SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY x)z
            ORDER BY %5$s 
            LIMIT %6$s"
           (:columnName bucket-column)
