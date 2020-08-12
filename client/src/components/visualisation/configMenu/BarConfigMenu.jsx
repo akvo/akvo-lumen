@@ -160,7 +160,7 @@ class BarConfigMenu extends Component {
           columnOptions.find(item => item.value === value).title : null,
       }, spec, onChangeSpec, columnOptions)}
     />) : '';
-    const columnsBucketColumn = filterColumns(columnOptions, ['number', 'text']);
+    const columnsBucketColumn = filterColumns(columnOptions, ['number', 'text', 'option']);
     const columnsMetricColumn = filterColumns(columnOptions, ['number']);
     return (
       <div>
