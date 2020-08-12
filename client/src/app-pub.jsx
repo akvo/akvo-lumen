@@ -63,12 +63,14 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
                 metadata={data.metadata ? data.metadata : null}
                 filteredDashboard={!filteredDashboardCondition()}
                 onFilterValueChange={onChangeFilter}
+                env={initialState.env}
               />
             ) : (
               <VisualisationViewerContainer
                 visualisation={data.visualisations[data.visualisationId]}
                 metadata={data.metadata ? data.metadata[data.visualisationId] : null}
                 datasets={immutableDatasets}
+                env={initialState.env}
               />
             )}
             <LumenBranding
