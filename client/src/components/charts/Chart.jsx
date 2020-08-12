@@ -177,6 +177,7 @@ export default class Chart extends Component {
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
+            env={env}
           />
         );
       case 'line':
