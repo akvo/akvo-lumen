@@ -130,8 +130,8 @@
              (question-responses-base (select-keys responses (:main-ns dict)))
              {:ns "main"})]
           (mapv #(with-meta
-                   (question-responses-base {% (get responses %)})
-                   {:ns %})
+                    (or (question-responses-base {% (get responses %)}) {})
+                     {:ns %})
                 (:rqg-ns dict)))))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
