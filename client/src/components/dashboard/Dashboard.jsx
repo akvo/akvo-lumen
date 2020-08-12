@@ -698,7 +698,7 @@ class Dashboard extends Component {
       return <LoadingSpinner />;
     }
     const { DashboardHeader, DashboardEditor } = this.state.asyncComponents;
-    const { exporting, history, library } = this.props;
+    const { exporting, history, library, env } = this.props;
     const dashboard = getDashboardFromState(this.state.dashboard, true);
 
     const filteredDashboard = (this.props.filteredDashboard && !filteredDashboardCondition()) ||
@@ -745,6 +745,7 @@ class Dashboard extends Component {
               onTabSelected={tab => this.setState({ tabSelected: tab })}
               preventPageOverlaps={this.props.preventPageOverlaps}
               intl={this.props.intl}
+              env={env}
             />
             {!exporting && (
               <ShareEntity
@@ -780,6 +781,7 @@ Dashboard.propTypes = {
   preventPageOverlaps: PropTypes.bool,
   print: printShape,
   query: PropTypes.object,
+  env: PropTypes.object.isRequired,
 };
 
 export default connect(state => state)(injectIntl(Dashboard));

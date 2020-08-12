@@ -95,7 +95,7 @@ class DashboardViewer extends Component {
 
   render() {
     // eslint-disable-next-line max-len
-    const { datasets, metadata, windowWidth, filteredDashboard, onFilterValueChange } = this.props;
+    const { datasets, metadata, windowWidth, filteredDashboard, onFilterValueChange, env } = this.props;
     const { dashboard } = this.state;
     const layout = dashboard.layout;
     const viewportType = getViewportType(windowWidth);
@@ -145,6 +145,7 @@ class DashboardViewer extends Component {
               datasets={datasets}
               metadata={metadata}
               intl={this.props.intl}
+              env={env}
             />
           )}
         </div>
@@ -166,6 +167,7 @@ DashboardViewer.propTypes = {
     layout: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
   }),
+  env: PropTypes.object.isRequired,
 };
 
 export default injectIntl(connect(({ print }) => ({ print }))(windowSize(DashboardViewer)));

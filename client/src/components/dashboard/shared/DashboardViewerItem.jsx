@@ -96,7 +96,7 @@ export default class DashboardViewerItem extends Component {
   }
 
   render() {
-    const { item, dashFiltered, intl } = this.props;
+    const { item, dashFiltered, intl, env } = this.props;
     const isText = item.type === 'text';
     const isVisualisation = (item.type === 'visualisation' && item.visualisation);
     const style = this.getItemStyle();
@@ -136,6 +136,7 @@ export default class DashboardViewerItem extends Component {
               width={style.width - (cPadding * 2)}
               height={style.height ? style.height - (cPadding * 2) - titleHeight : 'auto'}
               showTitle={false}
+              env={env}
             />
           </div>
         }
@@ -159,5 +160,6 @@ DashboardViewerItem.propTypes = {
   dashFiltered: PropTypes.bool,
   metadata: PropTypes.object,
   intl: intlShape,
+  env: PropTypes.object.isRequired,
 };
 

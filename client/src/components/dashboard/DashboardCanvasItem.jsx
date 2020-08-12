@@ -140,6 +140,7 @@ const DashboardCanvasItem = React.forwardRef((props, ref) => {
                 height={dimensions.height - titleHeight}
                 showTitle={false}
                 exporting={exporting}
+                env={props.env}
               /> : <LoadingSpinner />
             }
           </div>
@@ -189,6 +190,7 @@ DashboardCanvasItem.propTypes = {
   onSave: PropTypes.func,
   exporting: PropTypes.bool,
   intl: intlShape,
+  env: PropTypes.object.isRequired,
 };
 
 export default DashboardCanvasItem;
