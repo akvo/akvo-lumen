@@ -240,6 +240,7 @@ export default class Chart extends Component {
             legendPosition={visualisation.spec.legendPosition}
             valueLabelsVisible={visualisation.spec.showValueLabels}
             horizontal={visualisation.spec.horizontal}
+            env={env}
           />
         );
       case 'bubble':

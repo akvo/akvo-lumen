@@ -69,12 +69,12 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    const { data, env } = this.props;
+    const { data, env, visualisation } = this.props;
     if (!get(data, 'series[0]')) return false;
     const series = merge({}, data.common, data.series[0]);
     const sortFunctionFactory = sortLegendsFunctionFactory(data);
 
-    const specLegend = ensureSpecLegend(this.props.visualisation.spec.legend);
+    const specLegend = ensureSpecLegend(visualisation.spec.legend);
     let sortList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
     if (env.environment.orderedLegend) {
       sortList = sortListFunc(sortFunctionFactory, specLegend);
