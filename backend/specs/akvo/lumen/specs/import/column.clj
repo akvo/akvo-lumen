@@ -19,8 +19,8 @@
 (create-ns  'akvo.lumen.specs.import.column.geopoint)
 (create-ns  'akvo.lumen.specs.import.column.multiple)
 (create-ns  'akvo.lumen.specs.import.column.multiple.caddisfly)
-(create-ns 'akvo.lumen.specs.import.column.multiple.geo-shape-features)
-
+(create-ns  'akvo.lumen.specs.import.column.multiple.geo-shape-features)
+(create-ns  'akvo.lumen.specs.import.column.option)
 (alias 'c.text 'akvo.lumen.specs.import.column.text)
 (alias 'c.number 'akvo.lumen.specs.import.column.number)
 (alias 'c.date 'akvo.lumen.specs.import.column.date)
@@ -29,8 +29,8 @@
 (alias 'c.multiple 'akvo.lumen.specs.import.column.multiple)
 (alias 'c.multiple.caddisfly 'akvo.lumen.specs.import.column.multiple.caddisfly)
 (alias 'c.multiple.geo-shape-features 'akvo.lumen.specs.import.column.multiple.geo-shape-features)
-
-(s/def ::type #{"text" "number" "date" "geoshape" "geopoint" "multiple"})
+(alias 'c.option 'akvo.lumen.specs.import.column.option)
+(s/def ::type #{"text" "number" "date" "geoshape" "geopoint" "multiple" "option"})
 
 (s/def ::c.text/type #{"text"})
 (s/def ::c.number/type #{"number"})
@@ -38,6 +38,7 @@
 (s/def ::c.geoshape/type #{"geoshape"})
 (s/def ::c.geopoint/type #{"geopoint"})
 (s/def ::c.multiple/type #{"multiple"})
+(s/def ::c.option/type #{"option"})
 
 (s/def ::column-header (s/keys :req-un [::v/title]
                                :opt-un [::v/id
@@ -60,6 +61,10 @@
 
 (s/def ::c.multiple.caddisfly/multipleId ::v/multipleId)
 (s/def ::c.multiple.geo-shape-features/multipleId ::v/id)
+
+(s/def ::c.option/header* (s/keys :req-un [::c.option/type]))
+(s/def ::c.option/header (s/merge ::column-header ::c.option/header*))
+
 (defmulti column-multiple :multipleType)
 
 (s/def ::c.multiple.caddisfly/multipleType #{"caddisfly"})
@@ -85,6 +90,7 @@
 (defmethod column-header "geoshape" [_] ::c.geoshape/header)
 (defmethod column-header "geopoint" [_] ::c.geopoint/header)
 (defmethod column-header "multiple" [_] ::c.multiple/header)
+(defmethod column-header "option" [_] ::c.option/header)
 
 (s/def ::header (s/multi-spec column-header :type))
 
@@ -134,6 +140,10 @@
                             #(instance? Geopoint %)
                             #(s/gen #{(Geopoint. v/point)})))
 
+(s/def ::c.option/value (s/with-gen
+                            string?
+                            #(s/gen #{"opt1|opt2" "opt2" "opt2|opt3" "opt4" "opt1|opt5"})))
+
 (defmulti column-body (fn[{:keys [type] :as o}] type))
 
 (s/def ::c.text/body (s/keys :req-un [::c.text/type ::c.text/value]))
@@ -142,6 +152,7 @@
 (s/def ::c.multiple/body (s/keys :req-un [::c.multiple/type ::c.multiple/value]))
 (s/def ::c.geoshape/body (s/keys :req-un [::c.geoshape/type ::c.geoshape/value]))
 (s/def ::c.geopoint/body (s/keys :req-un [::c.geopoint/type ::c.geopoint/value]))
+(s/def ::c.option/body (s/keys :req-un [::c.option/type ::c.option/value]))
 
 (defmethod column-body "text" [_] ::c.text/body)
 (defmethod column-body "number" [_] ::c.number/body)
@@ -149,6 +160,7 @@
 (defmethod column-body "multiple" [_] ::c.multiple/body)
 (defmethod column-body "geoshape" [_] ::c.geoshape/body)
 (defmethod column-body "geopoint" [_] ::c.geopoint/body)
+(defmethod column-body "option" [_] ::c.option/body)
 
 (s/def ::body  (s/multi-spec column-body (fn [a b] a)))
 
@@ -166,5 +178,7 @@
   (s/keys :req-un [::c.geoshape/header ::c.geoshape/body]))
 (defmethod column "geopoint" [_]
   (s/keys :req-un [::c.geopoint/header ::c.geopoint/body]))
+(defmethod column "option" [_]
+  (s/keys :req-un [::c.option/header ::c.option/body]))
 
 (s/def ::column (s/multi-spec column (fn [a b] a)))
