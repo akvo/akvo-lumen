@@ -142,12 +142,14 @@
                                                         (conj c co)
                                                         c)) [] imported-dataset-columns)]
        (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
-         (failed-update conn job-execution-id
-                        (cond-> "Column mismatch"
-                          (seq (:missed-columns compatible-errors))
-                          (str ".\n Following columns are missed in new data version: " (:missed-columns compatible-errors))
-                          (seq (:wrong-types compatible-errors))
-                          (str ".\n Following columns have changed the column type in new data version: " (:wrong-types compatible-errors))))
+         (do
+           (failed-update conn job-execution-id
+                          (cond-> "Column mismatch"
+                            (seq (:missed-columns compatible-errors))
+                            (str ".\n Following columns are missed in new data version: " (:missed-columns compatible-errors))
+                            (seq (:wrong-types compatible-errors))
+                            (str ".\n Following columns have changed the column type in new data version: " (:wrong-types compatible-errors))))
+           {:success? false})
          (let [table-name          (util/gen-table-name "ds")
                imported-table-name (util/gen-table-name "imported")]
            (postgres/create-dataset-table conn table-name importer-columns)
@@ -169,7 +171,8 @@
                                       key           (assoc "key" (boolean key))
                                       multipleType (assoc "multipleType" multipleType)
                                       multipleId   (assoc "multipleId" multipleId)))]
-             {:table-name table-name :imported-table-name imported-table-name
+             {:success? true
+              :table-name table-name :imported-table-name imported-table-name
               :importer-columns (mapv coerce-column-fn importer-columns) :imported-dataset-columns imported-dataset-columns
               :latest-dataset-version latest-dataset-version})))))))
 
@@ -184,19 +187,20 @@
        (try
          (let [{:keys [table-name imported-table-name
                        importer-columns imported-dataset-columns
-                       latest-dataset-version]}  (import-data-to-table tenant-conn
-                                                                       import-config
-                                                                       dataset-id
-                                                                       job-execution-id
-                                                                       data-source-spec)
-               {:keys [columns transformations]} (engine/apply-dataset-transformations-on-table tenant-conn
-                                                                                                caddisfly
-                                                                                                dataset-id
-                                                                                                (:transformations latest-dataset-version)
-                                                                                                table-name
-                                                                                                importer-columns
-                                                                                                imported-dataset-columns)]
-           (successful-update tenant-conn job-execution-id dataset-id table-name imported-table-name latest-dataset-version columns transformations))
+                       latest-dataset-version success?]}  (import-data-to-table tenant-conn
+                                                                                import-config
+                                                                                dataset-id
+                                                                                job-execution-id
+                                                                                data-source-spec)]
+           (when success?
+             (let [{:keys [columns transformations]} (engine/apply-dataset-transformations-on-table tenant-conn
+                                                                                                    caddisfly
+                                                                                                    dataset-id
+                                                                                                    (:transformations latest-dataset-version)
+                                                                                                    table-name
+                                                                                                    importer-columns
+                                                                                                    imported-dataset-columns)]
+               (successful-update tenant-conn job-execution-id dataset-id table-name imported-table-name latest-dataset-version columns transformations))))
          (catch Exception e
            (failed-update tenant-conn job-execution-id (.getMessage e))
            (p/track error-tracker e)
