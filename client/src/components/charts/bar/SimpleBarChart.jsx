@@ -27,6 +27,7 @@ import ChartLayout from '../ChartLayout';
 import Tooltip from '../Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../constants/chart';
 import RenderComplete from '../RenderComplete';
+import { sortListFunc, ensureSpecLegend, sortLegendsFunctionFactory } from '../LegendsSortable';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -72,13 +73,19 @@ export default class SimpleBarChart extends Component {
   }
 
   getData() {
-    const { data } = this.props;
+    const { data, env, visualisation } = this.props;
 
     if (!itsSet(data, 'series[0]')) return false;
 
     const result = merge({}, data.common, data.series[0]);
+    const sortFunctionFactory = sortLegendsFunctionFactory(data);
+    const specLegend = ensureSpecLegend(visualisation.spec.legend);
+    let sortList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+    if (env.environment.orderedLegend) {
+      sortList = sortListFunc(sortFunctionFactory, specLegend);
+    }
 
-    result.data = result.data.filter(itsSet);
+    result.data = sortList(result.data.filter(itsSet));
 
     return result;
   }

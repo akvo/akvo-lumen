@@ -177,6 +177,7 @@ export default class Chart extends Component {
             legendTitle={visualisation.spec.legendTitle}
             onChangeVisualisationSpec={onChangeVisualisationSpec}
             edit={Boolean(onChangeVisualisationSpec)}
+            env={env}
           />
         );
       case 'line':
@@ -239,6 +240,7 @@ export default class Chart extends Component {
             legendPosition={visualisation.spec.legendPosition}
             valueLabelsVisible={visualisation.spec.showValueLabels}
             horizontal={visualisation.spec.horizontal}
+            env={env}
           />
         );
       case 'bubble':
