@@ -8,6 +8,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import itsSet from 'its-set';
 
+import { sortListFunc, ensureSpecLegend, sortLegendsFunctionFactory } from './LegendsSortable';
 import { round, replaceLabelIfValueEmpty } from '../../utilities/chart';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
@@ -46,6 +47,7 @@ export default class PieChart extends Component {
     style: PropTypes.object,
     labelsVisible: PropTypes.bool,
     visualisation: PropTypes.object,
+    env: PropTypes.object.isRequired,
   }
 
   static defaultProps = {
@@ -68,15 +70,22 @@ export default class PieChart extends Component {
   }
 
   getData() {
-    const { data } = this.props;
+    const { data, env } = this.props;
     if (!get(data, 'series[0]')) return false;
 
     const series = merge({}, data.common, data.series[0]);
+    const sortFunctionFactory = sortLegendsFunctionFactory(data);
+
+    const specLegend = ensureSpecLegend(this.props.visualisation.spec.legend);
+    let sortList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+    if (env.environment.orderedLegend) {
+      sortList = sortListFunc(sortFunctionFactory, specLegend);
+    }
 
     return {
       ...series,
-      data: series.data
-        .filter(itsSet)
+      data: sortList(series.data
+        .filter(itsSet))
         .map(datum => ({
           ...datum,
           value: Math.abs(datum.value),

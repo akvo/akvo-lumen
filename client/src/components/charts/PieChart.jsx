@@ -7,9 +7,9 @@ import get from 'lodash/get';
 import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import itsSet from 'its-set';
-import { isEqual } from 'lodash';
 import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
 import { round, replaceLabelIfValueEmpty } from '../../utilities/chart';
+import { sortListFunc, ensureSpecLegend, sortLegendsFunctionFactory } from './LegendsSortable';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -72,27 +72,18 @@ export default class PieChart extends Component {
     const { data, env } = this.props;
     if (!get(data, 'series[0]')) return false;
     const series = merge({}, data.common, data.series[0]);
-    const specLegend = this.props.visualisation.spec.legend || {};
-    const specLegendOrder = specLegend.order || {};
-    const sortFunctionFactory = get(data, 'series.common.metadata.type') === 'text' ?
-          sortAlphabetically : sortChronologically;
-    let sortList;
-    if (env.environment.orderedLegend && specLegendOrder.mode === 'custom') {
-      sortList = (list) => {
-        if (isEqual(new Set(specLegendOrder.list), new Set(list.map(({ key }) => key)))) {
-          // if bucket column changes we need to get the new spec api call returned
-          // before sorting new values
-          return specLegendOrder.list.map(k => list.find(({ key }) => k === key));
-        }
-        return list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
-      };
-    } else {
-      sortList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+    const sortFunctionFactory = sortLegendsFunctionFactory(data);
+
+    const specLegend = ensureSpecLegend(this.props.visualisation.spec.legend);
+    let sortList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+    if (env.environment.orderedLegend) {
+      sortList = sortListFunc(sortFunctionFactory, specLegend);
     }
+
     return {
       ...series,
       data: sortList(series.data
-        .filter(itsSet))
+          .filter(itsSet))
         .map(datum => ({
           ...datum,
           value: Math.abs(datum.value),
