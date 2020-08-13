@@ -296,7 +296,7 @@ export default class SimpleBarChart extends Component {
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
             data={sortList(series.data).map(({ key }) => key)}
             colorMapping={
-              series.data.reduce((acc, { key }, i) => ({
+              sortList(series.data).reduce((acc, { key }, i) => ({
                 ...acc,
                 [key]: this.getColor(key, i, series.data.length),
               }), {})
