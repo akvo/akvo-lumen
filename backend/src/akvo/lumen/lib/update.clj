@@ -126,55 +126,61 @@
 
 (defn- import-data-to-table [tenant-conn import-config dataset-id job-execution-id data-source-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
-    (with-open [importer (import/dataset-importer (get data-source-spec "source")
-                                                  (assoc import-config :environment (env/all conn)))]
-     (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
-           latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
-           imported-dataset-columns (vec (:columns initial-dataset-version))
-           importer-columns         (p/columns importer)
+    (let [environment (env/all conn)]
+      (with-open [importer (import/dataset-importer (get data-source-spec "source")
+                                                    (assoc import-config :environment environment))]
+        (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
+              latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
+              imported-dataset-columns (vec (:columns initial-dataset-version))
+              importer-columns         (p/columns importer)
 
-           columns-used (columns-used-in-txs
-                         (import/importer-type (get data-source-spec "source"))
-                         initial-dataset-version
-                         latest-dataset-version)
-           imported-dataset-columns-checked (reduce (fn [c co]
-                                                      (if (contains? columns-used (get co "columnName"))
-                                                        (conj c co)
-                                                        c)) [] imported-dataset-columns)]
-       (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked importer-columns)]
-         (do
-           (failed-update conn job-execution-id
-                          (cond-> "Column mismatch"
-                            (seq (:missed-columns compatible-errors))
-                            (str ".\n Following columns are missed in new data version: " (:missed-columns compatible-errors))
-                            (seq (:wrong-types compatible-errors))
-                            (str ".\n Following columns have changed the column type in new data version: " (:wrong-types compatible-errors))))
-           {:success? false})
-         (let [table-name          (util/gen-table-name "ds")
-               imported-table-name (util/gen-table-name "imported")]
-           (postgres/create-dataset-table conn table-name importer-columns)
-           (doseq [record (map (comp postgres/coerce-to-sql import/extract-first-and-merge) (p/records importer))]
-             (jdbc/insert! conn table-name record))
-           (db.job-execution/clone-data-table conn {:from-table table-name
-                                                    :to-table   imported-table-name}
-                                              {}
-                                              {:transaction? false})
-           (let [coerce-column-fn (fn [{:keys [title id type key multipleId multipleType groupName groupId] :as column}]
-                                    (cond-> {"type" type
-                                             "title" title
-                                             "columnName" id
-                                             "groupName" groupName
-                                             "groupId" groupId
-                                             "sort" nil
-                                             "direction" nil
-                                             "hidden" false}
-                                      key           (assoc "key" (boolean key))
-                                      multipleType (assoc "multipleType" multipleType)
-                                      multipleId   (assoc "multipleId" multipleId)))]
-             {:success? true
-              :table-name table-name :imported-table-name imported-table-name
-              :importer-columns (mapv coerce-column-fn importer-columns) :imported-dataset-columns imported-dataset-columns
-              :latest-dataset-version latest-dataset-version})))))))
+              columns-used (columns-used-in-txs
+                            (import/importer-type (get data-source-spec "source"))
+                            initial-dataset-version
+                            latest-dataset-version)
+              imported-dataset-columns-checked (reduce (fn [c co]
+                                                         (if (contains? columns-used (get co "columnName"))
+                                                           (conj c co)
+                                                           c)) [] imported-dataset-columns)]
+          (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked
+                                                                (if (get environment "optionColumnType")
+                                                                  (map #(update % :type (fn [t]
+                                                                                          (if (= "option" t) "text" t)))
+                                                                       importer-columns)
+                                                                  importer-columns))]
+            (do
+              (failed-update conn job-execution-id
+                             (cond-> "Column mismatch"
+                               (seq (:missed-columns compatible-errors))
+                               (str ".\n Following columns are missed in new data version: " (:missed-columns compatible-errors))
+                               (seq (:wrong-types compatible-errors))
+                               (str ".\n Following columns have changed the column type in new data version: " (:wrong-types compatible-errors))))
+              {:success? false})
+            (let [table-name          (util/gen-table-name "ds")
+                  imported-table-name (util/gen-table-name "imported")]
+              (postgres/create-dataset-table conn table-name importer-columns)
+              (doseq [record (map (comp postgres/coerce-to-sql import/extract-first-and-merge) (p/records importer))]
+                (jdbc/insert! conn table-name record))
+              (db.job-execution/clone-data-table conn {:from-table table-name
+                                                       :to-table   imported-table-name}
+                                                 {}
+                                                 {:transaction? false})
+              (let [coerce-column-fn (fn [{:keys [title id type key multipleId multipleType groupName groupId] :as column}]
+                                       (cond-> {"type" type
+                                                "title" title
+                                                "columnName" id
+                                                "groupName" groupName
+                                                "groupId" groupId
+                                                "sort" nil
+                                                "direction" nil
+                                                "hidden" false}
+                                         key           (assoc "key" (boolean key))
+                                         multipleType (assoc "multipleType" multipleType)
+                                         multipleId   (assoc "multipleId" multipleId)))]
+                {:success? true
+                 :table-name table-name :imported-table-name imported-table-name
+                 :importer-columns (mapv coerce-column-fn importer-columns) :imported-dataset-columns imported-dataset-columns
+                 :latest-dataset-version latest-dataset-version}))))))))
 
 (defn update-dataset [tenant-conn caddisfly import-config error-tracker dataset-id data-source-id data-source-spec]
   (if-let [current-tx-job (db.transformation/pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
