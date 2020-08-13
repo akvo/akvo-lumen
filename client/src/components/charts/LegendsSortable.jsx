@@ -78,9 +78,9 @@ export const LegendsSortable = ({
   (
     <div style={{ marginBottom: '5px' }}>
       {sortable ?
-      legendItems.map((value, index) =>
+      legendItems && legendItems.map((value, index) =>
         <SortableItem key={`item-${value}`} value={value} index={legends.indexOf(value)} color={getColor(value, index)} />) :
-      legendItems.map((value, index) =>
+      legendItems && legendItems.map((value, index) =>
         <NoSortableItem value={value} key={`item-${value}`} color={getColor(value, index)} />)
       }
     </div>
@@ -95,7 +95,7 @@ export const LegendsSortable = ({
 
 LegendsSortable.propTypes = {
   visualisation: PropTypes.object.isRequired,
-  colors: PropTypes.object.isRequired,
+  colors: PropTypes.object,
   onChangeSpec: PropTypes.func.isRequired,
   specLegend: PropTypes.object.isRequired,
 };
