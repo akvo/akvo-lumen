@@ -13,6 +13,7 @@ import ButtonRowInput from './ButtonRowInput';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOption from '../../common/ConfigMenu/ConfigMenuSectionOption';
 import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -115,6 +116,8 @@ class BarConfigMenu extends Component {
       onChangeSpec,
       columnOptions,
       aggregationOptions,
+      env,
+      intl,
     } = this.props;
     const spec = visualisation.spec;
     const seriesColumnOptions = columnOptions.filter(c => c.value !== spec.metricColumnY);
@@ -162,6 +165,8 @@ class BarConfigMenu extends Component {
     />) : '';
     const columnsBucketColumn = filterColumns(columnOptions, ['number', 'text', 'option']);
     const columnsMetricColumn = filterColumns(columnOptions, ['number']);
+    const specLegend = spec.legend || {};
+
     return (
       <div>
         <ConfigMenuSection
@@ -218,6 +223,32 @@ class BarConfigMenu extends Component {
                 spec={spec}
                 onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
               />
+              {Boolean(env.environment.orderedLegend) && (
+                <div style={{ marginBottom: '20px' }}>
+                  <ButtonRowInput
+                    labelClass="label"
+                    options={[{
+                      label: <FormattedMessage id="legend_order_auto_mode" />,
+                      value: 'auto',
+                    }, {
+                      label: <FormattedMessage id="legend_order_custom_mode" />,
+                      value: 'custom',
+                    }]}
+                    selected={get(spec, 'legend.order.mode') || 'auto'}
+                    label={intl.formatMessage({ id: 'legend_category_order' })}
+                    onChange={(val) => {
+                      const legend = resetLegend(specLegend, visualisation, val);
+                      onChangeSpec({ legend });
+                    }}
+                    buttonSpacing="0"
+                  />
+                  <LegendsSortable
+                    onChangeSpec={onChangeSpec}
+                    visualisation={visualisation}
+                    colors={spec.colors}
+                    specLegend={specLegend}
+                  />
+                </div>)}
               <ToggleInput
                 name="splitBucket"
                 type="checkbox"
