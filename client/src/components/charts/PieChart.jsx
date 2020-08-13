@@ -9,7 +9,7 @@ import merge from 'lodash/merge';
 import itsSet from 'its-set';
 import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
 import { round, replaceLabelIfValueEmpty } from '../../utilities/chart';
-import { sortListFunc, ensureSpecLegend, sortLegendsFunctionFactory } from './LegendsSortable';
+import { sortLegendListFunc, ensureSpecLegend, sortLegendsFunctionFactory } from './LegendsSortable';
 import Legend from './Legend';
 import ResponsiveWrapper from '../common/ResponsiveWrapper';
 import ColorPicker from '../common/ColorPicker';
@@ -75,14 +75,14 @@ export default class PieChart extends Component {
     const sortFunctionFactory = sortLegendsFunctionFactory(data);
 
     const specLegend = ensureSpecLegend(visualisation.spec.legend);
-    let sortList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+    let sortLegendList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
     if (env.environment.orderedLegend) {
-      sortList = sortListFunc(sortFunctionFactory, specLegend);
+      sortLegendList = sortLegendListFunc(sortFunctionFactory, specLegend);
     }
 
     return {
       ...series,
-      data: sortList(series.data
+      data: sortLegendList(series.data
           .filter(itsSet))
         .map(datum => ({
           ...datum,

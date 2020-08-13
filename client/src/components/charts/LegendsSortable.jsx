@@ -115,7 +115,7 @@ export const resetLegend = (specLegend, visualisation, val) => {
 };
 
 
-export const sortListFunc = (defaultSortFunction, specLegend) => {
+export const sortLegendListFunc = (defaultSortFunction, specLegend) => {
   if (specLegend.order.mode === 'custom') {
     return (list) => {
       if (isEqual(new Set(specLegend.order.list), new Set(list.map(({ key }) => key)))) {
