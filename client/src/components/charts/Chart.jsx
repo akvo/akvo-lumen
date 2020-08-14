@@ -217,6 +217,7 @@ export default class Chart extends Component {
             legendTitle={visualisation.spec.categoryLabel}
             legendDescription={visualisation.spec.sizeLabel}
             legendPosition={visualisation.spec.legendPosition}
+            env={env}
           />
         );
       case 'bar':

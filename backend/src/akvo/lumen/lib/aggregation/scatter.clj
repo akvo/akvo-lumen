@@ -7,7 +7,7 @@
             [clojure.tools.logging :as log]))
 
 (defn- serie-data [tag sql-data index]
-  (mapv #(let [key-value (nth % index)] (array-map tag key-value :key key-value)) sql-data))
+  (mapv #(let [v (nth % index)] (array-map tag v :key v)) sql-data))
 
 (defn serie [sql-data column index]
   (when (:title column)
@@ -119,7 +119,7 @@
                    (serie sql-response column idx))
                  [column-x column-y column-size column-category])
         :common {:metadata {:type (:type column-label)}
-                 :data (serie-data :label sql-response 4)}})
+                 :data (serie-data :label sql-response 3)}})
       (lib/bad-request
        {:message (format "Results are more than %d. Please select another column or use a different aggregation."
                          max-points)}))))
