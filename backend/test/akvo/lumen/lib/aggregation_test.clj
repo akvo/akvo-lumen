@@ -335,20 +335,23 @@
                 [{:key "C",
                   :label "C",
                   :data
-                  [{:value 1548979200000}
-                   {:value 1549065600000}
-                   {:value 1549152000000}
-                   {:value 1549238400000}],
+                  [{:value 1548979200000, :key 1548979200000}
+                   {:value 1549065600000, :key 1549065600000}
+                   {:value 1549152000000, :key 1549152000000}
+                   {:value 1549238400000, :key 1549238400000}],
                   :metadata {:type "date"}}
                  {:key "B",
                   :label "B",
-                  :data [{:value 1.0} {:value 2.0} {:value 3.0} {:value 4.0}],
+                  :data [{:value 1.0, :key 1.0}
+                         {:value 2.0, :key 2.0}
+                         {:value 3.0, :key 3.0}
+                         {:value 4.0, :key 4.0}],
                   :metadata {:type "number"}}
                  nil
                  nil],
                 :common
                 {:metadata {:type nil, :sampled false},
-                 :data [{:label nil} {:label nil} {:label nil} {:label nil}]}}))))))
+                 :data [{:label nil :key nil} {:label nil :key nil} {:label nil :key nil} {:label nil :key nil}]}}))))))
 
 (deftest bubble-tests
   (let [data {:columns [{:id "c1", :title "A", :type "text"}
@@ -375,7 +378,7 @@
                   :metadata {:type nil}}],
                 :common
                 {:metadata {:sampled false},
-                 :data [{:label "c"} {:label "b"} {:label "a"}]}}))))
+                 :data [{:label "c" :key "c"} {:label "b" :key "b"} {:label "a" :key "a"}]}}))))
     (testing "Metric queries"
       (let [[tag query-result] (query {:bucketColumn "c1"
                                        :metricColumn "c2"
@@ -388,4 +391,4 @@
                   :metadata {:type "number"}}],
                 :common
                 {:metadata {:sampled false},
-                 :data [{:label "c"} {:label "b"} {:label "a"}]}}))))))
+                 :data [{:label "c" :key "c"} {:label "b" :key "b"} {:label "a" :key "a"}]}}))))))
