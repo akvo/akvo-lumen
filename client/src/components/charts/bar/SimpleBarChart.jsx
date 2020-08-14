@@ -27,7 +27,7 @@ import ChartLayout from '../ChartLayout';
 import Tooltip from '../Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../constants/chart';
 import RenderComplete from '../RenderComplete';
-import { sortLegendListFunc, ensureSpecLegend, sortLegendsFunctionFactory } from '../LegendsSortable';
+import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from '../LegendsSortable';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -273,13 +273,11 @@ export default class SimpleBarChart extends Component {
     const dataCount = series.data.length;
     const axisLabelFontSize =
       getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
-    const sortFunctionFactory = sortLegendsFunctionFactory(series.data);
-    const specLegend = ensureSpecLegend(visualisation.spec.legend);
-    let sortLegendList = list => list.sort((a, b) => sortFunctionFactory(a, b, ({ key }) => key));
+    let legendSeriesData = series.data;
     if (env.environment.orderedLegend) {
-      sortLegendList = sortLegendListFunc(sortFunctionFactory, specLegend);
+      const specLegend = ensureSpecLegend(visualisation.spec.legend);
+      legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(series.data);
     }
-
     return (
       <ChartLayout
         style={style}
@@ -294,9 +292,9 @@ export default class SimpleBarChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={sortLegendList(series.data).map(({ key }) => key)}
+            data={legendSeriesData.map(({ key }) => key)}
             colorMapping={
-              sortLegendList(series.data).reduce((acc, { key }, i) => ({
+              legendSeriesData.reduce((acc, { key }, i) => ({
                 ...acc,
                 [key]: this.getColor(key, i, series.data.length),
               }), {})

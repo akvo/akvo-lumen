@@ -114,6 +114,7 @@ export const resetLegend = (specLegend, visualisation, val) => {
   return legend;
 };
 
+export const noSortFunc = () => 1;
 
 export const sortLegendListFunc = (defaultSortFunction, specLegend) => {
   if (specLegend.order.mode === 'custom') {
