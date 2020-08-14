@@ -9,7 +9,7 @@ import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
 import { palette } from '../../utilities/visualisationColors';
 import LegendShape from './LegendShape';
 
-const sortLegendsFunctionFactory = visualisation => (get(visualisation, 'data.common.metadata.type') === 'text' ?
+export const sortLegendsFunctionFactory = data => (get(data, 'data.common.metadata.type') === 'text' ?
   sortAlphabetically : sortChronologically);
 
 const sortableItemStyle = { display: 'flex', alignItems: 'center', flexDirection: 'row', margin: '5px 0px 5px 5px' };
@@ -78,9 +78,9 @@ export const LegendsSortable = ({
   (
     <div style={{ marginBottom: '5px' }}>
       {sortable ?
-      legendItems.map((value, index) =>
+      legendItems && legendItems.map((value, index) =>
         <SortableItem key={`item-${value}`} value={value} index={legends.indexOf(value)} color={getColor(value, index)} />) :
-      legendItems.map((value, index) =>
+      legendItems && legendItems.map((value, index) =>
         <NoSortableItem value={value} key={`item-${value}`} color={getColor(value, index)} />)
       }
     </div>
@@ -95,7 +95,7 @@ export const LegendsSortable = ({
 
 LegendsSortable.propTypes = {
   visualisation: PropTypes.object.isRequired,
-  colors: PropTypes.object.isRequired,
+  colors: PropTypes.object,
   onChangeSpec: PropTypes.func.isRequired,
   specLegend: PropTypes.object.isRequired,
 };
@@ -112,4 +112,20 @@ export const resetLegend = (specLegend, visualisation, val) => {
     return resetLegend(specLegend, visualisation, 'auto');
   }
   return legend;
+};
+
+export const noSortFunc = () => 1;
+
+export const sortLegendListFunc = (defaultSortFunction, specLegend) => {
+  if (specLegend.order.mode === 'custom') {
+    return (list) => {
+      if (isEqual(new Set(specLegend.order.list), new Set(list.map(({ key }) => key)))) {
+        // if bucket column changes we need to get the new spec api call returned
+        // before sorting new values
+        return specLegend.order.list.map(k => list.find(({ key }) => k === key));
+      }
+      return list.sort((a, b) => defaultSortFunction(a, b, ({ key }) => key));
+    };
+  }
+  return list => list.sort((a, b) => defaultSortFunction(a, b, ({ key }) => key));
 };
