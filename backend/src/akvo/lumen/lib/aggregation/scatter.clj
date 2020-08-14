@@ -7,7 +7,7 @@
             [clojure.tools.logging :as log]))
 
 (defn- serie-data [tag sql-data index]
-  (mapv #(array-map tag (nth % index)) sql-data))
+  (mapv #(let [key-value (nth % index)] (array-map tag key-value :key key-value)) sql-data))
 
 (defn serie [sql-data column index]
   (when (:title column)

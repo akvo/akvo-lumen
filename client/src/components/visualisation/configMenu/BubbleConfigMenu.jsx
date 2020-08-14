@@ -1,13 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { intlShape, injectIntl } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ToggleInput from '../../common/ToggleInput';
 import { filterColumns } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
+import ButtonRowInput from './ButtonRowInput';
+import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -77,13 +79,14 @@ function BubbleConfigMenu(props) {
     columnOptions,
     aggregationOptions,
     intl,
+    env,
   } = props;
   const spec = visualisation.spec;
 
   const onChangeSpec = (data) => {
     props.onChangeSpec({ ...data, version: 2 });
   };
-
+  const specLegend = spec.legend || {};
   return (
     <div>
 
@@ -151,6 +154,33 @@ function BubbleConfigMenu(props) {
                 showLegend: val,
               })}
             />
+            {Boolean(spec.showLegend) && Boolean(env.environment.orderedLegend) && (
+              <div style={{ marginBottom: '20px' }} >
+                <ButtonRowInput
+                  labelClass="label"
+                  options={[{
+                    label: <FormattedMessage id="legend_order_auto_mode" />,
+                    value: 'auto',
+                  }, {
+                    label: <FormattedMessage id="legend_order_custom_mode" />,
+                    value: 'custom',
+                  }]}
+                  selected={get(spec, 'legend.order.mode') || 'auto'}
+                  label={intl.formatMessage({ id: 'legend_category_order' })}
+                  onChange={(val) => {
+                    const legend = resetLegend(specLegend, visualisation, val);
+                    onChangeSpec({ legend });
+                  }}
+                  buttonSpacing="0"
+                />
+                <LegendsSortable
+                  onChangeSpec={onChangeSpec}
+                  visualisation={visualisation}
+                  colors={spec.colors}
+                  specLegend={specLegend}
+                />
+              </div>)}
+
             {Boolean(spec.showLegend) && (
               <div>
                 <ConfigMenuSectionOptionText
