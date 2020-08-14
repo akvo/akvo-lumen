@@ -259,6 +259,7 @@ export default class Chart extends Component {
             legendVisible={visualisation.spec.showLegend}
             legendPosition={visualisation.spec.legendPosition}
             labelsVisible={visualisation.spec.showLabels}
+            env={env}
           />
         );
       default:

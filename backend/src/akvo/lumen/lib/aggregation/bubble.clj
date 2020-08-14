@@ -39,7 +39,7 @@
                 :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
                 :metadata {:type (:type column-size)}}]
       :common {:metadata {:sampled (= (count sql-response) max-points)}
-               :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})))
+               :data     (mapv (fn [[size-value label]] {:label label :key label}) sql-response)}})))
 
 (defn query-v2
   [tenant-conn {:keys [columns table-name]} query]
@@ -64,7 +64,7 @@
                   :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
                   :metadata {:type (:type column-size)}}]
         :common {:metadata {}
-                 :data     (mapv (fn [[size-value label]] {:label label}) sql-response)}})
+                 :data     (mapv (fn [[size-value label]] {:label label :key label}) sql-response)}})
       (lib/bad-request
        {:message (format "Results are more than %d. Please select another column or use a different aggregation."
                          max-points)}))))
