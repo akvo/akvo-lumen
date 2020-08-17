@@ -11,6 +11,7 @@ import Spinner from '../common/LoadingSpinner';
 import { trackEvent } from '../../utilities/analytics';
 import { RENDER_MAP_LAYER_TYPE } from '../../constants/analytics';
 import RenderComplete from './RenderComplete';
+import { ensureSpecLegend } from './LegendsSortable';
 
 require('../../../node_modules/leaflet/dist/leaflet.css');
 require('./MapVisualisation.scss');
@@ -63,79 +64,86 @@ const wrapLabel = (str) => {
   return Boolean(str.toString().split(' ').some(word => word.length > 18));
 };
 
-const LegendEntry = ({ singleMetadata, layer }) => (
-  <div className="LegendEntry">
-    {Boolean(get(singleMetadata, 'pointColorMapping')) &&
-      <div className="container">
-        <h4>{layer.title}</h4>
-        <h5>{`${singleMetadata.pointColorMappingTitle}`}</h5>
-        <div className="listContainer">
-          <ul>
-            {singleMetadata.pointColorMapping.map(item =>
-              <li
-                key={item.value}
-              >
-                <div
-                  className="colorMarker"
-                  style={{
-                    backgroundColor: item.color,
-                  }}
-                />
-                <p className={`label ${wrapLabel(item.value) ? 'breakAll' : ''}`}>
-                  {chart.replaceLabelIfValueEmpty(item.value)}
-                </p>
-              </li>
-              )}
-          </ul>
-        </div>
-      </div>
-    }
-    {Boolean(get(singleMetadata, 'shapeColorMapping')) &&
-      <div className="container">
-        <h4>{layer.title}</h4>
-        <h5>{singleMetadata.shapeColorMappingTitle}</h5>
-        <div className="contents">
-          <div className="gradientContainer">
-            <p className="gradientLabel min">
-              Min
-            </p>
-            <p className="gradientLabel max">
-              Max
-            </p>
-            <div
-              className="gradientDisplay"
-              style={{
-                background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
-              }}
-            />
+const LegendEntry = ({ singleMetadata, layer }) => {
+  let pointColorMapping = singleMetadata.pointColorMapping;
+  const specLegend = ensureSpecLegend(layer.legend);
+  if (get(specLegend, 'order.mode') === 'custom') {
+    pointColorMapping = get(specLegend, 'order.list').map(x => pointColorMapping.find(z => z.value === x));
+  }
+  return (
+    <div className="LegendEntry">
+      {Boolean(get(singleMetadata, 'pointColorMapping')) &&
+        <div className="container">
+          <h4>{layer.title}</h4>
+          <h5>{`${singleMetadata.pointColorMappingTitle}`}</h5>
+          <div className="listContainer">
+            <ul>
+              {pointColorMapping.map(item =>
+                <li
+                  key={item.value}
+                >
+                  <div
+                    className="colorMarker"
+                    style={{
+                      backgroundColor: item.color,
+                    }}
+                  />
+                  <p className={`label ${wrapLabel(item.value) ? 'breakAll' : ''}`}>
+                    {chart.replaceLabelIfValueEmpty(item.value)}
+                  </p>
+                </li>
+                )}
+            </ul>
           </div>
         </div>
-      </div>
-    }
-    {Boolean(singleMetadata && layer.layerType === 'raster') &&
-      <div className="container">
-        <h4>{layer.title}</h4>
-        <h5>Raster layer</h5>
-        <div className="contents">
-          <div className="gradientContainer">
-            <p className="gradientLabel min">
-              {singleMetadata.min !== undefined ? chart.round(singleMetadata.min, 2) : 'Min'}
-            </p>
-            <p className="gradientLabel max">
-              {singleMetadata.max !== undefined ? chart.round(singleMetadata.max, 2) : 'Max'}
-            </p>
-            <div
-              className="gradientDisplay"
-              style={{
-                background: `linear-gradient(90deg,${layer.startColor || 'white'},${layer.endColor || 'black'})`,
-              }}
-            />
+      }
+      {Boolean(get(singleMetadata, 'shapeColorMapping')) &&
+        <div className="container">
+          <h4>{layer.title}</h4>
+          <h5>{singleMetadata.shapeColorMappingTitle}</h5>
+          <div className="contents">
+            <div className="gradientContainer">
+              <p className="gradientLabel min">
+                Min
+              </p>
+              <p className="gradientLabel max">
+                Max
+              </p>
+              <div
+                className="gradientDisplay"
+                style={{
+                  background: `linear-gradient(90deg,${singleMetadata.shapeColorMapping.map(o => o.color).join(',')})`,
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    }
-  </div>
-);
+      }
+      {Boolean(singleMetadata && layer.layerType === 'raster') &&
+        <div className="container">
+          <h4>{layer.title}</h4>
+          <h5>Raster layer</h5>
+          <div className="contents">
+            <div className="gradientContainer">
+              <p className="gradientLabel min">
+                {singleMetadata.min !== undefined ? chart.round(singleMetadata.min, 2) : 'Min'}
+              </p>
+              <p className="gradientLabel max">
+                {singleMetadata.max !== undefined ? chart.round(singleMetadata.max, 2) : 'Max'}
+              </p>
+              <div
+                className="gradientDisplay"
+                style={{
+                  background: `linear-gradient(90deg,${layer.startColor || 'white'},${layer.endColor || 'black'})`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  );
+};
 
 LegendEntry.propTypes = {
   singleMetadata: PropTypes.object,
