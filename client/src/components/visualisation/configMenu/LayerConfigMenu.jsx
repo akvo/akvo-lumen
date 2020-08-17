@@ -136,7 +136,7 @@ const GeopointDataTab = injectIntl((props) => {
           value={layer.pointColorColumn != null ?
             layer.pointColorColumn.toString() : null}
           name="xGroupColumnMenu"
-          options={filterColumns(columnOptions, ['text', 'number'])}
+          options={filterColumns(columnOptions, ['text', 'number', 'option'])}
           clearable
           onChange={columnName =>
             handlePointColorColumnChange(columnName,
@@ -218,7 +218,7 @@ const GeoshapeDataTab = injectIntl((props) => {
           placeholderId="select_a_geoshape_label_column"
           value={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
           name="shapeLabelInput"
-          options={filterColumns(columnOptions, 'text')}
+          options={filterColumns(columnOptions, ['text', 'option'])}
           onChange={value => onChangeMapLayer(layerIndex, {
             shapeLabelColumn: value,
           })}
@@ -576,7 +576,7 @@ class LayerConfigMenu extends Component {
                 <FilterMenu
                   filters={layer.filters}
                   hasDataset={layer.datasetId !== null}
-                  columnOptions={filterColumns(columnOptions, ['text', 'number', 'date'])}
+                  columnOptions={filterColumns(columnOptions, ['option', 'text', 'number', 'date'])}
                   onChangeSpec={object => onChangeMapLayer(layerIndex, object)}
                 />
               </div>
@@ -619,7 +619,7 @@ class LayerConfigMenu extends Component {
             <div
               className="inputGroup"
             >
-              {filterColumns(columnOptions, ['text', 'number', 'date']).map((option, index) =>
+              {filterColumns(columnOptions, ['option', 'text', 'number', 'date']).map((option, index) =>
                 <div
                   className="optionContainer"
                   key={index}

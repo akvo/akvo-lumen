@@ -146,7 +146,7 @@ function ScatterConfigMenu(props) {
                 [{
                   label: props.intl.formatMessage({ id: 'select_a_data_column_to_group_by' }),
                   value: null,
-                }].concat(filterColumns(columnOptions, ['number', 'text']))
+                }].concat(filterColumns(columnOptions, ['number', 'text', 'option']))
               }
               onChange={(value) => {
                 onChangeSpec({
@@ -309,7 +309,7 @@ function ScatterConfigMenu(props) {
               value={spec.bucketColumn !== null ?
                 spec.bucketColumn.toString() : null}
               name="xGroupColumnMenu"
-              options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+              options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
               clearable
               onChange={(value) => {
                 const change = { bucketColumn: value };
@@ -353,7 +353,7 @@ function ScatterConfigMenu(props) {
               labelTextId="popup_label_column"
               value={getPopupLabelChoice(spec)}
               name="datapointLabelColumnMenu"
-              options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+              options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
               clearable
               onChange={value => onChangeSpec({ datapointLabelColumn: value })}
               disabled={spec.bucketColumn !== null}
