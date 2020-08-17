@@ -53,8 +53,9 @@ const getLegends = (specLegend, visualisation) => {
 
 // ensure spec legend has order object
 export const ensureSpecLegend = (specLegend) => {
-  const legend = { ...specLegend } || {};
-  const order = { ...legend.order } || {};
+  const defaultOrder = { mode: 'auto', list: []};
+  const legend = { ...specLegend } || { order: defaultOrder};
+  const order = legend.order || defaultOrder;
   legend.order = order;
   return legend;
 };
