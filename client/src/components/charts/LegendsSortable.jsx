@@ -39,7 +39,7 @@ SortableItem.propTypes = {
 };
 
 const getLegends = (specLegend, visualisation) => {
-  const specLegendsList = get(specLegend, 'order.list');
+  const specLegendsList = get(specLegend, 'order.list') || [];
 
   const visLegendsList = get(visualisation, 'data.common.data') || [];
 
