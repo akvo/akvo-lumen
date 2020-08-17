@@ -200,7 +200,7 @@ export default class PivotTableConfigMenu extends Component {
                   labelTextId="columns"
                   value={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
                   name="categoryColumnInput"
-                  options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+                  options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
                   onChange={(value) => {
                     const change = { categoryColumn: value };
 
@@ -258,7 +258,7 @@ export default class PivotTableConfigMenu extends Component {
                 labelTextId="row_column"
                 value={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
                 name="rowColumnInput"
-                options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+                options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
                 onChange={(value) => {
                   const change = { rowColumn: value };
                   if (value == null && spec.aggregation !== 'count') {

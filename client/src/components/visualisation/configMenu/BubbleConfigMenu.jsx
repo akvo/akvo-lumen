@@ -99,7 +99,7 @@ function BubbleConfigMenu(props) {
               labelTextId="bucket_column"
               value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
               name="bucketColumnMenu"
-              options={filterColumns(columnOptions, ['number', 'text'])}
+              options={filterColumns(columnOptions, ['number', 'text', 'option'])}
               clearable
               onChange={value => handleChangeSpec({
                 bucketColumn: value,
