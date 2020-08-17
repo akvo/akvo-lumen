@@ -346,7 +346,7 @@ class FilterMenu extends Component {
                       name="filterColumnInput"
                       placeholder={`${formatMessage({ id: 'choose_a_column_to_filter_by' })}...`}
                       value={newFilterColumn || null}
-                      options={filterColumns(columnOptions, ['text', 'number', 'date'])}
+                      options={filterColumns(columnOptions, ['option', 'text', 'number', 'date'])}
                       onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
                     />
                     <label htmlFor="filterStrategyInput">

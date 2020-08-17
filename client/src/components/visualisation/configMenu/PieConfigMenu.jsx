@@ -29,7 +29,7 @@ function PieConfigMenu(props) {
             placeholderId="select_a_data_column_to_group_by"
             value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
             name="xGroupColumnMenu"
-            options={filterColumns(columnOptions, ['number', 'date', 'text'])}
+            options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
             clearable
             onChange={(value) => {
               const legend = resetLegend(specLegend, visualisation);
