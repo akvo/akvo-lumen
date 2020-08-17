@@ -31,6 +31,7 @@ export default class BarChart extends Component {
     }),
     grouped: PropTypes.bool,
     horizontal: PropTypes.bool,
+    env: PropTypes.object.isRequired,
   }
 
   static defaultProps = {

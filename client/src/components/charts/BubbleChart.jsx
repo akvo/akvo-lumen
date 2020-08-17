@@ -17,6 +17,7 @@ import Legend from './Legend';
 import RenderComplete from './RenderComplete';
 import Tooltip from './Tooltip';
 import BubbleLegend from './BubbleLegend';
+import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from './LegendsSortable';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -48,6 +49,7 @@ class BubbleChart extends Component {
     marginRight: PropTypes.number,
     marginTop: PropTypes.number,
     marginBottom: PropTypes.number,
+    env: PropTypes.object.isRequired,
   }
 
   static defaultProps = {
@@ -215,6 +217,7 @@ class BubbleChart extends Component {
       marginRight,
       marginBottom,
       marginLeft,
+      env,
     } = this.props;
 
     const series = this.getData();
@@ -224,6 +227,11 @@ class BubbleChart extends Component {
     const totalCount = series.data.reduce((total, datum) => total + datum.value, 0);
 
     const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
+    let legendSeriesData = series.data;
+    if (env.environment.orderedLegend) {
+      const specLegend = ensureSpecLegend(visualisation.spec.legend);
+      legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(series.data);
+    }
 
     return (
       <ChartLayout
@@ -243,9 +251,9 @@ class BubbleChart extends Component {
             description={
               legendDescription && <BubbleLegend title={legendDescription} />
             }
-            data={series.data.map(({ key }) => key)}
+            data={legendSeriesData.map(({ key }) => key)}
             colorMapping={
-              series.data.reduce((acc, { key }, i) => ({
+              legendSeriesData.reduce((acc, { key }, i) => ({
                 ...acc,
                 [key]: this.getColor(key, i),
               }), {})
