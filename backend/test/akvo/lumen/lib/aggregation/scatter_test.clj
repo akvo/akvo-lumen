@@ -10,10 +10,10 @@
     (is (= (scatter/serie sql-data column 0)
            {:key (:title column),
             :label (:title column),
-            :data [{:value :a0} {:value :a1}],
+            :data [{:value :a0 :key :a0} {:value :a1 :key :a1}],
             :metadata {:type (:type column)}}))
     (is (= (scatter/serie sql-data column 1)
            {:key (:title column),
             :label (:title column),
-            :data [{:value :b0} {:value :b1}],
+            :data [{:value :b0 :key :b0} {:value :b1 :key :b1}],
             :metadata {:type (:type column)}}))))
