@@ -21,7 +21,9 @@ const NoSortableItem = ({ value, color }) =>
 </div>);
 
 NoSortableItem.propTypes = {
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string.isRequired,
+    PropTypes.number.isrequires]),
   color: PropTypes.string.isRequired,
 };
 
@@ -34,7 +36,9 @@ const SortableItem = sortableElement(({ index, value, color }) =>
      <div style={{ marginLeft: '4px' }}>{value}</div></div>));
 
 SortableItem.propTypes = {
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string.isRequired,
+    PropTypes.number.isrequires]),
   index: PropTypes.number.isRequired,
 };
 
