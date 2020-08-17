@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import get from 'lodash/get';
 
 import SelectMenu from '../../common/SelectMenu';
 import ButtonRowInput from './ButtonRowInput';
@@ -14,6 +15,7 @@ import * as entity from '../../../domain/entity';
 import { palette } from '../../../utilities/visualisationColors';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
+import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
 
 require('./LayerConfigMenu.scss');
 
@@ -481,7 +483,14 @@ class LayerConfigMenu extends Component {
   getTabContent(columnOptions) {
     const { layer, layerIndex, metadata, onChangeMapLayer, disabled, intl } = this.props;
     let tabContent;
-
+    const specLegend = layer.legend || {};
+    const visualisation = {
+      data:
+      { common: {
+        data: (get(metadata, `layerMetadata[${layerIndex}].pointColorMapping`) || [])
+              .map(({ value }) => ({ key: value })),
+        metadata: { type: 'text' } } } };
+    const onChangeSpec = object => onChangeMapLayer(layerIndex, object);
     switch (this.state.activeTab) {
       case 'data':
         tabContent = (
@@ -600,6 +609,36 @@ class LayerConfigMenu extends Component {
                 this.props.onChangeMapLayer(layerIndex, { legend });
               }}
             />
+            {Boolean(layer.legend.visible) && (
+              <div>
+                {Boolean(this.props.env.environment.orderedLegend) && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <ButtonRowInput
+                      labelClass="label"
+                      options={[{
+                        label: <FormattedMessage id="legend_order_auto_mode" />,
+                        value: 'auto',
+                      }, {
+                        label: <FormattedMessage id="legend_order_custom_mode" />,
+                        value: 'custom',
+                      }]}
+                      selected={get(layer, 'legend.order.mode') || 'auto'}
+                      label={intl.formatMessage({ id: 'legend_category_order' })}
+                      onChange={(val) => {
+                        const legend = resetLegend(specLegend, visualisation, val);
+                        onChangeSpec({ legend });
+                      }}
+                      buttonSpacing="0"
+                    />
+                    <LegendsSortable
+                      onChangeSpec={onChangeSpec}
+                      visualisation={visualisation}
+                      colors={(get(metadata, `layerMetadata[${layerIndex}].availableColors`) || [])}
+                      specLegend={specLegend}
+                    />
+                  </div>)}
+              </div>
+            )}
 
           </div>
         );
@@ -801,6 +840,7 @@ LayerConfigMenu.propTypes = {
   layerIndex: PropTypes.number.isRequired,
   onSave: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
+  env: PropTypes.object.isRequired,
 };
 
 export default injectIntl(LayerConfigMenu);

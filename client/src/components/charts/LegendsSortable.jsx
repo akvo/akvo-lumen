@@ -23,7 +23,7 @@ const NoSortableItem = ({ value, color }) =>
 NoSortableItem.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string.isRequired,
-    PropTypes.number.isrequires]),
+    PropTypes.number.isRequired]),
   color: PropTypes.string.isRequired,
 };
 
@@ -38,7 +38,7 @@ const SortableItem = sortableElement(({ index, value, color }) =>
 SortableItem.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string.isRequired,
-    PropTypes.number.isrequires]),
+    PropTypes.number.isRequired]),
   index: PropTypes.number.isRequired,
 };
 
@@ -53,8 +53,9 @@ const getLegends = (specLegend, visualisation) => {
 
 // ensure spec legend has order object
 export const ensureSpecLegend = (specLegend) => {
-  const legend = { ...specLegend } || {};
-  const order = { ...legend.order } || {};
+  const defaultOrder = { mode: 'auto', list: [] };
+  const legend = { ...specLegend } || { order: defaultOrder };
+  const order = legend.order || defaultOrder;
   legend.order = order;
   return legend;
 };
