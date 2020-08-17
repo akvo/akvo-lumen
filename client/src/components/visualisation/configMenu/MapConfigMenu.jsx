@@ -186,6 +186,7 @@ class MapConfigMenu extends Component {
               datasetOptions={this.props.datasetOptions}
               onChangeMapLayer={this.handleChangeMapLayer}
               onSave={this.props.onSave}
+              env={this.props.env}
               disabled={visualisation.awaitingResponse}
             />
           }
@@ -209,6 +210,7 @@ MapConfigMenu.propTypes = {
   onChangeMapLayer: PropTypes.func,
   datasetOptions: PropTypes.array.isRequired,
   loadDataset: PropTypes.func.isRequired,
+  env: PropTypes.object.isRequired,
 };
 
 export default injectIntl(MapConfigMenu);
