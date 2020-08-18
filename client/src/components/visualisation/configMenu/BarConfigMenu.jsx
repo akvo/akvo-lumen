@@ -166,7 +166,87 @@ class BarConfigMenu extends Component {
     const columnsBucketColumn = filterColumns(columnOptions, ['number', 'text', 'option']);
     const columnsMetricColumn = filterColumns(columnOptions, ['number']);
     const specLegend = spec.legend || {};
-
+    const legendSettings = (
+      <div>
+        <ToggleInput
+          name="showLegend"
+          type="checkbox"
+          labelId="show_legend"
+          className="InputGroup"
+          checked={Boolean(spec.showLegend)}
+          onChange={val => onChangeSpec({
+            showLegend: val,
+          })}
+        />
+        {Boolean(spec.showLegend) && Boolean(env.environment.orderedLegend) && (
+          <div style={{ marginBottom: '20px' }}>
+            <ButtonRowInput
+              labelClass="label"
+              options={[{
+                label: <FormattedMessage id="legend_order_auto_mode" />,
+                value: 'auto',
+              }, {
+                label: <FormattedMessage id="legend_order_custom_mode" />,
+                value: 'custom',
+              }]}
+              selected={get(spec, 'legend.order.mode') || 'auto'}
+              label={intl.formatMessage({ id: 'legend_category_order' })}
+              onChange={(val) => {
+                const legend = resetLegend(specLegend, visualisation, val,
+                  Boolean(subBucketMethodView || (metricColumnsY.length > 0)));
+                onChangeSpec({ legend });
+              }}
+              buttonSpacing="0"
+            />
+            <LegendsSortable
+              onChangeSpec={onChangeSpec}
+              visualisation={visualisation}
+              colors={spec.colors}
+              specLegend={specLegend}
+              hasSubbucket={Boolean(subBucketMethodView || (metricColumnsY.length > 0))}
+            />
+            <div>
+              <ConfigMenuSectionOptionText
+                value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
+                placeholderId="legend_title"
+                name="legendLabel"
+                maxLength={32}
+                onChange={event => handleChangeSpec({
+                  legendTitle: event.target.value.toString(),
+                }, spec, onChangeSpec, columnOptions)}
+              />
+              <ConfigMenuSectionOptionSelect
+                placeholderId="legend_position"
+                value={spec.legendPosition}
+                name="legendPosition"
+                options={[
+                  {
+                    label: this.props.intl.formatMessage({ id: 'legend_position_auto' }),
+                    value: null,
+                  },
+                  {
+                    label: this.props.intl.formatMessage({ id: 'legend_position_top' }),
+                    value: 'top',
+                  },
+                  {
+                    label: this.props.intl.formatMessage({ id: 'legend_position_right' }),
+                    value: 'right',
+                  },
+                  {
+                    label: this.props.intl.formatMessage({ id: 'legend_position_bottom' }),
+                    value: 'bottom',
+                  },
+                  {
+                    label: this.props.intl.formatMessage({ id: 'legend_position_left' }),
+                    value: 'left',
+                  },
+                ]}
+                clearable
+                onChange={value => onChangeSpec({ legendPosition: value })}
+              /></div>
+          </div>
+        )}
+      </div>);
     return (
       <div>
         <ConfigMenuSection
@@ -223,45 +303,6 @@ class BarConfigMenu extends Component {
                 spec={spec}
                 onChangeSpec={value => handleChangeSpec(value, spec, onChangeSpec, columnOptions)}
               />
-              <div>
-                <ToggleInput
-                  name="showLegend"
-                  type="checkbox"
-                  labelId="show_legend"
-                  className="InputGroup"
-                  checked={Boolean(spec.showLegend)}
-                  onChange={val => onChangeSpec({
-                    showLegend: val,
-                  })}
-                />
-                {Boolean(spec.showLegend) && Boolean(env.environment.orderedLegend) && (
-                  <div style={{ marginBottom: '20px' }}>
-                    <ButtonRowInput
-                      labelClass="label"
-                      options={[{
-                        label: <FormattedMessage id="legend_order_auto_mode" />,
-                        value: 'auto',
-                      }, {
-                        label: <FormattedMessage id="legend_order_custom_mode" />,
-                        value: 'custom',
-                      }]}
-                      selected={get(spec, 'legend.order.mode') || 'auto'}
-                      label={intl.formatMessage({ id: 'legend_category_order' })}
-                      onChange={(val) => {
-                        const legend = resetLegend(specLegend, visualisation, val);
-                        onChangeSpec({ legend });
-                      }}
-                      buttonSpacing="0"
-                    />
-                    <LegendsSortable
-                      onChangeSpec={onChangeSpec}
-                      visualisation={visualisation}
-                      colors={spec.colors}
-                      specLegend={specLegend}
-                    />
-                  </div>)}
-              </div>
-
               <ToggleInput
                 name="splitBucket"
                 type="checkbox"
@@ -277,48 +318,7 @@ class BarConfigMenu extends Component {
           )}
           advancedOptions={(
             <div>
-              {spec.bucketColumn !== null && (
-                <div>
-                  <ConfigMenuSectionOptionText
-                    value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
-                    placeholderId="legend_title"
-                    name="legendLabel"
-                    maxLength={32}
-                    onChange={event => handleChangeSpec({
-                      legendTitle: event.target.value.toString(),
-                    }, spec, onChangeSpec, columnOptions)}
-                  />
-                  <ConfigMenuSectionOptionSelect
-                    placeholderId="legend_position"
-                    value={spec.legendPosition}
-                    name="legendPosition"
-                    options={[
-                      {
-                        label: this.props.intl.formatMessage({ id: 'legend_position_auto' }),
-                        value: null,
-                      },
-                      {
-                        label: this.props.intl.formatMessage({ id: 'legend_position_top' }),
-                        value: 'top',
-                      },
-                      {
-                        label: this.props.intl.formatMessage({ id: 'legend_position_right' }),
-                        value: 'right',
-                      },
-                      {
-                        label: this.props.intl.formatMessage({ id: 'legend_position_bottom' }),
-                        value: 'bottom',
-                      },
-                      {
-                        label: this.props.intl.formatMessage({ id: 'legend_position_left' }),
-                        value: 'left',
-                      },
-                    ]}
-                    clearable
-                    onChange={value => onChangeSpec({ legendPosition: value })}
-                  />
-                </div>
-              )}
+              {spec.bucketColumn !== null && legendSettings}
               <ConfigMenuSectionOptionText
                 value={spec.axisLabelX !== null ? spec.axisLabelX.toString() : null}
                 placeholderId="x_axis_label"

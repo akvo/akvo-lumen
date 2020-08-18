@@ -23,7 +23,7 @@ const NoSortableItem = ({ value, color }) =>
 NoSortableItem.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string.isRequired,
-    PropTypes.number.isrequires]),
+    PropTypes.number.isRequired]),
   color: PropTypes.string.isRequired,
 };
 
@@ -38,23 +38,22 @@ const SortableItem = sortableElement(({ index, value, color }) =>
 SortableItem.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string.isRequired,
-    PropTypes.number.isrequires]),
+    PropTypes.number.isRequired]),
   index: PropTypes.number.isRequired,
 };
 
-const getLegends = (specLegend, visualisation) => {
+const getLegends = (specLegend, visualisation, hasSubbucket) => {
   const specLegendsList = get(specLegend, 'order.list') || [];
-
-  const visLegendsList = get(visualisation, 'data.common.data') || [];
-
+  const visLegendsList = get(visualisation, hasSubbucket ? 'data.series' : 'data.common.data') || [];
   return isEqual(new Set(specLegendsList), new Set(visLegendsList.map(l => l.key))) ?
   specLegendsList : visLegendsList.map(l => l.key).sort(sortLegendsFunctionFactory(visualisation));
 };
 
 // ensure spec legend has order object
 export const ensureSpecLegend = (specLegend) => {
-  const legend = { ...specLegend } || {};
-  const order = { ...legend.order } || {};
+  const defaultOrder = { mode: 'auto', list: [] };
+  const legend = { ...specLegend } || { order: defaultOrder };
+  const order = legend.order || defaultOrder;
   legend.order = order;
   return legend;
 };
@@ -64,9 +63,10 @@ export const LegendsSortable = ({
   colors,
   specLegend,
   visualisation,
+  hasSubbucket,
 }) => {
   const sortable = (get(specLegend, 'order.mode') || 'auto') === 'custom';
-  const legends = getLegends(specLegend, visualisation);
+  const legends = getLegends(specLegend, visualisation, hasSubbucket);
 
   const onSortEnd = ({ oldIndex, newIndex }) => {
     const currentItems = arrayMove(legends, oldIndex, newIndex);
@@ -102,18 +102,19 @@ LegendsSortable.propTypes = {
   colors: PropTypes.object,
   onChangeSpec: PropTypes.func.isRequired,
   specLegend: PropTypes.object.isRequired,
+  hasSubbucket: PropTypes.bool,
 };
 
-export const resetLegend = (specLegend, visualisation, val) => {
+export const resetLegend = (specLegend, visualisation, val, hasSubbucket) => {
   const legend = ensureSpecLegend(specLegend);
-  const legends = getLegends(legend, visualisation);
+  const legends = getLegends(legend, visualisation, hasSubbucket);
   if (val) {
     legend.order.mode = val;
     if (val === 'auto') {
       legend.order.list = legends.sort(sortLegendsFunctionFactory(visualisation));
     }
   } else {
-    return resetLegend(specLegend, visualisation, 'auto');
+    return resetLegend(specLegend, visualisation, 'auto', hasSubbucket);
   }
   return legend;
 };
