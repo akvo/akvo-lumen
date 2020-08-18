@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.bar
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
@@ -13,11 +13,6 @@
     nil   "x ASC"
     "asc" (format "%s ASC NULLS FIRST" column)
     "dsc" (format "%s DESC NULLS LAST" column)))
-
-(defn- sql-option-bucket-column [bucket-column]
-  (if (= "option" (:type bucket-column))
-    (format "unnest(regexp_split_to_array(%1$s,'\\|'))" (:columnName bucket-column))
-    (:columnName bucket-column)))
 
 (defn- subbucket-sql [table-name bucket-column subbucket-column aggregation filter-sql sort-sql truncate-size]
   (format "
