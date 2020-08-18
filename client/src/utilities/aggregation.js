@@ -80,7 +80,7 @@ export const getNeedNewAggregation = (
   const vType = newV.visualisationType || optionalVizType;
 
   if ((newV && !oldV) || (vType !== (oldV.visualisationType || 'map'))) {
-    console.log('getNeedNewAggregation', newV, oldV, vType, oldV.visualisationType);
+//    console.log('getNeedNewAggregation', newV, oldV, vType, oldV.visualisationType);
     return true;
   }
 
