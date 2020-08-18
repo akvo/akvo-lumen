@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Collection } from '@potion/layout'; // TODO: see if can optimize this
 import { Circle, Svg, Group } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
+import { randomColor } from '@potion/color';
 import {
   get,
   uniq,
@@ -24,6 +25,8 @@ import { MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../constants/chart';
 import RenderComplete from './RenderComplete';
 import Legend from './Legend';
 import BubbleLegend from './BubbleLegend';
+import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from './LegendsSortable';
+import { palette } from '../../utilities/visualisationColors';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -87,6 +90,7 @@ class ScatterChart extends Component {
     visualisation: PropTypes.object.isRequired,
     legendTitle: PropTypes.string,
     legendDescription: PropTypes.string,
+    env: PropTypes.object.isRequired,
   }
 
   static defaultProps = {
@@ -160,20 +164,10 @@ class ScatterChart extends Component {
     };
   }
 
-  getColor(category) {
-    const { colorMapping, colors, color } = this.props;
-    if (!itsSet(category)) {
-      return color;
-    }
-    if (colorMapping[category]) {
-      return colorMapping[category];
-    }
-    if (this.colors[category]) {
-      return this.colors[category];
-    }
-    this.colors[category] = colors[this.colorsCount];
-    this.colorsCount += 1;
-    return this.colors[category];
+  getColor(category, index) {
+    const { colorMapping, colors } = this.props;
+    this.colors[index] = this.colors[index] || randomColor();
+    return colorMapping[category] || colors[index] || this.colors[index];
   }
 
   handleShowTooltip(event, tooltipItems) {
@@ -276,6 +270,7 @@ class ScatterChart extends Component {
       legendDescription,
       legendVisible,
       legendPosition,
+      env,
     } = this.props;
 
     const {
@@ -302,6 +297,18 @@ class ScatterChart extends Component {
       }
       return value;
     };
+    let legendSeriesData = series.data.map(x => ({ ...x, key: x.label }));
+    let categories = uniq(legendSeriesData.map(({ category }) => category));
+    if (env.environment.orderedLegend) {
+      const specLegend = ensureSpecLegend(visualisation.spec.legend);
+      if (specLegend.order.list.length > 0) {
+        categories = specLegend.order.list;
+      } else {
+        legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(legendSeriesData);
+        categories = legendSeriesData.map(({ category }) => category)
+          .filter((value, index, self) => self.indexOf(value) === index);
+      }
+    }
 
     return (
       <ChartLayout
@@ -314,35 +321,32 @@ class ScatterChart extends Component {
         onClick={() => {
           this.setState({ isPickingColor: undefined });
         }}
-        legend={({ horizontal }) => {
-          const categories = uniq(series.data.map(({ category }) => category));
-          return (
-            <Legend
-              horizontal={!horizontal}
-              title={legendTitle}
-              description={
-                legendDescription && <BubbleLegend title={legendDescription} />
-              }
-              data={categories}
-              colorMapping={categories.reduce((acc, category) => ({
-                ...acc,
-                [category]: this.getColor(category),
-              }), {})}
-              activeItem={get(this.state, 'hoveredNode')}
-              onMouseEnter={({ datum }) => () => {
-                if (this.state.isPickingColor) return;
-                this.handleMouseEnterLegendNode(datum);
-              }}
-              onMouseLeave={() => () => {
-                this.setState({ hoveredCategory: null });
-              }}
-              onClick={({ datum }) => (event) => {
-                event.stopPropagation();
-                this.handleShowColorPicker(datum);
-              }}
-            />
-          );
-        }}
+        legend={({ horizontal }) => (
+          <Legend
+            horizontal={!horizontal}
+            title={legendTitle}
+            description={
+              legendDescription && <BubbleLegend title={legendDescription} />
+            }
+            data={categories}
+            colorMapping={categories.reduce((acc, category, i) => ({
+              ...acc,
+              [category]: this.getColor(category, i, palette),
+            }), {})}
+            activeItem={get(this.state, 'hoveredNode')}
+            onMouseEnter={({ datum }) => () => {
+              if (this.state.isPickingColor) return;
+              this.handleMouseEnterLegendNode(datum);
+            }}
+            onMouseLeave={() => () => {
+              this.setState({ hoveredCategory: null });
+            }}
+            onClick={({ datum }) => (event) => {
+              event.stopPropagation();
+              this.handleShowColorPicker(datum);
+            }}
+          />
+          )}
         chart={
           <ResponsiveWrapper>{(dimensions) => {
             const margins = calculateMargins({
@@ -460,7 +464,7 @@ class ScatterChart extends Component {
                         const normalizedX = xScale(x);
                         const normalizedY = yScale(y);
                         const normalizedSize = Math.sqrt(sizeScale(size));
-                        const color = this.getColor(category);
+                        const color = this.getColor(category, i);
 
                         return (
                           <Group key={key || i}>

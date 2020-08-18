@@ -205,7 +205,7 @@ function ScatterConfigMenu(props) {
                 <LegendsSortable
                   onChangeSpec={onChangeSpec}
                   visualisation={visualisation}
-                  colors={spec.colors}
+                  colors={spec.colorMapping}
                   specLegend={specLegend}
                 />
               </div>)}
