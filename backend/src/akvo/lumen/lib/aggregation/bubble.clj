@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.bubble
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
@@ -30,7 +30,7 @@
                           FROM %3$s 
                           GROUP BY %2$s"
                          (sql-aggregation-subquery aggregation-method (or column-size column-bucket))
-                         (:columnName column-bucket) ;; maybe we need to use => (or c-size c-bucket)
+                         (sql-option-bucket-column column-bucket) ;; maybe we need to use => (or c-size c-bucket)
                          subquery)
         sql-response (run-query tenant-conn sql-text)]
     (lib/ok
@@ -54,7 +54,7 @@
                           FROM %3$s 
                           GROUP BY %2$s"
                          (sql-aggregation-subquery aggregation-method (or column-size column-bucket))
-                         (:columnName column-bucket) ;; maybe we need to use => (or c-size c-bucket)
+                         (sql-option-bucket-column column-bucket) ;; maybe we need to use => (or c-size c-bucket)
                          subquery)
         sql-response (run-query tenant-conn sql-text)]
     (if (< (count sql-response) max-points)
