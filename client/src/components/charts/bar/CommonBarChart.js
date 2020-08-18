@@ -44,6 +44,7 @@ export const barPropTypes = {
   xAxisLabel: PropTypes.string,
   grid: PropTypes.bool,
   visualisation: PropTypes.object,
+  env: PropTypes.object.isRequired,
 };
 
 export const stackedBarPropTypes = {
@@ -77,6 +78,7 @@ export const stackedBarPropTypes = {
   grid: PropTypes.bool,
   yAxisTicks: PropTypes.number,
   visualisation: PropTypes.object,
+  env: PropTypes.object.isRequired,
 };
 
 

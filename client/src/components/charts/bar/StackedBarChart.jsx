@@ -29,6 +29,7 @@ import Tooltip from '../Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../constants/chart';
 import { isLight } from '../../../utilities/color';
 import RenderComplete from '../RenderComplete';
+import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from '../LegendsSortable';
 
 const getPaddingBottom = (data) => {
   const labelCutoffLength = 16;
@@ -280,6 +281,7 @@ export default class StackedBarChart extends Component {
       grid,
       visualisation,
       legendPosition,
+      env,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
@@ -294,6 +296,11 @@ export default class StackedBarChart extends Component {
     const paddingBottom = getPaddingBottom(series.data);
     const axisLabelFontSize =
       getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
+    let legendSeriesData = stackNodes;
+    if (env.environment.orderedLegend) {
+      const specLegend = ensureSpecLegend(visualisation.spec.legend);
+      legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(stackNodes);
+    }
 
     return (
       <ChartLayout
@@ -309,9 +316,9 @@ export default class StackedBarChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={legendTitle}
-            data={stackNodes.map(({ key }) => replaceLabelIfValueEmpty(key))}
+            data={legendSeriesData.map(({ key }) => replaceLabelIfValueEmpty(key))}
             colorMapping={
-              stackNodes.reduce((acc, { key }, i) => ({
+              legendSeriesData.reduce((acc, { key }, i) => ({
                 ...acc,
                 [replaceLabelIfValueEmpty(key)]: this.getColor(key, i),
               }), {})
