@@ -9,7 +9,7 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql    (sql-str columns (:filters query))
         bucket-column (find-column columns (:bucketColumn query))
-        query         (format "SELECT %1$s, count(*) FROM %2$s WHERE %3$s GROUP BY %1$s"
+        query         (format "SELECT %1$s as x, count(*) FROM %2$s WHERE %3$s GROUP BY x"
                               (sql-option-bucket-column bucket-column) table-name filter-sql)
         counts        (run-query tenant-conn query)
         max-segments  50]
