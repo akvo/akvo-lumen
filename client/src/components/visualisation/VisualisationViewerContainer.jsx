@@ -35,7 +35,7 @@ export default class VisualisationViewerContainer extends Component {
   }
 
   render() {
-    const { datasets, visualisation, metadata } = this.props;
+    const { datasets, visualisation, metadata, env } = this.props;
     return (
       <div className="VisualisationViewerContainer">
         <div
@@ -48,6 +48,7 @@ export default class VisualisationViewerContainer extends Component {
             visualisation={visualisation}
             height={this.state.clientHeight}
             width={this.state.clientWidth}
+            env={env}
           />
         </div>
       </div>
@@ -59,4 +60,5 @@ VisualisationViewerContainer.propTypes = {
   datasets: PropTypes.object.isRequired,
   visualisation: PropTypes.object.isRequired,
   metadata: PropTypes.object,
+  env: PropTypes.any,
 };
