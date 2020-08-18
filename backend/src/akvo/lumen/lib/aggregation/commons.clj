@@ -45,3 +45,8 @@
             (log/error ex)
             (throw ex))
           (deref column-names))))))
+
+(defn sql-option-bucket-column [bucket-column]
+  (if (= "option" (:type bucket-column))
+    (format "unnest(regexp_split_to_array(%1$s,'\\|'))" (:columnName bucket-column))
+    (:columnName bucket-column)))
