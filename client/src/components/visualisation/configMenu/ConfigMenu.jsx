@@ -145,6 +145,7 @@ function ConfigMenu(props) {
               columnOptions={columnOptions}
               aggregationOptions={aggregationOptions}
               onSave={props.onSaveVisualisation}
+              env={props.env}
               onChangeSourceDataset={props.onChangeSourceDataset}
               loadDataset={props.loadDataset}
             />
