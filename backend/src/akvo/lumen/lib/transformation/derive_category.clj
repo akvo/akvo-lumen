@@ -75,6 +75,7 @@
                                            {:rnum        (:rnum i)
                                             :value       (condp = derivation-type
                                                            "text"   (find-text-cat (mappings-dict mappings) v uncategorized-value)
+                                                           "option" (find-text-cat (mappings-dict mappings) v uncategorized-value)
                                                            "number" (find-number-cat mappings v uncategorized-value))
                                             :column-name new-column-name
                                             :table-name  table-name})))

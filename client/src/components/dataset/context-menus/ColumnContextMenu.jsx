@@ -91,45 +91,47 @@ const commonOptions = [
     value: 'delete-column',
   },
 ];
-
-const dataTypeOptions = ({
-  text: [
-    {
-      label: <FormattedMessage id="filter" />,
-      value: 'core/filter-column',
+const textOptions = [
+  {
+    label: <FormattedMessage id="filter" />,
+    value: 'core/filter-column',
+  },
+  {
+    label: <FormattedMessage id="whitespace" />,
+    value: 'whitespace',
+    subMenu: [{
+      label: <FormattedMessage id="remove_leading_and_trailing_whitespace" />,
+      value: 'core/trim',
     },
     {
-      label: <FormattedMessage id="whitespace" />,
-      value: 'whitespace',
-      subMenu: [{
-        label: <FormattedMessage id="remove_leading_and_trailing_whitespace" />,
-        value: 'core/trim',
+      label: <FormattedMessage id="remove_double_space" />,
+      value: 'core/trim-doublespace',
+    },
+    ],
+  },
+  {
+    label: <FormattedMessage id="change_case" />,
+    value: 'change-case',
+    subMenu: [
+      {
+        label: <FormattedMessage id="to_uppercase_label" />,
+        value: 'core/to-uppercase',
       },
       {
-        label: <FormattedMessage id="remove_double_space" />,
-        value: 'core/trim-doublespace',
+        label: <FormattedMessage id="to_lowercase_label" />,
+        value: 'core/to-lowercase',
       },
-      ],
-    },
-    {
-      label: <FormattedMessage id="change_case" />,
-      value: 'change-case',
-      subMenu: [
-        {
-          label: <FormattedMessage id="to_uppercase_label" />,
-          value: 'core/to-uppercase',
-        },
-        {
-          label: <FormattedMessage id="to_lowercase_label" />,
-          value: 'core/to-lowercase',
-        },
-        {
-          label: <FormattedMessage id="to_titlecase_label" />,
-          value: 'core/to-titlecase',
-        },
-      ],
-    },
-  ],
+      {
+        label: <FormattedMessage id="to_titlecase_label" />,
+        value: 'core/to-titlecase',
+      },
+    ],
+  },
+];
+
+const dataTypeOptions = ({
+  text: textOptions,
+  option: textOptions,
   number: [],
   date: [],
   geopoint: [],
