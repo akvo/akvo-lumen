@@ -10,7 +10,7 @@ import SelectMenu from '../../common/SelectMenu';
 import './SourceDeriveCategoryOptions.scss';
 
 const SourceDeriveCategoryOptions = ({ dataset, onChange, selected, intl }) => {
-  const columnsSelect = filterColumns(dataset.columns, ['text', 'number']);
+  const columnsSelect = filterColumns(dataset.columns, ['text', 'number', 'option']);
   return (
     <Container className="SourceDeriveCategoryOptions">
       <Row>

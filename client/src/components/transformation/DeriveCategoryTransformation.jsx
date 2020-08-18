@@ -110,7 +110,7 @@ class DeriveCategoryTransformation extends Component {
 
   handleValidate() {
     const { mappings, uncategorizedValue } = this.state.transformation.args.derivation;
-    const textColumn = this.state.columnType === 'text';
+    const textColumn = (this.state.columnType === 'text' || this.state.columnType === 'option');
     // eslint-disable-next-line no-unused-vars
     const categoryCounts = textColumn ? countBy(mappings, ([sv, categoryName]) => categoryName) :
     // eslint-disable-next-line no-unused-vars
@@ -138,7 +138,7 @@ class DeriveCategoryTransformation extends Component {
       return;
     }
 
-    if (columnType === 'text') {
+    if (columnType === 'text' || columnType === 'option') {
       onApplyTransformation({
         ...transformation,
         args: {
@@ -247,7 +247,8 @@ class DeriveCategoryTransformation extends Component {
             />
           )}
 
-          {transformation.args.source.column.columnName && !selectingSourceColumn && columnType === 'text'
+          {transformation.args.source.column.columnName && !selectingSourceColumn &&
+          (columnType === 'text' || columnType === 'option')
           && (
             <DeriveCategoryMappingsText
               mappings={transformation.args.derivation.mappings || []}
