@@ -116,7 +116,16 @@ class FilterMenu extends Component {
             value: 'isEmpty',
           },
         ],
-        number: [
+        option: [
+          {
+            label: formatMessage({ id: 'exactly_matches' }),
+            value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'is_empty' }),
+            value: 'isEmpty',
+          },
+        ],        number: [
           {
             label: formatMessage({ id: 'is_higher_than' }),
             value: 'isHigher',
