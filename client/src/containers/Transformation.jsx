@@ -84,7 +84,7 @@ class Transformation extends Component {
             this.props.dispatch(fetchDataset(id));
           }}
           onFetchSortedDataset={(id, columnName, columnType) => {
-            if (columnType === 'text') {
+            if (columnType === 'text' || columnType === 'option') {
               this.props.dispatch(fetchTextSortedDataset(id, columnName));
             } else {
               this.props.dispatch(fetchNumberSortedDataset(id, columnName));

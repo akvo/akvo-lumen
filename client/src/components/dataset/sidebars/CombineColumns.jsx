@@ -8,7 +8,7 @@ import SidebarControls from './SidebarControls';
 import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 function SelectColumn({ columns, idx, onChange, value, intl }) {
-  const columnsSelect = filterColumns(columns, ['text']);
+  const columnsSelect = filterColumns(columns, ['text', 'option']);
   return (
     <div className="inputGroup">
       <label

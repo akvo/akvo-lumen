@@ -12,11 +12,10 @@ import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import './SplitColumn.scss';
 import { showNotification } from '../../../actions/notification';
-import { columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 function textColumnOptions(columns) {
-  return columns
-    .filter(column => (column.get('type') === 'text'))
+  return filterColumns(columns, ['text', 'option'])
     .map(column => (fromJS({
       label: column.get('title'),
       value: column.get('columnName'),

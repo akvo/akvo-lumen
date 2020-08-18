@@ -101,7 +101,8 @@
                                      "geoshape" "geometry(GEOMETRY, 4326)"
                                      "number" "double precision"
                                      "multiple" "text"
-                                     "text" "text")})))
+                                     "text" "text"
+                                     "option" "text")})))
 
 (defn insert-merged-data
   "Insert the merged values into the target dataset"
