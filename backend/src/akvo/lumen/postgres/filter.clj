@@ -73,6 +73,10 @@
                      (column :columnName)
                      op
                      (core/escape-string value))
+      "option" (format "coalesce(%1$s, '') %2$s '%3$s'"
+                     (column :columnName)
+                     op
+                     (core/escape-string value))
       (invalid-filter "Type not supported" {:type (:type column)}))))
 
 (defmethod filter-sql "isEmpty"
