@@ -1,6 +1,6 @@
 (ns akvo.lumen.lib.aggregation.scatter
   (:require [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-aggregation-subquery) :as commons]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-aggregation-subquery sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
@@ -56,7 +56,7 @@
                          (:columnName column-x)
                          (:columnName column-y)
                          (:columnName column-size)
-                         (:columnName column-category)
+                         (sql-option-bucket-column column-category)
                          (:columnName column-label)
                          table-name
                          filter-sql
@@ -105,7 +105,7 @@
                          (:columnName column-x)
                          (:columnName column-y)
                          (:columnName column-size)
-                         (:columnName column-category)
+                         (sql-option-bucket-column column-category)
                          (:columnName column-label)
                          table-name
                          filter-sql)
