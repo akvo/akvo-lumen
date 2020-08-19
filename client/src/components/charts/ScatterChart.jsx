@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Collection } from '@potion/layout'; // TODO: see if can optimize this
 import { Circle, Svg, Group } from '@potion/element';
 import { AxisBottom, AxisLeft } from '@vx/axis';
-import { randomColor } from '@potion/color';
 import {
   get,
   uniq,
@@ -26,7 +25,6 @@ import RenderComplete from './RenderComplete';
 import Legend from './Legend';
 import BubbleLegend from './BubbleLegend';
 import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from './LegendsSortable';
-import { palette } from '../../utilities/visualisationColors';
 
 const startAxisFromZero = (axisExtent, type) => {
   // Returns an educated guess on if axis should start from zero or not
@@ -164,10 +162,20 @@ class ScatterChart extends Component {
     };
   }
 
-  getColor(category, index) {
-    const { colorMapping, colors } = this.props;
-    this.colors[index] = this.colors[index] || randomColor();
-    return colorMapping[category] || colors[index] || this.colors[index];
+  getColor(category) {
+    const { colorMapping, colors, color } = this.props;
+    if (!itsSet(category)) {
+      return color;
+    }
+    if (colorMapping[category]) {
+      return colorMapping[category];
+    }
+    if (this.colors[category]) {
+      return this.colors[category];
+    }
+    this.colors[category] = colors[this.colorsCount];
+    this.colorsCount += 1;
+    return this.colors[category];
   }
 
   handleShowTooltip(event, tooltipItems) {
@@ -309,7 +317,6 @@ class ScatterChart extends Component {
           .filter((value, index, self) => self.indexOf(value) === index);
       }
     }
-
     return (
       <ChartLayout
         style={style}
@@ -329,9 +336,9 @@ class ScatterChart extends Component {
               legendDescription && <BubbleLegend title={legendDescription} />
             }
             data={categories}
-            colorMapping={categories.reduce((acc, category, i) => ({
+            colorMapping={categories.reduce((acc, category, idx) => ({
               ...acc,
-              [category]: this.getColor(category, i, palette),
+              [category]: this.getColor(idx),
             }), {})}
             activeItem={get(this.state, 'hoveredNode')}
             onMouseEnter={({ datum }) => () => {
@@ -346,7 +353,8 @@ class ScatterChart extends Component {
               this.handleShowColorPicker(datum);
             }}
           />
-          )}
+          )
+        }
         chart={
           <ResponsiveWrapper>{(dimensions) => {
             const margins = calculateMargins({
@@ -464,10 +472,9 @@ class ScatterChart extends Component {
                         const normalizedX = xScale(x);
                         const normalizedY = yScale(y);
                         const normalizedSize = Math.sqrt(sizeScale(size));
-                        const color = this.getColor(category, i);
-
+                        const color = this.getColor(categories.indexOf(category));
                         return (
-                          <Group key={key || i}>
+                          <Group key={i}>
                             <Circle
                               key={i}
                               cx={normalizedX}

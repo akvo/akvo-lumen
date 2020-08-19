@@ -2,7 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import itsSet from 'its-set';
-import { get } from 'lodash';
+import {
+  get,
+  uniqBy,
+} from 'lodash';
 
 import { filterColumns } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -53,7 +56,10 @@ function ScatterConfigMenu(props) {
   } = props;
 
   const spec = visualisation.spec;
-
+  const adaptedVisualisation = { data: { series: [] } };
+  if (get(visualisation, 'data.series[3]')) {
+    adaptedVisualisation.data.series = uniqBy(visualisation.data.series[3].data, 'key');
+  }
   const onChangeSpec = (data) => {
     props.onChangeSpec({ ...data, version: 2 });
   };
@@ -197,16 +203,18 @@ function ScatterConfigMenu(props) {
                   selected={get(spec, 'legend.order.mode') || 'auto'}
                   label={intl.formatMessage({ id: 'legend_category_order' })}
                   onChange={(val) => {
-                    const legend = resetLegend(specLegend, visualisation, val);
+                    const legend = resetLegend(specLegend, adaptedVisualisation, val, true, true);
                     onChangeSpec({ legend });
                   }}
                   buttonSpacing="0"
                 />
                 <LegendsSortable
                   onChangeSpec={onChangeSpec}
-                  visualisation={visualisation}
-                  colors={spec.colorMapping}
+                  visualisation={adaptedVisualisation}
+                  colors={spec.colors}
                   specLegend={specLegend}
+                  hasSubbucket
+                  noSort
                 />
               </div>)}
             {Boolean(spec.showLegend) && (
