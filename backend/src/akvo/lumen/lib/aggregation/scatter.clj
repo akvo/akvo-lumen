@@ -119,7 +119,7 @@
                    (serie sql-response column idx))
                  [column-x column-y column-size column-category])
         :common {:metadata {:type (:type column-label)}
-                 :data (serie-data :label sql-response 3)}})
+                 :data (serie-data :label sql-response 4)}})
       (lib/bad-request
        {:message (format "Results are more than %d. Please select another column or use a different aggregation."
                          max-points)}))))
