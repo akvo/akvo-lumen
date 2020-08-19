@@ -747,9 +747,9 @@ class LayerConfigMenu extends Component {
     let legend;
 
     if (columnOption != null) {
-      legend = Object.assign({}, this.props.layer.legend, { title: columnOption.title });
+      legend = Object.assign({}, this.props.layer.legend, { title: columnOption.title, order: {} });
     } else {
-      legend = Object.assign({}, this.props.layer.legend, { title: null });
+      legend = Object.assign({}, this.props.layer.legend, { title: null, order: {} });
     }
 
     this.props.onChangeMapLayer(this.props.layerIndex, {
