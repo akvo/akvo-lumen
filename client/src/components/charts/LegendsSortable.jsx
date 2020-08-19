@@ -27,18 +27,20 @@ const sortableItemStyle = {
   margin: '5px 0px 5px 5px',
 };
 
-const getLegends = (specLegend, visualisation, hasSubbucket) => {
-  const specLegendsList = get(specLegend, 'order.list') || [];
-  const visLegendsList =
+const visLegendsListFun = (visualisation, hasSubbucket) =>
     get(visualisation, hasSubbucket ? 'data.series' : 'data.common.data') || [];
-  return isEqual(
+
+const getLegends = (specLegend, visualisation, hasSubbucket, noSort) => {
+  const specLegendsList = get(specLegend, 'order.list') || [];
+  const visLegendsList = visLegendsListFun(visualisation, hasSubbucket);
+  const legends = isEqual(
     new Set(specLegendsList),
     new Set(visLegendsList.map(l => l.key))
   )
-    ? specLegendsList
-    : visLegendsList
-        .map(l => l.key)
-        .sort(sortLegendsFunctionFactory(visualisation));
+        ? specLegendsList
+        : visLegendsList
+        .map(l => l.key);
+  return noSort ? legends : legends.sort(sortLegendsFunctionFactory(visualisation));
 };
 
 // ensure spec legend has order object
@@ -50,18 +52,22 @@ export const ensureSpecLegend = (specLegend) => {
   return legend;
 };
 
-export const resetLegend = (specLegend, visualisation, val, hasSubbucket) => {
+export const resetLegend = (specLegend, visualisation, val, hasSubbucket, noSort) => {
   const legend = ensureSpecLegend(specLegend);
-  const legends = getLegends(legend, visualisation, hasSubbucket);
+  const legends = getLegends(legend, visualisation, hasSubbucket, noSort);
   if (val) {
     legend.order.mode = val;
     if (val === 'auto') {
-      legend.order.list = legends.sort(
-        sortLegendsFunctionFactory(visualisation)
-      );
+      if (noSort) {
+        legend.order.list = visLegendsListFun(visualisation, hasSubbucket).map(({ key }) => key);
+      } else {
+        legend.order.list = legends.sort(
+          sortLegendsFunctionFactory(visualisation)
+        );
+      }
     }
   } else {
-    return resetLegend(specLegend, visualisation, 'auto', hasSubbucket);
+    return resetLegend(specLegend, visualisation, 'auto', hasSubbucket, noSort);
   }
   return legend;
 };
@@ -137,9 +143,10 @@ export const LegendsSortable = ({
   specLegend,
   visualisation,
   hasSubbucket,
+  noSort,
 }) => {
   const sortable = (get(specLegend, 'order.mode') || 'auto') === 'custom';
-  const legends = getLegends(specLegend, visualisation, hasSubbucket);
+  const legends = getLegends(specLegend, visualisation, hasSubbucket, noSort);
 
   const onSortEnd = ({ oldIndex, newIndex }) => {
     const currentItems = arrayMove(legends, oldIndex, newIndex);
@@ -183,4 +190,5 @@ LegendsSortable.propTypes = {
   onChangeSpec: PropTypes.func.isRequired,
   specLegend: PropTypes.object.isRequired,
   hasSubbucket: PropTypes.bool,
+  noSort: PropTypes.bool,
 };

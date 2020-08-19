@@ -15,7 +15,8 @@ import * as entity from '../../../domain/entity';
 import { palette } from '../../../utilities/visualisationColors';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
-import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
+import { LegendsSortable,
+         resetLegend } from '../../charts/LegendsSortable';
 
 require('./LayerConfigMenu.scss');
 
@@ -626,7 +627,7 @@ class LayerConfigMenu extends Component {
                       selected={get(layer, 'legend.order.mode') || 'auto'}
                       label={intl.formatMessage({ id: 'legend_category_order' })}
                       onChange={(val) => {
-                        const legend = resetLegend(specLegend, visualisation, val);
+                        const legend = resetLegend(specLegend, visualisation, val, null, true);
                         onChangeSpec({ legend });
                       }}
                       buttonSpacing="0"
@@ -634,8 +635,11 @@ class LayerConfigMenu extends Component {
                     <LegendsSortable
                       onChangeSpec={onChangeSpec}
                       visualisation={visualisation}
-                      colors={(get(metadata, `layerMetadata[${layerIndex}].availableColors`) || {})}
+                      colors={(get(metadata, `layerMetadata[${layerIndex}].pointColorMapping`) || [])
+                              .map(({value, color}) => { let c = {}; c[value] = color; return c; })
+                              .reduce((accumulator, currentValue) => ({...accumulator, ...currentValue}) , {})}
                       specLegend={specLegend}
+                      noSort={true}
                     />
                   </div>)}
               </div>
