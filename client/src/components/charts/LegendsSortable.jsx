@@ -33,14 +33,18 @@ const visLegendsListFun = (visualisation, hasSubbucket) =>
 const getLegends = (specLegend, visualisation, hasSubbucket, noSort) => {
   const specLegendsList = get(specLegend, 'order.list') || [];
   const visLegendsList = visLegendsListFun(visualisation, hasSubbucket);
-  const legends = isEqual(
+  const noChanged = isEqual(
     new Set(specLegendsList),
     new Set(visLegendsList.map(l => l.key))
-  )
+  );
+  if (noChanged && (get(specLegend, 'order.mode') !== 'auto')) {
+    return specLegendsList;
+  }
+  const legends = noChanged
         ? specLegendsList
         : visLegendsList
         .map(l => l.key);
-  return noSort ? legends : legends.sort(sortLegendsFunctionFactory(visualisation));
+  return noSort ? legends : legends.slice().sort(sortLegendsFunctionFactory(visualisation));
 };
 
 // ensure spec legend has order object
@@ -61,7 +65,7 @@ export const resetLegend = (specLegend, visualisation, val, hasSubbucket, noSort
       if (noSort) {
         legend.order.list = visLegendsListFun(visualisation, hasSubbucket).map(({ key }) => key);
       } else {
-        legend.order.list = legends.sort(
+        legend.order.list = legends.slice().sort(
           sortLegendsFunctionFactory(visualisation)
         );
       }
@@ -89,11 +93,11 @@ export const sortLegendListFunc = (defaultSortFunction, specLegend) => {
           list.find(({ key }) => k === key)
         );
       }
-      return list.sort((a, b) => defaultSortFunction(a, b, ({ key }) => key));
+      return list.slice().sort((a, b) => defaultSortFunction(a, b, ({ key }) => key));
     };
   }
   return list =>
-    list.sort((a, b) => defaultSortFunction(a, b, ({ key }) => key));
+    list.slice().sort((a, b) => defaultSortFunction(a, b, ({ key }) => key));
 };
 
 
