@@ -243,7 +243,7 @@
                                    (if (contains? date-column-set c)
                                      (str c "::text")
                                      c))
-                                 popup-columns)
+                                 (filter #(not= % (:columnName point-color-column)) popup-columns))
                             geom-column)
                 point-color-column (conj (str (sql-option-bucket-column point-color-column) " as " (:columnName point-color-column)))))]
     (format "select %s from %s where %s"
