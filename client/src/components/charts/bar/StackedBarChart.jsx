@@ -413,7 +413,7 @@ export default class StackedBarChart extends Component {
                         translate: [margins.left, margins.top],
                       }}
                     >
-                      {stackNodes.map((stackSeries, seriesIndex) => {
+                      {legendSeriesData.map((stackSeries, seriesIndex) => {
                         const seriesKey = stackSeries.key;
                         const seriesIsNotHovered = (
                           this.state.hoveredSeries &&

@@ -353,7 +353,7 @@ export default class SimpleBarChart extends Component {
                   )}
 
                   <Grid
-                    data={series.data}
+                    data={legendSeriesData}
                     bands
                     size={[
                       dimensions.width - margins.left - margins.right,

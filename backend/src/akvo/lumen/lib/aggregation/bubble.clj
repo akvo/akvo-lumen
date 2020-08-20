@@ -63,7 +63,7 @@
                   :label    (:title column-size)
                   :data     (mapv (fn [[size-value label]] {:value size-value}) sql-response)
                   :metadata {:type (:type column-size)}}]
-        :common {:metadata {}
+        :common {:metadata {:type (:type column-bucket)}
                  :data     (mapv (fn [[size-value label]] {:label label :key label}) sql-response)}})
       (lib/bad-request
        {:message (format "Results are more than %d. Please select another column or use a different aggregation."
