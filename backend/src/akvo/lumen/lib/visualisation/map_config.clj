@@ -1,9 +1,11 @@
 (ns akvo.lumen.lib.visualisation.map-config
   (:require [akvo.lumen.postgres.filter :as filter]
+            [akvo.lumen.lib.aggregation.commons :refer (sql-option-bucket-column)]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [clojure.walk :as walk]
             [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.db.raster :as db.raster])
   (:import [java.awt Color]))
 
@@ -243,11 +245,11 @@
                                      c))
                                  popup-columns)
                             geom-column)
-                point-color-column (conj point-color-column)))]
+                point-color-column (conj (str (sql-option-bucket-column point-color-column) " as " (:columnName point-color-column)))))]
     (format "select %s from %s where %s"
-            (str/join ", " cols)
-            table-name
-            where-clause)))
+                        (str/join ", " cols)
+                        table-name
+                        where-clause)))
 
 (defn shape-sql [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause
                  {:keys [datasetId shapeLabelColumn ] :as layer}]
@@ -281,12 +283,12 @@
 
     (and aggregationDataset aggregationColumn aggregationGeomColumn)
     (shape-aggregation-sql tenant-conn columns table-name geom-column
-                           popup-columns point-color-column where-clause layer
+                           popup-columns (:columnName point-color-column) where-clause layer
                            layer-index)
 
     (= layerType "geo-shape")
     (shape-sql tenant-conn columns table-name geom-column popup-columns
-               point-color-column where-clause layer)
+               (:columnName point-color-column) where-clause layer)
 
     :else
     (point-sql tenant-conn columns table-name geom-column popup-columns
@@ -339,9 +341,10 @@
                                  :srid "3857"}})
                    (let [geom-column (get-geom-column layer)
                          {:keys [columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
-                         where-clause (filter/sql-str (walk/keywordize-keys columns) filters)
+                         kw-columns (walk/keywordize-keys columns)
+                         where-clause (filter/sql-str kw-columns filters)
                          popup-columns (mapv :column popup)
-                         point-color-column pointColorColumn
+                         point-color-column (find-column kw-columns pointColorColumn)
                          sql (get-sql tenant-conn columns table-name geom-column
                                       popup-columns point-color-column
                                       where-clause layer idx)]

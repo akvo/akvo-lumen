@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.visualisation.map-metadata
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
+            [akvo.lumen.lib.aggregation.commons :refer (sql-option-bucket-column)]
             [clojure.walk :as walk]
             [clojure.string :as str]))
 
@@ -50,10 +51,11 @@
       sorted)))
 
 (defn point-color-mapping
-  [tenant-conn table-name {:keys [pointColorMapping pointColorColumn]} where-clause]
+  [tenant-conn table-name {:keys [pointColorMapping pointColorColumn]} where-clause columns]
   (when pointColorColumn
-    (let [sql-str (format "SELECT distinct %s AS value FROM %s WHERE %s LIMIT 22"
-                          pointColorColumn table-name where-clause)
+    (let [pointColorColumn (first (filter #(= (:columnName %) pointColorColumn) columns))
+          sql-str (format "SELECT distinct %s AS value FROM %s WHERE %s LIMIT 22"
+                          (sql-option-bucket-column pointColorColumn) table-name where-clause)
           distinct-values (map :value
                                (jdbc/query tenant-conn sql-str))
           used-colors (set (map :color pointColorMapping))
@@ -110,8 +112,9 @@
 
 (defn get-column-titles [tenant-conn selector-name selector-value dataset-version-ns]
   (let [sql-str "SELECT columns, modified FROM dataset_version WHERE %s='%s' AND namespace='%s' ORDER BY version DESC LIMIT 1"]
-    (map (fn [{:strs [columnName title]}]
+    (map (fn [{:strs [columnName title type]}]
            {:columnName columnName
+            :type type
             :title title})
          (-> (jdbc/query tenant-conn (format sql-str selector-name selector-value dataset-version-ns))
              first
@@ -127,7 +130,7 @@
 (defn point-metadata [tenant-conn table-name layer where-clause]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")]
     {:boundingBox (bounds tenant-conn table-name layer where-clause)
-     :pointColorMapping (point-color-mapping tenant-conn table-name layer where-clause)
+     :pointColorMapping (point-color-mapping tenant-conn table-name layer where-clause column-titles)
      :availableColors palette
      :pointColorMappingTitle (get-column-title-for-name column-titles (:pointColorColumn layer))
      :columnTitles column-titles}))
