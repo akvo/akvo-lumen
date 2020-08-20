@@ -303,7 +303,7 @@ class BubbleChart extends Component {
                 <Svg width={dimensions.width} height={dimensions.height}>
                   <Group transform={{ translate: [margins.left, margins.top] }}>
                     <Pack
-                      data={{ children: series.data }}
+                      data={{ children: legendSeriesData }}
                       sum={datum => datum.value}
                       size={[availableWidth, availableHeight]}
                       includeRoot={false}
