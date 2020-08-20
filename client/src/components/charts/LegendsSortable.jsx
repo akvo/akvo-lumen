@@ -15,7 +15,8 @@ import LegendShape from './LegendShape';
 
 // HELPER FUNCTIONS
 // eslint-disable-next-line no-confusing-arrow
-export const sortLegendsFunctionFactory = data => get(data, 'data.common.metadata.type') === 'text'
+export const sortLegendsFunctionFactory = data =>
+  get(data, 'data.common.metadata.type') === 'text' || get(data, 'data.common.metadata.type') === 'option'
   ? sortAlphabetically
   : sortChronologically;
 
