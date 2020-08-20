@@ -17,7 +17,7 @@ import Legend from './Legend';
 import RenderComplete from './RenderComplete';
 import Tooltip from './Tooltip';
 import BubbleLegend from './BubbleLegend';
-import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from './LegendsSortable';
+import { sortLegendsFunctionFactory, sortLegendListFunc, ensureSpecLegend } from './LegendsSortable';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -227,10 +227,13 @@ class BubbleChart extends Component {
     const totalCount = series.data.reduce((total, datum) => total + datum.value, 0);
 
     const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
+
+    const sortFunctionFactory = sortLegendsFunctionFactory(visualisation);
+
     let legendSeriesData = series.data;
     if (env.environment.orderedLegend) {
       const specLegend = ensureSpecLegend(visualisation.spec.legend);
-      legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(series.data);
+      legendSeriesData = sortLegendListFunc(sortFunctionFactory, specLegend)(series.data.slice());
     }
 
     return (
