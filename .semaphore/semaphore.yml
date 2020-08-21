@@ -10,18 +10,18 @@ blocks:
       secrets:
         - name: GCP
         - name: TestEnv
-      prologue:
-        commands:
+      # prologue:
+      #   commands:
           - checkout
-          - cd backend
-          - cache restore lein-deps-$(checksum project.clj)
-          - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
-          - cache restore lein-$(checksum `which lein`)
-          - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
-          - cd ../client
-          - cache restore client-npm-deps-$(checksum package-lock.json)
-          - mv ./node_modules .node_modules 2>/dev/null || true
-          - cd ..
+      #     - cd backend
+      #     - cache restore lein-deps-$(checksum project.clj)
+      #     - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
+      #     - cache restore lein-$(checksum `which lein`)
+      #     - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
+      #     - cd ../client
+      #     - cache restore client-npm-deps-$(checksum package-lock.json)
+      #     - mv ./node_modules .node_modules 2>/dev/null || true
+      #     - cd ..
       jobs:
         - name: 'Build&Test'
           commands:
@@ -36,23 +36,23 @@ blocks:
                 export CI_PULL_REQUEST="false"
               fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
-            - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
-            - ./ci/build.sh
-            - ./ci/prepare_deploy.sh
-            - ./ci/deploy.sh
+            # - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
+            - ./ci/build2.sh
+            # - ./ci/prepare_deploy.sh
+            # - ./ci/deploy.sh
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
-      epilogue:
-        on_pass:
-          commands:
-            - cd backend
-            - cache store lein-deps-$(checksum project.clj) ~/.m2
-            - cache store lein-$(checksum `which lein`) ~/.lein
-            - cd ../client/
-            - cache store client-npm-deps-$(checksum package-lock.json) ./node_modules
-            - cd ..
-        on_fail:
-          commands:
-            - export PROJECT_NAME=akvo-lumen
-            - docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml logs --no-color
+      # epilogue:
+      #   on_pass:
+      #     commands:
+      #       - cd backend
+      #       - cache store lein-deps-$(checksum project.clj) ~/.m2
+      #       - cache store lein-$(checksum `which lein`) ~/.lein
+      #       - cd ../client/
+      #       - cache store client-npm-deps-$(checksum package-lock.json) ./node_modules
+      #       - cd ..
+        # on_fail:
+        #   commands:
+        #     - export PROJECT_NAME=akvo-lumen
+        #     - docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml logs --no-color
