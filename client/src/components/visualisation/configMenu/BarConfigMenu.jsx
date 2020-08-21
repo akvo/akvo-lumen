@@ -426,17 +426,19 @@ BarConfigMenu.propTypes = {
 
 export default compose(
   mapProps((props) => {
-    const {
-      visualisation,
-      columnOptions,
-    } = props;
+    const { visualisation, columnOptions } = props;
     const spec = visualisation.spec;
+
     const subBucketColumn = filter(columnOptions, ['value', spec.subBucketColumn])[0];
-    const subBucketColumnTypeCondition = subBucketColumn ? subBucketColumn.type !== 'text' : true;
+    const subBucketColumnTypeCondition = subBucketColumn
+      ? subBucketColumn.type !== 'text' && subBucketColumn.type !== 'option'
+      : true;
+
     if (spec.subBucketColumn && subBucketColumnTypeCondition) {
       spec.subBucketColumn = spec.subBucketColumn;
       spec.subBucketMethod = 'split';
     }
+
     return { ...props, visualisation: { ...visualisation, spec } };
   })
 )(injectIntl(BarConfigMenu));
