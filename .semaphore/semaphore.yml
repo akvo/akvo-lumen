@@ -13,15 +13,15 @@ blocks:
       prologue:
         commands:
           - checkout
-      #     - cd backend
+          - cd backend
       #     - cache restore lein-deps-$(checksum project.clj)
       #     - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
       #     - cache restore lein-$(checksum `which lein`)
       #     - mv home/semaphore/.lein ~/.lein 2>/dev/null || true
-      #     - cd ../client
-      #     - cache restore client-npm-deps-$(checksum package-lock.json)
-      #     - mv ./node_modules .node_modules 2>/dev/null || true
-      #     - cd ..
+          - cd ../client
+          - cache restore client-npm-deps-$(checksum package-lock.json)
+          - mv ./node_modules .node_modules 2>/dev/null || true
+          - cd ..
       jobs:
         - name: 'Build&Test'
           commands:
@@ -37,6 +37,7 @@ blocks:
               fi
             - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
             # - if [[ ! -d "$HOME/.lein" ]]; then mkdir "$HOME/.lein"; fi;
+            - if [[ ! -d "$HOME/.clojure" ]]; then mkdir "$HOME/.clojure"; fi;
             - ./ci/build2.sh
             # - ./ci/prepare_deploy.sh
             # - ./ci/deploy.sh
