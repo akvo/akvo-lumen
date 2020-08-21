@@ -7,17 +7,17 @@ services:
    ports:
     - "8080:8080"
  backend:
-   image: akvo/akvo-lumen-backend-dev:20200610.033159.f413ba3
+   image: akvo/akvo-lumen-backend-dev:20200821.111405.a9bcd9c
    volumes:
       - ./backend:/app
       - ~/.m2:/home/akvo/.m2
-      - ~/.lein:/home/akvo/.lein
+      - ~/.clojure:/home/akvo/.clojure
       - ~/.m2:/root/.m2:delegated
-      - ~/.lein:/root/.lein:delegated
+      - ~/.clojure:/root/.clojure:delegated
    ports:
       - "47480:47480"
       - "3000:3000"
-   command: ["./import-and-run.sh"]
+   command: ["./import-and-run-2.sh"]
  client:
    volumes:
       - ./client:/lumen
