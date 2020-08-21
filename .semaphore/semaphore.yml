@@ -10,8 +10,8 @@ blocks:
       secrets:
         - name: GCP
         - name: TestEnv
-      # prologue:
-      #   commands:
+      prologue:
+        commands:
           - checkout
       #     - cd backend
       #     - cache restore lein-deps-$(checksum project.clj)
