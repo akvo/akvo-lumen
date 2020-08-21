@@ -16,4 +16,4 @@
   (dev/migrate-and-seed)
   (println "Brave developer, REPL at will!"))
 
-(kick-start)
+#_(kick-start)
