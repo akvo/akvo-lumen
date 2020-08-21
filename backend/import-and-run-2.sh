@@ -10,7 +10,7 @@ echo "Starting REPL ..."
 
 cmd="${1:-repl}"
 if [[ "${cmd}" == "repl" ]]; then
-   run-as-user.sh clojure -A:akvo-cider-clj -R:nREPL:dev:test -C:dev:test
+   run-as-user.sh clojure -A:akvo-flumen-clj -R:nREPL:dev:test -C:dev:test
 elif [[ "${cmd}" == "functional-and-seed" ]]; then
     # Two thing in one so that we avoid starting yet another JVM
     # run-as-user.sh lein do test :functional, run -m dev/migrate-and-seed
