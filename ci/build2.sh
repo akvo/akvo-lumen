@@ -22,20 +22,34 @@ fi
 log Running Backend unit tests
 backend_image_version=$(awk -F':' '/backend-dev/ {print $3}' docker-compose.override.yml)
 docker run -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh clojure -A:dev:test
+
+# log Creating Production Backend image
+
+
 ) > backend.build.txt 2>&1 &
 
 BE_BUILD_PID=$!
 
+(
+log Running Client linting, unit tests and creating production assets
+client_image_version=$(awk -F':' '/client-dev/ {print $3}' docker-compose.yml)
+docker run -v "$(pwd)/client:/lumen" --rm=false -t "akvo/akvo-lumen-client-dev:${client_image_version}" ./ci-build.sh
+
+log Creating Production Client image
+
+docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-client:${CI_COMMIT} ./client
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-client:${CI_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-client:develop
+) > client.build.txt 2>&1 &
 
 CLIENT_BUILD_PID=$!
 
 log Creating Production Windshaft image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-maps:${CI_COMMIT} ./windshaft
-# docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${CI_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-maps:develop
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-maps:${CI_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-maps:develop
 
 log Creating Production Exporter image
 docker build --quiet --rm=false -t eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${CI_COMMIT} ./exporter
-# docker tag eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${CI_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-exporter:develop
+docker tag eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${CI_COMMIT} eu.gcr.io/${PROJECT_NAME}/lumen-exporter:develop
 
 log Waiting for BE build
 
