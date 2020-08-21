@@ -12,7 +12,7 @@ blocks:
         - name: TestEnv
       # prologue:
       #   commands:
-      #     - checkout
+          - checkout
       #     - cd backend
       #     - cache restore lein-deps-$(checksum project.clj)
       #     - mv home/semaphore/.m2 ~/.m2 2>/dev/null || true
