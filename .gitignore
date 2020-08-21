@@ -25,6 +25,9 @@ backend/profiles.clj
 backend/dev/resources/local.edn
 backend/dev/src/local.clj
 
+## Backend tools.deps
+backend/.cpcache
+
 # CI
 ci/dev/deployment.yaml
 ci/prod/deployment.yaml
