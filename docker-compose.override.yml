@@ -7,8 +7,7 @@ services:
    ports:
     - "8080:8080"
  backend:
-   # image: akvo/akvo-lumen-backend-dev:20200610.033159.f413ba3
-   image: akvo/akvo-lumen-backend-dev:latest
+   image: akvo/akvo-lumen-backend-dev:20200821.111405.a9bcd9c
    volumes:
       - ./backend:/app
       - ~/.m2:/home/akvo/.m2
