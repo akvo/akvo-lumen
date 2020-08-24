@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# clojure -A:org.akvo.lumen.test -m kaocha.runner "$@"
+
+clojure -C:org.akvo.lumen.dev:org.akvo.lumen.test -R:org.akvo.lumen.dev:org.akvo.lumen.test  -M:org.akvo.lumen.test -m kaocha.runner "$@"
