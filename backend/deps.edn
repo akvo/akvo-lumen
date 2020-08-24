@@ -97,28 +97,30 @@
         org.slf4j/log4j-over-slf4j {:mvn/version "1.7.26" :exclusions [org.slf4j/slf4j-api]}
         ring/ring-core {:mvn/version "1.7.1" :exclusions [ring/ring-codec]}
         }
- :aliases {:dev {:extra-paths ["dev/src" "dev/resources" "test/resources"]
-                 :extra-deps {integrant/repl {:mvn/version "0.3.1"
-                                              :exclusions [com.stuartsierra/dependency]}
-                              com.gearswithingears/shrubbery {:mvn/version "0.4.1"}
-                              org.clojure/tools.namespace {:mvn/version "0.2.11"}
-                              org.clojure/tools.nrepl {:mvn/version "0.2.13"}
-                              reloaded.repl {:mvn/version "0.2.4"}
-                              com.cognitect/transit-clj {:mvn/version "0.8.313"}
-                              kerodon {:mvn/version "0.9.0"}
-                              eftest {:mvn/version "0.5.8"
-                                      :exclusions [org.clojure/spec.alpha
-                                                   org.clojure/clojure
-                                                   org.clojure/core.rrb-vector
-                                                   fipp
-                                                   org.clojure/core.specs.alpha]}
-                              duct/generate {:mvn/version "0.8.2"}}}
-           :test {:extra-paths ["test" "test/resources"]
-                  :extra-deps {org.clojure/spec.alpha {:mvn/version "0.2.187"}
-                               com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                          :sha "6ec7f8eef509cd14d831e8cc16e856b31327a862"}
-                               diehard {:mvn/version "0.8.3"
-                                        :exclusions [org.clojure/spec.alpha
-                                                     org.clojure/clojure
-                                                     org.clojure/core.specs.alpha]}}
-                  :main-opts ["-m" "cognitect.test-runner"]}}}
+ :aliases {:org.akvo.lumen.nREPL-server {:main-opts ["-m" "init.nrepl"]
+                                         :extra-deps {nrepl/nrepl {:mvn/version "0.8.0"}}}
+           :org.akvo.lumen.dev {:extra-paths ["dev/src" "dev/resources" "test/resources"]
+                                :extra-deps {integrant/repl {:mvn/version "0.3.1"
+                                                             :exclusions [com.stuartsierra/dependency]}
+                                             com.gearswithingears/shrubbery {:mvn/version "0.4.1"}
+                                             org.clojure/tools.namespace {:mvn/version "0.2.11"}
+                                             org.clojure/tools.nrepl {:mvn/version "0.2.13"}
+                                             reloaded.repl {:mvn/version "0.2.4"}
+                                             com.cognitect/transit-clj {:mvn/version "0.8.313"}
+                                             kerodon {:mvn/version "0.9.0"}
+                                             eftest {:mvn/version "0.5.8"
+                                                     :exclusions [org.clojure/spec.alpha
+                                                                  org.clojure/clojure
+                                                                  org.clojure/core.rrb-yvector
+                                                                  fipp
+                                                                  org.clojure/core.specs.alpha]}
+                                             duct/generate {:mvn/version "0.8.2"}}}
+           :org.akvo.lumen.test {:extra-paths ["test" "test/resources"]
+                                 :extra-deps {org.clojure/spec.alpha {:mvn/version "0.2.187"}
+                                              com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                                                                         :sha "6ec7f8eef509cd14d831e8cc16e856b31327a862"}
+                                              diehard {:mvn/version "0.8.3"
+                                                       :exclusions [org.clojure/spec.alpha
+                                                                    org.clojure/clojure
+                                                                    org.clojure/core.specs.alpha]}}
+                                 :main-opts ["-m" "cognitect.test-runner"]}}}
