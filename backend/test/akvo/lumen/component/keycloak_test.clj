@@ -10,14 +10,14 @@
    [integrant.core :as ig]))
 
 
-(def ^:dynamic *keycloak*)
+#_(def ^:dynamic *keycloak*)
 
-(defn fixture [f]
-  (let [system (ig/init (tu/start-config)
-                        [:akvo.lumen.component.keycloak/authorization-service])]
-    (binding [*keycloak* (:akvo.lumen.component.keycloak/authorization-service system)]
-      (f))
-    (ig/halt! system)))
+#_(defn fixture [f]
+    (let [system (ig/init (tu/start-config)
+                          [:akvo.lumen.component.keycloak/authorization-service])]
+      (binding [*keycloak* (:akvo.lumen.component.keycloak/authorization-service system)]
+        (f))
+      (ig/halt! system)))
 
 (use-fixtures :once fixture)
 
