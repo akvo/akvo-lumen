@@ -28,7 +28,7 @@
             (SELECT %1$s as x, %2$s as y, %7$s as s
              FROM %3$s
              WHERE %4$s
-             GROUP BY x, %7$s)
+             GROUP BY x, s)
           SELECT
             data_table.x AS x,
             data_table.y,
@@ -47,7 +47,7 @@
           filter-sql
           sort-sql
           truncate-size
-          (:columnName subbucket-column)))
+          (sql-option-bucket-column subbucket-column)))
 
 (defn- bucket-sql [table-name bucket-column aggregation filter-sql sort-sql truncate-size]
   (format "SELECT * 
