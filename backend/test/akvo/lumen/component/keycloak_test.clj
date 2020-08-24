@@ -21,7 +21,7 @@
 
 (use-fixtures :once fixture)
 
-(deftest keycloak-test
+(deftest ^:functional keycloak-test
   (testing "Jerome (admin) permissions to t1"
     (is (= #{"t1/admin"}
            (p/allowed-paths *keycloak* {:email "jerome@t1.akvolumen.org" :iat (tc/to-date (t/now))}))))
