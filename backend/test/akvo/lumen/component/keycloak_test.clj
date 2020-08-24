@@ -19,7 +19,7 @@
         (f))
       (ig/halt! system)))
 
-(use-fixtures :once fixture)
+#_(use-fixtures :once fixture)
 
 #_(deftest ^:functional keycloak-test
     (testing "Jerome (admin) permissions to t1"
