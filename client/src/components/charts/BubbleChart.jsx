@@ -217,7 +217,6 @@ class BubbleChart extends Component {
       marginRight,
       marginBottom,
       marginLeft,
-      env,
     } = this.props;
 
     const series = this.getData();
@@ -230,11 +229,9 @@ class BubbleChart extends Component {
 
     const sortFunctionFactory = sortLegendsFunctionFactory(visualisation);
 
-    let legendSeriesData = series.data;
-    if (env.environment.orderedLegend) {
-      const specLegend = ensureSpecLegend(visualisation.spec.legend);
-      legendSeriesData = sortLegendListFunc(sortFunctionFactory, specLegend)(series.data.slice());
-    }
+    const specLegend = ensureSpecLegend(visualisation.spec.legend);
+    const legendSeriesData = sortLegendListFunc(sortFunctionFactory,
+      specLegend)(series.data.slice());
 
     return (
       <ChartLayout

@@ -290,7 +290,6 @@ export default class StackedBarChart extends Component {
       xAxisLabel,
       grid,
       visualisation,
-      env,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
@@ -315,11 +314,9 @@ export default class StackedBarChart extends Component {
     const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
     const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
 
-    let legendSeriesData = stackNodes;
-    if (env.environment.orderedLegend) {
-      const specLegend = ensureSpecLegend(visualisation.spec.legend);
-      legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(stackNodes);
-    }
+    const specLegend = ensureSpecLegend(visualisation.spec.legend);
+    const legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(stackNodes);
+
 
     return (
       <ChartLayout

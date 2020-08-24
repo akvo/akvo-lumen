@@ -77,12 +77,8 @@ const getData = (props) => { // eslint-disable-line
 };
 
 const getLegendSeriesData = (stackNodes, env, visualisation) => {
-  let legendSeriesData = stackNodes;
-  if (env.environment.orderedLegend) {
-    const specLegend = ensureSpecLegend(visualisation.spec.legend);
-    legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(stackNodes);
-  }
-  return legendSeriesData;
+  const specLegend = ensureSpecLegend(visualisation.spec.legend);
+  return sortLegendListFunc(noSortFunc, specLegend)(stackNodes);
 };
 
 export default class StackedBarChart extends Component {

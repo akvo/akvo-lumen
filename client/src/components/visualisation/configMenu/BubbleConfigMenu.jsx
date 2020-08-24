@@ -79,7 +79,6 @@ function BubbleConfigMenu(props) {
     columnOptions,
     aggregationOptions,
     intl,
-    env,
   } = props;
   const spec = visualisation.spec;
 
@@ -154,7 +153,7 @@ function BubbleConfigMenu(props) {
                 showLegend: val,
               })}
             />
-            {Boolean(spec.showLegend) && Boolean(env.environment.orderedLegend) && (
+            {Boolean(spec.showLegend) && (
               <div style={{ marginBottom: '20px' }} >
                 <ButtonRowInput
                   labelClass="label"

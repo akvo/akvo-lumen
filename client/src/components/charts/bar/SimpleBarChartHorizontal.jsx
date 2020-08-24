@@ -239,7 +239,6 @@ export default class SimpleBarChart extends Component {
       xAxisLabel,
       grid,
       visualisation,
-      env,
     } = this.props;
 
     const { tooltipItems, tooltipVisible, tooltipPosition, hasRendered } = this.state;
@@ -255,11 +254,8 @@ export default class SimpleBarChart extends Component {
       getLabelFontSize(yAxisLabel, xAxisLabel, MAX_FONT_SIZE, MIN_FONT_SIZE, height, width);
     const maxLabelChars = Math.floor(marginLeft / LABEL_CHAR_WIDTH);
     const labelSizeToAxisLabelSize = Math.ceil(axisLabelFontSize / labelFont.fontSize);
-    let legendSeriesData = series.data;
-    if (env.environment.orderedLegend) {
-      const specLegend = ensureSpecLegend(visualisation.spec.legend);
-      legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(series.data);
-    }
+    const specLegend = ensureSpecLegend(visualisation.spec.legend);
+    const legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(series.data);
 
     return (
       <ChartLayout

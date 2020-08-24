@@ -56,32 +56,31 @@ function PieConfigMenu(props) {
             />
             {Boolean(spec.showLegend) && (
               <div>
-                {Boolean(props.env.environment.orderedLegend) && (
-                  <div style={{ marginBottom: '20px' }}>
-                    <ButtonRowInput
-                      labelClass="label"
-                      options={[{
-                        label: <FormattedMessage id="legend_order_auto_mode" />,
-                        value: 'auto',
-                      }, {
-                        label: <FormattedMessage id="legend_order_custom_mode" />,
-                        value: 'custom',
-                      }]}
-                      selected={get(spec, 'legend.order.mode') || 'auto'}
-                      label={intl.formatMessage({ id: 'legend_category_order' })}
-                      onChange={(val) => {
-                        const legend = resetLegend(specLegend, visualisation, val);
-                        onChangeSpec({ legend });
-                      }}
-                      buttonSpacing="0"
-                    />
-                    <LegendsSortable
-                      onChangeSpec={onChangeSpec}
-                      visualisation={visualisation}
-                      colors={spec.colors}
-                      specLegend={specLegend}
-                    />
-                  </div>)}
+                <div style={{ marginBottom: '20px' }}>
+                  <ButtonRowInput
+                    labelClass="label"
+                    options={[{
+                      label: <FormattedMessage id="legend_order_auto_mode" />,
+                      value: 'auto',
+                    }, {
+                      label: <FormattedMessage id="legend_order_custom_mode" />,
+                      value: 'custom',
+                    }]}
+                    selected={get(spec, 'legend.order.mode') || 'auto'}
+                    label={intl.formatMessage({ id: 'legend_category_order' })}
+                    onChange={(val) => {
+                      const legend = resetLegend(specLegend, visualisation, val);
+                      onChangeSpec({ legend });
+                    }}
+                    buttonSpacing="0"
+                  />
+                  <LegendsSortable
+                    onChangeSpec={onChangeSpec}
+                    visualisation={visualisation}
+                    colors={spec.colors}
+                    specLegend={specLegend}
+                  />
+                </div>
                 <ConfigMenuSectionOptionText
                   value={spec.legendTitle != null ? spec.legendTitle.toString() : null}
                   placeholderId="legend_title"
