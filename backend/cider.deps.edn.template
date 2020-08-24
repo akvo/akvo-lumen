@@ -1,0 +1,5 @@
+;; Template with aliases to be put in ~/.clojure/deps.edn
+
+{:aliases
+ {:org.akvo.lumen.override {:extra-deps {cider/cider-nrepl {:mvn/version "0.25.3"}}
+                            :main-opts ["-m" "init.nrepl-cider"]}}}
