@@ -613,38 +613,37 @@ class LayerConfigMenu extends Component {
             />
             {Boolean(layer.legend.visible) && (
               <div>
-                {Boolean(this.props.env.environment.orderedLegend) && (
-                  <div style={{ marginBottom: '20px' }}>
-                    <ButtonRowInput
-                      labelClass="label"
-                      options={[{
-                        label: <FormattedMessage id="legend_order_auto_mode" />,
-                        value: 'auto',
-                      }, {
-                        label: <FormattedMessage id="legend_order_custom_mode" />,
-                        value: 'custom',
-                      }]}
-                      selected={get(layer, 'legend.order.mode') || 'auto'}
-                      label={intl.formatMessage({ id: 'legend_category_order' })}
-                      onChange={(val) => {
-                        const legend = resetLegend(specLegend, visualisation, val, null, true);
-                        onChangeSpec({ legend });
-                      }}
-                      buttonSpacing="0"
-                    />
-                    <LegendsSortable
-                      onChangeSpec={onChangeSpec}
-                      visualisation={visualisation}
-                      colors={(get(metadata, `layerMetadata[${layerIndex}].pointColorMapping`) || [])
-                              .map(({ value, color }) => {
-                                const c = {}; c[value] = color; return c;
-                              })
-                              .reduce((accumulator, currentValue) =>
-                              ({ ...accumulator, ...currentValue }), {})}
-                      specLegend={specLegend}
-                      noSort
-                    />
-                  </div>)}
+                <div style={{ marginBottom: '20px' }}>
+                  <ButtonRowInput
+                    labelClass="label"
+                    options={[{
+                      label: <FormattedMessage id="legend_order_auto_mode" />,
+                      value: 'auto',
+                    }, {
+                      label: <FormattedMessage id="legend_order_custom_mode" />,
+                      value: 'custom',
+                    }]}
+                    selected={get(layer, 'legend.order.mode') || 'auto'}
+                    label={intl.formatMessage({ id: 'legend_category_order' })}
+                    onChange={(val) => {
+                      const legend = resetLegend(specLegend, visualisation, val, null, true);
+                      onChangeSpec({ legend });
+                    }}
+                    buttonSpacing="0"
+                  />
+                  <LegendsSortable
+                    onChangeSpec={onChangeSpec}
+                    visualisation={visualisation}
+                    colors={(get(metadata, `layerMetadata[${layerIndex}].pointColorMapping`) || [])
+                            .map(({ value, color }) => {
+                              const c = {}; c[value] = color; return c;
+                            })
+                            .reduce((accumulator, currentValue) =>
+                            ({ ...accumulator, ...currentValue }), {})}
+                    specLegend={specLegend}
+                    noSort
+                  />
+                </div>
               </div>
             )}
 
