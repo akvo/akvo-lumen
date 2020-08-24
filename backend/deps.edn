@@ -117,8 +117,10 @@
                                              duct/generate {:mvn/version "0.8.2"}}}
            :org.akvo.lumen.test {:extra-paths ["test" "test/resources"]
                                  :extra-deps {org.clojure/spec.alpha {:mvn/version "0.2.187"}
-                                              com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                                         :sha "6ec7f8eef509cd14d831e8cc16e856b31327a862"}
+                                              com.cognitect/test-runner {:git/url "https://github.com/kawas44/test-runner.git"
+                                                                         :sha "6e630803e166bc160b2d0771c64f24fac9d1c9bc"}
+                                              ;; com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                                              ;;                            :sha "6ec7f8eef509cd14d831e8cc16e856b31327a862"}
                                               diehard {:mvn/version "0.8.3"
                                                        :exclusions [org.clojure/spec.alpha
                                                                     org.clojure/clojure
