@@ -2,7 +2,7 @@
   (:require [akvo.lumen.lib.aes :as aes]
             [clojure.test :refer :all]))
 
-(deftest aes
+(deftest ^:unit aes
   (let [secret "secret"
         clear-text "clear-text"]
     (testing "Encryption & decryption round trip"
