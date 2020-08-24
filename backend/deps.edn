@@ -1,0 +1,131 @@
+{:paths ["src" "resources" "specs"]
+ :deps {selmer {:mvn/version "1.12.12",
+                :exclusions [com.fasterxml.jackson.dataformat/jackson-dataformat-smile
+                             com.fasterxml.jackson.dataformat/jackson-dataformat-cbor
+                             cheshire]}
+        org.clojure/clojure {:mvn/version "1.10.1"}
+        org.clojure/tools.logging {:mvn/version "0.4.1"}
+        net.postgis/postgis-jdbc {:mvn/version "2.3.0" :exclusions [org.postgresql/postgresql]}
+        clj-time {:mvn/version "0.15.1"}
+        org.akvo/commons {:mvn/version "0.4.6"
+                          :exclusions [org.postgresql/postgresql org.clojure/java.jdbc]},
+        org.slf4j/jcl-over-slf4j {:mvn/version "1.7.26" :exclusions [org.slf4j/slf4j-api]}
+        compojure {:mvn/version "1.6.1", :exclusions [medley]}
+        duct/module.logging {:mvn/version "0.4.0"
+                             :exclusions [org.clojure/spec.alpha
+                                          org.clojure/clojure
+                                          org.clojure/core.specs.alpha
+                                          com.stuartsierra/dependency]}
+        org.apache.tika/tika-core {:mvn/version "1.21"}
+        ring/ring-defaults {:mvn/version "0.3.2"}
+        environ {:mvn/version  "1.1.0"}
+        diehard {:mvn/version "0.8.3"
+                 :exclusions [org.clojure/spec.alpha
+                              org.clojure/clojure
+                              org.clojure/core.specs.alpha]}
+        ring/ring-json {:mvn/version "0.4.0"}
+        commons-io/commons-io {:mvn/version "2.6"}
+        org.postgresql/postgresql {:mvn/version "42.2.5"},
+        com.fasterxml.jackson.core/jackson-core {:mvn/version "2.9.9"}
+        org.slf4j/jul-to-slf4j {:mvn/version "1.7.26" :exclusions [org.slf4j/slf4j-api]}
+        ring {:mvn/version "1.7.1", :exclusions [ring/ring-core]}
+        cheshire {:mvn/version "5.9.0"
+                  :exclusions [com.fasterxml.jackson.core/jackson-core]}
+        meta-merge {:mvn/version "1.0.0"}
+        org.apache.httpcomponents/httpcore {:mvn/version "4.4.11"}
+        org.immutant/web {:mvn/version "2.1.10", :exclusions [ch.qos.logback/logback-classic]}
+        ragtime {:mvn/version "0.7.2"}
+        clojurewerkz/scrypt {:mvn/version "1.2.0"}
+        duct/core {:mvn/version "0.7.0" :exclusions [org.clojure/clojure]}
+        com.layerware/hugsql {:mvn/version "0.4.9"}
+        funcool/cuerdas {:mvn/version "2.2.0"
+                         :exclusions [org.clojure/spec.alpha
+                                      com.google.protobuf/protobuf-java
+                                      com.google.errorprone/error_prone_annotations
+                                      org.clojure/clojure
+                                      com.google.guava/guava
+                                      org.clojure/core.specs.alpha
+                                      com.google.code.findbugs/jsr305
+                                      org.clojure/tools.reader]}
+        org.akvo/resumed {:mvn/version "1.46.266acfa5bb52c9b484af19f0bcfbfacb60b97319"}
+        io.prometheus/simpleclient_hotspot {:mvn/version "0.6.0"}
+        duct/database.sql.hikaricp {:mvn/version "0.4.0"
+                                    :exclusions [org.clojure/spec.alpha
+                                                 org.slf4j/slf4j-nop
+                                                 org.clojure/clojure
+                                                 integrant
+                                                 org.clojure/core.specs.alpha]}
+        io.prometheus/simpleclient_dropwizard {:mvn/version "0.6.0"}
+        org.clojure/data.csv {:mvn/version "0.1.4"}
+        org.clojure/java.jdbc {:mvn/version "0.7.9"}
+        org.apache.httpcomponents/httpclient {:mvn/version "4.5.8"}
+        org.clojure/core.match {:mvn/version "0.3.0"}
+        clj-http {:mvn/version "3.10.0"
+                  :exclusions [org.apache.httpcomponents/httpcore
+                               org.apache.httpcomponents/httpclient
+                               org.apache.httpcomponents/httpmime
+                               commons-io/commons-io]}
+        raven-clj {:mvn/version "1.6.0"}
+        org.clojure/test.check {:mvn/version "0.10.0-alpha3"}
+        metosin/reitit {:mvn/version "0.3.7"
+                        :exclusions [com.cognitect/transit-java
+                                     org.clojure/spec.alpha
+                                     org.ow2.asm/asm
+                                     ring/ring-core
+                                     mvxcvi/puget
+                                     org.clojure/clojure
+                                     ring/ring-codec
+                                     org.clojure/core.rrb-vector
+                                     mvxcvi/arrangement
+                                     fipp
+                                     r
+                                     org.clojure/core.specs.alpha
+                                     com.cognitect/transit-clj
+                                     com.fasterxml.jackson.core/jackson-databind
+                                     com.fasterxml.jackson.core/jackson-core]}
+        ch.qos.logback/logback-classic {:mvn/version "1.2.3"}
+        iapetos {:mvn/version "0.1.8" :exclusions [io.prometheus/simpleclient]}
+        org.apache.tika/tika-parsers {:mvn/version "1.21"
+                                      :exclusions [org.slf4j/slf4j-api
+                                                   com.fasterxml.jackson.core/jackson-core
+                                                   org.apache.httpcomponents/httpcore
+                                                   org.apache.httpcomponents/httpclient
+                                                   org.apache.httpcomponents/httpmime
+                                                   commons-io/commons-io]}
+        honeysql {:mvn/version "0.9.4"}
+        org.apache.httpcomponents/httpmime {:mvn/version "4.5.8"}
+        org.slf4j/log4j-over-slf4j {:mvn/version "1.7.26" :exclusions [org.slf4j/slf4j-api]}
+        ring/ring-core {:mvn/version "1.7.1" :exclusions [ring/ring-codec]}
+        }
+ :aliases {:org.akvo.lumen.nREPL-server {:main-opts ["-m" "init.nrepl"]
+                                         :extra-deps {nrepl/nrepl {:mvn/version "0.8.0"}}}
+           :org.akvo.lumen.dev {:extra-paths ["dev/src" "dev/resources" "test/resources"]
+                                :extra-deps {integrant/repl {:mvn/version "0.3.1"
+                                                             :exclusions [com.stuartsierra/dependency]}
+                                             com.gearswithingears/shrubbery {:mvn/version "0.4.1"}
+                                             org.clojure/tools.namespace {:mvn/version "0.2.11"}
+                                             org.clojure/tools.nrepl {:mvn/version "0.2.13"}
+                                             reloaded.repl {:mvn/version "0.2.4"}
+                                             com.cognitect/transit-clj {:mvn/version "0.8.313"}
+                                             kerodon {:mvn/version "0.9.0"}
+                                             eftest {:mvn/version "0.5.8"
+                                                     :exclusions [org.clojure/spec.alpha
+                                                                  org.clojure/clojure
+                                                                  org.clojure/core.rrb-yvector
+                                                                  fipp
+                                                                  org.clojure/core.specs.alpha]}
+                                             duct/generate {:mvn/version "0.8.2"}}}
+           :org.akvo.lumen.test {:extra-paths ["test" "test/resources"]
+                                 :extra-deps {org.clojure/spec.alpha {:mvn/version "0.2.187"}
+                                              lambdaisland/kaocha {:mvn/version "1.0.669"}
+                                              com.cognitect/test-runner {:git/url "https://github.com/kawas44/test-runner.git"
+                                                                         :sha "6e630803e166bc160b2d0771c64f24fac9d1c9bc"}
+                                              ;; com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                                              ;;                            :sha "6ec7f8eef509cd14d831e8cc16e856b31327a862"}
+
+                                              diehard {:mvn/version "0.8.3"
+                                                       :exclusions [org.clojure/spec.alpha
+                                                                    org.clojure/clojure
+                                                                    org.clojure/core.specs.alpha]}}
+                                 ;;:main-opts ["-m" "cognitect.test-runner"]
+                                 }}}
