@@ -20,7 +20,7 @@ fi
 
 log Running Backend unit tests
 backend_image_version=$(awk -F':' '/backend-dev/ {print $3}' docker-compose.override.yml)
-docker run -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh clj -C:dev -A:test -e :functional
+docker run -v "$HOME/.m2:/home/akvo/.m2" -v "$(pwd)/backend:/app" "akvo/akvo-lumen-backend-dev:${backend_image_version}" run-as-user.sh clj -C:org.akvo.lumen.dev -A:org.akvo.lumen.test -e :functional
 
 # log Creating Production Backend image
 
