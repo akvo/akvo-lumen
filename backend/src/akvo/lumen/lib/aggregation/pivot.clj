@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.pivot
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
+            [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
@@ -13,10 +13,12 @@
    `NULL = NULL` is `NULL`. To work around this, we must use another value to represent the
    empty value. For dates, we use 1001-01-01 01:00:00"
   [column]
-  (format "COALESCE(%s, %s)" (:columnName column) (case (:type column)
-                                                    "text" "''"
-                                                    "date" "'1001-01-01 01:00:00'::timestamptz"
-                                                    "'NaN'::double precision")))
+  (if (= "option" (:type column))
+    (sql-option-bucket-column column)
+    (format "COALESCE(%s, %s)" (:columnName column) (case (:type column)
+                                                      "text" "''"
+                                                      "date" "'1001-01-01 01:00:00'::timestamptz"
+                                                      "'NaN'::double precision"))))
 
 (defn unique-values-sql [table-name filter-str category-column]
   (let [select (format "SELECT DISTINCT %s%s"
