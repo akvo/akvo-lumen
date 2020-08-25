@@ -4,7 +4,7 @@
             [clojure.test.check.clojure-test :refer (defspec)]
             [clojure.test :refer :all]))
 
-(deftest find-category-test
+(deftest ^:unit find-category-test
   (testing "mapping number type"
     (let [uncategorized-val "no-cat"
           cat-one           "one"
@@ -14,4 +14,3 @@
       (is (= cat-one (derive-category/find-number-cat mappings 1 uncategorized-val)))
       (is (= cat-two (derive-category/find-number-cat mappings 2 uncategorized-val)))
       (is (= uncategorized-val (derive-category/find-number-cat mappings 3 uncategorized-val))))))
-

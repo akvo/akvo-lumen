@@ -71,7 +71,8 @@
       (is (every? trimmable? titles)))))
 
 
-(deftest valid-column-name
+;; This is really a unit test that lives in a functional namespace (due to fixture)
+(deftest ^:functional valid-column-name
   (testing "valid column name"
     (is (not (csv/valid-column-name? "d123123")))
     (is (not (csv/valid-column-name? "c")))

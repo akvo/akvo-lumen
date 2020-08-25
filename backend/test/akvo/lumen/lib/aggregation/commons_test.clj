@@ -19,7 +19,7 @@
    [
     {
      ;; geo location layer
-     "layerType" "geo-location", 
+     "layerType" "geo-location",
      "popup" (popup "p"),
      "longitude" nil,
      "pointSize" 3,
@@ -58,7 +58,7 @@
    "version" 1,
    "baseLayer" "street"})
 
-(deftest spec-columns-test
+(deftest ^:unit spec-columns-test
   (let [data
         [{:id "5e8c4554-e6ed-4c75-95b1-3d7d4eaea231",
           :visualisationType "map",
@@ -191,8 +191,8 @@
            "categoryColumn" "c2",
            "categoryTitle" nil}}]
         data (map (partial merge {:datasetId "5e8b13fe-2c7d-4478-b340-f8e0aba9ec2a"
-                              :name "name"
-                              :created 1586172976186
+                                  :name "name"
+                                  :created 1586172976186
                                   :modified 1586250225831}) data)
         expectations [["map" ["c1" "c2" "c3" "c4" "c5" "f1" "f2" "ff1" "ff2" "p1" "p2" "pp1" "pp2"]]
                       ["scatter" ["c1" "c2" "c3" "c4" "c5" "c6"]]
@@ -209,4 +209,3 @@
                             (vec (sort (vec (commons/spec-columns ::s.visualisation/visualisation (walk/keywordize-keys %))))))
                    data)
              expectations)))))
-

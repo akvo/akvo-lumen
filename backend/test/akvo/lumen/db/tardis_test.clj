@@ -10,7 +10,7 @@
 
 (use-fixtures :each system-fixture tenant-conn-fixture)
 
-(deftest tardis-with-alter-table
+(deftest ^:functional tardis-with-alter-table
   (testing "with current data in public schema table, we alter table definition. Functionality keeps the same"
     (is (= '() (get-data *tenant-conn* {:table-name "data_source"})))
     (is (= 1 (insert-data-source *tenant-conn* {})))
