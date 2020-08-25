@@ -127,19 +127,19 @@
       (is (= "(coalesce(c4, '') = 'South') AND (coalesce(c3, '') = 'null')"
              r) )))
   (testing "filter option val"
-    (let [filters [{:value "wow",
-                    :column "c8",
-                    :strategy "is",
-                    :operation "keep",
-                    :columnType "option"}]
-          r (f/sql-str columns filters)]
-      (is (= "(position('wow' in c8) > 0)"
-             r) ))
-    (let [filters [{:value "yay",
-                    :column "c8",
-                    :strategy "is",
-                    :operation "isEmpty",
-                    :columnType "option"}]
-          r (f/sql-str columns filters)]
-      (is (= "(position('yay' in c8) = 0)"
-             r)))))
+    (let [base-filter {:value "wow",
+                       :column "c8",
+                       :operation "keep",
+                       :columnType "option"}]
+     (let [filters [(assoc base-filter :strategy "is")]
+           r (f/sql-str columns filters)]
+       (is (= "(coalesce(c8, '') = 'wow')" r)))
+     (let [filters [(assoc base-filter :strategy "contains")]
+           r (f/sql-str columns filters)]
+       (is (= "(position('wow' in c8) > 0)" r)))
+     (let [filters [(assoc base-filter :strategy "not_contains")]
+           r (f/sql-str columns filters)]
+       (is (= "(position('wow' in c8) = 0)" r)))
+     (let [filters [(assoc base-filter :strategy "is" :operation "isEmpty" :value "yay")]
+           r (f/sql-str columns filters)]
+       (is (= "(coalesce(c8, '') <> 'yay')" r))))))
