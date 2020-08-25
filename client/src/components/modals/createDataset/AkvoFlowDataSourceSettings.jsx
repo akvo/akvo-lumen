@@ -238,7 +238,6 @@ class AkvoFlowDataSourceSettings extends Component {
       return (
         <SelectMenu
           key={idx}
-          isClearable={false}
           options={options}
           value={id}
           onChange={evt => this.changeFolderSelection(evt, idx)}
@@ -254,7 +253,6 @@ class AkvoFlowDataSourceSettings extends Component {
       <SelectMenu
         placeholder={formatMessage({ id: 'select_survey_or_folder' })}
         isLoading={this.state.isLoadingNext}
-        isClearable={false}
         options={this.foldersAndSurveysSelectionOptions(lastSelectedFolderId)}
         value={selectedSurveyId}
         onChange={evt => this.handleSelection(evt)}
@@ -266,7 +264,6 @@ class AkvoFlowDataSourceSettings extends Component {
       <SelectMenu
         placeholder={formatMessage({ id: 'select_form' })}
         isLoading={this.state.isLoadingForms}
-        isClearable={false}
         options={this.formSelectionOptions(selectedSurveyId)}
         value={selectedFormId}
         onChange={evt => this.handleFormSelection(evt)}

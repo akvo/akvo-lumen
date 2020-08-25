@@ -20,7 +20,7 @@ export default function FilterColumns({ filter, intl, dataset, onFilterValueChan
           </span>
           <SelectMenu
             name="datasets"
-            isClearable
+            clearable
             key={`filterColumn-${idx}`}
             width="200px"
             value={filter.columns[columnIndex].value}

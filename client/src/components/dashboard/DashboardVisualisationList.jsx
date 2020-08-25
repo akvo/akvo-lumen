@@ -74,7 +74,7 @@ export default class DashboardVisualisationList extends Component {
                 <SelectMenu
                   name="datasets"
                   value={filterByDataset}
-                  isClearable
+                  clearable
                   onChange={(id) => {
                     this.setState({ filterByDataset: id, filterText: '' });
                     trackEvent(FILTER_VISUALISATIONS_BY_DATASET_IN_DASHBOARD);

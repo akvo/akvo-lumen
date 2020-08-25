@@ -386,8 +386,8 @@ class DashboardEditor extends Component {
                   <SelectMenu
                     name="datasets"
                     value={filter.datasetId}
-                    isClearable
                     width="200px"
+                    clearable
                     onChange={(id) => {
                       this.setState({ filterText: '' });
                       if (filter.datasetId !== id) {
