@@ -292,7 +292,7 @@ class DashboardEditor extends Component {
     const visualisations = getArrayFromObject(this.props.visualisations);
     const datasetsWithViss = datasetsWithVisualizations(visualisations
       .filter(v => entitiesKeysSet.has(v.id)), datasets);
-    const selectedDatasetColumns = filter.datasetId && datasets[filter.datasetId] && filterColumns(datasets[filter.datasetId].get('columns'), 'text');
+    const selectedDatasetColumns = filter.datasetId && datasets[filter.datasetId] && filterColumns(datasets[filter.datasetId].get('columns'), ['text', 'option']);
     const newColumnFilterSelect = idx => (options, finder, removeable) =>
     (<div name="datasetFilterColumns" key={`div-selectFilterColumn-${idx}`} style={{ marginTop: '5px', position: 'relative' }}>
       <SelectMenu
