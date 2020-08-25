@@ -278,7 +278,6 @@ class ScatterChart extends Component {
       legendDescription,
       legendVisible,
       legendPosition,
-      env,
     } = this.props;
 
     const {
@@ -307,15 +306,13 @@ class ScatterChart extends Component {
     };
     let legendSeriesData = series.data.map(x => ({ ...x, key: x.label }));
     let categories = uniq(legendSeriesData.map(({ category }) => category));
-    if (env.environment.orderedLegend) {
-      const specLegend = ensureSpecLegend(visualisation.spec.legend);
-      if (specLegend.order.list.length > 0) {
-        categories = specLegend.order.list;
-      } else {
-        legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(legendSeriesData);
-        categories = legendSeriesData.map(({ category }) => category)
-          .filter((value, index, self) => self.indexOf(value) === index);
-      }
+    const specLegend = ensureSpecLegend(visualisation.spec.legend);
+    if (specLegend.order.list.length > 0) {
+      categories = specLegend.order.list;
+    } else {
+      legendSeriesData = sortLegendListFunc(noSortFunc, specLegend)(legendSeriesData);
+      categories = legendSeriesData.map(({ category }) => category)
+        .filter((value, index, self) => self.indexOf(value) === index);
     }
     return (
       <ChartLayout

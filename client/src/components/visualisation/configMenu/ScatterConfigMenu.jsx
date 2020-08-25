@@ -51,7 +51,6 @@ function ScatterConfigMenu(props) {
     visualisation,
     columnOptions,
     aggregationOptions,
-    env,
     intl,
   } = props;
 
@@ -189,7 +188,7 @@ function ScatterConfigMenu(props) {
                 showLegend: val,
               })}
             />
-            {Boolean(spec.showLegend) && Boolean(env.environment.orderedLegend) && (
+            {Boolean(spec.showLegend) && (
               <div style={{ marginBottom: '20px' }} >
                 <ButtonRowInput
                   labelClass="label"
