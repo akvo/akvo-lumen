@@ -71,7 +71,7 @@
 
 (defn question-type->lumen-type
   [environment question]
-  (let [res (condp = (:type question)
+  (condp = (:type question)
               "NUMBER" "number"
               "DATE" "date"
               "GEO" "geopoint"
@@ -79,12 +79,7 @@
               "GEO-SHAPE-FEATURES" "multiple"
               "CADDISFLY" "multiple"
               "OPTION" "option"
-              "text")]
-    (if (= res "option")
-      (if (get environment "optionColumnType")
-        "option"
-        "text")
-      res)))
+              "text"))
 
 (defn questions
   "Get the list of questions from a form"
