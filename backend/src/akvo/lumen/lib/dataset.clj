@@ -1,10 +1,12 @@
 (ns akvo.lumen.lib.dataset
-  (:require [akvo.lumen.db.dataset :as db.dataset]
+  (:require [akvo.lumen.lib.aggregation.commons :as acommons]
+            [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.job-execution :as db.job-execution]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.visualisation :as db.visualisation]
             [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.dataset.utils :as dutils]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.csv :as i.csv]
             [akvo.lumen.lib.import.flow-common :as flow-common]
@@ -146,13 +148,14 @@
 
 (defn sort-text
   [tenant-conn id column-name limit order]
-  (when-let [dataset (db.dataset/table-name-by-dataset-id tenant-conn {:id id})]
-    (let [result (->> (merge {:column-name column-name :table-name (:table-name dataset)}
-                        (when limit {:limit limit}))
-                   (db.dataset/count-vals-by-column-name tenant-conn)
-                   (map (juxt :counter :coincidence)))]
-      (cond->> result
-        (= "value" order) (sort-by second)))))
+  (when-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-conn {:id id})]
+    (let [column (dutils/find-column (w/keywordize-keys (:columns dataset)) column-name)]
+      (let [result (->> (merge {:column-name (acommons/sql-option-bucket-column column) :table-name (:table-name dataset)}
+                               (when limit {:limit limit}))
+                        (db.dataset/count-vals-by-column-name tenant-conn)
+                        (map (juxt :counter :coincidence)))]
+        (cond->> result
+          (= "value" order) (sort-by second))))))
 
 (defn sort-number
   [tenant-conn id column-name]
