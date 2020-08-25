@@ -118,8 +118,16 @@ class FilterMenu extends Component {
         ],
         option: [
           {
+            label: formatMessage({ id: 'contains' }),
+            value: 'contains',
+          },
+          {
             label: formatMessage({ id: 'exactly_matches' }),
             value: 'is',
+          },
+          {
+            label: formatMessage({ id: 'not_contains' }),
+            value: 'not_contains',
           },
           {
             label: formatMessage({ id: 'is_empty' }),
