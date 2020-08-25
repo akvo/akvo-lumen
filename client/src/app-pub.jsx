@@ -160,7 +160,7 @@ const fetchDashboard = (env, password, callback) =>
                     })
                     .then(([data, filterColumnsFetched]) => {
                       if (callbackReady) callbackReady();
-                      return renderSuccessfulShare(data, filterColumnsFetched || [], { env },
+                      return renderSuccessfulShare(data, filterColumnsFetched || [], { env },
                         onChangeFilter);
                     }
                     )
