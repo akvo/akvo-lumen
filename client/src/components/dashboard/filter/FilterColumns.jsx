@@ -26,7 +26,11 @@ export default function FilterColumns({ filter, intl, dataset, onFilterValueChan
             value={filter.columns[columnIndex].value}
             onChange={(id) => {
               const editedFilter = filter;
+              const selectedColumn = columns.find(x => x.get('columnName') === filter.columns[columnIndex].column);
               editedFilter.columns[columnIndex].value = id;
+              if (selectedColumn.get('type') === 'option') {
+                editedFilter.columns[columnIndex].strategy = 'contains';
+              }
               onFilterValueChange(editedFilter, true);
             }}
             options={vals}
