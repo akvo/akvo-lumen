@@ -4,7 +4,7 @@
             [clojure.data :as d]
             [clojure.string :as str]))
 
-(deftest compatible-columns-errors
+(deftest ^:unit compatible-columns-errors
   (let [dict {"c1" "year", "c2" "dd/mm/yyyy", "c3" "yyyy-mm-dd", "c4" "name"}]
     (let [imported-columns [{:id "c1", :type "number"} {:id "c2", :type "text"} {:id "c3", :type "text"} {:id "c4", :type "text"}]
           columns [{:id "c1", :type "text"} {:id "c2", :type "text"} {:id "c3", :type "text"} {:id "c4", :type "number"}]]
@@ -23,7 +23,7 @@
       (is (= [{:title "name", :id "c4"}]
              (:missed-columns (update/compatible-columns-errors dict imported-columns columns)))))))
 
-(deftest compatible-columns
+(deftest ^:unit compatible-columns
   (let [imported-columns [{"sort" nil,
                            "type" "text",
                            "title" "A",

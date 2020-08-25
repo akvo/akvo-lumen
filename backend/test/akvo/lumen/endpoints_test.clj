@@ -12,7 +12,7 @@
 (use-fixtures :once (partial system-fixture "endpoints-test.edn")
   tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
-(deftest handler-test
+(deftest ^:functional handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
 
     (testing "/"
@@ -175,7 +175,7 @@
                      (select-keys meta-dataset [:id :name :status :transformations :columns]))))
 
             (let [meta-group-dataset (-> (h (get* (api-url "/datasets" dataset-id "groups")))
-                                   body-kw)]
+                                         body-kw)]
               (is (= {:id dataset-id
                       :name title
                       :status "OK"
@@ -185,7 +185,7 @@
                      (select-keys meta-group-dataset [:id :name :status :transformations :groups]))))
 
             (let [meta-group-dataset (-> (h (get* (api-url "/datasets" dataset-id "group" "main")))
-                                   body-kw)]
+                                         body-kw)]
               (is (= {:status "OK"
                       :columns (map #(assoc % :groupName "main" :groupId "main") commons/dataset-link-columns)}
                      (select-keys meta-group-dataset [:status :columns])))))
@@ -198,7 +198,7 @@
                                    body-kw)]
               (is (= '([3 "B"] [2 "A"]) dataset-sort)))
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c6" "text") {"order" "value"}))
-                                 body-kw)]
+                                   body-kw)]
               (is (= '([2 "A"] [3 "B"]) dataset-sort)))
             (let [dataset-sort (-> (h (get* (api-url "/datasets" dataset-id "sort" "c2" "number")))
                                    body-kw)]

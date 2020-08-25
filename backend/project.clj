@@ -67,7 +67,8 @@
   :target-path "target/%s/"
   :aliases {"setup" ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
-            "seed" ["run" "-m" "dev/seed"]}
+            "seed" ["run" "-m" "dev/seed"]
+            "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
                    :functional :functional
@@ -76,6 +77,13 @@
   :profiles
   {:dev           [:project/dev :profiles/dev]
    :test          [:project/test :profiles/test]
+   :kaocha        {:dependencies [[lambdaisland/kaocha "1.0.669"
+                                   :exclusions [fipp
+                                                mvxcvi/puget
+                                                org.clojure/core.rrb-vector
+                                                org.clojure/java.classpath
+                                                org.clojure/spec.alpha
+                                                org.clojure/tools.reader]]]}
    :uberjar       {:aot :all}
    :profiles/dev  {}
    :profiles/test  {}

@@ -24,7 +24,7 @@
       (is (= tag (or expected-tag ::lib/ok)))
       res)))
 
-(deftest pivot-tests
+(deftest ^:functional pivot-tests
   (let [columns [{:id "c1", :title "A", :type "text"}
                  {:id "c2", :title "B", :type "text"}
                  {:id "c3", :title "C", :type "number"}]
@@ -137,7 +137,7 @@
                 :rows [[]]
                 :metadata {:categoryColumnTitle "A"}}))))))
 
-(deftest pie-tests
+(deftest ^:functional pie-tests
   (let [data {:columns
               [{:id "c1", :title "A", :type "text"}
                {:id "c2", :title "B", :type "text"}],
@@ -169,7 +169,7 @@
                 {:data [{:key "b1", :label "b1"} {:key "b2", :label "b2"}],
                  :metadata {:type "text"}}}))))))
 
-(deftest bar-tests
+(deftest ^:functional bar-tests
   (let [data       {:columns [{:id "c1", :title "A", :type "text"}
                               {:id "c2", :title "B", :type "number"}
                               {:id "c3", :title "C", :type "number"}
@@ -269,7 +269,7 @@
                   {:label "b", :key "b"}
                   {:label "c", :key "c"}]}}))))))
 
-(deftest line-tests
+(deftest ^:functional line-tests
   (let [data {:columns [{:id "c1", :title "A", :type "text"}
                         {:id "c2", :title "B", :type "number"}
                         {:id "c3", :title "C", :type "date"}]
@@ -313,7 +313,7 @@
                     {:timestamp 1549152000000}
                     {:timestamp 1549238400000}]}})))))))
 
-(deftest scatter-tests
+(deftest ^:functional scatter-tests
   (let [data {:columns [{:id "c1", :title "A", :type "text"}
                         {:id "c2", :title "B", :type "number"}
                         {:id "c3", :title "C", :type "date"}]
@@ -353,7 +353,7 @@
                 {:metadata {:type nil, :sampled false},
                  :data [{:label nil :key nil} {:label nil :key nil} {:label nil :key nil} {:label nil :key nil}]}}))))))
 
-(deftest bubble-tests
+(deftest ^:functional bubble-tests
   (let [data {:columns [{:id "c1", :title "A", :type "text"}
                         {:id "c2", :title "B", :type "number"}
                         {:id "c3", :title "C", :type "number"}]

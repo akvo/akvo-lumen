@@ -3,7 +3,7 @@
             [akvo.lumen.component.caddisfly-test :refer (caddisfly)]
             [clojure.test :refer :all]))
 
-(deftest details-test
+(deftest ^:unit details-test
   (testing "get multiple column details"
     (let [multipleType "caddisfly"
           multipleId "0b4a0aaa-f556-4c11-a539-c4626582cca6"]

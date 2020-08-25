@@ -91,7 +91,7 @@
                     vec
                     (update-in [1 "args"] dissoc "parseFormat")))
 
-(deftest op-validation
+(deftest ^:functional op-validation
   (testing "op validation"
     (doseq [op ops]
       (is (engine/valid? op) (str op)))
@@ -858,7 +858,7 @@
         (is (= "New Title" (get after "title")))))))
 
 ;; Regression #808
-(deftest valid-column-names
+(deftest ^:functional valid-column-names
   (is (engine/valid?
        (gen-transformation "core/sort-column"
                            {::transformation.sort-column.s/sortDirection "ASC"
