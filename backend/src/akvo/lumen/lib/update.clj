@@ -36,7 +36,7 @@
       (let [tx (first txs)
             cols1 (apply conj cols0 (try
                                       (when-not (engine/avoidable-if-missing? tx)
-                                        (engine/columns-used tx columns))
+                                        (flatten (engine/columns-used tx columns)))
                                       (catch Throwable e
                                         (if-let [ex-d (ex-data e)]
                                           (throw (ex-info (format "Transformation '%s' failed. %s" counter (.getMessage e)) 
