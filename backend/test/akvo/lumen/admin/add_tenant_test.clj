@@ -2,7 +2,8 @@
   (:require [akvo.lumen.admin.add-tenant :as at]
             [clojure.test :refer [deftest is testing]]))
 
-(deftest conform-label
+
+(deftest ^:unit conform-label
 
   (testing "Valid"
     (let [valid-label "tenant"]
@@ -41,7 +42,7 @@
                  (at/conform-label "-ao")))))
 
 
-(deftest label
+(deftest ^:unit label
   (testing "Production scheme"
     (is (= "tenant"
            (at/label "https://tenant.akvo-lumen.org"))))

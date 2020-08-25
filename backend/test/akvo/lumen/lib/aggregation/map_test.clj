@@ -4,7 +4,7 @@
             [clojure.walk :as w]
             [clojure.test :refer :all]))
 
-(deftest add-filters-test
+(deftest ^:unit add-filters-test
   (let [filter* {:datasetId "5e3303ab-9eb4-4216-b183-96998701d451"
                  :columns [{:value "Amsterdam", :column "c1", :strategy "is", :operation "keep", :columnType "text"}]}
         filters (w/stringify-keys (:columns filter*))

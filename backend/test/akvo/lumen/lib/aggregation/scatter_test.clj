@@ -3,7 +3,7 @@
             [clojure.tools.logging :as log]
             [clojure.test :refer :all]))
 
-(deftest serie-test
+(deftest ^:unit serie-test
   (let [sql-data [[:a0 :b0 :c0 :d0 :e0] [:a1 :b1 :c1 :d1 :e1]]
         column {:title "c1"
                 :type "text"}]
