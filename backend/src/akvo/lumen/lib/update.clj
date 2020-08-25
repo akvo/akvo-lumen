@@ -110,10 +110,12 @@
                            ))
         columns-dict (reduce (fn [c x] (assoc c (:id x) x)) {} columns)
         imported-columns (map (fn [{:keys [id type] :as x}]
-                                (if (and (= type "text")
-                                         (= "geoshape" (-> (get columns-dict id) :type)))
-                                  (assoc x :type "geoshape")
-                                  x)) imported-columns)
+                                (cond
+                                  (and (= type "text")
+                                       (= "geoshape" (-> (get columns-dict id) :type))) (assoc x :type "geoshape")
+                                  (and (= type "text")
+                                       (= "option" (-> (get columns-dict id) :type))) (assoc x :type "option")
+                                  :else x)) imported-columns)
         compatible? (set/subset? (set imported-columns) (set columns))]
     (if-not compatible?
       (do
@@ -143,11 +145,7 @@
                                                            (conj c co)
                                                            c)) [] imported-dataset-columns)]
           (if-let [compatible-errors (compatible-columns-error? imported-dataset-columns-checked
-                                                                (if (get environment "optionColumnType")
-                                                                  (map #(update % :type (fn [t]
-                                                                                          (if (= "option" t) "text" t)))
-                                                                       importer-columns)
-                                                                  importer-columns))]
+                                                                importer-columns)]
             (do
               (failed-update conn job-execution-id
                              (cond-> "Column mismatch"
