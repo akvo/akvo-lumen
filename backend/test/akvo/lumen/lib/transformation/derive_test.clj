@@ -29,7 +29,7 @@
                   (when-not res (log/error v expression res))
                   res)))
 
-(deftest parse-row-nested-object-references
+(deftest ^:unit parse-row-nested-object-references
   (is (= '(("row[\"g1\"][\"q2\"]" "g1" "q2"))
          (derive/parse-row-object-references  "row[\"g1\"][\"q2\"]")))
   (is (= '(("row['g1']['q2']" "g1" "q2"))
@@ -47,7 +47,7 @@
     (is (= '(("row.g1" "g1"))
            (derive/parse-row-object-references  "row.g1.g2")))))
 
-(deftest parse-row-object-references
+(deftest ^:unit parse-row-object-references
   (is (= '(["row.a" "a"])
          (derive/parse-row-object-references "row.a")))
 
@@ -93,7 +93,7 @@
   (is (= '(["row['e`']" "e`"])
          (derive/parse-row-object-references "row['e`']"))))
 
-(deftest computed
+(deftest ^:unit computed
   (let [t1 {"op" "core/derive"
             "args" {"newColumnTitle" "C"
                     "newColumnType" "text"
@@ -121,7 +121,7 @@
                first
                (get "column-name"))))))
 
-(deftest adapt-code-test
+(deftest ^:unit adapt-code-test
   (let [code_v1 "row.a_1+row.b_1"
         code_v2 "row['a_2']+row['b_2']"
         t1 {"op" "core/derive"
@@ -160,15 +160,15 @@
     (is (= (update-in t1 ["args" "code"] (constantly code_v2))
            (engine/adapt-transformation t1 older-columns new-columns)))))
 
-(deftest row-template-format-test
+(deftest ^:unit row-template-format-test
   (is (= "row['%s']"
          (derive/row-template-format "row.hi")))
   (is (= "row[\"%s\"]"
          (derive/row-template-format "row[\"hi\"]")))
   (is (= "row['%s']"
-       (derive/row-template-format "row['hi']"))))
+         (derive/row-template-format "row['hi']"))))
 
-(deftest column-groups-test
+(deftest ^:unit column-groups-test
   (let [columns (walk/keywordize-keys
                  [{"sort" nil
                    "type" "text"

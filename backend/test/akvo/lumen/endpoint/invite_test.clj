@@ -2,7 +2,7 @@
   (:require [akvo.lumen.endpoint.invite :as invite]
             [clojure.test :refer :all]))
 
-(deftest location
+(deftest ^:unit location
   (testing "Production"
     (is (= "https://example.akvolumen.org"
            (invite/location nil {:server-name "example.akvolumen.org"}))))

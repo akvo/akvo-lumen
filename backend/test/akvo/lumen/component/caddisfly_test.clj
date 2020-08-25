@@ -18,7 +18,7 @@
      (->> {:local-schema-uri "./caddisfly/caddisfly-tests-v2.json"}
           (ig/init-key :akvo.lumen.component.caddisfly/local)))))
 
-(deftest component-versions-test
+(deftest ^:unit component-versions-test
   (testing "prod component version"
     (is (= (-> (caddisfly :prod) :schema first val keys set)
            #{:name :uuid :sample :device :brand :model :reagents :results :hasImage})))
@@ -29,7 +29,7 @@
 (defn load-local-file [uri]
   (-> uri io/resource slurp (json/parse-string keyword)))
 
-(deftest upgrading-caddisfly-schema
+(deftest ^:unit upgrading-caddisfly-schema
   (testing "compatibility"
     (let [v1 "./caddisfly/tests-schema.json"
           d1 (c/extract-tests (load-local-file v1))

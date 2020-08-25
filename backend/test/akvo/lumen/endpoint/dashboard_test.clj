@@ -56,7 +56,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
-(deftest dashboard-unit
+(deftest ^:functional dashboard-unit
   (testing "filter-type"
     (is (= (dashboard/filter-type (dashboard-spec "abc123") "text")
            {:entities
