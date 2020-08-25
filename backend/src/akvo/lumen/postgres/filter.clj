@@ -74,9 +74,29 @@
                      op
                      (core/escape-string value))
       "option" (format "coalesce(%1$s, '') %2$s '%3$s'"
-                     (column :columnName)
-                     op
-                     (core/escape-string value))
+                       (column :columnName)
+                       op
+                       (core/escape-string value))
+      (invalid-filter "Type not supported" {:type (:type column)}))))
+
+(defmethod filter-sql "contains"
+  [{:keys [column operation value]}]
+  (let [op (if (= operation "keep") "=" "<>")]
+    (condp = (:type column)
+      "option" (format "position('%3$s' in %1$s) %2$s 0"
+                       (column :columnName)
+                       (if (= "=" op) ">" "=")
+                       (core/escape-string value))
+      (invalid-filter "Type not supported" {:type (:type column)}))))
+
+(defmethod filter-sql "not_contains"
+  [{:keys [column operation value]}]
+  (let [op (if (= operation "keep") "=" "<>")]
+    (condp = (:type column)
+      "option" (format "position('%3$s' in %1$s) %2$s 0"
+                       (column :columnName)
+                       (if (= "=" op) "=" ">")
+                       (core/escape-string value))
       (invalid-filter "Type not supported" {:type (:type column)}))))
 
 (defmethod filter-sql "isEmpty"
