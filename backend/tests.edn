@@ -5,9 +5,9 @@
    :test-paths ["test"]}
   {:id :unit
    :focus-meta [:unit]
-   :source-paths ["src"]
+   :source-paths ["src" "specs" "dev/src" "dev/resources" "test/resources"]
    :test-paths ["test"]}
   {:id :functional
    :focus-meta [:functional]
-   :source-paths ["src"]
+   :source-paths ["src" "specs" "dev/src" "dev/resources" "test/resources"]
    :test-paths ["test"]}]}
