@@ -80,6 +80,17 @@
      :columnName "c7",
      :direction nil,
      :sort nil}
+    {:groupId nil,
+     :key false,
+     :groupName nil,
+     :type "option",
+     :title "my option",
+     :multipleId nil,
+     :hidden false,
+     :multipleType nil,
+     :columnName "c8",
+     :direction nil,
+     :sort nil}
     {:sort nil,
      :type "geopoint",
      :title "Location",
@@ -101,7 +112,6 @@
                     :value "Sweden"}]]
       (is (= "(coalesce(c4, '') = 'South') AND (coalesce(c3, '') = 'Sweden')"
              (f/sql-str columns filters)))))
-
   (testing "filter value nil"
     (let [filters [{:value "South",
                     :column "c4",
@@ -115,4 +125,21 @@
                     :value nil}]
           r (f/sql-str columns filters)]
       (is (= "(coalesce(c4, '') = 'South') AND (coalesce(c3, '') = 'null')"
-             r) ))))
+             r) )))
+  (testing "filter option val"
+    (let [base-filter {:value "wow",
+                       :column "c8",
+                       :operation "keep",
+                       :columnType "option"}]
+     (let [filters [(assoc base-filter :strategy "is")]
+           r (f/sql-str columns filters)]
+       (is (= "(coalesce(c8, '') = 'wow')" r)))
+     (let [filters [(assoc base-filter :strategy "contains")]
+           r (f/sql-str columns filters)]
+       (is (= "(position('wow' in c8) > 0)" r)))
+     (let [filters [(assoc base-filter :strategy "not_contains")]
+           r (f/sql-str columns filters)]
+       (is (= "(position('wow' in c8) = 0)" r)))
+     (let [filters [(assoc base-filter :strategy "is" :operation "isEmpty" :value "yay")]
+           r (f/sql-str columns filters)]
+       (is (= "(coalesce(c8, '') <> 'yay')" r))))))
