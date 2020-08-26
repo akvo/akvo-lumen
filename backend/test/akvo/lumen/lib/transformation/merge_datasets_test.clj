@@ -2,7 +2,7 @@
   (:require [akvo.lumen.lib.transformation.merge-datasets :refer :all]
             [clojure.test :refer :all]))
 
-(deftest distinct-columns-test
+(deftest ^:unit distinct-columns-test
   (is (= '("c1" "c2" "c3" "identifier")
          (distinct-columns {:datasetId "uuid",
                             :mergeColumn "identifier",

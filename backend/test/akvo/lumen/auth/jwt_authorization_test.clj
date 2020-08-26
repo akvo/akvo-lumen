@@ -35,7 +35,7 @@
 (defn update-auth-roles [o]
   (assoc o :auth-roles (keycloak/claimed-roles (:jwt-claims o))))
 
-(deftest wrap-auth-test
+(deftest ^:unit wrap-auth-test
   (testing "GET / without claims"
     (let [response ((wrap-auth test-handler)
                     (immutant-request :get "/"))]
