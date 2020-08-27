@@ -49,6 +49,8 @@ spec:
             secretKeyRef:
               name: lumen
               key: encryption_key
+        - name: PGSSLMODE
+          value: prefer
       - name: lumen-exporter
         image: eu.gcr.io/akvo-lumen/lumen-exporter:${BUILD_HASH}
         ports:
