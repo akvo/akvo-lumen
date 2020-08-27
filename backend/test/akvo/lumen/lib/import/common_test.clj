@@ -5,7 +5,7 @@
 (deftest extract-first-and-merge-test
   (testing "extract every first ns-responses into one `main` response"
     (is (= {:main 1, :a 1, :b 3}
-           (common/extract-first-and-merge [(with-meta {:main 1} {:ns "main"})
-                                            (with-meta {:a 1} {:ns "one"})
-                                            (with-meta {:a 2} {:ns "one"})
-                                            (with-meta {:b 3} {:ns "two"})])))))
+           (common/extract-first-and-merge [(with-meta {:main 1} {:namespace "main"})
+                                            (with-meta {:a 1} {:namespace "one"})
+                                            (with-meta {:a 2} {:namespace "one"})
+                                            (with-meta {:b 3} {:namespace "two"})])))))

@@ -26,7 +26,7 @@
                           :title spec-name ;; TODO Consistent naming. Change on client side?
                           :description spec-description
                                      :author claims})
-    (doseq [[ns* cols] (group-by :ns columns)]
+    (doseq [[ns* cols] (group-by :namespace columns)]
       (let [imported-table-name (util/gen-table-name "imported")
             table-name (get ns-table-names ns*)]
         (db.job-execution/clone-data-table conn
@@ -54,7 +54,7 @@
                                                                                          :title (string/trim title)
                                                                                          :type type}]
                                                                          (if rqg
-                                                                           (assoc column-def :ns ns :repeatable (= groupId ns))
+                                                                           (assoc column-def :namespace ns :repeatable (= groupId ns))
                                                                            column-def)))
                                                                      cols)
                                                       :transformations []})))
@@ -77,14 +77,14 @@
      (try
        (with-open [importer (common/dataset-importer (get spec "source")
                                                      (assoc import-config :environment (env/all conn)))]
-         (let [columns        (map  (fn [c] (update c :ns (fn [ns] (or ns "main")))) (p/columns importer))
-               ns-table-names (reset! ns-table-names-atom (reduce #(assoc % %2 (util/gen-table-name "ds")) {} (distinct (map :ns columns))))]
-           (doseq [[ns* cols] (group-by :ns columns)]
+         (let [columns        (map  (fn [c] (update c :namespace (fn [ns] (or ns "main")))) (p/columns importer))
+               ns-table-names (reset! ns-table-names-atom (reduce #(assoc % %2 (util/gen-table-name "ds")) {} (distinct (map :namespace columns))))]
+           (doseq [[ns* cols] (group-by :namespace columns)]
              ;; todo foreign references????
              (postgres/create-dataset-table conn (get ns-table-names ns*) cols))
            (doseq [record-groups (take common/rows-limit (p/records importer))]
              (doseq [record record-groups]
-               (jdbc/insert! conn (get ns-table-names (:ns (meta record) "main"))
+               (jdbc/insert! conn (get ns-table-names (:namespace (meta record) "main"))
                              (postgres/coerce-to-sql record))))
            (successful-execution conn job-execution-id  data-source-id ns-table-names columns {:spec-name        (get spec "name")
                                                                                                :spec-description (get spec "description" "")} claims)))
