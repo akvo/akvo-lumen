@@ -75,6 +75,7 @@ else
 fi
 
 log Starting Docker Compose environment
+touch "log_docker_compose_ci_prod"
 docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml up --no-color -d --build
 
 bash ci/helpers/wait-for-docker-compose-to-start.sh
@@ -85,6 +86,7 @@ docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml r
 
 log Running the end to end tests against local Docker Compose Environment
 ./ci/e2e-test.sh akvolumenci keycloak http://t1.lumen.local/
+rm "log_docker_compose_ci_prod"
 
 log Done
 #docker-compose -p akvo-lumen-ci -f docker-compose.yml -f docker-compose.ci.yml down
