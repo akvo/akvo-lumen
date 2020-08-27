@@ -79,7 +79,6 @@ The Akvo Lumen UI should be accessible at:
 The Docker Compose file mounts the "client" directory, so any changes in the source directory should
 be picked up automatically by the Webpack server.
 
-
 #### Tests
 
 Run:
