@@ -80,7 +80,8 @@
            (doseq [[ns* cols] (group-by :namespace columns)]
              ;; todo foreign references????
              (postgres/create-dataset-table conn (get ns-table-names ns*) cols))
-           (doseq [record-groups (take common/rows-limit (p/records importer))]
+           (doseq [[record-groups idx] (map vector (take common/rows-limit (p/records importer)) (range))]
+             (log/debug :parent-rnum (inc idx)) ;; should be used to keep foreign references, also take care in table definition
              (doseq [record record-groups]
                (jdbc/insert! conn (get ns-table-names (:namespace (meta record) "main"))
                              (postgres/coerce-to-sql record))))
