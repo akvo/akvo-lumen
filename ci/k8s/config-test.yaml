@@ -4,4 +4,4 @@ metadata:
   name: akvo-lumen
   namespace: default
 data:
-  google-sql-db-instance: lumen-test-db
+  google-sql-db-instance: shared-test-database
