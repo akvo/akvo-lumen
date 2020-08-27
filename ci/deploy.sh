@@ -17,6 +17,7 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
     ENVIRONMENT=production
+    K8S_CONFIG_FILE=ci/k8s/config-prod.yml
     BACKEND_POD_CPU_REQUESTS="500m"
     BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="5Gi"
@@ -42,6 +43,7 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
 else
     log Environement is test
     gcloud container clusters get-credentials test
+    K8S_CONFIG_FILE=ci/k8s/config-test.yml
     BACKEND_POD_CPU_REQUESTS="250m"
     BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="768Mi"
@@ -76,6 +78,9 @@ log Finding blue/green state
 LIVE_COLOR=$(./ci/live-color.sh)
 log LIVE is "${LIVE_COLOR}"1
 DARK_COLOR=$(./ci/helpers/dark-color.sh "$LIVE_COLOR")
+
+log "Deploying config $K8S_CONFIG_FILE"
+kubectl apply -f ${K8S_CONFIG_FILE}
 
 log "Deploying to dark ($DARK_COLOR)"
 sed -e "s/\${BUILD_HASH}/$CI_COMMIT/" \
