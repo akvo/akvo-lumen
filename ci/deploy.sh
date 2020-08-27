@@ -17,7 +17,7 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     log Environment is production
     gcloud container clusters get-credentials production
     ENVIRONMENT=production
-    K8S_CONFIG_FILE=ci/k8s/config-prod.yml
+    K8S_CONFIG_FILE=ci/k8s/config-prod.yaml
     BACKEND_POD_CPU_REQUESTS="500m"
     BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="5Gi"
@@ -43,7 +43,7 @@ if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
 else
     log Environement is test
     gcloud container clusters get-credentials test
-    K8S_CONFIG_FILE=ci/k8s/config-test.yml
+    K8S_CONFIG_FILE=ci/k8s/config-test.yaml
     BACKEND_POD_CPU_REQUESTS="250m"
     BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="768Mi"
