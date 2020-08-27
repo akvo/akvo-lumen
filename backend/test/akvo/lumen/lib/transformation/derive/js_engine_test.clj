@@ -6,12 +6,12 @@
    [clojure.test :refer [deftest is]]))
 
 
-(deftest javascript-logic
+(deftest ^:unit javascript-logic
   (is (= (js-engine/eval* "1 + 1") 2))
   (is (= (js-engine/eval* "'akvo'.toUpperCase();") "AKVO"))
   (is (not (js-engine/eval* "NaN === NaN;"))))
 
-(deftest checking-valid-code
+(deftest ^:unit checking-valid-code
   (is (true? (js-engine/evaluable? "true")))
   (is (true? (js-engine/evaluable? "1+2")))
   (is (true? (js-engine/evaluable? "row[\"age\"].reduce((a,b) => (a+b))")))

@@ -98,7 +98,7 @@
      :direction nil,
      :columnName "d1"}))
 
-(deftest sql-str
+(deftest ^:unit sql-str
   (testing "filter value not nil"
     (let [filters [{:value "South",
                     :column "c4",

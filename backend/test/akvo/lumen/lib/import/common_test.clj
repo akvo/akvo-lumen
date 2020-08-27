@@ -2,7 +2,7 @@
   (:require [akvo.lumen.lib.import.common :as common]
             [clojure.test :refer :all]))
 
-(deftest extract-first-and-merge-test
+(deftest ^:unit extract-first-and-merge-test
   (testing "extract every first ns-responses into one `main` response"
     (is (= {:main 1, :a 1, :b 3}
            (common/extract-first-and-merge [(with-meta {:main 1} {:ns "main"})

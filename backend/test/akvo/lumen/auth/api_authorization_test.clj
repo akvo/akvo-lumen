@@ -2,7 +2,7 @@
   (:require [akvo.lumen.auth.api-authorization :as m]
             [clojure.test :refer [deftest testing is]]))
 
-(deftest api-tenant-admin?-test
+(deftest ^:unit api-tenant-admin?-test
   (let [tf (fn [cxt tenant allowed-paths bool]
              (testing cxt
                (is (= bool (m/api-tenant-admin? tenant allowed-paths)))))]
