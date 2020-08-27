@@ -53,9 +53,7 @@
                                                                                          :sort nil
                                                                                          :title (string/trim title)
                                                                                          :type type}]
-                                                                         (if rqg
-                                                                           (assoc column-def :namespace ns :repeatable (= groupId ns))
-                                                                           column-def)))
+                                                                         (assoc column-def :namespace ns :repeatable (= groupId ns))))
                                                                      cols)
                                                       :transformations []})))
     (db.job-execution/update-job-execution conn {:id             job-execution-id
