@@ -44,6 +44,7 @@ else
     log Environement is test
     gcloud container clusters get-credentials test
     K8S_CONFIG_FILE=ci/k8s/config-test.yaml
+    kubectl apply -f lumentest-cleanup-job.yaml
     BACKEND_POD_CPU_REQUESTS="250m"
     BACKEND_POD_CPU_LIMITS="1000m"
     BACKEND_POD_MEM_REQUESTS="768Mi"
