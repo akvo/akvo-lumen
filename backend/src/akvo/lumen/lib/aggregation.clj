@@ -28,14 +28,17 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
-      (try
-        (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
-        (catch clojure.lang.ExceptionInfo e
-          (log/warn e :query query :visualisation-type visualisation-type)
-          (lib/bad-request (merge {:message (.getMessage e)}
-                                  (ex-data e)))))
-      (lib/not-found {"datasetId" dataset-id}))))
+    (let [res (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
+      (if-let [dataset-versions (seq res)]
+        (try
+          (query* tenant-tx-conn (map #(update % :columns (comp walk/keywordize-keys vec))
+                                      dataset-versions)
+                  visualisation-type query)
+          (catch clojure.lang.ExceptionInfo e
+            (log/warn e :query query :visualisation-type visualisation-type)
+            (lib/bad-request (merge {:message (.getMessage e)}
+                                    (ex-data e)))))
+        (lib/not-found {"datasetId" dataset-id})))))
 
 
 (def vis-aggregation-mapper {"pivot table" "pivot"
