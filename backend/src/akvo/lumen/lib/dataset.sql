@@ -61,14 +61,13 @@ SELECT * from dataset WHERE id IN (:v*:ids);
 -- :doc update dataset meta
 UPDATE dataset SET title = :title WHERE id = :id;
 
--- :name db-dataset-by-id :? :1
+-- :name db-dataset-by-id :? :*
 WITH
 source_data AS (
-SELECT (spec->'source')::jsonb - 'refreshToken' as source
+SELECT (spec->'source')::jsonb - 'refreshToken' as source, dataset_version.id as source_ds_id
   FROM data_source, dataset_version, job_execution, dataset
  WHERE dataset_version.dataset_id = dataset.id
    AND dataset_version.version = 1
-   AND dataset_version.namespace = :namespace
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.data_source_id = data_source.id
    AND dataset_version.dataset_id=:id
@@ -82,10 +81,12 @@ SELECT dataset_version.table_name AS "table-name",
        source_data.source,
        dataset_version.created AS "updated",
        dataset_version.columns,
+       dataset_version.namespace,
        dataset_version.transformations
   FROM dataset_version, dataset, source_data
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
+   AND source_ds_id=dataset_version.id
    AND version=(SELECT max(version)
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
