@@ -3,6 +3,7 @@
             [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [clojure.tools.logging :as log]
+            [clojure.string :as str]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]))
 
@@ -13,9 +14,9 @@
         bucket-column (find-column columns (:bucketColumn query))
         query         (format "SELECT %1$s as x, count(*) FROM %2$s WHERE %3$s GROUP BY x"
                               (sql-option-bucket-column bucket-column)
-                              (clojure.string/join  ", " (map :table-name ds-versions))
+                              (str/join  ", " (map :table-name ds-versions))
                               (str
-                               (clojure.string/join "=" (map (comp #(str % ".rnum" ) :table-name) ds-versions))
+                               (str/join "=" (map (comp #(str % ".rnum" ) :table-name) ds-versions))
                                " AND "
                                filter-sql))
         counts        (run-query tenant-conn query)
