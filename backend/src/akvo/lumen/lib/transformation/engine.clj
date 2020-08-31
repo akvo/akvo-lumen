@@ -144,6 +144,7 @@
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+        namespaces (set (map :namespace dataset-versions))
         previous-columns (vec (flatten (map :columns dataset-versions)))
 ]
     (let [{:keys [namespace success? message columns execution-log error-data]}
@@ -169,14 +170,13 @@
                                                                                                            columns))))
                                                               (vec (:transformations dataset-version)))
                                            :columns (if (= (:namespace dataset-version) namespace)
-                                                      (vec (filter #(if (= "main" (:namespace dataset-version))
-                                                                      (or (contains? #{"main" "transformations" "metadata" nil} (:groupId %))
-                                                                          (not (:repeatable %)))
-                                                                      (= namespace (:groupId %)))
-                                                                   (w/keywordize-keys columns)))
+                                                      (vec (filter
+                                                            #(if (= "main" (:namespace dataset-version))
+                                                               ((complement contains?) (disj namespaces "main") (:groupId %))
+                                                               (= namespace (:groupId %)))
+                                                            (w/keywordize-keys columns)))
                                                       (vec (:columns dataset-version)))}]
-                 (db.dataset-version/new-dataset-version tenant-conn next-dataset-version)))
-             )
+                 (db.dataset-version/new-dataset-version tenant-conn next-dataset-version))))
       (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))
 
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
