@@ -32,6 +32,7 @@
         commons-keys [:updated :created :source :modified :title :author :id]
         specific-keys [:transformations :columns :table-name]]
     (assoc (select-keys (first dataset-col) commons-keys)
+           :transformations (:transformations (first (filter #(= "main"(:namespace %)) dataset-col)))
            :groups (reduce (fn [c ds]
                              (let [ds-groups (map #(get % "groupId") (:columns ds))]
                                (reduce #(assoc % %2 (let [data (select-keys ds specific-keys)]
