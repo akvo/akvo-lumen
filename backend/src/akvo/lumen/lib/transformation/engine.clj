@@ -161,7 +161,7 @@
                                            :imported-table-name (:imported-table-name dataset-version)
                                            :version (inc (:version dataset-version))
                                            :namespace (:namespace dataset-version)
-                                           :transformations (if (= (:namespace dataset-version) namespace)
+                                           :transformations (if (= (:namespace dataset-version) "main")
                                                               (w/keywordize-keys
                                                                (conj (vec (:transformations dataset-version))
                                                                      (assoc transformation
@@ -169,7 +169,11 @@
                                                                                                            columns))))
                                                               (vec (:transformations dataset-version)))
                                            :columns (if (= (:namespace dataset-version) namespace)
-                                                      (w/keywordize-keys columns)
+                                                      (vec (filter #(if (= "main" (:namespace dataset-version))
+                                                                      (or (contains? #{"main" "transformations" "metadata" nil} (:groupId %))
+                                                                          (not (:repeatable %)))
+                                                                      (= namespace (:groupId %)))
+                                                                   (w/keywordize-keys columns)))
                                                       (vec (:columns dataset-version)))}]
                  (db.dataset-version/new-dataset-version tenant-conn next-dataset-version)))
              )
