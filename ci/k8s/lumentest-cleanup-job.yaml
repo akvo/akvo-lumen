@@ -29,7 +29,7 @@ spec:
                 export PGPORT=5432
                 export PGHOST="$(echo "$LUMEN_DB_URL" | sed -n 's|.*postgresql://\(.*\):.*|\1|p')"
                 export PGUSER="$(echo "$LUMEN_DB_URL" | sed -n 's|.*user=\(.*\)&password.*|\1|p')"
-                export PGPASSWORD="$(echo "$LUMEN_DB_URL" | sed -n 's|.*password=\(.*\)&.*|\1|p')"
+                export PGPASSWORD="$(echo "$LUMEN_DB_URL" | sed -n 's|.*password=\(.*\)|\1|p')"
                 export PGSSLMODE=prefer
                 export PGDATABASE=tenant_lumencitest
                 sleep 10
