@@ -34,7 +34,10 @@
     (assoc (select-keys (first dataset-col) commons-keys)
            :groups (reduce (fn [c ds]
                              (let [ds-groups (map #(get % "groupId") (:columns ds))]
-                               (reduce #(assoc % %2 (select-keys ds specific-keys)) c ds-groups)))
+                               (reduce #(assoc % %2 (let [data (select-keys ds specific-keys)]
+                                                      (update data :columns
+                                                              (fn [cols]
+                                                                (filter (fn [c] (= %2 (get c "groupId" ))) cols))))) c ds-groups)))
                            {} dataset-col))))
 
 
