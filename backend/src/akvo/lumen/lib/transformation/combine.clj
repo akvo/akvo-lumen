@@ -39,6 +39,7 @@
         {:success? true
          :execution-log [(format "Combined columns %s, %s into %s"
                                  first-column-name second-column-name new-column-name)]
+         :namespace namespace
          :columns (conj columns {"title" column-title
                                  "type" "text"
                                  "sort" nil
