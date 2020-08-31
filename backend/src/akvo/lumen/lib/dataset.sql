@@ -71,7 +71,9 @@ SELECT (spec->'source')::jsonb - 'refreshToken' as source, dataset_version.id as
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.data_source_id = data_source.id
    AND dataset_version.dataset_id=:id
+   LIMIT 1
 )
+
 SELECT dataset_version.table_name AS "table-name",
        dataset.title,
        dataset.created,
@@ -86,7 +88,6 @@ SELECT dataset_version.table_name AS "table-name",
   FROM dataset_version, dataset, source_data
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
-   AND source_ds_id=dataset_version.id
    AND version=(SELECT max(version)
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
