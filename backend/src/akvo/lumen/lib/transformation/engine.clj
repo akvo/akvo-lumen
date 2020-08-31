@@ -63,9 +63,9 @@
 
 (defn- try-apply-operation
   "invoke apply-operation inside a try-catch"
-  [deps table-name columns op-spec]
+  [deps dataset-versions columns op-spec]
   (try
-    (apply-operation deps table-name columns op-spec)
+    (apply-operation deps dataset-versions columns op-spec)
     (catch Exception e
       (log-ex e)
       {:success? false
@@ -143,30 +143,33 @@
 
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
-  (let [dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
-        previous-columns (vec (:columns dataset-version))
-        source-table (:table-name dataset-version)]
+  (let [dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+        previous-columns (vec (flatten (map :columns dataset-versions)))
+]
     (let [{:keys [success? message columns execution-log error-data]}
-          (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))]
+          (try-apply-operation deps dataset-versions previous-columns (assoc transformation :dataset-id dataset-id))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
         (throw (ex-info (or message "") {})))
-      (let [new-dataset-version-id (str (util/squuid))]
-        (db.transformation/clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
-        (let [next-dataset-version {:id new-dataset-version-id
-                                    :dataset-id dataset-id
-                                    :job-execution-id job-execution-id
-                                    :table-name source-table
-                                    :imported-table-name (:imported-table-name dataset-version)
-                                    :version (inc (:version dataset-version))
-                                    :transformations (w/keywordize-keys
-                                                      (conj (vec (:transformations dataset-version))
-                                                            (assoc transformation
-                                                                   "changedColumns" (diff-columns previous-columns
-                                                                                                  columns))))
-                                    :columns (w/keywordize-keys columns)}]
-          (db.dataset-version/new-dataset-version tenant-conn next-dataset-version)
-          (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
+      (map (fn [dataset-version]
+             (let [new-dataset-version-id (str (util/squuid))]
+               (db.transformation/clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
+               (let [next-dataset-version {:id new-dataset-version-id
+                                           :dataset-id dataset-id
+                                           :job-execution-id job-execution-id
+                                           :table-name (:table-name dataset-version)
+                                           :imported-table-name (:imported-table-name dataset-version)
+                                           :version (inc (:version dataset-version))
+                                           :namespace (:namespace dataset-version)
+                                           :transformations (w/keywordize-keys
+                                                             (conj (vec (:transformations dataset-version))
+                                                                   (assoc transformation
+                                                                          "changedColumns" (diff-columns previous-columns
+                                                                                                         columns))))
+                                           :columns (w/keywordize-keys columns)}]
+                 (db.dataset-version/new-dataset-version tenant-conn next-dataset-version))))
+           dataset-versions)
+      (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))
 
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
