@@ -40,7 +40,7 @@
              :groupId (:groupId q)
              :metadata (:metadata q)
              :groupName (:groupName q)
-             :ns (:ns q)
+             :namespace (:namespace q)
              :id (format "c%s" (:id q))}
             (when (= t "multiple")
               (if (:caddisflyResourceUuid q)
@@ -54,7 +54,7 @@
   "extract every first group-responses into one `main` response"
   [ns-responses]
   (->> ns-responses
-       (group-by #(:ns (meta %)))
+       (group-by #(:namespace (meta %)))
        vals
        (map first)
        (reduce merge {})))
