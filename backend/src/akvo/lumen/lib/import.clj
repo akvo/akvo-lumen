@@ -34,28 +34,30 @@
                                             :to-table imported-table-name}
                                            {}
                                            {:transaction? false})
-        (db.dataset-version/new-dataset-version conn {:id (util/squuid)
-                                                      :dataset-id dataset-id
-                                                      :job-execution-id job-execution-id
-                                                      :table-name table-name
-                                                      :namespace ns*
-                                                      :imported-table-name imported-table-name
-                                                      :version 1
-                                                      :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId ns]}]
-                                                                       (let [column-def {:columnName id
-                                                                                         :direction nil
-                                                                                         :hidden false
-                                                                                         :key (boolean key)
-                                                                                         :multipleId multipleId
-                                                                                         :multipleType multipleType
-                                                                                         :groupName groupName
-                                                                                         :groupId groupId
-                                                                                         :sort nil
-                                                                                         :title (string/trim title)
-                                                                                         :type type}]
-                                                                         (assoc column-def :namespace ns :repeatable (= groupId ns))))
-                                                                     cols)
-                                                      :transformations []})))
+        (db.dataset-version/new-dataset-version
+         conn {:id (util/squuid)
+               :dataset-id dataset-id
+               :job-execution-id job-execution-id
+               :table-name table-name
+               :namespace ns*
+               :imported-table-name imported-table-name
+               :version 1
+               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace]}]
+                                {:columnName id
+                                 :direction nil
+                                 :groupId groupId
+                                 :groupName groupName
+                                 :hidden false
+                                 :key (boolean key)
+                                 :multipleId multipleId
+                                 :multipleType multipleType
+                                 :namespace namespace
+                                 :repeatable (= groupId namespace)
+                                 :sort nil
+                                 :title (string/trim title)
+                                 :type type})
+                              cols)
+               :transformations []})))
     (db.job-execution/update-job-execution conn {:id             job-execution-id
                                                  :status         "OK"
                                                  :dataset-id     dataset-id})))
