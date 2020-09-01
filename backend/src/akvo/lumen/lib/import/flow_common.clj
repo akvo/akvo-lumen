@@ -123,11 +123,19 @@
                {:rqg-ns (set (map :id rep-col)) :main-ns (set (map :id non-rep-col))})]
     (into [(with-meta
              (question-responses-base (select-keys responses (:main-ns dict)))
-             {:ns "main"})]
-          (mapv #(with-meta
-                    (or (question-responses-base {% (get responses %)}) {})
-                     {:ns %})
-                (:rqg-ns dict)))))
+             {:namespace "main"})]
+          (flatten
+           (mapv (fn [rqg]
+                   (let [result (map (fn [res]
+                                       (with-meta
+                                         (or (question-responses-base {rqg [res]}) {})
+                                         {:namespace rqg}))
+                                     (get responses rqg))]
+                     ;; logic below should be redundant to the places that use of https://github.com/akvo/akvo-lumen/blob/issue-2127-base/backend/src/akvo/lumen/lib/import/common.clj#L53 (eg:current update logic)
+                     (if (seq result)  ;; only takes first iteration
+                       (first result)
+                       result)))
+                 (:rqg-ns dict))))))
 
 (def metadata-keys #{"identifier" "instance_id" "display_name" "submitter" "submitted_at" "surveyal_time" "device_id"})
 
