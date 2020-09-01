@@ -59,17 +59,19 @@
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
   [tenant-conn id]
-  (if-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [columns (remove #(get % "hidden") (:columns dataset))]
-      (lib/ok
-       {:id id
-        :name (:title dataset)
-        :modified (:modified dataset)
-        :created (:created dataset)
-        :updated (:updated dataset)
-        :status "OK"
-        :transformations (:transformations dataset)
-        :columns columns}))
+  (if-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
+    (lib/ok (->
+             (reduce
+              (fn [d [group-id group]]
+                (let [columns (remove #(get % "hidden") (:columns group))]
+                  (-> d
+                      (update :columns #(apply conj % columns))
+                      (assoc :status "OK"))))
+              (assoc dataset :columns [])
+              (:groups dataset))
+             remove-token
+             (select-keys [:created :id :modified :status :title :transformations :updated :author :source :columns])
+             (rename-keys {:title :name})))
     (lib/not-found {:error "Not found"})))
 
 (defn fetch-groups-metadata
@@ -80,18 +82,19 @@
 
   always we'll use 'transformations' groupId to include all generated transformations"
   [tenant-conn id]
-  (if-let [dataset (w/keywordize-keys (db.dataset/dataset-by-id tenant-conn {:id id}))]
-    (let [columns (remove #(get % :hidden) (:columns dataset))
+  (if-let [dataset (w/keywordize-keys (db.dataset/dataset-in-groups-by-id tenant-conn {:id id}))]
+    (let [columns (remove #(get % :hidden) (reduce #(into % %2) [] (map :columns (vals (:groups dataset)))))
           groups  (if (= "AKVO_FLOW" (-> dataset :source :kind))
                     (let [columns-by-group (group-by :groupId columns)
                           groups           (dissoc columns-by-group nil)
                           nil-group        (get columns-by-group nil)]
-                      (merge groups
+                      (merge (dissoc groups "metadata")
                              (reduce (fn [c col]
                                        (let [k (if (contains? flow-common/metadata-keys (:columnName col))
                                                  :metadata :transformations)]
                                          (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                                     {:metadata [] :transformations []}  nil-group)))
+                                     {:metadata (get groups "metadata" [])
+                                      :transformations (get groups "transformations" [])}  nil-group)))
                     (reduce (fn [c col]
                               (let [k (if (i.csv/valid-column-name? (:columnName col))
                                         :main :transformations)]
@@ -111,30 +114,39 @@
 
 (defn fetch
   [tenant-conn id]
-  (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [columns (remove #(get % "hidden") (:columns dataset))
-          data (rest (jdbc/query tenant-conn
-                                 [(select-data-sql (:table-name dataset) columns)]
-                                 {:as-arrays? true}))]
-
-      
-      (-> dataset
-          remove-token
-          (select-keys [:created :id :modified :status :title :transformations :updated :author :source])
-          (rename-keys {:title :name})
-          (assoc :rows data :columns columns :status "OK")))))
+  (when-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
+    (->
+     (reduce
+      (fn [d [group-id group]]
+        (let [columns (remove #(get % "hidden") (:columns group))
+              data (rest (jdbc/query tenant-conn
+                                     [(select-data-sql (:table-name group) columns)]
+                                     {:as-arrays? true}))]
+          (-> d 
+              (update :rows (fn [rows] ;; naive impl expecting to have same rows in each group
+                              (if (seq rows)
+                                (map into rows data)                                
+                                (apply conj rows data))))
+              (update :columns #(apply conj % columns))
+              (assoc :status "OK"))))
+      (assoc dataset :rows [] :columns [])
+      (:groups dataset))
+     remove-token
+     (select-keys [:created :id :modified :status :title :transformations :updated :author :source :rows :columns])
+     (rename-keys {:title :name}))))
 
 (defn fetch-group
   [tenant-conn id group-id]
-  (when-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [column-remove-condition (condp = group-id
+  (when-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
+    (let [group-dataset (get (:groups dataset) (if (= "main" group-id) nil group-id))
+          column-remove-condition (condp = group-id
                                     "metadata" #(not (contains? flow-common/metadata-keys (get % "columnName")))
                                     "transformations" #(not (tx.engine/is-derived? (get % "columnName")))
                                     "main" #(not (i.csv/valid-column-name? (get % "columnName")))
                                     #(not (= group-id (get % "groupId"))))
-          columns (remove #(or (get % "hidden") (column-remove-condition %)) (:columns dataset))
+          columns (remove #(or (get % "hidden") (column-remove-condition %)) (:columns group-dataset))
           data (rest (jdbc/query tenant-conn
-                                 [(select-data-sql (:table-name dataset) columns)]
+                                 [(select-data-sql (:table-name group-dataset) columns)]
                                  {:as-arrays? true}))]
       (-> (select-keys dataset [:updated :created :modified])
           remove-token
@@ -148,7 +160,9 @@
 
 (defn sort-text
   [tenant-conn id column-name limit order]
-  (when-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-conn {:id id})]
+  (when-let [dataset (first (filter (fn [{:keys [table-name columns]}]
+                                      (not-empty (filter #(= column-name (get % "columnName")) columns)))
+                                    (db.dataset/table-name-and-columns-by-dataset-id tenant-conn {:id id})))]
     (let [column (dutils/find-column (w/keywordize-keys (:columns dataset)) column-name)]
       (let [result (->> (merge {:column-name (acommons/sql-option-bucket-column column) :table-name (:table-name dataset)}
                                (when limit {:limit limit}))
