@@ -12,7 +12,7 @@
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
             [clojure.spec.alpha :as s]))
 
-(s/def ::aggregation/dataset (s/keys :req-un [::db.dsv.s/columns ::db.dsv.s/table-name]))
+(s/def ::aggregation/dataset any? #_(s/keys :req-un [::db.dsv.s/columns ::db.dsv.s/table-name]))
 (s/def ::aggregation.pie/bucketColumn ::db.dsv.column.s/columnName)
 (s/def ::aggregation.pie/query (s/keys :req-un [::postgres.filter/filters
                                                 ::aggregation.pie/bucketColumn]))
