@@ -83,12 +83,19 @@
           (name id)
           (colum-type-fn* type)))
 
-(defn create-dataset-table [conn table-name columns]
-  (jdbc/execute! conn [(format "create table %s (rnum serial primary key, %s);"
-                               table-name
-                               (str/join ", " (map column-type-fn columns)))])
-  (create-indexes conn table-name columns)
-  (add-key-constraints conn table-name columns))
+(defn create-dataset-table
+  ([conn table-name columns]
+   (create-dataset-table conn table-name columns nil))
+  ([conn table-name columns references]
+   (let [sql (format "create table %s (rnum serial primary key, %s %s);"
+                                table-name
+                                (if references
+                                  (format  "parent_rnum integer references %s(rnum) NOT NULL, " references)
+                                  "")
+                                (str/join ", " (map column-type-fn columns)))]
+     (jdbc/execute! conn [sql]))
+   (create-indexes conn table-name columns)
+   (add-key-constraints conn table-name columns)))
 
 (defrecord Geoshape [wkt-string])
 
