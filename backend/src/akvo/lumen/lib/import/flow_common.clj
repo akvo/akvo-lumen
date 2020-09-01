@@ -87,7 +87,7 @@
   (->> (:questionGroups form)
        (reduce #(into % (map (fn [q* [group-id group-name repeatable]]
                                (let [ns (if repeatable group-id "main")]
-                                 (assoc q* :groupId group-id :groupName group-name :ns ns)))
+                                 (assoc q* :groupId group-id :groupName group-name :namespace ns)))
                              (:questions %2) (repeat [(:id %2) (str/trim (:name %2)) (:repeatable %2)]))) [])))
 
 (defn form
@@ -115,7 +115,7 @@
 ;; to
 ;; [(with-meta
 ;;          {question-id -> first-response}
-;;          {:ns xxx})]
+;;          {:namespace xxx})]
 (defn question-responses
   "Returns a list of maps with meta from question-id to the first response iteration"
   [groups responses]
