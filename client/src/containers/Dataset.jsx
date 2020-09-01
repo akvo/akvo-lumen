@@ -164,8 +164,6 @@ function Dataset(props) {
       if (currentGroup && currentGroup.get('groupId') === groupId) {
         resolve();
       } else {
-        changeCurrentGroup(null);
-
         api
           .get(`/api/datasets/${datasetId}/group/${groupId}`)
           .then((response) => {
