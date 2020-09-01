@@ -42,7 +42,7 @@
                :namespace ns*
                :imported-table-name imported-table-name
                :version 1
-               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace]}]
+               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId]}]
                                 {:columnName id
                                  :direction nil
                                  :groupId groupId
@@ -51,8 +51,6 @@
                                  :key (boolean key)
                                  :multipleId multipleId
                                  :multipleType multipleType
-                                 :namespace namespace
-                                 :repeatable (= groupId namespace)
                                  :sort nil
                                  :title (string/trim title)
                                  :type type})

@@ -42,7 +42,6 @@
 
 (s/def ::column-header (s/keys :req-un [::v/title]
                                :opt-un [::v/id
-                                        ::v/namespace
                                         ::v/metadata]))
 
 (s/def ::c.text/header* (s/keys :req-un [::c.text/type] :opt-un [::v/key]))
