@@ -59,17 +59,19 @@
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
   [tenant-conn id]
-  (if-let [dataset (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [columns (remove #(get % "hidden") (:columns dataset))]
-      (lib/ok
-       {:id id
-        :name (:title dataset)
-        :modified (:modified dataset)
-        :created (:created dataset)
-        :updated (:updated dataset)
-        :status "OK"
-        :transformations (:transformations dataset)
-        :columns columns}))
+  (if-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
+    (lib/ok (->
+             (reduce
+              (fn [d [group-id group]]
+                (let [columns (remove #(get % "hidden") (:columns group))]
+                  (-> d
+                      (update :columns #(apply conj % columns))
+                      (assoc :status "OK"))))
+              (assoc dataset :columns [])
+              (:groups dataset))
+             remove-token
+             (select-keys [:created :id :modified :status :title :transformations :updated :author :source :columns])
+             (rename-keys {:title :name})))
     (lib/not-found {:error "Not found"})))
 
 (defn fetch-groups-metadata
