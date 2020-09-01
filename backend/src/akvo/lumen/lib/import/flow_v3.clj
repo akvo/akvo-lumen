@@ -18,7 +18,7 @@
                                              (assoc :type "GEO-SHAPE-FEATURES")
                                              (assoc :multipleType "geo-shape-features")
                                              (assoc :multipleId (:id i))
-                                             (assoc :ns (:ns i))
+                                             (assoc :namespace (:namespace i))
                                              (assoc :derived-id (:id i))
                                              (assoc :derived-fn (fn [x] (-> x (w/keywordize-keys) :features first :properties)))
                                              (update :name (fn [o] (str o " Features" )))
@@ -91,9 +91,11 @@
            (let [data-point-id (get form-instance "dataPointId")]
              (if-let [data-point (get data-points data-point-id)]
                (let [[main-group & more-groups] (response-data form (get form-instance "responses"))]
-                 (into [(merge main-group
-                                (flow-common/common-records form-instance data-point)
-                                {:device_id (get form-instance "deviceIdentifier")})]
+                 (into [(with-meta
+                          (merge main-group
+                                 (flow-common/common-records form-instance data-point)
+                                 {:device_id (get form-instance "deviceIdentifier")})
+                          (meta main-group))]
                        more-groups))
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
                                {:form-instance-id (get form-instance "id")
