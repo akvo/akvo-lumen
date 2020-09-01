@@ -106,9 +106,11 @@
            (let [data-point-id (get form-instance "dataPointId")
                  data-point (get data-points data-point-id)]
              (let [[main-group & more-groups] (response-data form (get form-instance "responses"))]
-               (into [(merge main-group
-                             (flow-common/common-records form-instance data-point)
-                             {:latitude (get-in data-points [data-point-id "latitude"])
-                              :longitude (get-in data-points [data-point-id "longitude"])})]
+               (into [(with-meta
+                        (merge main-group
+                               (flow-common/common-records form-instance data-point)
+                               {:latitude (get-in data-points [data-point-id "latitude"])
+                                :longitude (get-in data-points [data-point-id "longitude"])})
+                        (meta main-group))]
                      more-groups))))
          (flow-common/form-instances headers-fn form))))
