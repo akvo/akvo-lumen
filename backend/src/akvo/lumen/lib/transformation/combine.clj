@@ -16,8 +16,10 @@
                   (= (engine/error-strategy op-spec) "fail")))))
 
 (defmethod engine/apply-operation "core/combine"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (let [new-column-name (engine/next-column-name columns)
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  (let [namespace (get op-spec "namespace" "main")
+        table-name (:table-name (first (filter #(= (:namespace %) namespace) dataset-versions)))
+        new-column-name (engine/next-column-name columns)
         {[first-column-name second-column-name] "columnNames"
          separator "separator"
          column-title "newColumnTitle"} (engine/args op-spec)]
@@ -29,13 +31,15 @@
                                               :new-column-name new-column-name})
         (db.tx.combine/combine-columns tenant-conn
                                        {:table-name table-name
+                                        :tables (vec (map :table-name (filter #(not= (:namespace %) namespace) dataset-versions)))
                                         :new-column-name new-column-name
-                                        :first-column first-column-name
-                                        :second-column second-column-name
+                                        :first-column (str table-name "." first-column-name)
+                                        :second-column (str table-name "." second-column-name)
                                         :separator separator})
         {:success? true
          :execution-log [(format "Combined columns %s, %s into %s"
                                  first-column-name second-column-name new-column-name)]
+         :namespace namespace
          :columns (conj columns {"title" column-title
                                  "type" "text"
                                  "sort" nil

@@ -45,6 +45,7 @@
 
 (s/def ::key boolean?)
 
+(s/def ::namespace (s/nilable string?))
 ;; alias and custom generator doesn't work so far
 ;; https://dev.clojure.org/jira/browse/CLJ-2079
 (s/def ::multipleId (s/with-gen
