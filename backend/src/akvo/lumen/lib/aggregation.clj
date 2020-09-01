@@ -28,7 +28,12 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
+    (if-let [dataset (reduce (fn [c {:keys [table-name columns namespace]}]
+                               (cond-> c
+                                 true (update :columns into columns)
+                                 (= namespace "main") (assoc :table-name table-name)))
+                             {:table-name nil :columns []}
+                             (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id}))]
       (try
         (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
