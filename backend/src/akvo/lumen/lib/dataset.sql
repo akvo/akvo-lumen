@@ -64,7 +64,7 @@ UPDATE dataset SET title = :title WHERE id = :id;
 -- :name db-dataset-by-id :? :*
 WITH
 source_data AS (
-SELECT (spec->'source')::jsonb - 'refreshToken' as source, dataset_version.id as source_ds_id
+SELECT (spec->'source')::jsonb - 'refreshToken' as source
   FROM data_source, dataset_version, job_execution, dataset
  WHERE dataset_version.dataset_id = dataset.id
    AND dataset_version.version = 1
