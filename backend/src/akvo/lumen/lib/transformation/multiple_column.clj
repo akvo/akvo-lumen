@@ -16,8 +16,9 @@
      (every? (comp util/valid-type? :type) columns-to-extract)
      (#{"fail" "leave-empty" "delete-row"} onError))))
 
-(defn- apply-operation [deps table-name columns op-spec]
-  (let [{:keys [onError op args] :as op-spec} (walk/keywordize-keys op-spec)]
+(defn- apply-operation [deps dataset-versions columns op-spec]
+  (let [{:keys [onError op args] :as op-spec} (walk/keywordize-keys op-spec)
+        table-name (t.engine/get-table-name dataset-versions op-spec)]
     ;; so far we only implement `caddisfly` in other case we throw exception based on core/condp impl
     (condp = (-> args :selectedColumn :multipleType)
       "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec)

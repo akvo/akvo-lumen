@@ -22,8 +22,8 @@
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/trim"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "trim"))
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  (transform tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec "trim"))
 
 (defmethod engine/columns-used "core/trim"
   [applied-transformation columns]
@@ -37,8 +37,8 @@
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/to-lowercase"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "lower"))
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  (transform tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec "lower"))
 
 (defmethod engine/columns-used "core/to-lowercase"
   [applied-transformation columns]
@@ -52,8 +52,8 @@
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/to-uppercase"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "upper"))
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  (transform tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec "upper"))
 
 (defmethod engine/columns-used "core/to-uppercase"
   [applied-transformation columns]
@@ -75,17 +75,17 @@
   true)
 
 (defmethod engine/apply-operation "core/to-titlecase"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "initcap"))
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  (transform tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec "initcap"))
 
 (defmethod engine/valid? "core/trim-doublespace" [op-spec]
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/trim-doublespace"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)]
-    (db.tx.text/trim-doublespace tenant-conn {:table-name table-name
-                                   :column-name column-name})
+    (db.tx.text/trim-doublespace tenant-conn {:table-name (engine/get-table-name dataset-versions op-spec)
+                                              :column-name column-name})
     {:success? true
      :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
      :columns columns})
