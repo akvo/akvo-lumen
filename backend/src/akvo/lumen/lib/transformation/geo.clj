@@ -24,10 +24,11 @@
   (jdbc/execute! conn (postgres/geo-index table-name column-name)))
 
 (defmethod engine/apply-operation "core/generate-geopoints"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (if-let [response-error (engine/column-title-error? (get (engine/args op-spec) "columnTitleGeo") columns)]
     response-error
-   (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
+    (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
+          table-name (engine/get-table-name dataset-versions op-spec)
          get-client-type (partial engine/column-type columns)
          column-types (map get-client-type [columnNameLat columnNameLong])]
      (if (every? #(= "number" %) column-types)
