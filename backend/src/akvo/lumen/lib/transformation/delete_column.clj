@@ -34,8 +34,9 @@
                 (some #(= % column-name) columns)))))
 
 (defmethod engine/apply-operation "core/delete-column"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (let [column-name (col-name op-spec)
+        table-name (engine/get-table-name dataset-versions op-spec)
         merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]
     (if (empty? merged-sources)
       (if-let [existent-viss (seq (visualisations-with-dataset-column tenant-conn (:dataset-id op-spec) column-name))]        
