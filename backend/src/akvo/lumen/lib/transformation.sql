@@ -22,12 +22,11 @@ UPDATE dataset
 -- :doc Checks the existence of a dataset for a given id
 SELECT id FROM dataset WHERE id = :id
 
--- :name db-latest-dataset-version-by-dataset-id :? :1
+-- :name db-latest-dataset-version-by-dataset-id :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
-SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
+SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace 
   FROM dataset_version
  WHERE dataset_id = :dataset-id
-   AND namespace = :namespace
    AND version = (SELECT MAX(v.version)
                     FROM dataset_version v
                    WHERE v.dataset_id = :dataset-id);
