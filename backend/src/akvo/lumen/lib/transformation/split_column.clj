@@ -78,9 +78,10 @@
       default-values)))
 
 (defmethod engine/apply-operation "core/split-column"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
     (let [{:keys [onError op args]} (walk/keywordize-keys op-spec)
+          table-name (engine/get-table-name dataset-versions op-spec)
           column-name               (col-name args)
           pattern                   (pattern* args)
           re-pattern*               (re-pattern (Pattern/quote pattern))]
