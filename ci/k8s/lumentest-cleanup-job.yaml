@@ -33,7 +33,11 @@ spec:
                 export PGSSLMODE=prefer
                 export PGDATABASE=tenant_lumencitest
                 sleep 10
+                trap "touch /tmp/pod/terminated" EXIT
                 psql -c "DELETE FROM dataset"
+            volumeMounts:
+              - mountPath: /tmp/pod
+                name: tmp-pod
             resources:
               requests:
                 cpu: "50m"
@@ -49,9 +53,13 @@ spec:
                   key: lumen_db_url
           - name: cloudsql-proxy
             image: eu.gcr.io/cloudsql-docker/gce-proxy:1.16
-            command: ["/cloud_sql_proxy",
-                      "-instances=akvo-lumen:europe-west1:$(GOOGLE_SQL_DB_INSTANCE)=tcp:5432",
-                      "-credential_file=/secrets/cloudsql/credentials.json"]
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                /cloud_sql_proxy -instances=akvo-lumen:europe-west1:$(GOOGLE_SQL_DB_INSTANCE)=tcp:5432 -credential_file=/secrets/cloudsql/credentials.json & CHILD_PID=$!
+                (while true; do if [[ -f "/tmp/pod/terminated" ]]; then kill $CHILD_PID; echo "Killed $CHILD_PID because the main container terminated."; fi; sleep 1; done) &
+                wait $CHILD_PID
+                if [[ -f "/tmp/pod/terminated" ]]; then exit 0; echo "Job completed. Exiting..."; fi
             securityContext:
               runAsUser: 2  # non-root user
               allowPrivilegeEscalation: false
@@ -66,8 +74,13 @@ spec:
                 mountPath: "/secrets/cloudsql/credentials.json"
                 subPath: "cloud-database-service-account.json"
                 readOnly: true
+              - mountPath: /tmp/pod
+                name: tmp-pod
+                readOnly: true
           restartPolicy: Never
           volumes:
             - name: "secret-config"
               secret:
                 secretName: "lumen"
+            - name: tmp-pod
+              emptyDir: {}
