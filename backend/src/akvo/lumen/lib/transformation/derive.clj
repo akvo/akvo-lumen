@@ -154,7 +154,7 @@
     row))
 
 (defmethod engine/apply-operation "core/derive"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (if-let [response-error (engine/column-title-error? (::column-title (args op-spec)) columns)]
     response-error
     (do (engine/columns-used (walk/keywordize-keys op-spec) columns)
@@ -162,6 +162,7 @@
           (let [{:keys [::code
                         ::column-title
                         ::column-type]} (args op-spec)
+                table-name (engine/get-table-name dataset-versions op-spec)
                 new-column-name         (engine/next-column-name columns)
                 columns-groups*         (columns-groups (walk/keywordize-keys columns))
                 adapter                 (comp (js-engine/rqg columns)

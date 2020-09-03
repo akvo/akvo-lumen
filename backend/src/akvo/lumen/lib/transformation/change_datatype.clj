@@ -98,9 +98,10 @@
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defmethod engine/apply-operation "core/change-datatype"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (let [{column-name "columnName"
-         new-type "newType"} (engine/args op-spec)]
+         new-type "newType"} (engine/args op-spec)
+        table-name (engine/get-table-name dataset-versions op-spec)]
     (condp = new-type
       "text" (change-datatype-to-text tenant-conn table-name columns op-spec)
       "number" (change-datatype-to-number tenant-conn table-name columns op-spec)
