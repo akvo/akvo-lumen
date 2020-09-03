@@ -87,7 +87,7 @@
     "lodash": "^4.17.5",
     "log-with-style": "0.3.0",
     "moment": "^2.17.1",
-    "node-sass": "4.5.3",
+    "node-sass": "4.13.1",
     "numeral": "^2.0.6",
     "object-assign": "4.1.0",
     "oidc-client": "^1.9.1",
