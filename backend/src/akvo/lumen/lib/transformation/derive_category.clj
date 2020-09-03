@@ -48,8 +48,9 @@
 
 
 (defmethod engine/apply-operation "core/derive-category"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (let [op-spec               (walk/keywordize-keys op-spec)
+        table-name (engine/get-table-name dataset-versions op-spec)
         source-column-name    (get-in op-spec [:args :source :column :columnName])
         source-column-title    (get-in op-spec [:args :source :column :title])
         column-title          (get-in op-spec [:args :target :column :title])

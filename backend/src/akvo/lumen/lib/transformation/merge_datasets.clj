@@ -116,7 +116,7 @@
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
-    (if-let [source-dataset (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
+    (if-let [source-dataset (first (filter #(= "main" (:namespace %)) (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})))]
       source-dataset
       (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
                       {:source source})))))
@@ -163,8 +163,8 @@
      :columns (into columns target-merge-columns)}))
 
 (defmethod engine/apply-operation "core/merge-datasets"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (apply-merge-operation tenant-conn table-name columns op-spec))
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  (apply-merge-operation tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec))
 
 (defn- merged-datasets-diff [tenant-conn merged-dataset-sources]
   (let [dataset-ids (mapv :datasetId merged-dataset-sources)

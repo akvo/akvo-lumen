@@ -8,9 +8,10 @@
   (boolean (not-empty (get (engine/args op-spec) "expression"))))
 
 (defmethod engine/apply-operation "core/filter-column"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions columns op-spec]
   (let [{expr "expression"
          column-name "columnName"} (engine/args op-spec)
+        table-name (engine/get-table-name dataset-versions op-spec)
         expr-fn (first (keys expr))
         expr-val (first (vals expr))
         filter-fn (if (= "is" expr-fn) ;; TODO: logic only valid for text columns
