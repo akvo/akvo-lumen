@@ -138,8 +138,12 @@
         source-merge-columns))
 
 (defn apply-merge-operation
-  [conn table-name columns op-spec]
-  (let [source (get-in op-spec ["args" "source"])
+  [conn dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        dsv (get dataset-versions namespace)
+        columns (:columns dsv)
+        table-name (:table-name dsv)
+        source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         source-dataset (get-source-dataset conn source)
         source-table-name (:table-name source-dataset)
@@ -153,20 +157,22 @@
                          source-table-name
                          target-merge-columns
                          column-names-translation
-                         source)]
+                         source)
+        new-columns (into columns target-merge-columns)]
     (add-columns conn table-name target-merge-columns)
     (insert-merged-data conn table-name target data)
     {:success? true
      :execution-log [(format "Merged columns from %s into %s"
                              source-table-name
                              table-name)]
-     :columns (into columns target-merge-columns)}))
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] new-columns)
+                                 (update-in ["main" :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))
 
 (defmethod engine/apply-operation "core/merge-datasets"
   [{:keys [tenant-conn]} dataset-versions op-spec]
-  (let [namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))]
-   (apply-merge-operation tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec)))
+  (apply-merge-operation tenant-conn dataset-versions op-spec))
 
 (defn- merged-datasets-diff [tenant-conn merged-dataset-sources]
   (let [dataset-ids (mapv :datasetId merged-dataset-sources)

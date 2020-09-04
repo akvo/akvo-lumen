@@ -12,9 +12,9 @@
   (let [{expr "expression"
          column-name "columnName"} (engine/args op-spec)
         namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))
-
-        table-name (engine/get-table-name dataset-versions op-spec)
+        dsv (get dataset-versions namespace)
+        columns (vec (:columns dsv))
+        table-name (:table-name dsv)
         expr-fn (first (keys expr))
         expr-val (first (vals expr))
         filter-fn (if (= "is" expr-fn) ;; TODO: logic only valid for text columns
@@ -29,7 +29,10 @@
                                               :filter-val filter-val})]
     {:success? true
      :execution-log [(str "Deleted " result " rows")]
-     :columns columns}))
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] columns)
+                                 (update-in ["main" :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) columns)))}))
 
 (defmethod engine/columns-used "core/filter-column"
   [applied-transformation columns]
