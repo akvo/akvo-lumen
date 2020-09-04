@@ -163,8 +163,10 @@
      :columns (into columns target-merge-columns)}))
 
 (defmethod engine/apply-operation "core/merge-datasets"
-  [{:keys [tenant-conn]} dataset-versions columns op-spec]
-  (apply-merge-operation tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))]
+   (apply-merge-operation tenant-conn (engine/get-table-name dataset-versions op-spec) columns op-spec)))
 
 (defn- merged-datasets-diff [tenant-conn merged-dataset-sources]
   (let [dataset-ids (mapv :datasetId merged-dataset-sources)
