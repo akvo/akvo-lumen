@@ -99,12 +99,18 @@
     [[(Double/parseDouble south) (Double/parseDouble west)]
      [(Double/parseDouble north) (Double/parseDouble east)]]))
 
-(defn bounds [tenant-conn table-name layer where-clause]
+(defn- antemeridian? [opts]
+  (= (:centre-of-the-world opts) "antemeridian"))
+
+(defn bounds [tenant-conn table-name layer where-clause opts]
   (let [geom (or (:geom layer)
                  (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326)"
                          (:longitude layer)
                          (:latitude layer)))
-        sql-str (format "SELECT ST_Extent(%s) FROM %s WHERE %s"
+        bounds-query (if (antemeridian? opts)
+                       "SELECT ST_Extent(ST_ShiftLongitude(%s)) FROM %s WHERE %s"
+                       "SELECT ST_Extent(%s) FROM %s WHERE %s")
+        sql-str (format bounds-query
                         geom table-name where-clause)]
     (when-some [st-extent (-> (jdbc/query tenant-conn sql-str)
                               first :st_extent)]
@@ -127,40 +133,44 @@
       first
       :title))
 
-(defn point-metadata [tenant-conn table-name layer where-clause]
+(defn point-metadata [tenant-conn table-name layer where-clause opts]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")]
-    {:boundingBox (bounds tenant-conn table-name layer where-clause)
+    {:boundingBox (bounds tenant-conn table-name layer where-clause opts)
      :pointColorMapping (point-color-mapping tenant-conn table-name layer where-clause column-titles)
      :availableColors palette
      :pointColorMappingTitle (get-column-title-for-name column-titles (:pointColorColumn layer))
      :columnTitles column-titles}))
 
-(defn shape-aggregation-metadata [tenant-conn table-name layer where-clause]
+(defn shape-aggregation-metadata [tenant-conn table-name layer where-clause opts]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")
         column-title-for-name (get-column-title-for-name
                                (get-column-titles tenant-conn "dataset_id" (:aggregationDataset layer) "main")
                                (:aggregationColumn layer))
         shape-color-mapping-title (format "%s (%s)" column-title-for-name
                                           (:aggregationMethod layer))]
-    {:boundingBox (bounds tenant-conn table-name layer where-clause)
+    {:boundingBox (bounds tenant-conn table-name layer where-clause opts)
      :shapeColorMapping (shape-color-mapping layer)
      :availableColors gradient-palette
      :columnTitles column-titles
      :shapeColorMappingTitle shape-color-mapping-title}))
 
-(defn shape-metadata [tenant-conn table-name layer where-clause]
+(defn shape-metadata [tenant-conn table-name layer where-clause opts]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")]
     {:columnTitles column-titles
-     :boundingBox (bounds tenant-conn table-name layer where-clause)}))
+     :boundingBox (bounds tenant-conn table-name layer where-clause opts)}))
 
-(defn raster-metadata [tenant-conn table-name layer where-clause]
+(defn raster-metadata [tenant-conn table-name layer where-clause opts]
   (let [raster-meta (walk/keywordize-keys (jdbc/query tenant-conn ["SELECT metadata FROM raster_dataset WHERE raster_table = ?" table-name]))
         {{:keys [bbox]} :metadata} (first raster-meta)]
     (merge
       {:max (:max (:metadata (first raster-meta)) )
        :min (:min (:metadata (first raster-meta)))}
       (if bbox
-        {:boundingBox [(reverse (first bbox)) (reverse (second bbox))]}
+        (let [shift-longitude (if-not (antemeridian? opts)
+                                identity
+                                (fn [[lat long]]
+                                  [lat (if (neg? long) (+ 360 long) long)]))]
+          {:boundingBox [(shift-longitude (reverse (first bbox))) (shift-longitude (reverse (second bbox)))]})
         {}))))
 
 (defn get-metadata [{:keys [aggregationDataset aggregationColumn aggregationGeomColumn layerType]
@@ -178,5 +188,5 @@
     :else
     point-metadata))
 
-(defn build [tenant-conn table-name layer where-clause]
-  ((get-metadata layer) tenant-conn table-name layer where-clause))
+(defn build [tenant-conn table-name layer where-clause opts]
+  ((get-metadata layer) tenant-conn table-name layer where-clause opts))

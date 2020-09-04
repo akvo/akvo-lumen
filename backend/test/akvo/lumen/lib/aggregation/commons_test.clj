@@ -56,7 +56,9 @@
      "aggregationColumn" "c5"}
     ],
    "version" 1,
-   "baseLayer" "street"})
+   "baseLayer" "street"
+   "centreOfTheWorld" "greenwich"
+   })
 
 (deftest ^:unit spec-columns-test
   (let [data

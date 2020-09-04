@@ -55,6 +55,7 @@ class VisualisationEditor extends Component {
           Boolean(
             nextPropsVisualisation.spec.layers &&
               nextPropsVisualisation.spec.layers.length &&
+              (
               nextPropsVisualisation.spec.layers.some((layer, idx) =>
                                                       getNeedNewAggregation(
                                                         layer,
@@ -62,6 +63,10 @@ class VisualisationEditor extends Component {
                                                         'map'
                                                       )
                                                     )
+              ||
+              nextPropsVisualisation.spec.centreOfTheWorld
+              !== prevState.visualisation.spec.centreOfTheWorld
+              )
           )
           ||
           Boolean(
