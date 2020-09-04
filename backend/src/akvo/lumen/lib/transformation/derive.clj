@@ -156,7 +156,9 @@
 (defmethod engine/apply-operation "core/derive"
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))]
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (vec (:columns dsv))]
     (if-let [response-error (engine/column-title-error? (::column-title (args op-spec)) columns)]
             response-error
             (do (engine/columns-used (walk/keywordize-keys op-spec) columns)
@@ -164,7 +166,6 @@
                   (let [{:keys [::code
                                 ::column-title
                                 ::column-type]} (args op-spec)
-                        table-name (engine/get-table-name dataset-versions op-spec)
                         new-column-name         (engine/next-column-name columns)
                         columns-groups*         (columns-groups (walk/keywordize-keys columns))
                         adapter                 (comp (js-engine/rqg columns)
@@ -184,7 +185,13 @@
                                                                   "fail"        (throw e) ;; interrupt js execution
                                                                   ))))))
                         base-opts               {:table-name  table-name
-                                                 :column-name new-column-name}]
+                                                 :column-name new-column-name}
+                        new-columns (conj columns {"title"      column-title
+                                                   "type"       column-type
+                                                   "sort"       nil
+                                                   "hidden"     false
+                                                   "direction"  nil
+                                                   "columnName" new-column-name})]
                     (db.tx.engine/add-column conn {:table-name table-name
                                                    :column-type             (lumen->pg-type column-type)
                                                    :new-column-name         new-column-name})
@@ -192,12 +199,10 @@
                     (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))
                     {:success?      true
                      :execution-log [(format "Derived columns using '%s'" code)]
-                     :columns       (conj columns {"title"      column-title
-                                                   "type"       column-type
-                                                   "sort"       nil
-                                                   "hidden"     false
-                                                   "direction"  nil
-                                                   "columnName" new-column-name})}))))))
+                     :dataset-versions (vals (-> dataset-versions
+                                                 (assoc-in [namespace :columns] new-columns)
+                                                 (update-in ["main" :transformations]
+                                                            engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))))))
 
 (defmethod engine/columns-used "core/derive"
   [applied-transformation columns]
