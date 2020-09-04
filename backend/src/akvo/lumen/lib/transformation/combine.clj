@@ -16,8 +16,9 @@
                   (= (engine/error-strategy op-spec) "fail")))))
 
 (defmethod engine/apply-operation "core/combine"
-  [{:keys [tenant-conn]} dataset-versions columns op-spec]
-  (let [namespace (get op-spec "namespace" "main")
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))
         table-name (engine/get-table-name dataset-versions op-spec)
         new-column-name (engine/next-column-name columns)
         {[first-column-name second-column-name] "columnNames"
