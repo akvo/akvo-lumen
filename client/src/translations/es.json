@@ -337,6 +337,8 @@
   "square": "Cuadrado",
   "stack_bars": "Barras de pila",
   "street": "Calle",
+  "greenwich": "Greenwich",
+  "antimeridian": "Meridiano 180",
   "styling_dataset": "Set de datos de estilos",
   "styling_indicator": "Indicador de estilos",
   "styling_indicator_geopoint_column": "Aplicar estilos de columna de geopoint",

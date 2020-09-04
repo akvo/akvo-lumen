@@ -342,6 +342,8 @@
   "square": "Square",
   "stack_bars": "Stack bars",
   "street": "Street",
+  "greenwich": "Greenwich",
+  "antimeridian": "Antimeridian",
   "styling_dataset": "Styling dataset",
   "styling_indicator": "Styling indicator",
   "styling_indicator_geopoint_column": "Styling indicator geopoint column",

@@ -95,11 +95,11 @@
                                                           :headers headers*
                                                           :content-type :json}))
                            :body json/decode (get "layergroupid"))
-        layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil)]
+        layer-meta (map-metadata/build tenant-conn raster_table {:layerType "raster"} nil nil)]
     (lib/ok {:layerGroupId layer-group-id
              :layerMetadata layer-meta})))
 
-(defn metadata-layers [tenant-conn layers]
+(defn metadata-layers [tenant-conn layers opts]
   (map (fn [current-layer]
          (let [current-layer-type (:layerType current-layer)
                current-dataset-id (if (= current-layer-type "raster")
@@ -115,14 +115,14 @@
                                    (when (not= current-layer-type "raster")
                                      (throw
                                       (ex-info "no authorised to create a map visualisation with current dataset associated" {:datasetId current-dataset-id}))))
-                               current-layer current-where-clause)))
+                               current-layer current-where-clause opts)))
        layers))
 
 (defn create
-  [tenant-conn windshaft-url layers]
+  [tenant-conn windshaft-url layers opts]
   (try
     (conform-create-args layers)
-    (let [metadata-array (metadata-layers tenant-conn layers)
+    (let [metadata-array (metadata-layers tenant-conn layers opts)
           map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
           headers* (headers tenant-conn)
           layer-group-id (-> (http.client/post* (format "%s/layergroup" windshaft-url)
