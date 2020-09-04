@@ -21,9 +21,10 @@
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"
          sort-direction "sortDirection"} (engine/args op-spec)
-        table-name (engine/get-table-name dataset-versions op-spec)
         namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (:columns dsv)
         idx-name (str table-name "_" column-name)
         sort-idx (get-sort-idx columns)
         new-cols (engine/update-column columns
@@ -35,7 +36,10 @@
                                   :column-name column-name
                                   :table-name table-name})
     {:success? true
-     :columns new-cols}))
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] new-cols)
+                                 (update-in ["main" :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) new-cols)))}))
 
 (defmethod engine/columns-used "core/sort-column"
   [applied-transformation columns]

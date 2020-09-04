@@ -8,16 +8,20 @@
 (defn- transform
   [tenant-conn dataset-versions op-spec fn]
   (let [{column-name "columnName"} (engine/args op-spec)
-        table-name (engine/get-table-name dataset-versions op-spec)
         namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))
-]
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (:columns dsv)
+        ]
     (db.tx.text/text-transform tenant-conn {:table-name table-name
-                                 :column-name column-name
-                                 :fn fn})
+                                            :column-name column-name
+                                            :fn fn})
     {:success? true
      :execution-log [(format "Text transform %s on %s" fn column-name)]
-     :columns columns}))
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] columns)
+                                 (update-in ["main" :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) columns)))}))
 
 (defn valid? [op-spec]
   (util/valid-column-name? (get (engine/args op-spec) "columnName")))
@@ -88,13 +92,17 @@
 (defmethod engine/apply-operation "core/trim-doublespace"
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
-        namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))]
-    (db.tx.text/trim-doublespace tenant-conn {:table-name (engine/get-table-name dataset-versions op-spec)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (:columns dsv)]
+    (db.tx.text/trim-doublespace tenant-conn {:table-name table-name
                                               :column-name column-name})
     {:success? true
      :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
-     :columns columns}))
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] columns)
+                                 (update-in ["main" :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) columns)))}))
 
 (defmethod engine/columns-used "core/trim-doublespace"
   [applied-transformation columns]
