@@ -55,10 +55,16 @@ AND version= :version
 AND namespace = :namespace;
 
 -- :name db-initial-dataset-version-to-update-by-dataset-id :? :1
-SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
+SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
   FROM  dataset_version
   WHERE dataset_id= :dataset-id AND transformations='[]'
   AND namespace = :namespace
+  ORDER BY version DESC LIMIT 1;
+
+-- :name db-n-initial-dataset-version-to-update-by-dataset-id :? :*
+SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
+  FROM  dataset_version
+  WHERE dataset_id= :dataset-id AND transformations='[]'
   ORDER BY version DESC LIMIT 1;
 
 -- :name db-dataset-version-by-dataset-id :? :1
