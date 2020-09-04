@@ -18,19 +18,26 @@
 (defmethod engine/apply-operation "core/combine"
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))
-        table-name (engine/get-table-name dataset-versions op-spec)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (vec (:columns dsv))
         new-column-name (engine/next-column-name columns)
         {[first-column-name second-column-name] "columnNames"
          separator "separator"
-         column-title "newColumnTitle"} (engine/args op-spec)]
+         column-title "newColumnTitle"} (engine/args op-spec)
+        new-columns (conj columns {"title" column-title
+                                   "type" "text"
+                                   "sort" nil
+                                   "hidden" false
+                                   "direction" nil
+                                   "columnName" new-column-name})]
     (if-let [title-error (engine/column-title-error? column-title columns)]
       title-error
-      (do
+      (do 
         (db.tx.engine/add-column tenant-conn {:table-name table-name
                                               :column-type "text"
                                               :new-column-name new-column-name})
-        (let [tables (vec (map :table-name (filter #(not= (:namespace %) namespace) dataset-versions)))]
+        (let [tables (vec (map :table-name (keys (dissoc dataset-versions namespace))))]
           ((if (seq tables) db.tx.combine/combine-columns-from-tables db.tx.combine/combine-columns)
            tenant-conn
            {:table-name table-name
@@ -43,12 +50,10 @@
          :execution-log [(format "Combined columns %s, %s into %s"
                                  first-column-name second-column-name new-column-name)]
          :namespace namespace
-         :columns (conj columns {"title" column-title
-                                 "type" "text"
-                                 "sort" nil
-                                 "hidden" false
-                                 "direction" nil
-                                 "columnName" new-column-name})}))))
+         :dataset-versions (vals (-> dataset-versions
+                                     (assoc-in [namespace :columns] new-columns)
+                                     (update-in ["main" :transformations]
+                                                engine/update-dsv-txs op-spec columns new-columns)))}))))
 
 (defmethod engine/columns-used "core/combine"
   [applied-transformation columns]
