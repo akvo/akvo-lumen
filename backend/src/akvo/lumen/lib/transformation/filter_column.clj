@@ -8,9 +8,12 @@
   (boolean (not-empty (get (engine/args op-spec) "expression"))))
 
 (defmethod engine/apply-operation "core/filter-column"
-  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{expr "expression"
          column-name "columnName"} (engine/args op-spec)
+        namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))
+
         table-name (engine/get-table-name dataset-versions op-spec)
         expr-fn (first (keys expr))
         expr-val (first (vals expr))
