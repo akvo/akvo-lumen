@@ -164,25 +164,25 @@ class MapConfigMenu extends Component {
               <ConfigMenuSection
                 title="base_map"
                 options={(
-                <div>
-                  <ButtonRowInput
-                    options={['street', 'satellite', 'terrain'].map(item => ({
-                      label: <FormattedMessage id={item} />,
-                      value: item,
-                    }))}
-                    selected={visualisation.spec.baseLayer}
-                    onChange={baseLayer => onChangeSpec({ baseLayer })}
-                  />
+                  <div>
+                    <ButtonRowInput
+                      options={['street', 'satellite', 'terrain'].map(item => ({
+                        label: <FormattedMessage id={item} />,
+                        value: item,
+                      }))}
+                      selected={visualisation.spec.baseLayer}
+                      onChange={baseLayer => onChangeSpec({ baseLayer })}
+                    />
 
-                  <ButtonRowInput
-                    options={['greenwich', 'antemeridian'].map(item => ({
-                      label: <FormattedMessage id={item} />,
-                      value: item,
-                    }))}
-                    selected={visualisation.spec.centreOfTheWorld}
-                    onChange={centreOfTheWorld => onChangeSpec({ centreOfTheWorld })}
-                  />
-                </div>)}
+                    <ButtonRowInput
+                      options={['greenwich', 'antemeridian'].map(item => ({
+                        label: <FormattedMessage id={item} />,
+                        value: item,
+                      }))}
+                      selected={visualisation.spec.centreOfTheWorld}
+                      onChange={centreOfTheWorld => onChangeSpec({ centreOfTheWorld })}
+                    />
+                  </div>)}
               />
             </div>
           :

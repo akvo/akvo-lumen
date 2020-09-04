@@ -63,7 +63,9 @@ class VisualisationEditor extends Component {
                                                         'map'
                                                       )
                                                     )
-              || nextPropsVisualisation.spec.centreOfTheWorld != prevState.visualisation.spec.centreOfTheWorld
+              ||
+              nextPropsVisualisation.spec.centreOfTheWorld
+              !== prevState.visualisation.spec.centreOfTheWorld
               )
           )
           ||

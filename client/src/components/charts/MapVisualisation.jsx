@@ -428,7 +428,10 @@ export default class MapVisualisation extends Component {
     }
 
     if (metadata && metadata.layerMetadata && metadata.layerMetadata.length) {
-      const mergedBoundingBox = metadata.layerMetadata.map(layer => layer.boundingBox).find(boundingBox => boundingBox) || [[90, 180], [-90, -180]];
+      const mergedBoundingBox = metadata.layerMetadata
+        .map(layer => layer.boundingBox)
+        .find(boundingBox => boundingBox)
+       || [[90, 180], [-90, -180]];
 
       metadata.layerMetadata.forEach((layer) => {
         if (layer.boundingBox) {
