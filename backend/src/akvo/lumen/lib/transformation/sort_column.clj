@@ -18,10 +18,12 @@
   (inc (count (filter #(get % "sort") columns))))
 
 (defmethod engine/apply-operation "core/sort-column"
-  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"
          sort-direction "sortDirection"} (engine/args op-spec)
         table-name (engine/get-table-name dataset-versions op-spec)
+        namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))
         idx-name (str table-name "_" column-name)
         sort-idx (get-sort-idx columns)
         new-cols (engine/update-column columns
@@ -44,9 +46,11 @@
   true)
 
 (defmethod engine/apply-operation "core/remove-sort"
-  [{:keys [tenant-conn]} dataset-versions columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
         table-name (engine/get-table-name dataset-versions op-spec)
+        namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))
         idx-name (str table-name "_" column-name)
         new-cols (engine/update-column columns
                                        column-name
