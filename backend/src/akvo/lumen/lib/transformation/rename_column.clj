@@ -12,17 +12,18 @@
   [op-spec]
   (and (util/valid-column-name? (col-name op-spec))
        (string? (new-col-title op-spec))))
-
+;; TODO this affects on how transformations and columns in a dataset_version are related :/
 (defmethod engine/apply-operation "core/rename-column"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (if-let [response-error (engine/column-title-error? (new-col-title op-spec) columns)]
-    response-error
-    (let [column-name      (col-name op-spec)
-          column-idx       (engine/column-index columns column-name)
-          new-column-title (new-col-title op-spec)]
-      {:success?      true
-       :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
-       :columns       (engine/update-column columns column-name assoc "title" new-column-title)})))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))]
+    (if-let [response-error (engine/column-title-error? (new-col-title op-spec) columns)]
+            response-error
+            (let [column-name      (col-name op-spec)
+                  new-column-title (new-col-title op-spec)]
+              {:success?      true
+               :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
+               :columns       (engine/update-column columns column-name assoc "title" new-column-title)}))))
 
 (defmethod engine/columns-used "core/rename-column"
   [applied-transformation columns]
