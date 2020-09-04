@@ -16,8 +16,11 @@
                   (= (engine/error-strategy op-spec) "fail")))))
 
 (defmethod engine/apply-operation "core/combine"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (let [new-column-name (engine/next-column-name columns)
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))
+        table-name (engine/get-table-name dataset-versions op-spec)
+        new-column-name (engine/next-column-name columns)
         {[first-column-name second-column-name] "columnNames"
          separator "separator"
          column-title "newColumnTitle"} (engine/args op-spec)]
@@ -27,15 +30,19 @@
         (db.tx.engine/add-column tenant-conn {:table-name table-name
                                               :column-type "text"
                                               :new-column-name new-column-name})
-        (db.tx.combine/combine-columns tenant-conn
-                                       {:table-name table-name
-                                        :new-column-name new-column-name
-                                        :first-column first-column-name
-                                        :second-column second-column-name
-                                        :separator separator})
+        (let [tables (vec (map :table-name (filter #(not= (:namespace %) namespace) dataset-versions)))]
+          ((if (seq tables) db.tx.combine/combine-columns-from-tables db.tx.combine/combine-columns)
+           tenant-conn
+           {:table-name table-name
+            :tables tables
+            :new-column-name new-column-name
+            :first-column (str table-name "." first-column-name)
+            :second-column (str table-name "." second-column-name)
+            :separator separator}))
         {:success? true
          :execution-log [(format "Combined columns %s, %s into %s"
                                  first-column-name second-column-name new-column-name)]
+         :namespace namespace
          :columns (conj columns {"title" column-title
                                  "type" "text"
                                  "sort" nil
