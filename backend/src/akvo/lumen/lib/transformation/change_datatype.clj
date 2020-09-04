@@ -102,16 +102,21 @@
   (let [{column-name "columnName"
          new-type "newType"} (engine/args op-spec)
         namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))
-        table-name (engine/get-table-name dataset-versions op-spec)]
+        dsv (get dataset-versions namespace)
+        columns (:columns dsv)
+        table-name (:table-name dsv)]
     (condp = new-type
       "text" (change-datatype-to-text tenant-conn table-name columns op-spec)
       "number" (change-datatype-to-number tenant-conn table-name columns op-spec)
       "date" (change-datatype-to-date tenant-conn table-name columns op-spec))
-    {:success? true
-     :execution-log [(format "Changed column %s datatype from %s to %s"
-                             column-name (engine/column-type columns column-name) new-type)]
-     :columns (engine/update-column columns column-name assoc "type" new-type)}))
+    (let [new-columns (engine/update-column columns column-name assoc "type" new-type)]
+      {:success?         true
+       :execution-log    [(format "Changed column %s datatype from %s to %s"
+                                  column-name (engine/column-type columns column-name) new-type)]
+       :dataset-versions (vals (-> dataset-versions
+                                   (assoc-in [namespace :columns] new-columns)
+                                   (update-in ["main" :transformations]
+                                              engine/update-dsv-txs op-spec (:columns dsv) new-columns)))})))
 
 (defmethod engine/columns-used "core/change-datatype"
   [applied-transformation columns]
