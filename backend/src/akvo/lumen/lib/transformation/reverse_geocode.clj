@@ -23,8 +23,11 @@
       :table-name))
 
 (defmethod engine/apply-operation "core/reverse-geocode"
-  [{:keys [tenant-conn]} table-name columns {:strs [args] :as op-spec}]
-  (let [column-name (engine/next-column-name columns)
+  [{:keys [tenant-conn]} dataset-versions {:strs [args] :as op-spec}]
+  (let [namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))
+        column-name (engine/next-column-name columns)
+        table-name (engine/get-table-name dataset-versions op-spec)
         {:strs [target source]} args
         geopointColumn (get target "geopointColumn")
         {:strs [mergeColumn geoshapeColumn]} source

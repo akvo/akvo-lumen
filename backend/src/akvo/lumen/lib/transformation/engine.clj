@@ -44,18 +44,17 @@
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
    * {:keys [tenant-conn] :as deps}: includes open connection to the database
-   * table-name: table on which to operate (ds_<uuid>)
-   * columns: in-memory representation of a columns spec
+   * dataset-versions: each one contains the table-name and column to operate (ds_<uuid>)
    * op-spec: JSON payload with the operation settings
    spec is a JSON payload with the following keys:
    - \"op\" : operation to perform
    - \"args\" : map with arguments to the operation
    - \"onError\" : Error strategy"
-  (fn [deps table-name columns op-spec]
+  (fn [deps dataset-versions  op-spec]
     (get op-spec "op")))
 
 (defmethod apply-operation :default
-  [deps table-name columns op-spec]
+  [deps dataset-versions op-spec]
   (let [msg (str "Unknown operation " (get op-spec "op"))]
     (log/debug msg)
     {:success? false
@@ -63,9 +62,9 @@
 
 (defn- try-apply-operation
   "invoke apply-operation inside a try-catch"
-  [deps dataset-versions columns op-spec]
+  [deps dataset-versions op-spec]
   (try
-    (apply-operation deps dataset-versions columns op-spec)
+    (apply-operation deps dataset-versions op-spec)
     (catch Exception e
       (log-ex e)
       {:success? false
@@ -145,10 +144,9 @@
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
         namespaces (set (map :namespace dataset-versions))
-        previous-columns (vec (flatten (map :columns dataset-versions)))
-]
+        previous-columns (vec (flatten (map :columns dataset-versions)))]
     (let [{:keys [namespace success? message columns execution-log error-data]}
-          (try-apply-operation deps dataset-versions previous-columns (assoc transformation :dataset-id dataset-id))
+          (try-apply-operation deps dataset-versions (assoc transformation :dataset-id dataset-id))
           namespace (or namespace (get transformation "namespace" "main"))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
@@ -216,7 +214,7 @@
             (db.transformation/drop-table tenant-conn {:table-name previous-table-name})))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [success? message columns execution-log] :as transformation-result}
-              (try-apply-operation deps [{:table-name table-name :namespace "main"}] columns (assoc transformation :dataset-id dataset-id))]
+              (try-apply-operation deps [{:table-name table-name :namespace "main"}] (assoc transformation :dataset-id dataset-id))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log) (inc tx-index))
             (do
@@ -276,10 +274,16 @@
     {:success? false
      :message  (format "In this dataset there's already a column with this name: %s. Please choose another non existing name" column-title)}))
 
+(defn get-namespace [op-spec]
+  (get op-spec "namespace" "main"))
+
+(defn get-dsv [dataset-versions namespace]
+  (first (filter #(= (:namespace %) namespace) dataset-versions)))
+
 (defn get-table-name-by-ns [dataset-versions namespace]
-  (:table-name (first (filter #(= (:namespace %) namespace) dataset-versions))))
+  (:table-name (get-dsv dataset-versions namespace)))
 
 (defn get-table-name [dataset-versions op-spec]
-  (get-table-name-by-ns dataset-versions (get op-spec "namespace" "main")))
+  (get-table-name-by-ns dataset-versions (get-namespace op-spec)))
 
 
