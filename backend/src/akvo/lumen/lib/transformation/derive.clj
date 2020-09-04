@@ -154,47 +154,50 @@
     row))
 
 (defmethod engine/apply-operation "core/derive"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (if-let [response-error (engine/column-title-error? (::column-title (args op-spec)) columns)]
-    response-error
-    (do (engine/columns-used (walk/keywordize-keys op-spec) columns)
-        (jdbc/with-db-transaction [conn tenant-conn]
-          (let [{:keys [::code
-                        ::column-title
-                        ::column-type]} (args op-spec)
-                new-column-name         (engine/next-column-name columns)
-                columns-groups*         (columns-groups (walk/keywordize-keys columns))
-                adapter                 (comp (js-engine/rqg columns)
-                                              (js-engine/column-name->column-title columns))
-                row-fn                  (js-engine/row-transform-fn {:adapter     adapter
-                                                                     :code        code
-                                                                     :column-type column-type})
-                js-execution-seq        (->> (db.tx.derive/all-data conn {:table-name table-name})
-                                             (map (fn [i]
-                                                    (try
-                                                      (let [row (extend-row i adapter columns-groups*)]
-                                                        [(:rnum row) :set-value! (row-fn row)])
-                                                      (catch Exception e
-                                                        (condp = (engine/error-strategy op-spec)
-                                                          "leave-empty" [(:rnum i) :set-value! nil]
-                                                          "delete-row"  [(:rnum i) :delete-row!]
-                                                          "fail"        (throw e) ;; interrupt js execution
-                                                          ))))))
-                base-opts               {:table-name  table-name
-                                         :column-name new-column-name}]
-            (db.tx.engine/add-column conn {:table-name table-name
-                                           :column-type             (lumen->pg-type column-type)
-                                           :new-column-name         new-column-name})
-            (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
-            (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))
-            {:success?      true
-             :execution-log [(format "Derived columns using '%s'" code)]
-             :columns       (conj columns {"title"      column-title
-                                           "type"       column-type
-                                           "sort"       nil
-                                           "hidden"     false
-                                           "direction"  nil
-                                           "columnName" new-column-name})})))))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        columns (:columns (engine/get-dsv dataset-versions namespace))]
+    (if-let [response-error (engine/column-title-error? (::column-title (args op-spec)) columns)]
+            response-error
+            (do (engine/columns-used (walk/keywordize-keys op-spec) columns)
+                (jdbc/with-db-transaction [conn tenant-conn]
+                  (let [{:keys [::code
+                                ::column-title
+                                ::column-type]} (args op-spec)
+                        table-name (engine/get-table-name dataset-versions op-spec)
+                        new-column-name         (engine/next-column-name columns)
+                        columns-groups*         (columns-groups (walk/keywordize-keys columns))
+                        adapter                 (comp (js-engine/rqg columns)
+                                                      (js-engine/column-name->column-title columns))
+                        row-fn                  (js-engine/row-transform-fn {:adapter     adapter
+                                                                             :code        code
+                                                                             :column-type column-type})
+                        js-execution-seq        (->> (db.tx.derive/all-data conn {:table-name table-name})
+                                                     (map (fn [i]
+                                                            (try
+                                                              (let [row (extend-row i adapter columns-groups*)]
+                                                                [(:rnum row) :set-value! (row-fn row)])
+                                                              (catch Exception e
+                                                                (condp = (engine/error-strategy op-spec)
+                                                                  "leave-empty" [(:rnum i) :set-value! nil]
+                                                                  "delete-row"  [(:rnum i) :delete-row!]
+                                                                  "fail"        (throw e) ;; interrupt js execution
+                                                                  ))))))
+                        base-opts               {:table-name  table-name
+                                                 :column-name new-column-name}]
+                    (db.tx.engine/add-column conn {:table-name table-name
+                                                   :column-type             (lumen->pg-type column-type)
+                                                   :new-column-name         new-column-name})
+                    (set-cells-values! conn base-opts (js-execution>sql-params js-execution-seq :set-value!))
+                    (delete-rows! conn base-opts (js-execution>sql-params js-execution-seq :delete-row!))
+                    {:success?      true
+                     :execution-log [(format "Derived columns using '%s'" code)]
+                     :columns       (conj columns {"title"      column-title
+                                                   "type"       column-type
+                                                   "sort"       nil
+                                                   "hidden"     false
+                                                   "direction"  nil
+                                                   "columnName" new-column-name})}))))))
 
 (defmethod engine/columns-used "core/derive"
   [applied-transformation columns]
