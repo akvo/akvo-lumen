@@ -6,14 +6,22 @@
             [clojure.tools.logging :as log]))
 
 (defn- transform
-  [tenant-conn table-name columns op-spec fn]
-  (let [{column-name "columnName"} (engine/args op-spec)]
+  [tenant-conn dataset-versions op-spec fn]
+  (let [{column-name "columnName"} (engine/args op-spec)
+        namespace (engine/get-namespace op-spec)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (:columns dsv)
+        ]
     (db.tx.text/text-transform tenant-conn {:table-name table-name
-                                 :column-name column-name
-                                 :fn fn})
+                                            :column-name column-name
+                                            :fn fn})
     {:success? true
      :execution-log [(format "Text transform %s on %s" fn column-name)]
-     :columns columns}))
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] columns)
+                                 (update-in ["main" :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) columns)))}))
 
 (defn valid? [op-spec]
   (util/valid-column-name? (get (engine/args op-spec) "columnName")))
@@ -22,8 +30,8 @@
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/trim"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "trim"))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (transform tenant-conn dataset-versions op-spec "trim"))
 
 (defmethod engine/columns-used "core/trim"
   [applied-transformation columns]
@@ -37,8 +45,8 @@
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/to-lowercase"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "lower"))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (transform tenant-conn dataset-versions op-spec "lower"))
 
 (defmethod engine/columns-used "core/to-lowercase"
   [applied-transformation columns]
@@ -52,8 +60,8 @@
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/to-uppercase"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "upper"))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (transform tenant-conn dataset-versions op-spec "upper"))
 
 (defmethod engine/columns-used "core/to-uppercase"
   [applied-transformation columns]
@@ -75,22 +83,26 @@
   true)
 
 (defmethod engine/apply-operation "core/to-titlecase"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (transform tenant-conn table-name columns op-spec "initcap"))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (transform tenant-conn dataset-versions op-spec "initcap"))
 
 (defmethod engine/valid? "core/trim-doublespace" [op-spec]
   (valid? op-spec))
 
 (defmethod engine/apply-operation "core/trim-doublespace"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (let [{column-name "columnName"} (engine/args op-spec)]
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [{column-name "columnName"} (engine/args op-spec)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (:columns dsv)]
     (db.tx.text/trim-doublespace tenant-conn {:table-name table-name
-                                   :column-name column-name})
+                                              :column-name column-name})
     {:success? true
      :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
-     :columns columns})
-  {:success? true
-   :columns columns})
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] columns)
+                                 (update-in ["main" :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) columns)))}))
 
 (defmethod engine/columns-used "core/trim-doublespace"
   [applied-transformation columns]
