@@ -175,7 +175,7 @@ class MapConfigMenu extends Component {
                     />
 
                     <ButtonRowInput
-                      options={['greenwich', 'antemeridian'].map(item => ({
+                      options={['greenwich', 'antimeridian'].map(item => ({
                         label: <FormattedMessage id={item} />,
                         value: item,
                       }))}

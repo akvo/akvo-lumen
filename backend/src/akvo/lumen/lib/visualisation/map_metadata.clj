@@ -99,15 +99,15 @@
     [[(Double/parseDouble south) (Double/parseDouble west)]
      [(Double/parseDouble north) (Double/parseDouble east)]]))
 
-(defn- antemeridian? [opts]
-  (= (:centre-of-the-world opts) "antemeridian"))
+(defn- antimeridian? [opts]
+  (= (:centre-of-the-world opts) "antimeridian"))
 
 (defn bounds [tenant-conn table-name layer where-clause opts]
   (let [geom (or (:geom layer)
                  (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326)"
                          (:longitude layer)
                          (:latitude layer)))
-        bounds-query (if (antemeridian? opts)
+        bounds-query (if (antimeridian? opts)
                        "SELECT ST_Extent(ST_ShiftLongitude(%s)) FROM %s WHERE %s"
                        "SELECT ST_Extent(%s) FROM %s WHERE %s")
         sql-str (format bounds-query
@@ -166,7 +166,7 @@
       {:max (:max (:metadata (first raster-meta)) )
        :min (:min (:metadata (first raster-meta)))}
       (if bbox
-        (let [shift-longitude (if-not (antemeridian? opts)
+        (let [shift-longitude (if-not (antimeridian? opts)
                                 identity
                                 (fn [[lat long]]
                                   [lat (if (neg? long) (+ 360 long) long)]))]
