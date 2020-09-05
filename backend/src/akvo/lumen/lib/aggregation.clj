@@ -64,17 +64,18 @@
 
 (defn run-map-visualisation
   [tenant-conn visualisation windshaft-url]
-  (let [layers (get-in visualisation [:spec "layers"])]
+  (let [layers (get-in visualisation [:spec "layers"])
+        visualisation-opts {:centre-of-the-world (get-in visualisation [:spec "centreOfTheWorld"])}]
     (if (some #(get % "datasetId") layers)
       (let [dataset-id (some #(get % "datasetId") layers)
-            [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))
+            [map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers) visualisation-opts)
             [dataset-tag dataset] (dataset/fetch-metadata tenant-conn dataset-id)]
         (when (and (= map-data-tag ::lib/ok)
                    (= dataset-tag ::lib/ok))
           {:datasets {dataset-id dataset}
            :visualisations {(:id visualisation) (merge visualisation map-data)}
            :metadata {(:id visualisation) map-data}}))
-      (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers))]
+      (let [[map-data-tag map-data] (maps/create tenant-conn windshaft-url (walk/keywordize-keys layers) visualisation-opts)]
         (when (= map-data-tag ::lib/ok)
           {:visualisations {(:id visualisation) (merge visualisation map-data)}
            :metadata {(:id visualisation) map-data}})))))
