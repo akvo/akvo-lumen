@@ -4,6 +4,7 @@ import Immutable from 'immutable';
 import { FormattedMessage } from 'react-intl';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
+import { namespace } from '../../../utilities/column';
 
 function trim(transformation) {
   return transformation.updateIn(['args', 'newColumnTitle'], title => title.trim());
@@ -15,6 +16,7 @@ export default class RenameColumn extends Component {
     const x = {
       transformation: Immutable.fromJS({
         op: 'core/rename-column',
+        namespace: namespace(props.column.get('groupId')),
         args: {
           columnName: props.column.get('columnName'),
           newColumnTitle: props.column.get('title'),
