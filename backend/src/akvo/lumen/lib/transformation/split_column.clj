@@ -85,6 +85,7 @@
           dsv (get dataset-versions namespace)
           table-name (:table-name dsv)
           columns (vec (:columns dsv))
+          all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
           column-name               (col-name args)         
           pattern                   (pattern* args)
           re-pattern*               (re-pattern (Pattern/quote pattern))]
@@ -95,7 +96,7 @@
                                       :analysis)
                                  pattern)]
         (let [new-rows-count    (inc (:max-coincidences-in-one-row pattern-analysis))
-              new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) columns)
+              new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) all-dsv-columns)
               add-db-columns    (doseq [c new-columns]
                                   (db.tx.engine/add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
