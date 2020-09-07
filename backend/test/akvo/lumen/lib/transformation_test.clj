@@ -10,11 +10,9 @@
                                          *caddisfly*
                                          caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
-
+            [akvo.lumen.db.transformation :as db.transformation :refer [dataset-version-by-dataset-id]]
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
             [akvo.lumen.lib.transformation.engine :as engine]
@@ -74,6 +72,9 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
+
+(defn latest-dataset-version-by-dataset-id [db opts]
+  (first (db.transformation/latest-dataset-version-by-dataset-id db opts)))
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
@@ -726,7 +727,7 @@
       (is (= new-derived-column
              (keywordize-keys (last columns))))
       (let [applied-tx (keywordize-keys (last transformations))]
-        (is (= (keywordize-keys tx) (select-keys applied-tx [:op :args])))
+        (is (= (dissoc (keywordize-keys tx) :namespace) (select-keys applied-tx [:op :args])))
         (is (= {:d1
 	        {:after
 	         new-derived-column,
@@ -769,7 +770,7 @@
       (is (= new-derived-column
              (keywordize-keys (last columns))))
       (let [applied-tx (keywordize-keys (last transformations))]
-        (is (= (keywordize-keys tx) (select-keys applied-tx [:op :args])))
+        (is (= (dissoc (keywordize-keys tx) :namespace) (select-keys applied-tx [:op :args])))
         (is (= {:d1
 	        {:after
 	         new-derived-column,
