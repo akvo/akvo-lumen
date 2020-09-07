@@ -51,8 +51,15 @@
             :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
         (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
-      (doseq [dsv (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-        (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
+
+      (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+        (condp = (:type command)
+          :transformation (let [dsv (let [main-dsv (first (filter #(= "main" (:namespace %)) dsvs))
+                                          last-tx-namespace (engine/get-namespace (last (:transformations main-dsv)))]
+                                      (first (filter #(= last-tx-namespace (:namespace %)) dsvs)))]
+                            (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
+          :undo (doseq [dsv dsvs]
+                  (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))))
       (catch Exception e
         (let [msg (.getMessage e)]
           (engine/log-ex e)
