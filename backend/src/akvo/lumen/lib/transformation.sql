@@ -61,11 +61,19 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
   AND namespace = :namespace
   ORDER BY version DESC LIMIT 1;
 
+
+-- :name db-initial-dataset-version-version-by-dataset-id :? :1
+SELECT version
+  FROM  dataset_version
+  WHERE dataset_id= :dataset-id AND transformations='[]'
+  AND namespace = 'main'
+  ORDER BY version DESC LIMIT 1;
+
+
 -- :name db-n-initial-dataset-version-to-update-by-dataset-id :? :*
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
   FROM  dataset_version
-  WHERE dataset_id= :dataset-id AND transformations='[]'
-  ORDER BY version DESC LIMIT 1;
+  WHERE dataset_id= :dataset-id AND version= :version ;
 
 -- :name db-dataset-version-by-dataset-id :? :1
 -- :doc Returns the most recent dataset version for a given dataset id
