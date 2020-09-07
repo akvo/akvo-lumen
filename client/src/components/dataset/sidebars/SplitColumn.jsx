@@ -12,7 +12,7 @@ import SidebarControls from './SidebarControls';
 import * as API from '../../../utilities/api';
 import './SplitColumn.scss';
 import { showNotification } from '../../../actions/notification';
-import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+import { namespace, filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 function textColumnOptions(columns) {
   return filterColumns(columns, ['text', 'option'])
@@ -132,12 +132,13 @@ SplitColumnOptions.propTypes = {
   prefixErrorMessage: PropTypes.string,
 };
 
-function apiColumnPatternAnalysis(datasetId, columnName, limit) {
+function apiColumnPatternAnalysis(datasetId, columnName, groupId, limit) {
   return API
     .get(`/api/split-column/${datasetId}/pattern-analysis`, {
       query: JSON.stringify({
         columnName,
         limit,
+        namespace: namespace(groupId),
       }),
     })
     .then((response) => {
@@ -172,7 +173,7 @@ class SplitColumn extends Component {
 
   handleSelectColumn(columns, columnName, datasetId) {
     const column = filterByColumnName(columns, columnName);
-    apiColumnPatternAnalysis(datasetId, columnName, 200)
+    apiColumnPatternAnalysis(datasetId, columnName, column.groupId, 200)
       .then((apiRes) => {
         if (apiRes.error) {
           if (apiRes.error === 404) {
