@@ -161,6 +161,7 @@
                                                                 (assoc :dataset-id dataset-id)
                                                                 (assoc :job-execution-id job-execution-id)
                                                                 (update :columns vec)
+                                                                (update :transformations vec)
                                                                 (update :version inc))))
       (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))
 
@@ -168,16 +169,17 @@
   (let [table-names-dict (reduce (fn [c dsv] (assoc c (:imported-table-name dsv) {:new (util/gen-table-name "ds")
                                                                                   :imported (:imported-table-name dsv)
                                                                                   :previous (:table-name dsv) })) {} current-dataset-versions)
-        initial-dsvs (db.transformation/n-initial-dataset-version-to-update-by-dataset-id
-                     tenant-conn
-                     {:dataset-id dataset-id})
-        main-initial-dsv (first (filter #(= "main" (:namespace %)) current-dataset-versions))]
+        initial-dsvs (let [v (:version (db.transformation/initial-dataset-version-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))]
+                       (db.transformation/n-initial-dataset-version-to-update-by-dataset-id
+                        tenant-conn
+                        {:dataset-id dataset-id :version v}))
+        main-current-dsv (first (filter #(= "main" (:namespace %)) current-dataset-versions))]
     (doseq [t (vals table-names-dict)] (db.transformation/copy-table tenant-conn
                                                                      {:source-table (:imported t)
                                                                       :dest-table (:new t)}
                                                                      {}
                                                                      {:transaction? false}))
-    (loop [transformations (butlast (:transformations main-initial-dsv))
+    (loop [transformations (butlast (:transformations main-current-dsv))
            dsvs initial-dsvs
            full-execution-log []
            tx-index 0]
@@ -191,9 +193,9 @@
                               (assoc :dataset-id dataset-id)
                               (assoc :table-name (:new tables))
                               (assoc :job-execution-id job-execution-id)
-                              (assoc :version (inc (:version main-initial-dsv)))
+                              (assoc :version (inc (:version main-current-dsv)))
                               (update :columns vec)
-                              (assoc :transformations (w/keywordize-keys (vec (butlast (:transformations main-initial-dsv))))))]
+                              (assoc :transformations (w/keywordize-keys (vec (butlast (:transformations main-current-dsv))))))]
               (db.dataset-version/new-dataset-version tenant-conn new-dsv)
               (db.transformation/drop-table tenant-conn {:table-name (:previous tables)})))
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
@@ -207,8 +209,9 @@
               (log/info (str "Unsuccessful undo of dataset: " dataset-id))
               (log/debug message)
               (log/debug "Job executionid: " job-execution-id)
-              (throw (ex-info (str "Failed to undo transformation index:" tx-index ". Tx message:" message) {:transformation-result transformation-result
-                                                                                     :transformation transformation})))))))))
+              (throw (ex-info (str "Failed to undo transformation index:" tx-index ". Tx message:" message)
+                              {:transformation-result transformation-result
+                               :transformation transformation})))))))))
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
   (let [current-dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
