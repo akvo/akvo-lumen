@@ -611,7 +611,8 @@
         (is (= (:status job) "FAILED"))
         (is (= (:error-message job) "Cannot delete column. It is used in the following visalisations: 'Visualisation'"))))))
 
-(deftest ^:functional multiple-column-test
+(deftest ^{:functional true
+           :kaocha/pending false} multiple-column-test
   (let [multiple-column-type       "caddisfly"
         {:keys [hasImage columns]} (:body (multiple-column/details {:caddisfly *caddisfly*} multiple-column-type import.values.s/cad1-id))
         bols                       (at-least-one-true (count columns))
