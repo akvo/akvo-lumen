@@ -97,3 +97,8 @@ export const columnSelectOptions = (intl, columns) => {
   const res = extractColumnOptions(columns);
   return isImmutable(res) ? res.toArray() : res;
 };
+
+export function namespace(groupId) {
+  const mainG = new Set(['main', 'metadata', null, 'transformations']);
+  return mainG.has(groupId) ? 'main' : groupId;
+}
