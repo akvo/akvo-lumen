@@ -41,8 +41,9 @@
                         :handler (fn [{tenant :tenant
                                        body :body}]
                                    (let [{:strs [spec]} body
-                                         layers (w/keywordize-keys (get-in spec ["layers"]))]
-                                     (maps/create (p/connection tenant-manager tenant) windshaft-url layers)))}}]]
+                                         spec (w/keywordize-keys spec)
+                                         layers (get spec :layers)]
+                                     (maps/create (p/connection tenant-manager tenant) windshaft-url layers {:centre-of-the-world (:centreOfTheWorld spec)})))}}]]
    ;; rasters don't depend on flow data (yet!), so no need to wrap this call 
    ["/rasters" ["" {:post {:parameters {:body map?}
                            :handler (fn [{tenant :tenant

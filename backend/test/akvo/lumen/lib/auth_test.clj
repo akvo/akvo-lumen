@@ -51,6 +51,7 @@
                 :spec
                 {:version 1,
                  :baseLayer "street",
+                 :centreOfTheWorld "greenwich"
                  :layers [{:aggregationMethod "avg",
                            :popup [],
                            :filters [],
