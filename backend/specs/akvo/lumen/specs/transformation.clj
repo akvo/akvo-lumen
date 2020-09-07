@@ -32,6 +32,9 @@
 
 (s/def ::transformation.engine.s/onError #{"leave-empty" "fail" "delete-row" "default-value"})
 
+(s/def ::transformation.engine.s/namespace (s/with-gen string? #(s/gen #{"main"})))
+
+
 (s/def ::transformation.engine.s/op #{"core/change-datatype"
                                       "core/combine"
                                       "core/delete-column"
@@ -67,7 +70,8 @@
   (s/keys
    :req-un [::transformation.delete-column/args
             ::transformation.engine.s/onError
-            ::transformation.engine.s/op]))
+            ::transformation.engine.s/op]
+   :opt-un [::transformation.engine.s/namespace]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.change-datatype)
