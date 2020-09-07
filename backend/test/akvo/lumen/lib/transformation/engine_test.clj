@@ -86,7 +86,9 @@
   (testing "Valid data"
     (let [ops (:ops transformations)]
       (is (every? :success? (for [op ops]
-                              (try-apply-operation {:tenant-conn *tenant-conn*} "ds_test_1" columns op))))))
+                              (try-apply-operation {:tenant-conn *tenant-conn*} [{:namespace "main"
+                                                                                  :table-name "ds_test_1"
+                                                                                  :columns columns}] op))))))
 
   (testing "Filter column (text)"
     (let [ops (:filter-column transformations)
@@ -96,7 +98,9 @@
       (db-delete-test-data *tenant-conn*)
       (db-test-data *tenant-conn*)
 
-      (is (= true (:success? (try-apply-operation {:tenant-conn *tenant-conn*} "ds_test_1" columns filter-using-is))))
+      (is (= true (:success? (try-apply-operation {:tenant-conn *tenant-conn*} [{:namespace "main"
+                                                                                 :table-name "ds_test_1"
+                                                                                 :columns columns}] filter-using-is))))
 
       (let [result (db-select-test-data *tenant-conn*)]
         (is (= 1 (count result)))
@@ -105,7 +109,9 @@
       (db-delete-test-data *tenant-conn*)
       (db-test-data *tenant-conn*)
 
-      (is (= true (:success? (try-apply-operation {:tenant-conn *tenant-conn*} "ds_test_1" columns filter-using-contains))))
+      (is (= true (:success? (try-apply-operation {:tenant-conn *tenant-conn*} [{:namespace "main"
+                                                                                 :table-name "ds_test_1"
+                                                                                 :columns columns}] filter-using-contains))))
 
       (let [result (db-select-test-data *tenant-conn*)]
         (is (= 1 (count result)))
@@ -118,8 +124,12 @@
       (db-delete-test-data *tenant-conn*)
       (db-insert-invalid-data *tenant-conn*)
 
-      (is (not (:success? (try-apply-operation {:tenant-conn *tenant-conn*} "ds_test_1" columns op-to-number))))
-      (is (not (:success? (try-apply-operation {:tenant-conn *tenant-conn*} "ds_test_1" columns op-to-date))))))
+      (is (not (:success? (try-apply-operation {:tenant-conn *tenant-conn*} [{:namespace "main"
+                                                                              :table-name "ds_test_1"
+                                                                              :columns columns}] op-to-number))))
+      (is (not (:success? (try-apply-operation {:tenant-conn *tenant-conn*} [{:namespace "main"
+                                                                              :table-name "ds_test_1"
+                                                                              :columns columns}] op-to-date))))))
 
   (testing "Invalid data, on-error: default-value"
     (let [op1 (assoc (:to-number transformations) "onError" "default-value")
@@ -128,7 +138,9 @@
       (db-delete-test-data *tenant-conn*)
       (db-insert-invalid-data *tenant-conn*)
 
-      (let [result (try-apply-operation {:tenant-conn *tenant-conn*} "ds_test_1" columns op1)
+      (let [result (try-apply-operation {:tenant-conn *tenant-conn*} [{:namespace "main"
+                                                                       :table-name "ds_test_1"
+                                                                       :columns columns}] op1)
             data (db-select-test-data *tenant-conn*)]
         (is (:success? result))
         (is (= 1 (count data)))
