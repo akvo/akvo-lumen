@@ -51,13 +51,14 @@
                  [iapetos "0.1.8" :exclusions [io.prometheus/simpleclient]]
                  [io.prometheus/simpleclient_hotspot "0.6.0"]
                  [io.prometheus/simpleclient_dropwizard "0.6.0"]
-                 [org.clojure/test.check "0.10.0-alpha3"]]
+                 [org.clojure/test.check "1.1.0"]]
   :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
   :pedantic? :abort
   :plugins [[lein-ancient "0.6.15"]
             [lein-codox "0.9.6"]
+            [cider/cider-nrepl "0.23.0-SNAPSHOT"]
             [lein-environ "1.0.3"]
             [lein-cljfmt "0.5.7"]
             [jonase/eastwood "0.3.3"]]
@@ -68,15 +69,18 @@
   :aliases {"setup" ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
             "seed" ["run" "-m" "dev/seed"]
-            "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
+            "kaocha-unit" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :unit]
+            "kaocha-functional" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :functional]
+            ;; "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]
+            }
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
                    :functional :functional
                    :all (constantly true)}
   :eastwood {:config-files ["eastwood_cfg.clj"]}
   :profiles
-  {:dev           [:project/dev :profiles/dev]
-   :test          [:project/test :profiles/test]
+  {:dev           [:project/dev :profiles/dev :kaocha]
+   :test          [:project/test :profiles/test :kaocha]
    :kaocha        {:dependencies [[lambdaisland/kaocha "1.0.669"
                                    :exclusions [fipp
                                                 mvxcvi/puget
