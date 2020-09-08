@@ -6,7 +6,9 @@
             [akvo.lumen.db.job-execution :as db.job-execution]
             [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
-            [clojure.java.jdbc :as jdbc]))
+            [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w]))
 
 (def transformation-namespaces
   '[akvo.lumen.lib.transformation.change-datatype
@@ -51,12 +53,10 @@
             :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
         (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
-
-      (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+      (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+            namespaces (set (engine/namespaces (:transformation command) (w/keywordize-keys (reduce into [] (map :columns dsvs)))))]
         (condp = (:type command)
-          :transformation (let [dsv (let [main-dsv (first (filter #(= "main" (:namespace %)) dsvs))
-                                          last-tx-namespace (engine/get-namespace (last (:transformations main-dsv)))]
-                                      (first (filter #(= last-tx-namespace (:namespace %)) dsvs)))]
+          :transformation (let [dsv (filter #(contains? namespaces (:namespace %)) dsvs)]
                             (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
           :undo (doseq [dsv dsvs]
                   (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))))
