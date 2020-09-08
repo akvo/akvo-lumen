@@ -19,7 +19,8 @@
 (defn- extract
   [caddisfly id]
   (when id
-    (if-let [schema (c.caddisfly/get-schema caddisfly id)]
+    (when-let [schema (c.caddisfly/get-schema caddisfly id)]
+      (log/error :id id :schema schema)
       (adapt-schema schema))))
 
 (def geo-shape-columns [{:id 1 :name "length" :type "number"}
@@ -29,7 +30,8 @@
 (defn details
   "depending of type of multiple columns we dispatch to different logic impls"
   [{:keys [caddisfly] :as deps} multipleType multipleId]
-  (log/debug ::all :multipleType multipleType :multipleId multipleId)
+  (log/error ::all :multipleType multipleType :multipleId multipleId :res (c.caddisfly/get-schema caddisfly multipleId) )
+  (log/error :caddisfly caddisfly)
   (condp = multipleType
     "caddisfly" (if-let [res (extract caddisfly multipleId)]
                   (response res)

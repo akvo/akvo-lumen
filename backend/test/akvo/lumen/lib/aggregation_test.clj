@@ -13,7 +13,7 @@
             [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.test :refer :all]))
 
-(use-fixtures :once tu/spec-instrument system-fixture tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture)
 
 (defn query* [t dataset-id & [expected-tag]]
   (fn [q]

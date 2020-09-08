@@ -1,13 +1,7 @@
 #kaocha/v1
 {:tests
  [{:id :all
-   :source-paths ["src"]
-   :test-paths ["test"]}
-  {:id :unit
-   :focus-meta [:unit]
-   :source-paths ["src"]
-   :test-paths ["test"]}
-  {:id :functional
-   :focus-meta [:functional]
-   :source-paths ["src"]
-   :test-paths ["test"]}]}
+   :type :kaocha.type/spec.test.check
+   :test-paths ["test"]
+   :source-paths ["src" "specs" "dev/src" "dev/resources" "test/resources"]
+   :kaocha.plugin.randomize/randomize? false}]}
