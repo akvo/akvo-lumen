@@ -1,16 +1,16 @@
 (ns akvo.lumen.specs.import.column
-  (:require [akvo.lumen.specs :as lumen.s]
-            [akvo.lumen.specs.import.values :as v]
-            [akvo.lumen.util :refer (squuid)]
-            [clj-time.coerce :as tcc]
-            [clj-time.core :as tc]
-            [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [clojure.string :as string]
-            [clojure.test.check.generators :as tgen]
-            [clojure.tools.logging :as log])
-  (:import [akvo.lumen.postgres Geoshape Geopoint]
-           [java.time Instant]))
+     (:require [akvo.lumen.specs :as lumen.s]
+               [akvo.lumen.specs.import.values :as v]
+               [akvo.lumen.util :refer (squuid)]
+               [clj-time.coerce :as tcc]
+               [clj-time.core :as tc]
+               [clojure.spec.alpha :as s]
+               [clojure.spec.gen.alpha :as gen]
+               [clojure.string :as string]
+               [clojure.test.check.generators :as tgen]
+               [clojure.tools.logging :as log])
+     (:import [akvo.lumen.postgres Geoshape Geopoint]
+              [java.time Instant]))
 
 (create-ns  'akvo.lumen.specs.import.column.text)
 (create-ns  'akvo.lumen.specs.import.column.number)
@@ -98,33 +98,8 @@
 
 (s/def ::c.number/value double?)
 
-(def year-gen (tgen/choose 1976 2018))
-
-(def month-gen (tgen/choose 1 12))
-
-(def day-gen (tgen/choose 1 31))
-
-(def date-gen (tgen/such-that (fn [t]
-                                (try
-                                  (apply tc/date-time t)
-                                  (catch Exception e false)))
-                              (tgen/tuple year-gen month-gen day-gen)))
-
-(def instant-gen (tgen/fmap (fn [e] (Instant/ofEpochMilli (tcc/to-long (apply tc/date-time e)))) date-gen))
-
-(gen/sample date-gen 10)
-
-(gen/sample instant-gen 10)
-
-(def false-gen (gen/return false))
-
-(def text-year-gen (tgen/fmap str year-gen))
-
-(defn date-format-gen [fun] (tgen/fmap fun date-gen))
-
-(gen/sample (date-format-gen (fn [[y _ _]] (str y))) 10)
-
-(s/def ::c.date/value (s/with-gen #(instance? Instant %) (fn [] instant-gen)))
+(s/def ::c.date/value (s/with-gen #(instance? Instant %)
+                        (fn [] lumen.s/instant-gen)))
 
 (lumen.s/sample ::c.date/value)
 

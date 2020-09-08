@@ -268,18 +268,18 @@
                                                        ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/sample-imported-dataset [:text
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
                                                                                          (fn [[y _ _ :as date]]
                                                                                            (str y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]
+                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
                                                                                          (fn [[y m d :as date]]
                                                                                            (str d "/" m "/" y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]
+                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
                                                                                          (fn [date]
                                                                                            (string/join "-" date))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]]
+                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]]
                                                          10)
         years               (map (comp :value second) (:rows data))
         years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
