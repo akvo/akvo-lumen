@@ -72,7 +72,7 @@
 (alias 'db.dataset-version.s                    'akvo.lumen.specs.db.dataset-version)
 (alias 'db.dataset-version.column.s             'akvo.lumen.specs.db.dataset-version.column)
 
-(use-fixtures :once tu/spec-instrument caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
+(use-fixtures :once caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
