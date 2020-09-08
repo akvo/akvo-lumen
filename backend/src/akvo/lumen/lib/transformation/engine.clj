@@ -162,6 +162,7 @@
                                     :transformations (w/keywordize-keys
                                                       (conj (vec (:transformations dataset-version))
                                                             (assoc transformation
+                                                                   "created" (System/currentTimeMillis)
                                                                    "changedColumns" (diff-columns previous-columns
                                                                                                   columns))))
                                     :columns (w/keywordize-keys columns)}]
