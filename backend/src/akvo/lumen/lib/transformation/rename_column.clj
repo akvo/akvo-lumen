@@ -1,8 +1,8 @@
 (ns akvo.lumen.lib.transformation.rename-column
   (:require [akvo.lumen.util :as util]
             [clojure.tools.logging :as log]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.lib.transformation.engine :as engine]))
-
 
 (defn col-name [op-spec]
   (get (engine/args op-spec) "columnName"))
@@ -31,7 +31,14 @@
                                            (update-in ["main" :transformations]
                                                       engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))))
 
-
 (defmethod engine/columns-used "core/rename-column"
   [applied-transformation columns]
   [(-> applied-transformation :args :columnName)])
+
+(defmethod engine/namespaces "core/rename-column"
+  [op-spec columns]
+  [(-> (find-column columns (get-in op-spec ["args" "columnName"]))
+       :groupId
+       engine/coerce-namespace)])
+
+
