@@ -10,7 +10,7 @@
             [clojure.tools.logging :as log]))
 
 (use-fixtures :once (partial system-fixture "endpoints-test.edn")
-  tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+  tenant-conn-fixture error-tracker-fixture)
 
 (deftest ^{:functional true
            :kaocha/pending false} handler-test

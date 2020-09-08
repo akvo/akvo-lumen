@@ -20,7 +20,7 @@
   (db-test-data *tenant-conn*)
   (f))
 
-(use-fixtures :once system-fixture tenant-conn-fixture fixture summarise-transformation-logs-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture fixture summarise-transformation-logs-fixture)
 
 (def transformations
   {:ops [{"op" "core/to-titlecase"

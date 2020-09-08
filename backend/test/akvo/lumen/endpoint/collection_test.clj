@@ -17,7 +17,7 @@
             [clojure.test :refer :all]))
 
 
-(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture)
 
 (defn entities-set [collection]
   (-> #{}

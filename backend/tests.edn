@@ -2,5 +2,6 @@
 {:tests
  [{:id :all
    :test-paths ["test"]
+   :kaocha.spec.test.check/instrument? true
    :source-paths ["src" "specs" "dev/src" "dev/resources" "test/resources"]
    :kaocha.plugin.randomize/randomize? false}]}
