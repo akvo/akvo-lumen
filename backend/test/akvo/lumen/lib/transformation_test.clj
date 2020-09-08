@@ -27,6 +27,7 @@
             [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
             [akvo.lumen.util :refer [conform squuid]]
             [cheshire.core :as json]
+            [cheshire.generate :as ches.generate]
             [clj-time.coerce :as tcc]
             [clj-time.core :as tc]
             [clj-time.format :as timef]
@@ -39,6 +40,8 @@
             [clojure.walk :refer (stringify-keys keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [akvo.lumen.postgres Geoshape Geopoint]))
+
+(ches.generate/add-encoder java.time.Instant (fn [obj jsonGenerator] (.writeString jsonGenerator (str obj))))
 
 (alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
 (alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
