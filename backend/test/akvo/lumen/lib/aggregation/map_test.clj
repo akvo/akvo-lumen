@@ -45,7 +45,9 @@
                 "layerType" "geo-location",
                 "rasterId" nil}],
               "version" 1,
-              "baseLayer" "street"},
+              "baseLayer" "street"
+              "centreOfTheWorld" "greenwich"
+              },
              :created 1580463683887,
              :modified 1581089685620}]
     (is (=  (maps/add-filters viz filter*)
@@ -86,6 +88,8 @@
                 "layerType" "geo-location",
                 "rasterId" nil}],
               "version" 1,
-              "baseLayer" "street"},
+              "baseLayer" "street"
+              "centreOfTheWorld" "greenwich"
+              },
              :created 1580463683887,
              :modified 1581089685620}))))
