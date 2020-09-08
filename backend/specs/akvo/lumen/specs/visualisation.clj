@@ -235,9 +235,10 @@
 (alias 'map.s 'akvo.lumen.specs.visualisation.map)
 
 (s/def ::map.s/baseLayer #{"street" "satellite" "terrain"})
+(s/def ::map.s/centreOfTheWorld #{"greenwich" "antimeridian"})
 
 (s/def ::map.s/spec
-  (s/keys :req-un [::version ::map.s/baseLayer ::visualisation.maps.s/layers]))
+  (s/keys :req-un [::version ::map.s/baseLayer ::map.s/centreOfTheWorld ::visualisation.maps.s/layers]))
 
 (defmethod vis "map"  [_]
   (s/merge ::base-viz (s/keys :req-un [::map.s/spec])) )
