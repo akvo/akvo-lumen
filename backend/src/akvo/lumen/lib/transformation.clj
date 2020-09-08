@@ -56,7 +56,7 @@
       (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
             namespaces (set (engine/namespaces (:transformation command) (w/keywordize-keys (reduce into [] (map :columns dsvs)))))]
         (condp = (:type command)
-          :transformation (let [dsv (filter #(contains? namespaces (:namespace %)) dsvs)]
+          :transformation (doseq [dsv (filter #(contains? namespaces (:namespace %)) dsvs)]
                             (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
           :undo (doseq [dsv dsvs]
                   (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))))
