@@ -642,16 +642,18 @@
                            (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
                                                      {::import.values.s/multipleId import.values.s/cad1-id
                                                       ::import.values.s/id         "c1"}))
-          [tag _ :as res] (apply-transformation
-                           {:type :transformation
-                            :transformation
-                            (-> (gen-transformation :core/extract-multiple
-                                                    {::db.dataset-version.column.s/columnName "c1"
-                                                     ::transformation.split-column.s/pattern  "-"
-                                                     ::transformation.engine.s/onError        "fail"}
-                                                    :selectedColumn selected-column)
-                                (update-in ["args" "extractImage"] (constantly true))
-                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+          multiple-tx {:type :transformation
+                       :transformation
+                       (-> (gen-transformation :core/extract-multiple
+                                               {::db.dataset-version.column.s/columnName "c1"
+                                                ::transformation.split-column.s/pattern  "-"
+                                                ::transformation.engine.s/onError        "fail"}
+                                               :selectedColumn selected-column)
+                           (update-in ["args" "extractImage"] (constantly true))
+                           (assoc-in ["args" "columns"] (stringify-keys columns-payload)))}
+          _ (log/error :multiple-tx multiple-tx)
+          [tag _ :as res] (apply-transformation multiple-tx)]
+      
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
 
