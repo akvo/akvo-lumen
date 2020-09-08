@@ -30,7 +30,8 @@
 (defn details
   "depending of type of multiple columns we dispatch to different logic impls"
   [{:keys [caddisfly] :as deps} multipleType multipleId]
-  (log/error ::all :multipleType multipleType :multipleId multipleId)
+  (log/error ::all :multipleType multipleType :multipleId multipleId :res (c.caddisfly/get-schema caddisfly multipleId) )
+  (log/error :caddisfly caddisfly)
   (condp = multipleType
     "caddisfly" (if-let [res (extract caddisfly multipleId)]
                   (response res)
