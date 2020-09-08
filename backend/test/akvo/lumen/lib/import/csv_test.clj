@@ -19,7 +19,7 @@
 
 
 
-(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture)
 
 
 (deftest ^:functional test-dos-file

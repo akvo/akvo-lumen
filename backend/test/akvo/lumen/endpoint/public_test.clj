@@ -16,7 +16,7 @@
 ;;;
 
 
-(use-fixtures :once system-fixture tenant-conn-fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
