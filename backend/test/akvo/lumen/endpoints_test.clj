@@ -12,7 +12,8 @@
 (use-fixtures :once (partial system-fixture "endpoints-test.edn")
   tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
-(deftest ^:functional handler-test
+(deftest ^{:functional true
+           :kaocha/pending false} handler-test
   (let [h (:handler (:akvo.lumen.component.handler/handler *system*))]
 
     (testing "/"

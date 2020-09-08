@@ -21,7 +21,8 @@
             [duct.generate :as gen]
             [integrant.core :as ig]
             [integrant.repl :as ir]
-            [integrant.repl.state :as state :refer (system)])
+            [integrant.repl.state :as state :refer (system)]
+            [kaocha.repl :as kc])
   (:import [org.postgresql.util PSQLException PGobject]))
 
 (defn check-specs! []
@@ -82,4 +83,23 @@
   ([label] (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) label))
   ([] (db-conn "t1")))
 
+(comment
+  
+  ;; Run all tests
+  (kc/run :all)
 
+  ;; Run unit tests
+  (kc/run {:id :all
+           :kaocha.filter/focus-meta [:unit]})
+  
+  ;; Run functional tests
+  (kc/run {:id :all
+           :kaocha.filter/focus-meta [:functional]})
+  
+  ;; Two flaky tests 
+  
+  (kc/run 'akvo.lumen.endpoints-test/handler-test)
+  
+  (kc/run 'akvo.lumen.lib.transformation-test/multiple-column-test)
+  
+  )
