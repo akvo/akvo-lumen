@@ -68,15 +68,18 @@
   :aliases {"setup" ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
             "seed" ["run" "-m" "dev/seed"]
-            "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
+            "kaocha-unit" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :unit]
+            "kaocha-functional" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :functional]
+            ;; "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]
+            }
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
                    :functional :functional
                    :all (constantly true)}
   :eastwood {:config-files ["eastwood_cfg.clj"]}
   :profiles
-  {:dev           [:project/dev :profiles/dev]
-   :test          [:project/test :profiles/test]
+  {:dev           [:project/dev :profiles/dev :kaocha]
+   :test          [:project/test :profiles/test :kaocha]
    :kaocha        {:dependencies [[lambdaisland/kaocha "1.0.669"
                                    :exclusions [fipp
                                                 mvxcvi/puget

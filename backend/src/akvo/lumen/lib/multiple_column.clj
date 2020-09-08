@@ -19,7 +19,8 @@
 (defn- extract
   [caddisfly id]
   (when id
-    (if-let [schema (c.caddisfly/get-schema caddisfly id)]
+    (when-let [schema (c.caddisfly/get-schema caddisfly id)]
+      (log/error :id id :schema schema)
       (adapt-schema schema))))
 
 (def geo-shape-columns [{:id 1 :name "length" :type "number"}
