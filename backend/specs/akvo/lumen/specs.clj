@@ -1,11 +1,15 @@
 (ns akvo.lumen.specs
-  (:require [clojure.spec.alpha :as s]
+  (:require [akvo.lumen.util :refer (squuid)]
+            [clj-time.coerce :as tcc]
+            [clj-time.core :as tc]
+            [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [integrant.core :as ig]
             [clojure.string :as string]
-            [akvo.lumen.util :refer (squuid)]
-            [clojure.tools.logging :as log])
-  (:import java.util.UUID))
+            [clojure.test.check.generators :as tgen]
+            [clojure.tools.logging :as log]
+            [integrant.core :as ig])
+  (:import [java.util UUID]
+           [java.time Instant]))
 
 (defn keyname [key] (str (namespace key) "/" (name key)))
 
@@ -69,3 +73,31 @@
   (s/with-gen
     (s/and string? (complement string/blank?))
     #(gen/not-empty (gen/string-alphanumeric))))
+
+
+(def year-gen (tgen/choose 1976 2018))
+
+(def month-gen (tgen/choose 1 12))
+
+(def day-gen (tgen/choose 1 31))
+
+(def date-gen (tgen/such-that (fn [t]
+                                (try
+                                  (apply tc/date-time t)
+                                  (catch Exception e false)))
+                              (tgen/tuple year-gen month-gen day-gen)))
+
+(def instant-gen (tgen/fmap (fn [e] (Instant/ofEpochMilli (tcc/to-long (apply tc/date-time e)))) date-gen))
+
+(def false-gen (gen/return false))
+
+(def text-year-gen (tgen/fmap str year-gen))
+
+(defn date-format-gen [fun] (tgen/fmap fun date-gen))
+
+(comment
+  (gen/sample date-gen 10)
+
+  (gen/sample instant-gen 10)
+  (gen/sample (date-format-gen (fn [[y _ _]] (str y))) 10)
+)
