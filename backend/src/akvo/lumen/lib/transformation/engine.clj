@@ -6,7 +6,8 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
-            [clojure.walk :as w]))
+            [clojure.walk :as w])
+  (:import [java.time Instant]))
 
 (defmulti columns-used
   (fn [applied-transformation columns]
@@ -162,7 +163,7 @@
                                     :transformations (w/keywordize-keys
                                                       (conj (vec (:transformations dataset-version))
                                                             (assoc transformation
-                                                                   "created" (System/currentTimeMillis)
+                                                                   "created" (Instant/ofEpochMilli (System/currentTimeMillis))
                                                                    "changedColumns" (diff-columns previous-columns
                                                                                                   columns))))
                                     :columns (w/keywordize-keys columns)}]
