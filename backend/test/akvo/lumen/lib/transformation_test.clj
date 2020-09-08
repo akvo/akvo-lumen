@@ -27,6 +27,7 @@
             [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
             [akvo.lumen.util :refer [conform squuid]]
             [cheshire.core :as json]
+            [cheshire.generate :as ches.generate]
             [clj-time.coerce :as tcc]
             [clj-time.core :as tc]
             [clj-time.format :as timef]
@@ -39,6 +40,8 @@
             [clojure.walk :refer (stringify-keys keywordize-keys)]
             [hugsql.core :as hugsql])
   (:import [akvo.lumen.postgres Geoshape Geopoint]))
+
+(ches.generate/add-encoder java.time.Instant (fn [obj jsonGenerator] (.writeString jsonGenerator (str obj))))
 
 (alias 'import.column.text.s                    'akvo.lumen.specs.import.column.text)
 (alias 'import.column.number.s                    'akvo.lumen.specs.import.column.number)
@@ -268,18 +271,18 @@
                                                        ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/sample-imported-dataset [:text
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
                                                                                          (fn [[y _ _ :as date]]
                                                                                            (str y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]
+                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
                                                                                          (fn [[y m d :as date]]
                                                                                            (str d "/" m "/" y))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (import.column.s/date-format-gen
+                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]
+                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
                                                                                          (fn [date]
                                                                                            (string/join "-" date))))
-                                                                  ::import.values.s/key (fn [] import.column.s/false-gen)}]]
+                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]]
                                                          10)
         years               (map (comp :value second) (:rows data))
         years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
