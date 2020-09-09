@@ -38,7 +38,7 @@
                                :table-name table-name
                                :imported-table-name imported-table-name
                                :version 1
-                               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId ns]}]
+                               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace]}]
                                                 (let [column-def {:columnName id
                                                                   :direction nil
                                                                   :hidden false
@@ -51,7 +51,7 @@
                                                                   :title (string/trim title)
                                                                   :type type}]
                                                   (if rqg
-                                                    (assoc column-def :ns ns :repeatable (= groupId ns))
+                                                    (assoc column-def :namespace namespace :repeatable (= groupId namespace))
                                                     column-def)))
                                               columns)
                                :transformations []})
