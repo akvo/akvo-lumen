@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.transformation.geo
   "Geometry data transformations"
   (:require [akvo.lumen.lib.import.common :as import]
+            [akvo.lumen.lib.dataset.utils :as dataset.utils :refer (find-column)]
             [akvo.lumen.util :as util]
             [akvo.lumen.db.transformation.geo :as db.tx.geo]
             [akvo.lumen.lib.transformation.engine :as engine]

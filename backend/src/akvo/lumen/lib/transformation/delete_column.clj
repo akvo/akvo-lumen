@@ -4,6 +4,7 @@
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.specs.visualisation :as s.visualisation]
             [akvo.lumen.util :as util]
             [clojure.string :as str]

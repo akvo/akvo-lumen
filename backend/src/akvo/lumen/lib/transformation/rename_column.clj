@@ -34,11 +34,3 @@
 (defmethod engine/columns-used "core/rename-column"
   [applied-transformation columns]
   [(-> applied-transformation :args :columnName)])
-
-(defmethod engine/namespaces "core/rename-column"
-  [op-spec columns]
-  [(-> (find-column columns (get-in op-spec ["args" "columnName"]))
-       :groupId
-       engine/coerce-namespace)])
-
-
