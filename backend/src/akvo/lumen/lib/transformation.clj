@@ -50,7 +50,7 @@
       (jdbc/with-db-transaction [tx-conn tenant-conn]
         (let [tx-namespaces (set (engine/namespaces (w/keywordize-keys (:transformation command))
                                                     (w/keywordize-keys (reduce into [] (map :columns (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id}))))))]
-          (if (< 2 (count tx-namespaces))
+          (if (< (count tx-namespaces) 2)
             (do 
               (let [tx-deps (assoc deps :tenant-conn tx-conn)]
                 (condp = (:type command)
