@@ -154,7 +154,7 @@ class BarConfigMenu extends Component {
       value={spec.subBucketColumn !== null ?
         spec.subBucketColumn.toString() : null}
       name="subGroupColumnMenu"
-      options={filterColumns(columnOptions, ['text', 'option'])}
+      options={columnSelectOptions(this.props.intl, filterColumns(columnOptions, ['text', 'option']))}
       clearable
       disabled={spec.bucketColumn === null}
       onChange={value => handleChangeSpec({
