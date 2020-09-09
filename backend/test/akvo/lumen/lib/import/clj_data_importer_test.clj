@@ -33,6 +33,8 @@
                                                                 :version 1})
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
+                           (filter #(= "main" (:namespace %)))
+                           first
                            (get-data *tenant-conn*))]
       (is (= (map keys (:columns dataset)) '(("groupId"
                                               "key"
@@ -75,6 +77,8 @@
                                                                 :version 1})
           stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
+                           (filter #(= "main" (:namespace %)))
+                           first
                            (get-data *tenant-conn*))
           updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                    *error-tracker* (:dataset-id job) (:data-source-id job)
