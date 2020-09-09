@@ -57,4 +57,4 @@
 
 (defmethod engine/columns-used "core/combine"
   [applied-transformation columns]
-  [(:columnNames (:args applied-transformation))])
+  (vec (:columnNames (:args applied-transformation))))
