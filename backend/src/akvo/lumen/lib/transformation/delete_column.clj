@@ -34,8 +34,12 @@
                 (some #(= % column-name) columns)))))
 
 (defmethod engine/apply-operation "core/delete-column"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [column-name (col-name op-spec)
+        namespace (engine/get-namespace op-spec)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (:columns dsv)
         merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]
     (if (empty? merged-sources)
       (if-let [existent-viss (seq (visualisations-with-dataset-column tenant-conn (:dataset-id op-spec) column-name))]        
@@ -43,13 +47,16 @@
          :message  (format "Cannot delete column. It is used in the following visalisations: %s"
                            (str/join ", " (map #(format "'%s'" (second %))  existent-viss)))
          :error-data existent-viss}
-        (let [column-idx  (engine/column-index columns column-name)]
+        (let [column-idx  (engine/column-index columns column-name)
+              new-columns (into (vec (take column-idx columns))
+                                (drop (inc column-idx) columns))]
           (db.tx.engine/delete-column tenant-conn {:table-name table-name :column-name column-name})
           {:success?      true
            :execution-log [(format "Deleted column %s" column-name)]
-           :columns       (into (vec (take column-idx columns))
-                                (drop (inc column-idx) columns))})
-        )
+           :dataset-versions (vals (-> dataset-versions
+                                           (assoc-in [namespace :columns] new-columns)
+                                           (update-in [namespace :transformations]
+                                                      engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))
       {:success? false
        :message  (format "Cannot delete column. It is used in merge transformations of dataset: %s"
                          (str/join "," (map (comp :title second) merged-sources)))})))
