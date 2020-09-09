@@ -281,9 +281,3 @@
 
 (defn get-dsv [dataset-versions namespace]
   (first (filter #(= (:namespace %) namespace) dataset-versions)))
-
-(defn get-table-name-by-ns [dataset-versions namespace]
-  (:table-name (get-dsv dataset-versions namespace)))
-
-(defn get-table-name [dataset-versions op-spec]
-  (get-table-name-by-ns dataset-versions (get-namespace op-spec)))
