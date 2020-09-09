@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.transformation.derive-category
   (:require [akvo.lumen.util :as util]
             [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.lib.dataset.utils :as dataset.utils]
+            [akvo.lumen.lib.dataset.utils :as dataset.utils :refer (find-column)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [clojure.set :as set]
@@ -45,7 +45,6 @@
                  (when eval1 cat))))
            mappings)
      uncategorized-value)))
-
 
 (defmethod engine/apply-operation "core/derive-category"
   [{:keys [tenant-conn]} dataset-versions op-spec]

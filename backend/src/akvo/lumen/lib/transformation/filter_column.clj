@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.transformation.filter-column
   (:require [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.db.transformation.filter-column :as db.tx.filter-column]
+            [akvo.lumen.lib.dataset.utils :as dataset.utils :refer (find-column)]
             [clojure.tools.logging :as log]))
 
 (defmethod engine/valid? "core/filter-column"
