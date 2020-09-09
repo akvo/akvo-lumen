@@ -35,6 +35,9 @@
 
 (s/def ::transformation.engine.s/onError #{"leave-empty" "fail" "delete-row" "default-value"})
 
+(s/def ::transformation.engine.s/namespace (s/with-gen string? #(s/gen #{"main"})))
+
+
 (s/def ::transformation.engine.s/op #{"core/change-datatype"
                                       "core/combine"
                                       "core/delete-column"
@@ -76,7 +79,9 @@
    :req-un [::transformation.delete-column/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/created
+            ::transformation.engine.s/namespace]))
+
 
 
 (create-ns  'akvo.lumen.specs.transformation.change-datatype)
@@ -97,7 +102,9 @@
    :req-un [::transformation.change-datatype/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
+
 
 (create-ns  'akvo.lumen.specs.transformation.combine)
 (alias 'transformation.combine 'akvo.lumen.specs.transformation.combine)
@@ -117,7 +124,8 @@
    :req-un [::transformation.combine/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.derive)
@@ -139,7 +147,8 @@
    :req-un [::transformation.derive/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.filter-column)
@@ -160,7 +169,8 @@
    :req-un [::transformation.filter-column/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.generate-geopoints)
@@ -181,7 +191,8 @@
    :req-un [::transformation.generate-geopoints/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.merge-datasets)
 (alias 'transformation.merge-datasets 'akvo.lumen.specs.transformation.merge-datasets)
@@ -219,7 +230,8 @@
 (defmethod op-spec "core/merge-datasets"  [_]
   (s/keys
    :req-un [::transformation.merge-datasets/args
-            ::transformation.engine.s/op]))
+            ::transformation.engine.s/op]
+   :opt-un [::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.derive-category)
 (alias 'transformation.derive-category 'akvo.lumen.specs.transformation.derive-category)
@@ -297,7 +309,8 @@
 (defmethod op-spec "core/derive-category"  [_]
   (s/keys
    :req-un [::transformation.derive-category/args
-            ::transformation.engine.s/op]))
+            ::transformation.engine.s/op]
+   :opt-un [::transformation.engine.s/namespace]))
 
 (create-ns 'akvo.lumen.specs.transformation.extract-multiple)
 (alias 'transformation.extract-multiple 'akvo.lumen.specs.transformation.extract-multiple)
@@ -330,7 +343,8 @@
    :req-un [::transformation.extract-multiple/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 
 (create-ns  'akvo.lumen.specs.transformation.rename-column)
@@ -348,7 +362,8 @@
    :req-un [::transformation.rename-column/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 
 
@@ -386,7 +401,8 @@
 (defmethod op-spec "core/reverse-geocode"  [_]
   (s/keys
    :req-un [::transformation.reverse-geocode/args
-            ::transformation.engine.s/op]))
+            ::transformation.engine.s/op]
+   :opt-un [::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.sort-column)
 (alias 'transformation.sort-column 'akvo.lumen.specs.transformation.sort-column)
@@ -403,7 +419,8 @@
    :req-un [::transformation.sort-column/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.remove-sort)
 (alias 'transformation.remove-sort 'akvo.lumen.specs.transformation.remove-sort)
@@ -418,7 +435,8 @@
    :req-un [::transformation.remove-sort/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.split-column)
 (alias 'transformation.split-column 'akvo.lumen.specs.transformation.split-column)
@@ -440,7 +458,8 @@
    :req-un [::transformation.split-column/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.trim)
 (alias 'transformation.trim 'akvo.lumen.specs.transformation.trim)
@@ -453,7 +472,8 @@
    :req-un [::transformation.trim/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.to-lowercase)
 (alias 'transformation.to-lowercase 'akvo.lumen.specs.transformation.to-lowercase)
@@ -466,7 +486,8 @@
    :req-un [::transformation.to-lowercase/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.to-uppercase)
 (alias 'transformation.to-uppercase 'akvo.lumen.specs.transformation.to-uppercase)
@@ -479,7 +500,8 @@
    :req-un [::transformation.to-uppercase/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.to-titlecase)
 (alias 'transformation.to-titlecase 'akvo.lumen.specs.transformation.to-titlecase)
@@ -492,7 +514,8 @@
    :req-un [::transformation.to-titlecase/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.transformation.trim-doublespace)
 (alias 'transformation.trim-doublespace 'akvo.lumen.specs.transformation.trim-doublespace)
@@ -505,7 +528,8 @@
    :req-un [::transformation.trim-doublespace/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/created]))
+   :opt-un [::transformation.engine.s/namespace
+            ::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
 (alias 'db.dsv.transformation 'akvo.lumen.specs.dataset-version.transformation)
