@@ -55,7 +55,7 @@
            :execution-log [(format "Deleted column %s" column-name)]
            :dataset-versions (vals (-> dataset-versions
                                            (assoc-in [namespace :columns] new-columns)
-                                           (update-in ["main" :transformations]
+                                           (update-in [namespace :transformations]
                                                       engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))
       {:success? false
        :message  (format "Cannot delete column. It is used in merge transformations of dataset: %s"

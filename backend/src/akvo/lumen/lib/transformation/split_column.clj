@@ -113,7 +113,7 @@
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
            :dataset-versions (vals (-> dataset-versions
                                        (assoc-in [namespace :columns] res-columns)
-                                       (update-in ["main" :transformations]
+                                       (update-in [namespace :transformations]
                                                   engine/update-dsv-txs op-spec (:columns dsv) res-columns)))})
         {:success? false
          :message  (format "No results trying to split column '%s' with pattern '%s'"
