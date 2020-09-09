@@ -2,6 +2,7 @@
   (:require [akvo.lumen.util :as util]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.lib.dataset.utils :as dataset.utils]
             [akvo.lumen.db.job-execution :as db.job-execution]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -42,18 +43,15 @@
   [op-spec]
   false)
 
-(defmulti namespaces
+(defn namespaces
   "return a vector of namespaces, being the first the target transformation namespace.
   So far transformations only could use one namespace, so this method will be used for validating purposes too"
-  (fn [op-spec columns]
-    (op-spec "op")))
-
-(defmethod namespaces :default
   [op-spec columns]
-  #_(throw (ex-info (str "unimplemented defmulti namespaces for tx: " (:op op-spec))
-                    {:transformation op-spec}))
-  ;; TODO provisional response
-  ["main"])
+  (mapv
+   #(-> (dataset.utils/find-column columns %) :groupId coerce-namespace)
+   [(get-in op-spec ["args" "columnNameLat"])
+    (get-in op-spec ["args" "columnNameLong"])])
+  (columns-used op-spec columns))
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
