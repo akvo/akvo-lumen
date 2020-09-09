@@ -84,22 +84,16 @@
   ([] (db-conn "t1")))
 
 (comment
-  
+
   ;; Run all tests
   (kc/run :all)
 
   ;; Run unit tests
   (kc/run {:id :all
            :kaocha.filter/focus-meta [:unit]})
-  
+
   ;; Run functional tests
   (kc/run {:id :all
            :kaocha.filter/focus-meta [:functional]})
-  
-  ;; Two flaky tests 
-  
-  (kc/run 'akvo.lumen.endpoints-test/handler-test)
-  
-  (kc/run 'akvo.lumen.lib.transformation-test/multiple-column-test)
-  
+
   )
