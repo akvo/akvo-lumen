@@ -50,7 +50,16 @@
       (jdbc/with-db-transaction [tx-conn tenant-conn]
         (let [tx-deps (assoc deps :tenant-conn tx-conn)]
           (condp = (:type command)
-            :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
+            :transformation (do
+                              (let [tx-namespaces (set (engine/namespaces (w/keywordize-keys (:transformation command))
+                                                                          (w/keywordize-keys (reduce into [] (map :columns (db.transformation/latest-dataset-version-by-dataset-id tx-conn {:dataset-id dataset-id}))))))]
+                                (when (>= (count tx-namespaces) 2)
+                                  (throw (ex-info "Transformation not allowed thus it contains more than one namespace"
+                                                  {:namespaces tx-namespaces
+                                                   :dataset-id dataset-id
+                                                   :tx command
+                                                   :job-execution-id job-execution-id}))))
+                              (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command)))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
         (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
       (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
