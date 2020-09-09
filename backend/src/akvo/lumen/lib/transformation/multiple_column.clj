@@ -27,3 +27,8 @@
   [deps dataset-versions op-spec]
   (-> (apply-operation deps dataset-versions op-spec)
       (update :columns walk/stringify-keys)))
+
+(defmethod t.engine/columns-used "core/extract-multiple"
+  [applied-transformation columns]
+  [(-> applied-transformation :args :selectedColumn :columnName)])
+
