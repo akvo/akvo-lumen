@@ -243,14 +243,6 @@
   [op-spec older-columns new-columns]
   op-spec)
 
-(defn unify-transformation-history [dataset-versions]
-  ;; TODO IMPL
-  (->> dataset-versions
-       (map :transformations)
-       (reduce into [])
-       w/keywordize-keys
-       (sort-by :created #(compare (Instant/parse %1) (Instant/parse %2)))))
-
 (defn apply-dataset-transformations-on-table
   "no transactional thus we can discard the temporary table we are working with"
   [conn caddisfly dataset-id transformations table-name new-columns old-columns]
