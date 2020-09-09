@@ -54,7 +54,8 @@
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
         (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
       (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
-            namespaces (set (engine/namespaces (:transformation command) (w/keywordize-keys (reduce into [] (map :columns dsvs)))))]
+            _ (log/debug :txs (doall (map (juxt :transformations :namespace) dsvs)))
+            namespaces (set (engine/namespaces (w/keywordize-keys (:transformation command)) (w/keywordize-keys (reduce into [] (map :columns dsvs)))))]
         (condp = (:type command)
           :transformation (doseq [dsv (filter #(contains? namespaces (:namespace %)) dsvs)]
                             (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
