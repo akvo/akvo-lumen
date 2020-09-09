@@ -52,9 +52,10 @@
 (defmethod engine/apply-operation "core/remove-sort"
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
-        table-name (engine/get-table-name dataset-versions op-spec)
         namespace (engine/get-namespace op-spec)
-        columns (:columns (engine/get-dsv dataset-versions namespace))
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (:columns dsv)
         idx-name (str table-name "_" column-name)
         new-cols (engine/update-column columns
                                        column-name
