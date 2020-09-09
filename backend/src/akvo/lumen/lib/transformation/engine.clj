@@ -247,6 +247,7 @@
   (->> dataset-versions
        (map :transformations)
        (reduce into [])
+       w/keywordize-keys
        (sort-by :created #(compare (Instant/parse %1) (Instant/parse %2)))))
 
 (defn apply-dataset-transformations-on-table
