@@ -78,10 +78,15 @@
       default-values)))
 
 (defmethod engine/apply-operation "core/split-column"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions op-spec]
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
     (let [{:keys [onError op args]} (walk/keywordize-keys op-spec)
-          column-name               (col-name args)
+          namespace (engine/get-namespace op-spec)
+          dsv (get dataset-versions namespace)
+          table-name (:table-name dsv)
+          columns (vec (:columns dsv))
+          all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
+          column-name               (col-name args)         
           pattern                   (pattern* args)
           re-pattern*               (re-pattern (Pattern/quote pattern))]
       (if-let [pattern-analysis (get
@@ -91,7 +96,7 @@
                                       :analysis)
                                  pattern)]
         (let [new-rows-count    (inc (:max-coincidences-in-one-row pattern-analysis))
-              new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) columns)
+              new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) all-dsv-columns)
               add-db-columns    (doseq [c new-columns]
                                   (db.tx.engine/add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
@@ -102,10 +107,14 @@
                                    (split ((keyword column-name) row) re-pattern* new-rows-count)
                                    (map (fn [column v]
                                           [(:id column) v]) new-columns)
-                                   (update-row tenant-conn table-name (:rnum row))))]
+                                   (update-row tenant-conn table-name (:rnum row))))
+              res-columns (into columns (walk/stringify-keys (vec new-columns)))]
           {:success?      true
            :execution-log [(format "Splitted column %s with pattern %s" column-name pattern)]
-           :columns       (into columns (walk/stringify-keys (vec new-columns)))})
+           :dataset-versions (vals (-> dataset-versions
+                                       (assoc-in [namespace :columns] res-columns)
+                                       (update-in [namespace :transformations]
+                                                  engine/update-dsv-txs op-spec (:columns dsv) res-columns)))})
         {:success? false
          :message  (format "No results trying to split column '%s' with pattern '%s'"
                            (:title (selected-column args)) (pattern* args))}))))
