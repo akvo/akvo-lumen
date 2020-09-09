@@ -43,6 +43,11 @@
   [op-spec]
   false)
 
+(def main-namespaces #{"main" "metadata" "transformations" nil})
+
+(defn coerce-namespace [groupId]
+  (if (contains? main-namespaces groupId) "main" groupId))
+
 (defn namespaces
   "return a vector of namespaces, being the first the target transformation namespace.
   So far transformations only could use one namespace, so this method will be used for validating purposes too"
@@ -280,11 +285,6 @@
   (when (not-empty (filter #(= column-title (get % "title")) columns))
     {:success? false
      :message  (format "In this dataset there's already a column with this name: %s. Please choose another non existing name" column-title)}))
-
-(def main-namespaces #{"main" "metadata" "transformations" nil})
-
-(defn coerce-namespace [groupId]
-  (if (contains? main-namespaces groupId) "main" groupId))
 
 (defn get-namespace [op-spec]
   (get op-spec "namespace" "main"))
