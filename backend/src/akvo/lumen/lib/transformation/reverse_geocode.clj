@@ -56,7 +56,7 @@
          :execution-log ["Geocoded"]
          :dataset-versions (vals (-> dataset-versions
                                      (assoc-in [namespace :columns] new-columns)
-                                     (update-in ["main" :transformations]
+                                     (update-in [namespace :transformations]
                                                 engine/update-dsv-txs op-spec (:columns dsv) new-columns))) }))))
 
 (defmethod engine/columns-used "core/reverse-geocode"

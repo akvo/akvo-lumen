@@ -19,7 +19,7 @@
      :execution-log [(format "Text transform %s on %s" fn column-name)]
      :dataset-versions (vals (-> dataset-versions
                                  (assoc-in [namespace :columns] columns)
-                                 (update-in ["main" :transformations]
+                                 (update-in [namespace :transformations]
                                             engine/update-dsv-txs op-spec columns columns)))}))
 
 (defn valid? [op-spec]
@@ -100,7 +100,7 @@
      :execution-log [(format "Text transform trim-doublespace on %s" column-name)]
      :dataset-versions (vals (-> dataset-versions
                                  (assoc-in [namespace :columns] columns)
-                                 (update-in ["main" :transformations]
+                                 (update-in [namespace :transformations]
                                             engine/update-dsv-txs op-spec (:columns dsv) columns)))}))
 
 (defmethod engine/columns-used "core/trim-doublespace"
