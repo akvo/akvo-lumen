@@ -28,7 +28,7 @@
                :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
                :dataset-versions (vals (-> dataset-versions
                                            (assoc-in [namespace :columns] new-columns)
-                                           (update-in ["main" :transformations]
+                                           (update-in [namespace :transformations]
                                                       engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))))
 
 (defmethod engine/columns-used "core/rename-column"

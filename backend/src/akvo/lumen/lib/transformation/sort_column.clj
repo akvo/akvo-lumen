@@ -24,7 +24,7 @@
         namespace (engine/get-namespace op-spec)
         dsv (get dataset-versions namespace)
         table-name (:table-name dsv)
-        columns (:columns dsv)
+        columns (vec (:columns dsv))
         idx-name (str table-name "_" column-name)
         sort-idx (get-sort-idx columns)
         new-cols (engine/update-column columns
@@ -38,7 +38,7 @@
     {:success? true
      :dataset-versions (vals (-> dataset-versions
                                  (assoc-in [namespace :columns] new-cols)
-                                 (update-in ["main" :transformations]
+                                 (update-in [namespace :transformations]
                                             engine/update-dsv-txs op-spec (:columns dsv) new-cols)))}))
 
 (defmethod engine/columns-used "core/sort-column"
