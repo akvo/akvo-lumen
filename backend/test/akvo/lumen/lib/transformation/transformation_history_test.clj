@@ -4,7 +4,6 @@
             [clojure.walk :as w])
   (:import [java.time Instant]))
 
-
 (def data
   [[[{"op" "core/rename-column",
       "args" {"columnName" "c583119147", "newColumnTitle" "nombre"},
@@ -78,13 +77,7 @@
     (is (= "2020-09-08T14:30:56.577Z" (:created (last txs))))
     (let [dsvs (map (fn [txs] {:transformations txs}) data-kw)]
       (is (= 2 (count dsvs)))
-      (is (= [(last txs) (first txs)] (engine/unify-transformation-history dsvs)))
-      
-      )
-    
-    )
-  
-  )
+      (is (= [(last txs) (first txs)] (engine/unify-transformation-history dsvs))))))
 
 
 
