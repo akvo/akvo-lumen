@@ -81,5 +81,5 @@
            :execution-log [(format "Extract caddisfly column %s" (:columnName selected-column))]
            :dataset-versions (vals (-> dataset-versions
                                            (assoc-in [namespace :columns] res-columns)
-                                           (update-in ["main" :transformations]
+                                           (update-in [namespace :transformations]
                                                       engine/update-dsv-txs op-spec columns res-columns)))})))))
