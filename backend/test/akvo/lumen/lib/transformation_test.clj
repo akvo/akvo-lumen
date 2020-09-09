@@ -387,7 +387,7 @@
                                                             ::transformation.derive.s/newColumnType "text"
                                                             ::transformation.engine.s/onError "leave-empty"})})]
         (is (= status "FAILED"))
-        (is (= (:error-message job) "Failed to transform: Column 'oops' doesn't exist."))))
+        (is (= (:error-message job) "Column 'oops' doesn't exist."))))
 
     (testing "Basic text transform"
       (apply-transformation {:type :transformation
