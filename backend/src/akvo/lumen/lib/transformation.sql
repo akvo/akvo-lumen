@@ -22,7 +22,7 @@ UPDATE dataset
 -- :doc Checks the existence of a dataset for a given id
 SELECT id FROM dataset WHERE id = :id
 
--- :name db-latest-dataset-versions-by-dataset-id :? :*
+-- :name db-latest-dataset-version-by-dataset-id :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace 
   FROM dataset_version
@@ -31,14 +31,14 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
                     FROM dataset_version v
                    WHERE v.dataset_id = :dataset-id);
 
--- :name db-latest-dataset-versions-with-columns-by-dataset-ids :? :*
+-- :name db-latest-dataset-version-with-columns-by-dataset-ids :? :*
 -- :doc Returns the most recent dataset version for a given dataset ids
 select DISTINCT ON (dataset_id, namespace) dataset_id, id, version, columns, namespace
 FROM dataset_version
 WHERE dataset_id IN (:v*:dataset-ids)
 order by dataset_id, namespace, version desc;
 
--- :name db-latest-dataset-versions-with-transformations :? :*
+-- :name db-latest-dataset-version-with-transformations :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 select DISTINCT ON (dataset_id, namespace) dataset_id, dataset_version.id as id, version, title, transformations, namespace
 FROM dataset_version, dataset
@@ -65,7 +65,7 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
   FROM  dataset_version
   WHERE dataset_id= :dataset-id AND version= :version ;
 
--- :name db-dataset-versions-by-dataset-id-and-version :? :*
+-- :name db-dataset-version-by-dataset-id-and-version :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
   FROM dataset_version

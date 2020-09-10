@@ -173,7 +173,7 @@
 
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
-  (let [dataset-versions (db.transformation/latest-dataset-versions-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+  (let [dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (let [{:keys [success? message dataset-versions execution-log error-data]}
           (try-apply-operation deps dataset-versions (assoc transformation
                                                             :dataset-id dataset-id
@@ -242,7 +242,7 @@
                                :transformation transformation})))))))))
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
-  (let [current-dataset-versions (db.transformation/latest-dataset-versions-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+  (let [current-dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (when (not= (:version (first current-dataset-versions)) 1)
       (apply-undo deps dataset-id job-execution-id current-dataset-versions))))
 
