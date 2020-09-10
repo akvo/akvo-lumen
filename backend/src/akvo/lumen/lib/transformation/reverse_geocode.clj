@@ -27,7 +27,8 @@
   (let [namespace (engine/get-namespace op-spec)
         dsv (get dataset-versions namespace)
         columns (:columns dsv)
-        column-name (engine/next-column-name columns)
+        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
+        column-name (engine/next-column-name all-dsv-columns)
         table-name (:table-name dsv)
         {:strs [target source]} args
         geopointColumn (get target "geopointColumn")
