@@ -1,45 +1,43 @@
 (ns akvo.lumen.lib.transformation-test
-  {:functional true}
-  (:require [akvo.lumen.fixtures :refer [*tenant-conn*
-                                         *system*
-                                         tenant-conn-fixture
-                                         system-fixture
-                                         *error-tracker*
-                                         error-tracker-fixture
-                                         summarise-transformation-logs-fixture
-                                         *caddisfly*
-                                         caddisfly-fixture]]
-            [akvo.lumen.lib :as lib]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
-            [akvo.lumen.lib.multiple-column :as multiple-column]
-            [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
-
-            [akvo.lumen.lib.transformation :as transformation]
-            [akvo.lumen.lib.transformation.derive-category :as derive-category]
-            [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.postgres :as postgres]
-            [akvo.lumen.specs :as lumen.s]
-            [akvo.lumen.specs.import :as import.s]
-            [akvo.lumen.specs.import.column :as import.column.s]
-            [akvo.lumen.specs.import.values :as import.values.s]
-            [akvo.lumen.specs.transformation :as transformation.s]
-            [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
-            [akvo.lumen.util :refer [conform squuid]]
-            [cheshire.core :as json]
-            [cheshire.generate :as ches.generate]
-            [clj-time.coerce :as tcc]
-            [clj-time.core :as tc]
-            [clj-time.format :as timef]
-            [clojure.java.io :as io]
-            [clojure.set :as set]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as string]
-            [clojure.test :refer :all]
-            [clojure.tools.logging :as log]
-            [clojure.walk :refer (stringify-keys keywordize-keys)]
-            [hugsql.core :as hugsql])
-  (:import [akvo.lumen.postgres Geoshape Geopoint]))
+     {:functional true}
+     (:require [akvo.lumen.fixtures :refer [*tenant-conn*
+                                            *system*
+                                            tenant-conn-fixture
+                                            system-fixture
+                                            *error-tracker*
+                                            error-tracker-fixture
+                                            summarise-transformation-logs-fixture
+                                            *caddisfly*
+                                            caddisfly-fixture]]
+               [akvo.lumen.lib :as lib]
+               [akvo.lumen.lib.multiple-column :as multiple-column]
+               [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
+               [akvo.lumen.db.transformation :as db.transformation :refer [dataset-versions-by-dataset-id-and-version]]
+               [akvo.lumen.lib.transformation :as transformation]
+               [akvo.lumen.lib.transformation.derive-category :as derive-category]
+               [akvo.lumen.lib.transformation.engine :as engine]
+               [akvo.lumen.postgres :as postgres]
+               [akvo.lumen.specs :as lumen.s]
+               [akvo.lumen.specs.import :as import.s]
+               [akvo.lumen.specs.import.column :as import.column.s]
+               [akvo.lumen.specs.import.values :as import.values.s]
+               [akvo.lumen.specs.transformation :as transformation.s]
+               [akvo.lumen.test-utils :refer [update-file import-file at-least-one-true retry-job-execution] :as tu]
+               [akvo.lumen.util :refer [conform squuid]]
+               [cheshire.core :as json]
+               [cheshire.generate :as ches.generate]
+               [clj-time.coerce :as tcc]
+               [clj-time.core :as tc]
+               [clj-time.format :as timef]
+               [clojure.java.io :as io]
+               [clojure.set :as set]
+               [clojure.spec.alpha :as s]
+               [clojure.string :as string]
+               [clojure.test :refer :all]
+               [clojure.tools.logging :as log]
+               [clojure.walk :refer (stringify-keys keywordize-keys)]
+               [hugsql.core :as hugsql])
+     (:import [akvo.lumen.postgres Geoshape Geopoint]))
 
 (ches.generate/add-encoder java.time.Instant (fn [obj jsonGenerator] (.writeString jsonGenerator (str obj))))
 
@@ -77,6 +75,12 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
+
+(defn dataset-version-by-dataset-id [conn opts]
+  (first (filter #(= "main" (:namespace %)) (dataset-versions-by-dataset-id-and-version conn opts))))
+
+(defn latest-dataset-version-by-dataset-id [db opts]
+  (first (filter #(= "main" (:namespace %)) (db.transformation/latest-dataset-version-by-dataset-id db opts))))
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
@@ -386,7 +390,7 @@
                                                             ::transformation.derive.s/newColumnType "text"
                                                             ::transformation.engine.s/onError "leave-empty"})})]
         (is (= status "FAILED"))
-        (is (= (:error-message job) "Failed to transform: Column 'oops' doesn't exist."))))
+        (is (= (:error-message job) "Column 'oops' doesn't exist."))))
 
     (testing "Basic text transform"
       (apply-transformation {:type :transformation
