@@ -7,10 +7,10 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [clojure.tools.logging :as log]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
+            [akvo.lumen.db.transformation :refer [dataset-versions-by-dataset-id-and-version]]
             [akvo.lumen.specs.import :as i-c]
             [akvo.lumen.lib.import.clj-data-importer :as i]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
+            [akvo.lumen.db.transformation :refer [latest-dataset-versions-by-dataset-id]]
             [akvo.lumen.db.transformation-test :refer [get-data]]
             [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
             [akvo.lumen.utils.logging-config :refer [with-no-logs]]
@@ -23,6 +23,9 @@
 
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
+(defn dataset-version-by-dataset-id [conn opts]
+  (first (filter #(= "main" (:namespace %)) (dataset-versions-by-dataset-id-and-version conn opts))))
+
 (deftest ^:functional test-import
   (testing "Testing import"
     (let [dataset-id (import-file *tenant-conn* *error-tracker*
@@ -31,8 +34,10 @@
                                    :data (i-c/sample-imported-dataset [:text :number] 2) })
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
+          stored-data (->> (latest-dataset-versions-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
+                           (filter #(= "main" (:namespace %)))
+                           first
                            (get-data *tenant-conn*))]
       (is (= (map keys (:columns dataset)) '(("groupId"
                                               "key"
@@ -73,8 +78,10 @@
           dataset-id (:dataset_id dataset)
           dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
                                                                 :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
+          stored-data (->> (latest-dataset-versions-by-dataset-id *tenant-conn*
                                                                  {:dataset-id dataset-id})
+                           (filter #(= "main" (:namespace %)))
+                           first
                            (get-data *tenant-conn*))
           updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                    *error-tracker* (:dataset-id job) (:data-source-id job)
