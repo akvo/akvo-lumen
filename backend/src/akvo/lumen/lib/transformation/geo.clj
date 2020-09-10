@@ -28,6 +28,7 @@
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [namespace (engine/get-namespace op-spec)
         dsv (get dataset-versions namespace)
+        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
         columns (vec (:columns dsv))]
     (if-let [response-error (engine/column-title-error? (get (engine/args op-spec) "columnTitleGeo") columns)]
       response-error
@@ -37,7 +38,7 @@
             column-types (map get-client-type [columnNameLat columnNameLong])]
         (if (every? #(= "number" %) column-types)
           (try
-            (let [column-name-geo (engine/next-column-name columns)
+            (let [column-name-geo (engine/next-column-name all-dsv-columns)
                   opts {:table-name table-name :column-name-geo column-name-geo}
                   new-columns (conj columns {"title" columnTitleGeo
                                              "type" "geopoint"
