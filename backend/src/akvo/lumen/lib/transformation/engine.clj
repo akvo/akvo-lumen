@@ -43,6 +43,15 @@
   [op-spec]
   false)
 
+(defn unify-transformation-history [dataset-versions]
+  ;; TODO IMPL
+  (->> dataset-versions
+       (map :transformations)
+       (reduce into [])
+       w/keywordize-keys
+       (sort-by :created #(compare (Instant/parse %1) (Instant/parse %2)))))
+
+
 (def main-namespaces #{"main" "metadata" "transformations" nil})
 
 (defn coerce-namespace [groupId]
