@@ -21,7 +21,8 @@
         dsv (get dataset-versions namespace)
         table-name (:table-name dsv)
         columns (vec (:columns dsv))
-        new-column-name (engine/next-column-name columns)
+        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
+        new-column-name (engine/next-column-name all-dsv-columns)
         {[first-column-name second-column-name] "columnNames"
          separator "separator"
          column-title "newColumnTitle"} (engine/args op-spec)
