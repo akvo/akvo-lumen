@@ -4,7 +4,9 @@
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
             [akvo.lumen.db.transformation.reverse-geocode :as db.tx.reverse-geocode]
             [akvo.lumen.util :as util]
-            [clojure.java.jdbc :as jdbc]))
+            [akvo.lumen.lib.dataset.utils :as dataset.utils]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.walk :as w]))
 
 (defmethod engine/valid? "core/reverse-geocode"
   [op-spec]
@@ -18,9 +20,13 @@
 (defn table-qualify [table-name column-name]
   (str table-name "." column-name))
 
-(defn source-table-name [conn {:strs [datasetId]}]
-  (-> (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
-      :table-name))
+(defn source-table-name [conn {:strs [datasetId mergeColumn geoshapeColumn]}]
+  (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
+        columns (w/keywordize-keys (reduce into [] (map :columns dsvs)))
+        namespaces (set (engine/namespaces columns [mergeColumn geoshapeColumn]))]
+    (if-let [namespace (and (= 1 (count namespaces)) (first namespaces))]
+      (:table-name (first (filter #(= namespace (:namespace %)) dsvs)))
+      (throw "Reverse-geocode source columns should belong to the same data-group"))))
 
 (defmethod engine/apply-operation "core/reverse-geocode"
   [{:keys [tenant-conn]} dataset-versions {:strs [args] :as op-spec}]
@@ -32,7 +38,7 @@
         table-name (:table-name dsv)
         {:strs [target source]} args
         geopointColumn (get target "geopointColumn")
-        {:strs [mergeColumn geoshapeColumn]} source
+        {:strs [mergeColumn geoshapeColumn]} source        
         source-table-name (source-table-name tenant-conn source)
         new-columns (conj columns
                           {"title" (get target "title")
@@ -58,7 +64,7 @@
          :dataset-versions (vals (-> dataset-versions
                                      (assoc-in [namespace :columns] new-columns)
                                      (update-in [namespace :transformations]
-                                                engine/update-dsv-txs op-spec (:columns dsv) new-columns))) }))))
+                                                engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))))
 
 (defmethod engine/columns-used "core/reverse-geocode"
   [applied-transformation columns]
