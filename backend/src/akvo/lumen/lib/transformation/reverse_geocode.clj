@@ -23,12 +23,24 @@
       :table-name))
 
 (defmethod engine/apply-operation "core/reverse-geocode"
-  [{:keys [tenant-conn]} table-name columns {:strs [args] :as op-spec}]
-  (let [column-name (engine/next-column-name columns)
+  [{:keys [tenant-conn]} dataset-versions {:strs [args] :as op-spec}]
+  (let [namespace (engine/get-namespace op-spec)
+        dsv (get dataset-versions namespace)
+        columns (:columns dsv)
+        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
+        column-name (engine/next-column-name all-dsv-columns)
+        table-name (:table-name dsv)
         {:strs [target source]} args
         geopointColumn (get target "geopointColumn")
         {:strs [mergeColumn geoshapeColumn]} source
-        source-table-name (source-table-name tenant-conn source)]
+        source-table-name (source-table-name tenant-conn source)
+        new-columns (conj columns
+                          {"title" (get target "title")
+                           "type" "text"
+                           "sort" nil
+                           "hidden" false
+                           "direction" nil
+                           "columnName" column-name})]
     (if-let [response-error (engine/column-title-error? (get target "title") columns)]
       response-error
       (do
@@ -43,13 +55,10 @@
                                                             :target-table-name table-name})
         {:success? true
          :execution-log ["Geocoded"]
-         :columns (conj columns
-                        {"title" (get target "title")
-                         "type" "text"
-                         "sort" nil
-                         "hidden" false
-                         "direction" nil
-                         "columnName" column-name})}))))
+         :dataset-versions (vals (-> dataset-versions
+                                     (assoc-in [namespace :columns] new-columns)
+                                     (update-in [namespace :transformations]
+                                                engine/update-dsv-txs op-spec (:columns dsv) new-columns))) }))))
 
 (defmethod engine/columns-used "core/reverse-geocode"
   [applied-transformation columns]
