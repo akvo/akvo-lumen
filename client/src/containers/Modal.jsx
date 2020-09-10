@@ -20,7 +20,7 @@ const getWidth = (modal) => {
 
 const getHeight = (modal) => {
   switch (modal) {
-    case 'create-dataset': return 450;
+    case 'create-dataset': return 'auto';
     default: return 250;
   }
 };
