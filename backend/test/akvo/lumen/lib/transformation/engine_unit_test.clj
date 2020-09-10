@@ -71,10 +71,10 @@
          "columnName" "identifier"}}}}] "main"]])
 
 (deftest ^:unit unify-history-test
-  (let [data-kw (map first (w/keywordize-keys data))
+  (let [data-kw (map first data)
         txs (map first data-kw)]
-    (is (= "2020-09-08T14:31:07.745Z" (:created (first txs))))
-    (is (= "2020-09-08T14:30:56.577Z" (:created (last txs))))
+    (is (= "2020-09-08T14:31:07.745Z" (get (first txs) "created")))
+    (is (= "2020-09-08T14:30:56.577Z" (get (last txs) "created")))
     (let [dsvs (map (fn [txs] {:transformations txs}) data-kw)]
       (is (= 2 (count dsvs)))
       (is (= [(last txs) (first txs)] (engine/unify-transformation-history dsvs))))))
