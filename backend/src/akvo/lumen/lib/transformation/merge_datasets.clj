@@ -143,14 +143,14 @@
         dsv (get dataset-versions namespace)
         columns (vec (:columns dsv))
         table-name (:table-name dsv)
+        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
         source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         source-dataset (get-source-dataset conn source)
         source-table-name (:table-name source-dataset)
         source-merge-columns (get-source-merge-columns source
                                                        source-dataset)
-        column-names-translation (merge-column-names-map columns
-                                                         source-merge-columns)
+        column-names-translation (merge-column-names-map all-dsv-columns source-merge-columns)
         target-merge-columns (get-target-merge-columns source-merge-columns
                                                        column-names-translation)
         data (fetch-data conn
