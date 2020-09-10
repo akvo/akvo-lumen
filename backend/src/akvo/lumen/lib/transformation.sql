@@ -75,12 +75,11 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
   FROM  dataset_version
   WHERE dataset_id= :dataset-id AND version= :version ;
 
--- :name db-dataset-version-by-dataset-id :? :1
+-- :name db-dataset-versions-by-dataset-id-and-version :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
   FROM dataset_version
  WHERE dataset_id = :dataset-id
-   AND namespace = :namespace
    AND version = :version;
 
 -- :name clear-dataset-version-data-table :! :n
