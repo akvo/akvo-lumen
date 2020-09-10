@@ -49,12 +49,17 @@
   (if (contains? main-namespaces groupId) "main" groupId))
 
 (defn namespaces
-  "return a vector of namespaces, being the first the target transformation namespace.
+  "return a vector of namespaces.
   So far transformations only could use one namespace, so this method will be used for validating purposes too"
-  [op-spec columns]
+  [columns-used columns]
   (mapv
    #(-> (dataset.utils/find-column columns %) :groupId coerce-namespace)
-   (columns-used op-spec columns)))
+   columns-used))
+
+(defn namespaces-by-op
+  "return a vector of namespaces, being the first the target transformation namespace."
+  [op-spec columns]
+  (namespaces (columns-used op-spec columns) columns))
 
 (defmulti apply-operation
   "Applies a particular operation based on `op` key from spec
