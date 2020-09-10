@@ -132,7 +132,7 @@
       (with-open [importer (import/dataset-importer (get data-source-spec "source")
                                                     (assoc import-config :environment environment))]
         (let [initial-dataset-version  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id})
-              latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
+              latest-dataset-version (first (filter #(= "main" (:namespace %)) (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})))
               imported-dataset-columns (vec (:columns initial-dataset-version))
               importer-columns         (p/columns importer)
 
