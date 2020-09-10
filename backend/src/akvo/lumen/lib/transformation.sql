@@ -22,7 +22,7 @@ UPDATE dataset
 -- :doc Checks the existence of a dataset for a given id
 SELECT id FROM dataset WHERE id = :id
 
--- :name db-latest-dataset-version-by-dataset-id :? :*
+-- :name db-latest-dataset-versions-by-dataset-id :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace 
   FROM dataset_version
@@ -52,14 +52,6 @@ where dataset_id= :dataset-id
 AND version= :version
 AND namespace = :namespace;
 
--- :name db-initial-dataset-version-to-update-by-dataset-id :? :1
-SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
-  FROM  dataset_version
-  WHERE dataset_id= :dataset-id AND transformations='[]'
-  AND namespace = :namespace
-  ORDER BY version DESC LIMIT 1;
-
-
 -- :name db-initial-dataset-version-version-by-dataset-id :? :1
 SELECT version
   FROM  dataset_version
@@ -68,7 +60,7 @@ SELECT version
   ORDER BY version DESC LIMIT 1;
 
 
--- :name db-n-initial-dataset-version-to-update-by-dataset-id :? :*
+-- :name db-initial-dataset-version-to-update-by-dataset-id :? :*
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
   FROM  dataset_version
   WHERE dataset_id= :dataset-id AND version= :version ;
