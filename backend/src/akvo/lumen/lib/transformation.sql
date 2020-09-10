@@ -31,21 +31,19 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
                     FROM dataset_version v
                    WHERE v.dataset_id = :dataset-id);
 
--- :name db-latest-dataset-versions-by-dataset-ids :? :*
+-- :name db-latest-dataset-versions-with-columns-by-dataset-ids :? :*
 -- :doc Returns the most recent dataset version for a given dataset ids
-select DISTINCT ON (dataset_id) dataset_id, id, version, transformations, columns
+select DISTINCT ON (dataset_id, namespace) dataset_id, id, version, columns, namespace
 FROM dataset_version
 WHERE dataset_id IN (:v*:dataset-ids)
-AND dataset_version.namespace = :namespace
-order by dataset_id, version desc;
+order by dataset_id, namespace, version desc;
 
--- :name db-latest-dataset-versions :? :*
+-- :name db-latest-dataset-versions-with-transformations :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
-select DISTINCT ON (dataset_id) dataset_id, dataset_version.id as id, version, title, transformations
+select DISTINCT ON (dataset_id, namespace) dataset_id, dataset_version.id as id, version, title, transformations, namespace
 FROM dataset_version, dataset
 where dataset.id=dataset_id
-AND dataset_version.namespace = :namespace
-order by dataset_id, version desc;
+order by dataset_id, namespace, version desc;
 
 -- :name db-update-dataset-version :! :n
 -- :doc Update dataset version
