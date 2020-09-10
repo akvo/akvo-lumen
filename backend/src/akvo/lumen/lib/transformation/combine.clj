@@ -34,23 +34,19 @@
                                    "columnName" new-column-name})]
     (if-let [title-error (engine/column-title-error? column-title columns)]
       title-error
-      (do 
+      (do
         (db.tx.engine/add-column tenant-conn {:table-name table-name
                                               :column-type "text"
                                               :new-column-name new-column-name})
-        (let [tables (vec (map :table-name (keys (dissoc dataset-versions namespace))))]
-          ((if (seq tables) db.tx.combine/combine-columns-from-tables db.tx.combine/combine-columns)
-           tenant-conn
-           {:table-name table-name
-            :tables tables
-            :new-column-name new-column-name
-            :first-column (str table-name "." first-column-name)
-            :second-column (str table-name "." second-column-name)
-            :separator separator}))
+        (db.tx.combine/combine-columns tenant-conn
+                                       {:table-name table-name
+                                        :new-column-name new-column-name
+                                        :first-column first-column-name
+                                        :second-column second-column-name
+                                        :separator separator})
         {:success? true
          :execution-log [(format "Combined columns %s, %s into %s"
                                  first-column-name second-column-name new-column-name)]
-         :namespace namespace
          :dataset-versions (vals (-> dataset-versions
                                      (assoc-in [namespace :columns] new-columns)
                                      (update-in [namespace :transformations]
