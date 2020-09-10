@@ -7,11 +7,11 @@
 (defn latest-dataset-version-by-dataset-id [conn opts]
   (db-latest-dataset-version-by-dataset-id conn (merge dv/defaults opts)))
 
-(defn latest-dataset-versions [conn]
-  (db-latest-dataset-versions conn dv/defaults))
+(defn latest-dataset-versions-with-transformations [conn]
+  (db-latest-dataset-versions-with-transformations conn dv/defaults))
 
-(defn latest-dataset-versions-by-dataset-ids [conn opts]
-  (db-latest-dataset-versions-by-dataset-ids conn (merge dv/defaults opts)))
+(defn latest-dataset-versions-with-columns-by-dataset-ids [conn opts]
+  (db-latest-dataset-versions-with-columns-by-dataset-ids conn (merge dv/defaults opts)))
 
 ;; todo to change on update RQG change
 (defn initial-dataset-version-to-update-by-dataset-id [conn opts]
