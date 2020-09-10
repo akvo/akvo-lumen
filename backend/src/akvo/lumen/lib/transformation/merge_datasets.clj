@@ -116,7 +116,7 @@
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
-    (if-let [source-dataset (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})]
+    (if-let [source-dataset (first (filter #(= "main" (:namespace %)) (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})))]
       source-dataset
       (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
                       {:source source})))))
@@ -138,33 +138,41 @@
         source-merge-columns))
 
 (defn apply-merge-operation
-  [conn table-name columns op-spec]
-  (let [source (get-in op-spec ["args" "source"])
+  [conn dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        dsv (get dataset-versions namespace)
+        columns (vec (:columns dsv))
+        table-name (:table-name dsv)
+        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
+        source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         source-dataset (get-source-dataset conn source)
         source-table-name (:table-name source-dataset)
         source-merge-columns (get-source-merge-columns source
                                                        source-dataset)
-        column-names-translation (merge-column-names-map columns
-                                                         source-merge-columns)
+        column-names-translation (merge-column-names-map all-dsv-columns source-merge-columns)
         target-merge-columns (get-target-merge-columns source-merge-columns
                                                        column-names-translation)
         data (fetch-data conn
                          source-table-name
                          target-merge-columns
                          column-names-translation
-                         source)]
+                         source)
+        new-columns (into columns target-merge-columns)]
     (add-columns conn table-name target-merge-columns)
     (insert-merged-data conn table-name target data)
     {:success? true
      :execution-log [(format "Merged columns from %s into %s"
                              source-table-name
                              table-name)]
-     :columns (into columns target-merge-columns)}))
+     :dataset-versions (vals (-> dataset-versions
+                                 (assoc-in [namespace :columns] new-columns)
+                                 (update-in [namespace :transformations]
+                                            engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))
 
 (defmethod engine/apply-operation "core/merge-datasets"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (apply-merge-operation tenant-conn table-name columns op-spec))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (apply-merge-operation tenant-conn dataset-versions op-spec))
 
 (defn- merged-datasets-diff [tenant-conn merged-dataset-sources]
   (let [dataset-ids (mapv :datasetId merged-dataset-sources)
@@ -193,7 +201,7 @@
 
 (defn consistency-error? [tenant-conn dataset-id]
   (let [merged-sources (->> (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                            :transformations
+                            (map :transformations)
                             walk/keywordize-keys
                             (filter #(= "core/merge-datasets" (:op %)))
                             (map #(-> % :args :source)))]
@@ -203,7 +211,7 @@
        :dataset-diff ds-diff}
       (when-let [column-diff (when (not-empty merged-sources)
                                (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
-                                                           (db.transformation/latest-dataset-versions-by-dataset-ids tenant-conn)
+                                                           (db.transformation/latest-dataset-versions-with-columns-by-dataset-ids tenant-conn)
                                                            (map #(rename-keys % {:dataset_id :dataset-id})))
                                      column-diff-coll (->> merged-sources
                                                            (map (partial merged-columns-diff dss))
@@ -226,7 +234,7 @@
    :origin {:id 'uuid-str
             :title 'str}}"
   [tenant-conn target-dataset-id]
-  (->> (db.transformation/latest-dataset-versions tenant-conn) ;; all dataset_versions
+  (->> (db.transformation/latest-dataset-versions-with-transformations tenant-conn) ;; all dataset_versions
        (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
        (map (fn [dataset-version]
               ;; get source datasets of merge transformations with appended dataset-version as origin
