@@ -141,7 +141,7 @@
                                                     (assoc import-config :environment environment))]
         (let [initial-dataset-versions  (db.transformation/initial-dataset-version-to-update-by-dataset-id conn {:dataset-id dataset-id
                                                                                                                  :version 1})
-              latest-dataset-versions (db.transformation/latest-dataset-versions-by-dataset-id conn {:dataset-id dataset-id})
+              latest-dataset-versions (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id dataset-id})
               imported-dataset-columns (reduce into [] (map :columns initial-dataset-versions))
               importer-columns         (map  (fn [c] (update c :namespace (fn [ns] (or ns "main")))) (p/columns importer))
               ns-table-names (reset! ns-table-names-atom (reduce #(assoc % %2 (util/gen-table-name "ds")) {} (distinct (map :namespace importer-columns))))

@@ -116,7 +116,7 @@
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
-    (if-let [source-dataset (first (filter #(= "main" (:namespace %)) (db.transformation/latest-dataset-versions-by-dataset-id conn {:dataset-id source-dataset-id})))]
+    (if-let [source-dataset (first (filter #(= "main" (:namespace %)) (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id source-dataset-id})))]
       source-dataset
       (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
                       {:source source})))))
@@ -200,7 +200,7 @@
        :dataset-id (:datasetId merge-source-op)})))
 
 (defn consistency-error? [tenant-conn dataset-id]
-  (let [merged-sources (->> (db.transformation/latest-dataset-versions-by-dataset-id tenant-conn {:dataset-id dataset-id})
+  (let [merged-sources (->> (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
                             (map :transformations)
                             walk/keywordize-keys
                             (filter #(= "core/merge-datasets" (:op %)))
@@ -211,7 +211,7 @@
        :dataset-diff ds-diff}
       (when-let [column-diff (when (not-empty merged-sources)
                                (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
-                                                           (db.transformation/latest-dataset-versions-with-columns-by-dataset-ids tenant-conn)
+                                                           (db.transformation/latest-dataset-version-with-columns-by-dataset-ids tenant-conn)
                                                            (map #(rename-keys % {:dataset_id :dataset-id})))
                                      column-diff-coll (->> merged-sources
                                                            (map (partial merged-columns-diff dss))
