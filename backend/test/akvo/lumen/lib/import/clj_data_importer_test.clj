@@ -7,10 +7,10 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [clojure.tools.logging :as log]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
+            [akvo.lumen.db.transformation :refer [dataset-versions-by-dataset-id-and-version]]
             [akvo.lumen.specs.import :as i-c]
             [akvo.lumen.lib.import.clj-data-importer :as i]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
+            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
             [akvo.lumen.db.transformation-test :refer [get-data]]
             [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
             [akvo.lumen.utils.logging-config :refer [with-no-logs]]
@@ -22,6 +22,9 @@
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+
+(defn dataset-version-by-dataset-id [conn opts]
+  (first (filter #(= "main" (:namespace %)) (dataset-versions-by-dataset-id-and-version conn opts))))
 
 (deftest ^:functional test-import
   (testing "Testing import"
