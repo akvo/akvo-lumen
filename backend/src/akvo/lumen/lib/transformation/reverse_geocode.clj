@@ -21,7 +21,7 @@
   (str table-name "." column-name))
 
 (defn source-table-name [conn {:strs [datasetId mergeColumn geoshapeColumn]}]
-  (let [dsvs (db.transformation/latest-dataset-versions-by-dataset-id conn {:dataset-id datasetId})
+  (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
         columns (w/keywordize-keys (reduce into [] (map :columns dsvs)))
         namespaces (set (engine/namespaces columns [mergeColumn geoshapeColumn]))]
     (if-let [namespace (and (= 1 (count namespaces)) (first namespaces))]
