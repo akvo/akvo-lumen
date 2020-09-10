@@ -21,7 +21,7 @@
     (let [query            (json/parse-string (get query-params "query") keyword)
           namespace        (:namespace query "main")
           tenant-conn      (p/connection tenant-manager tenant)
-          dataset-version  (first (filter #(= namespace (:namespace %)) (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})))
+          dataset-version  (first (filter #(= namespace (:namespace %)) (db.transformation/latest-dataset-versions-by-dataset-id tenant-conn {:dataset-id dataset-id})))
           sql-query        {:table-name  (:table-name dataset-version)
                             :column-name (:columnName query)
                             :limit       (str (:limit query "200"))}
