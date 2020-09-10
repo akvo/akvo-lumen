@@ -201,7 +201,7 @@
 
 (defn consistency-error? [tenant-conn dataset-id]
   (let [merged-sources (->> (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                            :transformations
+                            (map :transformations)
                             walk/keywordize-keys
                             (filter #(= "core/merge-datasets" (:op %)))
                             (map #(-> % :args :source)))]
@@ -211,7 +211,7 @@
        :dataset-diff ds-diff}
       (when-let [column-diff (when (not-empty merged-sources)
                                (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
-                                                           (db.transformation/latest-dataset-versions-by-dataset-ids tenant-conn)
+                                                           (db.transformation/latest-dataset-versions-with-columns-by-dataset-ids tenant-conn)
                                                            (map #(rename-keys % {:dataset_id :dataset-id})))
                                      column-diff-coll (->> merged-sources
                                                            (map (partial merged-columns-diff dss))
@@ -234,7 +234,7 @@
    :origin {:id 'uuid-str
             :title 'str}}"
   [tenant-conn target-dataset-id]
-  (->> (db.transformation/latest-dataset-versions tenant-conn) ;; all dataset_versions
+  (->> (db.transformation/latest-dataset-versions-with-transformations tenant-conn) ;; all dataset_versions
        (filter #(not= target-dataset-id (:dataset_id %))) ;; exclude (target-)dataset(-id)
        (map (fn [dataset-version]
               ;; get source datasets of merge transformations with appended dataset-version as origin
