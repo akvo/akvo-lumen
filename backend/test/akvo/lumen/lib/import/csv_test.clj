@@ -10,17 +10,17 @@
             [clojure.string :as string]
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.lib.import.csv :as csv]
-            [akvo.lumen.db.transformation :refer [dataset-version-by-dataset-id]]
+            [akvo.lumen.db.transformation :refer [dataset-versions-by-dataset-id-and-version]]
             [clojure.test :refer :all]
             [hugsql.core :as hugsql])
   (:import [java.util.concurrent ExecutionException]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
-
-
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
+(defn dataset-version-by-dataset-id [conn opts]
+  (first (filter #(= "main" (:namespace %)) (dataset-versions-by-dataset-id-and-version conn opts))))
 
 (deftest ^:functional test-dos-file
   (testing "Import of DOS-formatted CSV file"
