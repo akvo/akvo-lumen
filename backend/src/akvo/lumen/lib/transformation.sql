@@ -31,14 +31,14 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
                     FROM dataset_version v
                    WHERE v.dataset_id = :dataset-id);
 
--- :name db-latest-dataset-versions-with-columns-by-dataset-ids :? :*
+-- :name db-latest-dataset-version-with-columns-by-dataset-ids :? :*
 -- :doc Returns the most recent dataset version for a given dataset ids
 select DISTINCT ON (dataset_id, namespace) dataset_id, id, version, columns, namespace
 FROM dataset_version
 WHERE dataset_id IN (:v*:dataset-ids)
 order by dataset_id, namespace, version desc;
 
--- :name db-latest-dataset-versions-with-transformations :? :*
+-- :name db-latest-dataset-version-with-transformations :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 select DISTINCT ON (dataset_id, namespace) dataset_id, dataset_version.id as id, version, title, transformations, namespace
 FROM dataset_version, dataset
@@ -52,14 +52,6 @@ where dataset_id= :dataset-id
 AND version= :version
 AND namespace = :namespace;
 
--- :name db-initial-dataset-version-to-update-by-dataset-id :? :1
-SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
-  FROM  dataset_version
-  WHERE dataset_id= :dataset-id AND transformations='[]'
-  AND namespace = :namespace
-  ORDER BY version DESC LIMIT 1;
-
-
 -- :name db-initial-dataset-version-version-by-dataset-id :? :1
 SELECT version
   FROM  dataset_version
@@ -68,12 +60,12 @@ SELECT version
   ORDER BY version DESC LIMIT 1;
 
 
--- :name db-n-initial-dataset-version-to-update-by-dataset-id :? :*
+-- :name db-initial-dataset-version-to-update-by-dataset-id :? :*
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
   FROM  dataset_version
   WHERE dataset_id= :dataset-id AND version= :version ;
 
--- :name db-dataset-versions-by-dataset-id-and-version :? :*
+-- :name db-dataset-version-by-dataset-id-and-version :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations, namespace
   FROM dataset_version

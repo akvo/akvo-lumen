@@ -13,6 +13,7 @@
                             :hidden false,
                             :multipleType nil,
                             :columnName "c1",
+                            :namespace "main",
                             :groupId nil
                             :groupName nil
                             :direction nil,
@@ -26,6 +27,7 @@
                             :groupId nil
                             :groupName nil
                             :columnName "c2",
+                            :namespace "main",
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -37,6 +39,7 @@
                             :groupId nil
                             :groupName nil
                             :columnName "c3",
+                            :namespace "main",
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -47,6 +50,7 @@
                             :groupId nil
                             :groupName nil
                             :multipleType nil,
+                            :namespace "main",
                             :columnName "c4",
                             :direction nil,
                             :sort nil}
@@ -56,6 +60,7 @@
                             :multipleId nil,
                             :hidden false,
                             :multipleType nil,
+                            :namespace "main",
                             :columnName "c5",
                             :groupId nil
                             :groupName nil
@@ -69,6 +74,7 @@
                             :groupId nil
                             :groupName nil
                             :multipleType nil,
+                            :namespace "main",
                             :columnName "c6",
                             :direction nil,
                             :sort nil}])
