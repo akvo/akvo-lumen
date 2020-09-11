@@ -211,7 +211,7 @@
        :dataset-diff ds-diff}
       (when-let [column-diff (when (not-empty merged-sources)
                                (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
-                                                           (db.transformation/latest-dataset-versions-with-columns-by-dataset-ids tenant-conn)
+                                                           (db.transformation/latest-dataset-version-with-columns-by-dataset-ids tenant-conn)
                                                            (map #(rename-keys % {:dataset_id :dataset-id})))
                                      column-diff-coll (->> merged-sources
                                                            (map (partial merged-columns-diff dss))
