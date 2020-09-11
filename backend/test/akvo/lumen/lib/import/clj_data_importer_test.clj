@@ -48,6 +48,7 @@
                                               "type"
                                               "multipleType"
                                               "hidden"
+                                              "namespace"
                                               "multipleId"
                                               "columnName")
                                              ("groupId"
@@ -59,6 +60,7 @@
                                               "type"
                                               "multipleType"
                                               "hidden"
+                                              "namespace"
                                               "multipleId"
                                               "columnName"))))
 

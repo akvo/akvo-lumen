@@ -409,6 +409,7 @@
                                :multipleId nil,
                                :hidden false,
                                :multipleType nil,
+                               :namespace "main",
                                :columnName "c1",
                                :groupId "main"
                                :groupName "main"
