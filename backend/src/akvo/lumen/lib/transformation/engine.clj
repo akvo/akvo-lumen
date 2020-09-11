@@ -200,8 +200,7 @@
                        (db.transformation/initial-dataset-version-to-update-by-dataset-id
                         tenant-conn
                         {:dataset-id dataset-id :version v}))
-        main-current-dsv (first (filter #(= "main" (:namespace %)) current-dataset-versions))]
-    (log/error table-names-dict)
+        current-version (:version (first current-dataset-versions))]
     (doseq [t (vals table-names-dict)] (db.transformation/copy-table tenant-conn
                                                                      {:source-table (:imported t)
                                                                       :dest-table (:new t)}
@@ -216,17 +215,15 @@
           (doseq [dataset-version dsvs]
             (db.transformation/clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
             (let [tables (get table-names-dict (:namespace dataset-version))
-
                   new-dsv (-> dataset-version
                               (assoc :id (str (util/squuid)))
                               (assoc :dataset-id dataset-id)
                               (assoc :table-name (:new tables))
                               (assoc :imported-table-name (:imported tables))
                               (assoc :job-execution-id job-execution-id)
-                              (assoc :version (inc (:version main-current-dsv)))
+                              (assoc :version (inc current-version))
                               (update :columns vec)
-                              ;; TODO FIX THIS 
-                              (assoc :transformations (w/keywordize-keys (vec (butlast (:transformations main-current-dsv))))))]
+                              (update :transformations vec))]
               (db.dataset-version/new-dataset-version tenant-conn new-dsv)
               (db.transformation/drop-table tenant-conn {:table-name (:previous tables)})))
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
