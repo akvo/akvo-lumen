@@ -61,9 +61,6 @@
                                                          (assoc :id (str (util/squuid)))
                                                          (assoc :dataset-id dataset-id)
                                                          (assoc :job-execution-id job-execution-id)
-                                                         ;; :table-name > table-name that should be setted before
-                                                         ;; :imported-table-name >  imported-table-name that should be setted before
-
                                                          (update :columns vec)
                                                          (update :transformations vec)
                                                          (assoc :version version)))))
@@ -184,7 +181,7 @@
                                                       :to-table imported-table-name}
                                                      {}
                                                      {:transaction? false})))
-             (let [coerce-column-fn (fn [{:keys [title id type key multipleId multipleType groupName groupId] :as column}]
+             (let [coerce-column-fn (fn [{:keys [title id type key multipleId multipleType groupName groupId namespace] :as column}]
                                         (cond-> {"type" type
                                                  "title" title
                                                  "columnName" id
@@ -192,6 +189,7 @@
                                                  "groupId" groupId
                                                  "sort" nil
                                                  "direction" nil
+                                                 "namespace" namespace
                                                  "hidden" false}
                                           key           (assoc "key" (boolean key))
                                           multipleType (assoc "multipleType" multipleType)
