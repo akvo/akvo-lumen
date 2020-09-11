@@ -409,6 +409,7 @@
                                :multipleId nil,
                                :hidden false,
                                :multipleType nil,
+                               :namespace "main",
                                :columnName "c1",
                                :groupId nil
                                :groupName nil
@@ -420,6 +421,7 @@
                                :multipleId nil,
                                :hidden false,
                                :groupId nil
+                               :namespace "main",
                                :groupName nil
                                :multipleType nil,
                                :columnName "c2",
