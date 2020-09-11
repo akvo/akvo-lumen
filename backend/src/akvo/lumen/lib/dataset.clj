@@ -82,35 +82,19 @@
 
   always we'll use 'transformations' groupId to include all generated transformations"
   [tenant-conn id]
-  (if-let [dataset (w/keywordize-keys (db.dataset/dataset-in-groups-by-id tenant-conn {:id id}))]
-    (let [columns (remove #(get % :hidden) (reduce #(into % %2) [] (map :columns (vals (:groups dataset)))))
-          groups  (if (= "AKVO_FLOW" (-> dataset :source :kind))
-                    (let [columns-by-group (group-by :groupId columns)
-                          groups           (dissoc columns-by-group nil)
-                          nil-group        (get columns-by-group nil)]
-                      (merge (dissoc groups "metadata")
-                             (reduce (fn [c col]
-                                       (let [k (if (contains? flow-common/metadata-keys (:columnName col))
-                                                 :metadata :transformations)]
-                                         (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                                     {:metadata (get groups "metadata" [])
-                                      :transformations (get groups "transformations" [])}  nil-group)))
-                    (reduce (fn [c col]
-                              (let [k (if (i.csv/valid-column-name? (:columnName col))
-                                        :main :transformations)]
-                                (update c k #(conj % (assoc col :groupId k :groupName k)))))
-                            {:main [] :transformations []}  columns))]
-      (lib/ok
-       {:id              id
-        :name            (:title dataset)
-        :modified        (:modified dataset)
-        :created         (:created dataset)
-        :updated         (:updated dataset)
-        :status          "OK"
-        :transformations (:transformations dataset)
-        :source          (:source dataset)
-        :groups          groups}))
-    (lib/not-found {:error "Not found"})))
+  (if-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [dataset* (-> (select-keys (first dsvs)
+                                    [:id :title :modified :created :updated :source])
+                       (assoc :status "OK"
+                              :transformations (tx.engine/unify-transformation-history dsvs))
+                       (rename-keys {:title :name}))
+          dataset-columns (->> dsvs
+                               (map :columns)
+                               (reduce into [])
+                               (map db.dataset/adapt-group))
+          groups (group-by #(get % "groupId") dataset-columns)]
+      (lib/ok (assoc dataset*  :groups groups)))
+   (lib/not-found {:error "Not found"})))
 
 (defn fetch
   [tenant-conn id]
