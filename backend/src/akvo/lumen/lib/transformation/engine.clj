@@ -228,7 +228,7 @@
               (db.transformation/drop-table tenant-conn {:table-name (:previous tables)})))
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
-              dsvss (map #(assoc % :table-name (:new (get table-names-dict (:imported-table-name %)))) dsvs)
+              dsvss (map #(assoc % :table-name (:new (get table-names-dict (:namespace %)))) dsvs)
               {:keys [success? message dataset-versions execution-log] :as transformation-result}
               (try-apply-operation deps dsvss transformation)]
           (if success?
