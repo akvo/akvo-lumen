@@ -7,7 +7,7 @@
                                          *error-tracker*
                                          error-tracker-fixture]]
             [clojure.tools.logging :as log]
-            [akvo.lumen.db.transformation :refer [dataset-versions-by-dataset-id-and-version]]
+            [akvo.lumen.db.transformation :refer [dataset-version-by-dataset-id-and-version]]
             [akvo.lumen.specs.import :as i-c]
             [akvo.lumen.lib.import.clj-data-importer :as i]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
@@ -24,7 +24,7 @@
 (use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (defn dataset-version-by-dataset-id [conn opts]
-  (first (filter #(= "main" (:namespace %)) (dataset-versions-by-dataset-id-and-version conn opts))))
+  (first (filter #(= "main" (:namespace %)) (dataset-version-by-dataset-id-and-version conn opts))))
 
 (deftest ^:functional test-import
   (testing "Testing import"
@@ -48,6 +48,7 @@
                                               "type"
                                               "multipleType"
                                               "hidden"
+                                              "namespace"
                                               "multipleId"
                                               "columnName")
                                              ("groupId"
@@ -59,6 +60,7 @@
                                               "type"
                                               "multipleType"
                                               "hidden"
+                                              "namespace"
                                               "multipleId"
                                               "columnName"))))
 
