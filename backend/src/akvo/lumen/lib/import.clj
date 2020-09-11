@@ -42,11 +42,12 @@
                :namespace ns*
                :imported-table-name imported-table-name
                :version 1
-               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId]}]
+               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace]}]
                                 {:columnName id
                                  :direction nil
                                  :groupId groupId
                                  :groupName groupName
+                                 :namespace namespace
                                  :hidden false
                                  :key (boolean key)
                                  :multipleId multipleId
