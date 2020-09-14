@@ -122,7 +122,7 @@
   (let [dict (let [[rep-col non-rep-col] (u/split-with-non-stop :repeatable groups)]
                {:rqg-ns (set (map :id rep-col)) :main-ns (set (map :id non-rep-col))})]
     (into [(with-meta
-             (question-responses-base (select-keys responses (:main-ns dict)))
+             (or (question-responses-base (select-keys responses (:main-ns dict))) {})
              {:ns "main"})]
           (mapv #(with-meta
                     (or (question-responses-base {% (get responses %)}) {})
