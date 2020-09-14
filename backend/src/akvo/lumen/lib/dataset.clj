@@ -37,7 +37,9 @@
   [column]
   (get column "sort"))
 
-(defn select-data-sql [table-name columns]
+(defn select-data-sql
+  "first table name is main namespace table"
+  [table-names columns]
   (let [select-expr (->> columns
                          (map (fn [{:strs [type columnName]}]
                                 (condp = type
@@ -49,11 +51,17 @@
                         (filter column-sort-order cols)
                         (sort-by column-sort-order cols)
                         (mapv #(format "%s %s" (get % "columnName") (get % "direction")) cols)
-                        (conj cols "rnum")
+                        (conj cols (format "%s.rnum" (first table-names)))
                         (str/join ", " cols))]
     (format "SELECT %s FROM %s ORDER BY %s"
             select-expr
-            table-name
+            (if (= 1 (count table-names))
+              (first table-names)
+              (format "%s %s" (first table-names)
+                      (let [f (first table-names)
+                            r (rest table-names)]
+                        (str/join ", "
+                                  (map #(format " JOIN %s ON %s.rnum=%s.rnum" % f %) r)))))
             order-by-expr)))
 
 (defn fetch-metadata
@@ -74,6 +82,13 @@
              (rename-keys {:title :name})))
     (lib/not-found {:error "Not found"})))
 
+(defn- groups [dsvs]
+  (let [dataset-columns (->> dsvs
+                             (map :columns)
+                             (reduce into [])
+                             (map db.dataset/adapt-group))]
+    (group-by #(get % "groupId") dataset-columns)))
+
 (defn fetch-groups-metadata
   "Fetch dataset groups metadata (everything apart from rows)
 
@@ -87,13 +102,8 @@
                                     [:id :title :modified :created :updated :source])
                        (assoc :status "OK"
                               :transformations (tx.engine/unify-transformation-history dsvs))
-                       (rename-keys {:title :name}))
-          dataset-columns (->> dsvs
-                               (map :columns)
-                               (reduce into [])
-                               (map db.dataset/adapt-group))
-          groups (group-by #(get % "groupId") dataset-columns)]
-      (lib/ok (assoc dataset*  :groups groups)))
+                       (rename-keys {:title :name}))]
+      (lib/ok (assoc dataset*  :groups (groups dsvs))))
    (lib/not-found {:error "Not found"})))
 
 (defn fetch
@@ -104,7 +114,7 @@
       (fn [d [group-id group]]
         (let [columns (remove #(get % "hidden") (:columns group))
               data (rest (jdbc/query tenant-conn
-                                     [(select-data-sql (:table-name group) columns)]
+                                     [(select-data-sql [(:table-name group)] columns)]
                                      {:as-arrays? true}))]
           (-> d 
               (update :rows (fn [rows] ;; naive impl expecting to have same rows in each group
@@ -121,26 +131,24 @@
 
 (defn fetch-group
   [tenant-conn id group-id]
-  (when-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
-    (let [group-dataset (get (:groups dataset) (if (= "main" group-id) nil group-id))
-          column-remove-condition (condp = group-id
-                                    "metadata" #(not (contains? flow-common/metadata-keys (get % "columnName")))
-                                    "transformations" #(not (tx.engine/is-derived? (get % "columnName")))
-                                    "main" #(not (i.csv/valid-column-name? (get % "columnName")))
-                                    #(not (= group-id (get % "groupId"))))
-          columns (remove #(or (get % "hidden") (column-remove-condition %)) (:columns group-dataset))
+  (when-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [group-dataset (get (groups dsvs) group-id)
+          namespaces (set (map #(get % "namespace" "main") group-dataset))
+          columns (remove #(get % "hidden")  group-dataset)
+          _       (log/debug :namespaces namespaces :group-dataset columns)
+          table-names (map :table-name (filter #(contains? namespaces (:namespace %)) dsvs))
+          q (select-data-sql (reverse (sort table-names)) columns)
+          _ (log/debug :q q :columns columns)
           data (rest (jdbc/query tenant-conn
-                                 [(select-data-sql (:table-name group-dataset) columns)]
+                                 [q]
                                  {:as-arrays? true}))]
-      (-> (select-keys dataset [:updated :created :modified])
+      (log/debug :namespaces namespaces :table-names table-names :data data)
+      (log/debug :columns (map (juxt :namespace :columnName) (w/keywordize-keys columns)))
+      (-> (select-keys (first dsvs) [:updated :created :modified])
           remove-token
           (assoc :rows data
-                 :columns (map (fn [col]
-                                 (cond-> col
-                                   true (assoc "groupId" group-id)
-                                   (contains? #{"main" "transformations" "metadata"} group-id)
-                                   (assoc "groupName" group-id))) columns)
-                 :status "OK" :datasetId id :groupId group-id)))))
+                 :columns columns
+                 :status "OK" :datasetId (:id (first dsvs)) :groupId group-id)))))
 
 (defn sort-text
   [tenant-conn id column-name limit order]
