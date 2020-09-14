@@ -87,7 +87,8 @@
                              (map :columns)
                              (reduce into [])
                              (map db.dataset/adapt-group))]
-    (group-by #(get % "groupId") dataset-columns)))
+    (-> (group-by #(get % "groupId") dataset-columns)
+        (update "transformations" vec))))
 
 (defn fetch-groups-metadata
   "Fetch dataset groups metadata (everything apart from rows)

@@ -14,8 +14,8 @@
                             :multipleType nil,
                             :columnName "c1",
                             :namespace "main",
-                            :groupId nil
-                            :groupName nil
+                            :groupId "main"
+                            :groupName "main"
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -24,8 +24,8 @@
                             :multipleId nil,
                             :hidden false,
                             :multipleType nil,
-                            :groupId nil
-                            :groupName nil
+                            :groupId "main"
+                            :groupName "main"
                             :columnName "c2",
                             :namespace "main",
                             :direction nil,
@@ -36,8 +36,8 @@
                             :multipleId nil,
                             :hidden false,
                             :multipleType nil,
-                            :groupId nil
-                            :groupName nil
+                            :groupId "main"
+                            :groupName "main"
                             :columnName "c3",
                             :namespace "main",
                             :direction nil,
@@ -47,8 +47,8 @@
                             :title "Temperature",
                             :multipleId nil,
                             :hidden false,
-                            :groupId nil
-                            :groupName nil
+                            :groupId "main"
+                            :groupName "main"
                             :multipleType nil,
                             :namespace "main",
                             :columnName "c4",
@@ -62,8 +62,8 @@
                             :multipleType nil,
                             :namespace "main",
                             :columnName "c5",
-                            :groupId nil
-                            :groupName nil
+                            :groupId "main"
+                            :groupName "main"
                             :direction nil,
                             :sort nil}
                            {:key false,
@@ -71,8 +71,8 @@
                             :title "Cat",
                             :multipleId nil,
                             :hidden false,
-                            :groupId nil
-                            :groupName nil
+                            :groupId "main"
+                            :groupName "main"
                             :multipleType nil,
                             :namespace "main",
                             :columnName "c6",
