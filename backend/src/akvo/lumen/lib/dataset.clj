@@ -60,7 +60,7 @@
               (format "%s %s" (first table-names)
                       (let [f (first table-names)
                             r (rest table-names)]
-                        (str/join ", "
+                        (str/join " "
                                   (map #(format " JOIN %s ON %s.rnum=%s.rnum" % f %) r)))))
             order-by-expr)))
 
@@ -108,26 +108,29 @@
 
 (defn fetch
   [tenant-conn id]
-  (when-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
-    (->
-     (reduce
-      (fn [d [group-id group]]
-        (let [columns (remove #(get % "hidden") (:columns group))
-              data (rest (jdbc/query tenant-conn
-                                     [(select-data-sql [(:table-name group)] columns)]
-                                     {:as-arrays? true}))]
-          (-> d 
-              (update :rows (fn [rows] ;; naive impl expecting to have same rows in each group
-                              (if (seq rows)
-                                (map into rows data)                                
-                                (apply conj rows data))))
-              (update :columns #(apply conj % columns))
-              (assoc :status "OK"))))
-      (assoc dataset :rows [] :columns [])
-      (:groups dataset))
-     remove-token
-     (select-keys [:created :id :modified :status :title :transformations :updated :author :source :rows :columns])
-     (rename-keys {:title :name}))))
+  (when-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [groups-dataset (groups dsvs)
+          columns (reduce into [] (vals groups-dataset))
+          namespaces (set (map #(get % "namespace" "main") columns))
+          columns (remove #(get % "hidden")  columns)
+          _       (log/debug :namespaces namespaces :group-dataset columns)
+          table-names (map :table-name (filter #(contains? namespaces (:namespace %)) dsvs))
+          q (select-data-sql (reverse (sort table-names)) columns)
+          _ (log/debug :q q :columns columns)
+          data (rest (jdbc/query tenant-conn
+                                 [q]
+                                 {:as-arrays? true}))]
+      (log/debug :namespaces namespaces :table-names table-names :data data)
+      (log/debug :columns (map (juxt :namespace :columnName) (w/keywordize-keys columns)))
+      (-> (select-keys (first dsvs) [:created :id :modified :status :title :updated :author :source ])
+
+          remove-token
+          (assoc :rows data
+                 :transformations (tx.engine/unify-transformation-history dsvs)
+                 :columns columns
+                 :status "OK")
+          (rename-keys {:title :name})
+          ))))
 
 (defn fetch-group
   [tenant-conn id group-id]
