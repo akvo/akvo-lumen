@@ -46,7 +46,8 @@
                                         {:possible-reason "maybe you don't update the flow dataset!? (via client dashboard ...)"}})))
 
           new-columns (->> (columns-to-extract (:columns args) selected-column caddisfly-schema (:extractImage args))
-                           (multiple-column/add-name-to-new-columns columns))]
+                           (multiple-column/add-name-to-new-columns columns)
+                           (map #(assoc % :namespace namespace)))]
       (if-let [errors (->> (map :title new-columns)
                            (filter #(engine/column-title-error? % columns))
                            not-empty)]

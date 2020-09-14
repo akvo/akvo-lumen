@@ -411,8 +411,8 @@
                                :multipleType nil,
                                :namespace "main",
                                :columnName "c1",
-                               :groupId nil
-                               :groupName nil
+                               :groupId "main"
+                               :groupName "main"
                                :direction nil,
                                :sort nil}
                               {:key false,
@@ -420,9 +420,9 @@
                                :title "two",
                                :multipleId nil,
                                :hidden false,
-                               :groupId nil
+                               :groupId "main"
                                :namespace "main",
-                               :groupName nil
+                               :groupName "main"
                                :multipleType nil,
                                :columnName "c2",
                                :direction nil,

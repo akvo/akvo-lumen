@@ -44,6 +44,7 @@
                                              "type" "geopoint"
                                              "sort" nil
                                              "hidden" false
+                                             "namespace" namespace
                                              "direction" nil
                                              "columnName" column-name-geo})]
               (jdbc/with-db-transaction [conn tenant-conn]
