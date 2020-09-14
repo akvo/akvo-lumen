@@ -16,18 +16,19 @@
      (every? (comp util/valid-type? :type) columns-to-extract)
      (#{"fail" "leave-empty" "delete-row"} onError))))
 
-(defn- apply-operation [deps table-name columns op-spec]
+(defn- apply-operation [deps dataset-versions op-spec]
   (let [{:keys [onError op args] :as op-spec} (walk/keywordize-keys op-spec)]
     ;; so far we only implement `caddisfly` in other case we throw exception based on core/condp impl
     (condp = (-> args :selectedColumn :multipleType)
-      "caddisfly" (t.m-c.caddisfly/apply-operation deps table-name columns op-spec)
-      "geo-shape-features" (t.m-c.geo-shape-features/apply-operation deps table-name columns op-spec))))
+      "caddisfly" (t.m-c.caddisfly/apply-operation deps dataset-versions op-spec)
+      "geo-shape-features" (t.m-c.geo-shape-features/apply-operation deps dataset-versions op-spec))))
 
 (defmethod t.engine/apply-operation "core/extract-multiple"
-  [deps table-name columns op-spec]
-  (-> (apply-operation deps table-name columns op-spec)
+  [deps dataset-versions op-spec]
+  (-> (apply-operation deps dataset-versions op-spec)
       (update :columns walk/stringify-keys)))
 
 (defmethod t.engine/columns-used "core/extract-multiple"
   [applied-transformation columns]
-  [(:columnName (:selectedColumn (:args applied-transformation)))])
+  [(-> applied-transformation :args :selectedColumn :columnName)])
+
