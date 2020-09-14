@@ -114,15 +114,11 @@
           columns (reduce into [] (vals groups-dataset))
           namespaces (set (map #(get % "namespace" "main") columns))
           columns (remove #(get % "hidden")  columns)
-          _       (log/debug :namespaces namespaces :group-dataset columns)
           table-names (map :table-name (filter #(contains? namespaces (:namespace %)) dsvs))
           q (select-data-sql (reverse (sort table-names)) columns)
-          _ (log/debug :q q :columns columns)
           data (rest (jdbc/query tenant-conn
                                  [q]
                                  {:as-arrays? true}))]
-      (log/debug :namespaces namespaces :table-names table-names :data data)
-      (log/debug :columns (map (juxt :namespace :columnName) (w/keywordize-keys columns)))
       (-> (select-keys (first dsvs) [:created :id :modified :status :title :updated :author :source ])
 
           remove-token
@@ -139,15 +135,11 @@
     (let [group-dataset (get (groups dsvs) group-id)
           namespaces (set (map #(get % "namespace" "main") group-dataset))
           columns (remove #(get % "hidden")  group-dataset)
-          _       (log/debug :namespaces namespaces :group-dataset columns)
           table-names (map :table-name (filter #(contains? namespaces (:namespace %)) dsvs))
           q (select-data-sql (reverse (sort table-names)) columns)
-          _ (log/debug :q q :columns columns)
           data (rest (jdbc/query tenant-conn
                                  [q]
                                  {:as-arrays? true}))]
-      (log/debug :namespaces namespaces :table-names table-names :data data)
-      (log/debug :columns (map (juxt :namespace :columnName) (w/keywordize-keys columns)))
       (-> (select-keys (first dsvs) [:updated :created :modified])
           remove-token
           (assoc :rows data
