@@ -16,11 +16,23 @@
                   (= (engine/error-strategy op-spec) "fail")))))
 
 (defmethod engine/apply-operation "core/combine"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (let [new-column-name (engine/next-column-name columns)
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [namespace (engine/get-namespace op-spec)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+        columns (vec (:columns dsv))
+        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
+        new-column-name (engine/next-column-name all-dsv-columns)
         {[first-column-name second-column-name] "columnNames"
          separator "separator"
-         column-title "newColumnTitle"} (engine/args op-spec)]
+         column-title "newColumnTitle"} (engine/args op-spec)
+        new-columns (conj columns {"title" column-title
+                                   "type" "text"
+                                   "sort" nil
+                                   "namespace" namespace
+                                   "hidden" false
+                                   "direction" nil
+                                   "columnName" new-column-name})]
     (if-let [title-error (engine/column-title-error? column-title columns)]
       title-error
       (do
@@ -36,13 +48,11 @@
         {:success? true
          :execution-log [(format "Combined columns %s, %s into %s"
                                  first-column-name second-column-name new-column-name)]
-         :columns (conj columns {"title" column-title
-                                 "type" "text"
-                                 "sort" nil
-                                 "hidden" false
-                                 "direction" nil
-                                 "columnName" new-column-name})}))))
+         :dataset-versions (vals (-> dataset-versions
+                                     (assoc-in [namespace :columns] new-columns)
+                                     (update-in [namespace :transformations]
+                                                engine/update-dsv-txs op-spec columns new-columns)))}))))
 
 (defmethod engine/columns-used "core/combine"
   [applied-transformation columns]
-  [(:columnNames (:args applied-transformation))])
+  (vec (:columnNames (:args applied-transformation))))
