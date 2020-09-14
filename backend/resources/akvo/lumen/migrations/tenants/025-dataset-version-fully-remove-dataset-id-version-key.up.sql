@@ -1,0 +1,2 @@
+ALTER TABLE dataset_version DROP CONSTRAINT IF EXISTS dataset_version_dataset_id_version_key;
+DROP INDEX IF EXISTS dataset_version_dataset_id_version_key;
