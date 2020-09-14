@@ -266,7 +266,7 @@
 (defn apply-dataset-transformations-on-table
   "no transactional thus we can discard the temporary table we are working with"
   [conn caddisfly dataset-id transformations ns-table-names ns-imported-tables new-columns old-columns]
-  (let [new-columns (map #(update % :namespace (fn [ns] (or ns "main"))) new-columns)]
+  (let [new-columns (map #(update % "namespace" (fn [ns] (or ns "main"))) new-columns)]
     (loop [dsvs            (generate-dsvs new-columns ns-table-names ns-imported-tables)
            transformations transformations
            applied-txs     []]
