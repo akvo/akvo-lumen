@@ -707,11 +707,12 @@
         new-column-name      "Derived column name"
         uncategorized-value  "Uncategorised value"
         new-derived-column   {:sort       nil,
-	                      :type       "text",
-	                      :title      new-column-name
-	                      :hidden     false,
-	                      :direction  nil,
-	                      :columnName "d1"}
+                              :type       "text",
+                              :title      new-column-name
+                              :hidden     false,
+                              :namespace "main"
+                              :direction  nil,
+                              :columnName "d1"}
         mappings*            [[[">=" 0] ["<=" 1] "one"]
                               [["=" 2] nil "two"]]
         tx                   (gen-transformation "core/derive-category"
@@ -750,11 +751,12 @@
         new-column-name      "Derived column name"
         uncategorized-value  "Uncategorised value"
         new-derived-column   {:sort       nil,
-	                      :type       "text",
-	                      :title      new-column-name
-	                      :hidden     false,
-	                      :direction  nil,
-	                      :columnName "d1"}
+                              :type       "text",
+                              :title      new-column-name
+                              :hidden     false,
+                              :namespace "main"
+                              :direction  nil,
+                              :columnName "d1"}
         mappings*            [[["v2" "v3"] "mapped-1"]
                               [["v4"] "mapped-2"]]
         tx                   (gen-transformation "core/derive-category"
