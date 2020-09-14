@@ -1,7 +1,11 @@
 #kaocha/v1
-{:tests
- [{:id :all
-   :test-paths ["test"]
-   :kaocha.spec.test.check/instrument? true
-   :source-paths ["src" "specs" "dev/src" "dev/resources" "test/resources"]
-   :kaocha.plugin.randomize/randomize? false}]}
+{:tests [{:id :all
+          :type :kaocha.type/clojure.test
+          :test-paths ["test"]
+          :source-paths ["src" "specs" "dev/src" "dev/resources" "test/resources"]}]
+ :plugins [:kaocha.plugin/filter
+           :kaocha.plugin/capture-output
+           :kaocha.plugin/profiling
+           :orchestra
+           :preloads]
+ :kaocha.plugin.preloads/ns-names [akvo.lumen.specs]}

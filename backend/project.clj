@@ -81,13 +81,14 @@
   :profiles
   {:dev           [:project/dev :profiles/dev :kaocha]
    :test          [:project/test :profiles/test :kaocha]
-   :kaocha        {:dependencies [[lambdaisland/kaocha "1.0.669"
+   :kaocha        {:dependencies [[lambdaisland/kaocha "1.0.681"
                                    :exclusions [fipp
                                                 mvxcvi/puget
                                                 org.clojure/core.rrb-vector
                                                 org.clojure/java.classpath
                                                 org.clojure/spec.alpha
-                                                org.clojure/tools.reader]]]}
+                                                org.clojure/tools.reader]]
+                                  [orchestra "2020.07.12-1"]]}
    :uberjar       {:aot :all}
    :profiles/dev  {}
    :profiles/test  {}
