@@ -34,7 +34,8 @@
           columns (vec (:columns dsv))
           selected-column           (find-column (walk/keywordize-keys columns) (-> args :selectedColumn :columnName))
           new-columns (->> (columns-to-extract (:columns args) selected-column (:extractImage args))
-                           (multiple-column/add-name-to-new-columns columns))]
+                           (multiple-column/add-name-to-new-columns columns)
+                           (map #(assoc % :namespace namespace)))]
       (if-let [errors (->> (map :title new-columns)
                            (filter #(engine/column-title-error? % columns))
                            not-empty)]
