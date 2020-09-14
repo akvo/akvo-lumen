@@ -29,6 +29,7 @@
         new-columns (conj columns {"title" column-title
                                    "type" "text"
                                    "sort" nil
+                                   "namespace" namespace
                                    "hidden" false
                                    "direction" nil
                                    "columnName" new-column-name})]

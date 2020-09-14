@@ -96,7 +96,7 @@
                                       :analysis)
                                  pattern)]
         (let [new-rows-count    (inc (:max-coincidences-in-one-row pattern-analysis))
-              new-columns       (columns-to-extract (new-column-name args) new-rows-count (selected-column args) all-dsv-columns)
+              new-columns       (map #(assoc % :namespace namespace) (columns-to-extract (new-column-name args) new-rows-count (selected-column args) all-dsv-columns))
               add-db-columns    (doseq [c new-columns]
                                   (db.tx.engine/add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
