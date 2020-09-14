@@ -45,6 +45,7 @@
                            "type" "text"
                            "sort" nil
                            "hidden" false
+                           "namespace" namespace
                            "direction" nil
                            "columnName" column-name})]
     (if-let [response-error (engine/column-title-error? (get target "title") columns)]
