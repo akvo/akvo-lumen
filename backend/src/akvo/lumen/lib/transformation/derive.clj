@@ -191,6 +191,7 @@
                                                    "type"       column-type
                                                    "sort"       nil
                                                    "hidden"     false
+                                                   "namespace"  namespace
                                                    "direction"  nil
                                                    "columnName" new-column-name})]
                     (db.tx.engine/add-column conn {:table-name table-name
