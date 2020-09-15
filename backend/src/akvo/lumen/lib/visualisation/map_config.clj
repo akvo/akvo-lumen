@@ -5,7 +5,7 @@
             [clojure.tools.logging :as log]
             [clojure.walk :as walk]
             [akvo.lumen.db.dataset :as db.dataset]
-            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause)]
             [akvo.lumen.db.raster :as db.raster])
   (:import [java.awt Color]))
 
@@ -143,7 +143,7 @@
     :else []))
 
 (defn shape-aggregation-sql
-  [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index]
+  [tenant-conn columns geom-column popup-columns point-color-column where-clause current-layer layer-index]
   (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id (:aggregationDataset current-layer)})
         point-table-name table-name
         point-columns columns
@@ -232,9 +232,11 @@
             shape-table-name
             shape-table-name)))
 
-(defn point-sql [tenant-conn columns table-name geom-column popup-columns
+(defn point-sql [tenant-conn columns geom-column popup-columns
                  point-color-column where-clause {:keys [datasetId] :as layer}]
-  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+  (let [ds-versions (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+        columns (reduce into [] (map :columns ds-versions))
+        table-names (map :table-name ds-versions)
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
                                 #{} columns)
@@ -248,12 +250,15 @@
                 point-color-column (conj (str (sql-option-bucket-column point-color-column) " as " (:columnName point-color-column)))))]
     (format "select %s from %s where %s"
                         (str/join ", " cols)
-                        table-name
+                        (from-clause table-names)
                         where-clause)))
 
-(defn shape-sql [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause
+(defn shape-sql [tenant-conn columns geom-column popup-columns point-color-column where-clause
                  {:keys [datasetId shapeLabelColumn ] :as layer}]
-  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+  (let [ds-versions (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+        columns (reduce into [] (map :columns ds-versions))
+        table-names (map :table-name ds-versions)
+
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
                                 #{} columns)
@@ -268,30 +273,27 @@
                 shapeLabelColumn (conj shapeLabelColumn)))]
     (format "select %s from %s where %s"
             (str/join ", " cols)
-            table-name
+            (from-clause table-names)
             where-clause)))
 
 (defn get-sql
-  [tenant-conn columns table-name geom-column popup-columns point-color-column
+  [tenant-conn columns geom-column popup-columns point-color-column
    where-clause {:keys [aggregationDataset aggregationColumn
                         aggregationGeomColumn layerType]
                  :as layer} layer-index]
   (cond
 
-    (= layerType "raster")
-    (format "SELECT * FROM %s" table-name)
-
     (and aggregationDataset aggregationColumn aggregationGeomColumn)
-    (shape-aggregation-sql tenant-conn columns table-name geom-column
+    (shape-aggregation-sql tenant-conn columns geom-column
                            popup-columns (:columnName point-color-column) where-clause layer
                            layer-index)
 
     (= layerType "geo-shape")
-    (shape-sql tenant-conn columns table-name geom-column popup-columns
+    (shape-sql tenant-conn columns geom-column popup-columns
                (:columnName point-color-column) where-clause layer)
 
     :else
-    (point-sql tenant-conn columns table-name geom-column popup-columns
+    (point-sql tenant-conn columns geom-column popup-columns
                point-color-column where-clause layer)))
 
 (defn get-interactivity
@@ -326,7 +328,7 @@
           (or max "255")
           (or end-color "#000000")))
 
-(defn get-layers [tenant-conn layers metadata-array table-name]
+(defn- get-layers [tenant-conn layers metadata-array]
   (map-indexed (fn [idx {:keys [datasetId rasterId filters geom popup pointColorColumn]
                          :as layer}]
                  (if (= (:layerType layer) "raster")
@@ -340,12 +342,13 @@
                                  :sql (format "SELECT * FROM %s" raster_table)
                                  :srid "3857"}})
                    (let [geom-column (get-geom-column layer)
-                         {:keys [columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+                         ds-versions (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+                         columns (reduce into [] (map :columns ds-versions))
                          kw-columns (walk/keywordize-keys columns)
                          where-clause (filter/sql-str kw-columns filters)
                          popup-columns (mapv :column popup)
                          point-color-column (find-column kw-columns pointColorColumn)
-                         sql (get-sql tenant-conn columns table-name geom-column
+                         sql (get-sql tenant-conn columns geom-column
                                       popup-columns point-color-column
                                       where-clause layer idx)]
 
@@ -359,12 +362,12 @@
                                 :srid "4326"}})))
                layers))
 
-(defn build [tenant-conn table-name layers metadata-array]
+(defn builde [tenant-conn layers metadata-array]
   {:version "1.6.0"
    :buffersize {:png 8
                 :grid.json 0
                 :mvt 0}
-   :layers (get-layers tenant-conn layers metadata-array table-name)})
+   :layers (get-layers tenant-conn layers metadata-array)})
 
 (defn build-raster [table-name min max]
   {:version "1.6.0"
