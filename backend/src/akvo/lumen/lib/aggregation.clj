@@ -17,31 +17,27 @@
             [clojure.walk :as walk]))
 
 (defmulti query*
-  (fn [tenant-conn dataset visualisation-type query]
+  (fn [tenant-conn dataset-versions visualisation-type query]
     visualisation-type))
 
 (defmethod query* :default
-  [tenant-conn dataset visualisation-type query]
+  [tenant-conn dataset-versions visualisation-type query]
   (lib/bad-request {"message" "Unsupported visualisation type"
                     "visualisationType" visualisation-type
                     "query" query}))
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (reduce (fn [c {:keys [table-name columns namespace]}]
-                               (cond-> c
-                                 true (update :columns into columns)
-                                 (= namespace "main") (assoc :table-name table-name)))
-                             {:table-name nil :columns []}
-                             (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id}))]
+    (if-let [dataset-versions (seq (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id}))]
       (try
-        (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
+        (query* tenant-tx-conn (map #(update % :columns (comp walk/keywordize-keys vec))
+                                    dataset-versions)
+                visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
           (log/warn e :query query :visualisation-type visualisation-type)
           (lib/bad-request (merge {:message (.getMessage e)}
                                   (ex-data e)))))
       (lib/not-found {"datasetId" dataset-id}))))
-
 
 (def vis-aggregation-mapper {"pivot table" "pivot"
                              "line"      "line"
@@ -158,31 +154,31 @@
 
 
 (defmethod query* "pivot"
-  [tenant-conn dataset _ query]
-  (pivot/query tenant-conn dataset query))
+  [tenant-conn dataset-versions _ query]
+  (pivot/query tenant-conn dataset-versions query))
 
 (defmethod query* "pie"
-  [tenant-conn dataset _ query]
-  (pie/query tenant-conn dataset query))
+  [tenant-conn dataset-versions _ query]
+  (pie/query tenant-conn dataset-versions query))
 
 (defmethod query* "donut"
-  [tenant-conn dataset _ query]
-  (pie/query tenant-conn dataset query))
+  [tenant-conn dataset-versions _ query]
+  (pie/query tenant-conn dataset-versions query))
 
 (defmethod query* "line"
-  [tenant-conn dataset _ query]
-  (line/query tenant-conn dataset query))
+  [tenant-conn dataset-versions _ query]
+  (line/query tenant-conn dataset-versions query))
 
 (defmethod query* "bar"
-  [tenant-conn dataset _ query]
-  (bar/query tenant-conn dataset query))
+  [tenant-conn dataset-versions _ query]
+  (bar/query tenant-conn dataset-versions query))
 
 (defmethod query* "scatter"
-  [tenant-conn dataset _ query]
-  (scatter/query tenant-conn dataset query))
+  [tenant-conn dataset-versions _ query]
+  (scatter/query tenant-conn dataset-versions query))
 
 (defmethod query* "bubble"
-  [tenant-conn dataset _ query]
-  (bubble/query tenant-conn dataset query))
+  [tenant-conn dataset-versions _ query]
+  (bubble/query tenant-conn dataset-versions query))
 
 
