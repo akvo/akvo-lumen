@@ -83,6 +83,11 @@
   ([label] (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) label))
   ([] (db-conn "t1")))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Test
+;;;
+
 (comment
 
   ;; Run all tests

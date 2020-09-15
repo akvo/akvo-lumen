@@ -69,9 +69,9 @@
   :aliases {"setup" ["run" "-m" "duct.util.repl/setup"]
             "migrate" ["run" "-m" "dev/migrate"]
             "seed" ["run" "-m" "dev/seed"]
-            "kaocha-unit" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :unit]
-            "kaocha-functional" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :functional]
-            ;; "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]
+            "test-all" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]
+            "test-unit" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :unit]
+            "test-functional" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner" "--focus-meta" :functional]
             }
   :test-selectors {:default (and (constantly true)
                                  (complement :functional))
