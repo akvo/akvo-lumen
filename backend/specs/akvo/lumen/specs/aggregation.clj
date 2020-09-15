@@ -12,7 +12,8 @@
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
             [clojure.spec.alpha :as s]))
 
-(s/def ::aggregation/dataset (s/keys :req-un [::db.dsv.s/columns ::db.dsv.s/table-name]))
+(s/def ::aggregation/dataset-version (s/keys :req-un [::db.dsv.s/columns ::db.dsv.s/table-name]))
+(s/def ::aggregation/dataset-versions (s/coll-of ::aggregation/dataset-version :distinct true))
 (s/def ::aggregation.pie/bucketColumn ::db.dsv.column.s/columnName)
 (s/def ::aggregation.pie/query (s/keys :req-un [::postgres.filter/filters
                                                 ::aggregation.pie/bucketColumn]))
@@ -20,8 +21,8 @@
 (s/fdef aggregation.pie/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
-	 :dataset ::aggregation/dataset
-	 :query ::aggregation.pie/query)
+         :dataset-versions ::aggregation/dataset-versions
+         :query ::aggregation.pie/query)
   :ret any?)
 
 (s/def ::aggregation.pivot/categoryColumn (s/nilable ::db.dsv.column.s/columnName)) ;; todo should be fixed in client side?
@@ -42,8 +43,8 @@
 (s/fdef aggregation.pivot/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
-	 :dataset ::aggregation/dataset
-	 :query ::aggregation.pivot/query)
+         :dataset-versions ::aggregation/dataset-versions
+         :query ::aggregation.pivot/query)
   :ret any?)
 
 (s/def ::aggregation.bar/bucketColumn (s/nilable ::db.dsv.column.s/columnName))
@@ -92,8 +93,8 @@
 (s/fdef aggregation.bar/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
-	 :dataset ::aggregation/dataset
-	 :query ::aggregation.bar/query)
+         :dataset-versions ::aggregation/dataset-versions
+         :query ::aggregation.bar/query)
   :ret any?)
 
 (s/def ::aggregation.bubble/bucketColumn ::db.dsv.column.s/columnName)
@@ -108,8 +109,8 @@
 (s/fdef aggregation.bubble/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
-	 :dataset ::aggregation/dataset
-	 :query ::aggregation.bubble/query)
+         :dataset-versions ::aggregation/dataset-versions
+         :query ::aggregation.bubble/query)
   :ret any?)
 
 (s/def ::aggregation.line/metricColumnX ::db.dsv.column.s/columnName)
@@ -124,8 +125,8 @@
 (s/fdef aggregation.line/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
-	 :dataset ::aggregation/dataset
-	 :query ::aggregation.line/query)
+         :dataset-versions ::aggregation/dataset-versions
+         :query ::aggregation.line/query)
   :ret any?)
 
 (s/def ::aggregation.scatter/metricColumnX ::db.dsv.column.s/columnName)
@@ -148,6 +149,6 @@
 (s/fdef aggregation.scatter/query
   :args (s/cat
          :db-conn ::db.s/tenant-connection
-	 :dataset ::aggregation/dataset
-	 :query ::aggregation.scatter/query)
+         :dataset-versions ::aggregation/dataset-versions
+         :query ::aggregation.scatter/query)
   :ret any?)
