@@ -35,7 +35,7 @@
               *keycloak* (ig/init-key :akvo.lumen.component.keycloak/authorization-service keycloak-config )]
       (f))))
 
-(use-fixtures :once system-fixture tenant-conn-fixture fixture tu/spec-instrument)
+(use-fixtures :once system-fixture tenant-conn-fixture fixture)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

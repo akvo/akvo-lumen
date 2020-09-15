@@ -51,14 +51,6 @@
           [job ds-job]
           res)))))
 
-(defn spec-instrument
-  "Fixture to instrument all functions"
-  [f]
-  (stest/instrument)
-  (let [r (f)]
-    (stest/unstrument)
-    r))
-
 (defn import-file
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
   [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]

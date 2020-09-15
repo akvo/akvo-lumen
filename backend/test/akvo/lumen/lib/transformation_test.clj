@@ -72,7 +72,7 @@
 (alias 'db.dataset-version.s                    'akvo.lumen.specs.db.dataset-version)
 (alias 'db.dataset-version.column.s             'akvo.lumen.specs.db.dataset-version.column)
 
-(use-fixtures :once tu/spec-instrument caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
+(use-fixtures :once caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
@@ -614,7 +614,8 @@
         (is (= (:status job) "FAILED"))
         (is (= (:error-message job) "Cannot delete column. It is used in the following visalisations: 'Visualisation'"))))))
 
-(deftest ^:functional multiple-column-test
+(deftest ^{:functional true
+           :kaocha/pending false} multiple-column-test
   (let [multiple-column-type       "caddisfly"
         {:keys [hasImage columns]} (:body (multiple-column/details {:caddisfly *caddisfly*} multiple-column-type import.values.s/cad1-id))
         bols                       (at-least-one-true (count columns))
@@ -641,16 +642,18 @@
                            (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
                                                      {::import.values.s/multipleId import.values.s/cad1-id
                                                       ::import.values.s/id         "c1"}))
-          [tag _ :as res] (apply-transformation
-                           {:type :transformation
-                            :transformation
-                            (-> (gen-transformation :core/extract-multiple
-                                                    {::db.dataset-version.column.s/columnName "c1"
-                                                     ::transformation.split-column.s/pattern  "-"
-                                                     ::transformation.engine.s/onError        "fail"}
-                                                    :selectedColumn selected-column)
-                                (update-in ["args" "extractImage"] (constantly true))
-                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+          multiple-tx {:type :transformation
+                       :transformation
+                       (-> (gen-transformation :core/extract-multiple
+                                               {::db.dataset-version.column.s/columnName "c1"
+                                                ::transformation.split-column.s/pattern  "-"
+                                                ::transformation.engine.s/onError        "fail"}
+                                               :selectedColumn selected-column)
+                           (update-in ["args" "extractImage"] (constantly true))
+                           (assoc-in ["args" "columns"] (stringify-keys columns-payload)))}
+          _ (log/error :multiple-tx multiple-tx)
+          [tag _ :as res] (apply-transformation multiple-tx)]
+      
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
 

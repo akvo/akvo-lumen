@@ -1,13 +1,11 @@
 #kaocha/v1
-{:tests
- [{:id :all
-   :source-paths ["src"]
-   :test-paths ["test"]}
-  {:id :unit
-   :focus-meta [:unit]
-   :source-paths ["src"]
-   :test-paths ["test"]}
-  {:id :functional
-   :focus-meta [:functional]
-   :source-paths ["src"]
-   :test-paths ["test"]}]}
+{:tests [{:id :all
+          :type :kaocha.type/clojure.test
+          :test-paths ["test"]
+          :source-paths ["src" "specs" "dev/src" "dev/resources" "test/resources"]}]
+ :plugins [:kaocha.plugin/filter
+           :kaocha.plugin/capture-output
+           :kaocha.plugin/profiling
+           :orchestra
+           :preloads]
+ :kaocha.plugin.preloads/ns-names [akvo.lumen.specs]}
