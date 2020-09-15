@@ -104,18 +104,21 @@
          (let [current-layer-type (:layerType current-layer)
                current-dataset-id (if (= current-layer-type "raster")
                                     (:rasterId current-layer)
-                                    (:datasetId current-layer))
-               {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
-                                                           (db.raster/raster-by-id tenant-conn {:id current-dataset-id})
-                                                           (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id}))
-               current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
-           (map-metadata/build tenant-conn
-                               (or raster_table
-                                   table-name
-                                   (when (not= current-layer-type "raster")
-                                     (throw
-                                      (ex-info "no authorised to create a map visualisation with current dataset associated" {:datasetId current-dataset-id}))))
-                               current-layer current-where-clause opts)))
+                                    (:datasetId current-layer))]
+           (if (= current-layer-type "raster")
+             (let [{:keys [raster_table]} (db.raster/raster-by-id tenant-conn {:id current-dataset-id})]
+               (map-metadata/raster-metadata tenant-conn raster_table current-layer opts))
+             (let [ds-versions          (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id})
+                   columns              (reduce into [] (map :columns ds-versions))
+                   table-names (map :table-name ds-versions)
+                   current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
+               (map-metadata/build tenant-conn
+                                    (or (seq table-names)
+                                        (throw
+                                         (ex-info "no authorised to create a map visualisation with current dataset associated" {:datasetId current-dataset-id})))
+                                    current-layer current-where-clause opts)
+               ))
+))
        layers))
 
 (defn create
@@ -123,6 +126,7 @@
   (try
     (conform-create-args layers)
     (let [metadata-array (metadata-layers tenant-conn layers opts)
+          _ (log/error :metadata-array metadata-array)
           map-config (map-config/build tenant-conn layers metadata-array)
           headers* (headers tenant-conn)
           layer-group-id (-> (http.client/post* (format "%s/layergroup" windshaft-url)
