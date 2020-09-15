@@ -2,6 +2,7 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [akvo.lumen.lib.aggregation.commons :refer (sql-option-bucket-column)]
+            [akvo.lumen.lib.dataset.utils :refer (from-clause)]
             [clojure.walk :as walk]
             [clojure.string :as str]))
 
@@ -51,11 +52,11 @@
       sorted)))
 
 (defn point-color-mapping
-  [tenant-conn table-name {:keys [pointColorMapping pointColorColumn]} where-clause columns]
+  [tenant-conn table-names {:keys [pointColorMapping pointColorColumn]} where-clause columns]
   (when pointColorColumn
     (let [pointColorColumn (first (filter #(= (:columnName %) pointColorColumn) columns))
           sql-str (format "SELECT distinct %s AS value FROM %s WHERE %s LIMIT 22"
-                          (sql-option-bucket-column pointColorColumn) table-name where-clause)
+                          (sql-option-bucket-column pointColorColumn) (from-clause table-names) where-clause)
           distinct-values (map :value
                                (jdbc/query tenant-conn sql-str))
           used-colors (set (map :color pointColorMapping))
@@ -102,7 +103,7 @@
 (defn- antimeridian? [opts]
   (= (:centre-of-the-world opts) "antimeridian"))
 
-(defn bounds [tenant-conn table-name layer where-clause opts]
+(defn bounds [tenant-conn table-names layer where-clause opts]
   (let [geom (or (:geom layer)
                  (format "ST_SetSRID(ST_MakePoint(%s, %s), 4326)"
                          (:longitude layer)
@@ -111,7 +112,7 @@
                        "SELECT ST_Extent(ST_ShiftLongitude(%s)) FROM %s WHERE %s"
                        "SELECT ST_Extent(%s) FROM %s WHERE %s")
         sql-str (format bounds-query
-                        geom table-name where-clause)]
+                        geom (from-clause table-names) where-clause)]
     (when-some [st-extent (-> (jdbc/query tenant-conn sql-str)
                               first :st_extent)]
       (parse-box st-extent))))
@@ -126,6 +127,17 @@
              first
              :columns))))
 
+(defn get-column-titles* [tenant-conn dataset-id]
+  (let [sql-str "SELECT columns, modified FROM dataset_version WHERE dataset_id='%s' and version=(SELECT max(version) FROM dataset_version WHERE dataset_version.dataset_id='%s')"]
+    (map (fn [{:strs [columnName title type]}]
+           {:columnName columnName
+            :type type
+            :title title})
+         (->> (jdbc/query tenant-conn (format sql-str dataset-id dataset-id))
+              (map :columns)
+              (reduce into [])))))
+
+
 (defn get-column-title-for-name [collection column-name]
   (-> (filter (fn [{:keys [columnName]}]
                 (boolean (= columnName column-name)))
@@ -133,10 +145,10 @@
       first
       :title))
 
-(defn point-metadata [tenant-conn table-name layer where-clause opts]
-  (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")]
-    {:boundingBox (bounds tenant-conn table-name layer where-clause opts)
-     :pointColorMapping (point-color-mapping tenant-conn table-name layer where-clause column-titles)
+(defn point-metadata [tenant-conn table-names layer where-clause opts]
+  (let [column-titles (get-column-titles* tenant-conn (:datasetId layer))]
+    {:boundingBox (bounds tenant-conn table-names layer where-clause opts)
+     :pointColorMapping (point-color-mapping tenant-conn table-names layer where-clause column-titles)
      :availableColors palette
      :pointColorMappingTitle (get-column-title-for-name column-titles (:pointColorColumn layer))
      :columnTitles column-titles}))
@@ -159,7 +171,7 @@
     {:columnTitles column-titles
      :boundingBox (bounds tenant-conn table-name layer where-clause opts)}))
 
-(defn raster-metadata [tenant-conn table-name layer where-clause opts]
+(defn raster-metadata [tenant-conn table-name layer opts]
   (let [raster-meta (walk/keywordize-keys (jdbc/query tenant-conn ["SELECT metadata FROM raster_dataset WHERE raster_table = ?" table-name]))
         {{:keys [bbox]} :metadata} (first raster-meta)]
     (merge
@@ -176,9 +188,6 @@
 (defn get-metadata [{:keys [aggregationDataset aggregationColumn aggregationGeomColumn layerType]
                      :as layer}]
   (cond
-    (= layerType "raster")
-    raster-metadata
-
     (and aggregationDataset aggregationColumn aggregationGeomColumn)
     shape-aggregation-metadata
 
@@ -188,5 +197,5 @@
     :else
     point-metadata))
 
-(defn build [tenant-conn table-name layer where-clause opts]
-  ((get-metadata layer) tenant-conn table-name layer where-clause opts))
+(defn buildo [tenant-conn table-names layer where-clause opts]
+  ((get-metadata layer) tenant-conn table-names layer where-clause opts))
