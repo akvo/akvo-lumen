@@ -21,7 +21,8 @@
             [duct.generate :as gen]
             [integrant.core :as ig]
             [integrant.repl :as ir]
-            [integrant.repl.state :as state :refer (system)])
+            [integrant.repl.state :as state :refer (system)]
+            [kaocha.repl :as kc])
   (:import [org.postgresql.util PSQLException PGobject]))
 
 (defn check-specs! []
@@ -83,3 +84,21 @@
   ([] (db-conn "t1")))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Test
+;;;
+
+(comment
+
+  ;; Run all tests
+  (kc/run :all)
+
+  ;; Run unit tests
+  (kc/run {:id :all
+           :kaocha.filter/focus-meta [:unit]})
+
+  ;; Run functional tests
+  (kc/run {:id :all
+           :kaocha.filter/focus-meta [:functional]})
+
+  )

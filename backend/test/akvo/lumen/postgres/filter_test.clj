@@ -131,15 +131,15 @@
                        :column "c8",
                        :operation "keep",
                        :columnType "option"}]
-     (let [filters [(assoc base-filter :strategy "is")]
-           r (f/sql-str columns filters)]
-       (is (= "(coalesce(c8, '') = 'wow')" r)))
-     (let [filters [(assoc base-filter :strategy "contains")]
-           r (f/sql-str columns filters)]
-       (is (= "(position('wow' in c8) > 0)" r)))
-     (let [filters [(assoc base-filter :strategy "not_contains")]
-           r (f/sql-str columns filters)]
-       (is (= "(position('wow' in c8) = 0)" r)))
-     (let [filters [(assoc base-filter :strategy "is" :operation "isEmpty" :value "yay")]
-           r (f/sql-str columns filters)]
-       (is (= "(coalesce(c8, '') <> 'yay')" r))))))
+      (let [filters [(assoc base-filter :strategy "is")]
+            r (f/sql-str columns filters)]
+        (is (= "(coalesce(c8, '') = 'wow')" r)))
+      (let [filters [(assoc base-filter :strategy "contains")]
+            r (f/sql-str columns filters)]
+        (is (= "(position('wow' in c8) > 0)" r)))
+      (let [filters [(assoc base-filter :strategy "not_contains")]
+            r (f/sql-str columns filters)]
+        (is (= "(position('wow' in c8) = 0)" r)))
+      (let [filters [(assoc base-filter :strategy "isEmpty")]
+            r (f/sql-str columns filters)]
+        (is (= "(c8 IS NULL)" r))))))
