@@ -26,6 +26,9 @@
 (s/def ::schema (s/keys :req-un [::name ::uuid ::results ::hasImage]))
 
 
+(s/def ::columns (s/coll-of any?))
+(s/def ::adapted-schema (s/keys :req-un [::hasImage ::columns]))
+
 (s/fdef multiple-column.caddisfly/columns-to-extract
   :args (s/cat
          :columns any?
@@ -34,7 +37,6 @@
          :extractImage boolean?)
   :ret any?)
 
-
 (s/fdef  lib.multiple-column/adapt-schema
   :args (s/cat :schema ::schema)
-  :ret ::schema)
+  :ret ::adapted-schema)
