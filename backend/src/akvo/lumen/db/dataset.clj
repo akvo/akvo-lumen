@@ -18,10 +18,27 @@
                               (contains? flow-common/metadata-keys (get c "columnName")) ["metadata" "metadata"]
                               (tx.engine/is-derived? (get c "columnName")) ["transformations" "transformations"]
                               :else ["main" "main"])]
-
     (-> c
         (assoc "groupId" groupId)
         (assoc "groupName" groupName))))
+
+(defn dataset-in-groups-by-id
+  "dataset arranged in groups"
+  [conn opts]
+  (let [dataset-col (map (fn [ds]
+                           (update ds :columns (fn [cols]
+                                                 (mapv adapt-group cols)))) (dataset-by-id conn opts))
+        commons-keys [:updated :created :source :modified :title :author :id]
+        specific-keys [:transformations :columns :table-name]]
+    (assoc (select-keys (first dataset-col) commons-keys)
+           :transformations (:transformations (first (filter #(= "main"(:namespace %)) dataset-col)))
+           :groups (reduce (fn [c ds]
+                             (let [ds-groups (map #(get % "groupId") (:columns ds))]
+                               (reduce #(assoc % %2 (let [data (select-keys ds specific-keys)]
+                                                      (update data :columns
+                                                              (fn [cols]
+                                                                (filter (fn [c] (= %2 (get c "groupId" ))) cols))))) c ds-groups)))
+                           {} dataset-col))))
 
 (defn table-name-and-columns-by-dataset-id [conn opts]
   (db-table-name-and-columns-by-dataset-id conn (merge dv/defaults opts)))
