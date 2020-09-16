@@ -68,8 +68,11 @@
          grouped (-> (group-by #(get % "groupId") dataset-columns)
                      (update "transformations" vec))]
      (if ordered?
-       (let [ordered (distinct (map #(get % "groupId") dataset-columns))]
-         (reduce #(conj % [%2 (get grouped %2)]) [] ordered))
+       (let [ordered (distinct (map #(get % "groupId") dataset-columns))
+             res (reduce #(conj % [%2 (get grouped %2)]) [] ordered)]
+         (if (contains? (set ordered) "transformations")
+           res
+           (conj res ["transformations" []]) ))
        grouped))))
 
 (defn fetch-groups-metadata
