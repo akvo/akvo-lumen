@@ -122,7 +122,7 @@
       (str (int (* 360 hue))))
     (catch Exception e "0")))
 
-(defn shape-aggregagation-extra-cols-sql [popup table-name prefix postfix]
+(defn shape-aggregation-extra-cols-sql [popup table-name prefix postfix]
   (if (= (count popup) 0)
     ""
     (str prefix
@@ -169,18 +169,11 @@
               %s
               round(_aggregation, 5) as _aggregation,
               shapefill,
-              %s.%s
+              %s
             FROM
               (
                 with temp_table as
-                  (select
-                      %s
-                      %s.rnum AS shapeRowNum,
-                      %s(pointTable.%s::decimal) AS aggregation
-                    from %s
-                    left join (select * from %s)pointTable on
-                    st_contains(%s.%s, pointTable.%s)
-                    GROUP BY %s.rnum %s)
+                  (%s)
                 select
                   %s
                   shapeRowNum,
@@ -212,22 +205,27 @@
               row_query.shapeRowNum = %s.rnum
             ;
             "
-
-            (shape-aggregagation-extra-cols-sql extra-cols "row_query" "" ",")
-            shape-table-name
-            (:geom current-layer )
-            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "" ",")
-            shape-table-name
-            aggregation-method
-            (:aggregationColumn current-layer)
-            shape-table-name
-            point-table-name
-            shape-table-name
-            (:geom current-layer)
-            (:aggregationGeomColumn current-layer)
-            shape-table-name
-            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "," "")
-            (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
+            (shape-aggregation-extra-cols-sql extra-cols "row_query" "" ",")
+            (format "%s.%s" shape-table-name (:geom current-layer ))
+            (let [cols (shape-aggregation-extra-cols-sql extra-cols shape-table-name "" ",")]
+              (format "select
+                      %s
+                      %s.rnum AS shapeRowNum,
+                      %s(pointTable.%s::decimal) AS aggregation
+                    from %s
+                    left join (select * from %s)pointTable on st_contains(%s.%s, pointTable.%s)
+                    GROUP BY %s"
+                      cols
+                      shape-table-name
+                      aggregation-method
+                      (:aggregationColumn current-layer)
+                      shape-table-name
+                      point-table-name
+                      shape-table-name
+                      (:geom current-layer)
+                      (:aggregationGeomColumn current-layer)
+                      (format "%s.rnum %s" shape-table-name cols)))
+            (shape-aggregation-extra-cols-sql extra-cols "temp_table" "" ",")
             hue
             shape-table-name
             shape-table-name)))
