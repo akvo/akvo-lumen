@@ -126,7 +126,6 @@
   (try
     (conform-create-args layers)
     (let [metadata-array (metadata-layers tenant-conn layers opts)
-          _ (log/error :metadata-array metadata-array)
           map-config (map-config/build tenant-conn layers metadata-array)
           headers* (headers tenant-conn)
           layer-group-id (-> (http.client/post* (format "%s/layergroup" windshaft-url)
