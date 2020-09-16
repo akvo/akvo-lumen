@@ -4,7 +4,13 @@ import { FormattedMessage } from 'react-intl';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default function DatasetHeader(props) {
+
   const getActionButtions = () => {
+    const dataGroupViewToggle = {
+      buttonText: props.oldDataView ? 'Use data groups' : 'Don\'t use data groups',
+      onClick: props.onDataTableViewToggle,
+    };
+
     const settings = {
       buttonText: <FormattedMessage id="settings" />,
       onClick: props.onShowDatasetSettings,
@@ -84,7 +90,7 @@ export default function DatasetHeader(props) {
       },
     };
 
-    const result = [settings, transform, transformationLog, visualise];
+    const result = [dataGroupViewToggle, settings, transform, transformationLog, visualise];
 
     return result;
   };

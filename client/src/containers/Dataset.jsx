@@ -52,6 +52,11 @@ function Dataset(props) {
 
   const [hasTrackedPageView, setHasTrackedPageView] = useState(false);
 
+  const dataGroupVal = window.localStorage.getItem('dataGroups');
+  const dataGroup = dataGroupVal !== null ? JSON.parse(dataGroupVal) : false;
+  const [oldDataView, setOldDataView] = useState(dataGroup);
+  // const isFeatureFlag = true;
+
   const [currentGroup, changeCurrentGroup] = useState(null);
 
   const removePending = timestamp =>
@@ -155,6 +160,10 @@ function Dataset(props) {
         from: 'dataset',
       },
     });
+  };
+
+  const onDataTableViewToggle = () => {
+    setOldDataView(!oldDataView);
   };
 
   const onChangeQuestionGroup = (groupId) => {
@@ -283,6 +292,10 @@ function Dataset(props) {
     }
   }, [title]);
 
+  useEffect(() => {
+    window.localStorage.setItem('dataGroups', `${oldDataView}`);
+  }, [oldDataView]);
+
   const { params, history } = props;
   const { datasetId } = params;
   if (dataset == null) {
@@ -295,7 +308,7 @@ function Dataset(props) {
       history={history}
     >
       <div className="Dataset">
-        {isFeatureFlag ? (
+        {!oldDataView ? (
           <DatasetTableV2
             history={history}
             datasetId={datasetId}
@@ -314,6 +327,8 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
+              oldDataView,
+              onDataTableViewToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
@@ -344,6 +359,8 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
+              oldDataView,
+              onDataTableViewToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
