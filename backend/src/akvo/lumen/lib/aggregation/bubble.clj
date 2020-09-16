@@ -2,7 +2,7 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
-            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]))
@@ -17,13 +17,14 @@
   "DEPRECATED: version 1 works with sampling data, only current vizs without further modifications will use this version,
    following modifications will use version 2 and user will be prompt to use aggregation facilities if sql results are
    higher than 2.5K rows"
-  [tenant-conn {:keys [columns table-name]} query]
-  (let [column-size  (find-column columns (:metricColumn query))
+  [tenant-conn ds-versions query]
+  (let [columns   (reduce #(into % (:columns %2)) [] ds-versions)
+        column-size  (find-column columns (:metricColumn query))
         column-bucket (find-column columns (:bucketColumn query))
         max-points 2500
         aggregation-method (if column-size (:metricAggregation query) "count")
         subquery (format "(SELECT * FROM %1$s WHERE %2$s ORDER BY random() LIMIT %3$s)z "
-                         table-name
+                         (from-clause (map :table-name ds-versions))
                          (sql-str columns (:filters query))
                          max-points)
         sql-text (format "SELECT %1$s AS size, %2$s AS label 
@@ -42,13 +43,14 @@
                :data     (mapv (fn [[size-value label]] {:label label :key label}) sql-response)}})))
 
 (defn query-v2
-  [tenant-conn {:keys [columns table-name]} query]
-  (let [column-size  (find-column columns (:metricColumn query))
+  [tenant-conn ds-versions query]
+  (let [columns   (reduce #(into % (:columns %2)) [] ds-versions)
+        column-size  (find-column columns (:metricColumn query))
         column-bucket (find-column columns (:bucketColumn query))
         max-points 2500
         aggregation-method (if column-size (:metricAggregation query) "count")
         subquery (format "(SELECT * FROM %1$s WHERE %2$s)z "
-                         table-name
+                         (from-clause (map :table-name ds-versions))
                          (sql-str columns (:filters query)))
         sql-text (format "SELECT %1$s AS size, %2$s AS label 
                           FROM %3$s 
