@@ -16,3 +16,9 @@
                 r (rest table-names)]
             (str/join " "
                       (map #(format " JOIN %s ON %s.rnum=%s.rnum" % f %) r)))))
+
+(defn- find-table-name-by-ns [ds-versions namespace]
+  (:table-name (first (filter #(= (:namespace %) namespace) ds-versions))))
+
+(defn find-table-name-by-column [ds-versions column]
+  (find-table-name-by-ns ds-versions (:namespace column "main")))
