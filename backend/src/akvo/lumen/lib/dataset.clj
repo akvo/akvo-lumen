@@ -57,11 +57,7 @@
             select-expr
             (if (= 1 (count table-names))
               (first table-names)
-              (format "%s %s" (first table-names)
-                      (let [f (first table-names)
-                            r (rest table-names)]
-                        (str/join " "
-                                  (map #(format " JOIN %s ON %s.rnum=%s.rnum" % f %) r)))))
+              (dutils/from-clause table-names))
             order-by-expr)))
 
 (defn fetch-metadata
