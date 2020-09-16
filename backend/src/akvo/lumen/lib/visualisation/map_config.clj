@@ -5,7 +5,7 @@
             [clojure.tools.logging :as log]
             [clojure.walk :as walk]
             [akvo.lumen.db.dataset :as db.dataset]
-            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause find-table-name-by-column)]
             [akvo.lumen.db.raster :as db.raster])
   (:import [java.awt Color]))
 
@@ -122,12 +122,6 @@
       (str (int (* 360 hue))))
     (catch Exception e "0")))
 
-(defn- find-table-name [ds-versions namespace]
-  (:table-name (first (filter #(= (:namespace %) namespace) ds-versions))))
-
-(defn- find-table-name-with-column [ds-versions column]
-  (find-table-name ds-versions (:namespace column "main")))
-
 (defn shape-aggregation-extra-cols-sql [popup table-name prefix postfix]
   (if (= (count popup) 0)
     ""
@@ -142,7 +136,7 @@
     ""
     (str prefix
          (clojure.string/join "," (map (fn [{:keys [column]}]
-                                         (let [table-name (find-table-name-with-column ds-versions (find-column kw-columns column))]
+                                         (let [table-name (find-table-name-by-column ds-versions (find-column kw-columns column))]
                                           (str table-name "." column)))
                                        cols))
          postfix)))
@@ -183,9 +177,11 @@
         extra-cols (popup-and-label-cols (:popup current-layer) (:shapeLabelColumn current-layer))
 
         geom-ref (format "%s.%s"
-                         (find-table-name-with-column shape-ds-versions
+                         (find-table-name-by-column shape-ds-versions
                                                       (find-column shape-kw-columns (:geom current-layer)))
-                         (:geom current-layer ))]
+                         (:geom current-layer ))
+        first-shape-table-name (first shape-table-names) ;; TODO adapt later when different dimensions are around
+        ]
     (format "
             SELECT
               %s
@@ -238,19 +234,18 @@
                     left join (select * from %s)pointTable on st_contains(%s, pointTable.%s)
                     GROUP BY %s"
                       cols
-                      (first shape-table-names) ;; TODO adapt later
+                      first-shape-table-name
                       aggregation-method
                       (:aggregationColumn current-layer)
                       (from-clause shape-table-names)
                       (from-clause point-table-names)
                       geom-ref
                       (:aggregationGeomColumn current-layer)
-                      (format "%s.rnum %s" (first shape-table-names) cols))) ;; todo adapt later
+                      (format "%s.rnum %s" first-shape-table-name cols)))
             (shape-aggregation-extra-cols-sql extra-cols "temp_table" "" ",")
             hue
-            (first shape-table-names) ;; todo adapt later
-            (first shape-table-names) ;; todo adapt later
-            )))
+            first-shape-table-name
+            first-shape-table-name)))
 
 (defn point-sql [tenant-conn columns geom-column popup-columns
                  point-color-column where-clause {:keys [datasetId] :as layer}]
