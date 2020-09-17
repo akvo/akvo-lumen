@@ -31,7 +31,7 @@
 (create-ns 'akvo.lumen.specs.transformation.engine)
 (alias 'transformation.engine.s 'akvo.lumen.specs.transformation.engine)
 
-(s/def ::transformation.engine.s/created (s/with-gen #(instance? Instant %) (fn [] lumen.s/instant-gen)))
+(s/def ::transformation.engine.s/created (s/with-gen #(instance? Instant (Instant/parse %)) (fn []  lumen.s/str-instant-gen)))
 
 (s/def ::transformation.engine.s/onError #{"leave-empty" "fail" "delete-row" "default-value"})
 
