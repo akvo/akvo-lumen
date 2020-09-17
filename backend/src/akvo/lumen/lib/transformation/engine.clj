@@ -172,8 +172,7 @@
   (let [dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (let [{:keys [success? message dataset-versions execution-log error-data]}
           (try-apply-operation deps dataset-versions (assoc transformation
-                                                            :dataset-id dataset-id
-                                                            :created (Instant/ofEpochMilli (System/currentTimeMillis))))
+                                                            :dataset-id dataset-id))
           namespace (get transformation "namespace" "main")]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message dataset-versions execution-log error-data)
