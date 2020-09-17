@@ -57,7 +57,7 @@
                           "fail" (alter-table "%s(%s)" type-conversion column-name)
                           "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
                           "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
-    (engine/ensure-number default-value)
+    (engine/ensure-number (read-string default-value))
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defn change-datatype-to-text
@@ -101,7 +101,8 @@
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"
          new-type "newType"} (engine/args op-spec)
-        namespace (engine/get-namespace op-spec)
+        all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns column-name)
         dsv (get dataset-versions namespace)
         columns (vec (:columns dsv))
         table-name (:table-name dsv)]
