@@ -12,7 +12,8 @@
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{expr "expression"
          column-name "columnName"} (engine/args op-spec)
-        namespace (engine/get-namespace op-spec)
+        all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns column-name)
         dsv (get dataset-versions namespace)
         columns (vec (:columns dsv))
         table-name (:table-name dsv)
