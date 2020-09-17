@@ -79,7 +79,7 @@
 
 (defn apply
   [{:keys [tenant-conn] :as deps} dataset-id command]
-  (let [command (assoc command :created (str (Instant/ofEpochMilli (System/currentTimeMillis))))]
+  (let [command (assoc-in command [:transformation :created] (str (Instant/ofEpochMilli (System/currentTimeMillis))))]
     (if-let [current-tx-job (db.transformation/pending-tx-or-update-job-execution tenant-conn {:dataset-id dataset-id})]
       (lib/bad-request {:message (format "A running %s still exists, please wait to apply more ..." (:type current-tx-job))})
       (if-let [dataset (db.transformation/dataset-by-id tenant-conn {:id dataset-id})]

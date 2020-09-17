@@ -92,6 +92,8 @@
 (defmethod engine/apply-operation "core/trim-doublespace"
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
+        all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns column-name)
         dsv (get dataset-versions namespace)
         table-name (:table-name dsv)
         columns (:columns dsv)]
