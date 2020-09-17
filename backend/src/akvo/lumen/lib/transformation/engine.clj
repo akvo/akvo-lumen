@@ -299,8 +299,14 @@
     {:success? false
      :message  (format "In this dataset there's already a column with this name: %s. Please choose another non existing name" column-title)}))
 
-(defn get-namespace [op-spec]
-  (get op-spec "namespace" "main"))
+(defn get-namespace [columns columnName]
+  (let [column (first (filter #(= columnName
+                                  (or (get % "columnName")
+                                      (get % :columnName))) columns))]
+    (or (get column "namespace") (get column :namespace) "main")))
 
 (defn get-dsv [dataset-versions namespace]
   (first (filter #(= (:namespace %) namespace) dataset-versions)))
+
+(defn all-columns [dataset-versions]
+  (reduce into [] (map :columns (vals dataset-versions))))

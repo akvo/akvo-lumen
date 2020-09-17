@@ -26,19 +26,19 @@
 
 (defmethod engine/apply-operation "core/generate-geopoints"
   [{:keys [tenant-conn]} dataset-versions op-spec]
-  (let [namespace (engine/get-namespace op-spec)
+  (let [all-columns (engine/all-columns dataset-versions)
+        {:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
+        namespace (engine/get-namespace all-columns columnNameLat)
         dsv (get dataset-versions namespace)
-        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
         columns (vec (:columns dsv))]
     (if-let [response-error (engine/column-title-error? (get (engine/args op-spec) "columnTitleGeo") columns)]
       response-error
-      (let [{:strs [columnNameLat columnNameLong columnTitleGeo]} (engine/args op-spec)
-            table-name (:table-name dsv)
+      (let [table-name (:table-name dsv)
             get-client-type (partial engine/column-type columns)
             column-types (map get-client-type [columnNameLat columnNameLong])]
         (if (every? #(= "number" %) column-types)
           (try
-            (let [column-name-geo (engine/next-column-name all-dsv-columns)
+            (let [column-name-geo (engine/next-column-name all-columns)
                   opts {:table-name table-name :column-name-geo column-name-geo}
                   new-columns (conj columns {"title" columnTitleGeo
                                              "type" "geopoint"
