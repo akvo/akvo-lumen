@@ -37,7 +37,9 @@
   [column]
   (get column "sort"))
 
-(defn select-data-sql [table-name columns]
+(defn select-data-sql
+  "first table name is main namespace table"
+  [table-names columns]
   (let [select-expr (->> columns
                          (map (fn [{:strs [type columnName]}]
                                 (condp = type
@@ -49,16 +51,37 @@
                         (filter column-sort-order cols)
                         (sort-by column-sort-order cols)
                         (mapv #(format "%s %s" (get % "columnName") (get % "direction")) cols)
-                        (conj cols "rnum")
+                        (conj cols (format "%s.rnum" (first table-names)))
                         (str/join ", " cols))]
     (format "SELECT %s FROM %s ORDER BY %s"
             select-expr
-            table-name
+            (if (= 1 (count table-names))
+              (first table-names)
+              (dutils/from-clause table-names))
             order-by-expr)))
 
-(defn- groups [dataset]
-  (let [dataset-columns (->> (:columns dataset)
-                             (remove #(get % "hidden"))
+(defn fetch-metadata
+  "Fetch dataset metadata (everything apart from rows)"
+  [tenant-conn id]
+  (if-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
+    (lib/ok (->
+             (reduce
+              (fn [d [group-id group]]
+                (let [columns (remove #(get % "hidden") (:columns group))]
+                  (-> d
+                      (update :columns #(apply conj % columns))
+                      (assoc :status "OK"))))
+              (assoc dataset :columns [])
+              (:groups dataset))
+             remove-token
+             (select-keys [:created :id :modified :status :title :transformations :updated :author :source :columns])
+             (rename-keys {:title :name})))
+    (lib/not-found {:error "Not found"})))
+
+(defn- groups [dsvs]
+  (let [dataset-columns (->> dsvs
+                             (map :columns)
+                             (reduce into [])
                              (map db.dataset/adapt-group))]
     (-> (group-by #(get % "groupId") dataset-columns)
         (update "transformations" vec))))
@@ -71,64 +94,59 @@
 
   always we'll use 'transformations' groupId to include all generated transformations"
   [tenant-conn id]
-  (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [dataset* (-> (select-keys dsv
-                                    [:id :title :modified :created :updated :source :transformations])
-                       (assoc :status "OK")
+  (if-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [dataset* (-> (select-keys (first dsvs)
+                                    [:id :title :modified :created :updated :source])
+                       (assoc :status "OK"
+                              :transformations (tx.engine/unify-transformation-history dsvs))
                        (rename-keys {:title :name}))]
-      (lib/ok (assoc dataset*  :groups (groups dsv))))
+      (lib/ok (assoc dataset*  :groups (groups dsvs))))
    (lib/not-found {:error "Not found"})))
-
-(defn fetch-metadata
-  "Fetch dataset metadata (everything apart from rows)"
-  [tenant-conn id]
-  (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [groups   (groups dsv)
-          dataset* (-> (select-keys dsv
-                                    [:created :id :modified :status :title :transformations :updated :author :source :columns])
-                       (assoc :status "OK")
-                       (assoc :columns (reduce into [] (vals groups)))
-                       (rename-keys {:title :name}))]
-      (lib/ok dataset*))
-    (lib/not-found {:error "Not found"})))
 
 (defn fetch
   [tenant-conn id]
-  (when-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [groups-dataset (groups dsv)
+  (when-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [groups-dataset (groups dsvs)
           columns (reduce into [] (vals groups-dataset))
           namespaces (set (map #(get % "namespace" "main") columns))
           columns (remove #(get % "hidden")  columns)
-          q (select-data-sql (:table-name dsv) columns)
+          table-names (map :table-name (filter #(contains? namespaces (:namespace %)) dsvs))
+          q (select-data-sql (reverse (sort table-names)) columns)
           data (rest (jdbc/query tenant-conn
                                  [q]
                                  {:as-arrays? true}))]
-      (-> (select-keys dsv [:created :id :modified :status :title :updated :author :source :transformations])
+      (-> (select-keys (first dsvs) [:created :id :modified :status :title :updated :author :source ])
 
           remove-token
           (assoc :rows data
+                 :transformations (tx.engine/unify-transformation-history dsvs)
                  :columns columns
                  :status "OK")
-          (rename-keys {:title :name})))))
+          (rename-keys {:title :name})
+          ))))
 
 (defn fetch-group
   [tenant-conn id group-id]
-  (when-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [group-dataset (get (groups dsv) group-id)
+  (when-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [group-dataset (get (groups dsvs) group-id)
           namespaces (set (map #(get % "namespace" "main") group-dataset))
-          q (select-data-sql (:table-name dsv) group-dataset)
+          columns (remove #(get % "hidden")  group-dataset)
+          table-names (map :table-name (filter #(contains? namespaces (:namespace %)) dsvs))
+          q (select-data-sql (reverse (sort table-names)) columns)
           data (rest (jdbc/query tenant-conn
                                  [q]
                                  {:as-arrays? true}))]
-      (-> (select-keys dsv [:updated :created :modified :transformations])
+      (-> (select-keys (first dsvs) [:updated :created :modified])
           remove-token
           (assoc :rows data
-                 :columns group-dataset
-                 :status "OK" :datasetId (:id dsv) :groupId group-id)))))
+                 :columns columns
+                 :status "OK" :datasetId (:id (first dsvs)) :groupId group-id)))))
 
 (defn sort-text
   [tenant-conn id column-name limit order]
-  (when-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-conn {:id id})]
+  (when-let [dataset (first (filter (fn [{:keys [table-name columns]}]
+                                      (not-empty (filter #(= column-name (get % "columnName")) columns)))
+                                    (db.dataset/table-name-and-columns-by-dataset-id tenant-conn {:id id})))]
     (let [column (dutils/find-column (w/keywordize-keys (:columns dataset)) column-name)]
       (let [result (->> (merge {:column-name (acommons/sql-option-bucket-column column) :table-name (:table-name dataset)}
                                (when limit {:limit limit}))
