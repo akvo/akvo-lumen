@@ -21,7 +21,8 @@
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"
          sort-direction "sortDirection"} (engine/args op-spec)
-        namespace (engine/get-namespace op-spec)
+        all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns column-name)
         dsv (get dataset-versions namespace)
         table-name (:table-name dsv)
         columns (vec (:columns dsv))
@@ -52,7 +53,8 @@
 (defmethod engine/apply-operation "core/remove-sort"
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [{column-name "columnName"} (engine/args op-spec)
-        namespace (engine/get-namespace op-spec)
+        all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns column-name)
         dsv (get dataset-versions namespace)
         table-name (:table-name dsv)
         columns (:columns dsv)

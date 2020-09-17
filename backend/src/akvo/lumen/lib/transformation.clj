@@ -8,7 +8,8 @@
             [akvo.lumen.util :refer (squuid)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
-            [clojure.walk :as w]))
+            [clojure.walk :as w])
+  (:import [java.time Instant]))
 
 (def transformation-namespaces
   '[akvo.lumen.lib.transformation.change-datatype
@@ -78,15 +79,16 @@
 
 (defn apply
   [{:keys [tenant-conn] :as deps} dataset-id command]
-  (if-let [current-tx-job (db.transformation/pending-tx-or-update-job-execution tenant-conn {:dataset-id dataset-id})]
-    (lib/bad-request {:message (format "A running %s still exists, please wait to apply more ..." (:type current-tx-job))})
-    (if-let [dataset (db.transformation/dataset-by-id tenant-conn {:id dataset-id})]
-      (let [v (validate command)]
-        (if-not (:valid? v)
-          (lib/bad-request {:message (:message v)})
-          (let [job-execution-id (str (squuid))]
-            (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
-            (execute-tx deps job-execution-id dataset-id command)
-            (lib/ok {:jobExecutionId job-execution-id
-                     :datasetId dataset-id}))))
-      (lib/bad-request {:message "Dataset not found"}))))
+  (let [command (assoc command :created (str (Instant/ofEpochMilli (System/currentTimeMillis))))]
+    (if-let [current-tx-job (db.transformation/pending-tx-or-update-job-execution tenant-conn {:dataset-id dataset-id})]
+      (lib/bad-request {:message (format "A running %s still exists, please wait to apply more ..." (:type current-tx-job))})
+      (if-let [dataset (db.transformation/dataset-by-id tenant-conn {:id dataset-id})]
+        (let [v (validate command)]
+          (if-not (:valid? v)
+            (lib/bad-request {:message (:message v)})
+            (let [job-execution-id (str (squuid))]
+              (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
+              (execute-tx deps job-execution-id dataset-id command)
+              (lib/ok {:jobExecutionId job-execution-id
+                       :datasetId dataset-id}))))
+        (lib/bad-request {:message "Dataset not found"})))))
