@@ -44,10 +44,14 @@
   false)
 
 (defn unify-transformation-history [dataset-versions]
-  (->> dataset-versions
-       (map :transformations)
-       (reduce into [])
-       (sort-by #(get % "created") #(compare (Instant/parse %1) (Instant/parse %2)))))
+  (if (= 1 (count dataset-versions))
+    (->> dataset-versions
+         (map :transformations)
+         (reduce into []))
+    (->> dataset-versions
+         (map :transformations)
+         (reduce into [])
+         (sort-by #(get % "created") #(compare (Instant/parse %1) (Instant/parse %2))))))
 
 (defn namespaces
   "return a vector of namespaces.
