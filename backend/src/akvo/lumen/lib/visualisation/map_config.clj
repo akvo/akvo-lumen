@@ -122,7 +122,7 @@
       (str (int (* 360 hue))))
     (catch Exception e "0")))
 
-(defn shape-aggregagation-extra-cols-sql [popup table-name prefix postfix]
+(defn shape-aggregation-extra-cols-sql [popup table-name prefix postfix]
   (if (= (count popup) 0)
     ""
     (str prefix
@@ -143,7 +143,7 @@
     :else []))
 
 (defn shape-aggregation-sql
-  [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause current-layer layer-index]
+  [tenant-conn columns geom-column popup-columns point-color-column where-clause current-layer layer-index]
   (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id (:aggregationDataset current-layer)})
         point-table-name table-name
         point-columns columns
@@ -169,18 +169,11 @@
               %s
               round(_aggregation, 5) as _aggregation,
               shapefill,
-              %s.%s
+              %s
             FROM
               (
                 with temp_table as
-                  (select
-                      %s
-                      %s.rnum AS shapeRowNum,
-                      %s(pointTable.%s::decimal) AS aggregation
-                    from %s
-                    left join (select * from %s)pointTable on
-                    st_contains(%s.%s, pointTable.%s)
-                    GROUP BY %s.rnum %s)
+                  (%s)
                 select
                   %s
                   shapeRowNum,
@@ -212,27 +205,32 @@
               row_query.shapeRowNum = %s.rnum
             ;
             "
-
-            (shape-aggregagation-extra-cols-sql extra-cols "row_query" "" ",")
-            shape-table-name
-            (:geom current-layer )
-            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "" ",")
-            shape-table-name
-            aggregation-method
-            (:aggregationColumn current-layer)
-            shape-table-name
-            point-table-name
-            shape-table-name
-            (:geom current-layer)
-            (:aggregationGeomColumn current-layer)
-            shape-table-name
-            (shape-aggregagation-extra-cols-sql extra-cols shape-table-name "," "")
-            (shape-aggregagation-extra-cols-sql extra-cols "temp_table" "" ",")
+            (shape-aggregation-extra-cols-sql extra-cols "row_query" "" ",")
+            (format "%s.%s" shape-table-name (:geom current-layer ))
+            (let [cols (shape-aggregation-extra-cols-sql extra-cols shape-table-name "" ",")]
+              (format "select
+                      %s
+                      %s.rnum AS shapeRowNum,
+                      %s(pointTable.%s::decimal) AS aggregation
+                    from %s
+                    left join (select * from %s)pointTable on st_contains(%s.%s, pointTable.%s)
+                    GROUP BY %s"
+                      cols
+                      shape-table-name
+                      aggregation-method
+                      (:aggregationColumn current-layer)
+                      shape-table-name
+                      point-table-name
+                      shape-table-name
+                      (:geom current-layer)
+                      (:aggregationGeomColumn current-layer)
+                      (format "%s.rnum %s" shape-table-name cols)))
+            (shape-aggregation-extra-cols-sql extra-cols "temp_table" "" ",")
             hue
             shape-table-name
             shape-table-name)))
 
-(defn point-sql [tenant-conn columns table-name geom-column popup-columns
+(defn point-sql [tenant-conn columns geom-column popup-columns
                  point-color-column where-clause {:keys [datasetId] :as layer}]
   (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
         date-column-set (reduce (fn [m {:strs [columnName type]}]
@@ -251,7 +249,7 @@
                         table-name
                         where-clause)))
 
-(defn shape-sql [tenant-conn columns table-name geom-column popup-columns point-color-column where-clause
+(defn shape-sql [tenant-conn columns geom-column popup-columns point-color-column where-clause
                  {:keys [datasetId shapeLabelColumn ] :as layer}]
   (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
         date-column-set (reduce (fn [m {:strs [columnName type]}]
@@ -272,26 +270,23 @@
             where-clause)))
 
 (defn get-sql
-  [tenant-conn columns table-name geom-column popup-columns point-color-column
+  [tenant-conn columns geom-column popup-columns point-color-column
    where-clause {:keys [aggregationDataset aggregationColumn
                         aggregationGeomColumn layerType]
                  :as layer} layer-index]
   (cond
 
-    (= layerType "raster")
-    (format "SELECT * FROM %s" table-name)
-
     (and aggregationDataset aggregationColumn aggregationGeomColumn)
-    (shape-aggregation-sql tenant-conn columns table-name geom-column
+    (shape-aggregation-sql tenant-conn columns geom-column
                            popup-columns (:columnName point-color-column) where-clause layer
                            layer-index)
 
     (= layerType "geo-shape")
-    (shape-sql tenant-conn columns table-name geom-column popup-columns
+    (shape-sql tenant-conn columns geom-column popup-columns
                (:columnName point-color-column) where-clause layer)
 
     :else
-    (point-sql tenant-conn columns table-name geom-column popup-columns
+    (point-sql tenant-conn columns geom-column popup-columns
                point-color-column where-clause layer)))
 
 (defn get-interactivity
@@ -326,7 +321,7 @@
           (or max "255")
           (or end-color "#000000")))
 
-(defn get-layers [tenant-conn layers metadata-array table-name]
+(defn- get-layers [tenant-conn layers metadata-array]
   (map-indexed (fn [idx {:keys [datasetId rasterId filters geom popup pointColorColumn]
                          :as layer}]
                  (if (= (:layerType layer) "raster")
@@ -345,7 +340,7 @@
                          where-clause (filter/sql-str kw-columns filters)
                          popup-columns (mapv :column popup)
                          point-color-column (find-column kw-columns pointColorColumn)
-                         sql (get-sql tenant-conn columns table-name geom-column
+                         sql (get-sql tenant-conn columns geom-column
                                       popup-columns point-color-column
                                       where-clause layer idx)]
 
@@ -359,12 +354,12 @@
                                 :srid "4326"}})))
                layers))
 
-(defn build [tenant-conn table-name layers metadata-array]
+(defn build [tenant-conn layers metadata-array]
   {:version "1.6.0"
    :buffersize {:png 8
                 :grid.json 0
                 :mvt 0}
-   :layers (get-layers tenant-conn layers metadata-array table-name)})
+   :layers (get-layers tenant-conn layers metadata-array)})
 
 (defn build-raster [table-name min max]
   {:version "1.6.0"
