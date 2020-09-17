@@ -155,10 +155,10 @@
 
 (defmethod engine/apply-operation "core/derive"
   [{:keys [tenant-conn]} dataset-versions op-spec]
-  (let [namespace (engine/get-namespace op-spec)
+  (let [all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns (first (engine/columns-used op-spec)))
         dsv (get dataset-versions namespace)
         table-name (:table-name dsv)
-        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
         columns (vec (:columns dsv))]
     (if-let [response-error (engine/column-title-error? (::column-title (args op-spec)) columns)]
             response-error
@@ -167,7 +167,7 @@
                   (let [{:keys [::code
                                 ::column-title
                                 ::column-type]} (args op-spec)
-                        new-column-name         (engine/next-column-name all-dsv-columns)
+                        new-column-name         (engine/next-column-name all-columns)
                         columns-groups*         (columns-groups (walk/keywordize-keys columns))
                         adapter                 (comp (js-engine/rqg columns)
                                                       (js-engine/column-name->column-title columns))
