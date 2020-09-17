@@ -71,9 +71,9 @@
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
   [tenant-conn id]
-  (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [groups   (groups dsv)
-          dataset* (-> (select-keys dsv
+  (if-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [groups   (groups dsvs)
+          dataset* (-> (select-keys (first dsvs)
                                     [:created :id :modified :status :title :transformations :updated :author :source :columns])
                        (assoc :status "OK")
                        (assoc :columns (reduce into [] (vals groups)))
