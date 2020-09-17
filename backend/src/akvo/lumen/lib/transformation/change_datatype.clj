@@ -57,7 +57,7 @@
                           "fail" (alter-table "%s(%s)" type-conversion column-name)
                           "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
                           "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
-    (engine/ensure-number default-value)
+    (engine/ensure-number (read-string default-value))
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defn change-datatype-to-text

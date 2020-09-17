@@ -141,7 +141,7 @@
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= [::lib/bad-request {:message "Dataset not found"} nil nil]
-           (async-tx-apply {:tenant-conn *tenant-conn*} "Not-valid-id" []))))
+           (async-tx-apply {:tenant-conn *tenant-conn*} "Not-valid-id" {}))))
   (testing "Valid log"
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
                                                                  :has-column-headers? true

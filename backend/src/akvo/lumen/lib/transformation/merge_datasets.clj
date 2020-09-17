@@ -140,7 +140,7 @@
 (defn apply-merge-operation
   [conn dataset-versions op-spec]
   (let [all-columns (engine/all-columns dataset-versions)
-        namespace (engine/get-namespace all-columns (first (engine/columns-used op-spec)))
+        namespace (engine/get-namespace all-columns (first (engine/columns-used op-spec all-columns)))
         dsv (get dataset-versions namespace)
         columns (vec (:columns dsv))
         table-name (:table-name dsv)
