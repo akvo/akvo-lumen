@@ -81,14 +81,14 @@
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (jdbc/with-db-transaction [tenant-conn tenant-conn]
     (let [{:keys [onError op args]} (walk/keywordize-keys op-spec)
-          namespace (engine/get-namespace op-spec)
-          dsv (get dataset-versions namespace)
-          table-name (:table-name dsv)
-          columns (vec (:columns dsv))
-          all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
+          all-columns (engine/all-columns dataset-versions)
           column-name               (col-name args)         
           pattern                   (pattern* args)
-          re-pattern*               (re-pattern (Pattern/quote pattern))]
+          re-pattern*               (re-pattern (Pattern/quote pattern))
+          namespace (engine/get-namespace all-columns column-name)
+          dsv (get dataset-versions namespace)
+          table-name (:table-name dsv)
+          columns (vec (:columns dsv))]
       (if-let [pattern-analysis (get
                                  (->> (db.transformation/select-column-data tenant-conn {:table-name table-name :column-name column-name})
                                       (map (comp str (keyword column-name)))
@@ -96,7 +96,7 @@
                                       :analysis)
                                  pattern)]
         (let [new-rows-count    (inc (:max-coincidences-in-one-row pattern-analysis))
-              new-columns       (map #(assoc % :namespace namespace) (columns-to-extract (new-column-name args) new-rows-count (selected-column args) all-dsv-columns))
+              new-columns       (map #(assoc % :namespace namespace) (columns-to-extract (new-column-name args) new-rows-count (selected-column args) all-columns))
               add-db-columns    (doseq [c new-columns]
                                   (db.tx.engine/add-column tenant-conn {:table-name      table-name
                                                            :column-type     (:type c)
