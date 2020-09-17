@@ -17,7 +17,8 @@
 
 (defmethod engine/apply-operation "core/rename-column"
   [{:keys [tenant-conn]} dataset-versions op-spec]
-  (let [namespace (engine/get-namespace op-spec)
+  (let [all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns (col-name op-spec))
         dsv (get dataset-versions namespace)
         columns (vec (:columns dsv))]
     (if-let [response-error (engine/column-title-error? (new-col-title op-spec) columns)]
