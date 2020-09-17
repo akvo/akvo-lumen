@@ -123,7 +123,7 @@
   (try
     (conform-create-args layers)
     (let [metadata-array (metadata-layers tenant-conn layers opts)
-          map-config (map-config/build tenant-conn "todo: remove this" layers metadata-array)
+          map-config (map-config/build tenant-conn layers metadata-array)
           headers* (headers tenant-conn)
           layer-group-id (-> (http.client/post* (format "%s/layergroup" windshaft-url)
                                                 (merge http-client-req-defaults
