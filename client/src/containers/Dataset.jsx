@@ -34,9 +34,6 @@ import usePendingSaving from '../components/common/PendingSaving';
 require('../components/dataset/Dataset.scss');
 
 function Dataset(props) {
-  const env = useSelector(state => state.env.environment);
-
-  const isFeatureFlag = env.rqg;
 
   const dataset = useSelector(
     state => state.library.datasets[props.params.datasetId]
@@ -52,10 +49,9 @@ function Dataset(props) {
 
   const [hasTrackedPageView, setHasTrackedPageView] = useState(false);
 
-  const dataGroupVal = window.localStorage.getItem('dataGroups');
-  const dataGroup = dataGroupVal !== null ? JSON.parse(dataGroupVal) : false;
-  const [oldDataView, setOldDataView] = useState(dataGroup);
-  // const isFeatureFlag = true;
+  const useDataGroupsVal = window.localStorage.getItem('useDataGroups');
+  const useDataGroups = useDataGroupsVal !== null ? JSON.parse(useDataGroupsVal) : true;
+  const isFeatureFlag = useDataGroups;
 
   const [currentGroup, changeCurrentGroup] = useState(null);
 
@@ -162,8 +158,9 @@ function Dataset(props) {
     });
   };
 
-  const onDataTableViewToggle = () => {
-    setOldDataView(!oldDataView);
+  const onUseDataGroupsToggle = () => {
+    window.localStorage.setItem('useDataGroups', `${!useDataGroups}`);
+    window.location.reload();
   };
 
   const onChangeQuestionGroup = (groupId) => {
@@ -292,10 +289,6 @@ function Dataset(props) {
     }
   }, [title]);
 
-  useEffect(() => {
-    window.localStorage.setItem('dataGroups', `${oldDataView}`);
-  }, [oldDataView]);
-
   const { params, history } = props;
   const { datasetId } = params;
   if (dataset == null) {
@@ -308,7 +301,7 @@ function Dataset(props) {
       history={history}
     >
       <div className="Dataset">
-        {!oldDataView ? (
+        {useDataGroups ? (
           <DatasetTableV2
             history={history}
             datasetId={datasetId}
@@ -327,8 +320,8 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
-              oldDataView,
-              onDataTableViewToggle,
+              useDataGroups,
+              onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
@@ -359,8 +352,8 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
-              oldDataView,
-              onDataTableViewToggle,
+              useDataGroups,
+              onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(

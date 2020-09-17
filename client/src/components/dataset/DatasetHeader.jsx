@@ -7,8 +7,8 @@ export default function DatasetHeader(props) {
 
   const getActionButtions = () => {
     const dataGroupViewToggle = {
-      buttonText: props.oldDataView ? 'Use data groups' : 'Don\'t use data groups',
-      onClick: props.onDataTableViewToggle,
+      buttonText: props.useDataGroups ? 'Legacy data view' : 'Modern data view', // FormattedMessage
+      onClick: props.onUseDataGroupsToggle,
     };
 
     const settings = {

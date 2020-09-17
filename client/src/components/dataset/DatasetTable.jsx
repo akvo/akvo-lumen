@@ -348,6 +348,8 @@ class DatasetTable extends Component {
   }
 
   handleResize() {
+    // console.log('@handleResize');
+    // console.log(this.wrappingDiv);
     this.setState({
       width: this.wrappingDiv.clientWidth,
       height: this.wrappingDiv.clientHeight,
