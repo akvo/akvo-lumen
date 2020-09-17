@@ -17,15 +17,16 @@
 
 (defmethod engine/apply-operation "core/combine"
   [{:keys [tenant-conn]} dataset-versions op-spec]
-  (let [namespace (engine/get-namespace op-spec)
+  (let [{[first-column-name second-column-name] "columnNames"
+         separator "separator"
+         column-title "newColumnTitle"} (engine/args op-spec)
+        all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns first-column-name)
         dsv (get dataset-versions namespace)
         table-name (:table-name dsv)
         columns (vec (:columns dsv))
-        all-dsv-columns (reduce #(into % (:columns %2)) [] (vals dataset-versions))
-        new-column-name (engine/next-column-name all-dsv-columns)
-        {[first-column-name second-column-name] "columnNames"
-         separator "separator"
-         column-title "newColumnTitle"} (engine/args op-spec)
+        
+        new-column-name (engine/next-column-name all-columns)
         new-columns (conj columns {"title" column-title
                                    "type" "text"
                                    "sort" nil

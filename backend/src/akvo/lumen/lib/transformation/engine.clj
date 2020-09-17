@@ -172,8 +172,7 @@
   (let [dataset-versions (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
     (let [{:keys [success? message dataset-versions execution-log error-data]}
           (try-apply-operation deps dataset-versions (assoc transformation
-                                                            :dataset-id dataset-id
-                                                            :created (Instant/ofEpochMilli (System/currentTimeMillis))))
+                                                            :dataset-id dataset-id))
           namespace (get transformation "namespace" "main")]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message dataset-versions execution-log error-data)
@@ -299,8 +298,14 @@
     {:success? false
      :message  (format "In this dataset there's already a column with this name: %s. Please choose another non existing name" column-title)}))
 
-(defn get-namespace [op-spec]
-  (get op-spec "namespace" "main"))
+(defn get-namespace [columns columnName]
+  (let [column (first (filter #(= columnName
+                                  (or (get % "columnName")
+                                      (get % :columnName))) columns))]
+    (or (get column "namespace") (get column :namespace) "main")))
 
 (defn get-dsv [dataset-versions namespace]
   (first (filter #(= (:namespace %) namespace) dataset-versions)))
+
+(defn all-columns [dataset-versions]
+  (reduce into [] (map :columns (vals dataset-versions))))

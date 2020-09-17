@@ -49,17 +49,21 @@
 (defmethod engine/apply-operation "core/derive-category"
   [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [op-spec               (walk/keywordize-keys op-spec)
-        namespace (engine/get-namespace op-spec)
-        dsv (get dataset-versions namespace)
-        table-name (:table-name dsv)
-        columns (vec (:columns dsv))
+        all-columns (engine/all-columns dataset-versions)
         source-column-name    (get-in op-spec [:args :source :column :columnName])
         source-column-title    (get-in op-spec [:args :source :column :title])
         column-title          (get-in op-spec [:args :target :column :title])
         uncategorized-value   (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
-        new-column-name       (engine/next-column-name columns)
+        new-column-name       (engine/next-column-name all-columns)
         mappings              (get-in op-spec [:args :derivation :mappings])
         derivation-type       (get-in op-spec [:args :derivation :type] "text")
+
+        
+        namespace (engine/get-namespace all-columns source-column-name)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+
+        columns (vec (:columns dsv))
         execution-log-message (format "Derived category '%s' using column: '%s'(%s) and mappings: '%s'"
                                       column-title
                                       source-column-title

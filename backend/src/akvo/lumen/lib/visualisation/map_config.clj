@@ -122,6 +122,12 @@
       (str (int (* 360 hue))))
     (catch Exception e "0")))
 
+(defn- find-table-name [ds-versions namespace]
+  (:table-name (first (filter #(= (:namespace %) namespace) ds-versions))))
+
+(defn- find-table-name-with-column [ds-versions column]
+  (find-table-name ds-versions (:namespace column "main")))
+
 (defn shape-aggregation-extra-cols-sql [popup table-name prefix postfix]
   (if (= (count popup) 0)
     ""
