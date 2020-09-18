@@ -80,6 +80,7 @@ function DatasetTable(props) {
     });
   };
 
+  // handle intro
   useEffect(() => {
     if (window.localStorage.getItem('done-intro')) {
       return undefined;
@@ -131,10 +132,10 @@ function DatasetTable(props) {
       ],
     });
 
-    const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
+    const datasetHasGroups = props.groups && props.groups.size > 1;
     if (
       isMounted.current &&
-      (props.datasetGroupsAvailable && datasetHasQuestionGroups) &&
+      (props.datasetGroupsAvailable && datasetHasGroups) &&
       (sidebarProps || {}).type === 'groupsList') {
       intro.start();
     }
@@ -144,6 +145,7 @@ function DatasetTable(props) {
     };
   }, [props.datasetGroupsAvailable, props.groups, isMounted.current, sidebarProps]);
 
+  // handle resize
   useEffect(() => {
     if (isMounted.current) {
       handleResize();
@@ -155,19 +157,15 @@ function DatasetTable(props) {
     };
   }, [isMounted.current, props.groupAvailable]);
 
-  useEffect(() => {
-    const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
-    if (props.datasetGroupsAvailable && datasetHasQuestionGroups) {
-      handleGroupsSidebar();
-    }
-  }, []);
-
+  // handle group sidebar
   useEffect(() => {
     if (isMounted.current) {
-      const datasetHasQuestionGroups = props.groups && !props.groups.get('main');
+      const datasetHasGroups = props.groups && props.groups.size > 1;
 
-      if (props.datasetGroupsAvailable && datasetHasQuestionGroups) {
+      if (props.datasetGroupsAvailable && datasetHasGroups) {
         handleGroupsSidebar();
+      } else if (sidebarProps && sidebarProps.type === 'groupsList') {
+        hideSidebar();
       }
     } else {
       isMounted.current = true;
@@ -486,7 +484,7 @@ function DatasetTable(props) {
               )}
             </div>
 
-            {!sidebarProps && !props.groups.get('main') && (
+            {!sidebarProps && props.groups.size > 1 && (
               <div className="toggle-groups">
                 <span
                   onClick={() => handleGroupsSidebar()}
