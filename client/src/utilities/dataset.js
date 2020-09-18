@@ -34,8 +34,13 @@ export const getDatasetGroups = (groups, datasetGroupsAvailable) => {
 
       return acc;
     }, []).sort((x, y) => {
-      if (x.id === 'metadata') return -1;
-      if (y.id === 'metadata') return -1;
+      if (x.id === 'metadata') {
+        return -1;
+      }
+
+      if (y.id === 'metadata') {
+        return 1;
+      }
 
       return 0;
     });
