@@ -36,7 +36,6 @@ require('../components/dataset/Dataset.scss');
 function Dataset(props) {
   const maybeUseDataGroups = window.localStorage.getItem('useDataGroups');
   const useDataGroups = maybeUseDataGroups !== null ? JSON.parse(maybeUseDataGroups) : true;
-  const isFeatureFlag = useDataGroups;
 
   const dataset = useSelector(
     state => state.library.datasets[props.params.datasetId]
@@ -85,7 +84,7 @@ function Dataset(props) {
               () => {
                 dispatch(endTx(id));
               },
-              isFeatureFlag
+              useDataGroups
             )
           );
         }
@@ -120,7 +119,7 @@ function Dataset(props) {
               () => {
                 dispatch(endTx(id));
               },
-              isFeatureFlag
+              useDataGroups
             )
           );
         }
@@ -193,7 +192,7 @@ function Dataset(props) {
     const { params, dispatch } = props;
     const { datasetId } = params;
 
-    if (isFeatureFlag) {
+    if (useDataGroups) {
       if (dataset == null || dataset.get('groups') == null) {
         dispatch(
           fetchDatasetGroups(datasetId, null, () => setHasTrackedPageView(true))
@@ -209,7 +208,7 @@ function Dataset(props) {
   }, []);
 
   useEffect(() => {
-    if (!isFeatureFlag) {
+    if (!useDataGroups) {
       return undefined; // exit early
     }
 
@@ -300,7 +299,7 @@ function Dataset(props) {
       history={history}
     >
       <div className="Dataset">
-        {isFeatureFlag ? (
+        {useDataGroups ? (
           <DatasetTableV2
             history={history}
             datasetId={datasetId}
