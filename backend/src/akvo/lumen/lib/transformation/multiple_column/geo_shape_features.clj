@@ -29,7 +29,8 @@
   [{:keys [tenant-conn caddisfly] :as deps} dataset-versions op-spec]
   (jdbc/with-db-transaction [conn tenant-conn]
     (let [{:keys [onError op args]} op-spec
-          namespace (engine/get-namespace op-spec)
+          all-columns (engine/all-columns dataset-versions)
+          namespace (engine/get-namespace all-columns (-> args :selectedColumn :columnName))
           dsv (get dataset-versions namespace)
           columns (vec (:columns dsv))
           selected-column           (find-column (walk/keywordize-keys columns) (-> args :selectedColumn :columnName))
