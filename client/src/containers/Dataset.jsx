@@ -34,9 +34,9 @@ import usePendingSaving from '../components/common/PendingSaving';
 require('../components/dataset/Dataset.scss');
 
 function Dataset(props) {
-  const env = useSelector(state => state.env.environment);
-
-  const isFeatureFlag = env.rqg;
+  const maybeUseDataGroups = window.localStorage.getItem('useDataGroups');
+  const useDataGroups = maybeUseDataGroups !== null ? JSON.parse(maybeUseDataGroups) : true;
+  const isFeatureFlag = useDataGroups;
 
   const dataset = useSelector(
     state => state.library.datasets[props.params.datasetId]
@@ -182,6 +182,11 @@ function Dataset(props) {
     });
   };
 
+  const onUseDataGroupsToggle = () => {
+    window.localStorage.setItem('useDataGroups', `${!useDataGroups}`);
+    window.location.reload();
+  };
+
   useEffect(() => {
     // previous componentDidMount code
     // runs only once thus if has an empty array dependency list
@@ -314,6 +319,7 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
+              onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
@@ -344,6 +350,7 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
+              onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
