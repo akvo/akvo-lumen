@@ -16,6 +16,7 @@ import ColumnContextMenu from './context-menus/ColumnContextMenu';
 
 
 require('./DatasetTable.scss');
+require('./DatasetTableV2.scss');
 
 function formatCellValue(type, value) {
   switch (type) {
@@ -82,7 +83,7 @@ function DatasetTable(props) {
 
   // handle intro
   useEffect(() => {
-    if (window.localStorage.getItem('done-intro')) {
+    if (window.localStorage.getItem('useDataGroupsIntroDone')) {
       return undefined;
     }
 
@@ -105,7 +106,7 @@ function DatasetTable(props) {
     });
 
     intro.oncomplete(() => {
-      window.localStorage.setItem('done-intro', true);
+      window.localStorage.setItem('useDataGroupsIntroDone', true);
     });
 
     intro.setOptions({
@@ -118,6 +119,12 @@ function DatasetTable(props) {
       showBullets: false,
       steps: [
         {
+          intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/>`,
+          dynamic: true,
+          position: 'center',
+          tooltipClass: 'dataGroupsIntro0',
+        },
+        {
           element: '#GroupsList',
           intro: props.intl.formatMessage({ id: 'data_group_intro_1' }),
           dynamic: true,
@@ -128,6 +135,11 @@ function DatasetTable(props) {
           intro: props.intl.formatMessage({ id: 'data_group_intro_2' }),
           dynamic: true,
           position: 'right',
+        },
+        {
+          element: '.dataGroupViewToggle',
+          intro: props.intl.formatMessage({ id: 'data_group_intro_3' }),
+          dynamic: true,
         },
       ],
     });
