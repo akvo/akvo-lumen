@@ -81,7 +81,7 @@ function DatasetTable(props) {
   };
 
   useEffect(() => {
-    if (window.localStorage.getItem('done-intro')) {
+    if (window.localStorage.getItem('useDataGroupsIntroDone')) {
       return undefined;
     }
 
@@ -104,7 +104,7 @@ function DatasetTable(props) {
     });
 
     intro.oncomplete(() => {
-      window.localStorage.setItem('done-intro', true);
+      window.localStorage.setItem('useDataGroupsIntroDone', true);
     });
 
     intro.setOptions({
@@ -117,6 +117,11 @@ function DatasetTable(props) {
       showBullets: false,
       steps: [
         {
+          intro: props.intl.formatMessage({ id: 'data_group_intro_0' }),
+          dynamic: true,
+          position: 'center',
+        },
+        {
           element: '#GroupsList',
           intro: props.intl.formatMessage({ id: 'data_group_intro_1' }),
           dynamic: true,
@@ -127,6 +132,11 @@ function DatasetTable(props) {
           intro: props.intl.formatMessage({ id: 'data_group_intro_2' }),
           dynamic: true,
           position: 'right',
+        },
+        {
+          element: '.dataGroupViewToggle',
+          intro: props.intl.formatMessage({ id: 'data_group_intro_3' }),
+          dynamic: true,
         },
       ],
     });
