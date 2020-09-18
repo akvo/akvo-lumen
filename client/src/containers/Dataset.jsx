@@ -302,7 +302,7 @@ function Dataset(props) {
             group={currentGroup}
             columns={currentGroup ? currentGroup.get('columns') : null}
             rows={currentGroup ? currentGroup.get('rows') : null}
-            groups={dataset.get('groups')}
+            groups={dataset.get('groups') ? dataset.get('groups').filter(group => group.size) : null}
             Header={DatasetHeader}
             headerProps={{
               onShowDatasetSettings,
