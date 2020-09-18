@@ -7,7 +7,7 @@ export default function DatasetHeader(props) {
 
   const getActionButtions = () => {
     const dataGroupViewToggle = {
-      buttonText: props.useDataGroups ? 'Legacy data view' : 'Modern data view', // FormattedMessage
+      buttonText: <FormattedMessage id="switch_view" />,
       onClick: props.onUseDataGroupsToggle,
     };
 
@@ -143,4 +143,5 @@ DatasetHeader.propTypes = {
   onToggleTransformationLog: PropTypes.func,
   savingFailed: PropTypes.bool,
   timeToNextSave: PropTypes.number,
+  onUseDataGroupsToggle: PropTypes.func,
 };

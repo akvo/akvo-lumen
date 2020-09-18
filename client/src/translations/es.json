@@ -342,6 +342,7 @@
   "styling_dataset": "Set de datos de estilos",
   "styling_indicator": "Indicador de estilos",
   "styling_indicator_geopoint_column": "Aplicar estilos de columna de geopoint",
+  "switch_view": "Switch view",
   "sub_bucket_column": "Columna sub-cubo",
   "sub_bucket_method": "Método sub-cubo",
   "sum": "Suma",

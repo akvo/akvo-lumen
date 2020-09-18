@@ -320,7 +320,6 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
-              useDataGroups,
               onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
@@ -352,7 +351,6 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
-              useDataGroups,
               onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
