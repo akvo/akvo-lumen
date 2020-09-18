@@ -118,9 +118,10 @@ function DatasetTable(props) {
       showBullets: false,
       steps: [
         {
-          intro: `<div class="introjs-tooltiptext datagroupsIntroHeader "><h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/></div>`,
+          intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/>`,
           dynamic: true,
           position: 'center',
+          tooltipClass: 'dataGroupsIntro0',
         },
         {
           element: '#GroupsList',
