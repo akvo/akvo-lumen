@@ -16,6 +16,7 @@ import ColumnContextMenu from './context-menus/ColumnContextMenu';
 
 
 require('./DatasetTable.scss');
+require('./DatasetTableV2.scss');
 
 function formatCellValue(type, value) {
   switch (type) {
@@ -117,7 +118,7 @@ function DatasetTable(props) {
       showBullets: false,
       steps: [
         {
-          intro: props.intl.formatMessage({ id: 'data_group_intro_0' }),
+          intro: `<div class="introjs-tooltiptext datagroupsIntroHeader "><h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/></div>`,
           dynamic: true,
           position: 'center',
         },
