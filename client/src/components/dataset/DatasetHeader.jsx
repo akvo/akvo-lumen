@@ -5,6 +5,12 @@ import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default function DatasetHeader(props) {
   const getActionButtions = () => {
+    const dataGroupViewToggle = {
+      buttonText: <FormattedMessage id="switch_view" />,
+      customClass: 'dataGroupViewToggle',
+      onClick: props.onUseDataGroupsToggle,
+    };
+
     const settings = {
       buttonText: <FormattedMessage id="settings" />,
       onClick: props.onShowDatasetSettings,
@@ -84,7 +90,7 @@ export default function DatasetHeader(props) {
       },
     };
 
-    const result = [settings, transform, transformationLog, visualise];
+    const result = [dataGroupViewToggle, settings, transform, transformationLog, visualise];
 
     return result;
   };
@@ -137,4 +143,5 @@ DatasetHeader.propTypes = {
   onToggleTransformationLog: PropTypes.func,
   savingFailed: PropTypes.bool,
   timeToNextSave: PropTypes.number,
+  onUseDataGroupsToggle: PropTypes.func,
 };
