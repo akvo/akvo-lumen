@@ -566,9 +566,7 @@ export function canShowPivotTotals(spec) {
   const validCountSpec = spec.aggregation === 'count';
   const validSumSpec = spec.aggregation === 'sum' && spec.valueColumn !== null;
   const validTotalsSpec = validCountSpec || validSumSpec;
-  const haveBothDimensions = spec.categoryColumn && spec.rowColumn;
-
-  return validTotalsSpec && haveBothDimensions;
+  return validTotalsSpec && spec.rowColumn;
 }
 
 // Add totals to pivot data, where appropriate
@@ -584,7 +582,7 @@ export function processPivotData(data, spec) {
       metadata: Object.assign({}, data.metadata),
     }
   );
-
+  const columnsSelected = data.columns.length > 2;
   if (canShowPivotTotals(spec)) {
     // Populate the "Total" row with a title cell and a 0 for each column
     // (including the new row-total column which we haven't built yet)
@@ -625,10 +623,14 @@ export function processPivotData(data, spec) {
     }
 
     out.rows = processedRows;
-    out.columns.push({
-      title: 'Total',
-      type: 'number',
-    });
+    if (columnsSelected) {
+      out.columns.push({
+        title: 'Total',
+        type: 'number',
+      });
+    } else {
+      out.rows.map((row) => { row.pop(); return row; });
+    }
 
     out.metadata.hasRowTotals = true;
     out.metadata.hasColumnTotals = true;
