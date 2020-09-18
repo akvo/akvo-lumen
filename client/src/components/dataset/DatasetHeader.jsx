@@ -8,6 +8,7 @@ export default function DatasetHeader(props) {
   const getActionButtions = () => {
     const dataGroupViewToggle = {
       buttonText: <FormattedMessage id="switch_view" />,
+      customClass: "dataGroupViewToggle",
       onClick: props.onUseDataGroupsToggle,
     };
 

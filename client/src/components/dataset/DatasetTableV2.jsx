@@ -128,6 +128,11 @@ function DatasetTable(props) {
           dynamic: true,
           position: 'right',
         },
+        {
+          element: '.dataGroupViewToggle',
+          intro: 'Switch to legacy data view here.',
+          dynamic: true,
+        },
       ],
     });
 
