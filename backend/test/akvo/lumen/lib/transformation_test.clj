@@ -778,7 +778,7 @@
       (is (= new-derived-column
              (keywordize-keys (last columns))))
       (let [applied-tx (keywordize-keys (last transformations))]
-        (is (= (dissoc (keywordize-keys tx) :namespace) (select-keys applied-tx [:op :args])))
+        (is (= (dissoc (keywordize-keys tx) :created) (select-keys applied-tx [:op :args])))
         (is (= {:d1
 	        {:after
 	         new-derived-column,
