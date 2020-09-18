@@ -119,7 +119,7 @@ function DatasetTable(props) {
         {
           intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/>`,
           dynamic: true,
-          position: 'center', 
+          position: 'center',
         },
         {
           element: '#GroupsList',
