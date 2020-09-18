@@ -79,7 +79,7 @@
   "data_has_column_headers": "Data has column headers",
   "data_groups": "Data groups",
   "data_group_intro_0_header": "Introducing a new dataset view",
-  "data_group_intro_0_body": "Lumen now features a new dataset view that improves support for repeat question group's data, and organises a dataset into data groups, including a dedicated datagroup for derived columns.",
+  "data_group_intro_0_body": "Lumen now features a new dataset view that improves support for repeat question group's data, and organises a dataset into data groups, including a dedicated data group for derived columns.",
   "data_group_intro_0_footer": "The new view will become the default, in the future",
   "data_group_intro_1": "Data groups are based on Flow form question groups and submission metadata. Lumen maintains all data relations and provides them when visualizing data.",
   "data_group_intro_2": "A selected data group's data is shown on the grid.",
