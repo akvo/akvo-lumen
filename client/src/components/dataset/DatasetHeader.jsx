@@ -4,7 +4,6 @@ import { FormattedMessage } from 'react-intl';
 import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default function DatasetHeader(props) {
-
   const getActionButtions = () => {
     const dataGroupViewToggle = {
       buttonText: <FormattedMessage id="switch_view" />,

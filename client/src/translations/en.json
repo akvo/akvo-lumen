@@ -399,5 +399,6 @@
   "yikes": "Yikes",
   "y_axis": "Y-axis",
   "y_axis_label": "Y-axis label",
-  "you_need_permission_to_access": "You need permission to access"
+  "you_need_permission_to_access": "You need permission to access",
+  "data_groups_intro_guide": "Welcome to the new data groups view intro"
 }

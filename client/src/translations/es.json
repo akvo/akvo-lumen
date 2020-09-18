@@ -394,5 +394,6 @@
   "yikes": "Caramba!",
   "y_axis": "Eje y",
   "y_axis_label": "Etiqueta del eje y",
-  "you_need_permission_to_access": "Necesita permisos para acceder"
+  "you_need_permission_to_access": "Necesita permisos para acceder",
+  "data_groups_intro_guide": "Bienvenido a la introducción a la vista de nuevos grupos de datos"
 }

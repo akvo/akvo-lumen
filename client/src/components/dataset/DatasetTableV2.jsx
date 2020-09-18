@@ -117,6 +117,11 @@ function DatasetTable(props) {
       showBullets: false,
       steps: [
         {
+          intro: props.intl.formatMessage({ id: 'data_groups_intro_guide' }),
+          dynamic: true,
+          position: 'center',
+        },
+        {
           element: '#GroupsList',
           intro: props.intl.formatMessage({ id: 'data_group_intro_1' }),
           dynamic: true,
