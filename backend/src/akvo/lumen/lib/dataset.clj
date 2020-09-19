@@ -60,24 +60,6 @@
               (dutils/from-clause table-names))
             order-by-expr)))
 
-(defn fetch-metadata
-  "Fetch dataset metadata (everything apart from rows)"
-  [tenant-conn id]
-  (if-let [dataset (db.dataset/dataset-in-groups-by-id tenant-conn {:id id})]
-    (lib/ok (->
-             (reduce
-              (fn [d [group-id group]]
-                (let [columns (remove #(get % "hidden") (:columns group))]
-                  (-> d
-                      (update :columns #(apply conj % columns))
-                      (assoc :status "OK"))))
-              (assoc dataset :columns [])
-              (:groups dataset))
-             remove-token
-             (select-keys [:created :id :modified :status :title :transformations :updated :author :source :columns])
-             (rename-keys {:title :name})))
-    (lib/not-found {:error "Not found"})))
-
 (defn- groups [dsvs]
   (let [dataset-columns (->> dsvs
                              (map :columns)
@@ -85,6 +67,19 @@
                              (map db.dataset/adapt-group))]
     (-> (group-by #(get % "groupId") dataset-columns)
         (update "transformations" vec))))
+
+(defn fetch-metadata
+  "Fetch dataset metadata (everything apart from rows)"
+  [tenant-conn id]
+  (if-let [dsvs (seq (db.dataset/dataset-by-id tenant-conn {:id id}))]
+    (let [groups   (groups dsvs)
+          dataset* (-> (select-keys (first dsvs)
+                                    [:created :id :modified :status :title :transformations :updated :author :source :columns])
+                       (assoc :status "OK")
+                       (assoc :columns (reduce into [] (vals groups)))
+                       (rename-keys {:title :name}))]
+      (lib/ok dataset*))
+    (lib/not-found {:error "Not found"})))
 
 (defn fetch-groups-metadata
   "Fetch dataset groups metadata (everything apart from rows)
