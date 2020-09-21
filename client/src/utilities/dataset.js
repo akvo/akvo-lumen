@@ -23,23 +23,27 @@ export const getDatasetGroups = (groups, datasetGroupsAvailable) => {
   const groupsObject = groups.toJS();
   let groupNames = [];
 
-  // trying to keep metadata at the top
-  // refactor if you can think of a better implementation
-  const withoutMetadata = Object.keys(groupsObject).filter(group => group !== 'metadata');
-
-  groupNames = withoutMetadata
+  // keep metadata at the top
+  groupNames = Object.keys(groupsObject)
     .reduce((acc, curr) => {
       const column = groups.toJS()[curr][0];
-      const isRqg = groups.toJS()[curr].some(col => col.type === 'rqg');
 
       if (column) {
-        acc.push({ id: column.groupId, name: column.groupName, isRqg });
+        acc.push({ id: column.groupId, name: column.groupName, isRqg: false });
       }
 
       return acc;
-    }, []);
+    }, []).sort((x, y) => {
+      if (x.id === 'metadata') {
+        return -1;
+      }
 
-  groupNames.unshift({ id: 'metadata', name: 'metadata', isRqg: false });
+      if (y.id === 'metadata') {
+        return 1;
+      }
+
+      return 0;
+    });
 
   return groupNames;
 };

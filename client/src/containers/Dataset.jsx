@@ -34,9 +34,8 @@ import usePendingSaving from '../components/common/PendingSaving';
 require('../components/dataset/Dataset.scss');
 
 function Dataset(props) {
-  const env = useSelector(state => state.env.environment);
-
-  const isFeatureFlag = env.rqg;
+  const maybeUseDataGroups = window.localStorage.getItem('useDataGroups');
+  const useDataGroups = maybeUseDataGroups !== null ? JSON.parse(maybeUseDataGroups) : true;
 
   const dataset = useSelector(
     state => state.library.datasets[props.params.datasetId]
@@ -85,7 +84,7 @@ function Dataset(props) {
               () => {
                 dispatch(endTx(id));
               },
-              isFeatureFlag
+              useDataGroups
             )
           );
         }
@@ -120,7 +119,7 @@ function Dataset(props) {
               () => {
                 dispatch(endTx(id));
               },
-              isFeatureFlag
+              useDataGroups
             )
           );
         }
@@ -182,13 +181,18 @@ function Dataset(props) {
     });
   };
 
+  const onUseDataGroupsToggle = () => {
+    window.localStorage.setItem('useDataGroups', `${!useDataGroups}`);
+    window.location.reload();
+  };
+
   useEffect(() => {
     // previous componentDidMount code
     // runs only once thus if has an empty array dependency list
     const { params, dispatch } = props;
     const { datasetId } = params;
 
-    if (isFeatureFlag) {
+    if (useDataGroups) {
       if (dataset == null || dataset.get('groups') == null) {
         dispatch(
           fetchDatasetGroups(datasetId, null, () => setHasTrackedPageView(true))
@@ -204,7 +208,7 @@ function Dataset(props) {
   }, []);
 
   useEffect(() => {
-    if (!isFeatureFlag) {
+    if (!useDataGroups) {
       return undefined; // exit early
     }
 
@@ -295,14 +299,14 @@ function Dataset(props) {
       history={history}
     >
       <div className="Dataset">
-        {isFeatureFlag ? (
+        {useDataGroups ? (
           <DatasetTableV2
             history={history}
             datasetId={datasetId}
             group={currentGroup}
             columns={currentGroup ? currentGroup.get('columns') : null}
             rows={currentGroup ? currentGroup.get('rows') : null}
-            groups={dataset.get('groups')}
+            groups={dataset.get('groups') ? dataset.get('groups').filter(group => group.size) : null}
             Header={DatasetHeader}
             headerProps={{
               onShowDatasetSettings,
@@ -314,6 +318,7 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
+              onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
@@ -344,6 +349,7 @@ function Dataset(props) {
               timeToNextSave: pendingSaving.timeToNextSave,
               onChangeTitle: setTitle,
               onSaveDataset: pendingSaving.onHandleSave,
+              onUseDataGroupsToggle,
             }}
             transformations={getTransformations(dataset)}
             isLockedFromTransformations={getIsLockedFromTransformations(
