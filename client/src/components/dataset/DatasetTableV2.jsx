@@ -309,7 +309,7 @@ function DatasetTable(props) {
             hideSidebar();
           });
         },
-        columns: props.columns,
+        columns,
       });
     } else if (menuItem === 'extractMultiple') {
       handleSidebarProps({
@@ -361,7 +361,7 @@ function DatasetTable(props) {
             hideSidebar();
           });
         },
-        columns: props.columns,
+        columns,
       });
     } else if (menuItem === 'mergeDatasets') {
       props.history.push(`${props.location.pathname}/transformation/merge`);
