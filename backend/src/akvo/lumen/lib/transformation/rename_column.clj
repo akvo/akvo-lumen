@@ -1,5 +1,7 @@
 (ns akvo.lumen.lib.transformation.rename-column
   (:require [akvo.lumen.util :as util]
+            [clojure.tools.logging :as log]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.lib.transformation.engine :as engine]))
 
 (defn col-name [op-spec]
@@ -14,15 +16,22 @@
        (string? (new-col-title op-spec))))
 
 (defmethod engine/apply-operation "core/rename-column"
-  [{:keys [tenant-conn]} table-name columns op-spec]
-  (if-let [response-error (engine/column-title-error? (new-col-title op-spec) columns)]
-    response-error
-    (let [column-name      (col-name op-spec)
-          column-idx       (engine/column-index columns column-name)
-          new-column-title (new-col-title op-spec)]
-      {:success?      true
-       :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
-       :columns       (engine/update-column columns column-name assoc "title" new-column-title)})))
+  [{:keys [tenant-conn]} dataset-versions op-spec]
+  (let [all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns (col-name op-spec))
+        dsv (get dataset-versions namespace)
+        columns (vec (:columns dsv))]
+    (if-let [response-error (engine/column-title-error? (new-col-title op-spec) columns)]
+            response-error
+            (let [column-name      (col-name op-spec)
+                  new-column-title (new-col-title op-spec)
+                  new-columns (engine/update-column columns column-name assoc "title" new-column-title)]
+              {:success?      true
+               :execution-log [(format "Renamed column %s to %s" column-name new-column-title)]
+               :dataset-versions (vals (-> dataset-versions
+                                           (assoc-in [namespace :columns] new-columns)
+                                           (update-in [namespace :transformations]
+                                                      engine/update-dsv-txs op-spec columns new-columns)))}))))
 
 (defmethod engine/columns-used "core/rename-column"
   [applied-transformation columns]
