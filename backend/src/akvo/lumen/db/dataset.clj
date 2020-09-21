@@ -18,7 +18,6 @@
                               (contains? flow-common/metadata-keys (get c "columnName")) ["metadata" "metadata"]
                               (tx.engine/is-derived? (get c "columnName")) ["transformations" "transformations"]
                               :else ["main" "main"])]
-
     (-> c
         (assoc "groupId" groupId)
         (assoc "groupName" groupName))))
