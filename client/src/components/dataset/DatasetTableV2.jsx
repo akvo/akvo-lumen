@@ -104,6 +104,9 @@ function DatasetTable(props) {
       }
     });
 
+    intro.onexit(() => {
+      window.localStorage.setItem('useDataGroupsIntroDone', true);
+    });
     intro.oncomplete(() => {
       window.localStorage.setItem('useDataGroupsIntroDone', true);
     });
@@ -150,9 +153,7 @@ function DatasetTable(props) {
       intro.start();
     }
 
-    return () => {
-      intro.exit();
-    };
+    return undefined;
   }, [props.datasetGroupsAvailable, props.groups, isMounted.current, sidebarProps]);
 
   // handle resize
