@@ -76,7 +76,7 @@ function DatasetTable(props) {
     handleSidebarProps({
       type: 'groupsList',
       displayRight: false,
-      groups: getDatasetGroups(props.groups, props.datasetGroupsAvailable),
+      groups: props.datasetGroupsAvailable ? getDatasetGroups(props.groups) : [],
     });
   };
 
