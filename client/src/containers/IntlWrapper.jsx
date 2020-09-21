@@ -17,10 +17,10 @@ export const availableLocales = [{
   label: 'English',
   tag: 'en',
 }, {
-  label: 'Espanol',
+  label: 'Español',
   tag: 'es',
 }, {
-  label: 'Francais',
+  label: 'Français',
   tag: 'fr',
 }];
 
