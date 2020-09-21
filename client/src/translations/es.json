@@ -80,7 +80,7 @@
   "data_group_intro_0_header": "Experimente la nueva vista del set de datos",
   "data_group_intro_0_body": "Los set de datos ahora se dividen en grupos de datos para facilitar la limpieza y la transformación. Obtenga una mejor visión general independientemente del tamaño del set de datos. Un grupo de datos dedicado contiene todas las columnas transformadas para mantener las cosas organizadas.",
   "data_group_intro_0_footer": "En el futuro, esta nueva vista permitirá datos de grupos de datos repetidos y se convertirá en la predeterminada.",
-  "data_group_intro_1": "Lumen maneja todas las relaciones de datos entre los grupos al transformar y visualizar datos.",
+  "data_group_intro_1": "Los grupos de datos se basan en los grupos de preguntas de Flow y los metadatos de envío. Lumen maneja todas las relaciones de datos entre los grupos al transformar y visualizar datos.",
   "data_group_intro_2": "Seleccione cualquier grupo de datos para mostrar sus datos en la cuadrícula.",
   "data_group_intro_3": "Puede alternar entre vista nueva y antigua aquí.",
   "data_last_updated": "Última actualización de los datos",
