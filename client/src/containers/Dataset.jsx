@@ -221,7 +221,7 @@ function Dataset(props) {
     const groups = dataset.get('groups');
 
     // if there's no question group
-    if (groups.get('main')) {
+    if (groups.find(group => group.get(0) === 'main')) {
       api
         .get(`/api/datasets/${datasetId}/group/main`)
         .then((response) => {
@@ -306,7 +306,7 @@ function Dataset(props) {
             group={currentGroup}
             columns={currentGroup ? currentGroup.get('columns') : null}
             rows={currentGroup ? currentGroup.get('rows') : null}
-            groups={dataset.get('groups') ? dataset.get('groups').filter(group => group.size) : null}
+            groups={dataset.get('groups') ? dataset.get('groups').filter(group => group.get(1).size) : null}
             Header={DatasetHeader}
             headerProps={{
               onShowDatasetSettings,
