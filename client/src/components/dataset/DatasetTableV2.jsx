@@ -168,7 +168,7 @@ function DatasetTable(props) {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [isMounted.current, props.groupAvailable]);
+  }, [isMounted.current, props.groupAvailable, sidebarProps]);
 
   // handle group sidebar
   useEffect(() => {
