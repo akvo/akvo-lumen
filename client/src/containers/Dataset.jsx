@@ -23,7 +23,7 @@ import {
 } from '../domain/dataset';
 import * as api from '../utilities/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { TRANSFORM_DATASET } from '../constants/analytics';
+import { USE_DATA_GROUPS, TRANSFORM_DATASET } from '../constants/analytics';
 import { trackEvent, trackPageView } from '../utilities/analytics';
 import NavigationPrompt from '../components/common/NavigationPrompt';
 import DatasetHeader from '../components/dataset/DatasetHeader';
@@ -182,6 +182,7 @@ function Dataset(props) {
   };
 
   const onUseDataGroupsToggle = () => {
+    trackEvent(USE_DATA_GROUPS, `${!useDataGroups}`);
     window.localStorage.setItem('useDataGroups', `${!useDataGroups}`);
     window.location.reload();
   };
