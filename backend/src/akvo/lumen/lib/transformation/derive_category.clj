@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.transformation.derive-category
   (:require [akvo.lumen.util :as util]
             [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.lib.dataset.utils :as dataset.utils]
+            [akvo.lumen.lib.dataset.utils :as dataset.utils :refer (find-column)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
             [clojure.set :as set]
@@ -46,17 +46,24 @@
            mappings)
      uncategorized-value)))
 
-
 (defmethod engine/apply-operation "core/derive-category"
-  [{:keys [tenant-conn]} table-name columns op-spec]
+  [{:keys [tenant-conn]} dataset-versions op-spec]
   (let [op-spec               (walk/keywordize-keys op-spec)
+        all-columns (engine/all-columns dataset-versions)
         source-column-name    (get-in op-spec [:args :source :column :columnName])
         source-column-title    (get-in op-spec [:args :source :column :title])
         column-title          (get-in op-spec [:args :target :column :title])
         uncategorized-value   (get-in op-spec [:args :derivation :uncategorizedValue] "Uncategorised")
-        new-column-name       (engine/next-column-name columns)
+        new-column-name       (engine/next-column-name all-columns)
         mappings              (get-in op-spec [:args :derivation :mappings])
         derivation-type       (get-in op-spec [:args :derivation :type] "text")
+
+        
+        namespace (engine/get-namespace all-columns source-column-name)
+        dsv (get dataset-versions namespace)
+        table-name (:table-name dsv)
+
+        columns (vec (:columns dsv))
         execution-log-message (format "Derived category '%s' using column: '%s'(%s) and mappings: '%s'"
                                       column-title
                                       source-column-title
@@ -64,7 +71,14 @@
                                       mappings)]
     (if-let [response-error (engine/column-title-error? column-title columns)]
       response-error
-      (let [all-data (db.tx.derive/all-data tenant-conn {:table-name table-name})]
+      (let [all-data (db.tx.derive/all-data tenant-conn {:table-name table-name})
+            new-columns (conj columns {"title"      column-title
+                                       "type"       "text"
+                                       "sort"       nil
+                                       "namespace"  namespace
+                                       "hidden"     false
+                                       "direction"  nil
+                                       "columnName" new-column-name})]
         (jdbc/with-db-transaction [tenant-conn tenant-conn]
           (db.tx.engine/add-column tenant-conn {:table-name      table-name
                                                 :column-type     "text"
@@ -79,14 +93,13 @@
                                                            "number" (find-number-cat mappings v uncategorized-value))
                                             :column-name new-column-name
                                             :table-name  table-name})))
+          
           {:success?      true
            :execution-log [execution-log-message]
-           :columns       (conj columns {"title"      column-title
-                                         "type"       "text"
-                                         "sort"       nil
-                                         "hidden"     false
-                                         "direction"  nil
-                                         "columnName" new-column-name})})))))
+           :dataset-versions (vals (-> dataset-versions
+                                       (assoc-in [namespace :columns] new-columns)
+                                       (update-in [namespace :transformations]
+                                                  engine/update-dsv-txs op-spec (:columns dsv) new-columns)))})))))
 
 (defmethod engine/columns-used "core/derive-category"
   [applied-transformation columns]
