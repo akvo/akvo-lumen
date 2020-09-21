@@ -153,9 +153,7 @@ function DatasetTable(props) {
       intro.start();
     }
 
-    return () => {
-      intro.exit();
-    };
+    return undefined;
   }, [props.datasetGroupsAvailable, props.groups, isMounted.current, sidebarProps]);
 
   // handle resize
