@@ -675,6 +675,10 @@
            (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
                                      {::import.values.s/multipleId import.values.s/cad2-id
                                       ::import.values.s/id         "c2"}))
+          columns-payload            (mapv #(-> %
+                                                (update :name (partial str "new-name-bis-" %2 "-"))
+                                                (assoc :extract %3))
+                                           columns (range) bols)
           [tag _ :as res] (apply-transformation
                            {:type :transformation
                             :transformation

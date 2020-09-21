@@ -47,13 +47,13 @@
                                         {:possible-reason "maybe you don't update the flow dataset!? (via client dashboard ...)"}})))
 
           new-columns (->> (columns-to-extract (:columns args) selected-column caddisfly-schema (:extractImage args))
-                           (multiple-column/add-name-to-new-columns columns)
+                           (multiple-column/add-name-to-new-columns all-columns)
                            (map #(assoc % :namespace namespace)))]
       (if-let [errors (->> (map :title new-columns)
-                           (filter #(engine/column-title-error? % columns))
+                           (filter #(engine/column-title-error? % all-columns))
                            not-empty)]
         {:success? false
-         :message  (map :message errors)}
+         :message  (string/join "," (map :message errors))}
         (let [_ (log/debug ::apply-operation (:table-name dsv) (:columnName selected-column) onError)
               _ (log/debug :new-columns new-columns :selected-column selected-column :extractImage (:extractImage args))
 
