@@ -79,7 +79,7 @@
   "data_has_column_headers": "Data has column headers",
   "data_groups": "Data groups",
   "data_group_intro_0_header": "Experience the new dataset view",
-  "data_group_intro_0_body": "Datasets are now split into data groups to make it easy to clean and transform your data. Get a better overview regardless of the side of the dataset. A dedicated data group holds all transformed columns to keep things organised.",
+  "data_group_intro_0_body": "Datasets are now split into data groups to make it easy to clean and transform your data. Get a better overview regardless of the size of the dataset. A dedicated data group holds all transformed columns to keep things organised.",
   "data_group_intro_0_footer": "In the future, this new view will support data from repeated data groups and become the default.",
   "data_group_intro_1": "Lumen handles all data relations across the groups when transforming and visualising data.",
   "data_group_intro_2": "Select any data group to show its data on the grid.",
