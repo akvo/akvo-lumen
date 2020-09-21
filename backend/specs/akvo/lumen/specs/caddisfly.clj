@@ -35,6 +35,9 @@
   :ret any?)
 
 
+(s/def ::columns (s/coll-of any?))
+(s/def ::adapted-schema (s/keys :req-un [::hasImage ::columns]))
+
 (s/fdef  lib.multiple-column/adapt-schema
   :args (s/cat :schema ::schema)
-  :ret ::schema)
+  :ret ::adapted-schema)
