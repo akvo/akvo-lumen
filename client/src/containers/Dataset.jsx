@@ -182,6 +182,7 @@ function Dataset(props) {
   };
 
   const onUseDataGroupsToggle = () => {
+    trackEvent(USE_DATA_GROUPS, `${!useDataGroups}`);
     window.localStorage.setItem('useDataGroups', `${!useDataGroups}`);
     window.location.reload();
   };
