@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.scatter
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.commons :refer (run-query sql-aggregation-subquery sql-option-bucket-column) :as commons]
-            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]))
@@ -20,8 +20,9 @@
   "DEPRECATED: version 1 works with sampling data, only current vizs without further modifications will use this version,
    following modifications will use version 2 and user will be prompt to use aggregation facilities if sql results are
    higher than 2.5K rows"
-  [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (sql-str columns (:filters query))
+  [tenant-conn ds-versions query]
+  (let [columns (reduce #(into % (:columns %2)) [] ds-versions)
+        filter-sql (sql-str columns (:filters query))
         column-x (find-column columns (:metricColumnX query))
         column-y (find-column columns (:metricColumnY query))
         column-size (find-column columns (:metricColumnSize query))
@@ -33,7 +34,7 @@
         aggregation (partial sql-aggregation-subquery (:metricAggregation query))
 
         subquery (format "(SELECT * FROM %1$s WHERE %2$s ORDER BY random() LIMIT %3$s)z"
-                         table-name filter-sql max-points)
+                         (from-clause (map :table-name ds-versions)) filter-sql max-points)
 
         sql-text-with-aggregation
         (format "SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
@@ -58,7 +59,7 @@
                          (:columnName column-size)
                          (sql-option-bucket-column column-category)
                          (:columnName column-label)
-                         table-name
+                         (from-clause (map :table-name ds-versions))
                          filter-sql
                          max-points)
 
@@ -74,8 +75,9 @@
                 :data (serie-data :label sql-response 4)}})))
 
 (defn query-v2
-  [tenant-conn {:keys [columns table-name]} query]
-  (let [filter-sql (sql-str columns (:filters query))
+  [tenant-conn ds-versions query]
+  (let [columns   (reduce #(into % (:columns %2)) [] ds-versions)
+        filter-sql (sql-str columns (:filters query))
         column-x (find-column columns (:metricColumnX query))
         column-y (find-column columns (:metricColumnY query))
         column-size (find-column columns (:metricColumnSize query))
@@ -96,7 +98,7 @@
                 (aggregation column-size)
                 (aggregation column-category)
                 (:columnName column-bucket)
-                table-name
+                (from-clause (map :table-name ds-versions))
                 filter-sql)
         sql-text-without-aggregation (format "SELECT %1$s AS x, %2$s AS y, %3$s AS size, %4$s AS category, %5$s AS label 
                                               FROM %6$s 
@@ -107,7 +109,7 @@
                          (:columnName column-size)
                          (sql-option-bucket-column column-category)
                          (:columnName column-label)
-                         table-name
+                         (from-clause (map :table-name ds-versions))
                          filter-sql)
 
         sql-text (if column-bucket sql-text-with-aggregation sql-text-without-aggregation)

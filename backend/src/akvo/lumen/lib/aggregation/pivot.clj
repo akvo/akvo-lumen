@@ -2,7 +2,7 @@
   (:require [akvo.commons.psql-util]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
-            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
@@ -20,35 +20,35 @@
                                                       "date" "'1001-01-01 01:00:00'::timestamptz"
                                                       "'NaN'::double precision"))))
 
-(defn unique-values-sql [table-name filter-str category-column]
+(defn unique-values-sql [table-names filter-str category-column]
   (let [select (format "SELECT DISTINCT %s%s"
                        (coalesce category-column) (if (= "timestamptz"
                                                          (:type category-column))
                                                     "::timestamptz::date"
                                                     ""))
-        from   (format "FROM %s" table-name)
+        from   (format "FROM %s" (from-clause table-names))
         where  (format "WHERE %s ORDER BY 1" filter-str)]
     (format "%s %s %s" select from where)))
 
-(defn run-query-categories [conn table-name filter-str category-column]
-  (->> (unique-values-sql table-name filter-str category-column)
+(defn run-query-categories [conn table-names filter-str category-column]
+  (->> (unique-values-sql table-names filter-str category-column)
        (run-query conn)
        (map first)))
 
 (defn- run-pivot-query
-  [conn table-name {:keys [category-column row-column aggregation value-column]} filter-str categories]
+  [conn table-names {:keys [category-column row-column aggregation value-column]} filter-str categories]
   (let [source-sql        (let [select (format "SELECT %s, %s, %s(%s)"
                                                (:columnName row-column)
                                                (coalesce category-column)
                                                aggregation
                                                (:columnName value-column))
-                                from   (format "FROM %s" table-name)
+                                from   (format "FROM %s" (from-clause table-names))
                                 where  (format "WHERE %s GROUP BY 1,2 ORDER BY 1,2" filter-str)]
                             (format "%s %s %s" select from where))
         pivot-sql (let [select "SELECT *"
                         from   (format "FROM crosstab ($$ %s $$, $$ %s $$) AS ct (c1 text, %s)"
                                        source-sql
-                                       (unique-values-sql table-name filter-str category-column)
+                                       (unique-values-sql table-names filter-str category-column)
                                        (str/join "," (map #(format "c%s double precision" (+ % 2))
                                                           (range (count categories)))))
                         where  ""]
@@ -57,23 +57,24 @@
 
 
 (defn- apply-pivot
-  [conn table-name {:keys [category-column row-column] :as query} filter-str]
-  (if-let [categories (not-empty (run-query-categories conn table-name
+  [conn table-names {:keys [category-column row-column] :as query} filter-str]
+  (if-let [categories (not-empty (run-query-categories conn table-names
                                                        filter-str category-column))]
     {:columns (->> categories
                    (map (fn [title] {:title title :type "number"}))
                    (cons (select-keys row-column [:title :type])))
-     :rows    (run-pivot-query conn table-name query filter-str categories)}
+     :rows    (run-pivot-query conn table-names query filter-str categories)}
     {:columns []
      :rows [[]]}))
 
-(defn apply-query [conn table-name {:keys [row-column category-column value-column] :as query} filter-str]
+(defn apply-query [conn table-names {:keys [row-column category-column value-column] :as query} filter-str]
   (cond
 
     (and (nil? row-column) (nil? category-column))
     {:columns [{:type "number" :title "Total"}]
-     :rows    (run-query conn (format "SELECT count(rnum) FROM %s WHERE %s"
-                                      table-name
+     :rows    (run-query conn (format "SELECT count(%s.rnum) FROM %s WHERE %s"
+                                      (first table-names)
+                                      (from-clause table-names)
                                       filter-str))}
 
     (nil? category-column)
@@ -81,15 +82,17 @@
                 :title (get-in query [:row-column :title])}
                {:type  "number"
                 :title "Total"}]
-     :rows    (run-query conn (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+     :rows    (run-query conn (format "SELECT %s, count(%s.rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
                                       (coalesce (:row-column query))
-                                      table-name
+                                      (first table-names)
+                                      (from-clause table-names)
                                       filter-str))}
 
     (nil? row-column)
-    (let [data (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+    (let [data (->> (format "SELECT %s, count(%s.rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
                             (coalesce (:category-column query))
-                            table-name
+                            (first table-names)
+                            (from-clause table-names)
                             filter-str)
                     (run-query conn))]
       {:columns (->> data
@@ -103,12 +106,12 @@
                       (cons "Total"))]})
 
     (nil? value-column)
-    (apply-pivot conn table-name (assoc query
-                                        :value-column {:columnName "rnum"}
+    (apply-pivot conn table-names (assoc query
+                                         :value-column {:columnName (str (first table-names)".rnum")}
                                         :aggregation "count") filter-str)
 
     :else
-    (apply-pivot conn table-name query filter-str)))
+    (apply-pivot conn table-names query filter-str)))
 
 (defn build-query
   "Replace column names with proper column metadata from the dataset"
@@ -126,9 +129,10 @@
                                       {:aggregation (:aggregation query )})))
    :filters         (:filters query)})
 
-(defn query [tenant-conn {:keys [columns table-name]} query]
-  (let [query      (build-query columns query)
+(defn query [tenant-conn ds-versions query]
+  (let [columns   (reduce #(into % (:columns %2)) [] ds-versions)
+        query      (build-query columns query)
         filter-str (sql-str columns (:filters query))]
-    (lib/ok (merge (apply-query tenant-conn table-name query filter-str)
+    (lib/ok (merge (apply-query tenant-conn (map :table-name ds-versions) query filter-str)
                    {:metadata
                     {:categoryColumnTitle (get-in query [:category-column :title])}}))))
