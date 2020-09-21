@@ -12,6 +12,9 @@
 (defn dataset-by-id [conn opts]
   (db-dataset-by-id conn (merge dv/defaults opts)))
 
+(defn n-dataset-by-id [conn opts]
+  (db-n-dataset-by-id conn (merge dv/defaults opts)))
+
 (defn adapt-group [c]
   (let [[groupId groupName] (cond
                               (some? (get c "groupId")) [(get c "groupId") (get c "groupName")]
@@ -22,6 +25,9 @@
     (-> c
         (assoc "groupId" groupId)
         (assoc "groupName" groupName))))
+
+(defn n-table-name-and-columns-by-dataset-id [conn opts]
+  (db-n-table-name-and-columns-by-dataset-id conn (merge dv/defaults opts)))
 
 (defn table-name-and-columns-by-dataset-id [conn opts]
   (db-table-name-and-columns-by-dataset-id conn (merge dv/defaults opts)))
