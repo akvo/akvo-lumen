@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.bar
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
-            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
@@ -14,7 +14,7 @@
     "asc" (format "%s ASC NULLS FIRST" column)
     "dsc" (format "%s DESC NULLS LAST" column)))
 
-(defn- subbucket-sql [table-name bucket-column subbucket-column aggregation filter-sql sort-sql truncate-size]
+(defn- subbucket-sql [table-names bucket-column subbucket-column aggregation filter-sql sort-sql truncate-size]
   (format "
           WITH
           sort_table AS
@@ -43,20 +43,20 @@
           ORDER BY %5$s, data_table.s"
           (sql-option-bucket-column bucket-column)
           aggregation
-          table-name
+          (from-clause table-names)
           filter-sql
           sort-sql
           truncate-size
           (sql-option-bucket-column subbucket-column)))
 
-(defn- bucket-sql [table-name bucket-column aggregation filter-sql sort-sql truncate-size]
+(defn- bucket-sql [table-names bucket-column aggregation filter-sql sort-sql truncate-size]
   (format "SELECT * 
            FROM (SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY x)z
            ORDER BY %5$s 
            LIMIT %6$s"
           (sql-option-bucket-column bucket-column)
           aggregation
-          table-name
+          (from-clause table-names)
           filter-sql
           sort-sql
           truncate-size))
@@ -138,45 +138,46 @@
                             sql-response)}})
 
 (defn query
-  [tenant-conn {:keys [columns table-name]} query]
-  (if-let [bucket-column (find-column columns (:bucketColumn query))]
-    (let [subbucket-column (find-column columns (:subBucketColumn query))
-          metric-y-column  (or (find-column columns (:metricColumnY query)) subbucket-column)
-          metric-aggregation (:metricAggregation query)
-          aggregation      (aggregation* metric-aggregation metric-y-column bucket-column)
-          metric-columns-y (when (not (empty? (:metricColumnsY query)))
-                             (let [metric-columns-y (map #(find-column columns %) (:metricColumnsY query) )]
-                               (conj metric-columns-y metric-y-column)))
-          sql*  (if subbucket-column
-                  (subbucket-sql table-name bucket-column subbucket-column aggregation
-                                 (sql-str columns (:filters query))
-                                 (sort* (:sort query) "sort_value") (or (:truncateSize query) "ALL"))
-                  (bucket-sql table-name
-                              bucket-column 
-                              (if metric-columns-y
-                                (->> metric-columns-y
-                                     (map #(aggregation* metric-aggregation %  bucket-column))
-                                     (map-indexed
-                                      (fn [index x]
-                                        (if (= index 0) (str x " as y") x)) )
-                                     (str/join ", " ))
-                                (str aggregation " as y"))
-                              (sql-str columns (:filters query))
-                              (sort* (:sort query) "z.y")
-                              (or (:truncateSize query) "ALL")))
-          _ (log/debug :sql* sql*)
-          sql-response     (run-query tenant-conn sql*)
-          _ (log/debug :sql-response* sql-response)
-          max-elements     200]
-      (if (> (count sql-response) max-elements)
-        (lib/bad-request {"error"  true
-                          "reason" "too-many"
-                          "max"    max-elements
-                          "count"  (count sql-response)})
-        (lib/ok
-         (if metric-columns-y
-           (metrics-column-response sql-response bucket-column metric-columns-y)
-           (if subbucket-column
-             (subbucket-column-response sql-response bucket-column)
-             (bucket-column-response sql-response bucket-column metric-y-column))))))
-    (lib/ok (bucket-column-response nil nil nil))))
+  [tenant-conn ds-versions query]
+  (let [columns (reduce #(into % (:columns %2)) [] ds-versions)]
+    (if-let [bucket-column (find-column columns (:bucketColumn query))]
+      (let [subbucket-column (find-column columns (:subBucketColumn query))
+            metric-y-column  (or (find-column columns (:metricColumnY query)) subbucket-column)
+            metric-aggregation (:metricAggregation query)
+            aggregation      (aggregation* metric-aggregation metric-y-column bucket-column)
+            metric-columns-y (when (not (empty? (:metricColumnsY query)))
+                               (let [metric-columns-y (map #(find-column columns %) (:metricColumnsY query) )]
+                                 (conj metric-columns-y metric-y-column)))
+            sql*  (if subbucket-column
+                    (subbucket-sql (map :table-name ds-versions) bucket-column subbucket-column aggregation
+                                   (sql-str columns (:filters query))
+                                   (sort* (:sort query) "sort_value") (or (:truncateSize query) "ALL"))
+                    (bucket-sql (map :table-name ds-versions)
+                                bucket-column 
+                                (if metric-columns-y
+                                  (->> metric-columns-y
+                                       (map #(aggregation* metric-aggregation %  bucket-column))
+                                       (map-indexed
+                                        (fn [index x]
+                                          (if (= index 0) (str x " as y") x)) )
+                                       (str/join ", " ))
+                                  (str aggregation " as y"))
+                                (sql-str columns (:filters query))
+                                (sort* (:sort query) "z.y")
+                                (or (:truncateSize query) "ALL")))
+            _ (log/debug :sql* sql*)
+            sql-response     (run-query tenant-conn sql*)
+            _ (log/debug :sql-response* sql-response)
+            max-elements     200]
+        (if (> (count sql-response) max-elements)
+          (lib/bad-request {"error"  true
+                            "reason" "too-many"
+                            "max"    max-elements
+                            "count"  (count sql-response)})
+          (lib/ok
+           (if metric-columns-y
+             (metrics-column-response sql-response bucket-column metric-columns-y)
+             (if subbucket-column
+               (subbucket-column-response sql-response bucket-column)
+               (bucket-column-response sql-response bucket-column metric-y-column))))))
+      (lib/ok (bucket-column-response nil nil nil)))))

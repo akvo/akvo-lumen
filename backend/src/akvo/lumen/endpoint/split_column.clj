@@ -16,16 +16,21 @@
 
 (defn handler [{:keys [tenant-manager] :as opts}]
   (fn [{{:keys [dataset-id]} :path-params
-        query-params :query-params
-        tenant :tenant}]
-    (let [query           (json/parse-string (get query-params "query") keyword)
-          tenant-conn     (p/connection tenant-manager tenant)
-          dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
-          sql-query       {:table-name  (:table-name dataset-version)
-                           :column-name (:columnName query)
-                           :limit       (str (:limit query "200"))}
-          values          (map (comp str (keyword (:columnName query)))
-                               (db.transformation/select-random-column-data tenant-conn sql-query))
+        query-params         :query-params
+        tenant               :tenant}]
+    (let [query            (json/parse-string (get query-params "query") keyword)
+          namespace        (:namespace query "main")
+          tenant-conn      (p/connection tenant-manager tenant)
+          dsvs             (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+          column-name      (:columnName query)
+          column           (first (filter #(= column-name (get % "columnName")) (reduce into [] (map :columns dsvs))))
+          namespace        (get column "namespace" "main")
+          dataset-version  (first (filter #(= namespace (:namespace %)) dsvs))
+          sql-query        {:table-name  (:table-name dataset-version)
+                            :column-name column-name
+                            :limit       (str (:limit query "200"))}
+          values           (map (comp str (keyword (:columnName query)))
+                                (db.transformation/select-random-column-data tenant-conn sql-query))
           pattern-analysis (transformation/pattern-analysis (re-pattern "[^a-zA-Z0-9\\s]") values)]
       (lib/ok {:analysis (sort-pattern-analysis-by pattern-analysis :total-row-coincidences)}))))
 
