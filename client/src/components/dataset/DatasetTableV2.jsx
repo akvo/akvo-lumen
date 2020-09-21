@@ -104,6 +104,9 @@ function DatasetTable(props) {
       }
     });
 
+    intro.onexit(() => {
+      window.localStorage.setItem('useDataGroupsIntroDone', true);
+    });
     intro.oncomplete(() => {
       window.localStorage.setItem('useDataGroupsIntroDone', true);
     });
