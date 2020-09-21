@@ -18,7 +18,7 @@
                                              (assoc :type "GEO-SHAPE-FEATURES")
                                              (assoc :multipleType "geo-shape-features")
                                              (assoc :multipleId (:id i))
-                                             (assoc :ns (:ns i))
+                                             (assoc :namespace (:namespace i))
                                              (assoc :derived-id (:id i))
                                              (assoc :derived-fn (fn [x] (-> x (w/keywordize-keys) :features first :properties)))
                                              (update :name (fn [o] (str o " Features" )))
