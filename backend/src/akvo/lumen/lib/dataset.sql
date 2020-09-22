@@ -99,11 +99,12 @@ SELECT (spec->'source')::jsonb - 'refreshToken' as source
   FROM data_source, dataset_version, job_execution, dataset
  WHERE dataset_version.dataset_id = dataset.id
    AND dataset_version.version = 1
-   AND dataset_version.namespace = :namespace
    AND dataset_version.job_execution_id = job_execution.id
    AND job_execution.data_source_id = data_source.id
    AND dataset_version.dataset_id=:id
+   LIMIT 1
 )
+
 SELECT dataset_version.table_name AS "table-name",
        dataset.title,
        dataset.created,
@@ -113,6 +114,7 @@ SELECT dataset_version.table_name AS "table-name",
        source_data.source,
        dataset_version.created AS "updated",
        dataset_version.columns,
+       dataset_version.namespace,
        dataset_version.transformations
   FROM dataset_version, dataset, source_data
  WHERE dataset_version.dataset_id=:id
@@ -121,13 +123,13 @@ SELECT dataset_version.table_name AS "table-name",
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
 
--- :name db-table-name-and-columns-by-dataset-id :? :1
+-- :name db-table-name-and-columns-by-dataset-id :? :*
 SELECT dataset_version.table_name AS "table-name",
-       dataset_version.columns
+       dataset_version.columns,
+       dataset_version.namespace
   FROM dataset_version, dataset
  WHERE dataset_version.dataset_id=:id
    AND dataset.id=dataset_version.dataset_id
-   AND dataset_version.namespace = :namespace
    AND version=(SELECT max(version)
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);

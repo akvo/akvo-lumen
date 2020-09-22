@@ -86,9 +86,10 @@
                                   (apply tc/date-time t)
                                   (catch Exception e false)))
                               (tgen/tuple year-gen month-gen day-gen)))
+(defn- instant-base [e] (Instant/ofEpochMilli (tcc/to-long (apply tc/date-time e))))
+(def instant-gen (tgen/fmap instant-base date-gen))
 
-(def instant-gen (tgen/fmap (fn [e] (Instant/ofEpochMilli (tcc/to-long (apply tc/date-time e)))) date-gen))
-
+(def str-instant-gen (tgen/fmap (comp str instant-base) date-gen))
 (def false-gen (gen/return false))
 
 (def text-year-gen (tgen/fmap str year-gen))
