@@ -4,7 +4,10 @@
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
             [akvo.lumen.db.transformation.reverse-geocode :as db.tx.reverse-geocode]
             [akvo.lumen.util :as util]
-            [clojure.java.jdbc :as jdbc]))
+            [clojure.tools.logging :as log]
+            [akvo.lumen.lib.dataset.utils :as dataset.utils]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.walk :as w]))
 
 (defmethod engine/valid? "core/reverse-geocode"
   [op-spec]
@@ -18,17 +21,36 @@
 (defn table-qualify [table-name column-name]
   (str table-name "." column-name))
 
-(defn source-table-name [conn {:strs [datasetId]}]
-  (-> (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
-      :table-name))
+(defn source-table-name [conn {:strs [datasetId mergeColumn geoshapeColumn]}]
+  (let [dsvs (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
+        columns (w/keywordize-keys (reduce into [] (map :columns dsvs)))
+        namespaces (set (engine/namespaces columns [mergeColumn geoshapeColumn]))]
+    (if-let [namespace (and (= 1 (count namespaces)) (first namespaces))]
+      (:table-name (first (filter #(= namespace (:namespace %)) dsvs)))
+      (throw "Reverse-geocode source columns should belong to the same data-group"))))
 
 (defmethod engine/apply-operation "core/reverse-geocode"
-  [{:keys [tenant-conn]} table-name columns {:strs [args] :as op-spec}]
-  (let [column-name (engine/next-column-name columns)
+  [{:keys [tenant-conn]} dataset-versions {:strs [args] :as op-spec}]
+  (let [all-columns (engine/all-columns dataset-versions)
+        namespace (engine/get-namespace all-columns (first (engine/columns-used (w/keywordize-keys op-spec) all-columns)))
+        dsv (get dataset-versions namespace)
+        columns (:columns dsv)
+        column-name (engine/next-column-name all-columns)
+        table-name (:table-name dsv)
         {:strs [target source]} args
         geopointColumn (get target "geopointColumn")
-        {:strs [mergeColumn geoshapeColumn]} source
-        source-table-name (source-table-name tenant-conn source)]
+        {:strs [mergeColumn geoshapeColumn datasetId]} source
+        _ (log/error :YEP op-spec)
+        source-table-name (source-table-name tenant-conn source)
+        _ (log/error :YIP source-table-name )
+        new-columns (conj columns
+                          {"title" (get target "title")
+                           "type" "text"
+                           "sort" nil
+                           "hidden" false
+                           "namespace" namespace
+                           "direction" nil
+                           "columnName" column-name})]
     (if-let [response-error (engine/column-title-error? (get target "title") columns)]
       response-error
       (do
@@ -43,13 +65,10 @@
                                                             :target-table-name table-name})
         {:success? true
          :execution-log ["Geocoded"]
-         :columns (conj columns
-                        {"title" (get target "title")
-                         "type" "text"
-                         "sort" nil
-                         "hidden" false
-                         "direction" nil
-                         "columnName" column-name})}))))
+         :dataset-versions (vals (-> dataset-versions
+                                     (assoc-in [namespace :columns] new-columns)
+                                     (update-in [namespace :transformations]
+                                                engine/update-dsv-txs op-spec (:columns dsv) new-columns)))}))))
 
 (defmethod engine/columns-used "core/reverse-geocode"
   [applied-transformation columns]
