@@ -112,11 +112,11 @@ function DatasetTable(props) {
     });
 
     intro.setOptions({
-      nextLabel: 'Next',
-      prevLabel: 'Back',
+      nextLabel: props.intl.formatMessage({ id: 'next' }),
+      prevLabel: props.intl.formatMessage({ id: 'back' }),
       hidePrev: true,
-      skipLabel: 'Skip',
-      doneLabel: 'Got it',
+      skipLabel: props.intl.formatMessage({ id: 'skip' }),
+      doneLabel: props.intl.formatMessage({ id: 'got_it' }),
       showStepNumbers: false,
       showBullets: false,
       steps: [
