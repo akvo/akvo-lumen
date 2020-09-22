@@ -6,7 +6,10 @@
             [akvo.lumen.db.job-execution :as db.job-execution]
             [clojure.tools.logging :as log]
             [akvo.lumen.util :refer (squuid)]
-            [clojure.java.jdbc :as jdbc]))
+            [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w])
+  (:import [java.time Instant]))
 
 (def transformation-namespaces
   '[akvo.lumen.lib.transformation.change-datatype
@@ -48,11 +51,26 @@
       (jdbc/with-db-transaction [tx-conn tenant-conn]
         (let [tx-deps (assoc deps :tenant-conn tx-conn)]
           (condp = (:type command)
-            :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
+            :transformation (do
+                              (let [tx-namespaces (set (engine/namespaces-by-op (w/keywordize-keys (:transformation command))
+                                                                          (w/keywordize-keys (reduce into [] (map :columns (db.transformation/n-latest-dataset-version-by-dataset-id tx-conn {:dataset-id dataset-id}))))))]
+                                (when (>= (count tx-namespaces) 2)
+                                  (throw (ex-info "Transformation not allowed thus it contains more than one namespace"
+                                                  {:namespaces tx-namespaces
+                                                   :dataset-id dataset-id
+                                                   :tx command
+                                                   :job-execution-id job-execution-id}))))
+                              (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command)))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
         (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
-      (let [dsv (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-        (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
+      (let [dsvs (db.transformation/n-latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
+            namespaces (set (engine/namespaces-by-op (w/keywordize-keys (:transformation command)) (w/keywordize-keys (reduce into [] (map :columns dsvs)))))]
+        (condp = (:type command)
+          :transformation (doseq [dsv (filter #(contains? namespaces (:namespace %)) dsvs)]
+                            (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
+          :undo (doseq [dsv dsvs]
+                  (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))))
+
       (catch Exception e
         (let [msg (.getMessage e)]
           (engine/log-ex e)
@@ -61,15 +79,16 @@
 
 (defn apply
   [{:keys [tenant-conn] :as deps} dataset-id command]
-  (if-let [current-tx-job (db.transformation/pending-tx-or-update-job-execution tenant-conn {:dataset-id dataset-id})]
-    (lib/bad-request {:message (format "A running %s still exists, please wait to apply more ..." (:type current-tx-job))})
-    (if-let [dataset (db.transformation/dataset-by-id tenant-conn {:id dataset-id})]
-      (let [v (validate command)]
-        (if-not (:valid? v)
-          (lib/bad-request {:message (:message v)})
-          (let [job-execution-id (str (squuid))]
-            (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
-            (execute-tx deps job-execution-id dataset-id command)
-            (lib/ok {:jobExecutionId job-execution-id
-                     :datasetId dataset-id}))))
-      (lib/bad-request {:message "Dataset not found"}))))
+  (let [command (assoc-in command [:transformation :created] (str (Instant/ofEpochMilli (System/currentTimeMillis))))]
+    (if-let [current-tx-job (db.transformation/pending-tx-or-update-job-execution tenant-conn {:dataset-id dataset-id})]
+      (lib/bad-request {:message (format "A running %s still exists, please wait to apply more ..." (:type current-tx-job))})
+      (if-let [dataset (db.transformation/dataset-by-id tenant-conn {:id dataset-id})]
+        (let [v (validate command)]
+          (if-not (:valid? v)
+            (lib/bad-request {:message (:message v)})
+            (let [job-execution-id (str (squuid))]
+              (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
+              (execute-tx deps job-execution-id dataset-id command)
+              (lib/ok {:jobExecutionId job-execution-id
+                       :datasetId dataset-id}))))
+        (lib/bad-request {:message "Dataset not found"})))))
