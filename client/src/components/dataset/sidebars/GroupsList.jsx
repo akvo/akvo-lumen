@@ -23,8 +23,18 @@ function GroupsList(props) {
           const className = `groupItem clickable ${selectedGroup === group.id ? 'active' : ''}`;
 
           return (
-            <div onClick={() => onSelectGroup(group)} key={id} className={className}>
-              <p>{group.name}</p>
+            <div
+              onClick={() => onSelectGroup(group)}
+              key={id}
+              className={className}
+            >
+              <p>
+                {['metadata', 'transformations', 'main'].includes(group.name) ? (
+                  <FormattedMessage id={group.name} />
+                ) : (
+                  group.name
+                )}
+              </p>
               {group.isRqg && <MdRepeat className="icon" />}
             </div>
           );
