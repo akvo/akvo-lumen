@@ -5,7 +5,7 @@
             [clojure.tools.logging :as log]
             [clojure.walk :as walk]
             [akvo.lumen.db.dataset :as db.dataset]
-            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause find-table-name-by-column)]
             [akvo.lumen.db.raster :as db.raster])
   (:import [java.awt Color]))
 
@@ -122,6 +122,12 @@
       (str (int (* 360 hue))))
     (catch Exception e "0")))
 
+(defn- find-table-name [ds-versions namespace]
+  (:table-name (first (filter #(= (:namespace %) namespace) ds-versions))))
+
+(defn- find-table-name-with-column [ds-versions column]
+  (find-table-name ds-versions (:namespace column "main")))
+
 (defn shape-aggregation-extra-cols-sql [popup table-name prefix postfix]
   (if (= (count popup) 0)
     ""
@@ -129,6 +135,16 @@
          (clojure.string/join "," (map (fn [{:keys [column]}]
                                          (str table-name "." column))
                                        popup))
+         postfix)))
+
+(defn shape-aggregation-extra-cols-sql* [cols ds-versions kw-columns prefix postfix]
+  (if-not (seq cols)
+    ""
+    (str prefix
+         (clojure.string/join "," (map (fn [{:keys [column]}]
+                                         (let [table-name (find-table-name-by-column ds-versions (find-column kw-columns column))]
+                                          (str table-name "." column)))
+                                       cols))
          postfix)))
 
 (defn popup-and-label-cols [popup-cols label-col]
@@ -143,13 +159,15 @@
     :else []))
 
 (defn shape-aggregation-sql
-  [tenant-conn columns geom-column popup-columns point-color-column where-clause current-layer layer-index]
-  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id (:aggregationDataset current-layer)})
-        point-table-name table-name
-        point-columns columns
-        {:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id (:datasetId current-layer)})
-        shape-table-name table-name
-        shape-columns columns
+  [tenant-conn geom-column popup-columns point-color-column where-clause current-layer layer-index]
+  (let [aggregation-ds-versions (db.dataset/n-dataset-by-id tenant-conn {:id (:aggregationDataset current-layer)})
+        point-columns (reduce into [] (map :columns aggregation-ds-versions))
+        point-table-names (map :table-name aggregation-ds-versions)
+
+        shape-ds-versions (db.dataset/n-dataset-by-id tenant-conn {:id (:datasetId current-layer)})
+        shape-table-names (map :table-name shape-ds-versions)
+        shape-columns (reduce into [] (map :columns shape-ds-versions))
+        shape-kw-columns (walk/keywordize-keys shape-columns)
         aggregation-method (:aggregationMethod current-layer "avg")
         date-column-set (reduce (fn [m c]
                                   (if (= "date" (:type c))
@@ -162,8 +180,14 @@
                                      c)) popup-columns) geom-column)
                 point-color-column (conj point-color-column)))
         hue (color-to-hue (clojure.string/upper-case (:gradientColor current-layer "#FF0000")))
-        extra-cols (popup-and-label-cols (:popup current-layer) (:shapeLabelColumn current-layer))]
+        extra-cols (popup-and-label-cols (:popup current-layer) (:shapeLabelColumn current-layer))
 
+        geom-ref (format "%s.%s"
+                         (find-table-name-by-column shape-ds-versions
+                                                      (find-column shape-kw-columns (:geom current-layer)))
+                         (:geom current-layer ))
+        first-shape-table-name (first shape-table-names) ;; TODO adapt later when different dimensions are around
+        ]
     (format "
             SELECT
               %s
@@ -206,33 +230,34 @@
             ;
             "
             (shape-aggregation-extra-cols-sql extra-cols "row_query" "" ",")
-            (format "%s.%s" shape-table-name (:geom current-layer ))
-            (let [cols (shape-aggregation-extra-cols-sql extra-cols shape-table-name "" ",")]
+            geom-ref
+            (let [cols (shape-aggregation-extra-cols-sql* extra-cols shape-ds-versions shape-kw-columns "" ",")]
               (format "select
                       %s
                       %s.rnum AS shapeRowNum,
                       %s(pointTable.%s::decimal) AS aggregation
                     from %s
-                    left join (select * from %s)pointTable on st_contains(%s.%s, pointTable.%s)
+                    left join (select * from %s)pointTable on st_contains(%s, pointTable.%s)
                     GROUP BY %s"
                       cols
-                      shape-table-name
+                      first-shape-table-name
                       aggregation-method
                       (:aggregationColumn current-layer)
-                      shape-table-name
-                      point-table-name
-                      shape-table-name
-                      (:geom current-layer)
+                      (from-clause shape-table-names)
+                      (from-clause point-table-names)
+                      geom-ref
                       (:aggregationGeomColumn current-layer)
-                      (format "%s.rnum %s" shape-table-name cols)))
+                      (format "%s.rnum %s" first-shape-table-name cols)))
             (shape-aggregation-extra-cols-sql extra-cols "temp_table" "" ",")
             hue
-            shape-table-name
-            shape-table-name)))
+            first-shape-table-name
+            first-shape-table-name)))
 
 (defn point-sql [tenant-conn columns geom-column popup-columns
                  point-color-column where-clause {:keys [datasetId] :as layer}]
-  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+  (let [ds-versions (db.dataset/n-dataset-by-id tenant-conn {:id datasetId})
+        columns (reduce into [] (map :columns ds-versions))
+        table-names (map :table-name ds-versions)
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
                                 #{} columns)
@@ -246,12 +271,15 @@
                 point-color-column (conj (str (sql-option-bucket-column point-color-column) " as " (:columnName point-color-column)))))]
     (format "select %s from %s where %s"
                         (str/join ", " cols)
-                        table-name
+                        (from-clause table-names)
                         where-clause)))
 
 (defn shape-sql [tenant-conn columns geom-column popup-columns point-color-column where-clause
                  {:keys [datasetId shapeLabelColumn ] :as layer}]
-  (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+  (let [ds-versions (db.dataset/n-dataset-by-id tenant-conn {:id datasetId})
+        columns (reduce into [] (map :columns ds-versions))
+        table-names (map :table-name ds-versions)
+
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
                                 #{} columns)
@@ -266,7 +294,7 @@
                 shapeLabelColumn (conj shapeLabelColumn)))]
     (format "select %s from %s where %s"
             (str/join ", " cols)
-            table-name
+            (from-clause table-names)
             where-clause)))
 
 (defn get-sql
@@ -277,7 +305,7 @@
   (cond
 
     (and aggregationDataset aggregationColumn aggregationGeomColumn)
-    (shape-aggregation-sql tenant-conn columns geom-column
+    (shape-aggregation-sql tenant-conn geom-column
                            popup-columns (:columnName point-color-column) where-clause layer
                            layer-index)
 
@@ -335,7 +363,8 @@
                                  :sql (format "SELECT * FROM %s" raster_table)
                                  :srid "3857"}})
                    (let [geom-column (get-geom-column layer)
-                         {:keys [columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
+                         ds-versions (db.dataset/n-dataset-by-id tenant-conn {:id datasetId})
+                         columns (reduce into [] (map :columns ds-versions))
                          kw-columns (walk/keywordize-keys columns)
                          where-clause (filter/sql-str kw-columns filters)
                          popup-columns (mapv :column popup)
