@@ -1,7 +1,7 @@
 (ns akvo.lumen.lib.aggregation.line
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
-            [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.lib.dataset.utils :refer (find-column from-clause)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]))
@@ -21,8 +21,9 @@
   "DEPRECATED: version 1 works with sampling data, only current vizs without further modifications will use this version,
    following modifications will use version 2 and user will be prompt to use aggregation facilities if sql results are
    higher than 2.5K rows"
-  [tenant-conn {:keys [columns table-name]} query]
-  (let [column-x      (find-column columns (:metricColumnX query))
+  [tenant-conn ds-versions query]
+  (let [columns   (reduce #(into % (:columns %2)) [] ds-versions)
+        column-x      (find-column columns (:metricColumnX query))
         column-y      (find-column columns (:metricColumnY query))
         max-points    2500
         aggregation (aggregation* (:metricAggregation query) column-y)
@@ -34,7 +35,7 @@
                                ORDER BY zz.x"
                               (:columnName column-x)
                               (or aggregation (:columnName column-y))
-                              table-name
+                              (from-clause (map :table-name ds-versions))
                               (sql-str columns (:filters query))
                               (if aggregation (format  "GROUP BY %s" (:columnName column-x)) "")
                               max-points)
@@ -52,15 +53,16 @@
                                sql-response)}})))
 
 (defn query-v2
-  [tenant-conn {:keys [columns table-name]} query]
-  (let [column-x      (find-column columns (:metricColumnX query))
+  [tenant-conn ds-versions query]
+  (let [columns   (reduce #(into % (:columns %2)) [] ds-versions)
+        column-x      (find-column columns (:metricColumnX query))
         column-y      (find-column columns (:metricColumnY query))
         max-points    2500
         aggregation (aggregation* (:metricAggregation query) column-y)
         sql-text (format "SELECT %1$s AS x, %2$s AS y FROM %3$s WHERE %4$s %5$s ORDER BY x"
                               (:columnName column-x)
                               (or aggregation (:columnName column-y))
-                              table-name
+                              (from-clause (map :table-name ds-versions))
                               (sql-str columns (:filters query))
                               (if aggregation (format  "GROUP BY %s" (:columnName column-x)) ""))
         sql-response  (run-query tenant-conn sql-text)]
