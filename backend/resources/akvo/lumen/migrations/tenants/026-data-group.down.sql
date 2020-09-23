@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS data_group CASCADE;
+DROP TABLE IF EXISTS dataset_version_2 CASCADE;
+
+DROP TABLE IF EXISTS history.data_group CASCADE;
+DROP TABLE IF EXISTS history.dataset_version_2 CASCADE;
