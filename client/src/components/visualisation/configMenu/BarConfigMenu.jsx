@@ -116,7 +116,6 @@ class BarConfigMenu extends Component {
       onChangeSpec,
       columnOptions,
       aggregationOptions,
-      env,
       intl,
     } = this.props;
     const spec = visualisation.spec;
@@ -178,7 +177,7 @@ class BarConfigMenu extends Component {
             showLegend: val,
           })}
         />
-        {Boolean(spec.showLegend) && Boolean(env.environment.orderedLegend) && (
+        {Boolean(spec.showLegend) && (
           <div style={{ marginBottom: '20px' }}>
             <ButtonRowInput
               labelClass="label"
