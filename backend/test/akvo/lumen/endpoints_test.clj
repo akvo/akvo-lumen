@@ -180,8 +180,8 @@
                       :name title
                       :status "OK"
                       :transformations []
-                      :groups {:transformations []
-                               :main (map #(assoc % :groupName "main" :groupId "main") commons/dataset-link-columns)}}
+                      :groups [["main" (map #(assoc % :groupName "main" :groupId "main") commons/dataset-link-columns)]
+                               ["transformations" []]]}
                      (select-keys meta-group-dataset [:id :name :status :transformations :groups]))))
 
             (let [meta-group-dataset (-> (h (get* (api-url "/datasets" dataset-id "group" "main")))

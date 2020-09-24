@@ -56,12 +56,24 @@
             table-name
             order-by-expr)))
 
-(defn- groups [dataset]
-  (let [dataset-columns (->> (:columns dataset)
-                             (remove #(get % "hidden"))
-                             (map db.dataset/adapt-group))]
-    (-> (group-by #(get % "groupId") dataset-columns)
-        (update "transformations" vec))))
+
+
+(defn- groups
+  ([dataset]
+   (groups dataset false))
+  ([dataset ordered?]
+   (let [dataset-columns (->> (:columns dataset)
+                              (remove #(get % "hidden"))
+                              (map db.dataset/adapt-group))
+         grouped (-> (group-by #(get % "groupId") dataset-columns)
+                     (update "transformations" vec))]
+     (if ordered?
+       (let [ordered (distinct (map #(get % "groupId") dataset-columns))
+             res (reduce #(conj % [%2 (get grouped %2)]) [] ordered)]
+         (if (contains? (set ordered) "transformations")
+           res
+           (conj res ["transformations" []]) ))
+       grouped))))
 
 (defn fetch-groups-metadata
   "Fetch dataset groups metadata (everything apart from rows)
@@ -76,7 +88,7 @@
                                     [:id :title :modified :created :updated :source :transformations])
                        (assoc :status "OK")
                        (rename-keys {:title :name}))]
-      (lib/ok (assoc dataset*  :groups (groups dsv))))
+      (lib/ok (assoc dataset*  :groups (groups dsv true))))
    (lib/not-found {:error "Not found"})))
 
 (defn fetch-metadata

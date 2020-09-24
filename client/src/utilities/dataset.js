@@ -15,35 +15,25 @@ export const datasetsWithVisualizations = (visualisations, datasets) => {
         .reduce((c, v) => { const h = c; h[v] = datasets[v]; return c; }, {});
 };
 
-export const getDatasetGroups = (groups, datasetGroupsAvailable) => {
-  if (!datasetGroupsAvailable) {
-    return [];
-  }
-
-  const groupsObject = groups.toJS();
-  let groupNames = [];
+export const getDatasetGroups = (groupsList) => {
+  const groups = groupsList;
 
   // keep metadata at the top
-  groupNames = Object.keys(groupsObject)
-    .reduce((acc, curr) => {
-      const column = groups.toJS()[curr][0];
+  const groupNames = groups.reduce((acc, curr) => acc.concat({
+    id: curr.get(1).get(0).get('groupId'),
+    name: curr.get(1).get(0).get('groupName'),
+    isRqg: curr.get(1).get(0).get('repeatable'),
+  }), []).sort((x, y) => {
+    if (x.id === 'metadata') {
+      return -1;
+    }
 
-      if (column) {
-        acc.push({ id: column.groupId, name: column.groupName, isRqg: false });
-      }
+    if (y.id === 'metadata') {
+      return 1;
+    }
 
-      return acc;
-    }, []).sort((x, y) => {
-      if (x.id === 'metadata') {
-        return -1;
-      }
-
-      if (y.id === 'metadata') {
-        return 1;
-      }
-
-      return 0;
-    });
+    return 0;
+  });
 
   return groupNames;
 };
