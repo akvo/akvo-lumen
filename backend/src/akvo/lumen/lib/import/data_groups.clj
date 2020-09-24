@@ -20,43 +20,56 @@
 
 (defn- successful-execution [conn job-execution-id data-source-id dataset-id group-table-names columns {:keys [spec-name spec-description]} claims]
   (let [dataset-version-id (util/squuid)
-        {:strs [rqg]} (env/all conn)]
-    (db.dataset-version/new-dataset-version-2
-     conn {:id dataset-version-id
-           :dataset-id dataset-id
-           :job-execution-id job-execution-id
-           :author claims
-           :version 1
-           :transformations []})
-    (doseq [[group-id cols] (group-by :groupId columns)]
+        {:strs [rqg]} (env/all conn)
+        grouped-columns (group-by :groupId columns)]
+    (db.dataset-version/new-dataset-version-2 conn
+                                              {:id dataset-version-id
+                                               :dataset-id dataset-id
+                                               :job-execution-id job-execution-id
+                                               :author claims
+                                               :version 1
+                                               :transformations []})
+    (doseq [[group-id cols] grouped-columns]
       (let [imported-table-name (util/gen-table-name "imported")
-            table-name (get group-table-names group-id)]
+            table-name (get group-table-names group-id)
+            instance-id-col (->> "metadata"
+                                 grouped-columns
+                                 (filter #(= (:id %) "instance_id"))
+                                 first)]
         (db.job-execution/clone-data-table conn
                                            {:from-table table-name
                                             :to-table imported-table-name}
                                            {}
                                            {:transaction? false})
-        (db.dataset-version/new-data-group
-         conn {:id (util/squuid)
-               :dataset-version-id dataset-version-id
-               :imported-table-name imported-table-name
-               :table-name table-name
-               :group-id group-id
-               :group-name (:groupName (first cols) group-id)
-               :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace]}]
-                                {:columnName id
-                                 :direction nil
-                                 :groupId groupId
-                                 :groupName groupName
-                                 :namespace namespace
-                                 :hidden false
-                                 :key (boolean key)
-                                 :multipleId multipleId
-                                 :multipleType multipleType
-                                 :sort nil
-                                 :title (string/trim title)
-                                 :type type})
-                              cols)})))))
+        (db.dataset-version/new-data-group  conn
+                                            {:id (util/squuid)
+                                             :dataset-version-id dataset-version-id
+                                             :imported-table-name imported-table-name
+                                             :table-name table-name
+                                             :group-id group-id
+                                             :group-name (:groupName (first cols) group-id)
+                                             :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace hidden]}]
+                                                              {:columnName id
+                                                               :direction nil
+                                                               :groupId groupId
+                                                               :groupName groupName
+                                                               :namespace namespace
+                                                               :hidden (boolean hidden)
+                                                               :key (boolean key)
+                                                               :multipleId multipleId
+                                                               :multipleType multipleType
+                                                               :sort nil
+                                                               :title (string/trim title)
+                                                               :type type})
+                                                            (if (= group-id "metadata")
+                                                              cols
+                                                              (let [col (first cols)
+                                                                    new-col (merge instance-id-col {:key false
+                                                                                                    :hidden true
+                                                                                                    :groupName (:groupName col)
+                                                                                                    :groupId (:groupId col)
+                                                                                                    :namespace (:namespace col)})]
+                                                                (conj cols new-col))))})))))
 
 (defn execute [conn job-execution-id data-source-id dataset-id claims spec columns import-config]
   (let [importer (i.flow/data-groups-importer (get spec "source") (assoc import-config :environment (env/all conn)))
