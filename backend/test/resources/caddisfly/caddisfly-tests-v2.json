@@ -2490,6 +2490,22 @@
           "range": "0.5-6.0"
         }
       ]
+    },
+    {
+      "name": "Dissolved Oxygen",
+      "uuid": "cf0840aa-f678-11ea-adc1-0242ac120002",
+      "sample": "Water",
+      "device": "Sensor",
+      "brand": "Lovibond",
+      "model": "SD 400 Oxi L",
+      "results": [
+        {
+          "id": 1,
+          "name": "Dissolved Oxygen",
+          "unit": "mg/l",
+          "range": "0-50"
+        }
+      ]
     }
   ]
 }
