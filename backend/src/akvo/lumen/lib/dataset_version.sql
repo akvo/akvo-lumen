@@ -7,8 +7,8 @@ VALUES (:id, :dataset-id, :job-execution-id, :version,
         :table-name, :imported-table-name, :transformations, :columns, :namespace)
 -- :name db-new-dataset-version-2 :! :n
 -- :doc Inserts a new dataset version 2
-INSERT INTO dataset_version_2 (id, dataset_id, job_execution_id, version, transformations)
-VALUES (:id, :dataset-id, :job-execution-id, :version, :transformations)
+INSERT INTO dataset_version_2 (id, dataset_id, job_execution_id, version, transformations, author)
+VALUES (:id, :dataset-id, :job-execution-id, :version, :transformations, :author)
 
 
 -- :name db-new-data-group :! :n

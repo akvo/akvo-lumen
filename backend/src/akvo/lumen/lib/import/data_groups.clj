@@ -18,23 +18,19 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
-(defn- successful-execution [conn job-execution-id data-source-id group-table-names columns {:keys [spec-name spec-description]} claims]
-  (let [dataset-id (util/squuid)
-        dataset-version-id (util/squuid)
+(defn- successful-execution [conn job-execution-id data-source-id dataset-id group-table-names columns {:keys [spec-name spec-description]} claims]
+  (let [dataset-version-id (util/squuid)
         {:strs [rqg]} (env/all conn)]
-    (db.dataset/insert-dataset conn {:id dataset-id
-                                     :title spec-name ;; TODO Consistent naming. Change on client side?
-                                     :description spec-description
-                                     :author claims})
     (db.dataset-version/new-dataset-version-2
      conn {:id dataset-version-id
            :dataset-id dataset-id
            :job-execution-id job-execution-id
+           :author claims
            :version 1
            :transformations []})
-    (doseq [[ns* cols] (group-by :groupId columns)]
+    (doseq [[group-id cols] (group-by :groupId columns)]
       (let [imported-table-name (util/gen-table-name "imported")
-            table-name (get group-table-names ns*)]
+            table-name (get group-table-names group-id)]
         (db.job-execution/clone-data-table conn
                                            {:from-table table-name
                                             :to-table imported-table-name}
@@ -45,6 +41,8 @@
                :dataset-version-id dataset-version-id
                :imported-table-name imported-table-name
                :table-name table-name
+               :group-id group-id
+               :group-name (:groupName (first cols) group-id)
                :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace]}]
                                 {:columnName id
                                  :direction nil
@@ -60,25 +58,19 @@
                                  :type type})
                               cols)})))))
 
-(defn execute [conn job-execution-id data-source-id claims spec columns importer]
-  
-  (let [rows (p/records importer)
+(defn execute [conn job-execution-id data-source-id dataset-id claims spec columns importer]
+  (let [rows              (p/records importer)
         columns           (map  (fn [c] (update c :groupId (fn [groupId] (or groupId "main")))) columns)
-        
         group-ids         (distinct (map :groupId columns))
-;;        {group-id: ds_table}
         group-table-names (reduce #(assoc % %2 (util/gen-table-name "ds")) {} group-ids)]
     (doseq [[groupId cols] (group-by :groupId columns)]
-;; {group-id-1: [col1, col2]}    
       (postgres/create-dataset-table conn (get group-table-names groupId) cols))
-    (doseq [r (take common/rows-limit rows)]
-      [[{:c1 1 :c2 2} {:rq1 "a"} {:rq1 "b"}]   [{:c1 3 :c2 4} {:rq1 "c"} {:rq1 "d"}] ]
-      (log/error :nuevo r)
-;;      (:namespace (meta {:rq1 "a"})) ;; => "rqg-id" "main" #{metadata, group-nr1, group-nr2}
-      #_(doseq [record record-namespaces]
-        (let [ns* (:namespace (meta record) "main")]
-          (log/error (meta record) record )
-          #_(jdbc/insert! conn (get ns-table-names ns*) (postgres/coerce-to-sql record)))))
-    #_(successful-execution conn job-execution-id  data-source-id
-                            ns-table-names columns {:spec-name        (get spec "name")
-                                                    :spec-description (get spec "description" "")} claims)))
+    (doseq [response (take common/rows-limit rows)]
+      (doseq [[groupId iterations] response]
+        (let [table-name (or (get group-table-names groupId)
+                             (get group-table-names "main"))]
+          (doseq [iteration iterations]
+            (jdbc/insert! conn  table-name (postgres/coerce-to-sql iteration))))))
+    (successful-execution conn job-execution-id  data-source-id dataset-id
+                          group-table-names columns {:spec-name        (get spec "name")
+                                                     :spec-description (get spec "description" "")} claims)))

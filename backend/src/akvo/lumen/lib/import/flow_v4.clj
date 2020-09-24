@@ -24,7 +24,7 @@
 ;;               {:question1 11
 ;;                :question2 22}]}
 
-(defn response-data ;; {question-id -> response}
+(defn response-data
   [form responses]
   (reduce (fn [c [group-id iterations]]
             (let [updated-iterations (map (fn [iteration]
@@ -45,8 +45,8 @@
            (let [data-point-id (get form-instance "dataPointId")]
              (if-let [data-point (get data-points data-point-id)]
                (merge (response-data form (get form-instance "responses"))
-                      {:metadata (merge (flow-common/common-records form-instance data-point)
-                                        {:device_id (get form-instance "deviceIdentifier")})})
+                      {"metadata" [(merge (flow-common/common-records form-instance data-point)
+                                           {:device_id (get form-instance "deviceIdentifier")})]})
                (throw (ex-info "Flow form (dataPointId) referenced data point not in survey"
                                {:form-instance-id (get form-instance "id")
                                 :data-point-id data-point-id
