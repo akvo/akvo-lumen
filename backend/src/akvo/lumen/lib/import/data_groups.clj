@@ -8,7 +8,7 @@
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.env :as env]
-            [akvo.lumen.lib.import.flow]
+            [akvo.lumen.lib.import.flow :as i.flow]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.raster]
             [akvo.lumen.lib :as lib]
@@ -58,19 +58,24 @@
                                  :type type})
                               cols)})))))
 
-(defn execute [conn job-execution-id data-source-id dataset-id claims spec columns importer]
-  (let [rows              (p/records importer)
+(defn execute [conn job-execution-id data-source-id dataset-id claims spec columns import-config]
+  (let [importer (i.flow/data-groups-importer (get spec "source") (assoc import-config :environment (env/all conn)))
+        rows              (p/records importer)
         columns           (map  (fn [c] (update c :groupId (fn [groupId] (or groupId "main")))) columns)
+        instance_id_column (first  (filter #(= (:id %) "instance_id") columns))
         group-ids         (distinct (map :groupId columns))
         group-table-names (reduce #(assoc % %2 (util/gen-table-name "ds")) {} group-ids)]
     (doseq [[groupId cols] (group-by :groupId columns)]
-      (postgres/create-dataset-table conn (get group-table-names groupId) cols))
+      (postgres/create-dataset-table conn (get group-table-names groupId) (if (= groupId "metadata")
+                                                                            cols
+                                                                            (conj cols (assoc instance_id_column :key false)))))
     (doseq [response (take common/rows-limit rows)]
-      (doseq [[groupId iterations] response]
-        (let [table-name (or (get group-table-names groupId)
-                             (get group-table-names "main"))]
-          (doseq [iteration iterations]
-            (jdbc/insert! conn  table-name (postgres/coerce-to-sql iteration))))))
+      (let [form-instance-id (-> response (get "metadata") first :instance_id)]
+        (doseq [[groupId iterations] response]
+          (let [table-name (or (get group-table-names groupId)
+                               (get group-table-names "main"))]
+            (doseq [iteration iterations]
+              (jdbc/insert! conn table-name (postgres/coerce-to-sql (assoc iteration :instance_id form-instance-id))))))))
     (successful-execution conn job-execution-id  data-source-id dataset-id
                           group-table-names columns {:spec-name        (get spec "name")
                                                      :spec-description (get spec "description" "")} claims)))

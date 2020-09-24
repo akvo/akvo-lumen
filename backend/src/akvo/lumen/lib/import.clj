@@ -78,12 +78,11 @@
             (doseq [record (map (comp postgres/coerce-to-sql common/extract-first-and-merge)
                                 (take common/rows-limit (p/records importer)))]
               (jdbc/insert! conn table-name record))
-            (successful-execution conn job-execution-id  data-source-id dataset-id table-name columns {:spec-name (get spec "name")
-                                                                                                       :spec-description (get spec "description" "")} claims)
+            (successful-execution conn job-execution-id data-source-id dataset-id table-name columns {:spec-name (get spec "name")
+                                                                                                      :spec-description (get spec "description" "")} claims)
             (future
               (try
-                (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec columns
-                                       (i.flow/data-groups-importer (get spec "source") (assoc import-config :environment (env/all conn))))
+                (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec columns import-config)
                 (catch Exception e (log/error e))))))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)
