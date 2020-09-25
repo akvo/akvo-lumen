@@ -106,3 +106,17 @@
         headers? (boolean (get spec "hasColumnHeaders"))
         guess-types? (-> (get spec "guessColumnTypes") false? not)]
     (csv-importer path headers? guess-types?)))
+
+(defmethod import/datagroups-importer "CSV"
+  [spec data]
+  (let [base-importer (import/dataset-importer spec data)]
+    (reify
+      p/DatasetImporter
+      (columns [this]
+        (p/columns base-importer))
+      (records [this]
+        (->> (p/records base-importer)
+             (map (partial hash-map "main"))))
+      java.io.Closeable
+      (close [this]
+        (.close base-importer)))))

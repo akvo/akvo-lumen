@@ -19,6 +19,11 @@
   (fn [spec config]
     (dispatch-on-kind spec)))
 
+(defmulti datagroups-importer
+  "Creates a datagroups importer according to the spec"
+  (fn [spec config]
+    (dispatch-on-kind spec)))
+
 (defn get-path
   [spec file-upload-path]
   (or (get spec "path")
