@@ -56,8 +56,7 @@
                                      :flow-urls (read-flow-urls flow-api))))
               (throw e))))))))
 
-
-(defn data-groups-importer
+(defmethod import/datagroups-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId token email version] :as spec}
    {:keys [flow-api environment] :as config}]
   (let [headers-fn #((:internal-api-headers flow-api) {:email email :token token})

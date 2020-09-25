@@ -64,21 +64,22 @@
                                                             cols)})))))
 
 (defn execute [conn job-execution-id data-source-id dataset-id claims spec import-config]
-  (let [importer (i.flow/data-groups-importer (get spec "source") (assoc import-config :environment (env/all conn)))
-        rows              (p/records importer)
-        cols (p/columns importer)
-        columns           (map (fn [c] (update c :groupId (fn [groupId] (or groupId "main")))) cols)
-        instance_id_column (first  (filter #(= (:id %) "instance_id") columns))
-        group-ids         (distinct (map :groupId columns))
-        group-table-names (reduce #(assoc % %2 (util/gen-table-name "ds")) {} group-ids)]
-    (doseq [[groupId cols] (group-by :groupId columns)]
-      (postgres/create-dataset-table conn (get group-table-names groupId) cols))
-    (doseq [response (take common/rows-limit rows)]
-      (doseq [[groupId iterations] response]
-        (let [table-name (or (get group-table-names groupId)
-                             (get group-table-names "main"))]
-          (jdbc/insert-multi! conn table-name (mapv postgres/coerce-to-sql iterations)))))
-    (postgres/create-data-group-foreign-keys conn group-table-names)
-    (successful-execution conn job-execution-id  data-source-id dataset-id
-                          group-table-names columns {:spec-name        (get spec "name")
-                                                     :spec-description (get spec "description" "")} claims)))
+  (with-open [importer (common/datagroups-importer (get spec "source") (assoc import-config :environment (env/all conn)))]
+    (let [rows               (p/records importer)
+          columns            (map (fn [c] (-> c
+                                              (update :groupName (fn [groupName] (or groupName "main")))
+                                              (update :groupId (fn [groupId] (or groupId "main")))))
+                                  (p/columns importer))
+          group-table-names  (let [group-ids (distinct (map :groupId columns))]
+                               (reduce #(assoc % %2 (util/gen-table-name "ds")) {} group-ids))]
+      (doseq [[groupId cols] (group-by :groupId columns)]
+        (postgres/create-dataset-table conn (get group-table-names groupId) cols))
+      (doseq [response (take common/rows-limit rows)]
+        (log/error response)
+        (doseq [[groupId iterations] response]
+          (let [table-name (get group-table-names groupId)]
+            (jdbc/insert-multi! conn table-name (mapv postgres/coerce-to-sql iterations)))))
+      (postgres/create-data-group-foreign-keys conn group-table-names)
+      (successful-execution conn job-execution-id  data-source-id dataset-id
+                            group-table-names columns {:spec-name        (get spec "name")
+                                                       :spec-description (get spec "description" "")} claims))))
