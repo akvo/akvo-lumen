@@ -74,12 +74,10 @@
     (doseq [[groupId cols] (group-by :groupId columns)]
       (postgres/create-dataset-table conn (get group-table-names groupId) cols))
     (doseq [response (take common/rows-limit rows)]
-      (let [form-instance-id (-> response (get "metadata") first :instance_id)]
-        (doseq [[groupId iterations] response]
-          (let [table-name (or (get group-table-names groupId)
-                               (get group-table-names "main"))]
-            (doseq [iteration iterations]
-              (jdbc/insert! conn table-name (postgres/coerce-to-sql (assoc iteration :instance_id form-instance-id))))))))
+      (doseq [[groupId iterations] response]
+        (let [table-name (or (get group-table-names groupId)
+                             (get group-table-names "main"))]
+          (jdbc/insert-multi! conn table-name (mapv postgres/coerce-to-sql iterations)))))
     (postgres/create-data-group-foreign-keys conn group-table-names)
     (successful-execution conn job-execution-id  data-source-id dataset-id
                           group-table-names columns {:spec-name        (get spec "name")

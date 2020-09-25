@@ -80,7 +80,6 @@
                                                          :groupName groupName
                                                          :key false
                                                          :hidden true}))]
-            (prn columns)
             (apply conj columns new-columns))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
