@@ -89,6 +89,7 @@
                                (get group-table-names "main"))]
             (doseq [iteration iterations]
               (jdbc/insert! conn table-name (postgres/coerce-to-sql (assoc iteration :instance_id form-instance-id))))))))
+    (postgres/create-data-group-foreign-keys conn group-table-names)
     (successful-execution conn job-execution-id  data-source-id dataset-id
                           group-table-names columns {:spec-name        (get spec "name")
                                                      :spec-description (get spec "description" "")} claims)))
