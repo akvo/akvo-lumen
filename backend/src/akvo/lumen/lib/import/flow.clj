@@ -6,6 +6,7 @@
             [akvo.lumen.lib.import.flow-common :as flow-common]
             [akvo.lumen.lib.import.flow-v2 :as v2]
             [akvo.lumen.lib.import.flow-v3 :as v3]
+            [akvo.lumen.lib.import.flow-v4 :as v4]
             [clojure.tools.logging :as log]))
 
 (defn- read-flow-urls [flow-api]
@@ -47,6 +48,45 @@
           (cond
             (<= version 2) (v2/form-data headers-fn @survey formId)
             (<= version 3) (v3/form-data headers-fn instance @survey formId))
+          (catch Throwable e
+            (if-let [ex-d (ex-data e)]
+              (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
+                              (assoc ex-d
+                                     :instance instance
+                                     :flow-urls (read-flow-urls flow-api))))
+              (throw e))))))))
+
+
+(defn data-groups-importer
+  [{:strs [instance surveyId formId token email version] :as spec}
+   {:keys [flow-api environment] :as config}]
+  (let [headers-fn #((:internal-api-headers flow-api) {:email email :token token})
+        survey (delay (flow-common/survey-definition (:internal-url flow-api)
+                                                     headers-fn
+                                                     instance
+                                                     surveyId))]
+    (reify
+      java.io.Closeable
+      (close [this])
+      p/DatasetImporter
+      (columns [this]
+        (try
+          (v3/dataset-columns (flow-common/form @survey formId) environment)
+          (catch Throwable e
+            (if-let [ex-d (ex-data e)]
+              (do
+                (log/error e)
+                (let [message (if (= 403 (:status ex-d))
+                                (str "You don't have access to instance: " instance)
+                                (or (:cause e) (str "Null cause from instance: " instance)))]
+                  (throw (ex-info message
+                                  (assoc ex-d
+                                         :instance instance
+                                         :flow-urls (read-flow-urls flow-api))))))
+              (throw e)))))
+      (records [this]
+        (try
+          (v4/form-data headers-fn instance @survey formId)
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
