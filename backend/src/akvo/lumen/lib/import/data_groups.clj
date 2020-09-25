@@ -48,6 +48,7 @@
                                              :table-name table-name
                                              :group-id group-id
                                              :group-name (:groupName (first cols) group-id)
+                                             :repeatable (:repeatable (first cols) false)
                                              :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace hidden]}]
                                                               {:columnName id
                                                                :direction nil
