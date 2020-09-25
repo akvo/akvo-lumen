@@ -90,6 +90,15 @@
   (create-indexes conn table-name columns)
   (add-key-constraints conn table-name columns))
 
+(defn create-data-group-foreign-keys [conn group-tables]
+  (when-let [metadata-table-name (get group-tables "metadata")]
+    (let [fks (for [[group-id group-table-name] group-tables
+                    :when (not (= "metadata" group-id))]
+                (format "ALTER TABLE %s ADD FOREIGN KEY (instance_id) REFERENCES %s (instance_id) ON DELETE CASCADE"
+                        group-table-name metadata-table-name))]
+      (doseq [fk fks]
+        (jdbc/execute! conn fk)))))
+
 (defrecord Geoshape [wkt-string])
 
 (defrecord Geopoint [wkt-string])
