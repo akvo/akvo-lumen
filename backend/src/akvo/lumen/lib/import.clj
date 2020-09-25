@@ -7,10 +7,10 @@
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.protocols :as p]
-            [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.env :as env]
-            [akvo.lumen.lib.import.flow]
+            [akvo.lumen.lib.import.flow :as i.flow]
             [akvo.lumen.lib.import.csv]
+            [akvo.lumen.lib.import.data-groups :as i.data-groups]
             [akvo.lumen.lib.raster]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.util :as util]
@@ -19,9 +19,8 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
-(defn- successful-execution [conn job-execution-id data-source-id table-name columns {:keys [spec-name spec-description]} claims]
-  (let [dataset-id (util/squuid)
-        imported-table-name (util/gen-table-name "imported")
+(defn- successful-execution [conn job-execution-id data-source-id dataset-id table-name columns {:keys [spec-name spec-description]} claims]
+  (let [imported-table-name (util/gen-table-name "imported")
         {:strs [rqg]} (env/all conn)]
     (db.dataset/insert-dataset conn {:id dataset-id
                           :title spec-name ;; TODO Consistent naming. Change on client side?
@@ -73,13 +72,18 @@
       (try
         (with-open [importer (common/dataset-importer (get spec "source")
                                                       (assoc import-config :environment (env/all conn)))]
-          (let [columns (p/columns importer)]
+          (let [dataset-id (util/squuid)
+                columns (p/columns importer)]
             (postgres/create-dataset-table conn table-name columns)
             (doseq [record (map (comp postgres/coerce-to-sql common/extract-first-and-merge)
                                 (take common/rows-limit (p/records importer)))]
               (jdbc/insert! conn table-name record))
-            (successful-execution conn job-execution-id  data-source-id table-name columns {:spec-name (get spec "name")
-                                                                                            :spec-description (get spec "description" "")} claims)))
+            (successful-execution conn job-execution-id data-source-id dataset-id table-name columns {:spec-name (get spec "name")
+                                                                                                      :spec-description (get spec "description" "")} claims)
+            (future
+              (try
+                (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec columns import-config)
+                (catch Exception e (log/error e))))))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)
           (log/error e)
