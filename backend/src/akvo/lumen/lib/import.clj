@@ -82,7 +82,7 @@
                                                                                                       :spec-description (get spec "description" "")} claims)
             (future
               (try
-                (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec columns import-config)
+                (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec import-config)
                 (catch Exception e (log/error e))))))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)

@@ -71,7 +71,17 @@
       p/DatasetImporter
       (columns [this]
         (try
-          (v3/dataset-columns (flow-common/form @survey formId) environment)
+          (let [columns (v3/dataset-columns (flow-common/form @survey formId) environment)
+                instance-id-column (first  (filter #(= (:id %) "instance_id") columns))
+                data-groups (dissoc (group-by #(select-keys % [:groupId :groupName]) columns)
+                                    {:groupName "metadata" :groupId "metadata"})
+                new-columns (for [[{:keys [groupId groupName]} _] data-groups]
+                              (merge instance-id-column {:groupId groupId
+                                                         :groupName groupName
+                                                         :key false
+                                                         :hidden true}))]
+            (prn columns)
+            (apply conj columns new-columns))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (do

@@ -61,27 +61,18 @@
                                                                :sort nil
                                                                :title (string/trim title)
                                                                :type type})
-                                                            (if (= group-id "metadata")
-                                                              cols
-                                                              (let [col (first cols)
-                                                                    new-col (merge instance-id-col {:key false
-                                                                                                    :hidden true
-                                                                                                    :groupName (:groupName col)
-                                                                                                    :groupId (:groupId col)
-                                                                                                    :namespace (:namespace col)})]
-                                                                (conj cols new-col))))})))))
+                                                            cols)})))))
 
-(defn execute [conn job-execution-id data-source-id dataset-id claims spec columns import-config]
+(defn execute [conn job-execution-id data-source-id dataset-id claims spec import-config]
   (let [importer (i.flow/data-groups-importer (get spec "source") (assoc import-config :environment (env/all conn)))
         rows              (p/records importer)
-        columns           (map  (fn [c] (update c :groupId (fn [groupId] (or groupId "main")))) columns)
+        cols (p/columns importer)
+        columns           (map (fn [c] (update c :groupId (fn [groupId] (or groupId "main")))) cols)
         instance_id_column (first  (filter #(= (:id %) "instance_id") columns))
         group-ids         (distinct (map :groupId columns))
         group-table-names (reduce #(assoc % %2 (util/gen-table-name "ds")) {} group-ids)]
     (doseq [[groupId cols] (group-by :groupId columns)]
-      (postgres/create-dataset-table conn (get group-table-names groupId) (if (= groupId "metadata")
-                                                                            cols
-                                                                            (conj cols (assoc instance_id_column :key false)))))
+      (postgres/create-dataset-table conn (get group-table-names groupId) cols))
     (doseq [response (take common/rows-limit rows)]
       (let [form-instance-id (-> response (get "metadata") first :instance_id)]
         (doseq [[groupId iterations] response]
