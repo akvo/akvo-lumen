@@ -19,6 +19,8 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
+(def ^:dynamic *data-groups* true)
+
 (defn- successful-execution [conn job-execution-id data-source-id dataset-id table-name columns {:keys [spec-name spec-description]} claims]
   (let [imported-table-name (util/gen-table-name "imported")
         {:strs [rqg]} (env/all conn)]
@@ -80,10 +82,11 @@
               (jdbc/insert! conn table-name record))
             (successful-execution conn job-execution-id data-source-id dataset-id table-name columns {:spec-name (get spec "name")
                                                                                                       :spec-description (get spec "description" "")} claims)
-            (future
-              (try
-                (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec import-config)
-                (catch Exception e (log/error e))))))
+            (when *data-groups*
+              (future
+                (try
+                  (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec import-config)
+                  (catch Exception e (log/error e)))))))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)
           (log/error e)
