@@ -87,7 +87,7 @@
   (->> (:questionGroups form)
        (reduce #(into % (map (fn [q* [group-id group-name repeatable]]
                                (let [ns (if repeatable group-id "main")]
-                                 (assoc q* :groupId group-id :groupName group-name :ns ns)))
+                                 (assoc q* :groupId group-id :groupName group-name :ns ns :repeatable repeatable)))
                              (:questions %2) (repeat [(:id %2) (str/trim (:name %2)) (:repeatable %2)]))) [])))
 
 (defn form
@@ -139,7 +139,7 @@
         {:title "Submitter" :type "text" :id "submitter"}
         {:title "Submitted at" :type "date" :id "submitted_at"}
         {:title "Surveyal time" :type "number" :id "surveyal_time"}]
-       (mapv #(assoc % :groupName "metadata" :groupId "metadata"))))
+       (mapv #(assoc % :groupName "metadata" :groupId "metadata" :repeatable false))))
 
 (defn common-records [form-instance data-point]
   {:instance_id   (get form-instance "id")

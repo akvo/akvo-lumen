@@ -46,6 +46,7 @@
              :metadata (:metadata q)
              :groupName (:groupName q)
              :ns (:ns q)
+             :repeatable (:repeatable q)
              :id (format "c%s" (:id q))}
             (when (= t "multiple")
               (if (:caddisflyResourceUuid q)

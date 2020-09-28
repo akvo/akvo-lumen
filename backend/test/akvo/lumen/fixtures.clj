@@ -3,6 +3,7 @@
             [akvo.lumen.utils.local-error-tracker :refer [local-error-tracker]]
             [akvo.lumen.migrate :as lumen-migrate]
             [akvo.lumen.lib.transformation.engine :refer (log-ex)]
+            [akvo.lumen.lib.import :as import]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.test-utils
@@ -38,7 +39,8 @@
    (system-fixture config-edn nil f))
   ([config-edn more-ks f]
    (let [c (tu/start-config config-edn more-ks)]
-     (binding [lumen-migrate/*reporter* reporter/silent]
+     (binding [import/*data-groups* false
+               lumen-migrate/*reporter* reporter/silent]
        (lumen-migrate/migrate c)
        (binding [*system* (tu/start-system c)]
          (try
