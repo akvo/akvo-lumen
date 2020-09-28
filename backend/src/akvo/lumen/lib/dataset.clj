@@ -6,6 +6,7 @@
             [akvo.lumen.db.visualisation :as db.visualisation]
             [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.lib.env :as env]
             [akvo.lumen.lib.dataset.utils :as dutils]
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.lib.import.csv :as i.csv]
@@ -83,13 +84,20 @@
 
   always we'll use 'transformations' groupId to include all generated transformations"
   [tenant-conn id]
-  (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [dataset* (-> (select-keys dsv
-                                    [:id :title :modified :created :updated :source :transformations])
-                       (assoc :status "OK")
-                       (rename-keys {:title :name}))]
-      (lib/ok (assoc dataset*  :groups (groups dsv true))))
-   (lib/not-found {:error "Not found"})))
+  (if (get (env/all tenant-conn) "data-groups")
+    (if-let [data-groups (seq (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id id}))]
+      (let [dataset* (-> (select-keys (first data-groups)
+                                      [:name :modified :created :updated :source :transformations])
+                         (assoc :status "OK"))]
+        (lib/ok (assoc dataset*  :id id :groups (mapv (juxt :id :columns :repeatable) data-groups))))
+      (lib/not-found {:error "Not found"}))
+    (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
+      (let [dataset* (-> (select-keys dsv
+                                      [:id :title :modified :created :updated :source :transformations])
+                         (assoc :status "OK")
+                         (rename-keys {:title :name}))]
+        (lib/ok (assoc dataset*  :groups (groups dsv true))))
+      (lib/not-found {:error "Not found"}))))
 
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
@@ -125,18 +133,30 @@
 
 (defn fetch-group
   [tenant-conn id group-id]
-  (when-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [group-dataset (get (groups dsv) group-id)
-          namespaces (set (map #(get % "namespace" "main") group-dataset))
-          q (select-data-sql (:table-name dsv) group-dataset)
-          data (rest (jdbc/query tenant-conn
-                                 [q]
-                                 {:as-arrays? true}))]
-      (-> (select-keys dsv [:updated :created :modified :transformations])
-          remove-token
-          (assoc :rows data
-                 :columns group-dataset
-                 :status "OK" :datasetId (:id dsv) :groupId group-id)))))
+  (if (get (env/all tenant-conn) "data-groups")
+    (when-let [dg (db.dataset/data-group-by-dataset-id-and-group-id tenant-conn {:dataset-id id
+                                                                                 :group-id group-id})]
+      (let [q (select-data-sql (:table-name dg) (:columns dg))
+            data (rest (jdbc/query tenant-conn
+                                   [q]
+                                   {:as-arrays? true}))]
+        (-> (select-keys dg [:updated :created :modified :transformations])
+            remove-token
+            (assoc :rows data
+                   :columns (:columns dg)
+                   :status "OK" :datasetId id :groupId group-id))))
+    (when-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
+      (let [columns (get (groups dsv) group-id)
+            namespaces (set (map #(get % "namespace" "main") columns))
+            q (select-data-sql (:table-name dsv) columns)
+            data (rest (jdbc/query tenant-conn
+                                   [q]
+                                   {:as-arrays? true}))]
+        (-> (select-keys dsv [:updated :created :modified :transformations])
+            remove-token
+            (assoc :rows data
+                   :columns columns
+                   :status "OK" :datasetId (:id dsv) :groupId group-id))))))
 
 (defn sort-text
   [tenant-conn id column-name limit order]
