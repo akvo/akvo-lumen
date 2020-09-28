@@ -71,7 +71,7 @@
       (columns [this]
         (try
           (let [columns (v3/dataset-columns (flow-common/form @survey formId) environment)
-                instance-id-column (first  (filter #(= (:id %) "instance_id") columns))
+                instance-id-column (first (filter #(= (:id %) "instance_id") columns))
                 data-groups (dissoc (group-by #(select-keys % [:groupId :groupName]) columns)
                                     {:groupName "metadata" :groupId "metadata"})
                 new-columns (for [[{:keys [groupId groupName]} _] data-groups]

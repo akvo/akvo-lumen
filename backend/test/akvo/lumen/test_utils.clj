@@ -69,7 +69,10 @@
                           "fileName" (or dataset-name file)
                           "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
-        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {} spec)]
+        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {"email" "author@akvo.org"
+                                                                              "name" "Author"
+                                                                              "given_name" "Author"
+                                                                              "family_name" "Family"} spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
 
