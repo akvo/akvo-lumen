@@ -549,12 +549,12 @@ function DatasetTable(props) {
                 </Table>
               </div>
             ) : (
-                <LoadingSpinner />
+              <LoadingSpinner />
               )}
           </div>
         </div>
       ) : (
-          <LoadingSpinner />
+        <LoadingSpinner />
         )}
     </React.Fragment>
   );
