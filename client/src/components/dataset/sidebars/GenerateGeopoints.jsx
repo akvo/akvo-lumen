@@ -79,6 +79,8 @@ export default class GenerateGeopoints extends Component {
   render() {
     const { onClose, onApply, columns, intl } = this.props;
     const args = this.state.transformation.get('args');
+    // We have now an Array ['group', [{col_1}, {col_2}, {col_n}]]
+    const js_columms = columns.toJS()[1];
     return (
       <div
         className="DataTableSidebar"
@@ -88,14 +90,14 @@ export default class GenerateGeopoints extends Component {
         </SidebarHeader>
         <div className="inputs">
           <SelectColumn
-            columns={columns}
+            columns={js_columms}
             latOrLong="lat"
             intl={intl}
             onChange={value => this.handleSelectColumn(value, 'lat')}
             value={args.get('columnNameLat')}
           />
           <SelectColumn
-            columns={columns}
+            columns={js_columms}
             latOrLong="long"
             intl={intl}
             onChange={value => this.handleSelectColumn(value, 'long')}
