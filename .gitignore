@@ -32,7 +32,7 @@ ci/flipped.service.yaml
 
 # E2E tests
 client/e2e-test/cypress/plugins
-client/e2e-test/cypress/support
+# client/e2e-test/cypress/support
 
 # From https://github.com/github/gitignore
 
