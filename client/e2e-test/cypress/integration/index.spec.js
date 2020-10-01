@@ -285,8 +285,5 @@ describe('Akvo Lumen e2e tests', () => {
       .click({ force: true });
 
     cy.get('.DeleteConfirmationModal button.delete').click();
-
-
-    cy.get('.LibraryListingItem').filter(`:contains(${datasetName})`).should('have.length', 0);
   });
 });
