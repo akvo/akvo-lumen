@@ -35,7 +35,7 @@ services:
    volumes:
       - pg-data:/pg-certs:ro
  fe-e2e-tests:
-   image: akvo/akvo-lumen-e2e-test:20200110.115310.06b75bc
+   image: akvo/akvo-lumen-e2e-test:20201002.151859.72a3b7f
    shm_size: '256m'
    volumes:
      - ./client/e2e-test:/app/e2e-test
