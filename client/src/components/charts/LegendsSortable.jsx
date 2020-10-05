@@ -10,6 +10,7 @@ import get from 'lodash/get';
 import arrayMove from 'array-move';
 
 import { sortAlphabetically, sortChronologically } from '../../utilities/utils';
+import { displayTextForNullValues } from '../../utilities/chart';
 import { palette } from '../../utilities/visualisationColors';
 import LegendShape from './LegendShape';
 
@@ -44,7 +45,7 @@ const getLegends = (specLegend, visualisation, hasSubbucket, noSort) => {
   const legends = noChanged
         ? specLegendsList
         : visLegendsList
-        .map(l => l.key);
+        .map(l => l.key || displayTextForNullValues);
   return noSort ? legends : legends.slice().sort(sortLegendsFunctionFactory(visualisation));
 };
 
