@@ -158,6 +158,7 @@ class BarConfigMenu extends Component {
       disabled={spec.bucketColumn === null}
       onChange={value => handleChangeSpec({
         subBucketColumn: value,
+        showLegend: true,
         legendTitle: columnOptions.find(item => item.value === value) ?
           columnOptions.find(item => item.value === value).title : null,
       }, spec, onChangeSpec, columnOptions)}
