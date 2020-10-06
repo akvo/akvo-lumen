@@ -254,7 +254,6 @@ class ScatterChart extends Component {
   handleShowColorPicker(isPickingColor) {
     const { interactive, print, edit } = this.props;
     if (!interactive || print) return;
-    console.log(edit, isPickingColor);
     this.setState({ isPickingColor: edit ? isPickingColor : null });
   }
 
