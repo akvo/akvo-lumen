@@ -167,12 +167,17 @@ class ScatterChart extends Component {
     if (!itsSet(category)) {
       return color;
     }
+
+    // if color is selected
     if (colorMapping[category]) {
       return colorMapping[category];
     }
+
+    // if color is not selected use default colors
     if (this.colors[category]) {
       return this.colors[category];
     }
+
     this.colors[category] = colors[this.colorsCount];
     this.colorsCount += 1;
     return this.colors[category];
@@ -249,6 +254,7 @@ class ScatterChart extends Component {
   handleShowColorPicker(isPickingColor) {
     const { interactive, print, edit } = this.props;
     if (!interactive || print) return;
+    console.log(edit, isPickingColor);
     this.setState({ isPickingColor: edit ? isPickingColor : null });
   }
 
@@ -333,9 +339,9 @@ class ScatterChart extends Component {
               legendDescription && <BubbleLegend title={legendDescription} />
             }
             data={categories}
-            colorMapping={categories.reduce((acc, category, idx) => ({
+            colorMapping={categories.reduce((acc, category) => ({
               ...acc,
-              [category]: this.getColor(idx),
+              [category]: this.getColor(category),
             }), {})}
             activeItem={get(this.state, 'hoveredNode')}
             onMouseEnter={({ datum }) => () => {
@@ -469,7 +475,7 @@ class ScatterChart extends Component {
                         const normalizedX = xScale(x);
                         const normalizedY = yScale(y);
                         const normalizedSize = Math.sqrt(sizeScale(size));
-                        const color = this.getColor(categories.indexOf(category));
+                        const color = this.getColor(category);
                         return (
                           <Group key={i}>
                             <Circle
