@@ -151,6 +151,8 @@ export const LegendsSortable = ({
   hasSubbucket,
   noSort,
 }) => {
+  const legendColors = React.useRef({});
+  const legendColorsCount = React.useRef(0);
   const sortable = (get(specLegend, 'order.mode') || 'auto') === 'custom';
   const legends = getLegends(specLegend, visualisation, hasSubbucket, noSort);
 
@@ -161,27 +163,39 @@ export const LegendsSortable = ({
     onChangeSpec({ legend });
   };
 
-  const getColor = (key, index) => (colors && colors[key]) || palette[index];
+  const getColor = (key) => {
+    if (colors && colors[key]) {
+      return colors[key];
+    }
+
+    if (legendColors.current[key]) {
+      return legendColors.current[key];
+    }
+
+    legendColors.current[key] = palette[legendColorsCount.current];
+    legendColorsCount.current += 1;
+    return legendColors.current[key];
+  };
 
   // eslint-disable-next-line new-cap
   const SortableList = SortableContainer(({ legendItems }) => (
     <div style={{ marginBottom: '5px' }}>
       {sortable
         ? legendItems &&
-          legendItems.map((value, index) => (
+          legendItems.map(value => (
             <SortableItem
               key={`item-${value}`}
               value={value}
               index={legends.indexOf(value)}
-              color={getColor(value, index)}
+              color={getColor(value)}
             />
           ))
         : legendItems &&
-          legendItems.map((value, index) => (
+          legendItems.map(value => (
             <NoSortableItem
               value={value}
               key={`item-${value}`}
-              color={getColor(value, index)}
+              color={getColor(value)}
             />
           ))}
     </div>
