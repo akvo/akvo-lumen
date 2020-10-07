@@ -171,7 +171,7 @@ export const LegendsSortable = ({
           legendItems.map((value, index) => (
             <SortableItem
               key={`item-${value}`}
-              value={value}
+              value={value || displayTextForNullValues}
               index={legends.indexOf(value)}
               color={getColor(value, index)}
             />
@@ -179,7 +179,7 @@ export const LegendsSortable = ({
         : legendItems &&
           legendItems.map((value, index) => (
             <NoSortableItem
-              value={value}
+              value={value || displayTextForNullValues}
               key={`item-${value}`}
               color={getColor(value, index)}
             />
