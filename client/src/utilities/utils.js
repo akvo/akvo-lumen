@@ -48,8 +48,8 @@ export function checkUndefined(object = {}, ...keys) {
 }
 
 export const sortAlphabetically = (a, b, accessor = val => val) => {
-  const nameA = accessor(a).toLowerCase();
-  const nameB = accessor(b).toLowerCase();
+  const nameA = (accessor(a) && accessor(a).toLowerCase()) || '';
+  const nameB = (accessor(b) && accessor(b).toLowerCase()) || '';
   if (nameA < nameB) return -1;
   if (nameA > nameB) return 1;
   return 0;
