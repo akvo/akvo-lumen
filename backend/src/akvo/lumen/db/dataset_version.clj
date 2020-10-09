@@ -13,7 +13,11 @@
   (db-new-dataset-version conn (merge defaults opts)))
 
 (defn new-dataset-version-2 [conn opts]
-  (db-new-dataset-version-2 conn (merge defaults opts)))
+  (db-new-dataset-version-2 conn opts))
 
-(defn new-data-group [conn opts]
-  (db-new-data-group conn (merge defaults opts)))
+
+(defn dataset-version-2-by-dataset-id-and-version [conn opts]
+  (db-dataset-version-2-by-dataset-id-and-version conn opts))
+
+(defn latest-dataset-version-2-by-dataset-id [conn opts]
+  (db-latest-dataset-version-2-by-dataset-id conn opts))

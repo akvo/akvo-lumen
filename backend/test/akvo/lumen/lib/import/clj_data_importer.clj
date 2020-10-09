@@ -28,3 +28,17 @@
   (let [headers? (boolean (get spec "hasColumnHeaders"))
         guess-types? (-> (get spec "guessColumnTypes") false? not)]
     (clj-data-importer (:data (meta spec)) headers? guess-types?)))
+
+(defmethod common/datagroups-importer "clj"
+  [spec data]
+  (let [base-importer (common/dataset-importer spec data)]
+    (reify
+      p/DatasetImporter
+      (columns [this]
+        (p/columns base-importer))
+      (records [this]
+        (->> (p/records base-importer)
+             (map (partial hash-map "main"))))
+      java.io.Closeable
+      (close [this]
+        (.close base-importer)))))

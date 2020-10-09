@@ -4,6 +4,7 @@
             [akvo.lumen.db.job-execution :as db.job-execution]
             [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.csv]
@@ -41,7 +42,7 @@
                                             :to-table imported-table-name}
                                            {}
                                            {:transaction? false})
-        (db.dataset-version/new-data-group  conn
+        (db.data-group/new-data-group  conn
                                             {:id (util/squuid)
                                              :dataset-version-id dataset-version-id
                                              :imported-table-name imported-table-name
@@ -49,12 +50,11 @@
                                              :group-id group-id
                                              :group-name (:groupName (first cols) group-id)
                                              :repeatable (:repeatable (first cols) false)
-                                             :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace hidden]}]
+                                             :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId hidden]}]
                                                               {:columnName id
                                                                :direction nil
                                                                :groupId groupId
                                                                :groupName groupName
-                                                               :namespace namespace
                                                                :hidden (boolean hidden)
                                                                :key (boolean key)
                                                                :multipleId multipleId

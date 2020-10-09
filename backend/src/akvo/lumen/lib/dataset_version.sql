@@ -18,7 +18,20 @@ VALUES (
        (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
 );
 
--- :name db-new-data-group :! :n
--- :doc Inserts a new data-group
-INSERT INTO data_group (id, group_id, group_name, dataset_version_id, table_name, imported_table_name, columns, repeatable)
-VALUES (:id, :group-id, :group-name, :dataset-version-id, :table-name, :imported-table-name, :columns, :repeatable)
+-- :name db-dataset-version-2-by-dataset-id-and-version :? :1
+-- :doc Returns the most recent dataset version 2 for a given dataset id and version
+SELECT id, version, transformations
+  FROM dataset_version_2
+ WHERE dataset_id = :dataset-id
+   AND version = :version;
+
+
+
+-- :name db-latest-dataset-version-2-by-dataset-id :? :1
+-- :doc Returns the most recent dataset version 2 for a given dataset id
+SELECT id, version, transformations
+  FROM dataset_version_2
+ WHERE dataset_id = :dataset-id
+   AND version = (SELECT MAX(v.version)
+                    FROM dataset_version_2 v
+                   WHERE v.dataset_id = :dataset-id);
