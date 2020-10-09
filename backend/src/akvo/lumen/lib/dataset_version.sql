@@ -18,7 +18,3 @@ VALUES (
        (SELECT jsonb_object_agg(key, value) FROM jsonb_each(:author) WHERE key IN ('name', 'given_name', 'family_name', 'email'))
 );
 
--- :name db-new-data-group :! :n
--- :doc Inserts a new data-group
-INSERT INTO data_group (id, group_id, group_name, dataset_version_id, table_name, imported_table_name, columns, repeatable)
-VALUES (:id, :group-id, :group-name, :dataset-version-id, :table-name, :imported-table-name, :columns, :repeatable)

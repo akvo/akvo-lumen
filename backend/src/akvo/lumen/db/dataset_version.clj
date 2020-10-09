@@ -15,5 +15,3 @@
 (defn new-dataset-version-2 [conn opts]
   (db-new-dataset-version-2 conn (merge defaults opts)))
 
-(defn new-data-group [conn opts]
-  (db-new-data-group conn (merge defaults opts)))
