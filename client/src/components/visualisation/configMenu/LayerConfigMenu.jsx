@@ -496,12 +496,8 @@ class LayerConfigMenu extends Component {
     switch (this.state.activeTab) {
       case 'data':
         tabContent = (
-          <div
-            className="dataTab"
-          >
-            <div
-              className="inputGroup"
-            >
+          <div className="dataTab">
+            <div className="inputGroup">
               <label htmlFor="xDatasetMenu">
                 <FormattedMessage id="source_dataset" />:
               </label>
@@ -510,8 +506,8 @@ class LayerConfigMenu extends Component {
                 name="datasetMenu"
                 placeholder={intl.formatMessage({ id: 'choose_dataset' })}
                 value={getDatasetOrRasterId(layer)}
-                options={
-                  this.props.datasetOptions.concat(
+                options={this.props.datasetOptions
+                  .concat(
                     Object.keys(this.props.rasters)
                       .map(key => this.props.rasters[key])
                       .map(raster => ({
@@ -519,51 +515,78 @@ class LayerConfigMenu extends Component {
                         label: entity.getTitle(raster),
                       }))
                   )
-                  .sort((a, b) => sortAlphabetically(a, b, ({ label }) => label))
-                }
+                  .sort((a, b) =>
+                    sortAlphabetically(a, b, ({ label }) => label)
+                  )}
                 onChange={(datasetId) => {
                   if (datasetId.indexOf('raster') > -1) {
-                    onChangeMapLayer(this.props.layerIndex, { rasterId: datasetId.replace('raster-', ''), datasetId: null });
+                    onChangeMapLayer(this.props.layerIndex, {
+                      rasterId: datasetId.replace('raster-', ''),
+                      datasetId: null,
+                    });
                   } else {
-                    onChangeMapLayer(this.props.layerIndex, { datasetId, rasterId: null });
+                    onChangeMapLayer(this.props.layerIndex, {
+                      datasetId,
+                      rasterId: null,
+                    });
                   }
-                }
-                }
+                }}
                 buttonSpacing="0"
                 data-test-id="source-dataset"
                 inputProps={sourceDataset}
               />
             </div>
             <ButtonRowInput
-              options={[{
-                label: <FormattedMessage id="geo_location" />,
-                value: 'geo-location',
-              }, {
-                label: <FormattedMessage id="geo_shape" />,
-                value: 'geo-shape',
-              }, {
-                label: <FormattedMessage id="raster" />,
-                value: 'raster',
-              }]}
+              options={[
+                {
+                  label: <FormattedMessage id="geo_location" />,
+                  value: 'geo-location',
+                },
+                {
+                  label: <FormattedMessage id="geo_shape" />,
+                  value: 'geo-shape',
+                },
+                {
+                  label: <FormattedMessage id="raster" />,
+                  value: 'raster',
+                },
+              ]}
               selected={layer.layerType || 'geo-location'}
               label={intl.formatMessage({ id: 'layer_type' })}
-              onChange={value => onChangeMapLayer(layerIndex, {
-                layerType: value,
-              })}
+              onChange={value =>
+                onChangeMapLayer(layerIndex, {
+                  layerType: value,
+                })
+              }
               buttonSpacing="0"
             />
-            {(layer.layerType === 'geo-shape') &&
-              <GeoshapeDataTab
-                layer={layer}
-                layerIndex={layerIndex}
-                onChangeMapLayer={onChangeMapLayer}
-                columnOptions={columnOptions}
-                datasetOptions={this.props.datasetOptions}
-                datasets={this.props.datasets}
-                disabled={disabled}
-              />
-            }
-            {(layer.layerType === 'raster') &&
+            {layer.layerType === 'geo-shape' && (
+              <div>
+                <GeoshapeDataTab
+                  layer={layer}
+                  layerIndex={layerIndex}
+                  onChangeMapLayer={onChangeMapLayer}
+                  columnOptions={columnOptions}
+                  datasetOptions={this.props.datasetOptions}
+                  datasets={this.props.datasets}
+                  disabled={disabled}
+                />
+                <FilterMenu
+                  filters={layer.filters}
+                  hasDataset={layer.datasetId !== null}
+                  columnOptions={filterColumns(columnOptions, [
+                    'option',
+                    'text',
+                    'number',
+                    'date',
+                  ])}
+                  onChangeSpec={object =>
+                    onChangeMapLayer(layerIndex, object)
+                  }
+                />
+              </div>
+            )}
+            {layer.layerType === 'raster' && (
               <RasterDataTab
                 layer={layer}
                 layerIndex={layerIndex}
@@ -573,25 +596,34 @@ class LayerConfigMenu extends Component {
                 datasets={this.props.datasets}
                 disabled={disabled}
               />
-            }
-            {(layer.layerType === 'geo-location' || !layer.layerType) &&
+            )}
+            {(layer.layerType === 'geo-location' || !layer.layerType) && (
               <div>
                 <GeopointDataTab
                   layer={layer}
                   layerIndex={layerIndex}
                   onChangeMapLayer={onChangeMapLayer}
                   columnOptions={columnOptions}
-                  handlePointColorColumnChange={this.handlePointColorColumnChange}
+                  handlePointColorColumnChange={
+                    this.handlePointColorColumnChange
+                  }
                   disabled={disabled}
                 />
                 <FilterMenu
                   filters={layer.filters}
                   hasDataset={layer.datasetId !== null}
-                  columnOptions={filterColumns(columnOptions, ['option', 'text', 'number', 'date'])}
-                  onChangeSpec={object => onChangeMapLayer(layerIndex, object)}
+                  columnOptions={filterColumns(columnOptions, [
+                    'option',
+                    'text',
+                    'number',
+                    'date',
+                  ])}
+                  onChangeSpec={object =>
+                    onChangeMapLayer(layerIndex, object)
+                  }
                 />
               </div>
-            }
+            )}
           </div>
         );
         break;
