@@ -39,7 +39,7 @@
    (system-fixture config-edn nil f))
   ([config-edn more-ks f]
    (let [c (tu/start-config config-edn more-ks)]
-     (binding [import/*data-groups* false
+     (binding [import/*data-groups-future* false
                lumen-migrate/*reporter* reporter/silent]
        (lumen-migrate/migrate c)
        (binding [*system* (tu/start-system c)]
