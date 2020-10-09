@@ -324,7 +324,6 @@ class DashboardEditor extends Component {
           style={{ position: 'absolute', right: 0, top: 0, height: '2rem', width: '2rem' }}
           onClick={() => {
             filter.columns.splice(idx, 1);
-            this.props.dispatch(fetchColumn(filter.datasetId, null));
             onFilterChange(filter, true);
           }}
         >
