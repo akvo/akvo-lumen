@@ -50,12 +50,11 @@
                                              :group-id group-id
                                              :group-name (:groupName (first cols) group-id)
                                              :repeatable (:repeatable (first cols) false)
-                                             :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId namespace hidden]}]
+                                             :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId hidden]}]
                                                               {:columnName id
                                                                :direction nil
                                                                :groupId groupId
                                                                :groupName groupName
-                                                               :namespace namespace
                                                                :hidden (boolean hidden)
                                                                :key (boolean key)
                                                                :multipleId multipleId
