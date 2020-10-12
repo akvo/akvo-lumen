@@ -1,239 +1,158 @@
-/* eslint-disable import/first */
-import React, { Component } from 'react';
-import { render } from 'react-dom';
-import { Provider } from 'react-redux';
-import Immutable from 'immutable';
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import fetch from 'isomorphic-fetch';
-import IntlWrapper from './containers/IntlWrapper';
-import PrintProvider from './containers/PrintProvider';
-import VisualisationViewerContainer from './components/visualisation/VisualisationViewerContainer';
-import DashboardViewer from './components/dashboard/shared/DashboardViewer';
-import LumenBranding from './components/common/LumenBranding';
-import ErrorScreen from './components/common/ErrorScreen';
-import configureStore from './store/configureStore';
-import { init as initAnalytics, trackPageView } from './utilities/analytics';
-import * as auth from './utilities/auth';
 import queryString from 'querystringify';
+import LoadingSpinner from './components/common/LoadingSpinner';
+import PrivacyGate from './components/PrivacyGate';
+import PublicDashboard from './containers/PublicDashboard';
+import * as auth from './utilities/auth';
+
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
-const store = configureStore();
-const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '0';
-
-function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChangeFilter) {
-  const datasets = data.datasets;
-  const immutableDatasets = {};
-
-  // Transform datasets into immutable objects
-  if (datasets != null) {
-    Object.keys(datasets).forEach((key) => {
-      let dataset = Immutable.fromJS(datasets[key]);
-      if (!filteredDashboardCondition() && data.dashboards) {
-        const datasetId = data.dashboards[data.dashboardId].filter.datasetId;
-        if (key === datasetId) {
-          dataset = filterColumnsFetched.reduce((d, { columnName, values }) => d.setIn(['columnsFetched', columnName], values), dataset);
-        }
-      }
-      immutableDatasets[key] = dataset;
-    });
-  }
-
-  initAnalytics(initialState);
-
-  const entity = data.dashboards ?
-    data.dashboards[data.dashboardId] :
-    data.visualisations[data.visualisationId];
-
-  const entityType = data.dashboards ? 'dashboard' : 'visualisation';
-
-  trackPageView(`Share ${entityType}: ${entity.name || `Untitled ${entityType}`}`);
-
-  render(
-    <Provider store={store}>
-      <PrintProvider>
-        <IntlWrapper>
-          <div className="viewer" style={{ display: 'flex' }}>
-            {data.dashboards ? (
-              <DashboardViewer
-                dashboard={data.dashboards[data.dashboardId]}
-                visualisations={data.visualisations}
-                datasets={immutableDatasets}
-                metadata={data.metadata ? data.metadata : null}
-                filteredDashboard={!filteredDashboardCondition()}
-                onFilterValueChange={onChangeFilter}
-                env={initialState.env}
-              />
-            ) : (
-              <VisualisationViewerContainer
-                visualisation={data.visualisations[data.visualisationId]}
-                metadata={data.metadata ? data.metadata[data.visualisationId] : null}
-                datasets={immutableDatasets}
-                env={initialState.env}
-              />
-            )}
-            <LumenBranding
-              size={data.dashboards ? 'large' : 'small'}
-            />
-          </div>
-        </IntlWrapper>
-      </PrintProvider>
-    </Provider>,
-    rootElement
-  );
-}
-
-function renderNoSuchShare() {
-  render(
-    <div>No such public dashboard or visualisation</div>,
-    rootElement
-  );
-}
-
 const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
-let hasSubmitted = false;
 
-const fetchFilterColumn = (datasetId, columnName, columnType, password, callback) =>
-fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}?order=value`, { headers: { 'X-Password': password } })
-.then((response) => {
-  if (response.status === 403) {
-    renderPrivacyGate(); // eslint-disable-line
-    callback();
+const filteredDashboardCondition = () => queryString.parse(window.location.search)['filter-dashboard'] === '0';
+
+function PublicApp() {
+  const [hasSubmittedPassword, setHasSubmittedPassword] = useState(false);
+  const [view, setView] = useState(null);
+
+  // set default state
+  const [appData, setAppData] = useState({
+    data: {},
+    filterColumnsFetched: [],
+    initialState: {},
+    onChangeFilter: () => null,
+  });
+
+  function renderErrorView() {
+    setView('AUTH_ERROR');
+
+    // if already in error screen, then show password incorrect
+    if (view === 'AUTH_ERROR') {
+      setHasSubmittedPassword(true);
+    }
+
     return null;
   }
-  return response.json();
-})
-.then(body => ({ columnName, values: body.map(o => o[1]) })
-);
 
-const fetchDashboard = (env, password, callback) =>
-  (queryParams, onChangeFilter, callbackReady) => {
-    const url = `/share/${shareId}`;
-    const urlWithOptionalParams = queryParams == null ? url : `${url}?query=${encodeURIComponent(queryParams)}`;
-    fetch(urlWithOptionalParams, { headers: { 'X-Password': password } })
-          .then((response) => {
-            if (response.status === 403) {
-              renderPrivacyGate(); // eslint-disable-line
-              callback();
-              return null;
-            }
-            return response.json()
-                    .then((data) => {
-                      if (data) return data;
-                      throw Error(`NO DATA FOR: /share/${shareId}`);
-                    })
-                    .then((data) => {
-                      if (data.dashboardId) {
-                        const dashboard = data.dashboards[data.dashboardId];
-                        const datasetId = dashboard.filter.datasetId;
-                        const datasetKeys = new Set(Object.keys(data.datasets));
-                        if (!filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
-                          const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
-                          return Promise.all(columnsFetch).then((responses) => {
-                            if (datasetKeys.has(dashboard.filter.datasetId)) {
-                              return [data, responses];
-                            }
-                            return fetch(`/share/${shareId}/dataset/${datasetId}`, { headers: { 'X-Password': password } })
-                            // eslint-disable-next-line no-shadow
-                            .then((response) => {
-                              if (response.status === 403) {
-                                renderPrivacyGate(); // eslint-disable-line
-                                callback();
-                                return null;
-                              }
-                              return response.json();
-                            }).then((dataset) => {
-                              const udpatedData = data;
-                              udpatedData.datasets[dataset.id] = dataset;
-                              return [udpatedData, responses];
-                            });
-                          }
-                            );
-                        // eslint-disable-next-line no-else-return
-                        } else {
-                          return [data];
-                        }
-                      }
-                      return [data];
-                    })
-                    .then(([data, filterColumnsFetched]) => {
-                      if (callbackReady) callbackReady();
-                      return renderSuccessfulShare(data, filterColumnsFetched || [], { env },
-                        onChangeFilter);
-                    }
-                    )
-                    .catch((error) => {
-                      renderNoSuchShare();
-                      throw error;
-                    });
-          });
-  };
+  function fetchFilterColumn(datasetId, columnName, columnType, password) {
+    return fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}?order=value`, { headers: { 'X-Password': password } })
+      .then((response) => {
+        if (response.status === 403) {
+          return renderErrorView(); // eslint-disable-line
+        }
 
-const fetchData = (password = undefined, callback = () => {}) => {
-  auth.initPublic()
-    .then(({ env }) => {
-      const onChangeFilter = fetchDashboard(env, password, callback);
-      onChangeFilter(null, onChangeFilter);
-    });
-};
-
-class PrivacyGate extends Component {
-  constructor(props) {
-    super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-  componentDidMount() {
-    this.passwordInput.focus();
-  }
-  handleSubmit() {
-    hasSubmitted = true;
-    fetchData(this.state.password, () => this.forceUpdate());
-  }
-  render() {
-    return (
-      <ErrorScreen
-        code={403}
-        codeVisible={false}
-        title="A password is required to view this visualisation/dashboard"
-      >
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            this.handleSubmit();
-          }}
-        >
-          {hasSubmitted && (
-            <div className="alert alert-danger">
-              Password incorrect
-            </div>
-          )}
-          <div className="clearfix" />
-          <input
-            ref={(c) => { this.passwordInput = c; }}
-            onChange={({ target: { value } }) => {
-              this.setState({ password: value });
-            }}
-            type="password"
-            placeholder="Password"
-          />
-          <a
-            className="submitButton"
-            onClick={this.handleSubmit}
-          >
-            Submit
-          </a>
-        </form>
-      </ErrorScreen>
+        return response.json();
+      })
+      .then(body => ({
+        columnName,
+        values: body.map(o => o[1]),
+      })
     );
   }
+
+  function fetchDashboard(env, password) {
+    return (queryParams, onChangeFilter, callbackReady) => {
+      const url = `/share/${shareId}`;
+      const urlWithOptionalParams = queryParams == null ? url : `${url}?query=${encodeURIComponent(queryParams)}`;
+
+      fetch(urlWithOptionalParams, { headers: { 'X-Password': password } })
+        .then((response) => {
+          if (response.status === 403) {
+            return renderErrorView();
+          }
+
+          if (view === 'AUTH_ERROR') {
+            setView(null);
+          }
+
+          return response.json()
+            .then((data) => {
+              if (data) return data;
+              throw Error(`NO DATA FOR: /share/${shareId}`);
+            })
+            .then((data) => {
+              if (data.dashboardId) {
+                const dashboard = data.dashboards[data.dashboardId];
+                const datasetId = dashboard.filter.datasetId;
+                const datasetKeys = new Set(Object.keys(data.datasets));
+
+                if (!filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
+                  const columnsFetch = dashboard.filter.columns
+                    .map(o => fetchFilterColumn(datasetId, o.column, password));
+
+                  return Promise.all(columnsFetch).then((responses) => {
+                    if (datasetKeys.has(dashboard.filter.datasetId)) {
+                      return [data, responses];
+                    }
+
+                    return fetch(`/share/${shareId}/dataset/${datasetId}`, { headers: { 'X-Password': password } })
+                      .then((resp) => {
+                        if (resp.status === 403) {
+                          return renderErrorView();
+                        }
+
+                        return resp.json();
+                      })
+                      .then((dataset) => {
+                        const udpatedData = data;
+                        udpatedData.datasets[dataset.id] = dataset;
+                        return [udpatedData, responses];
+                      });
+                  });
+                }
+                return [data];
+              }
+              return [data];
+            })
+            .then(([data, filterColumnsFetched]) => {
+              if (callbackReady) callbackReady();
+
+              setAppData({
+                data,
+                filterColumnsFetched: filterColumnsFetched || [],
+                initialState: { env },
+                onChangeFilter,
+              });
+              setView('APP');
+            })
+            .catch((e) => {
+              setView('NO_DATA');
+              throw e;
+            });
+        });
+    };
+  }
+
+  const fetchData = (password = undefined) => {
+    auth.initPublic().then(({ env }) => {
+      const onChangeFilter = fetchDashboard(env, password);
+      onChangeFilter(null, onChangeFilter);
+    });
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (view === 'AUTH_ERROR') {
+    return <PrivacyGate hasSubmitted={hasSubmittedPassword} fetchData={fetchData} />;
+  }
+
+  if (view === 'NO_DATA') {
+    return <p>No such public dashboard or visualisation</p>;
+  }
+
+  if (view === 'APP') {
+    return <PublicDashboard {...appData} />;
+  }
+
+  return <LoadingSpinner />;
 }
 
-function renderPrivacyGate() {
-  render(<PrivacyGate />, rootElement);
-}
-
-if (shareId != null) {
-  fetchData();
-}
+ReactDOM.render(<PublicApp />, rootElement);
