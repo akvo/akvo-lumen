@@ -2,18 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import ContextMenu from '../../common/ContextMenu';
+import typeIconMap from '../TypeIconMap';
 
 const options = [
   {
-    label: <FormattedMessage id="text" />,
+    label: [typeIconMap.text, <FormattedMessage id="text" />],
     value: 'text',
   },
   {
-    label: <FormattedMessage id="number" />,
+    label: [typeIconMap.number, <FormattedMessage id="number" />],
     value: 'number',
   },
   {
-    label: <FormattedMessage id="date" />,
+    label: [typeIconMap.date, <FormattedMessage id="date" />],
     value: 'date',
   },
 ];
@@ -30,7 +31,7 @@ export default function DataTypeContextMenu({
       options={options}
       selected={column.get('type')}
       style={{
-        width: '8rem',
+        width: '10rem',
         top: `${dimensions.top}px`,
         left: `${dimensions.left}px`,
         right: 'initial',

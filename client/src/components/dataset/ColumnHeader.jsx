@@ -1,10 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
-import { FormattedMessage } from 'react-intl';
+// import { FormattedMessage } from 'react-intl';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
+import typeIconMap from './TypeIconMap';
 
 require('./ColumnHeader.scss');
+
+const getTypeIcon = (name) => {
+  if (typeIconMap[name]) {
+    return typeIconMap[name];
+  }
+  return <i>{name}</i>;
+};
 
 export default class ColumnHeader extends Component {
 
@@ -102,7 +110,7 @@ export default class ColumnHeader extends Component {
                 onClick={this.handleDataTypeMenuClick}
                 ref={(ref) => { this.columnTypeLabel = ref; }}
               >
-                <FormattedMessage id={column.get('type')} />
+                {getTypeIcon(column.get('type'))}
               </span>
             </span>
           }
