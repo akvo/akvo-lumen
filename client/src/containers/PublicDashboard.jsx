@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import queryString from 'querystringify';
 import Immutable from 'immutable';
 import { Provider } from 'react-redux';
