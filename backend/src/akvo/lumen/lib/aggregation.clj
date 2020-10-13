@@ -29,24 +29,22 @@
                     "query" query}))
 
 (defn query [tenant-conn dataset-id visualisation-type query]
-  (if (and (-> (env/all tenant-conn) (get "data-groups"))
-           (= visualisation-type "bar"))
-    (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
-      (let [data-groups (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
-           data-groups (map (fn [data-group]
-                              (update data-group :columns (comp walk/keywordize-keys vec)))
-                            data-groups)]
-       (bar/query-with-data-groups tenant-conn data-groups query)))
-    (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-      (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
-        (try
+  (try
+    (if (and (-> (env/all tenant-conn) (get "data-groups"))
+             (= visualisation-type "bar"))
+      (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
+        (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                       (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+          (bar/query-with-data-groups tenant-conn data-groups query)
+          (lib/not-found {"datasetId" dataset-id})))
+      (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
+        (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
           (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
-          (catch clojure.lang.ExceptionInfo e
-            (log/warn e :query query :visualisation-type visualisation-type)
-            (lib/bad-request (merge {:message (.getMessage e)}
-                                    (ex-data e)))))
-        (lib/not-found {"datasetId" dataset-id})))))
-
+          (lib/not-found {"datasetId" dataset-id}))))
+    (catch clojure.lang.ExceptionInfo e
+      (log/warn e :query query :visualisation-type visualisation-type)
+      (lib/bad-request (merge {:message (.getMessage e)}
+                              (ex-data e))))))
 
 (def vis-aggregation-mapper {"pivot table" "pivot"
                             "line"      "line"
