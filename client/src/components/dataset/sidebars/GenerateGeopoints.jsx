@@ -79,8 +79,6 @@ export default class GenerateGeopoints extends Component {
   render() {
     const { onClose, onApply, columns, intl } = this.props;
     const args = this.state.transformation.get('args');
-    const hasDataGroup = typeof columns.get(0) === 'string'; // group id in first position?
-    const cols = hasDataGroup ? columns.get(1) : columns;
     return (
       <div
         className="DataTableSidebar"
@@ -90,14 +88,14 @@ export default class GenerateGeopoints extends Component {
         </SidebarHeader>
         <div className="inputs">
           <SelectColumn
-            columns={cols}
+            columns={columns}
             latOrLong="lat"
             intl={intl}
             onChange={value => this.handleSelectColumn(value, 'lat')}
             value={args.get('columnNameLat')}
           />
           <SelectColumn
-            columns={cols}
+            columns={columns}
             latOrLong="long"
             intl={intl}
             onChange={value => this.handleSelectColumn(value, 'long')}

@@ -68,7 +68,8 @@ const LegendEntry = ({ singleMetadata, layer }) => {
   let pointColorMapping = singleMetadata.pointColorMapping;
   const specLegend = ensureSpecLegend(layer.legend);
   if (get(specLegend, 'order.mode') === 'custom' && (get(specLegend, 'order.list') || []).length > 0) {
-    pointColorMapping = get(specLegend, 'order.list').map(x => pointColorMapping.find(z => z.value === x));
+    pointColorMapping = get(specLegend, 'order.list').map(x => pointColorMapping.find(z => z.value === x))
+        .filter(x => x != null);
   }
   return (
     <div className="LegendEntry">

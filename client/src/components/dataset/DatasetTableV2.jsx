@@ -455,6 +455,13 @@ function DatasetTable(props) {
     );
   };
 
+  if (sidebarProps && sidebarProps.columns && (typeof sidebarProps.columns.get(0) === 'string')) {
+    const columnsV2 = Immutable.fromJS(props.groups.reduce(
+      (total, group) => total.concat(...group.get(1)), []
+    ));
+    sidebarProps.columns = columnsV2;
+  }
+
   return (
     <React.Fragment>
       {renderHeader()}
@@ -471,9 +478,8 @@ function DatasetTable(props) {
             }}
           >
             <div
-              className={`sidebarWrapper ${
-                sidebarProps ? 'expanded' : 'collapsed'
-              }`}
+              className={`sidebarWrapper ${sidebarProps ? 'expanded' : 'collapsed'
+                }`}
             >
               {sidebarProps && (
                 <DataTableSidebar
@@ -509,9 +515,8 @@ function DatasetTable(props) {
             {props.groupAvailable ? (
               <div
                 ref={wrappingDiv}
-                className={`wrapper ${
-                  sidebarProps ? 'hasSidebar' : 'noSidebar'
-                }`}
+                className={`wrapper ${sidebarProps ? 'hasSidebar' : 'noSidebar'
+                  }`}
               >
                 {activeDataTypeContextMenu != null && (
                   <DataTypeContextMenu
@@ -548,12 +553,12 @@ function DatasetTable(props) {
               </div>
             ) : (
               <LoadingSpinner />
-            )}
+              )}
           </div>
         </div>
       ) : (
         <LoadingSpinner />
-      )}
+        )}
     </React.Fragment>
   );
 }
