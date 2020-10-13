@@ -23,6 +23,14 @@
         (assoc "groupId" groupId)
         (assoc "groupName" groupName))))
 
+(defn data-group-by-dataset-id-and-group-id
+  [conn opts]
+  (db-data-group-by-dataset-and-group conn opts))
+
+(defn data-groups-by-dataset-id
+  [conn opts]
+  (db-data-groups-by-dataset conn opts))
+
 (defn table-name-and-columns-by-dataset-id [conn opts]
   (db-table-name-and-columns-by-dataset-id conn (merge dv/defaults opts)))
 
