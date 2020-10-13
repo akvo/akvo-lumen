@@ -29,17 +29,23 @@
                     "query" query}))
 
 (defn query [tenant-conn dataset-id visualisation-type query]
-  (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (with-meta
-                       (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})
-                       {:dataset-id dataset-id})]
-      (try
-        (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
-        (catch clojure.lang.ExceptionInfo e
-          (log/warn e :query query :visualisation-type visualisation-type)
-          (lib/bad-request (merge {:message (.getMessage e)}
-                                  (ex-data e)))))
-      (lib/not-found {"datasetId" dataset-id}))))
+  (if (and (-> (env/all tenant-conn) (get "data-groups"))
+           (= visualisation-type "bar"))
+    (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
+      (let [data-groups (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+           data-groups (map (fn [data-group]
+                              (update data-group :columns (comp walk/keywordize-keys vec)))
+                            data-groups)]
+       (bar/query-with-data-groups tenant-conn data-groups query)))
+    (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
+      (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
+        (try
+          (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
+          (catch clojure.lang.ExceptionInfo e
+            (log/warn e :query query :visualisation-type visualisation-type)
+            (lib/bad-request (merge {:message (.getMessage e)}
+                                    (ex-data e)))))
+        (lib/not-found {"datasetId" dataset-id})))))
 
 
 (def vis-aggregation-mapper {"pivot table" "pivot"
@@ -174,13 +180,7 @@
 
 (defmethod query* "bar"
   [tenant-conn dataset _ query]
-  (if (-> (env/all tenant-conn) (get "data-groups"))
-    (let [data-groups (db.dataset/data-groups-by-dataset-id tenant-conn {:id (-> dataset meta :dataset-id)})
-          data-groups (map (fn [data-group]
-                             (update data-group :columns (comp walk/keywordize-keys vec)))
-                           data-groups)]
-      (bar/query-with-data-groups tenant-conn data-groups query))
-    (bar/query tenant-conn dataset query)))
+  (bar/query tenant-conn dataset query))
 
 (defmethod query* "scatter"
     [tenant-conn dataset _ query]
