@@ -82,7 +82,7 @@ cat <<EOF > /tmp/new-user.json
 EOF
 
 email="${1}"
-sed -i "s/xxxxx/${email}/" /tmp/new-user.json
+sed -i".bak" -e "s/xxxxx/${email}/" /tmp/new-user.json
 new_user
 uid=$(user_id "${email}")
 gid=$(group_id)
