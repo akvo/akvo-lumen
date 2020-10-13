@@ -12,9 +12,11 @@
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.aggregation.bubble :as bubble]
+            [akvo.lumen.lib.env :as env]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.walk :as walk]))
+
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]
@@ -28,7 +30,9 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
+    (if-let [dataset (with-meta
+                       (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})
+                       {:dataset-id dataset-id})]
       (try
         (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
         (catch clojure.lang.ExceptionInfo e
@@ -39,14 +43,14 @@
 
 
 (def vis-aggregation-mapper {"pivot table" "pivot"
-                             "line"      "line"
-                             "bubble"    "bubble"
-                             "area"      "line"
-                             "pie"       "pie"
-                             "donut"     "donut"
-                             "polararea" "pie"
-                             "bar"       "bar"
-                             "scatter"   "scatter"})
+                            "line"      "line"
+                            "bubble"    "bubble"
+                            "area"      "line"
+                            "pie"       "pie"
+                            "donut"     "donut"
+                            "polararea" "pie"
+                            "bar"       "bar"
+                            "scatter"   "scatter"})
 
 (defn run-visualisation
   [tenant-conn visualisation]
@@ -170,14 +174,18 @@
 
 (defmethod query* "bar"
   [tenant-conn dataset _ query]
-  (bar/query tenant-conn dataset query))
+  (if (-> (env/all tenant-conn) (get "data-groups"))
+    (let [data-groups (db.dataset/data-groups-by-dataset-id tenant-conn {:id (-> dataset meta :dataset-id)})
+          data-groups (map (fn [data-group]
+                             (update data-group :columns (comp walk/keywordize-keys vec)))
+                           data-groups)]
+      (bar/query-with-data-groups tenant-conn data-groups query))
+    (bar/query tenant-conn dataset query)))
 
 (defmethod query* "scatter"
-  [tenant-conn dataset _ query]
-  (scatter/query tenant-conn dataset query))
+    [tenant-conn dataset _ query]
+    (scatter/query tenant-conn dataset query))
 
 (defmethod query* "bubble"
-  [tenant-conn dataset _ query]
-  (bubble/query tenant-conn dataset query))
-
-
+    [tenant-conn dataset _ query]
+    (bubble/query tenant-conn dataset query))
