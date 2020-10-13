@@ -90,6 +90,66 @@ SELECT dataset_version.table_name AS "table-name",
                   FROM dataset_version
                  WHERE dataset_version.dataset_id=:id);
 
+-- :name db-data-group-by-dataset-and-group :? :1
+WITH
+source_data AS (
+SELECT (spec->'source')::jsonb - 'refreshToken' as source
+  FROM data_source, dataset_version_2, job_execution, dataset
+ WHERE dataset_version_2.dataset_id = dataset.id
+   AND dataset_version_2.version = 1
+   AND dataset_version_2.job_execution_id = job_execution.id
+   AND job_execution.data_source_id = data_source.id
+   AND dataset_version_2.dataset_id = :dataset-id
+)
+SELECT data_group.table_name AS "table-name",
+       dataset.title,
+       dataset.created,
+       dataset.modified,
+       dataset.id,
+       dataset.author,
+       source_data.source,
+       dataset_version_2.created AS "updated",
+       data_group.columns,
+       dataset_version_2.transformations
+  FROM dataset_version_2, dataset, source_data, data_group
+ WHERE dataset_version_2.dataset_id = :dataset-id
+   AND dataset.id=dataset_version_2.dataset_id
+   AND data_group.dataset_version_id = dataset_version_2.id
+   AND data_group.group_id = :group-id
+   AND dataset_version_2.version=(SELECT max(version)
+                                    FROM dataset_version_2
+                                   WHERE dataset_id= :dataset-id);
+
+-- :name db-data-groups-by-dataset :? :*
+WITH
+source_data AS (
+SELECT (spec->'source')::jsonb - 'refreshToken' as source
+  FROM data_source, dataset_version_2, job_execution, dataset
+ WHERE dataset_version_2.dataset_id = dataset.id
+   AND dataset_version_2.version = 1
+   AND dataset_version_2.job_execution_id = job_execution.id
+   AND job_execution.data_source_id = data_source.id
+   AND dataset_version_2.dataset_id = :dataset-id
+)
+SELECT data_group.table_name AS "table-name",
+       dataset.title AS "name",
+       dataset.created,
+       dataset.modified,
+       data_group.group_id AS "id",
+       dataset.author,
+       source_data.source,
+       dataset_version_2.created AS "updated",
+       data_group.columns,
+       dataset_version_2.transformations,
+       data_group.repeatable
+  FROM dataset_version_2, dataset, source_data, data_group
+ WHERE dataset_version_2.dataset_id = :dataset-id
+   AND dataset.id=dataset_version_2.dataset_id
+   AND data_group.dataset_version_id = dataset_version_2.id
+   AND dataset_version_2.version=(SELECT max(version)
+                                    FROM dataset_version_2
+                                   WHERE dataset_id= :dataset-id);
+
 -- :name db-table-name-and-columns-by-dataset-id :? :1
 SELECT dataset_version.table_name AS "table-name",
        dataset_version.columns
