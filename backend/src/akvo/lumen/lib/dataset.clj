@@ -70,7 +70,7 @@
                      (update "transformations" vec))]
      (if ordered?
        (let [ordered (distinct (map #(get % "groupId") dataset-columns))
-             res (reduce #(conj % {:groupId %2 :columns (get grouped %2)}) [] ordered)]
+             res (reduce #(conj % [%2 (get grouped %2)]) [] ordered)]
          (if (contains? (set ordered) "transformations")
            res
            (conj res ["transformations" []]) ))
@@ -89,7 +89,7 @@
       (let [dataset* (-> (select-keys (first data-groups)
                                       [:name :modified :created :updated :source :transformations])
                          (assoc :status "OK"))]
-           (lib/ok (assoc dataset*  :id id :groups (mapv #(select-keys % [:id :columns :repeatable :groupName]) data-groups))))
+        (lib/ok (assoc dataset*  :id id :groups (mapv (juxt :id :columns :repeatable) data-groups))))
       (lib/not-found {:error "Not found"}))
     (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
       (let [dataset* (-> (select-keys dsv
