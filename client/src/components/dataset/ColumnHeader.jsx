@@ -1,19 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { intlShape, injectIntl } from 'react-intl';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
-import typeIconMap from './TypeIconMap';
 
 require('./ColumnHeader.scss');
 
-const getTypeIcon = (name) => {
-  if (typeIconMap[name]) {
-    return typeIconMap[name];
-  }
-  return <i>{name}</i>;
-};
-
-export default class ColumnHeader extends Component {
+class ColumnHeader extends Component {
 
   constructor() {
     super();
@@ -109,7 +102,7 @@ export default class ColumnHeader extends Component {
                 onClick={this.handleDataTypeMenuClick}
                 ref={(ref) => { this.columnTypeLabel = ref; }}
               >
-                {getTypeIcon(column.get('type'))}
+                <i title={this.props.intl.formatMessage({ id: column.get('type') })} className="dataset-type-icon" style={{ backgroundImage: `url(../../styles/img/type-${column.get('type')}.svg)` }} />
               </span>
             </span>
           }
@@ -126,6 +119,8 @@ export default class ColumnHeader extends Component {
   }
 }
 
+export default injectIntl(ColumnHeader);
+
 ColumnHeader.propTypes = {
   column: PropTypes.object.isRequired,
   onToggleDataTypeContextMenu: PropTypes.func.isRequired,
@@ -133,4 +128,5 @@ ColumnHeader.propTypes = {
   onRemoveSort: PropTypes.func.isRequired,
   columnMenuActive: PropTypes.bool.isRequired,
   disabled: PropTypes.bool,
+  intl: intlShape.isRequired,
 };

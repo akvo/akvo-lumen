@@ -60,7 +60,7 @@
             &, .columnTypeToggle {
                 display: inline-block;
                 &>i{
-                  margin-top: 8px;
+                  margin-top: 10px;
                   margin-left: -4px;
                 }
             }
@@ -73,7 +73,6 @@
 }
 
 .dataset-type-icon{
-  background-color: #d2d2d2;
   color: #252525;
   border-radius: 3px;
   padding: 0px 4px;
@@ -82,6 +81,9 @@
   line-height: 22px;
   min-width: 22px;
   text-align: center;
+  width: 20px;height: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
   &.icon-int, &.icon-str{
     font-weight: 600;
     font-size: 12px;
@@ -90,4 +92,5 @@
 .contextMenuItem .dataset-type-icon{
   margin-right: 7px;
   margin-left: -4px;
+  transform: translateY(5px);
 }
