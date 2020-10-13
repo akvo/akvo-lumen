@@ -3,7 +3,7 @@
 set -eu
 
 token() {
-    curl --verbose \
+    curl --silent \
 	 --location \
 	 --request POST \
 	 --data "grant_type=password" \
@@ -16,7 +16,7 @@ token() {
 
 group_id() {
     bearer=$(token)
-    curl --verbose \
+    curl --silent \
 	 --location \
 	 --header "Authorization: Bearer ${bearer}" \
 	 --header "Content-Type: application/json" \
@@ -26,7 +26,7 @@ group_id() {
 
 user_id() {
     bearer=$(token)
-    curl --verbose \
+    curl --silent \
 	 --location \
 	 --header "Authorization: Bearer ${bearer}" \
 	 --header "Content-Type: application/json" \
@@ -36,7 +36,7 @@ user_id() {
 
 assign_group() {
     bearer=$(token)
-    curl --verbose \
+    curl --silent \
 	 --location \
 	 --request PUT \
 	 --header "Authorization: Bearer ${bearer}" \
@@ -46,7 +46,7 @@ assign_group() {
 
 new_user() {
     bearer=$(token)
-    curl --verbose \
+    curl --silent \
 	 --location \
 	 --request POST \
 	 --header "Authorization: Bearer ${bearer}" \
@@ -73,7 +73,7 @@ cat <<EOF > /tmp/new-user.json
     ],
     "email": "xxxxx",
     "lastName": "Admin",
-    "firstName": "Local",
+    "firstName": "Akvo",
     "emailVerified": true,
     "totp": false,
     "enabled": true,
