@@ -99,15 +99,14 @@ class EntityTypeHeader extends Component {
         primaryActions={this.actionButtons(IS_PRIMARY)}
       >
         <div className="EntityTypeHeaderContainer">
-          <EntityTitleInput
-            title={title}
-            onBeginEditTitle={onBeginEditTitle}
-            onChangeTitle={onChangeTitle}
-          />
-
-          {/* hide status when editing */}
-          {saveStatusId && saveStatusId !== 'unsaved_changes' && (
+          <div className="TopRowContainer">
+            <EntityTitleInput
+              title={title}
+              onBeginEditTitle={onBeginEditTitle}
+              onChangeTitle={onChangeTitle}
+            />
             <div className="saveStatus">
+              <i className="saved" />
               {saveStatusId && <FormattedMessage id={saveStatusId} />}
               {timeToNextSave && savingFailed && (
                 <span>
@@ -125,7 +124,10 @@ class EntityTypeHeader extends Component {
                 </span>
               )}
             </div>
-          )}
+          </div>
+          <div className="TotalFormSubmissions">
+            2.4K form submissions
+          </div>
         </div>
       </Header>
     );

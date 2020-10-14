@@ -13,6 +13,20 @@
         justify-content: center;
         margin-right: 20px;
         width: 100%;
+        .TopRowContainer{
+          display: flex;
+        }
+        .TotalFormSubmissions{
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 20px;
+          letter-spacing: 0px;
+          text-align: left;
+          margin-left: 5px;
+          margin-top: -4px;
+          opacity: 0.7;
+        }
     }
 
     .entityInfo {
@@ -47,19 +61,13 @@
     }
 
     .EntityTitleInput {
-        font-size: 1.55rem;
+        // font-size: 1.55rem;
+        font-size: 18px;
         line-height: 2em;
         color: $darkGrey;
         flex-direction: column;
-
-        input {
-            width: 100%;
-            font-size: 1.55rem;
-        }
-
-        span,
-        input {
-            line-height: 1.55em;
+        input{
+          font-size: 18px;
         }
     }
 
@@ -67,7 +75,15 @@
         color: $textSecondary;
         font-size: 14px;
         padding: 0px 4px;
-
+        margin-top: 8px;
+        margin-left: 5px;
+        i{
+          display: inline-block;
+          width: 18px;
+          height: 13px;
+          background: url(../../styles/img/sync-status-saved.svg) no-repeat center;
+          margin-right: 10px;
+        }
         .clickable {
             text-decoration: none;
             text-transform: uppercase;
