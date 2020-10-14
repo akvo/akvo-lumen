@@ -101,7 +101,7 @@
 
 (defmethod filter-sql "isEmpty"
   [{:keys [column operation]}]
-  (if (= (:type column) "text")
+  (if (or (= (:type column) "option") (= (:type column) "text"))
     (format "coalesce(%s, '') %s ''"
             (column :columnName)
             (if (= operation "keep") "=" "<>"))
