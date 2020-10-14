@@ -40,12 +40,17 @@
     .columnTitleText {
         max-width: calc(100% - 30px);
         overflow: hidden;
-        text-overflow: ellipsis;
+        // text-overflow: ellipsis;
         white-space: nowrap;
         display: inline-block;
         font-weight: 500;
 
-
+        .holder{
+          display: inline-block;
+          width: calc(100% - 30px);
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
         .columnKey {
             margin-left: 0.5rem;
             margin-right: 0.5rem;

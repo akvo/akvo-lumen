@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { intlShape, injectIntl } from 'react-intl';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 require('./ColumnHeader.scss');
 
@@ -87,7 +88,6 @@ class ColumnHeader extends Component {
         }
         <span
           className="columnTitleText"
-          title={column.get('title')}
           data-test-id={column.get('title')}
         >
           {column.get('key') ?
@@ -102,11 +102,21 @@ class ColumnHeader extends Component {
                 onClick={this.handleDataTypeMenuClick}
                 ref={(ref) => { this.columnTypeLabel = ref; }}
               >
-                <i title={this.props.intl.formatMessage({ id: column.get('type') })} className="dataset-type-icon" style={{ backgroundImage: `url(../../styles/img/type-${column.get('type')}.svg)` }} />
+                <OverlayTrigger
+                  overlay={
+                    <Tooltip>
+                      {this.props.intl.formatMessage({ id: column.get('type') })}
+                    </Tooltip>
+                  }
+                >
+                  <i className="dataset-type-icon" style={{ backgroundImage: `url(../../styles/img/type-${column.get('type')}.svg)` }} />
+                </OverlayTrigger>
               </span>
             </span>
           }
-          {column.get('title')}
+          <ConditionalTooltip>
+            {column.get('title')}
+          </ConditionalTooltip>
         </span>
 
         {this.props.columnMenuActive ? (
@@ -118,6 +128,35 @@ class ColumnHeader extends Component {
     );
   }
 }
+
+const ConditionalTooltip = ({ children }) => {
+  const [useTooltip, setUseTooltip] = useState(false); // eslint-disable-line
+  const handleRef = (ref) => {
+    if (!ref) return;
+    if (ref.parentElement.offsetWidth < ref.offsetWidth + 40 && !useTooltip) {
+      setUseTooltip(true);
+    } else if (ref.parentElement.offsetWidth >= ref.offsetWidth + 40 && useTooltip) {
+      setUseTooltip(false);
+    }
+  };
+  if (useTooltip) {
+    return [
+      <OverlayTrigger
+        placement="bottom"
+        overlay={
+          <Tooltip>
+            <span>{children}</span>
+          </Tooltip>
+        }
+      >
+        <span className="holder"><span>{children}</span></span>
+      </OverlayTrigger>,
+    ];
+  }
+  return [
+    <span ref={handleRef}>{children}</span>,
+  ];
+};
 
 export default injectIntl(ColumnHeader);
 
