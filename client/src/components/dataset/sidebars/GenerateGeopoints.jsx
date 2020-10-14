@@ -22,6 +22,7 @@ function SelectColumn({ columns, latOrLong, onChange, value, intl }) {
         value={columnSelectSelectedOption(value, cols)}
         onChange={onChange}
         options={columnSelectOptions(intl, cols)}
+        clearable
       />
     </div>
   );
@@ -54,6 +55,27 @@ export default class GenerateGeopoints extends Component {
     this.handleChangeColumnTitleGeo = this.handleChangeColumnTitleGeo.bind(this);
   }
 
+  getColumns(latOrLong) {
+    const columnName = 'columnName'.concat(_.capitalize(latOrLong));
+    const oppositeColumnName = this.state.transformation.getIn(['args', columnName]);
+
+    // if opposite column is not selected
+    if (!oppositeColumnName) {
+      return this.props.columns;
+    }
+
+    // if opposite column is not from a RQG, filter out all RQG columns
+    const oppositeColumn = this.props.columns.find(col => col.get('columnName') === oppositeColumnName);
+    const isOppositeColumnFromRQG = oppositeColumn.get('repeatable');
+
+    if (!isOppositeColumnFromRQG) {
+      return this.props.columns.filter(col => !col.get('repeatable'));
+    }
+
+    // if opposite column is from a RQG, return only columns from the same group
+    return this.props.columns.filter(col => col.get('groupName') === oppositeColumn.get('groupName'));
+  }
+
   handleSelectColumn(value, latOrLong) {
     const { transformation } = this.state;
     const columnName = 'columnName'.concat(_.capitalize(latOrLong));
@@ -77,7 +99,7 @@ export default class GenerateGeopoints extends Component {
   }
 
   render() {
-    const { onClose, onApply, columns, intl } = this.props;
+    const { onClose, onApply, intl } = this.props;
     const args = this.state.transformation.get('args');
     return (
       <div
@@ -88,14 +110,14 @@ export default class GenerateGeopoints extends Component {
         </SidebarHeader>
         <div className="inputs">
           <SelectColumn
-            columns={columns}
+            columns={this.getColumns('long')}
             latOrLong="lat"
             intl={intl}
             onChange={value => this.handleSelectColumn(value, 'lat')}
             value={args.get('columnNameLat')}
           />
           <SelectColumn
-            columns={columns}
+            columns={this.getColumns('lat')}
             latOrLong="long"
             intl={intl}
             onChange={value => this.handleSelectColumn(value, 'long')}
