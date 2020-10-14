@@ -38,9 +38,8 @@
     }
 
     .columnTitleText {
-        max-width: calc(100% - 30px);
+        width: calc(100% - 30px);
         overflow: hidden;
-        // text-overflow: ellipsis;
         white-space: nowrap;
         display: inline-block;
         font-weight: 500;
