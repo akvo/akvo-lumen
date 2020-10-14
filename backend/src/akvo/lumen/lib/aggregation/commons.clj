@@ -2,7 +2,8 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.spec.alpha :as s]
             [akvo.lumen.specs.db.dataset-version.column :as s.column]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [clojure.string :as str]))
 
 (defn run-query [tenant-conn sql]
   (log/debug :run-query sql)
@@ -50,3 +51,40 @@
   (if (= "option" (:type bucket-column))
     (format "unnest(regexp_split_to_array(%1$s,'\\|'))" (:columnName bucket-column))
     (:columnName bucket-column)))
+
+(defn data-groups-sql-template
+  "Returns a data structure useful to generate a SELECT statement with the data groups passed as
+  parameter. We keep all columns for `metadata` groupId, and we *drop* `rnum` and `instance_id`
+  from all other data groups."
+  [data-groups]
+  (let [adapted-dgs (reduce
+                     (fn [dgs {:keys [columns groupId table-name]}]
+                       (conj dgs
+                             {:table-name table-name
+                              :columns (if (= groupId "metadata")
+                                         columns
+                                         (remove (fn [{:keys [columnName]}]
+                                                   (or (= "instance_id" columnName)
+                                                       (= "rnum" columnName)))
+                                                 columns))}))
+                     []
+                     data-groups)]
+    {:select (mapv :columnName (flatten (map :columns adapted-dgs)))
+     :from (mapv :table-name adapted-dgs)}))
+
+(defn data-groups-sql
+  [{:keys [select from]}]
+  (str/join " "
+            [(str "SELECT " (str/join ", "
+                                      select))
+             (str "FROM " (str/join ", "
+                                    from))
+             (when (> (count from) 1)
+               (str "WHERE " (str/join " AND "
+                                       (let [dt-1 (first from)]
+                                         (for [dt-n (rest from)]
+                                           (format "%s.instance_id=%s.instance_id" dt-1 dt-n))))))]))
+
+(defn data-groups-temp-view
+  [view-name sql]
+  (format "CREATE TEMP VIEW %s AS %s" view-name sql))

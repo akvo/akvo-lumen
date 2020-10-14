@@ -211,3 +211,35 @@
                             (vec (sort (vec (commons/spec-columns ::s.visualisation/visualisation (walk/keywordize-keys %))))))
                    data)
              expectations)))))
+
+(def test-data-groups [{:columns [{:columnName "instance_id"}
+                                  {:columnName "rnum"}
+                                  {:columnName "identifier"}
+                                  {:columnName "A"}]
+                        :groupId "metadata"
+                        :table-name "ds_meta"}
+                       {:columns [{:columnName "instance_id"}
+                                  {:columnName "rnum"}
+                                  {:columnName "B"}]
+                        :groupId "repeated"
+                        :table-name "ds_repeated"}
+                       {:groupId "not-repeated"
+                        :columns [{:columnName "instance_id"}
+                                  {:columnName "rnum"}
+                                  {:columnName "C"}]
+                        :table-name "ds_not_repeated"}])
+
+
+(def test-data-groups-template {:select ["instance_id" "rnum" "identifier" "A" "B" "C"]
+                                :from ["ds_meta" "ds_repeated" "ds_not_repeated"]})
+
+(deftest ^:unit generate-data-groups-template-sql
+  (is (= test-data-groups-template (commons/data-groups-sql-template test-data-groups))))
+
+(deftest ^:unit generate-data-groups-sql
+  (let [expected "SELECT instance_id, rnum, identifier, A, B, C FROM ds_meta, ds_repeated, ds_not_repeated WHERE ds_meta.instance_id=ds_repeated.instance_id AND ds_meta.instance_id=ds_not_repeated.instance_id"]
+    (is (= expected (commons/data-groups-sql test-data-groups-template)))))
+
+(deftest ^:unit data-groups-view
+  (let [expected "CREATE TEMP VIEW foo AS SELECT * FROM bar"]
+    (is (= expected (commons/data-groups-temp-view "foo" "SELECT * FROM bar")))))

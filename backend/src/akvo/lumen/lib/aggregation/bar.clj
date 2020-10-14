@@ -3,6 +3,7 @@
             [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.postgres.filter :refer (sql-str)]
+            [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.pprint :refer (pprint)]
@@ -19,11 +20,11 @@
           WITH
           sort_table AS
             (SELECT %1$s AS x, %2$s AS sort_value
-             FROM %3$s 
-             WHERE %4$s 
+             FROM %3$s
+             WHERE %4$s
              GROUP BY x
-             ORDER BY %5$s 
-             LIMIT %6$s), 
+             ORDER BY %5$s
+             LIMIT %6$s),
           data_table AS
             (SELECT %1$s as x, %2$s as y, %7$s as s
              FROM %3$s
@@ -50,9 +51,9 @@
           (sql-option-bucket-column subbucket-column)))
 
 (defn- bucket-sql [table-name bucket-column aggregation filter-sql sort-sql truncate-size]
-  (format "SELECT * 
+  (format "SELECT *
            FROM (SELECT %1$s as x, %2$s FROM %3$s WHERE %4$s GROUP BY x)z
-           ORDER BY %5$s 
+           ORDER BY %5$s
            LIMIT %6$s"
           (sql-option-bucket-column bucket-column)
           aggregation
@@ -152,7 +153,7 @@
                                  (sql-str columns (:filters query))
                                  (sort* (:sort query) "sort_value") (or (:truncateSize query) "ALL"))
                   (bucket-sql table-name
-                              bucket-column 
+                              bucket-column
                               (if metric-columns-y
                                 (->> metric-columns-y
                                      (map #(aggregation* metric-aggregation %  bucket-column))
@@ -180,3 +181,15 @@
              (subbucket-column-response sql-response bucket-column)
              (bucket-column-response sql-response bucket-column metric-y-column))))))
     (lib/ok (bucket-column-response nil nil nil))))
+
+(defn query-with-data-groups
+  [tenant-conn data-groups q]
+  (let [columns (reduce #(into % (:columns %2)) [] data-groups)
+        table-name (str "view_" (str/replace (util/squuid) "-" "_"))]
+    (->> data-groups
+         commons/data-groups-sql-template
+         commons/data-groups-sql
+         (commons/data-groups-temp-view table-name)
+         vector
+         (jdbc/execute! tenant-conn))
+    (query tenant-conn {:table-name table-name :columns columns} q)))
