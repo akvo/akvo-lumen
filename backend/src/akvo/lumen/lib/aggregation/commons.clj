@@ -73,16 +73,16 @@
      :from (mapv :table-name adapted-dgs)}))
 
 (defn data-groups-sql
-  [template]
+  [{:keys [select from]}]
   (str/join " "
             [(str "SELECT " (str/join ", "
-                                      (:select template)))
+                                      select))
              (str "FROM " (str/join ", "
-                                    (:from template)))
-             (when (> (count (:from template)) 1)
+                                    from))
+             (when (> (count from) 1)
                (str "WHERE " (str/join " AND "
-                                       (let [dt-1 (first (:from template))]
-                                         (for [dt-n (rest (:from template))]
+                                       (let [dt-1 (first from)]
+                                         (for [dt-n (rest from)]
                                            (format "%s.instance_id=%s.instance_id" dt-1 dt-n))))))]))
 
 (defn data-groups-temp-view
