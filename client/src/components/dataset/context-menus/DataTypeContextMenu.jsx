@@ -3,20 +3,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import ContextMenu from '../../common/ContextMenu';
 
-const options = [
-  {
-    label: <FormattedMessage id="text" />,
-    value: 'text',
-  },
-  {
-    label: <FormattedMessage id="number" />,
-    value: 'number',
-  },
-  {
-    label: <FormattedMessage id="date" />,
-    value: 'date',
-  },
-];
+const options = ['text', 'number', 'date'].map(it => ({
+  label: [<i className="dataset-type-icon" style={{ backgroundImage: `url(../../styles/img/type-${it}.svg)` }} />, <FormattedMessage id={it} />],
+  value: it,
+}));
 
 /* "The job of a context menu is to create props for the sidebar" */
 export default function DataTypeContextMenu({
@@ -30,7 +20,7 @@ export default function DataTypeContextMenu({
       options={options}
       selected={column.get('type')}
       style={{
-        width: '8rem',
+        width: '10rem',
         top: `${dimensions.top}px`,
         left: `${dimensions.left}px`,
         right: 'initial',

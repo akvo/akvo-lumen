@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
-import { FormattedMessage } from 'react-intl';
+import { intlShape, injectIntl } from 'react-intl';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 require('./ColumnHeader.scss');
 
-export default class ColumnHeader extends Component {
+class ColumnHeader extends Component {
 
   constructor() {
     super();
@@ -87,7 +88,6 @@ export default class ColumnHeader extends Component {
         }
         <span
           className="columnTitleText"
-          title={column.get('title')}
           data-test-id={column.get('title')}
         >
           {column.get('key') ?
@@ -102,11 +102,21 @@ export default class ColumnHeader extends Component {
                 onClick={this.handleDataTypeMenuClick}
                 ref={(ref) => { this.columnTypeLabel = ref; }}
               >
-                <FormattedMessage id={column.get('type')} />
+                <OverlayTrigger
+                  overlay={
+                    <Tooltip>
+                      {this.props.intl.formatMessage({ id: column.get('type') })}
+                    </Tooltip>
+                  }
+                >
+                  <i className="dataset-type-icon" style={{ backgroundImage: `url(../../styles/img/type-${column.get('type')}.svg)` }} />
+                </OverlayTrigger>
               </span>
             </span>
           }
-          {column.get('title')}
+          <ConditionalTooltip>
+            {column.get('title')}
+          </ConditionalTooltip>
         </span>
 
         {this.props.columnMenuActive ? (
@@ -119,6 +129,37 @@ export default class ColumnHeader extends Component {
   }
 }
 
+const ConditionalTooltip = ({ children }) => {
+  const [useTooltip, setUseTooltip] = useState(false); // eslint-disable-line
+  const handleRef = (ref) => {
+    if (!ref) return;
+    if (ref.parentElement.offsetWidth < ref.offsetWidth + 40 && !useTooltip) {
+      setUseTooltip(true);
+    } else if (ref.parentElement.offsetWidth >= ref.offsetWidth + 40 && useTooltip) {
+      setUseTooltip(false);
+    }
+  };
+  if (useTooltip) {
+    return [
+      <OverlayTrigger
+        placement="bottom"
+        overlay={
+          <Tooltip>
+            <span>{children}</span>
+          </Tooltip>
+        }
+      >
+        <span className="holder"><span>{children}</span></span>
+      </OverlayTrigger>,
+    ];
+  }
+  return [
+    <span ref={handleRef}>{children}</span>,
+  ];
+};
+
+export default injectIntl(ColumnHeader);
+
 ColumnHeader.propTypes = {
   column: PropTypes.object.isRequired,
   onToggleDataTypeContextMenu: PropTypes.func.isRequired,
@@ -126,4 +167,5 @@ ColumnHeader.propTypes = {
   onRemoveSort: PropTypes.func.isRequired,
   columnMenuActive: PropTypes.bool.isRequired,
   disabled: PropTypes.bool,
+  intl: intlShape.isRequired,
 };

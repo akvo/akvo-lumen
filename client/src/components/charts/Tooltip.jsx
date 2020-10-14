@@ -7,7 +7,7 @@ import LegendShape from './LegendShape';
 import './Tooltip.scss';
 
 const Tooltip = ({ items, ...rest }) => (items.length ? (
-  <div className="tooltip" style={{ position: 'absolute', ...rest }}>
+  <div className="chart-tooltip" style={{ position: 'absolute', ...rest }}>
     <ul>
       {items.map(({ color, key, value }) => {
         const hasKey = Boolean(itsSet(key) && key.length);
