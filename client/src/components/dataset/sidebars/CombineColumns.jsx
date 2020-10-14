@@ -24,6 +24,7 @@ function SelectColumn({ columns, idx, onChange, value, intl }) {
         value={columnSelectSelectedOption(value, columnsSelect)}
         onChange={onChange}
         options={columnSelectOptions(intl, columnsSelect)}
+        clearable
       />
     </div>
   );
@@ -51,6 +52,28 @@ export default class CombineColumns extends Component {
         onError: 'fail',
       }),
     };
+  }
+
+  getColumns(selectId) {
+    const oppositeColumnId = selectId === 1 ? 0 : 1; // setting the id to check the opposite column
+    const args = this.state.transformation.get('args');
+    const oppositeColumnName = args.getIn(['columnNames', oppositeColumnId]);
+
+    // if opposite column is not selected
+    if (!oppositeColumnName) {
+      return this.props.columns;
+    }
+
+    // if opposite column is not from a RQG, filter out all RQG columns
+    const oppositeColumn = this.props.columns.find(col => col.get('columnName') === oppositeColumnName);
+    const isOppositeColumnFromRQG = oppositeColumn.get('repeatable');
+
+    if (!isOppositeColumnFromRQG) {
+      return this.props.columns.filter(col => !col.get('repeatable'));
+    }
+
+    // if opposite column is from a RQG, return only columns from the same group
+    return this.props.columns.filter(col => col.get('groupName') === oppositeColumn.get('groupName'));
   }
 
   isValidTransformation() {
@@ -81,7 +104,7 @@ export default class CombineColumns extends Component {
   }
 
   render() {
-    const { onClose, onApply, columns, intl } = this.props;
+    const { onClose, onApply, intl } = this.props;
     const args = this.state.transformation.get('args');
     return (
       <div
@@ -92,14 +115,14 @@ export default class CombineColumns extends Component {
         </SidebarHeader>
         <div className="inputs">
           <SelectColumn
-            columns={columns}
+            columns={this.getColumns(0)}
             idx={1}
             onChange={value => this.handleSelectColumn(0, value)}
             value={args.getIn(['columnNames', 0])}
             intl={intl}
           />
           <SelectColumn
-            columns={columns}
+            columns={this.getColumns(1)}
             idx={2}
             onChange={value => this.handleSelectColumn(1, value)}
             value={args.getIn(['columnNames', 1])}
