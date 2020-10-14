@@ -185,7 +185,7 @@
 (defn query-with-data-groups
   [tenant-conn data-groups q]
   (let [columns (reduce #(into % (:columns %2)) [] data-groups)
-        table-name (str "view_" (str/replace (util/squuid) "-" "_"))]
+        table-name (util/gen-table-name "ds")]
     (->> data-groups
          commons/data-groups-sql-template
          commons/data-groups-sql
