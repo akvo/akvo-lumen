@@ -12,9 +12,11 @@
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.aggregation.bubble :as bubble]
+            [akvo.lumen.lib.env :as env]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.walk :as walk]))
+
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]
@@ -27,26 +29,32 @@
                     "query" query}))
 
 (defn query [tenant-conn dataset-id visualisation-type query]
-  (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-    (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
-      (try
-        (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
-        (catch clojure.lang.ExceptionInfo e
-          (log/warn e :query query :visualisation-type visualisation-type)
-          (lib/bad-request (merge {:message (.getMessage e)}
-                                  (ex-data e)))))
-      (lib/not-found {"datasetId" dataset-id}))))
-
+  (try
+    (if (and (-> (env/all tenant-conn) (get "data-groups"))
+             (= visualisation-type "bar"))
+      (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
+        (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                       (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+          (bar/query-with-data-groups tenant-conn data-groups query)
+          (lib/not-found {"datasetId" dataset-id})))
+      (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
+        (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
+          (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
+          (lib/not-found {"datasetId" dataset-id}))))
+    (catch clojure.lang.ExceptionInfo e
+      (log/warn e :query query :visualisation-type visualisation-type)
+      (lib/bad-request (merge {:message (.getMessage e)}
+                              (ex-data e))))))
 
 (def vis-aggregation-mapper {"pivot table" "pivot"
-                             "line"      "line"
-                             "bubble"    "bubble"
-                             "area"      "line"
-                             "pie"       "pie"
-                             "donut"     "donut"
-                             "polararea" "pie"
-                             "bar"       "bar"
-                             "scatter"   "scatter"})
+                            "line"      "line"
+                            "bubble"    "bubble"
+                            "area"      "line"
+                            "pie"       "pie"
+                            "donut"     "donut"
+                            "polararea" "pie"
+                            "bar"       "bar"
+                            "scatter"   "scatter"})
 
 (defn run-visualisation
   [tenant-conn visualisation]
@@ -173,11 +181,9 @@
   (bar/query tenant-conn dataset query))
 
 (defmethod query* "scatter"
-  [tenant-conn dataset _ query]
-  (scatter/query tenant-conn dataset query))
+    [tenant-conn dataset _ query]
+    (scatter/query tenant-conn dataset query))
 
 (defmethod query* "bubble"
-  [tenant-conn dataset _ query]
-  (bubble/query tenant-conn dataset query))
-
-
+    [tenant-conn dataset _ query]
+    (bubble/query tenant-conn dataset query))
