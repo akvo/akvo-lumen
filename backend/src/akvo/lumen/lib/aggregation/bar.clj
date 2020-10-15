@@ -67,7 +67,8 @@
     (format
      (case aggregation-method
        nil                         "NULL"
-       ("min" "max" "count" "sum") (str aggregation-method  "(%s)")
+       ("min" "max" "sum")         (str aggregation-method  "(%s)")
+       "count"                     (str aggregation-method  "(*)")
        "mean"                      "avg(%s)"
        "median"                    "percentile_cont(0.5) WITHIN GROUP (ORDER BY %s)"
        "distinct"                  "COUNT(DISTINCT %s)"
