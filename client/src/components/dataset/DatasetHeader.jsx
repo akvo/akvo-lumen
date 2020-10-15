@@ -103,6 +103,7 @@ export default function DatasetHeader(props) {
     timeToNextSave,
     history,
     onSaveDataset,
+    rowsCount,
   } = props;
 
   let saveStatusId = ({
@@ -116,15 +117,18 @@ export default function DatasetHeader(props) {
 
   return (
     <EntityTypeHeader
-      history={history}
       title={props.name}
       actionButtons={getActionButtions()}
       saveAction={onSaveDataset}
-      onChangeTitle={onChangeTitle}
-      onBeginEditTitle={onBeginEditTitle}
-      saveStatusId={saveStatusId}
-      savingFailed={savingFailed}
-      timeToNextSave={timeToNextSave}
+      {...{
+        onChangeTitle,
+        onBeginEditTitle,
+        saveStatusId,
+        savingFailed,
+        timeToNextSave,
+        history,
+        rowsCount,
+      }}
     />
   );
 }
@@ -144,4 +148,5 @@ DatasetHeader.propTypes = {
   savingFailed: PropTypes.bool,
   timeToNextSave: PropTypes.number,
   onUseDataGroupsToggle: PropTypes.func,
+  rowsCount: PropTypes.number,
 };
