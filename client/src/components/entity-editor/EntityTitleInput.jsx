@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { intlShape, injectIntl } from 'react-intl';
+import AutosizeInput from 'react-input-autosize';
 
 class EntityTitleInput extends Component {
 
@@ -36,27 +37,30 @@ class EntityTitleInput extends Component {
                 const workingTitle = titleIsDefault ? '' : title;
                 this.setState({ editMode: true, workingTitle });
                 this.titleInput.style.display = 'initial';
-                this.titleInput.focus();
+                this.titleInput.children[0].children[0].focus();
               }
               if (this.props.onBeginEditTitle) {
                 this.props.onBeginEditTitle();
               }
             }}
           >
-            <input
-              className="entityTitleInput"
-              data-test-id="entity-title"
+            <div
               style={{ display: 'none' }}
-              type="text"
               ref={(titleInput) => { this.titleInput = titleInput; }}
-              value={this.state.workingTitle}
-              onChange={evt => this.setState({ workingTitle: evt.target.value })}
-              onBlur={() => {
-                this.setState({ editMode: false });
-                onChangeTitle(this.state.workingTitle);
-                this.titleInput.style.display = 'none';
-              }}
-            />
+            >
+              <AutosizeInput
+                className="entityTitleInput"
+                data-test-id="entity-title"
+                type="text"
+                value={this.state.workingTitle}
+                onChange={evt => this.setState({ workingTitle: evt.target.value })}
+                onBlur={() => {
+                  this.setState({ editMode: false });
+                  onChangeTitle(this.state.workingTitle);
+                  this.titleInput.style.display = 'none';
+                }}
+              />
+            </div>
             <span
               style={{
                 display: this.state.editMode ? 'none' : 'block',
