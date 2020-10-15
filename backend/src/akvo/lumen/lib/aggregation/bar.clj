@@ -73,8 +73,9 @@
        "distinct"                  "COUNT(DISTINCT %s)"
        "q1"                        "percentile_cont(0.25) WITHIN GROUP (ORDER BY %s)"
        "q3"                        "percentile_cont(0.75) WITHIN GROUP (ORDER BY %s)")
-     (or (:columnName metric-column)
-         (:columnName bucket-column)))))
+     (sql-option-bucket-column
+      (or metric-column
+          bucket-column)))))
 
 (defn subbucket-column-response [sql-response bucket-column]
   (let [bucket-values    (distinct
