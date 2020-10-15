@@ -1,6 +1,10 @@
 @import "modules/importAll";
 @import "print.global"; 
 @import "~react-quill/dist/quill.snow";
+@import "~bootstrap/scss/_functions.scss";
+@import "~bootstrap/scss/_variables.scss";
+@import "~bootstrap/scss/_mixins.scss";
+@import "~bootstrap/scss/_tooltip.scss";
 
 html, body, #root, #root > div {
     min-height: calc(100vh);

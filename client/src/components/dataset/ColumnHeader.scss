@@ -38,14 +38,18 @@
     }
 
     .columnTitleText {
-        max-width: calc(100% - 30px);
+        width: calc(100% - 30px);
         overflow: hidden;
-        text-overflow: ellipsis;
         white-space: nowrap;
         display: inline-block;
         font-weight: 500;
 
-
+        .holder{
+          display: inline-block;
+          width: calc(100% - 30px);
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
         .columnKey {
             margin-left: 0.5rem;
             margin-right: 0.5rem;
@@ -59,6 +63,10 @@
 
             &, .columnTypeToggle {
                 display: inline-block;
+                &>i{
+                  margin-top: 10px;
+                  margin-left: -4px;
+                }
             }
         }
     }
@@ -66,4 +74,27 @@
     .icon {
         font-size: 1.8em;
     }
+}
+
+.dataset-type-icon{
+  color: #252525;
+  border-radius: 3px;
+  padding: 0px 4px;
+  line-height: normal;
+  display: inline-block;
+  line-height: 22px;
+  min-width: 22px;
+  text-align: center;
+  width: 20px;height: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  &.icon-int, &.icon-str{
+    font-weight: 600;
+    font-size: 12px;
+  }
+}
+.contextMenuItem .dataset-type-icon{
+  margin-right: 7px;
+  margin-left: -4px;
+  transform: translateY(5px);
 }
