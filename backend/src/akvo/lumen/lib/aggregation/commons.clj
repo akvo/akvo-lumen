@@ -50,7 +50,7 @@
 (defn sql-option-bucket-column [bucket-column]
   (if (= "option" (:type bucket-column))
     (format "unnest(case when %1$s IS NULL
-                         THEN ARRAY[]::text[]
+                         THEN ARRAY[NULL]::text[]
                          else case when %1$s = ''
                                    then ARRAY['']::text[]
                                    else array_remove(regexp_split_to_array(%1$s,'\\|'), '')
