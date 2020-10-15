@@ -97,3 +97,22 @@ export const columnSelectOptions = (intl, columns) => {
   const res = extractColumnOptions(columns);
   return isImmutable(res) ? res.toArray() : res;
 };
+
+// For combine columns and generate geopoints column select
+export const columnBasedOnOppositeColumn = (columns, oppositeColumnName) => {
+  // if opposite column is not selected
+  if (!oppositeColumnName) {
+    return columns;
+  }
+
+  // if opposite column is not from a RQG, filter out all RQG columns
+  const oppositeColumn = columns.find(col => col.get('columnName') === oppositeColumnName);
+  const isOppositeColumnFromRQG = oppositeColumn.get('repeatable');
+
+  if (!isOppositeColumnFromRQG) {
+    return columns.filter(col => !col.get('repeatable'));
+  }
+
+  // if opposite column is from a RQG, return only columns from the same group
+  return columns.filter(col => col.get('groupName') === oppositeColumn.get('groupName'));
+};
