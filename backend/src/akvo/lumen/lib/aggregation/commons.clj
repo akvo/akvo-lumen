@@ -49,7 +49,13 @@
 
 (defn sql-option-bucket-column [bucket-column]
   (if (= "option" (:type bucket-column))
-    (format "unnest(array_remove(regexp_split_to_array(%1$s,'\\|'), ''))" (:columnName bucket-column))
+    (format "unnest(case when %1$s IS NULL
+                         THEN ARRAY[]::text[]
+                         else case when %1$s = ''
+                                   then ARRAY['']::text[]
+                                   else array_remove(regexp_split_to_array(%1$s,'\\|'), '')
+                                   end
+                         end)" (:columnName bucket-column))
     (:columnName bucket-column)))
 
 (defn data-groups-sql-template
