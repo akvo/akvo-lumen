@@ -61,7 +61,6 @@
     }
 
     .EntityTitleInput {
-        // font-size: 1.55rem;
         font-size: 18px;
         line-height: 2em;
         color: $darkGrey;
@@ -76,14 +75,7 @@
         font-size: 14px;
         padding: 0px 4px;
         margin-top: 8px;
-        margin-left: 5px;
-        i{
-          display: inline-block;
-          width: 18px;
-          height: 13px;
-          background: url(../../styles/img/sync-status-saved.svg) no-repeat center;
-          margin-right: 10px;
-        }
+        margin-left: 10px;
         .clickable {
             text-decoration: none;
             text-transform: uppercase;

@@ -447,6 +447,7 @@ function DatasetTable(props) {
       <DatasetHeader
         {...props.headerProps}
         history={props.history}
+        rowsCount={props.rows ? props.rows.size : -1}
         isLockedFromTransformations={props.isLockedFromTransformations}
         onNavigateToVisualise={props.onNavigateToVisualise}
         onClickTransformMenuItem={handleClickDatasetControlItem}

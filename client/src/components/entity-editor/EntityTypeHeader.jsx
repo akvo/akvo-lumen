@@ -89,6 +89,7 @@ class EntityTypeHeader extends Component {
       timeToNextSave,
       savingFailed,
       saveAction,
+      rowsCount,
     } = this.props;
 
     return (
@@ -106,7 +107,6 @@ class EntityTypeHeader extends Component {
               onChangeTitle={onChangeTitle}
             />
             <div className="saveStatus">
-              <i className="saved" />
               {saveStatusId && <FormattedMessage id={saveStatusId} />}
               {timeToNextSave && savingFailed && (
                 <span>
@@ -125,9 +125,11 @@ class EntityTypeHeader extends Component {
               )}
             </div>
           </div>
+          {rowsCount > -1 &&
           <div className="TotalFormSubmissions">
-            2.4K form submissions
+            {rowsCount} form submissions
           </div>
+          }
         </div>
       </Header>
     );
@@ -145,6 +147,7 @@ EntityTypeHeader.propTypes = {
   savingFailed: PropTypes.bool,
   history: PropTypes.object.isRequired,
   saveAction: PropTypes.func.isRequired,
+  rowsCount: PropTypes.number.isRequired,
 };
 
 export default injectIntl(EntityTypeHeader);
