@@ -6,7 +6,12 @@ import { intlShape, FormattedMessage } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
 import SidebarControls from './SidebarControls';
-import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
+import {
+  filterColumns,
+  columnSelectOptions,
+  columnSelectSelectedOption,
+  columnBasedOnOppositeColumn,
+} from '../../../utilities/column';
 
 function SelectColumn({ columns, latOrLong, onChange, value, intl }) {
   const columnName = 'columnName'.concat(_.capitalize(latOrLong));
@@ -59,21 +64,7 @@ export default class GenerateGeopoints extends Component {
     const columnName = 'columnName'.concat(_.capitalize(latOrLong));
     const oppositeColumnName = this.state.transformation.getIn(['args', columnName]);
 
-    // if opposite column is not selected
-    if (!oppositeColumnName) {
-      return this.props.columns;
-    }
-
-    // if opposite column is not from a RQG, filter out all RQG columns
-    const oppositeColumn = this.props.columns.find(col => col.get('columnName') === oppositeColumnName);
-    const isOppositeColumnFromRQG = oppositeColumn.get('repeatable');
-
-    if (!isOppositeColumnFromRQG) {
-      return this.props.columns.filter(col => !col.get('repeatable'));
-    }
-
-    // if opposite column is from a RQG, return only columns from the same group
-    return this.props.columns.filter(col => col.get('groupName') === oppositeColumn.get('groupName'));
+    return columnBasedOnOppositeColumn(this.props.columns, oppositeColumnName);
   }
 
   handleSelectColumn(value, latOrLong) {
