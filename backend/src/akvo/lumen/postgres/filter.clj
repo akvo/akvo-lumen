@@ -101,10 +101,13 @@
 
 (defmethod filter-sql "isEmpty"
   [{:keys [column operation]}]
-  (if (= (:type column) "text")
-    (format "coalesce(%s, '') %s ''"
-            (column :columnName)
-            (if (= operation "keep") "=" "<>"))
+  (case (:type column)
+    "text" (format "coalesce(%s, '') %s ''"
+                   (column :columnName)
+                   (if (= operation "keep") "=" "<>"))
+    "option" (format "coalesce(%s, '') %s ''"
+                   (column :columnName)
+                   (if (= operation "keep") "=" "<>"))
     (format "%s IS %s"
             (column :columnName)
             (if (= operation "keep")
