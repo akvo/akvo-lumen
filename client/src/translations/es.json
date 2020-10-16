@@ -218,7 +218,7 @@
   "min_value": "Mínimo: {val}",
   "min": "Mínimo",
   "misc": "Otras opciones",
-  "multiple": "Múltiple",
+  "multiple": "Múltiples valores",
   "must_choose_bucket_column_first": "Debe elegir primero la columna cubo",
   "must_choose_x_axis_column_first": "Debe elegir primero la columna del eje x",
   "name": "Nombre",

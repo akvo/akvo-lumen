@@ -222,7 +222,7 @@
   "min_value": "Min: {val}",
   "min": "Min",
   "misc": "Other options",
-  "multiple": "Multiple",
+  "multiple": "Multiple values",
   "must_choose_bucket_column_first": "Must choose bucket column first",
   "must_choose_x_axis_column_first": "Must choose X-axis column first",
   "name": "Name",
