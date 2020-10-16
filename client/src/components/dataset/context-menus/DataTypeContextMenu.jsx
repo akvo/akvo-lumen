@@ -2,9 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import ContextMenu from '../../common/ContextMenu';
+import IMAGES from '../../../constants/images';
+
 
 const options = ['text', 'number', 'date'].map(it => ({
-  label: [<i className="dataset-type-icon" style={{ backgroundImage: `url(../../styles/img/type-${it}.svg)` }} />, <FormattedMessage id={it} />],
+  label: [<i className="dataset-type-icon" style={{ backgroundImage: `url(${IMAGES.DATASET[it]})` }} />, <FormattedMessage id={it} />],
   value: it,
 }));
 

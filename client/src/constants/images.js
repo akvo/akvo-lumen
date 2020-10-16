@@ -22,4 +22,14 @@ module.exports = {
   BRAND: {
     logo: 'https://akvo-public.storage.googleapis.com/AkvoLogo.svg',
   },
+  DATASET: {
+    text: require('../styles/img/type-text.svg'),
+    number: require('../styles/img/type-number.svg'),
+    date: require('../styles/img/type-date.svg'),
+    geopoint: require('../styles/img/type-geopoint.svg'),
+    geoshape: require('../styles/img/type-geoshape.svg'),
+    multiple: require('../styles/img/type-multiple.svg'),
+    option: require('../styles/img/type-option.svg'),
+  },
+
 };
