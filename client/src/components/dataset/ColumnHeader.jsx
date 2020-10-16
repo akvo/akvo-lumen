@@ -4,6 +4,7 @@ import Immutable from 'immutable';
 import { intlShape, injectIntl } from 'react-intl';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import IMAGES from '../../constants/images';
 
 require('./ColumnHeader.scss');
 
@@ -109,7 +110,7 @@ class ColumnHeader extends Component {
                     </Tooltip>
                   }
                 >
-                  <i className="dataset-type-icon" style={{ backgroundImage: `url(../../styles/img/type-${column.get('type')}.svg)` }} />
+                  <i className="dataset-type-icon" style={{ backgroundImage: `url(${IMAGES.DATASET[column.get('type')]})` }} />
                 </OverlayTrigger>
               </span>
             </span>
