@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import fetch from 'isomorphic-fetch';
 import queryString from 'querystringify';
+import LoadingSpinner from './components/common/LoadingSpinner';
 import PrivacyGate from './components/PrivacyGate';
 import PublicDashboard from './containers/PublicDashboard';
 import * as auth from './utilities/auth';
@@ -150,7 +151,7 @@ function PublicApp() {
     return <PublicDashboard {...appData} />;
   }
 
-  return null;
+  return <LoadingSpinner />;
 }
 
 ReactDOM.render(<PublicApp />, rootElement);
