@@ -10,7 +10,7 @@ import {
   filterColumns,
   columnSelectOptions,
   columnSelectSelectedOption,
-  columnBasedOnOppositeColumn,
+  filterColumnsByDataGroupDimension,
 } from '../../../utilities/column';
 
 function SelectColumn({ columns, latOrLong, onChange, value, intl }) {
@@ -64,7 +64,7 @@ export default class GenerateGeopoints extends Component {
     const columnName = 'columnName'.concat(_.capitalize(latOrLong));
     const oppositeColumnName = this.state.transformation.getIn(['args', columnName]);
 
-    return columnBasedOnOppositeColumn(this.props.columns, oppositeColumnName);
+    return filterColumnsByDataGroupDimension(this.props.columns, oppositeColumnName);
   }
 
   handleSelectColumn(value, latOrLong) {

@@ -9,7 +9,7 @@ import {
   filterColumns,
   columnSelectOptions,
   columnSelectSelectedOption,
-  columnBasedOnOppositeColumn,
+  filterColumnsByDataGroupDimension,
 } from '../../../utilities/column';
 
 function SelectColumn({ columns, idx, onChange, value, intl }) {
@@ -64,7 +64,7 @@ export default class CombineColumns extends Component {
     const args = this.state.transformation.get('args');
     const oppositeColumnName = args.getIn(['columnNames', oppositeColumnId]);
 
-    return columnBasedOnOppositeColumn(this.props.columns, oppositeColumnName);
+    return filterColumnsByDataGroupDimension(this.props.columns, oppositeColumnName);
   }
 
   isValidTransformation() {
