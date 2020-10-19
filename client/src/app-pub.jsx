@@ -20,9 +20,15 @@ require('./styles/style.global.scss');
 
 const rootElement = document.querySelector('#root');
 const store = configureStore();
-const filteredDashboardCondition = () => queryString.parse(location.search)['filter-dashboard'] === '0';
+const filteredDashboardCondition = () =>
+  queryString.parse(location.search)['filter-dashboard'] === '0';
 
-function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChangeFilter) {
+function renderSuccessfulShare(
+  data,
+  filterColumnsFetched,
+  initialState,
+  onChangeFilter
+) {
   const datasets = data.datasets;
   const immutableDatasets = {};
 
@@ -33,7 +39,11 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
       if (!filteredDashboardCondition() && data.dashboards) {
         const datasetId = data.dashboards[data.dashboardId].filter.datasetId;
         if (key === datasetId) {
-          dataset = filterColumnsFetched.reduce((d, { columnName, values }) => d.setIn(['columnsFetched', columnName], values), dataset);
+          dataset = filterColumnsFetched.reduce(
+            (d, { columnName, values }) =>
+              d.setIn(['columnsFetched', columnName], values),
+            dataset
+          );
         }
       }
       immutableDatasets[key] = dataset;
@@ -42,13 +52,15 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
 
   initAnalytics(initialState);
 
-  const entity = data.dashboards ?
-    data.dashboards[data.dashboardId] :
-    data.visualisations[data.visualisationId];
+  const entity = data.dashboards
+    ? data.dashboards[data.dashboardId]
+    : data.visualisations[data.visualisationId];
 
   const entityType = data.dashboards ? 'dashboard' : 'visualisation';
 
-  trackPageView(`Share ${entityType}: ${entity.name || `Untitled ${entityType}`}`);
+  trackPageView(
+    `Share ${entityType}: ${entity.name || `Untitled ${entityType}`}`
+  );
 
   render(
     <Provider store={store}>
@@ -68,14 +80,14 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
             ) : (
               <VisualisationViewerContainer
                 visualisation={data.visualisations[data.visualisationId]}
-                metadata={data.metadata ? data.metadata[data.visualisationId] : null}
+                metadata={
+                  data.metadata ? data.metadata[data.visualisationId] : null
+                }
                 datasets={immutableDatasets}
                 env={initialState.env}
               />
             )}
-            <LumenBranding
-              size={data.dashboards ? 'large' : 'small'}
-            />
+            <LumenBranding size={data.dashboards ? 'large' : 'small'} />
           </div>
         </IntlWrapper>
       </PrintProvider>
@@ -85,98 +97,128 @@ function renderSuccessfulShare(data, filterColumnsFetched, initialState, onChang
 }
 
 function renderNoSuchShare() {
-  render(
-    <div>No such public dashboard or visualisation</div>,
-    rootElement
-  );
+  render(<div>No such public dashboard or visualisation</div>, rootElement);
 }
 
 const pathMatch = window.location.pathname.match(/^\/s\/(.*)/);
 const shareId = pathMatch != null ? pathMatch[1] : null;
 let hasSubmitted = false;
 
-const fetchFilterColumn = (datasetId, columnName, columnType, password, callback) =>
-fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}?order=value`, { headers: { 'X-Password': password } })
-.then((response) => {
-  if (response.status === 403) {
-    renderPrivacyGate(); // eslint-disable-line
-    callback();
-    return null;
-  }
-  return response.json();
-})
-.then(body => ({ columnName, values: body.map(o => o[1]) })
-);
+const fetchFilterColumn = (
+  datasetId,
+  columnName,
+  columnType,
+  password,
+  callback
+) =>
+  fetch(
+    `/share/${shareId}/dataset/${datasetId}/column/${columnName}?order=value`,
+    { headers: { 'X-Password': password } }
+  )
+    .then((response) => {
+      if (response.status === 403) {
+        renderPrivacyGate(); // eslint-disable-line
+        callback();
+        return null;
+      }
+      return response.json();
+    })
+    .then(body => ({ columnName, values: body.map(o => o[1]) }));
 
-const fetchDashboard = (env, password, callback) =>
-  (queryParams, onChangeFilter, callbackReady) => {
-    const url = `/share/${shareId}`;
-    const urlWithOptionalParams = queryParams == null ? url : `${url}?query=${encodeURIComponent(queryParams)}`;
-    fetch(urlWithOptionalParams, { headers: { 'X-Password': password } })
-          .then((response) => {
-            if (response.status === 403) {
-              renderPrivacyGate(); // eslint-disable-line
-              callback();
-              return null;
-            }
-            return response.json()
-                    .then((data) => {
-                      if (data) return data;
-                      throw Error(`NO DATA FOR: /share/${shareId}`);
-                    })
-                    .then((data) => {
-                      if (data.dashboardId) {
-                        const dashboard = data.dashboards[data.dashboardId];
-                        const datasetId = dashboard.filter.datasetId;
-                        const datasetKeys = new Set(Object.keys(data.datasets));
-                        if (!filteredDashboardCondition() && dashboard.filter.columns.length > 0) {
-                          const columnsFetch = dashboard.filter.columns.map(o => fetchFilterColumn(datasetId, o.column, 'text', password, callback));
-                          return Promise.all(columnsFetch).then((responses) => {
-                            if (datasetKeys.has(dashboard.filter.datasetId)) {
-                              return [data, responses];
-                            }
-                            return fetch(`/share/${shareId}/dataset/${datasetId}`, { headers: { 'X-Password': password } })
-                            // eslint-disable-next-line no-shadow
-                            .then((response) => {
-                              if (response.status === 403) {
-                                renderPrivacyGate(); // eslint-disable-line
-                                callback();
-                                return null;
-                              }
-                              return response.json();
-                            }).then((dataset) => {
-                              const udpatedData = data;
-                              udpatedData.datasets[dataset.id] = dataset;
-                              return [udpatedData, responses];
-                            });
-                          }
-                            );
-                        // eslint-disable-next-line no-else-return
-                        } else {
-                          return [data];
-                        }
+const fetchDashboard = (env, password, callback) => (
+  queryParams,
+  onChangeFilter,
+  callbackReady
+) => {
+  const url = `/share/${shareId}`;
+  const urlWithOptionalParams =
+    queryParams == null
+      ? url
+      : `${url}?query=${encodeURIComponent(queryParams)}`;
+  fetch(urlWithOptionalParams, { headers: { 'X-Password': password } }).then(
+    (response) => {
+      if (response.status === 403) {
+        renderPrivacyGate(); // eslint-disable-line
+        callback();
+        return null;
+      }
+      return response
+        .json()
+        .then((data) => {
+          if (data) return data;
+          throw Error(`NO DATA FOR: /share/${shareId}`);
+        })
+        .then((data) => {
+          if (data.dashboardId) {
+            const dashboard = data.dashboards[data.dashboardId];
+            const datasetId = dashboard.filter.datasetId;
+            const datasetKeys = new Set(Object.keys(data.datasets));
+            if (
+              !filteredDashboardCondition() &&
+              dashboard.filter.columns.length > 0
+            ) {
+              const columnsFetch = dashboard.filter.columns.map(o =>
+                fetchFilterColumn(
+                  datasetId,
+                  o.column,
+                  'text',
+                  password,
+                  callback
+                )
+              );
+              return Promise.all(columnsFetch).then((responses) => {
+                if (datasetKeys.has(dashboard.filter.datasetId)) {
+                  return [data, responses];
+                }
+                return (
+                  fetch(`/share/${shareId}/dataset/${datasetId}`, {
+                    headers: { 'X-Password': password },
+                  })
+                    // eslint-disable-next-line no-shadow
+                    .then((response) => {
+                      if (response.status === 403) {
+                        renderPrivacyGate(); // eslint-disable-line
+                        callback();
+                        return null;
                       }
-                      return [data];
+                      return response.json();
                     })
-                    .then(([data, filterColumnsFetched]) => {
-                      if (callbackReady) callbackReady();
-                      return renderSuccessfulShare(data, filterColumnsFetched || [], { env },
-                        onChangeFilter);
-                    }
-                    )
-                    .catch((error) => {
-                      renderNoSuchShare();
-                      throw error;
-                    });
-          });
-  };
+                    .then((dataset) => {
+                      const udpatedData = data;
+                      udpatedData.datasets[dataset.id] = dataset;
+                      return [udpatedData, responses];
+                    })
+                );
+              });
+              // eslint-disable-next-line no-else-return
+            } else {
+              return [data];
+            }
+          }
+          return [data];
+        })
+        .then(([data, filterColumnsFetched]) => {
+          if (callbackReady) callbackReady();
+          return renderSuccessfulShare(
+            data,
+            filterColumnsFetched || [],
+            { env },
+            onChangeFilter
+          );
+        })
+        .catch((error) => {
+          renderNoSuchShare();
+          throw error;
+        });
+    }
+  );
+};
 
 const fetchData = (password = undefined, callback = () => {}) => {
-  auth.initPublic()
-    .then(({ env }) => {
-      const onChangeFilter = fetchDashboard(env, password, callback);
-      onChangeFilter(null, onChangeFilter);
-    });
+  auth.initPublic().then(({ env }) => {
+    const onChangeFilter = fetchDashboard(env, password, callback);
+    onChangeFilter(null, onChangeFilter);
+  });
 };
 
 class PrivacyGate extends Component {
@@ -205,23 +247,20 @@ class PrivacyGate extends Component {
           }}
         >
           {hasSubmitted && (
-            <div className="alert alert-danger">
-              Password incorrect
-            </div>
+            <div className="alert alert-danger">Password incorrect</div>
           )}
           <div className="clearfix" />
           <input
-            ref={(c) => { this.passwordInput = c; }}
+            ref={(c) => {
+              this.passwordInput = c;
+            }}
             onChange={({ target: { value } }) => {
               this.setState({ password: value });
             }}
             type="password"
             placeholder="Password"
           />
-          <a
-            className="submitButton"
-            onClick={this.handleSubmit}
-          >
+          <a className="submitButton" onClick={this.handleSubmit}>
             Submit
           </a>
         </form>
