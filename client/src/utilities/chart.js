@@ -81,7 +81,7 @@ function filterFn(filters, columns) {
 
 /* Deal with blank values */
 
-const displayTextForNullValues = 'No data';
+export const displayTextForNullValues = 'No data';
 
 export const replaceLabelIfValueEmpty = (label, getCssClassname) => {
   // We use a date value of "1001-01-01 01:00:00" to represent a missing date when we can't use null
