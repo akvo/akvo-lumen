@@ -279,8 +279,6 @@ export default class MapVisualisation extends Component {
             return false;
           }
         });
-        // console.log('layers', map._layers);
-        // console.log('checks', checks);
         const check = checks.filter(o => o).length === 0;
         if (check) {
           this.setState({ hasRendered: true });
