@@ -97,3 +97,20 @@ export const columnSelectOptions = (intl, columns) => {
   const res = extractColumnOptions(columns);
   return isImmutable(res) ? res.toArray() : res;
 };
+
+export const filterColumnsByDataGroupDimension = (columns, colName) => {
+  // if column is not selected the return all columns
+  if (!colName) {
+    return columns;
+  }
+
+  const column = columns.find(col => col.get('columnName') === colName);
+
+  // if column is not repeatable return all not repeatable columns
+  if (!column.get('repeatable')) {
+    return columns.filter(col => !col.get('repeatable'));
+  }
+
+  // if column is repeatable, return only columns from the same group
+  return columns.filter(col => col.get('groupName') === column.get('groupName'));
+};
