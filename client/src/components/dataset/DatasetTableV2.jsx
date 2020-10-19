@@ -295,7 +295,7 @@ function DatasetTable(props) {
   // eslint-disable-next-line consistent-return
   const handleClickDatasetControlItem = (menuItem) => {
     const columns = Immutable.fromJS(props.groups.reduce(
-      (total, group) => total.concat(...group), []
+      (total, group) => total.concat(...group.get(1)), []
     ));
 
     if (menuItem === 'combineColumns') {
@@ -455,13 +455,6 @@ function DatasetTable(props) {
       />
     );
   };
-
-  if (sidebarProps && sidebarProps.columns && (typeof sidebarProps.columns.get(0) === 'string')) {
-    const columnsV2 = Immutable.fromJS(props.groups.reduce(
-      (total, group) => total.concat(...group.get(1)), []
-    ));
-    sidebarProps.columns = columnsV2;
-  }
 
   return (
     <React.Fragment>
