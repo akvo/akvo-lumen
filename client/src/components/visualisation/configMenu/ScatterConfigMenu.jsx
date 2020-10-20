@@ -210,7 +210,7 @@ function ScatterConfigMenu(props) {
                 <LegendsSortable
                   onChangeSpec={onChangeSpec}
                   visualisation={adaptedVisualisation}
-                  colors={spec.colorMapping}
+                  colors={spec.colors}
                   specLegend={specLegend}
                   hasSubbucket
                   noSort
