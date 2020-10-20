@@ -21,7 +21,8 @@ export const sortLegendsFunctionFactory = data =>
   ? sortAlphabetically
   : sortChronologically;
 
-
+// eslint-disable-next-line no-confusing-arrow
+export const ensureLegendText = d => (d && d !== '') ? d : displayTextForNullValues;
 const sortableItemStyle = {
   display: 'flex',
   alignItems: 'center',
@@ -45,7 +46,7 @@ const getLegends = (specLegend, visualisation, hasSubbucket, noSort) => {
   const legends = noChanged
         ? specLegendsList
         : visLegendsList
-        .map(l => l.key || displayTextForNullValues);
+        .map(l => l.key);
   return noSort ? legends : legends.slice().sort(sortLegendsFunctionFactory(visualisation));
 };
 
@@ -171,7 +172,7 @@ export const LegendsSortable = ({
           legendItems.map((value, index) => (
             <SortableItem
               key={`item-${value}`}
-              value={value || displayTextForNullValues}
+              value={ensureLegendText(value)}
               index={legends.indexOf(value)}
               color={getColor(value, index)}
             />
@@ -179,14 +180,13 @@ export const LegendsSortable = ({
         : legendItems &&
           legendItems.map((value, index) => (
             <NoSortableItem
-              value={value || displayTextForNullValues}
+              value={ensureLegendText(value)}
               key={`item-${value}`}
               color={getColor(value, index)}
             />
           ))}
     </div>
   ));
-
   return <SortableList onSortEnd={onSortEnd} legendItems={legends} />;
 };
 
