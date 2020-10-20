@@ -27,7 +27,7 @@ import ChartLayout from '../ChartLayout';
 import Tooltip from '../Tooltip';
 import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE } from '../../../constants/chart';
 import RenderComplete from '../RenderComplete';
-import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from '../LegendsSortable';
+import { sortLegendListFunc, ensureSpecLegend, noSortFunc, ensureLegendText } from '../LegendsSortable';
 
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
@@ -289,7 +289,7 @@ export default class SimpleBarChart extends Component {
           <Legend
             horizontal={!horizontal}
             title={get(this.props, 'data.metadata.bucketColumnTitle')}
-            data={legendSeriesData.map(({ key }) => key)}
+            data={legendSeriesData.map(({ key }) => ensureLegendText(key))}
             colorMapping={
               legendSeriesData.reduce((acc, { key }, i) => ({
                 ...acc,
