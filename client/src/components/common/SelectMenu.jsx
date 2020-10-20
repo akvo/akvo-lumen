@@ -73,7 +73,7 @@ function SelectMenu(props) {
         isSearchable={props.searchable || true}
         placeholder={placeholder}
         inputProps={props.inputProps}
-        className="TheSelect"
+        classNamePrefix="react-select"
         styles={colorStyles}
       />
     </div>

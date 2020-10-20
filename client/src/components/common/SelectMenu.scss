@@ -1,15 +1,43 @@
 @import "../../styles/modules/importAll";
 
+$selectedColor: #0366D6;
+
 .SelectMenu {
     * {
         box-shadow: none !important;
         border-radius: 0;
-        color: $black !important;
     }
 
     &.disabled {
         .Select-control {
             cursor: not-allowed;
+        }
+    }
+
+    .react-select__indicator {
+        color: $black;
+    }
+
+    .react-select__group-heading {
+        color: $textSecondary;
+        font-size: 12px;
+        line-height: 16px;
+        background-color: transparent;
+    }
+
+    .react-select__option {
+        color: $textPrimary;
+        font-size: 14px;
+        line-height: 20px;
+        padding: 12px;
+
+        &--is-focused {
+            background-color: #E9F1F4;
+        }
+
+        &--is-selected {
+            background-color: $selectedColor;
+            color: $white;
         }
     }
 
