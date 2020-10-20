@@ -193,7 +193,8 @@ class BarConfigMenu extends Component {
               label={intl.formatMessage({ id: 'legend_category_order' })}
               onChange={(val) => {
                 const legend = resetLegend(specLegend, visualisation, val,
-                  Boolean(subBucketMethodView || (metricColumnsY.length > 0)));
+                  Boolean(subBucketMethodView || (metricColumnsY.length > 0)),
+                  true);
                 onChangeSpec({ legend });
               }}
               buttonSpacing="0"
@@ -202,6 +203,7 @@ class BarConfigMenu extends Component {
               onChangeSpec={onChangeSpec}
               visualisation={visualisation}
               colors={spec.colors}
+              noSort
               specLegend={specLegend}
               hasSubbucket={Boolean(subBucketMethodView || (metricColumnsY.length > 0))}
             />
