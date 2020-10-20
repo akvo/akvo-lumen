@@ -14,19 +14,32 @@ $selectedColor: #0366D6;
         }
     }
 
+    .react-select__menu {
+        border: 1px solid #e5e6ed;
+    }
+
+    .react-select__group {
+        font-size: 1em;
+        font-weight: normal;
+        text-transform: capitalize;
+    }
+
     .react-select__indicator {
         color: $black;
     }
 
     .react-select__group-heading {
-        color: $textSecondary;
+        color: #586069;
         font-size: 12px;
         line-height: 16px;
         background-color: transparent;
+        text-transform: capitalize;
+        padding: 10px;
+        font-weight: normal;
     }
 
     .react-select__option {
-        color: $textPrimary;
+        color: #24292E;
         font-size: 14px;
         line-height: 20px;
         padding: 12px;
