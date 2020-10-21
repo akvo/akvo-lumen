@@ -344,9 +344,6 @@ class DashboardEditor extends Component {
     columnFilterSelectAllOptions.find(o => (v ? o.value === v.column : false));
     const dashboardEntitiesVisualisations = Object.values(dashboard.entities).filter(e => e.type === 'visualisation').map(e => this.props.visualisations[e.id]);
     const datasetCondition = withDatasetRelated(filter.datasetId);
-
-    console.log(columnFilterSelectOptions);
-
     return (
       <div
         className={`DashboardEditor ${exporting ? 'DashboardEditor--exporting' : ''}`}
