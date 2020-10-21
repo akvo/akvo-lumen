@@ -14,48 +14,17 @@ function SelectMenu(props) {
   } else {
     placeholder = `${props.intl.formatMessage({ id: 'select' })}...`;
   }
+
   // eslint-disable-next-line no-shadow
   const options = props.options.map(({ value, label, labelId, options }) => ({
     label: labelId ? props.intl.formatMessage({ id: labelId }) : label,
     value,
     options,
   }));
-  const value = props.value && typeof props.value === 'string' ? options.filter(o => o.value === props.value)[0] : props.value;
-  const colorStyles = {
-    menu: styles => ({
-      ...styles,
-      border: '1px solid #e5e6ed',
-      borderTop: '0',
-    }),
-    option: (provided, state) => {
-      let bgc = null;
-      if (state.isSelected) {
-        bgc = '#ccc';
-      } else if (state.isFocused) {
-        bgc = '#F1F3F4';
-      }
-      return {
-        ...provided,
-        backgroundColor: bgc,
-      };
-    },
-    group: styles => ({
-      ...styles,
-      fontSize: '1em',
-      fontWeight: 'normal',
-      textTransform: 'capitalize',
-    }),
 
-    groupHeading: styles => ({
-      ...styles,
-      textTransform: 'capitalize',
-      backgroundColor: '#E6E9ED',
-      fontSize: '1em',
-      padding: '10px',
-      fontWeight: 'normal',
-    }),
-  };
+  const value = props.value && typeof props.value === 'string' ? options.filter(o => o.value === props.value)[0] : props.value;
   const width = props.width ? { width: props.width } : {};
+
   return (
     <div className={`SelectMenu ${props.disabled ? 'disabled' : 'enabled'}`} style={{ ...width }} >
       <Select
@@ -73,8 +42,7 @@ function SelectMenu(props) {
         isSearchable={props.searchable || true}
         placeholder={placeholder}
         inputProps={props.inputProps}
-        className="TheSelect"
-        styles={colorStyles}
+        classNamePrefix="react-select"
       />
     </div>
   );

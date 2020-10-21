@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 
 import UniqueValueMenu from './UniqueValueMenu';
 import ToggleInput from '../../common/ToggleInput';
 import { canShowPivotTotals } from '../../../utilities/chart';
-import { filterColumns } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions } from '../../../utilities/column';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -54,7 +54,7 @@ const showValueDisplayInput = (spec) => {
   return true;
 };
 
-export default class PivotTableConfigMenu extends Component {
+class PivotTableConfigMenu extends Component {
   constructor() {
     super();
     this.state = {
@@ -117,7 +117,7 @@ export default class PivotTableConfigMenu extends Component {
                   labelTextId="value_column"
                   value={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
                   name="valueColumnInput"
-                  options={filterColumns(columnOptions, ['number', 'date'])}
+                  options={columnSelectOptions(this.props.intl, filterColumns(columnOptions, ['number', 'date']))}
                   onChange={value => onChangeSpec({
                     valueColumn: value,
                   })}
@@ -200,7 +200,7 @@ export default class PivotTableConfigMenu extends Component {
                   labelTextId="columns"
                   value={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
                   name="categoryColumnInput"
-                  options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
+                  options={columnSelectOptions(this.props.intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
                   onChange={(value) => {
                     const change = { categoryColumn: value };
 
@@ -258,7 +258,7 @@ export default class PivotTableConfigMenu extends Component {
                 labelTextId="row_column"
                 value={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
                 name="rowColumnInput"
-                options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
+                options={columnSelectOptions(this.props.intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
                 onChange={(value) => {
                   const change = { rowColumn: value };
                   if (value == null && spec.aggregation !== 'count') {
@@ -310,6 +310,7 @@ export default class PivotTableConfigMenu extends Component {
 }
 
 PivotTableConfigMenu.propTypes = {
+  intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
@@ -317,3 +318,6 @@ PivotTableConfigMenu.propTypes = {
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
 };
+
+export default injectIntl(PivotTableConfigMenu)
+;
