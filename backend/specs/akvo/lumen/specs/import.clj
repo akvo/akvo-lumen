@@ -7,9 +7,10 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
-(defn sample-imported-dataset
+(defn csv-sample-imported-dataset
+  "a csv dataset"
   ([types-gens-tuple rows-count]
-   (sample-imported-dataset types-gens-tuple rows-count true))
+   (csv-sample-imported-dataset types-gens-tuple rows-count true))
   ([types-gens-tuple rows-count columns-no-keys?]
    (let [adapt-spec (fn [k] (-> k lumen.s/keyname (string/replace "/body" "/value" ) keyword))
          kw->spec (fn [s h] (->> (name h) (format s) keyword))
