@@ -53,7 +53,42 @@
 
       (is (= (map keys stored-data) expected-stored-data))
       (is (= (map keys data-groups-stored-data) expected-stored-data))))
-  )
+  (testing "Testing import flow"
+    (let [groups [{:groupId "group1"
+                   :groupName "repeatable group"
+                   :repeatable true
+                   :columns ["option" "text"]
+                   :max-responses 10}
+                  {:groupId "group2"
+                   :groupName "not repeatable group"
+                   :repeatable false
+                   :columns ["number" "date"]}]
+          dataset-id (import-file *tenant-conn* *error-tracker*
+                                  {:dataset-name "Padded titles"
+                                   :kind "clj-flow"
+                                   :data (i-c/flow-sample-imported-dataset groups 2)})
+          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
+                                                                :version 1})
+          _ (log/debug :dataset dataset)
+          dataset-version-2 (db.dataset-version/latest-dataset-version-2-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+          _ (log/debug dataset-version-2)
+          data-groups (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn* {:dataset-version-id (:id dataset-version-2)})
+          _ (log/error :data-groups data-groups)
+          data-groups-stored-data (->> (first data-groups)
+                                       (get-data *tenant-conn*))
+          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                 {:dataset-id dataset-id})
+                           (get-data *tenant-conn*))
+
+          expected-stored-data '((:rnum :c1 :c2) (:rnum :c1 :c2))]
+      (is (= 3 (count data-groups)))
+      (let [data-group (first data-groups)]
+        (is (= (:group_id data-group) "main"))
+        (is (= (:group_name data-group) "main"))
+        (is (= (:repeatable data-group) false))
+        )
+      (is (= (map keys stored-data) expected-stored-data))
+      (is (= (map keys data-groups-stored-data) expected-stored-data)))))
 
 (deftest ^:functional test-update
   (testing "Testing update"

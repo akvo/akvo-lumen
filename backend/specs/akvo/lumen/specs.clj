@@ -28,10 +28,18 @@
   ([s]
    (sample s 1))
   ([s amount]
-   (let [res (map first (s/exercise s amount))]
-     (if (== 1 amount)
-       (first res)
+   (let [res (map first (s/exercise s (if (= 1 amount) 10 amount)))]
+     (if (= 1 amount)
+       (nth res (rand-int 10))
        res))))
+
+(defn sample-with-gen-v2
+  ([spec gens]
+   (sample-with-gen-v2 spec gens nil))
+  ([spec gens fixed-values]
+   (s/conform spec
+              (merge
+               (sample-with-gen* spec gens) fixed-values))))
 
 (defn str-uuid? [v]
   (when (some? v)
