@@ -42,3 +42,25 @@
       java.io.Closeable
       (close [this]
         (.close base-importer)))))
+
+(defmethod common/dataset-importer "clj-flow"
+  [spec _]
+  (let [{:keys [columns-v3 records-v3] :as data} (:data (meta spec))]
+    (reify
+      p/DatasetImporter
+      (columns [this] columns-v3)
+      (records [this] records-v3)
+      java.io.Closeable
+      (close [this]))))
+
+(defmethod common/datagroups-importer "clj-flow"
+  [spec data]
+  (let [{:keys [columns-v4 records-v4] :as data} (:data (meta spec))]
+    (reify
+      p/DatasetImporter
+      (columns [this] columns-v4)
+      (records [this] records-v4)
+      java.io.Closeable
+      (close [this]))))
+
+

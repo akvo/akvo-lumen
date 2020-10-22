@@ -49,4 +49,109 @@
                      ;;  "ensure column bodies (cells) are valid specs"
                      (reduce (fn [_ i] (u/conform ::c/body i)) [] (flatten rows0)))
          rows      (mapv #(mapv (fn [c] (dissoc c :type)) %) rows0)]
-     {:columns columns :rows rows})))
+     {:columns (mapv #(dissoc % :groupId :groupName) columns) :rows rows})))
+
+(def ^:private metadata-columns [{:title "Identifier",
+                                  :type "text",
+                                  :id :identifier,
+                                  :groupName "metadata",
+                                  :groupId "metadata",
+                                  :repeatable false}
+                                 {:title "Instance id",
+                                  :type "text",
+                                  :id :instance_id,
+                                  :key true,
+                                  :groupName "metadata",
+                                  :groupId "metadata",
+                                  :repeatable false}
+                                 {:title "Display name",
+                                  :type "text",
+                                  :id :display_name,
+                                  :groupName "metadata",
+                                  :groupId "metadata",
+                                  :repeatable false}
+                                 {:title "Submitter",
+                                  :type "text",
+                                  :id :submitter,
+                                  :groupName "metadata",
+                                  :groupId "metadata",
+                                  :repeatable false}
+                                 {:title "Submitted at",
+                                  :type "date",
+                                  :id :submitted_at,
+                                  :groupName "metadata",
+                                  :groupId "metadata",
+                                  :repeatable false}
+                                 {:title "Surveyal time",
+                                  :type "number",
+                                  :id :surveyal_time,
+                                  :groupName "metadata",
+                                  :groupId "metadata",
+                                  :repeatable false}
+                                 {:title "Device Id",
+                                  :type "text",
+                                  :id :device_id,
+                                  :groupName "metadata",
+                                  :groupId "metadata"}])
+
+(defn- sample-column-values
+  [columns instance-id]
+  (-> (reduce (fn [x column] (assoc x (:id column) (:value (lumen.s/sample (c/column-body {:type (:type column)}))))) {} columns)
+      (assoc :instance_id instance-id)))
+
+(defn flow-sample-imported-dataset
+  " `groups` example shape
+  [{:groupId \"groupId2\"
+    :groupName \"groupName1\"
+    :repeatable true
+    :column-types [\"option\" \"text\"]
+    :max-responses 10}
+   {:groupId \"groupId2\"
+    :groupName \"groupName2\"
+    :repeatable false
+    :column-types [\"number\" \"date\"]}]"
+  [groups submissions]
+  (let [max-responses    (reduce (fn [c {:keys [groupId max-responses]}]
+                                   (assoc c groupId (or max-responses 1))
+                                   ) {} groups)
+        repeatables      (reduce (fn [c {:keys [groupId repeatable]}]
+                                   (assoc c groupId (boolean repeatable))
+                                   ) {} groups)
+        instance-ids     (map #(str (+ % 1000)) (range submissions))
+        group-columns    (->> (map (fn [group]
+                                     (let [group-details (select-keys group [:groupId :groupName :repeatable])]
+                                       (map (fn [column-type]
+                                              (let [header-spec (c/column-header {:type column-type})]
+                                                (lumen.s/sample-with-gen-v2 header-spec
+                                                                            {:akvo.lumen.specc/type #(s/gen #{column-type})}
+                                                                            (assoc group-details :key false))))
+                                            (:column-types group))))
+                                   groups)
+                              flatten
+                              (map #(assoc %2 :id (str "c" (inc %))) (range)))
+        group-columns-v4 (reduce (fn [c group]
+                                   (let [group-details (select-keys group [:groupId :groupName :repeatable])]
+                                     (conj c (merge {:title  "Instance id",
+                                                     :type   "text",
+                                                     :id     "instance_id",
+                                                     :key    false,
+                                                     :hidden true} group-details))))
+                                 group-columns groups)
+        data             (group-by :groupId group-columns)
+        rows             (map (fn [instance-id]
+                                (reduce (fn [c [groupId columns]]
+                                          (assoc c groupId (mapv (fn [_] (sample-column-values columns instance-id))
+                                                                 (range (if (get repeatables groupId)
+                                                                          (let [x (rand-int (get max-responses groupId))]
+                                                                            (if (> x 0) x 1))
+                                                                          1))))
+                                          ) {"metadata" [(sample-column-values metadata-columns instance-id)]} data))
+                              instance-ids)]
+    {:columns-v4 (vec (apply conj group-columns-v4 metadata-columns))
+     :columns-v3 (vec  (apply conj group-columns metadata-columns))
+     :records-v3 (mapv (fn [form-instance]
+                         (let [metadata (first (get form-instance "metadata"))
+                               groups   (reduce (fn [c [g responses]]
+                                                  (merge c (dissoc (first responses) :instance_id))) {} (dissoc form-instance "metadata"))]
+                           [metadata groups])) rows)
+     :records-v4 (vec rows)}))
