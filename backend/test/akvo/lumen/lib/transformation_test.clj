@@ -270,7 +270,7 @@
                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
                                                        ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
-        data                (import.s/sample-imported-dataset [:text
+        data                (import.s/csv-sample-imported-dataset [:text
                                                           [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
                                                                                          (fn [[y _ _ :as date]]
                                                                                            (str y))))
@@ -311,7 +311,7 @@
     (let [[job dataset] (import-file *tenant-conn* *error-tracker*
                                      {:dataset-name "Padded titles"
                                       :kind "clj"
-                                      :data (import.s/sample-imported-dataset [:text :number :text :number :text :number :text :number] 2)
+                                      :data (import.s/csv-sample-imported-dataset [:text :number :text :number :text :number :text :number] 2)
                                       :with-job? true})
           dataset-id (:dataset_id dataset)
           apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
@@ -325,7 +325,7 @@
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
-                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text :number] 2)})]
+                                        :data (import.s/csv-sample-imported-dataset [:text :number :text :number :text :number] 2)})]
           (is (some? updated-res))))
 
       (testing "Removing column with change-datatype tx"
@@ -334,7 +334,7 @@
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
-                                        :data (import.s/sample-imported-dataset [:text :number :text :number :text] 2)})]
+                                        :data (import.s/csv-sample-imported-dataset [:text :number :text :number :text] 2)})]
           (is (some? updated-res))))
 
       (testing "Removing column with rename-name tx, should fails"
@@ -348,7 +348,7 @@
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
-                                        :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
+                                        :data (import.s/csv-sample-imported-dataset [:text :number :text :number] 2)})]
           (is (= "FAILED" (:status (first updated-res))))))
 
       (testing "Removing column with delete-column tx"
@@ -361,7 +361,7 @@
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
                                         :with-job? true
-                                        :data (import.s/sample-imported-dataset [:text :number :text :number] 2)})]
+                                        :data (import.s/csv-sample-imported-dataset [:text :number :text :number] 2)})]
           (is (some? updated-res)))))))
 
 (deftest ^:functional derived-column-test
@@ -585,7 +585,7 @@
   (let [dataset-id           (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
                                            :kind         "clj"
-                                           :data         (import.s/sample-imported-dataset [:text :number :number :date :multiple] 2)})
+                                           :data         (import.s/csv-sample-imported-dataset [:text :number :number :date :multiple] 2)})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
         [tag _]              (apply-transformation {:type :transformation
                                                     :transformation
@@ -623,7 +623,7 @@
                                               (assoc :extract %3))
                                          columns (range) bols)
         new-columns                (filter :extract columns-payload)
-        data                       (-> (import.s/sample-imported-dataset
+        data                       (-> (import.s/csv-sample-imported-dataset
                                         [[:multiple {::import.column.multiple.s/header* #(s/gen ::import.column.multiple.caddisfly.s/header*)
                                                      ::import.column.multiple.s/value   #(s/gen #{import.values.s/cad1})}]
                                          [:multiple {::import.column.multiple.s/header* #(s/gen ::import.column.multiple.caddisfly.s/header*)
@@ -694,7 +694,7 @@
 
 (deftest ^:functional derive-category-number-test
   (let [column-vals          [1.0 2.0 3.0 4.0]
-        origin-data          (import.s/sample-imported-dataset [[:number {::import.column.number.s/value #(s/gen (set column-vals))}]] 100)
+        origin-data          (import.s/csv-sample-imported-dataset [[:number {::import.column.number.s/value #(s/gen (set column-vals))}]] 100)
         dataset-id           (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
                                            :kind         "clj"
@@ -737,7 +737,7 @@
 
 (deftest ^:functional derive-category-text-test
   (let [column-vals          ["v1" "v2" "v3" "v4"]
-        origin-data          (import.s/sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
+        origin-data          (import.s/csv-sample-imported-dataset [[:text {::import.column.text.s/value #(s/gen (set column-vals))}]] 100)
         dataset-id           (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
                                            :kind         "clj"
@@ -779,8 +779,8 @@
 	         :before nil}} (:changedColumns applied-tx)))))))
 
 (deftest ^:functional merge-datasets-test
-  (let [origin-data          (import.s/sample-imported-dataset [:text :date] 2)
-        target-data          (replace-column origin-data (import.s/sample-imported-dataset [:text :number :number :text] 2) 0)
+  (let [origin-data          (import.s/csv-sample-imported-dataset [:text :date] 2)
+        target-data          (replace-column origin-data (import.s/csv-sample-imported-dataset [:text :number :number :text] 2) 0)
         origin-dataset-id    (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
                                            :kind         "clj"
@@ -813,11 +813,11 @@
       (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db))))))
 
 (deftest ^:functional reverse-geocode-test
-  (let [geoshape-data (import.s/sample-imported-dataset
+  (let [geoshape-data (import.s/csv-sample-imported-dataset
               [:text
                [:geoshape {:import.column.geoshape.s/value #(s/gen #{(Geoshape. import.values.s/polygon)})}]]
               2)
-        geopoint-data (import.s/sample-imported-dataset
+        geopoint-data (import.s/csv-sample-imported-dataset
                        [:text
                         :geopoint]
                        2)
