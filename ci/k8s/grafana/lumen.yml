@@ -23,7 +23,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "iteration": 1570089083425,
+      "iteration": 1603366109493,
       "links": [],
       "panels": [
         {
@@ -31,13 +31,22 @@ data:
           "bars": true,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 2
+            "y": 0
           },
+          "hiddenSeries": false,
           "id": 2,
           "interval": "",
           "legend": {
@@ -57,7 +66,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -120,13 +133,22 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 2
+            "y": 0
           },
+          "hiddenSeries": false,
           "id": 5,
           "interval": "",
           "legend": {
@@ -146,7 +168,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -210,13 +236,22 @@ data:
           "bars": true,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 11
+            "y": 9
           },
+          "hiddenSeries": false,
           "id": 3,
           "legend": {
             "alignAsTable": true,
@@ -233,7 +268,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -297,13 +336,22 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 4,
             "x": 8,
-            "y": 11
+            "y": 9
           },
+          "hiddenSeries": false,
           "id": 21,
           "legend": {
             "alignAsTable": true,
@@ -322,7 +370,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -385,14 +437,23 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
           "decimals": 3,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 0,
+          "fillGradient": 0,
           "gridPos": {
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 11
+            "y": 9
           },
+          "hiddenSeries": false,
           "id": 23,
           "interval": "",
           "legend": {
@@ -410,7 +471,11 @@ data:
           "linewidth": 2,
           "links": [],
           "nullPointMode": "connected",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -420,26 +485,28 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$__interval])) by (container_name, pod_name)\n",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{pod=~\"lumen-[[color]].*\", container!=\"POD\", container=~\".+\"}[$__interval])) by (container, pod)\n",
               "format": "time_series",
               "hide": false,
+              "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{pod_name}} - {{container_name}}",
+              "legendFormat": "{{pod}} - {{container}}",
               "refId": "A"
             },
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",pod_name=~\"lumen-[[color]].*\", container_name!=\"POD\"}[$__interval])) by (instance, pod_name)\n",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{pod=~\"lumen-[[color]].*\", container!=\"POD\", container=~\".+\"}[$__interval])) by (instance, pod)\n",
               "format": "time_series",
               "hide": true,
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{instance}} - {{pod_name}}",
+              "legendFormat": "{{instance}} - {{pod}}",
               "refId": "B"
             },
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\",name=~\"^k8s_.*\",container_name!=\"POD\"}[$__interval])) by (instance)\n",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{container!=\"POD\", container=~\".+\"}[$__interval])) by (instance)\n",
               "format": "time_series",
               "hide": true,
+              "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{instance}}",
               "refId": "C"
@@ -465,6 +532,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:526",
               "decimals": null,
               "format": "short",
               "label": null,
@@ -474,6 +542,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:527",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -489,15 +558,27 @@ data:
         },
         {
           "content": "\n# DB stats\n\n\n\n\n",
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "gridPos": {
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 18
           },
           "id": 17,
           "links": [],
           "mode": "markdown",
+          "options": {
+            "content": "\n# DB stats\n\n\n\n\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "7.1.0",
           "timeFrom": null,
           "timeShift": null,
           "title": "",
@@ -509,13 +590,22 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 23
+            "y": 21
           },
+          "hiddenSeries": false,
           "id": 9,
           "interval": "",
           "legend": {
@@ -537,7 +627,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -602,14 +696,23 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
           "description": "Time that a DB connection has been in use, from the point of acquiring it from the pool, to the point returning it back.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 23
+            "y": 21
           },
+          "hiddenSeries": false,
           "id": 12,
           "legend": {
             "alignAsTable": true,
@@ -628,7 +731,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -692,14 +799,23 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
           "description": "Time to acquire a connection from the connection pool",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 31
+            "y": 29
           },
+          "hiddenSeries": false,
           "id": 11,
           "legend": {
             "alignAsTable": true,
@@ -720,7 +836,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -793,14 +913,23 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
+          "datasource": null,
           "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 31
+            "y": 29
           },
+          "hiddenSeries": false,
           "id": 13,
           "legend": {
             "alignAsTable": true,
@@ -821,7 +950,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -882,15 +1015,27 @@ data:
         },
         {
           "content": "\n# Memory stats\n\n\n\n\n",
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "gridPos": {
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 39
+            "y": 37
           },
           "id": 19,
           "links": [],
           "mode": "markdown",
+          "options": {
+            "content": "\n# Memory stats\n\n\n\n\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "7.1.0",
           "timeFrom": null,
           "timeShift": null,
           "title": "",
@@ -902,14 +1047,232 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "description": "See https://www.robustperception.io/irate-graphs-are-better-graphs and https://medium.com/@valyala/why-irate-from-prometheus-doesnt-capture-spikes-45f9896d7832 to understand the difference between rate and irate",
+          "datasource": null,
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 42
+            "y": 40
           },
+          "hiddenSeries": false,
+          "id": 25,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "container_memory_usage_bytes{pod=~\"lumen-[[color]].*\", container!=\"POD\", container=~\".+\"} / 1024 / 1024",
+              "interval": "",
+              "legendFormat": "{{pod}} - {{container}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Memory (MiB)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:474",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:475",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 40
+          },
+          "hiddenSeries": false,
+          "id": 7,
+          "interval": "",
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "jvm_memory_bytes_used{run=\"lumen-blue-green\", color=~\"${color}\"}",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{area}} memory [{{kubernetes_pod_name}}]",
+              "refId": "B"
+            },
+            {
+              "expr": "jvm_memory_bytes_max{run=\"lumen-blue-green\", color=~\"${color}\"}",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "max {{area}} memory [{{kubernetes_pod_name}}]",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "JVM Memory",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decbytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "description": "See https://www.robustperception.io/irate-graphs-are-better-graphs and https://medium.com/@valyala/why-irate-from-prometheus-doesnt-capture-spikes-45f9896d7832 to understand the difference between rate and irate",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 48
+          },
+          "hiddenSeries": false,
           "id": 15,
           "legend": {
             "avg": false,
@@ -924,7 +1287,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -997,106 +1364,10 @@ data:
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "fill": 1,
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 12,
-            "y": 42
-          },
-          "id": 7,
-          "interval": "",
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": true,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "jvm_memory_bytes_used{run=\"lumen-blue-green\", color=~\"${color}\"}",
-              "format": "time_series",
-              "interval": "",
-              "intervalFactor": 2,
-              "legendFormat": "{{area}} memory [{{kubernetes_pod_name}}]",
-              "refId": "B"
-            },
-            {
-              "expr": "jvm_memory_bytes_max{run=\"lumen-blue-green\", color=~\"${color}\"}",
-              "format": "time_series",
-              "interval": "",
-              "intervalFactor": 2,
-              "legendFormat": "max {{area}} memory [{{kubernetes_pod_name}}]",
-              "refId": "C"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "JVM Memory",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "decbytes",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
         }
       ],
       "refresh": false,
-      "schemaVersion": 18,
+      "schemaVersion": 26,
       "style": "dark",
       "tags": [],
       "templating": {
@@ -1104,8 +1375,7 @@ data:
           {
             "allValue": ".*",
             "current": {
-              "selected": false,
-              "tags": [],
+              "selected": true,
               "text": "All",
               "value": "$__all"
             },
@@ -1131,7 +1401,11 @@ data:
           {
             "allValue": ".*",
             "current": {
-              "text": "All",
+              "selected": true,
+              "tags": [],
+              "text": [
+                "All"
+              ],
               "value": [
                 "$__all"
               ]
@@ -1160,6 +1434,7 @@ data:
             "auto_count": 20,
             "auto_min": "2m",
             "current": {
+              "selected": false,
               "text": "auto",
               "value": "$__auto_interval_interval"
             },
@@ -1262,5 +1537,5 @@ data:
       "timezone": "",
       "title": "lumen",
       "uid": "u2IbaZhZz",
-      "version": 14
+      "version": 25201
     }
