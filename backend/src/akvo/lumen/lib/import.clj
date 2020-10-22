@@ -19,7 +19,7 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
-(def ^:dynamic *data-groups* true)
+(def ^:dynamic *data-groups-future* true)
 
 (defn- successful-execution [conn job-execution-id data-source-id dataset-id table-name columns {:keys [spec-name spec-description]} claims]
   (let [imported-table-name (util/gen-table-name "imported")
@@ -55,10 +55,7 @@
                                                     (assoc column-def :ns ns :repeatable (= groupId ns))
                                                     column-def)))
                                               columns)
-                               :transformations []})
-    (db.job-execution/update-job-execution conn {:id             job-execution-id
-                                :status         "OK"
-                                :dataset-id     dataset-id})))
+                               :transformations []})))
 
 (defn- failed-execution [conn job-execution-id reason table-name]
   (db.job-execution/update-failed-job-execution conn {:id job-execution-id
@@ -82,11 +79,20 @@
               (jdbc/insert! conn table-name record))
             (successful-execution conn job-execution-id data-source-id dataset-id table-name columns {:spec-name (get spec "name")
                                                                                                       :spec-description (get spec "description" "")} claims)
-            (when *data-groups*
-              (future
-                (try
-                  (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec import-config)
-                  (catch Exception e (log/error e)))))))
+            (if *data-groups-future*
+              (do
+                (db.job-execution/update-job-execution conn {:id             job-execution-id
+                                                             :status         "OK"
+                                                             :dataset-id     dataset-id})
+                (future
+                  (try
+                    (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec import-config)
+                    (catch Exception e (log/error e)))))
+              (do
+                (i.data-groups/execute conn job-execution-id data-source-id dataset-id claims spec import-config)
+                (db.job-execution/update-job-execution conn {:id             job-execution-id
+                                                             :status         "OK"
+                                                             :dataset-id     dataset-id})))))
         (catch Throwable e
           (failed-execution conn job-execution-id (.getMessage e) table-name)
           (log/error e)
