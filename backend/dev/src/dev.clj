@@ -5,6 +5,7 @@
             [akvo.lumen.migrate :as lumen-migrate]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs]
+            [akvo.lumen.specs.import :as i-c]
             [akvo.lumen.test-utils :as tu]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -82,4 +83,23 @@
   ([label] (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) label))
   ([] (db-conn "t1")))
 
+(defn new-flow-dataset
+  ([dataset-name]
+   (new-flow-dataset dataset-name [{:groupId "group1"
+                                    :groupName "repeatable group"
+                                    :repeatable true
+                                    :column-types ["option" "text"]
+                                    :max-responses 10}
+                                   {:groupId "group2"
+                                    :groupName "not repeatable group"
+                                    :repeatable false
+                                    :column-types ["number" "date"]}] 2))
+  ([dataset-name groups submissions]
+   (tu/import-file (db-conn)
+                   (:akvo.lumen.utils.local-error-tracker/local system)
+                   {:dataset-name dataset-name
+                    :kind "clj-flow"
+                    :data (i-c/flow-sample-imported-dataset groups submissions)})))
+
+;;(new-flow-dataset "example-data")
 

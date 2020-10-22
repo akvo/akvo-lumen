@@ -39,8 +39,7 @@
    (system-fixture config-edn nil f))
   ([config-edn more-ks f]
    (let [c (tu/start-config config-edn more-ks)]
-     (binding [import/*data-groups* false
-               lumen-migrate/*reporter* reporter/silent]
+     (binding [lumen-migrate/*reporter* reporter/silent]
        (lumen-migrate/migrate c)
        (binding [*system* (tu/start-system c)]
          (try
@@ -49,6 +48,10 @@
                       (tu/halt-system *system*)
                       (lumen-migrate/rollback c :tenant-manager)))))))))
 
+(defn data-groups-future-fixture
+  [f]
+  (binding [import/*data-groups-future* false]
+    (f)))
 
 (defn tenant-conn-fixture
   "Returns a fixture that binds a connection pool to *tenant-conn*"
