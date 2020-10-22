@@ -3,6 +3,7 @@
   (:require [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
+            [akvo.lumen.db.env :as env]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs]
             [akvo.lumen.test-utils :as tu]
@@ -81,5 +82,14 @@
 (defn db-conn
   ([label] (p/connection (:akvo.lumen.component.tenant-manager/tenant-manager system) label))
   ([] (db-conn "t1")))
+
+(defn flags []
+  (env/all-values (db-conn)))
+
+(defn activate-flag [flag]
+  (env/activate-flag (db-conn) flag))
+
+(defn deactivate-flag [flag]
+  (env/deactivate-flag (db-conn) flag))
 
 
