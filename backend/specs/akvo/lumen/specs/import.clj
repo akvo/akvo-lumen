@@ -142,7 +142,7 @@
                                 (reduce (fn [c [groupId columns]]
                                           (let [r (if (get repeatables groupId)
                                                         (let [x (rand-int (get max-responses groupId))]
-                                                          (if (> x 0) x 1))
+                                                          (if (> x 1) x 2))
                                                         1)]
                                             (assoc c groupId (mapv (fn [_] (sample-column-values columns instance-id))
                                                                    (range r))))
