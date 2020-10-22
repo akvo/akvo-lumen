@@ -84,7 +84,7 @@
         (is (= (:group_id data-group) "metadata"))
         (is (= (:group_name data-group) "metadata"))
         (is (= (:repeatable data-group) false)))
-      (is (= (keys (first stored-data)) expected-stored-data))
+      (is (= (set (keys (first stored-data))) (set (conj expected-stored-data :c1 :c2 :c3 :c4))))
       (is (= (keys (first (->> (first data-groups)
                                (get-data *tenant-conn*)))) expected-stored-data)))))
 
