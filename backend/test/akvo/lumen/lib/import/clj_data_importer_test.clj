@@ -46,11 +46,7 @@
       (let [data-group (first data-groups)]
         (is (= (:group_id data-group) "main"))
         (is (= (:group_name data-group) "main"))
-        (is (= (:repeatable data-group) false))
-
-        )
-
-
+        (is (= (:repeatable data-group) false)))
       (is (= (map keys stored-data) expected-stored-data))
       (is (= (map keys data-groups-stored-data) expected-stored-data))))
   (testing "Testing import flow"
@@ -75,7 +71,7 @@
                                                                  {:dataset-id dataset-id})
                            (get-data *tenant-conn*))
 
-          expected-stored-data '(:rnum            
+          expected-stored-data '(:rnum
                                  :device_id
                                  :surveyal_time
                                  :submitted_at
