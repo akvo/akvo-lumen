@@ -153,6 +153,8 @@
      :records-v3 (mapv (fn [form-instance]
                          (let [metadata (first (get form-instance "metadata"))
                                groups   (reduce (fn [c [g responses]]
-                                                  (merge c (dissoc (first responses) :instance_id))) {} (dissoc form-instance "metadata"))]
+                                                  (with-meta
+                                                    (merge c (dissoc (first responses) :instance_id))
+                                                    {:ns "main"})) {} (dissoc form-instance "metadata"))]
                            [metadata groups])) rows)
      :records-v4 (vec rows)}))
