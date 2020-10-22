@@ -53,12 +53,12 @@
     (let [groups [{:groupId "group1"
                    :groupName "repeatable group"
                    :repeatable true
-                   :columns ["option" "text"]
+                   :column-types ["option" "text"]
                    :max-responses 10}
                   {:groupId "group2"
                    :groupName "not repeatable group"
                    :repeatable false
-                   :columns ["number" "date"]}]
+                   :column-types ["number" "date"]}]
           dataset-id (import-file *tenant-conn* *error-tracker*
                                   {:dataset-name "Padded titles"
                                    :kind "clj-flow"

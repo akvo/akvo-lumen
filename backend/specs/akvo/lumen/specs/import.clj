@@ -140,11 +140,12 @@
         data             (group-by :groupId group-columns)
         rows             (map (fn [instance-id]
                                 (reduce (fn [c [groupId columns]]
-                                          (assoc c groupId (mapv (fn [_] (sample-column-values columns instance-id))
-                                                                 (range (if (get repeatables groupId)
-                                                                          (let [x (rand-int (get max-responses groupId))]
-                                                                            (if (> x 0) x 1))
-                                                                          1))))
+                                          (let [r (if (get repeatables groupId)
+                                                        (let [x (rand-int (get max-responses groupId))]
+                                                          (if (> x 0) x 1))
+                                                        1)]
+                                            (assoc c groupId (mapv (fn [_] (sample-column-values columns instance-id))
+                                                                   (range r))))
                                           ) {"metadata" [(sample-column-values metadata-columns instance-id)]} data))
                               instance-ids)]
     {:columns-v4 (vec (apply conj group-columns-v4 metadata-columns))
