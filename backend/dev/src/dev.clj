@@ -3,6 +3,7 @@
   (:require [akvo.lumen.endpoint.commons]
             [akvo.lumen.lib.aes :as aes]
             [akvo.lumen.migrate :as lumen-migrate]
+            [akvo.lumen.db.env :as env]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs]
             [akvo.lumen.specs.import :as i-c]
@@ -102,3 +103,11 @@
                    {:dataset-name dataset-name
                     :kind "clj-flow"
                     :data (i-c/flow-sample-imported-dataset groups submissions)})))
+(defn flags []
+  (env/all-values (db-conn)))
+
+(defn activate-flag [flag]
+  (env/activate-flag (db-conn) flag))
+
+(defn deactivate-flag [flag]
+  (env/deactivate-flag (db-conn) flag))
