@@ -75,7 +75,7 @@ log "Commits to be deployed:"
 echo ""
 git log --oneline $NEWEST_VERSION_IN_PROD..$TEST_LIVE_VERSION | grep -v "Merge pull request" | grep -v "Merge branch"
 
-"${DIR}"/helpers/generate-slack-notification.sh "${NEWEST_VERSION_IN_PROD}" "${TEST_LIVE_VERSION}" "Promoting Lumen to dark prod cluster" "good"
+"${DIR}"/helpers/generate-team-notification.sh "${NEWEST_VERSION_IN_PROD}" "${TEST_LIVE_VERSION}" "Promoting Lumen to dark prod cluster" "good"
 
 TAG_NAME="promote-$(TZ=UTC date +"%Y%m%d-%H%M%S")"
 
@@ -91,7 +91,7 @@ log "To deploy, run: "
 echo "----------------------------------------------"
 echo "git tag -a $TAG_NAME $TEST_LIVE_VERSION -m \"$PROMOTION_REASON\""
 echo "git push origin $TAG_NAME"
-echo "./notify.slack.sh"
+echo "./notify.team.sh"
 echo "----------------------------------------------"
 
 switch_back
