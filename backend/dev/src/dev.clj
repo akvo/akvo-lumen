@@ -85,21 +85,20 @@
 
 (defn new-flow-dataset
   ([dataset-name]
+   (when-not system (go))
    (new-flow-dataset dataset-name [{:groupId "group1"
                                     :groupName "repeatable group"
                                     :repeatable true
                                     :column-types ["option" "text"]
-                                    :max-responses 10}
+                                    :max-rqg-answers 10}
                                    {:groupId "group2"
                                     :groupName "not repeatable group"
                                     :repeatable false
                                     :column-types ["number" "date"]}] 2))
   ([dataset-name groups submissions]
+   (when-not system (go))
    (tu/import-file (db-conn)
                    (:akvo.lumen.utils.local-error-tracker/local system)
                    {:dataset-name dataset-name
                     :kind "clj-flow"
                     :data (i-c/flow-sample-imported-dataset groups submissions)})))
-
-;;(new-flow-dataset "example-data")
-

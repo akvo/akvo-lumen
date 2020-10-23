@@ -105,19 +105,17 @@
     :groupName \"groupName1\"
     :repeatable true
     :column-types [\"option\" \"text\"]
-    :max-responses 10}
+    :max-rqg-answers 10}
    {:groupId \"groupId2\"
     :groupName \"groupName2\"
     :repeatable false
     :column-types [\"number\" \"date\"]}]"
   [groups submissions]
-  (let [max-responses    (reduce (fn [c {:keys [groupId max-responses]}]
-                                   (assoc c groupId (or max-responses 1))
-                                   ) {} groups)
-        repeatables      (reduce (fn [c {:keys [groupId repeatable]}]
-                                   (assoc c groupId (boolean repeatable))
-                                   ) {} groups)
-        instance-ids     (map #(str (+ % 1000)) (range submissions))
+  (let [max-rqg-answers-dict    (reduce (fn [c {:keys [groupId max-rqg-answers]}]
+                                          (assoc c groupId (or max-rqg-answers 1))) {} groups)
+        repeatables-dict      (reduce (fn [c {:keys [groupId repeatable]}]
+                                        (assoc c groupId (boolean repeatable))) {} groups)
+        instance-ids     (map str (range submissions))
         group-columns    (->> (map (fn [group]
                                      (let [group-details (select-keys group [:groupId :groupName :repeatable])]
                                        (map (fn [column-type]
@@ -140,10 +138,10 @@
         data             (group-by :groupId group-columns)
         rows             (map (fn [instance-id]
                                 (reduce (fn [c [groupId columns]]
-                                          (let [r (if (get repeatables groupId)
-                                                        (let [x (rand-int (get max-responses groupId))]
-                                                          (if (> x 1) x 2))
-                                                        1)]
+                                          (let [r (if (get repeatables-dict groupId)
+                                                    (let [x (rand-int (get max-rqg-answers-dict groupId))]
+                                                      (if (> x 1) x 2))
+                                                    1)]
                                             (assoc c groupId (mapv (fn [_] (sample-column-values columns instance-id))
                                                                    (range r))))
                                           ) {"metadata" [(sample-column-values metadata-columns instance-id)]} data))
