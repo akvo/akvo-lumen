@@ -43,6 +43,10 @@
   [tenant-conn data-groups visualisation-type query]
   (bar/query-with-data-groups tenant-conn data-groups query))
 
+(defmethod query-with-data-groups "pie"
+  [tenant-conn data-groups visualisation-type query]
+  (pie/query-with-data-groups tenant-conn data-groups query))
+
 (defmethod query-with-data-groups "line"
   [tenant-conn data-groups visualisation-type query]
   (line/query-with-data-groups tenant-conn data-groups query))
@@ -63,7 +67,7 @@
 (defn query [tenant-conn dataset-id visualisation-type query]
   (try
     (if (and (-> (env/all tenant-conn) (get "data-groups"))
-             (contains? #{"bar" "line"} visualisation-type))
+             (contains? #{"bar" "line" "pie"} visualisation-type))
       (let [[variant-key data :as result] (data-groups-query tenant-conn dataset-id visualisation-type query)]
         (if (= variant-key :akvo.lumen.lib/not-found)
           (dataset-version-query tenant-conn dataset-id visualisation-type query)
