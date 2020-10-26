@@ -28,19 +28,28 @@
                     "visualisationType" visualisation-type
                     "query" query}))
 
+(defn data-groups-query [tenant-conn dataset-id visualisation-type query]
+  (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
+        (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                       (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+          (bar/query-with-data-groups tenant-conn data-groups query)
+          (lib/not-found {"datasetId" dataset-id}))))
+
+(defn dataset-version-query [tenant-conn dataset-id visualisation-type query]
+  (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
+        (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
+          (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
+          (lib/not-found {"datasetId" dataset-id}))))
+
 (defn query [tenant-conn dataset-id visualisation-type query]
   (try
     (if (and (-> (env/all tenant-conn) (get "data-groups"))
              (= visualisation-type "bar"))
-      (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
-        (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                                       (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-          (bar/query-with-data-groups tenant-conn data-groups query)
-          (lib/not-found {"datasetId" dataset-id})))
-      (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
-        (if-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-tx-conn {:id dataset-id})]
-          (query* tenant-tx-conn (update dataset :columns (comp walk/keywordize-keys vec)) visualisation-type query)
-          (lib/not-found {"datasetId" dataset-id}))))
+      (let [[variant-key data :as result] (data-groups-query tenant-conn dataset-id visualisation-type query)]
+        (if (= variant-key :akvo.lumen.lib/not-found)
+          (dataset-version-query tenant-conn dataset-id visualisation-type query)
+          result))
+      (dataset-version-query tenant-conn dataset-id visualisation-type query))
     (catch clojure.lang.ExceptionInfo e
       (log/warn e :query query :visualisation-type visualisation-type)
       (lib/bad-request (merge {:message (.getMessage e)}
