@@ -28,11 +28,30 @@
                     "visualisationType" visualisation-type
                     "query" query}))
 
+
+(defmulti query-with-data-groups
+  (fn [tenant-conn data-groups visualisation-type query]
+    visualisation-type))
+
+(defmethod query-with-data-groups :default
+  [tenant-conn data-groups visualisation-type query]
+  (lib/bad-request {"message" "Unsupported visualisation type"
+                    "visualisationType" visualisation-type
+                    "query" query}))
+
+(defmethod query-with-data-groups "bar"
+  [tenant-conn data-groups visualisation-type query]
+  (bar/query-with-data-groups tenant-conn data-groups query))
+
+(defmethod query-with-data-groups "line"
+  [tenant-conn data-groups visualisation-type query]
+  (line/query-with-data-groups tenant-conn data-groups query))
+
 (defn data-groups-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
         (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
                                        (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-          (bar/query-with-data-groups tenant-conn data-groups query)
+          (query-with-data-groups tenant-conn data-groups visualisation-type query)
           (lib/not-found {"datasetId" dataset-id}))))
 
 (defn dataset-version-query [tenant-conn dataset-id visualisation-type query]
@@ -44,7 +63,7 @@
 (defn query [tenant-conn dataset-id visualisation-type query]
   (try
     (if (and (-> (env/all tenant-conn) (get "data-groups"))
-             (= visualisation-type "bar"))
+             (contains? #{"bar" "line"} visualisation-type))
       (let [[variant-key data :as result] (data-groups-query tenant-conn dataset-id visualisation-type query)]
         (if (= variant-key :akvo.lumen.lib/not-found)
           (dataset-version-query tenant-conn dataset-id visualisation-type query)
