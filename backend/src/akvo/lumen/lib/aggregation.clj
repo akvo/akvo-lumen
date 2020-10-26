@@ -28,7 +28,6 @@
                     "visualisationType" visualisation-type
                     "query" query}))
 
-
 (defmulti query-with-data-groups
   (fn [tenant-conn data-groups visualisation-type query]
     visualisation-type))
@@ -51,6 +50,10 @@
   [tenant-conn data-groups visualisation-type query]
   (line/query-with-data-groups tenant-conn data-groups query))
 
+(defmethod query-with-data-groups "pivot"
+  [tenant-conn data-groups visualisation-type query]
+  (pivot/query-with-data-groups tenant-conn data-groups query))
+
 (defn data-groups-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
         (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
@@ -67,7 +70,7 @@
 (defn query [tenant-conn dataset-id visualisation-type query]
   (try
     (if (and (-> (env/all tenant-conn) (get "data-groups"))
-             (contains? #{"bar" "line" "pie"} visualisation-type))
+             (contains? #{"bar" "line" "pie" "pivot"} visualisation-type))
       (let [[variant-key data :as result] (data-groups-query tenant-conn dataset-id visualisation-type query)]
         (if (= variant-key :akvo.lumen.lib/not-found)
           (dataset-version-query tenant-conn dataset-id visualisation-type query)
