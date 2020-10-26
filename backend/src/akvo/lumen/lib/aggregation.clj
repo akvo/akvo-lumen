@@ -52,8 +52,7 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (try
-    (if (and (-> (env/all tenant-conn) (get "data-groups"))
-             (contains? #{"bar" "line" "pie" "pivot"} visualisation-type))
+    (if (-> (env/all tenant-conn) (get "data-groups"))
       (let [[variant-key data :as result] (data-groups-query tenant-conn dataset-id visualisation-type query)]
         (if (= variant-key :akvo.lumen.lib/not-found)
           (dataset-version-query tenant-conn dataset-id visualisation-type query)
