@@ -193,27 +193,6 @@
       }
 }
 
-.Dashboard{
-  .Header{
-    position: fixed;
-    z-index: 2;
-    background-color: #fff;
-  }
-  .DashboardEditor{
-    .DashboardEditorSidebar{
-      position: fixed;
-      left: 0;
-      top: 4.1rem;
-      height: calc(100vh - 4rem);
-      z-index: 2;
-    }
-    .DashboardEditorCanvasContainer{
-      margin-left: 320px;
-      height: auto;
-    }
-  }
-}
-
 @media print {
     .DashboardVisualisationList,
     .DashboardEditorCanvasControls,
