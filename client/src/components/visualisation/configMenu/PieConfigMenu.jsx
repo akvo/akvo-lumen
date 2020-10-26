@@ -5,7 +5,7 @@ import get from 'lodash/get';
 
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
-import { filterColumns } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
@@ -29,7 +29,7 @@ function PieConfigMenu(props) {
             placeholderId="select_a_data_column_to_group_by"
             value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
             name="xGroupColumnMenu"
-            options={filterColumns(columnOptions, ['number', 'date', 'text', 'option'])}
+            options={columnSelectOptions(intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
             clearable
             onChange={(value) => {
               const legend = resetLegend(specLegend, visualisation);

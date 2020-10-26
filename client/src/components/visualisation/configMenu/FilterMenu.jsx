@@ -6,7 +6,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 
 import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
-import { filterColumns } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions } from '../../../utilities/column';
 import './FilterMenu.scss';
 
 const getMenuFilters = filterArray =>
@@ -67,7 +67,6 @@ const isFilterValid = (filter, columnOptions, strategies) => {
 };
 
 class FilterMenu extends Component {
-
   constructor() {
     super();
     this.state = {
@@ -364,7 +363,12 @@ class FilterMenu extends Component {
                       name="filterColumnInput"
                       placeholder={`${formatMessage({ id: 'choose_a_column_to_filter_by' })}...`}
                       value={newFilterColumn || null}
-                      options={filterColumns(columnOptions, ['option', 'text', 'number', 'date'])}
+                      options={
+                        columnSelectOptions(
+                          this.props.intl,
+                          filterColumns(columnOptions, ['option', 'text', 'number', 'date'])
+                        )
+                      }
                       onChange={choice => this.updateNewFilter('newFilterColumn', choice)}
                     />
                     <label htmlFor="filterStrategyInput">

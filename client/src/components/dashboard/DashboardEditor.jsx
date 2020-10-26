@@ -11,7 +11,7 @@ import DashboardCanvasItem from './DashboardCanvasItem';
 import { groupIntoPages } from '../../utilities/dashboard';
 import { datasetsWithVisualizations } from '../../utilities/dataset';
 import { withDatasetRelated } from '../../utilities/visualisation';
-import { filterColumns } from '../../utilities/column';
+import { filterColumns, columnSelectOptions } from '../../utilities/column';
 import { A4 } from '../../constants/print';
 import SelectMenu from '../common/SelectMenu';
 import FilterColumns from './filter/FilterColumns';
@@ -333,7 +333,7 @@ class DashboardEditor extends Component {
     </div>);
     const selectedFilterColumnsDict = new Set(filter.columns.map(x => x.column));
     const columnFilterSelectAllOptions = selectedDatasetColumns && selectedDatasetColumns
-    .map(c => ({ value: c.get('columnName'), label: c.get('title') }));
+    .map(c => ({ value: c.get('columnName'), label: c.get('title'), groupName: c.get('groupName') }));
 
     let columnFilterSelectOptions = columnFilterSelectAllOptions ? columnFilterSelectAllOptions
     .filter(c => !selectedFilterColumnsDict.has(c.value)) : [];
@@ -419,11 +419,17 @@ class DashboardEditor extends Component {
                   <div className="filterInput" style={{ marginTop: '0.7rem' }}>
                     {
                       filter.columns.map((o, idx) =>
-                      newColumnFilterSelect(idx)(columnFilterSelectOptions,
-                        finderFilterSelectOptions, true))
+                      newColumnFilterSelect(idx)(
+                        columnSelectOptions(intl, columnFilterSelectOptions),
+                        finderFilterSelectOptions,
+                        true
+                      ))
                     }
-                    {newColumnFilterSelect(filter.columns.length)(columnFilterSelectOptions,
-                      finderFilterSelectOptions, false)}
+                    {newColumnFilterSelect(filter.columns.length)(
+                      columnSelectOptions(intl, columnFilterSelectOptions),
+                      finderFilterSelectOptions,
+                      false
+                    )}
                   </div>
                 </div>}
             </div>

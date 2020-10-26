@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-
+import { intlShape, injectIntl } from 'react-intl';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
-import { filterColumns } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions } from '../../../utilities/column';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -33,7 +33,7 @@ const getAxisLabel = (axis, spec, columnOptions) => {
   return newAxisLabel;
 };
 
-export default function LineConfigMenu(props) {
+function LineConfigMenu(props) {
   const {
     visualisation,
     columnOptions,
@@ -73,7 +73,7 @@ export default function LineConfigMenu(props) {
               labelTextId="metric_column"
               value={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
               name="metricColumnXInput"
-              options={filterColumns(columnOptions, ['number', 'date'])}
+              options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number', 'date']))}
               onChange={value => onChangeSpec({
                 metricColumnX: value,
                 axisLabelX: getAxisLabel('x', Object.assign({}, spec, { metricColumnX: value }), columnOptions),
@@ -106,7 +106,7 @@ export default function LineConfigMenu(props) {
               labelTextId="metric_column"
               value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
               name="metricColumnYInput"
-              options={filterColumns(columnOptions, ['number', 'text', 'option'])}
+              options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number', 'text', 'option']))}
               onChange={value => onChangeSpec({
                 metricColumnY: value,
                 axisLabelY: getAxisLabel('y', Object.assign({}, spec, { metricColumnY: value }), columnOptions),
@@ -132,6 +132,7 @@ export default function LineConfigMenu(props) {
 }
 
 LineConfigMenu.propTypes = {
+  intl: intlShape,
   visualisation: PropTypes.object.isRequired,
   env: PropTypes.object.isRequired,
   datasets: PropTypes.object.isRequired,
@@ -139,3 +140,5 @@ LineConfigMenu.propTypes = {
   columnOptions: PropTypes.array.isRequired,
   aggregationOptions: PropTypes.array.isRequired,
 };
+
+export default injectIntl(LineConfigMenu);

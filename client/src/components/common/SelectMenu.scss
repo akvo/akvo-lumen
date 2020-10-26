@@ -1,10 +1,11 @@
 @import "../../styles/modules/importAll";
 
+$selectedColor: #0366D6;
+
 .SelectMenu {
     * {
         box-shadow: none !important;
         border-radius: 0;
-        color: $black !important;
     }
 
     &.disabled {
@@ -13,19 +14,49 @@
         }
     }
 
+    .react-select__menu {
+        border: 1px solid #e5e6ed;
+    }
+
+    .react-select__group {
+        font-size: 1em;
+        font-weight: normal;
+        text-transform: capitalize;
+    }
+
+    .react-select__indicator {
+        color: $black;
+    }
+
+    .react-select__group-heading {
+        color: #586069;
+        font-size: 12px;
+        line-height: 16px;
+        background-color: transparent;
+        text-transform: capitalize;
+        padding: 10px;
+        font-weight: normal;
+    }
+
+    .react-select__option {
+        color: #24292E;
+        font-size: 14px;
+        line-height: 20px;
+        padding: 12px;
+
+        &--is-focused {
+            background-color: #E9F1F4;
+        }
+
+        &--is-selected {
+            background-color: $selectedColor;
+            color: $white;
+        }
+    }
+
     .Select, .Select-control, .Select-input {
         height: 100%;
     }
-    // .css-18ng2q5-group {
-    //     background-color: #e5e6ed;
-    //     font-size: 1em;
-    //     padding: 10px;
-    //     font-weight: normal;
-    // }
-    // .css-26l3qy-menu {
-    //     border: 1px solid #e5e6ed;
-    //     border-top: 0px;
-    // }
 
     .is-open {
         .combobox {
@@ -33,6 +64,7 @@
         }
         
     }
+
     .is-disabled {
         .Select-control {
             border: 1px solid rgba($black, 0.2);
@@ -72,8 +104,5 @@
         transition: color 0.3s, border 0.3s;
         transition-timing-function: ease;
         border-radius: 0;
-    }
-
-    .Select-menu-outer, .Select-menu {
     }
 }

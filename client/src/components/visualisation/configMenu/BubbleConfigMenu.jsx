@@ -6,7 +6,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ToggleInput from '../../common/ToggleInput';
-import { filterColumns } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ButtonRowInput from './ButtonRowInput';
 import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
@@ -98,7 +98,7 @@ function BubbleConfigMenu(props) {
               labelTextId="bucket_column"
               value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
               name="bucketColumnMenu"
-              options={filterColumns(columnOptions, ['number', 'text', 'option'])}
+              options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number', 'text', 'option']))}
               clearable
               onChange={value => handleChangeSpec({
                 bucketColumn: value,
@@ -247,7 +247,7 @@ function BubbleConfigMenu(props) {
               value={spec.metricColumn !== null ? spec.metricColumn.toString() : null}
               name="metricColumnInput"
               clearable
-              options={filterColumns(columnOptions, ['number'])}
+              options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number']))}
               onChange={(value) => {
                 let metricAggregation = 'count';
                 const previousMetricColumn = spec.metricColumn;
