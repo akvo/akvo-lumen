@@ -52,7 +52,7 @@ log "Commits to be deployed:"
 git log --oneline $PROD_LIVE_VERSION..$PROD_DARK_VERSION | grep -v "Merge pull request" | grep -v "Merge branch"
 
 if [ "${CLUSTER}" == "production" ]; then
- "${DIR}"/helpers/generate-team-notification.sh "${PROD_LIVE_VERSION}" "${PROD_DARK_VERSION}" "I am thinking about flipping **prod** to make this changes live. Should I?" "warning"
+ "${DIR}"/helpers/generate-team-notification.sh "${PROD_LIVE_VERSION}" "${PROD_DARK_VERSION}" "I am thinking about flipping **LUMEN prod** to make this changes live. Should I?" "warning"
  ./notify.team.sh
  read -r -e -p "Are you sure you want to flip production? [yn] " CONFIRM
  if [ "${CONFIRM}" != "y" ]; then
@@ -72,7 +72,7 @@ fi
 
 if [ "${CLUSTER}" == "production" ]; then
   "${DIR}"/helpers/record-flip.sh "${NEW_LIVE_COLOR}" "${PROD_DARK_VERSION}" "${PROD_LIVE_VERSION}" "${FLIP_DATE}"
-  "${DIR}"/helpers/generate-team-notification.sh "${PROD_LIVE_VERSION}" "${PROD_DARK_VERSION}" "Flipping *PROD!!!*" "warning"
+  "${DIR}"/helpers/generate-team-notification.sh "${PROD_LIVE_VERSION}" "${PROD_DARK_VERSION}" "Flipping **LUMEN PROD!!!**" "warning"
   log "Notifying the team about the changes deployed"
   ./notify.team.sh
 fi
