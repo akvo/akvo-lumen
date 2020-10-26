@@ -2,6 +2,7 @@
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.commons :refer (run-query) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.util :as util]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]))
@@ -83,3 +84,15 @@
   (if (= 1 (:version query))
     (query-v1 tenant-conn data query)
     (query-v2 tenant-conn data query)))
+
+(defn query-with-data-groups
+  [tenant-conn data-groups q]
+  (let [columns (reduce #(into % (:columns %2)) [] data-groups)
+        table-name (util/gen-table-name "ds")]
+    (->> data-groups
+         commons/data-groups-sql-template
+         commons/data-groups-sql
+         (commons/data-groups-temp-view table-name)
+         vector
+         (jdbc/execute! tenant-conn))
+    (query tenant-conn {:table-name table-name :columns columns} q)))
