@@ -3,6 +3,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.aggregation.commons :refer (run-query sql-option-bucket-column) :as commons]
             [akvo.lumen.lib.dataset.utils :refer (find-column)]
+            [akvo.lumen.util :as util]
             [akvo.lumen.postgres.filter :refer (sql-str)]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
@@ -132,3 +133,15 @@
     (lib/ok (merge (apply-query tenant-conn table-name query filter-str)
                    {:metadata
                     {:categoryColumnTitle (get-in query [:category-column :title])}}))))
+
+(defn query-with-data-groups
+  [tenant-conn data-groups q]
+  (let [columns (reduce #(into % (:columns %2)) [] data-groups)
+        table-name (util/gen-table-name "ds")]
+    (->> data-groups
+         commons/data-groups-sql-template
+         commons/data-groups-sql
+         (commons/data-groups-temp-view table-name)
+         vector
+         (jdbc/execute! tenant-conn))
+    (query tenant-conn {:table-name table-name :columns columns} q)))
