@@ -5,6 +5,7 @@
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
+            [akvo.lumen.lib.aggregation.commons :as commons]
             [akvo.lumen.lib.aggregation.pie :as pie]
             [akvo.lumen.lib.aggregation.maps :as a.maps]
             [akvo.lumen.lib.aggregation.line :as line]
@@ -28,35 +29,20 @@
                     "visualisationType" visualisation-type
                     "query" query}))
 
-
-(defmulti query-with-data-groups
-  (fn [tenant-conn data-groups visualisation-type query]
-    visualisation-type))
-
-(defmethod query-with-data-groups :default
-  [tenant-conn data-groups visualisation-type query]
-  (lib/bad-request {"message" "Unsupported visualisation type"
-                    "visualisationType" visualisation-type
-                    "query" query}))
-
-(defmethod query-with-data-groups "bar"
-  [tenant-conn data-groups visualisation-type query]
-  (bar/query-with-data-groups tenant-conn data-groups query))
-
-(defmethod query-with-data-groups "pie"
-  [tenant-conn data-groups visualisation-type query]
-  (pie/query-with-data-groups tenant-conn data-groups query))
-
-(defmethod query-with-data-groups "line"
-  [tenant-conn data-groups visualisation-type query]
-  (line/query-with-data-groups tenant-conn data-groups query))
-
 (defn data-groups-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
-        (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                                       (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-          (query-with-data-groups tenant-conn data-groups visualisation-type query)
-          (lib/not-found {"datasetId" dataset-id}))))
+    (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                   (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+      (let [columns (reduce #(into % (:columns %2)) [] data-groups)
+            table-name (util/gen-table-name "ds")]
+        (->> data-groups
+             commons/data-groups-sql-template
+             commons/data-groups-sql
+             (commons/data-groups-temp-view table-name)
+             vector
+             (jdbc/execute! tenant-conn))
+        (query* tenant-conn {:table-name table-name :columns columns} visualisation-type query))
+      (lib/not-found {"datasetId" dataset-id}))))
 
 (defn dataset-version-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn {:read-only? true}]
@@ -66,8 +52,7 @@
 
 (defn query [tenant-conn dataset-id visualisation-type query]
   (try
-    (if (and (-> (env/all tenant-conn) (get "data-groups"))
-             (contains? #{"bar" "line" "pie"} visualisation-type))
+    (if (-> (env/all tenant-conn) (get "data-groups"))
       (let [[variant-key data :as result] (data-groups-query tenant-conn dataset-id visualisation-type query)]
         (if (= variant-key :akvo.lumen.lib/not-found)
           (dataset-version-query tenant-conn dataset-id visualisation-type query)

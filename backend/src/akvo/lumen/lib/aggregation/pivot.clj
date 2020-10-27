@@ -72,7 +72,7 @@
 
     (and (nil? row-column) (nil? category-column))
     {:columns [{:type "number" :title "Total"}]
-     :rows    (run-query conn (format "SELECT count(rnum) FROM %s WHERE %s"
+     :rows    (run-query conn (format "SELECT count(*) FROM %s WHERE %s"
                                       table-name
                                       filter-str))}
 
@@ -81,13 +81,13 @@
                 :title (get-in query [:row-column :title])}
                {:type  "number"
                 :title "Total"}]
-     :rows    (run-query conn (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+     :rows    (run-query conn (format "SELECT %s, count(*) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
                                       (coalesce (:row-column query))
                                       table-name
                                       filter-str))}
 
     (nil? row-column)
-    (let [data (->> (format "SELECT %s, count(rnum) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
+    (let [data (->> (format "SELECT %s, count(*) FROM %s WHERE %s GROUP BY 1 ORDER BY 1"
                             (coalesce (:category-column query))
                             table-name
                             filter-str)
@@ -104,7 +104,7 @@
 
     (nil? value-column)
     (apply-pivot conn table-name (assoc query
-                                        :value-column {:columnName "rnum"}
+                                        :value-column {:columnName "*"}
                                         :aggregation "count") filter-str)
 
     :else
