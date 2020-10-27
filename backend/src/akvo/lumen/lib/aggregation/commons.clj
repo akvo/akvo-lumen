@@ -1,9 +1,12 @@
 (ns akvo.lumen.lib.aggregation.commons
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.spec.alpha :as s]
+            [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.util :as util]
             [akvo.lumen.specs.db.dataset-version.column :as s.column]
             [clojure.tools.logging :as log]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.walk :as walk]))
 
 (defn run-query [tenant-conn sql]
   (log/debug :run-query sql)
@@ -94,3 +97,16 @@
 (defn data-groups-temp-view
   [view-name sql]
   (format "CREATE TEMP VIEW %s AS %s" view-name sql))
+
+(defn table-name-and-columns-from-data-grops [tenant-conn dataset-id]
+  (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                   (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+    (let [columns (reduce #(into % (:columns %2)) [] data-groups)
+          table-name (util/gen-table-name "ds")]
+      (->> data-groups
+           data-groups-sql-template
+           data-groups-sql
+           (data-groups-temp-view table-name)
+           vector
+           (jdbc/execute! tenant-conn))
+      {:table-name table-name :columns columns})))
