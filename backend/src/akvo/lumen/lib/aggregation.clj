@@ -29,19 +29,23 @@
                     "visualisationType" visualisation-type
                     "query" query}))
 
+(defn table-name-and-columns-from-data-grops [tenant-conn dataset-id]
+  (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                   (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+    (let [columns (reduce #(into % (:columns %2)) [] data-groups)
+          table-name (util/gen-table-name "ds")]
+      (->> data-groups
+           commons/data-groups-sql-template
+           commons/data-groups-sql
+           (commons/data-groups-temp-view table-name)
+           vector
+           (jdbc/execute! tenant-conn))
+      {:table-name table-name :columns columns})))
+
 (defn data-groups-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
-    (if-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                                   (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-      (let [columns (reduce #(into % (:columns %2)) [] data-groups)
-            table-name (util/gen-table-name "ds")]
-        (->> data-groups
-             commons/data-groups-sql-template
-             commons/data-groups-sql
-             (commons/data-groups-temp-view table-name)
-             vector
-             (jdbc/execute! tenant-conn))
-        (query* tenant-conn {:table-name table-name :columns columns} visualisation-type query))
+    (if-let [data (table-name-and-columns-from-data-grops tenant-tx-conn dataset-id) ]
+      (query* tenant-tx-conn (select-keys data [:table-name :columns]) visualisation-type query)
       (lib/not-found {"datasetId" dataset-id}))))
 
 (defn dataset-version-query [tenant-conn dataset-id visualisation-type query]
