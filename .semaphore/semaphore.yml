@@ -9,7 +9,7 @@ global_job_config:
     - name: docker-hub-credentials
   prologue:
     commands:
-      - echo "${DOCKERHUB_PASSWORD}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+      - echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
 blocks:
   - name: 'Lumen: Build, test & deploy'
     task:
