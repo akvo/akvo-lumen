@@ -104,6 +104,7 @@ export default function DatasetHeader(props) {
     history,
     onSaveDataset,
     rowsCount,
+    dataSourceKind,
   } = props;
 
   let saveStatusId = ({
@@ -128,6 +129,7 @@ export default function DatasetHeader(props) {
         timeToNextSave,
         history,
         rowsCount,
+        dataSourceKind,
       }}
     />
   );
@@ -149,4 +151,5 @@ DatasetHeader.propTypes = {
   timeToNextSave: PropTypes.number,
   onUseDataGroupsToggle: PropTypes.func,
   rowsCount: PropTypes.number,
+  dataSourceKind: PropTypes.string,
 };

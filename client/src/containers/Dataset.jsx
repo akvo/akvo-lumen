@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Immutable from 'immutable';
+import Immutable, { getIn } from 'immutable';
 import { connect, useSelector } from 'react-redux';
 import { withRouter } from 'react-router';
 import { showModal } from '../actions/activeModal';
@@ -332,6 +332,7 @@ function Dataset(props) {
             datasetGroupsAvailable={dataset.get('groups') != null}
             groupAvailable={!!currentGroup}
             handleChangeQuestionGroup={onChangeQuestionGroup}
+            dataSourceKind={dataset.getIn(['source', 'kind'])}
           />
         ) : (
           <DatasetTableV1

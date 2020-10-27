@@ -441,7 +441,10 @@ function DatasetTable(props) {
 
   // renders
   const renderHeader = () => {
-    const { Header: DatasetHeader } = props;
+    const {
+      Header: DatasetHeader,
+      dataSourceKind,
+    } = props;
 
     return (
       <DatasetHeader
@@ -452,6 +455,7 @@ function DatasetTable(props) {
         onNavigateToVisualise={props.onNavigateToVisualise}
         onClickTransformMenuItem={handleClickDatasetControlItem}
         onToggleTransformationLog={handleToggleTransformationLog}
+        dataSourceKind={dataSourceKind}
       />
     );
   };
@@ -578,6 +582,7 @@ DatasetTable.propTypes = {
   pendingTransformations: PropTypes.object.isRequired,
   rows: PropTypes.object,
   transformations: PropTypes.object,
+  dataSourceKind: PropTypes.string,
 };
 
 export default withRouter(injectIntl(DatasetTable));

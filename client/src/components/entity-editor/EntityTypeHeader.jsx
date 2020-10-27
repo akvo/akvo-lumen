@@ -90,8 +90,9 @@ class EntityTypeHeader extends Component {
       savingFailed,
       saveAction,
       rowsCount,
+      dataSourceKind,
+      intl,
     } = this.props;
-
     return (
       <Header
         className="EntityTypeHeader"
@@ -127,7 +128,7 @@ class EntityTypeHeader extends Component {
           </div>
           {rowsCount > -1 &&
           <div className="TotalFormSubmissions">
-            {rowsCount} form submissions
+            { rowsCount } {intl.formatMessage({ id: ['DATA_FILE', 'LINK'].includes(dataSourceKind) ? 'rows' : 'form_submissons' })}
           </div>
           }
         </div>
@@ -148,6 +149,7 @@ EntityTypeHeader.propTypes = {
   history: PropTypes.object.isRequired,
   saveAction: PropTypes.func.isRequired,
   rowsCount: PropTypes.number,
+  dataSourceKind: PropTypes.string,
 };
 
 export default injectIntl(EntityTypeHeader);
