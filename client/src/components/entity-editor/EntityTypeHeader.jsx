@@ -147,7 +147,7 @@ EntityTypeHeader.propTypes = {
   savingFailed: PropTypes.bool,
   history: PropTypes.object.isRequired,
   saveAction: PropTypes.func.isRequired,
-  rowsCount: PropTypes.number.isRequired,
+  rowsCount: PropTypes.number,
 };
 
 export default injectIntl(EntityTypeHeader);
