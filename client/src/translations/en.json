@@ -144,6 +144,7 @@
   "following_filters_dash_will_be_deleted": "The following dashboards will not be more filtered by the dataset to be deleted",
   "following_visualisation_will_be_deleted": "The following visualisation will also be deleted",
   "following_visualisations_will_be_deleted": "The following visualisations will also be deleted",
+  "form_submissons": "form submissons",
   "generate_geopoints": "Generate geopoints",
   "generate": "Generate",
   "geo_location": "Geo location",

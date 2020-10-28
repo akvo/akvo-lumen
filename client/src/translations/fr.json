@@ -141,6 +141,7 @@
   "following_filters_dash_will_be_deleted": "Ces tableaux de bord  ne seront plus filtrés par le jeu de données supprimé",
   "following_visualisation_will_be_deleted": "La visualisation suivante sera également supprimée",
   "following_visualisations_will_be_deleted": "Les visualisations suivantes seront également supprimées",
+  "form_submissons": "formulaires envoyés",
   "generate_geopoints": "Generer point de location",
   "generate": "Generer",
   "geo_location": "Geo location",
