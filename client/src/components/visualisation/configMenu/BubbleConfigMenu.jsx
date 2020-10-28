@@ -6,7 +6,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ToggleInput from '../../common/ToggleInput';
-import { filterColumns, columnSelectOptions } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ButtonRowInput from './ButtonRowInput';
 import { LegendsSortable, resetLegend } from '../../charts/LegendsSortable';
@@ -96,7 +96,7 @@ function BubbleConfigMenu(props) {
             <ConfigMenuSectionOptionSelect
               placeholderId="select_a_data_column_to_group_by"
               labelTextId="bucket_column"
-              value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
+              value={columnSelectSelectedOption(spec.bucketColumn, filterColumns(columnOptions, ['number', 'text', 'option']))}
               name="bucketColumnMenu"
               options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number', 'text', 'option']))}
               clearable
@@ -244,7 +244,7 @@ function BubbleConfigMenu(props) {
               id="metric_column"
               placeholderId="select_a_metric_column"
               labelTextId="metric_column"
-              value={spec.metricColumn !== null ? spec.metricColumn.toString() : null}
+              value={columnSelectSelectedOption(spec.metricColumn, filterColumns(columnOptions, ['number']))}
               name="metricColumnInput"
               clearable
               options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number']))}

@@ -6,7 +6,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 
 import Button from '../../common/Button';
 import SelectMenu from '../../common/SelectMenu';
-import { filterColumns, columnSelectOptions } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 import './FilterMenu.scss';
 
 const getMenuFilters = filterArray =>
@@ -362,7 +362,7 @@ class FilterMenu extends Component {
                       className="filterColumnInput"
                       name="filterColumnInput"
                       placeholder={`${formatMessage({ id: 'choose_a_column_to_filter_by' })}...`}
-                      value={newFilterColumn || null}
+                      value={columnSelectSelectedOption(newFilterColumn, filterColumns(columnOptions, ['option', 'text', 'number', 'date']))}
                       options={
                         columnSelectOptions(
                           this.props.intl,
