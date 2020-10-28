@@ -23,7 +23,7 @@ function SelectMenu(props) {
   }));
 
   let value = props.value && typeof props.value === 'string' ? options.filter(o => o.value === props.value)[0] : props.value;
-  if (value && value.label !== undefined && !value.label.length) {
+  if (!value.options && !value.label) {
     value = null;
   }
 
