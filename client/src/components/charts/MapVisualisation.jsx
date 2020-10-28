@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import leaflet from 'leaflet';
 import { isEqual, cloneDeep, get, compact } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import ScrollTrigger from 'react-scroll-trigger';
 
 import leafletUtfGrid from '../../vendor/leaflet.utfgrid';
 import * as chart from '../../utilities/chart';
@@ -251,16 +250,17 @@ export default class MapVisualisation extends Component {
     this.state = {
       hasTrackedLayerTypes: false,
       hasRendered: false,
-      hasEnteredViewport: false,
     };
     this.hasAddedLayers = false;
   }
 
+  componentDidMount() {
+    this.renderLeafletMap(this.props);
+  }
+
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.hasEnteredViewport) {
-      this.renderLeafletMap(this.props);
-    }
+    this.renderLeafletMap(this.props);
   }
 
   componentWillUnmount() {
@@ -279,7 +279,10 @@ export default class MapVisualisation extends Component {
             return false;
           }
         });
+        // console.log('layers', map._layers);
+        // console.log('checks', checks);
         const check = checks.filter(o => o).length === 0;
+//        console.log('check', check);
         if (check) {
           this.setState({ hasRendered: true });
           clearInterval(this.loadInterval);
@@ -496,13 +499,6 @@ export default class MapVisualisation extends Component {
     this.storedLayerGroupId = layerGroupId;
   }
 
-  onEnterViewport = () => {
-    if (!this.state.hasEnteredViewport) {
-      this.setState({ hasEnteredViewport: true });
-      this.renderLeafletMap(this.props);
-    }
-  }
-
   render() {
     const { visualisation, metadata, width, height, showTitle, datasets, exporting } = this.props;
     const title = visualisation.name || '';
@@ -526,75 +522,73 @@ export default class MapVisualisation extends Component {
     );
     const lastUpdated = chart.getDataLastUpdated({ visualisation, datasets });
     return (
-      <ScrollTrigger onEnter={this.onEnterViewport}>
-        <div
-          className="MapVisualisation dashChart"
-          style={{
-            width,
-            height,
-          }}
-        >
-          {this.state.hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
-          {showTitle && (
-            <div>
-              <h2
+      <div
+        className="MapVisualisation dashChart"
+        style={{
+          width,
+          height,
+        }}
+      >
+        {this.state.hasRendered && visualisation.id && <RenderComplete id={visualisation.id} />}
+        {showTitle && (
+          <div>
+            <h2
+              style={{
+                height: titleHeight,
+                lineHeight: titleLength > 96 ? '16px' : '20px',
+                fontSize: titleLength > 96 ? '14px' : '16px',
+              }}
+            >
+              <span>
+                {chart.getTitle(visualisation)}
+              </span>
+            </h2>
+            {lastUpdated && (
+              <p
+                className="chartMeta"
                 style={{
-                  height: titleHeight,
-                  lineHeight: titleLength > 96 ? '16px' : '20px',
-                  fontSize: titleLength > 96 ? '14px' : '16px',
+                  height: titleHeight * META_SCALE,
+                  lineHeight: titleLength > 96 ? '12px' : '16px',
+                  fontSize: titleLength > 96 ? '10px' : '12px',
                 }}
               >
-                <span>
-                  {chart.getTitle(visualisation)}
-                </span>
-              </h2>
-              {lastUpdated && (
-                <p
-                  className="chartMeta"
-                  style={{
-                    height: titleHeight * META_SCALE,
-                    lineHeight: titleLength > 96 ? '12px' : '16px',
-                    fontSize: titleLength > 96 ? '10px' : '12px',
-                  }}
-                >
-                  <span className="capitalize">
-                    <FormattedMessage id="data_last_updated" />
-                  </span>: {lastUpdated}
-                </p>
-              )}
-            </div>
-          )}
-          <div
-            className="mapContainer"
-            style={{
-              height: mapHeight,
-              width: mapWidth,
-            }}
-          >
-            <div
-              style={{
-                height: `${height}px`,
-                width: `${width}px`,
-              }}
-              className="leafletMap" id="leafletMap"
-              ref={(ref) => { this.leafletMapNode = ref; }}
-            />
-            {needLegend &&
-              <Legend
-                layers={visualisation.spec.layers}
-                layerMetadata={metadata.layerMetadata}
-              />
-            }
-            {visualisation.awaitingResponse && !exporting && (
-              <Spinner />
+                <span className="capitalize">
+                  <FormattedMessage id="data_last_updated" />
+                </span>: {lastUpdated}
+              </p>
             )}
-            {
-              visualisation.failedToLoad &&
-              <div className="failedIndicator" />
-            }
           </div>
+        )}
+        <div
+          className="mapContainer"
+          style={{
+            height: mapHeight,
+            width: mapWidth,
+          }}
+        >
+          <div
+            style={{
+              height: `${height}px`,
+              width: `${width}px`,
+            }}
+            className="leafletMap" id="leafletMap"
+            ref={(ref) => { this.leafletMapNode = ref; }}
+          />
+          {needLegend &&
+            <Legend
+              layers={visualisation.spec.layers}
+              layerMetadata={metadata.layerMetadata}
+            />
+          }
+          {visualisation.awaitingResponse && !exporting && (
+            <Spinner />
+          )}
+          {
+            visualisation.failedToLoad &&
+            <div className="failedIndicator" />
+          }
         </div>
-      </ScrollTrigger>
+      </div>
     );
   }
 }
@@ -607,7 +601,6 @@ MapVisualisation.propTypes = {
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   showTitle: PropTypes.bool,
   exporting: PropTypes.bool,
-  canvasContainer: PropTypes.object,
 };
 
 MapVisualisation.defaultProps = {

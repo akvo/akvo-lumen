@@ -4,6 +4,23 @@ agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
+global_job_config:
+  secrets:
+    - name: docker-hub-credentials
+  prologue:
+    commands:
+      - echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+      - |
+        sudo rm -rf \
+        /usr/local/golang/ \
+        /home/semaphore/.phpbrew \
+        /home/semaphore/.kerl \
+        /home/semaphore/.sbt \
+        /home/semaphore/.nvm \
+        /home/semaphore/.npm \
+        /home/semaphore/.kiex \
+        /usr/lib/jvm \
+        /opt/*
 blocks:
   - name: 'Lumen: Build, test & deploy'
     task:

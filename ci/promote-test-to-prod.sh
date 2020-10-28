@@ -75,7 +75,7 @@ log "Commits to be deployed:"
 echo ""
 git log --oneline $NEWEST_VERSION_IN_PROD..$TEST_LIVE_VERSION | grep -v "Merge pull request" | grep -v "Merge branch"
 
-"${DIR}"/helpers/generate-team-notification.sh "${NEWEST_VERSION_IN_PROD}" "${TEST_LIVE_VERSION}" "Promoting Lumen to dark prod cluster" "good"
+"${DIR}"/helpers/generate-team-notification.sh "${NEWEST_VERSION_IN_PROD}" "${TEST_LIVE_VERSION}" "Promoting *Lumen* to dark prod cluster" "good"
 
 TAG_NAME="promote-$(TZ=UTC date +"%Y%m%d-%H%M%S")"
 
