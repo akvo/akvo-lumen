@@ -5,7 +5,7 @@ import { intlShape, injectIntl } from 'react-intl';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
-import { filterColumns, columnSelectOptions } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
 const getColumnTitle = (columnName, columnOptions) =>
   get(columnOptions.find(obj => obj.value === columnName), 'title');
@@ -71,7 +71,7 @@ function LineConfigMenu(props) {
             <ConfigMenuSectionOptionSelect
               placeholderId="select_a_metric_column"
               labelTextId="metric_column"
-              value={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
+              value={columnSelectSelectedOption(spec.metricColumnX, filterColumns(columnOptions, ['number', 'date']))}
               name="metricColumnXInput"
               options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number', 'date']))}
               onChange={value => onChangeSpec({
@@ -104,7 +104,7 @@ function LineConfigMenu(props) {
             <ConfigMenuSectionOptionSelect
               placeholderId="select_a_metric_column"
               labelTextId="metric_column"
-              value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+              value={columnSelectSelectedOption(spec.metricColumnY, filterColumns(columnOptions, ['number', 'text', 'option']))}
               name="metricColumnYInput"
               options={columnSelectOptions(props.intl, filterColumns(columnOptions, ['number', 'text', 'option']))}
               onChange={value => onChangeSpec({

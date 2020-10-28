@@ -22,7 +22,11 @@ function SelectMenu(props) {
     options,
   }));
 
-  const value = props.value && typeof props.value === 'string' ? options.filter(o => o.value === props.value)[0] : props.value;
+  let value = props.value && typeof props.value === 'string' ? options.filter(o => o.value === props.value)[0] : props.value;
+  if (!value.options && !value.label) {
+    value = null;
+  }
+
   const width = props.width ? { width: props.width } : {};
 
   return (

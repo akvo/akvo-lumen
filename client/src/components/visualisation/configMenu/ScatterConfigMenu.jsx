@@ -7,7 +7,7 @@ import {
   uniqBy,
 } from 'lodash';
 
-import { filterColumns, columnSelectOptions } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ToggleInput from '../../common/ToggleInput';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
@@ -71,7 +71,7 @@ function ScatterConfigMenu(props) {
           <ConfigMenuSectionOptionSelect
             placeholderId="select_a_metric_column"
             labelTextId="metric_column"
-            value={spec.metricColumnY !== null ? spec.metricColumnY.toString() : null}
+            value={columnSelectSelectedOption(spec.metricColumnY, filterColumns(columnOptions, ['number', 'date']))}
             name="yColumnInput"
             options={columnSelectOptions(intl, filterColumns(columnOptions, ['number', 'date']))}
             onChange={(value) => {
@@ -106,7 +106,7 @@ function ScatterConfigMenu(props) {
           <ConfigMenuSectionOptionSelect
             placeholderId="select_a_metric_column"
             labelTextId="metric_column"
-            value={spec.metricColumnX !== null ? spec.metricColumnX.toString() : null}
+            value={columnSelectSelectedOption(spec.metricColumnX, filterColumns(columnOptions, ['number', 'date']))}
             name="xColumnInput"
             options={columnSelectOptions(intl, filterColumns(columnOptions, ['number', 'date']))}
             clearable
@@ -143,7 +143,7 @@ function ScatterConfigMenu(props) {
               labelTextId="bucket_column"
               value={
                 itsSet(spec.bucketColumnCategory) ?
-                  spec.bucketColumnCategory.toString() :
+                  columnSelectSelectedOption(spec.bucketColumnCategory, filterColumns(columnOptions, ['number', 'text', 'option'])) :
                   null
               }
               name="sizeColumnInput"
@@ -272,7 +272,7 @@ function ScatterConfigMenu(props) {
               labelTextId="metric_column"
               value={
                 itsSet(spec.metricColumnSize) ?
-                  spec.metricColumnSize.toString() :
+                  columnSelectSelectedOption(spec.metricColumnSize, filterColumns(columnOptions, ['number', 'date'])) :
                   null
               }
               name="sizeColumnInput"
@@ -314,8 +314,7 @@ function ScatterConfigMenu(props) {
             <ConfigMenuSectionOptionSelect
               placeholderId="select_a_data_column_to_group_by"
               labelTextId="bucket_column"
-              value={spec.bucketColumn !== null ?
-                spec.bucketColumn.toString() : null}
+              value={columnSelectSelectedOption(spec.bucketColumn, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
               name="xGroupColumnMenu"
               options={columnSelectOptions(intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
               clearable
@@ -359,7 +358,7 @@ function ScatterConfigMenu(props) {
             <ConfigMenuSectionOptionSelect
               placeholderId="select_a_popup_label_column"
               labelTextId="popup_label_column"
-              value={getPopupLabelChoice(spec)}
+              value={columnSelectSelectedOption(getPopupLabelChoice(spec), filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
               name="datapointLabelColumnMenu"
               options={columnSelectOptions(intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
               clearable
