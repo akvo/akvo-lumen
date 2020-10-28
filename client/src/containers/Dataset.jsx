@@ -332,6 +332,7 @@ function Dataset(props) {
             datasetGroupsAvailable={dataset.get('groups') != null}
             groupAvailable={!!currentGroup}
             handleChangeQuestionGroup={onChangeQuestionGroup}
+            dataSourceKind={dataset.getIn(['source', 'kind'])}
           />
         ) : (
           <DatasetTableV1
