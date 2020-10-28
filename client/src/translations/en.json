@@ -256,6 +256,7 @@
   "pdf": "PDF",
   "pending": "Pending",
   "percentage_stack_bars": "Percentage Stack Bars",
+  "pick_a_default_value": "Pick a default value",
   "pie": "Pie",
   "pivot table": "Pivot table",
   "pivot_help_text": "Choose a column and a row to pivot on to use aggregations other than count.",
