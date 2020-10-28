@@ -2,6 +2,8 @@
   (:require [akvo.lumen.http.client :as http.client]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.postgres.filter :as filter]
+            [akvo.lumen.lib.aggregation.commons :as aggregation]
+            [akvo.lumen.lib.env :as env]
             [akvo.lumen.lib.visualisation.map-config :as map-config]
             [akvo.lumen.lib.visualisation.map-metadata :as map-metadata]
             [akvo.lumen.lib.transformation.engine :as engine]
@@ -107,7 +109,10 @@
                                     (:datasetId current-layer))
                {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
                                                            (db.raster/raster-by-id tenant-conn {:id current-dataset-id})
-                                                           (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id}))
+                                                           (if (-> (env/all tenant-conn) (get "data-groups"))
+                                                             (or (aggregation/table-name-and-columns-from-data-grops tenant-conn current-dataset-id)
+                                                                 (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id}))
+                                                             (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id})))
                current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]
            (map-metadata/build tenant-conn
                                (or raster_table
