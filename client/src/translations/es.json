@@ -250,6 +250,7 @@
   "pdf": "PDF",
   "pending": "Pendiente",
   "percentage_stack_bars": "Barras 100% apiladas",
+  "pick_a_default_value": "Elegir valor por defecto",
   "pie": "Pastel",
   "pivot table": "Tabla pivote",
   "pivot_help_text": "Escoje una columna y una fila pivote para utilizar agregaciones distintas del recuento.",
