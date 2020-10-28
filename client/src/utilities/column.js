@@ -70,7 +70,9 @@ export const findColumnI = (columns, cName) => columns.find(column => column.get
 
 export const columnSelectSelectedOption = (cValue, columns) => {
   const l = columns.find(c => (columnValue(c) || columnName(c)) === cValue);
-  return l ? { value: columnValue(l) || columnName(l), label: columnLabel(l) || columnTitle(l) } : { value: '', label: '' };
+  return l
+    ? { value: columnValue(l) || columnName(l), label: columnLabel(l) || columnTitle(l) }
+    : null;
 };
 
 export const columnSelectOptions = (intl, columns) => {
