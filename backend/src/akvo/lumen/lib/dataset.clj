@@ -60,10 +60,10 @@
 
 
 (defn- groups
-  ([dataset]
-   (groups dataset false))
-  ([dataset ordered?]
-   (let [dataset-columns (->> (:columns dataset)
+  ([columns]
+   (groups columns false))
+  ([columns ordered?]
+   (let [dataset-columns (->> columns
                               (remove #(get % "hidden"))
                               (map db.dataset/adapt-group))
          grouped (-> (group-by #(get % "groupId") dataset-columns)
@@ -96,14 +96,14 @@
                                       [:id :title :modified :created :updated :source :transformations])
                          (assoc :status "OK")
                          (rename-keys {:title :name}))]
-        (lib/ok (assoc dataset*  :groups (groups dsv true))))
+        (lib/ok (assoc dataset*  :groups (groups (:columns dsv) true))))
       (lib/not-found {:error "Not found"}))))
 
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
   [tenant-conn id]
   (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [groups   (groups dsv)
+    (let [groups   (groups (:columns dsv))
           dataset* (-> (select-keys dsv
                                     [:created :id :modified :status :title :transformations :updated :author :source :columns])
                        (assoc :status "OK")
@@ -115,7 +115,7 @@
 (defn fetch
   [tenant-conn id]
   (when-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [groups-dataset (groups dsv)
+    (let [groups-dataset (groups (:columns dsv))
           columns (reduce into [] (vals groups-dataset))
           namespaces (set (map #(get % "namespace" "main") columns))
           columns (remove #(get % "hidden")  columns)
@@ -146,7 +146,7 @@
                    :columns (:columns dg)
                    :status "OK" :datasetId id :groupId group-id))))
     (when-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-      (let [columns (get (groups dsv) group-id)
+      (let [columns (get (groups (:columns dsv)) group-id)
             namespaces (set (map #(get % "namespace" "main") columns))
             q (select-data-sql (:table-name dsv) columns)
             data (rest (jdbc/query tenant-conn
