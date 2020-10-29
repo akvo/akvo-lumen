@@ -46,3 +46,7 @@ Cypress.Commands.add('login', () => {
     });
   }
 });
+
+Cypress.Commands.add('waitForAutoSave', () => {
+  cy.get('.saveStatus').should('contain', 'All changes saved');
+});

@@ -50,10 +50,14 @@ describe('Akvo Lumen e2e tests', () => {
         force: true,
       });
 
+      cy.waitForAutoSave();
+
       cy.get('[data-test-id="dataset-menu"] .SelectMenu input')
         .first()
         .click({ force: true })
         .type(`${datasetName}{enter}`, { force: true });
+
+      cy.waitForAutoSave();
 
       // open column menu
       cy.get('[data-test-id="column-select"] .SelectMenu input', {
@@ -62,6 +66,8 @@ describe('Akvo Lumen e2e tests', () => {
         .first()
         .click({ force: true })
         .type(`${COLUMNS.TEXT_1}{enter}`, { force: true });
+
+      cy.waitForAutoSave();
 
       const title = `Visualisation of ${datasetName}`;
 
@@ -170,10 +176,15 @@ describe('Akvo Lumen e2e tests', () => {
 
       // Area
       cy.get('[data-test-id="visualisation-type-area"]').click({ force: true });
+
+      cy.waitForAutoSave();
+
       cy.get('[data-test-id="dataset-menu"] .SelectMenu input')
         .first()
         .click({ force: true })
         .type(`${datasetName}{enter}`, { force: true });
+
+      cy.waitForAutoSave();
 
       // open x axis menu
       cy.get('[data-test-id="x-axis-select"] .SelectMenu input')
