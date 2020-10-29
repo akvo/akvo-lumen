@@ -251,6 +251,7 @@
   "pdf": "PDF",
   "pending": "En attendant",
   "percentage_stack_bars": "Pourcentage de barres empilées",
+  "pick_a_default_value": "Entrez une valeur par défaut",
   "pie": "camembert",
   "pivot table": "Tableau croisé",
   "pivot_help_text": "Choisissez une colonne et une ligne à croiser pour utiliser des agrégations autres que le compte.",

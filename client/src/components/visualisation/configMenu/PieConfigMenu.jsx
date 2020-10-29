@@ -5,7 +5,7 @@ import get from 'lodash/get';
 
 import ButtonRowInput from './ButtonRowInput';
 import ToggleInput from '../../common/ToggleInput';
-import { filterColumns, columnSelectOptions } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
@@ -27,7 +27,7 @@ function PieConfigMenu(props) {
         options={(
           <ConfigMenuSectionOptionSelect
             placeholderId="select_a_data_column_to_group_by"
-            value={spec.bucketColumn !== null ? spec.bucketColumn.toString() : null}
+            value={columnSelectSelectedOption(spec.bucketColumn, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
             name="xGroupColumnMenu"
             options={columnSelectOptions(intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
             clearable

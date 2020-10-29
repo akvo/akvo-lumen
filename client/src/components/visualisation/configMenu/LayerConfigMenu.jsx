@@ -10,7 +10,7 @@ import Button from '../../common/Button';
 import ColorLabels from './ColorLabels';
 import FilterMenu from './FilterMenu';
 import { checkUndefined, sortAlphabetically } from '../../../utilities/utils';
-import { filterColumns, columnSelectOptions } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 import * as entity from '../../../domain/entity';
 import { palette } from '../../../utilities/visualisationColors';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -96,7 +96,7 @@ const GeopointDataTab = injectIntl((props) => {
               disabled={layer.datasetId === null || disabled}
               placeholder={intl.formatMessage({ id: 'select_a_latitude_column' })}
               labelText={intl.formatMessage({ id: 'select_a_latitude_column' })}
-              value={layer.latitude != null ? layer.latitude.toString() : null}
+              value={columnSelectSelectedOption(layer.latitude, filterColumns(columnOptions, 'number'))}
               name="latitudeInput"
               options={columnSelectOptions(intl, filterColumns(columnOptions, 'number'))}
               onChange={value => onChangeMapLayer(layerIndex, {
@@ -109,7 +109,7 @@ const GeopointDataTab = injectIntl((props) => {
               disabled={layer.datasetId === null || disabled}
               placeholder={intl.formatMessage({ id: 'select_a_longitude_column' })}
               labelText={intl.formatMessage({ id: 'select_a_longitude_column' })}
-              value={layer.longitude != null ? layer.longitude.toString() : null}
+              value={columnSelectSelectedOption(layer.longitude, filterColumns(columnOptions, 'number'))}
               name="longitudeInput"
               options={columnSelectOptions(intl, filterColumns(columnOptions, 'number'))}
               onChange={value => onChangeMapLayer(layerIndex, {
@@ -125,7 +125,7 @@ const GeopointDataTab = injectIntl((props) => {
           disabled={layer.datasetId === null || disabled}
           placeholder={intl.formatMessage({ id: 'select_a_geopoint_column' })}
           labelTextId="geopoint_column"
-          value={layer.geom != null ? layer.geom.toString() : null}
+          value={columnSelectSelectedOption(layer.geom, filterColumns(columnOptions, 'geopoint'))}
           name="geomInput"
           options={columnSelectOptions(intl, filterColumns(columnOptions, 'geopoint'))}
           onChange={value => onChangeMapLayer(layerIndex, {
@@ -144,8 +144,7 @@ const GeopointDataTab = injectIntl((props) => {
           }
           placeholder={intl.formatMessage({ id: 'select_a_color_coding_column' })}
           labelTextId="color_coding_column"
-          value={layer.pointColorColumn != null ?
-            layer.pointColorColumn.toString() : null}
+          value={columnSelectSelectedOption(layer.pointColorColumn, filterColumns(columnOptions, ['text', 'number', 'option']))}
           name="xGroupColumnMenu"
           options={columnSelectOptions(intl, filterColumns(columnOptions, ['text', 'number', 'option']))}
           clearable
@@ -205,7 +204,7 @@ const GeoshapeDataTab = injectIntl((props) => {
         disabled={layer.datasetId === null || disabled}
         placeholderId="select_a_geoshape_column"
         labelTextId="geoshape_column"
-        value={layer.geom != null ? layer.geom.toString() : null}
+        value={columnSelectSelectedOption(layer.geom, filterColumns(columnOptions, 'geoshape'))}
         name="geomInput"
         options={columnSelectOptions(intl, filterColumns(columnOptions, 'geoshape'))}
         onChange={value => onChangeMapLayer(layerIndex, {
@@ -227,7 +226,7 @@ const GeoshapeDataTab = injectIntl((props) => {
           clearable
           disabled={layer.datasetId === null || disabled}
           placeholderId="select_a_geoshape_label_column"
-          value={layer.shapeLabelColumn != null ? layer.shapeLabelColumn.toString() : null}
+          value={columnSelectSelectedOption(layer.shapeLabelColumn, filterColumns(columnOptions, ['text', 'option']))}
           name="shapeLabelInput"
           options={columnSelectOptions(intl, filterColumns(columnOptions, ['text', 'option']))}
           onChange={value => onChangeMapLayer(layerIndex, {
@@ -252,8 +251,7 @@ const GeoshapeDataTab = injectIntl((props) => {
         disabled={(layer.aggregationDataset == null) || disabled}
         placeholderId="select_a_styling_indicator_geopoint_column"
         labelTextId="styling_indicator_geopoint_column"
-        value={layer.aggregationGeomColumn != null ?
-          layer.aggregationGeomColumn.toString() : null}
+        value={columnSelectSelectedOption(layer.aggregationGeomColumn, filterColumns(aggregationColumns, ['geopoint']))}
         name="aggregationGeomColumn"
         options={columnSelectOptions(intl, filterColumns(aggregationColumns, ['geopoint']))}
         clearable
@@ -265,8 +263,7 @@ const GeoshapeDataTab = injectIntl((props) => {
         disabled={(layer.aggregationDataset == null) || disabled}
         placeholderId="select_a_styling_indicator"
         labelTextId="styling_indicator"
-        value={layer.aggregationColumn != null ?
-          layer.aggregationColumn.toString() : null}
+        value={columnSelectSelectedOption(layer.aggregationColumn, filterColumns(aggregationColumns, ['number']))}
         name="aggregationColumn"
         options={columnSelectOptions(intl, filterColumns(aggregationColumns, ['number']))}
         clearable

@@ -5,7 +5,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import UniqueValueMenu from './UniqueValueMenu';
 import ToggleInput from '../../common/ToggleInput';
 import { canShowPivotTotals } from '../../../utilities/chart';
-import { filterColumns, columnSelectOptions } from '../../../utilities/column';
+import { filterColumns, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 import ConfigMenuSectionOptionText from '../../common/ConfigMenu/ConfigMenuSectionOptionText';
 import ConfigMenuSectionOptionSelect from '../../common/ConfigMenu/ConfigMenuSectionOptionSelect';
 import ConfigMenuSection from '../../common/ConfigMenu/ConfigMenuSection';
@@ -115,7 +115,7 @@ class PivotTableConfigMenu extends Component {
                 <ConfigMenuSectionOptionSelect
                   placeholderId="select_a_value_column"
                   labelTextId="value_column"
-                  value={spec.valueColumn !== null ? spec.valueColumn.toString() : null}
+                  value={columnSelectSelectedOption(spec.valueColumn, filterColumns(columnOptions, ['number', 'date']))}
                   name="valueColumnInput"
                   options={columnSelectOptions(this.props.intl, filterColumns(columnOptions, ['number', 'date']))}
                   onChange={value => onChangeSpec({
@@ -198,7 +198,7 @@ class PivotTableConfigMenu extends Component {
                 <ConfigMenuSectionOptionSelect
                   placeholderId="select_a_column"
                   labelTextId="columns"
-                  value={spec.categoryColumn !== null ? spec.categoryColumn.toString() : null}
+                  value={columnSelectSelectedOption(spec.categoryColumn, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
                   name="categoryColumnInput"
                   options={columnSelectOptions(this.props.intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
                   onChange={(value) => {
@@ -256,7 +256,7 @@ class PivotTableConfigMenu extends Component {
               <ConfigMenuSectionOptionSelect
                 placeholderId="select_a_row_column"
                 labelTextId="row_column"
-                value={spec.rowColumn !== null ? spec.rowColumn.toString() : null}
+                value={columnSelectSelectedOption(spec.rowColumn, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
                 name="rowColumnInput"
                 options={columnSelectOptions(this.props.intl, filterColumns(columnOptions, ['number', 'date', 'text', 'option']))}
                 onChange={(value) => {
