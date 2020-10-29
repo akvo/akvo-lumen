@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import update from 'immutability-helper';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import debounce from 'lodash/debounce';
 import { intlShape, injectIntl } from 'react-intl';
 import BodyClassName from 'react-body-classname';
 
@@ -259,8 +260,14 @@ class Visualisation extends Component {
       visualisation: { ...this.state.visualisation, ...map },
       isUnsavedChanges: true,
     }, () => {
-      this.onSave();
-      callback();
+      if (!this.debouncedhandleChangeVisualisationCb) {
+        this.debouncedhandleChangeVisualisationCb = debounce(() => {
+          this.onSave();
+          callback();
+        }, 500);
+      }
+
+      this.debouncedhandleChangeVisualisationCb();
     });
   }
 
