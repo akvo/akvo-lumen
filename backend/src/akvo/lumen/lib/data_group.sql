@@ -9,3 +9,4 @@ VALUES (:id, :group-id, :group-name, :group-order, :dataset-version-id, :table-n
 SELECT id, group_id, group_name, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, created, modified, repeatable
 FROM data_group
 WHERE dataset_version_id=:dataset-version-id
+ORDER BY group_order, created
