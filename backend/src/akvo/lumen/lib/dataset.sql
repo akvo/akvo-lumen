@@ -148,7 +148,9 @@ SELECT data_group.table_name AS "table-name",
    AND data_group.dataset_version_id = dataset_version_2.id
    AND dataset_version_2.version=(SELECT max(version)
                                     FROM dataset_version_2
-                                   WHERE dataset_id= :dataset-id);
+                                   WHERE dataset_id= :dataset-id)
+ORDER BY data_group.group_order, data_group.created;
+
 
 -- :name db-table-name-and-columns-by-dataset-id :? :1
 SELECT dataset_version.table_name AS "table-name",
