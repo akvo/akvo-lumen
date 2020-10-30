@@ -22,7 +22,9 @@
 (defn- successful-execution [conn job-execution-id data-source-id dataset-id group-table-names columns {:keys [spec-name spec-description]} claims]
   (let [dataset-version-id (util/squuid)
         {:strs [rqg]} (env/all conn)
-        grouped-columns (group-by :groupId columns)]
+        grouped-columns (group-by :groupId columns)
+        ordered-groups-ids (distinct (map :groupId columns))
+        ordered-grouped-columns-col (reduce #(conj % [%2 (get grouped-columns %2)]) [] ordered-groups-ids)]
     (db.dataset-version/new-dataset-version-2 conn
                                               {:id dataset-version-id
                                                :dataset-id dataset-id
@@ -30,7 +32,7 @@
                                                :author claims
                                                :version 1
                                                :transformations []})
-    (doseq [[group-id cols] grouped-columns]
+    (doseq [[group-id cols] ordered-grouped-columns-col]
       (let [imported-table-name (util/gen-table-name "imported")
             table-name (get group-table-names group-id)
             instance-id-col (->> "metadata"
