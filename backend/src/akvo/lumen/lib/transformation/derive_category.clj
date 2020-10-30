@@ -36,11 +36,11 @@
     uncategorized-value
     (or
      (some (fn [[[a b :as x] [c d :as y] cat]]
-             (let [exp (read-string (format "(%s %s %s)" a v b))
-                   eval1 (eval exp)]
+             (let [exp (resolve (symbol a))
+                   eval1 (apply exp [v b])]
                (if y
-                 (let [exp2 (read-string (format "(%s %s %s)" c v d))
-                       eval1&2 (and eval1 (eval exp2))]
+                 (let [exp2 (resolve (symbol c))
+                       eval1&2 (and eval1 (apply exp2 [v d]))]
                    (when eval1&2 cat))
                  (when eval1 cat))))
            mappings)
