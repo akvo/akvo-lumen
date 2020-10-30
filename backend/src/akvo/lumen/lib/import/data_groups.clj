@@ -24,7 +24,19 @@
         {:strs [rqg]} (env/all conn)
         grouped-columns (group-by :groupId columns)
         ordered-groups-ids (distinct (map :groupId columns))
-        ordered-grouped-columns-col (reduce #(conj % [%2 (get grouped-columns %2)]) [] ordered-groups-ids)]
+        ordered-grouped-columns-list (->> ordered-groups-ids
+                                          (filter #(not= % "metadata"))
+                                          (map vector (range))
+                                          (reduce (fn [c [group-order group-id]]
+                                                    (conj c {:group-id group-id
+                                                             :columns (get grouped-columns group-id)
+                                                             :group-order group-order})) ()))
+        ordered-grouped-columns (if (contains? (set ordered-groups-ids) "metadata")
+                                  (vec (reverse (conj (map #(update % :group-order inc) ordered-grouped-columns-list)
+                                                      {:group-id "metadata"
+                                                       :columns (get grouped-columns "metadata")
+                                                       :group-order 0})))
+                                  (vec (reverse ordered-grouped-columns-list)))]
     (db.dataset-version/new-dataset-version-2 conn
                                               {:id dataset-version-id
                                                :dataset-id dataset-id
@@ -32,7 +44,7 @@
                                                :author claims
                                                :version 1
                                                :transformations []})
-    (doseq [[group-id cols] ordered-grouped-columns-col]
+    (doseq [{:keys [columns group-id group-order]} ordered-grouped-columns]
       (let [imported-table-name (util/gen-table-name "imported")
             table-name (get group-table-names group-id)
             instance-id-col (->> "metadata"
@@ -50,8 +62,9 @@
                                              :imported-table-name imported-table-name
                                              :table-name table-name
                                              :group-id group-id
-                                             :group-name (:groupName (first cols) group-id)
-                                             :repeatable (:repeatable (first cols) false)
+                                             :group-name (:groupName (first columns) group-id)
+                                             :repeatable (:repeatable (first columns) false)
+                                             :group-order group-order
                                              :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId hidden]}]
                                                               {:columnName id
                                                                :direction nil
@@ -64,7 +77,7 @@
                                                                :sort nil
                                                                :title (string/trim title)
                                                                :type type})
-                                                            cols)})))))
+                                                            columns)})))))
 
 (defn execute [conn job-execution-id data-source-id dataset-id claims spec import-config]
   (with-open [importer (common/datagroups-importer (get spec "source") (assoc import-config :environment (env/all conn)))]
