@@ -186,3 +186,6 @@ Session.vim
 /service.yaml
 /flipped.service.yaml
 /ci/helpers/flip.record.yaml
+
+# ORG-ROAM
+backend/roam
