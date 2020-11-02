@@ -558,7 +558,7 @@ class DatasetTable extends Component {
                   groupHeaderHeight={40}
                   headerHeight={40}
                   rowHeight={40}
-                  rowsCount={rows.size}
+                  rowsCount={props.rowsCount}
                   width={width}
                   height={height}
                   onScrollStart={() => this.handleScroll()}
@@ -580,6 +580,7 @@ DatasetTable.propTypes = {
   datasetId: PropTypes.string.isRequired,
   columns: PropTypes.object,
   rows: PropTypes.object,
+  rowsCount: PropTypes.number,
   transformations: PropTypes.object,
   pendingTransformations: PropTypes.object.isRequired,
   onTransform: PropTypes.func.isRequired,
