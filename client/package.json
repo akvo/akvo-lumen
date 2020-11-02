@@ -19,7 +19,6 @@
     "build": "babel-node tools/buildProd.js",
     "build:dev": "babel-node tools/buildDev.js",
     "test": "jest",
-    "test-old": "NODE_ENV=test mocha test/.setup.js \"test/**/*.@(js|jsx)\"",
     "test:watch": "npm test -- --watch",
     "analyze-bundle": "babel-node ./tools/analyzeBundle.js",
     "storybook": "start-storybook -p 6006",
