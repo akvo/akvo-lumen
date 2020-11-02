@@ -450,7 +450,7 @@ function DatasetTable(props) {
       <DatasetHeader
         {...props.headerProps}
         history={props.history}
-        rowsCount={props.rows ? props.rows.size : -1}
+        rowsCount={props.rowsCount}
         isLockedFromTransformations={props.isLockedFromTransformations}
         onNavigateToVisualise={props.onNavigateToVisualise}
         onClickTransformMenuItem={handleClickDatasetControlItem}
@@ -581,6 +581,7 @@ DatasetTable.propTypes = {
   onUndoTransformation: PropTypes.func.isRequired,
   pendingTransformations: PropTypes.object.isRequired,
   rows: PropTypes.object,
+  rowsCount: PropTypes.number,
   transformations: PropTypes.object,
   dataSourceKind: PropTypes.string,
 };

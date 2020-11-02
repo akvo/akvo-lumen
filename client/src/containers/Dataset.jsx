@@ -52,7 +52,7 @@ function Dataset(props) {
   const [hasTrackedPageView, setHasTrackedPageView] = useState(false);
 
   const [currentGroup, changeCurrentGroup] = useState(null);
-
+  const [rowsCount, setRowsCount] = useState(null);
   const removePending = timestamp =>
     setPendingTransformations(x => x.delete(timestamp));
 
@@ -229,7 +229,7 @@ function Dataset(props) {
           if (!response.ok) {
             throw new Error(response.body.message);
           }
-
+          setRowsCount(response.body.rows.length);
           changeCurrentGroup(Immutable.fromJS(response.body));
         })
         .catch((error) => {
@@ -247,7 +247,9 @@ function Dataset(props) {
           if (!response.ok) {
             throw new Error(response.body.message);
           }
-
+          if (currentGroup === 'metadata') {
+            setRowsCount(response.body.rows.length);
+          }
           changeCurrentGroup(Immutable.fromJS(response.body));
         })
         .catch((error) => {
@@ -261,7 +263,7 @@ function Dataset(props) {
           if (!response.ok) {
             throw new Error(response.body.message);
           }
-
+          setRowsCount(response.body.rows.length);
           changeCurrentGroup(Immutable.fromJS(response.body));
         })
         .catch((error) => {
@@ -307,6 +309,7 @@ function Dataset(props) {
             group={currentGroup}
             columns={currentGroup ? currentGroup.get('columns') : null}
             rows={currentGroup ? currentGroup.get('rows') : null}
+            rowsCount={rowsCount}
             groups={dataset.get('groups') ? dataset.get('groups').filter(group => group.get(1).size) : null}
             Header={DatasetHeader}
             headerProps={{
@@ -340,6 +343,7 @@ function Dataset(props) {
             datasetId={datasetId}
             columns={getColumns(dataset)}
             rows={getRows(dataset)}
+            rowsCount={rowsCount}
             Header={DatasetHeader}
             headerProps={{
               onShowDatasetSettings,
