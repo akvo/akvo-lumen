@@ -210,6 +210,7 @@ function Dataset(props) {
 
   useEffect(() => {
     if (!useDataGroups) {
+      setRowsCount(dataset && dataset.get('rows') && dataset.get('rows').size);
       return undefined; // exit early
     }
 
