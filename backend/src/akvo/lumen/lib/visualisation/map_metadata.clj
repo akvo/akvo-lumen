@@ -116,15 +116,24 @@
                               first :st_extent)]
       (parse-box st-extent))))
 
-(defn get-column-titles [tenant-conn selector-name selector-value dataset-version-ns]
-  (let [sql-str "SELECT columns, modified FROM dataset_version WHERE %s='%s' AND namespace='%s' ORDER BY version DESC LIMIT 1"]
+(defn get-column-titles [tenant-conn selector-name selector-value dataset-version-ns dataset-id]
+  (let [sql-str "SELECT columns FROM dataset_version WHERE %s='%s' AND namespace='%s' ORDER BY version DESC LIMIT 1"
+        columns (-> (jdbc/query tenant-conn (format sql-str selector-name selector-value dataset-version-ns))
+                        first
+                        :columns)
+        columns (if (empty? columns)
+                  (->> (jdbc/query tenant-conn (format "SELECT dg.columns
+                                                          FROM (SELECT id FROM dataset_version_2
+                                                                 WHERE dataset_id = '%s'
+                                                         ORDER BY version DESC LIMIT 1) dv, data_group dg
+                                                         WHERE dv.id = dg.dataset_version_id" dataset-id))
+                      (mapcat :columns))
+                  columns)]
     (map (fn [{:strs [columnName title type]}]
            {:columnName columnName
             :type type
             :title title})
-         (-> (jdbc/query tenant-conn (format sql-str selector-name selector-value dataset-version-ns))
-             first
-             :columns))))
+         columns)))
 
 (defn get-column-title-for-name [collection column-name]
   (-> (filter (fn [{:keys [columnName]}]
@@ -134,7 +143,7 @@
       :title))
 
 (defn point-metadata [tenant-conn table-name layer where-clause opts]
-  (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")]
+  (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main" (:datasetId layer))]
     {:boundingBox (bounds tenant-conn table-name layer where-clause opts)
      :pointColorMapping (point-color-mapping tenant-conn table-name layer where-clause column-titles)
      :availableColors palette
@@ -142,9 +151,9 @@
      :columnTitles column-titles}))
 
 (defn shape-aggregation-metadata [tenant-conn table-name layer where-clause opts]
-  (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")
+  (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main" (:datasetId layer))
         column-title-for-name (get-column-title-for-name
-                               (get-column-titles tenant-conn "dataset_id" (:aggregationDataset layer) "main")
+                               (get-column-titles tenant-conn "dataset_id" (:aggregationDataset layer) "main" (:datasetId layer))
                                (:aggregationColumn layer))
         shape-color-mapping-title (format "%s (%s)" column-title-for-name
                                           (:aggregationMethod layer))]
@@ -155,7 +164,7 @@
      :shapeColorMappingTitle shape-color-mapping-title}))
 
 (defn shape-metadata [tenant-conn table-name layer where-clause opts]
-  (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main")]
+  (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main" (:datasetId layer))]
     {:columnTitles column-titles
      :boundingBox (bounds tenant-conn table-name layer where-clause opts)}))
 
