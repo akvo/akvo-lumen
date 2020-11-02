@@ -398,6 +398,7 @@ class DatasetTable extends Component {
   render() {
     const {
       rows,
+      rowsCount,
       columns,
       history,
       pendingTransformations,
@@ -558,7 +559,7 @@ class DatasetTable extends Component {
                   groupHeaderHeight={40}
                   headerHeight={40}
                   rowHeight={40}
-                  rowsCount={props.rowsCount}
+                  rowsCount={rowsCount}
                   width={width}
                   height={height}
                   onScrollStart={() => this.handleScroll()}
