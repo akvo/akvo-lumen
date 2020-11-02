@@ -28,16 +28,106 @@ function formatCellValue(type, value) {
   }
 }
 
+function useIntroJs(props, isMounted, sidebarProps) {
+  const introStarted = useRef(false);
+
+  useEffect(() => {
+    if (window.localStorage.getItem('useDataGroupsIntroDone')) {
+      return undefined;
+    }
+
+    const intro = introJs();
+
+    intro.onbeforechange(() => {
+      const currentStepIdx = intro._currentStep;
+      const currentStepDynamic = !!intro._options.steps[currentStepIdx].dynamic;
+
+      if (currentStepDynamic) {
+        const step = intro._options.steps[currentStepIdx];
+        const element = document.querySelector(step.element);
+
+        if (element) {
+          const introItem = intro._introItems[currentStepIdx];
+          introItem.element = element;
+          introItem.position = step.position;
+        }
+      }
+    });
+
+    intro.onexit(() => {
+      window.localStorage.setItem('useDataGroupsIntroDone', true);
+    });
+
+    intro.oncomplete(() => {
+      window.localStorage.setItem('useDataGroupsIntroDone', true);
+    });
+
+    intro.setOptions({
+      nextLabel: props.intl.formatMessage({ id: 'next' }),
+      prevLabel: props.intl.formatMessage({ id: 'back' }),
+      hidePrev: true,
+      skipLabel: props.intl.formatMessage({ id: 'skip' }),
+      doneLabel: props.intl.formatMessage({ id: 'got_it' }),
+      showStepNumbers: false,
+      showBullets: false,
+      exitOnEsc: true,
+      exitOnOverlayClick: true,
+      steps: [
+        {
+          intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/>`,
+          dynamic: true,
+          position: 'center',
+        },
+        {
+          element: '#GroupsList',
+          intro: props.intl.formatMessage({ id: 'data_group_intro_1' }),
+          dynamic: true,
+          position: 'right',
+        },
+        {
+          element: '#GroupsList .groupItem:first-child',
+          intro: props.intl.formatMessage({ id: 'data_group_intro_2' }),
+          dynamic: true,
+          position: 'right',
+        },
+        {
+          element: '.dataGroupViewToggle',
+          intro: props.intl.formatMessage({ id: 'data_group_intro_3' }),
+          dynamic: true,
+        },
+      ],
+    });
+
+    const datasetHasGroups = props.groups && props.groups.size > 1;
+    const startIntro = isMounted.current &&
+      !introStarted.current &&
+      (props.datasetGroupsAvailable && datasetHasGroups) &&
+      (sidebarProps || {}).type === 'groupsList';
+
+
+    if (startIntro) {
+      intro.start();
+      introStarted.current = true;
+    }
+
+    return undefined;
+  }, [
+    props.datasetGroupsAvailable,
+    props.groups,
+    isMounted.current,
+    sidebarProps,
+    introStarted.current,
+  ]);
+}
+
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
   const isMounted = useRef(false);
-  const introMounted = useRef(false);
   const [width, setWidth] = useState(1024);
   const [height, setHeight] = useState(800);
   const [activeDataTypeContextMenu, setActiveDataTypeContextMenu] = useState(null);
   const [activeColumnContextMenu, setActiveColumnContextMenu] = useState(null);
   const [sidebarProps, setSidebarProps] = useState(null);
-
   const hideSidebar = () => {
     if (sidebarProps) {
       setSidebarProps(null);
@@ -82,90 +172,7 @@ function DatasetTable(props) {
   };
 
   // handle intro
-  useEffect(() => {
-    if (window.localStorage.getItem('useDataGroupsIntroDone')) {
-      return undefined;
-    }
-
-    const intro = introJs();
-
-    intro.onbeforechange(() => {
-      const currentStepIdx = intro._currentStep;
-      const currentStepDynamic = !!intro._options.steps[currentStepIdx].dynamic;
-
-      if (currentStepDynamic) {
-        const step = intro._options.steps[currentStepIdx];
-        const element = document.querySelector(step.element);
-
-        if (element) {
-          const introItem = intro._introItems[currentStepIdx];
-          introItem.element = element;
-          introItem.position = step.position;
-        }
-      }
-    });
-
-    intro.onexit(() => {
-      window.localStorage.setItem('useDataGroupsIntroDone', true);
-    });
-    intro.oncomplete(() => {
-      window.localStorage.setItem('useDataGroupsIntroDone', true);
-    });
-
-    intro.setOptions({
-      nextLabel: props.intl.formatMessage({ id: 'next' }),
-      prevLabel: props.intl.formatMessage({ id: 'back' }),
-      hidePrev: true,
-      skipLabel: props.intl.formatMessage({ id: 'skip' }),
-      doneLabel: props.intl.formatMessage({ id: 'got_it' }),
-      showStepNumbers: false,
-      showBullets: false,
-      exitOnEsc: true,
-      exitOnOverlayClick: true,
-      steps: [
-        {
-          intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/>`,
-          dynamic: true,
-          position: 'center',
-        },
-        {
-          element: '#GroupsList',
-          intro: props.intl.formatMessage({ id: 'data_group_intro_1' }),
-          dynamic: true,
-          position: 'right',
-        },
-        {
-          element: '#GroupsList .groupItem:first-child',
-          intro: props.intl.formatMessage({ id: 'data_group_intro_2' }),
-          dynamic: true,
-          position: 'right',
-        },
-        {
-          element: '.dataGroupViewToggle',
-          intro: props.intl.formatMessage({ id: 'data_group_intro_3' }),
-          dynamic: true,
-        },
-      ],
-    });
-
-    const datasetHasGroups = props.groups && props.groups.size > 1;
-    if (
-      isMounted.current &&
-      !introMounted.current &&
-      (props.datasetGroupsAvailable && datasetHasGroups) &&
-      (sidebarProps || {}).type === 'groupsList') {
-      intro.start();
-      introMounted.current = true;
-    }
-
-    return undefined;
-  }, [
-    props.datasetGroupsAvailable,
-    props.groups,
-    isMounted.current,
-    sidebarProps,
-    introMounted.current,
-  ]);
+  useIntroJs(props, isMounted, sidebarProps);
 
   // handle resize
   useEffect(() => {
