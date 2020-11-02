@@ -31,6 +31,7 @@ function formatCellValue(type, value) {
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
   const isMounted = useRef(false);
+  const introMounted = useRef(false);
   const [width, setWidth] = useState(1024);
   const [height, setHeight] = useState(800);
   const [activeDataTypeContextMenu, setActiveDataTypeContextMenu] = useState(null);
@@ -119,6 +120,8 @@ function DatasetTable(props) {
       doneLabel: props.intl.formatMessage({ id: 'got_it' }),
       showStepNumbers: false,
       showBullets: false,
+      exitOnEsc: true,
+      exitOnOverlayClick: true,
       steps: [
         {
           intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/>`,
@@ -148,13 +151,21 @@ function DatasetTable(props) {
     const datasetHasGroups = props.groups && props.groups.size > 1;
     if (
       isMounted.current &&
+      !introMounted.current &&
       (props.datasetGroupsAvailable && datasetHasGroups) &&
       (sidebarProps || {}).type === 'groupsList') {
       intro.start();
+      introMounted.current = true;
     }
 
     return undefined;
-  }, [props.datasetGroupsAvailable, props.groups, isMounted.current, sidebarProps]);
+  }, [
+    props.datasetGroupsAvailable,
+    props.groups,
+    isMounted.current,
+    sidebarProps,
+    introMounted.current,
+  ]);
 
   // handle resize
   useEffect(() => {
