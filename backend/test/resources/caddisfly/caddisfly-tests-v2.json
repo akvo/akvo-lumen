@@ -154,6 +154,51 @@
       ]
     },
     {
+      "name": "Bromine",
+      "uuid": "757e0669-75c7-462e-96d1-1a1f89498b76",
+      "sample": "Water",
+      "device": "Photometer",
+      "brand": "Lovibond",
+      "model": "MD610",
+      "reagents": [
+        {
+          "code": "511050BT"
+        }
+      ],
+      "results": [
+        {
+          "id": 1,
+          "name": "Bromine",
+          "unit": "mg/l",
+          "range": "0.05-13"
+        }
+      ]
+    },
+    {
+      "name": "Boron",
+      "uuid": "bec072ab-fe4d-47ae-bb26-331102169f64",
+      "sample": "Water",
+      "device": "Photometer",
+      "brand": "Lovibond",
+      "model": "MD610",
+      "reagents": [
+        {
+          "code": "515790"
+        },
+        {
+          "code": "515800BT"
+        }
+      ],
+      "results": [
+        {
+          "id": 1,
+          "name": "Boron",
+          "unit": "mg/l",
+          "range": "0.1-2"
+        }
+      ]
+    },
+    {
       "name": "Chloride",
       "uuid": "4f8fcb4b-35f6-40df-aa1c-c3f4a96352d4",
       "sample": "Water",
@@ -1045,6 +1090,63 @@
       ]
     },
     {
+      "name": "Ozone",
+      "uuid": "d8bf5165-9d22-4aae-ae23-cba1e0b544f8",
+      "sample": "Water",
+      "device": "Photometer",
+      "brand": "Lovibond",
+      "model": "MD610",
+      "reagents": [
+        {
+          "code": "511050BT"
+        },
+        {
+          "code": "511080BT"
+        },
+        {
+          "code": "512170BT"
+        }
+      ],
+      "results": [
+        {
+          "id": 1,
+          "name": "Ozone",
+          "unit": "mg/l",
+          "range": "0.02-2"
+        },
+        {
+          "id": 2,
+          "name": "Total Chlorine",
+          "unit": "mg/l",
+          "range": "0.02-2"
+        }
+      ]
+    },
+    {
+      "name": "Ozone",
+      "uuid": "59fc8823-cfc9-4384-aeee-5c3c765b9194",
+      "sample": "Water",
+      "device": "Photometer",
+      "brand": "Lovibond",
+      "model": "MD610",
+      "reagents": [
+        {
+          "code": "511050BT"
+        },
+        {
+          "code": "511080BT"
+        }
+      ],
+      "results": [
+        {
+          "id": 1,
+          "name": "Ozone",
+          "unit": "mg/l",
+          "range": "0.02-2"
+        }
+      ]
+    },
+    {
       "name": "Phosphate",
       "uuid": "8e096f48-19bf-4446-8fc7-a824d0b00f7c",
       "sample": "Water",
@@ -1277,6 +1379,51 @@
           "name": "Sulfate",
           "unit": "mg/l",
           "range": "5-100"
+        }
+      ]
+    },
+    {
+      "name": "Sulfide",
+      "uuid": "1a317bd6-2861-4e47-96c1-84d6e83172d6",
+      "sample": "Water",
+      "device": "Photometer",
+      "brand": "Lovibond",
+      "model": "MD610",
+      "reagents": [
+        {
+          "code": "502930"
+        },
+        {
+          "code": "502940"
+        }
+      ],
+      "results": [
+        {
+          "id": 1,
+          "name": "Sulfide",
+          "unit": "mg/l",
+          "range": "0.04-0.5"
+        }
+      ]
+    },
+    {
+      "name": "Sulfite",
+      "uuid": "c37adf31-c622-47c5-850c-4361028134f5",
+      "sample": "Water",
+      "device": "Photometer",
+      "brand": "Lovibond",
+      "model": "MD610",
+      "reagents": [
+        {
+          "code": "518020BT"
+        }
+      ],
+      "results": [
+        {
+          "id": 1,
+          "name": "Sulfite",
+          "unit": "mg/l",
+          "range": "0.1-5"
         }
       ]
     },
