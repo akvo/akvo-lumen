@@ -39,7 +39,7 @@ function PublicApp() {
     return null;
   }
 
-  function fetchFilterColumn(datasetId, columnName, columnType, password) {
+  function fetchFilterColumn(datasetId, columnName, password) {
     return fetch(`/share/${shareId}/dataset/${datasetId}/column/${columnName}?order=value`, { headers: { 'X-Password': password } })
       .then((response) => {
         if (response.status === 403) {
