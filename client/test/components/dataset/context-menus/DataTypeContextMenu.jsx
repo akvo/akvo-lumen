@@ -11,12 +11,14 @@ describe('<DataTypeContextMenu />', () => {
   const baseProps = {
     column: Immutable.fromJS({}),
     dimensions: { top: 0, left: 0 },
-    onContextMenuItemSelected: () => {},
+    onContextMenuItemSelected: jest.fn(),
+    onWindowClick: jest.fn(),
   };
 
   it('should render without error', () => {
     shallow(<DataTypeContextMenu {...baseProps} />);
   });
+
   it('renders a ContextMenu', () => {
     const wrapper = shallow(<DataTypeContextMenu {...baseProps} />);
     assert.equal(wrapper.find(ContextMenu).length, 1);
