@@ -8,7 +8,7 @@
 
 (s/def ::order.s/mode #{"auto" "custom"})
 
-(s/def ::order.s/value string?)
+(s/def ::order.s/value (s/nilable string?))
 
 (s/def ::order.s/list (s/coll-of ::order.s/value :distinct true))
 
