@@ -166,6 +166,7 @@
       (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "akvo/lumen/prod.edn"))
                                                   (admin.system/ig-select-keys [:akvo.lumen.admin/add-tenant
                                                                                 :akvo.lumen.component.error-tracker/config
+                                                                                :akvo.lumen.admin.db/config-adapter
                                                                                 :akvo.lumen.component.error-tracker/prod]))
             administer (:akvo.lumen.admin/add-tenant admin-system)]
         (exec administer {:url url :title title :email email})))

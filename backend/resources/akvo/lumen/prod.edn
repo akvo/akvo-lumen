@@ -4,11 +4,9 @@
                                                        {:client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
                                                    :email-user #duct/env "LUMEN_EMAIL_USER"}
- :akvo.lumen.admin.db/config {:root {:password #duct/env "PG_PASSWORD" 
-                                     :database #duct/env "PG_DATABASE"
-                                     :user #duct/env "PG_USER" 
-                                     :host #duct/env "PG_HOST"}
-                              :lumen {:password #duct/env "PG_PASSWORD"}}
+ :akvo.lumen.admin.db/config {:config-adapter #ig/ref :akvo.lumen.admin.db/config-adapter}
+
+ :akvo.lumen.admin.db/config-adapter {:uri #duct/env [ "LUMEN_DB_URL" :or "jdbc:postgresql://postgres/lumen?user=lumen&password=password&ssl=true" ]}
 
  :akvo.lumen.component.error-tracker/config {:dsn "admin-sentry-client-dsn"
                                              :opts {:environment  "LUMEN_SENTRY_ENVIRONMENT"
