@@ -34,8 +34,7 @@
 (defn exec [{:keys [authorizer dbs]} label]
   (binding [admin.db/env-vars (:root dbs)]
     (let [tenant (str "tenant_" (str/replace label "-" "_"))
-         db-uris (admin.db/db-uris label nil (-> dbs :lumen :password))]
-     (admin.db/drop-tenant-database label db-uris)
+         db-uris (admin.db/db-uris label nil (-> dbs :lumen :password) (-> dbs :lumen :user))]
      (admin.keycloak/remove-tenant authorizer label)
      true)))
 
