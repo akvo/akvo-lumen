@@ -54,6 +54,7 @@
 (defn- create-tenant-db [root-db-uri root-tenant-db-uri tenant-db-uri  tenant tenant-password drop-if-exists?]
   (try
     (util/exec! root-db-uri {} "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+    (util/exec! root-db-uri {} "GRANT %s TO %s" tenant "postgres")
     (util/exec! root-db-uri {} (str "CREATE DATABASE %1$s "
                                              "WITH OWNER = %1$s "
                                              "TEMPLATE = template0 "
