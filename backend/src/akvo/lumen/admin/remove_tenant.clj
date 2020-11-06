@@ -45,8 +45,11 @@
   (if (= (read-line) "Yes")    
     (binding [keycloak/http-client-req-defaults (http.client/req-opts 50000)]
       (admin.system/ig-derives)
-      (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "prod.edn"))
-                                                  (admin.system/ig-select-keys [:akvo.lumen.admin/remove-tenant]))
+      (let [admin-system (admin.system/new-system (admin.system/new-config (or edn-file "akvo/lumen/prod.edn"))
+                                                  (admin.system/ig-select-keys [:akvo.lumen.admin/remove-tenant
+                                                                                :akvo.lumen.component.error-tracker/prod
+                                                                                :akvo.lumen.component.error-tracker/config
+                                                                                :akvo.lumen.admin.db/config-adapter]))
             administer (:akvo.lumen.admin/remove-tenant admin-system)]
         (exec administer label)
         (println "Ok")

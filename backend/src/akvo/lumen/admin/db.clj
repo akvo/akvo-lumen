@@ -9,7 +9,8 @@
             [ragtime.jdbc :as r.jdbc]
             [akvo.lumen.lib.aes :as aes]
             [environ.core :refer [env]]
-            [akvo.lumen.migrate :as migrate]))
+            [akvo.lumen.migrate :as migrate]
+            [clojure.walk :as w]))
 
 (def ^:dynamic env-vars
   (let [ks-mapping {:pg-host :host
@@ -131,6 +132,25 @@
 
 (s/def ::lumen (s/keys :req-un [::password]))
 
+(s/def ::config-adapter (s/keys :req-un [::root
+                                         ::lumen]))
+
 (defmethod ig/pre-init-spec :akvo.lumen.admin.db/config [_]
-  (s/keys :req-un [::root
-                   ::lumen]))
+  (s/keys :req-un [::config-adapter]))
+
+(defn coerce-jdbc-url [uri]
+  (let [[a args] (str/split uri #"\?")
+        result (reduce #(conj % (str/split %2 #"=")) {} (str/split args #"&"))]
+    (let [[database host] (reverse (str/split a #"/"))]
+      (w/keywordize-keys (assoc result "database" database "host" host)))))
+
+(defmethod ig/init-key :akvo.lumen.admin.db/config-adapter [_ opts]
+  {:root (coerce-jdbc-url (:uri opts))
+   :lumen (coerce-jdbc-url (:uri opts))})
+
+(s/def ::uri string?)
+
+(defmethod ig/pre-init-spec :akvo.lumen.admin.db/config-adapter [_]
+  (s/keys :req-un [::uri]))
+
+
