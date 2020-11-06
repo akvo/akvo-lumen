@@ -118,7 +118,7 @@
 
 
 (defmethod ig/init-key :akvo.lumen.admin.db/config [_ opts]
-  opts)
+  (:config-adapter opts))
 
 (s/def ::password string?)
 (s/def ::database string?)
@@ -145,12 +145,12 @@
       (w/keywordize-keys (assoc result "database" database "host" host)))))
 
 (defmethod ig/init-key :akvo.lumen.admin.db/config-adapter [_ opts]
-  {:root (coerce-jdbc-url (:uri opts))
+  {:root (coerce-jdbc-url (:postgres-uri opts))
    :lumen (coerce-jdbc-url (:uri opts))})
 
 (s/def ::uri string?)
+(s/def ::postgres-uri string?)
 
 (defmethod ig/pre-init-spec :akvo.lumen.admin.db/config-adapter [_]
-  (s/keys :req-un [::uri]))
-
+  (s/keys :req-un [::uri ::postgres-uri]))
 
