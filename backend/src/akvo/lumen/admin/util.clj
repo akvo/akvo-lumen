@@ -22,12 +22,11 @@
           database (env :pg-database)
           user (env :pg-user)
           password (env :pg-password)}}]
-   (hikaricp/ssl-url
-    (format "jdbc:postgresql://%s/%s?ssl=true&user=%s%s"
-            host database user
-            (if-not password #_(or (= host "localhost") (= host "postgres"))
-              ""
-              (format "&password=%s" password))))))
+   (format "jdbc:postgresql://%s/%s?user=%s%s"
+           host database user
+           (if-not password #_(or (= host "localhost") (= host "postgres"))
+                   ""
+                   (format "&password=%s" password)))))
 
 (defn role-name [label & [admin?]]
   (let [s (if admin? "akvo:lumen:%s:admin" "akvo:lumen:%s")]
