@@ -25,10 +25,10 @@
   ([data]
    (util/db-uri (merge env-vars data))))
 
-(defn db-uris [label tenant-password & [lumen-db-password]]
+(defn db-uris [label tenant-password & [lumen-db-password lumen-db-user]]
   (let [tenant                       (str "tenant_" (str/replace label "-" "_"))
         main-db-uri                  (envs-db-uri)
-        lumen-db-uri                 (envs-db-uri {:database "lumen" :user "lumen" :password lumen-db-password})
+        lumen-db-uri                 (envs-db-uri {:database "lumen" :user (or lumen-db-user "lumen") :password lumen-db-password})
         tenant-db-uri                (envs-db-uri {:database tenant
                                                    :user     tenant
                                                    :password tenant-password})
@@ -54,6 +54,7 @@
 (defn- create-tenant-db [root-db-uri root-tenant-db-uri tenant-db-uri  tenant tenant-password drop-if-exists?]
   (try
     (util/exec! root-db-uri {} "CREATE ROLE \"%s\" WITH PASSWORD '%s' LOGIN;" tenant tenant-password)
+    (util/exec! root-db-uri {} "GRANT %s TO %s" tenant "postgres")
     (util/exec! root-db-uri {} (str "CREATE DATABASE %1$s "
                                              "WITH OWNER = %1$s "
                                              "TEMPLATE = template0 "
