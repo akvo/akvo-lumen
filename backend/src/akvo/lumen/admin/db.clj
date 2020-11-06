@@ -25,10 +25,10 @@
   ([data]
    (util/db-uri (merge env-vars data))))
 
-(defn db-uris [label tenant-password & [lumen-db-password]]
+(defn db-uris [label tenant-password & [lumen-db-password lumen-db-user]]
   (let [tenant                       (str "tenant_" (str/replace label "-" "_"))
         main-db-uri                  (envs-db-uri)
-        lumen-db-uri                 (envs-db-uri {:database "lumen" :user "lumen" :password lumen-db-password})
+        lumen-db-uri                 (envs-db-uri {:database "lumen" :user (or lumen-db-user "lumen") :password lumen-db-password})
         tenant-db-uri                (envs-db-uri {:database tenant
                                                    :user     tenant
                                                    :password tenant-password})

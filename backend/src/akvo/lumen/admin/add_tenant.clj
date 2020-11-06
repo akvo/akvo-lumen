@@ -151,7 +151,7 @@
   (binding [admin.db/env-vars (:root dbs)]
     (let [drop-if-exists? (boolean (:drop-if-exists? administer))
           {:keys [email label title url]} (conform-input url title email)
-          {:keys [tenant-db] :as db-uris} (admin.db/db-uris label (new-tenant-db-pass) (-> dbs :lumen :password))
+          {:keys [tenant-db] :as db-uris} (admin.db/db-uris label (new-tenant-db-pass) (-> dbs :lumen :password) (-> dbs :lumen :user))
           _ (admin.db/setup-tenant-database label title (-> administer :db-settings :encryption-key) db-uris drop-if-exists?)
           {:keys [user-id email tmp-password] :as user-creds} (admin.keycloak/setup-tenant authorizer label email url  drop-if-exists?)]
       (exec-mail (merge administer {:user-creds user-creds
