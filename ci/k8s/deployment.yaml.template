@@ -99,7 +99,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: lumen
-              key: lumen_db_url
+              key: lumen-db-url
+        - name: POSTGRES_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: postgres-db-url
         - name: LUMEN_EMAIL_PASSWORD
           valueFrom:
             secretKeyRef:

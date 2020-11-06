@@ -5,7 +5,8 @@
  :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
                                                    :email-user #duct/env "LUMEN_EMAIL_USER"}
 
- :akvo.lumen.admin.db/config-adapter {:uri #duct/env "LUMEN_DB_URL"}
+ :akvo.lumen.admin.db/config-adapter {:uri #duct/env "LUMEN_DB_URL"
+                                      :postgres-uri #duct/env "POSTGRES_DB_URL"}
 
  :akvo.lumen.component.error-tracker/config {:dsn "admin-sentry-client-dsn"
                                              :opts {:environment  "LUMEN_SENTRY_ENVIRONMENT"
