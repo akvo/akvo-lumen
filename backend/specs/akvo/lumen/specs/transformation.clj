@@ -1,7 +1,5 @@
 (ns akvo.lumen.specs.transformation
-  (:require [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.lib.transformation.engine :as lib.transformation.engine]
-            [akvo.lumen.specs :as lumen.s]
+  (:require [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.db.dataset-version :as db.dsv.s]
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
@@ -559,7 +557,3 @@
                                                ::db.dsv.s/job-execution-id ::db.dsv.s/table-name
                                                ::db.dsv.s/imported-table-name ::db.dsv.s/version
                                                ::db.dsv.s/transformations ::db.dsv.s/columns]))
-
-(s/fdef lib.transformation.engine/new-dataset-version
-  :args (s/cat :conn ::db.s/tenant-connection
-               :dsv ::next-dataset-version))
