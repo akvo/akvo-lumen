@@ -212,8 +212,7 @@
 
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
-  (execute-transformation-2 deps dataset-id job-execution-id transformation)
-  #_(if (and (get (env/all tenant-conn) "data-groups")
+  (if (and (get (env/all tenant-conn) "data-groups")
            (= "core/to-uppercase" (get transformation "op")))
     (execute-transformation-2 deps dataset-id job-execution-id transformation)
     (execute-transformation-1 deps dataset-id job-execution-id transformation)))
