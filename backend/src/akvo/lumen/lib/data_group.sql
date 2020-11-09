@@ -13,7 +13,7 @@ ORDER BY group_order, created
 
 -- :name db-get-data-group-by-column-name :? :1
 -- :doc Gets a data-group definition by column name
-SELECT id, group_id, group_name, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, created, modified, repeatable
+SELECT id, group_id AS "group-id", group_name AS "group-name", group_order AS "group-order", table_name AS "table-name", imported_table_name AS "imported-table-name", columns, created, modified, repeatable
 FROM data_group
 WHERE columns @> :column-name-filter::jsonb
  AND dataset_version_id=:dataset-version-id
