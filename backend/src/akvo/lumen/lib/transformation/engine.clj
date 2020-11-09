@@ -4,6 +4,8 @@
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.job-execution :as db.job-execution]
             [akvo.lumen.db.data-group :as db.data-group]
+            [akvo.lumen.specs.transformation :as s.transformation]
+            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
             [akvo.lumen.lib.env :as env]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -147,8 +149,9 @@
 (defn execute-transformation-2
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
+        column-name (first (aggregation.commons/spec-columns ::s.transformation/op-spec (w/keywordize-keys transformation)))
         data-group (db.data-group/get-data-group-by-column-name tenant-conn {:dataset-version-id (:id dataset-version)
-                                                                             :column-name (get (args transformation) "columnName")})
+                                                                             :column-name column-name})
         source-table (:table-name data-group)
         previous-columns (vec (:columns data-group))]
     (let [{:keys [success? message columns execution-log error-data]}
