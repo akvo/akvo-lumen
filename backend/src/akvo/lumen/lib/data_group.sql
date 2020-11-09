@@ -17,3 +17,11 @@ SELECT id, group_id AS "group-id", group_name AS "group-name", group_order AS "g
 FROM data_group
 WHERE columns @> :column-name-filter::jsonb
  AND dataset_version_id=:dataset-version-id
+
+
+-- :name db-update-reference-unmodified-groups :! :n
+-- :doc Updates the reference to the parent dataset version
+UPDATE data_group
+   SET dataset_version_id=:new-dataset-version-id
+ WHERE dataset_version_id=:old-dataset-version-id
+   AND group_id <> :modified-data-group-id

@@ -170,11 +170,16 @@
                                                                    "changedColumns" (diff-columns previous-columns
                                                                                                   columns))))}]
           (db.dataset-version/new-dataset-version-2 tenant-conn next-dataset-version)
-          (db.data-group/new-data-group  tenant-conn (merge
-                                                      (select-keys data-group [:imported-table-name :table-name :group-id :group-name :repeatable :group-order])
-                                                      {:id (util/squuid)
-                                                       :dataset-version-id new-dataset-version-id
-                                                       :columns columns}))
+          (db.data-group/new-data-group tenant-conn
+                                        (merge
+                                         (select-keys data-group
+                                                      [:imported-table-name :table-name :group-id :group-name :repeatable :group-order])
+                                         {:id (util/squuid)
+                                          :dataset-version-id new-dataset-version-id
+                                          :columns columns}))
+          (db.data-group/update-reference-non-modified-groups tenant-conn {:old-dataset-version-id (:id dataset-version)
+                                                                           :new-dataset-version-id new-dataset-version-id
+                                                                           :modified-data-group-id (:group-id data-group)})
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
 
 (defn execute-transformation-1
@@ -207,7 +212,6 @@
 
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
-  (prn transformation)
   (execute-transformation-2 deps dataset-id job-execution-id transformation)
   #_(if (and (get (env/all tenant-conn) "data-groups")
            (= "core/to-uppercase" (get transformation "op")))
