@@ -228,7 +228,7 @@ function DatasetTable(props) {
       type: 'transformationLog',
       displayRight: true,
       onUndo: props.onUndoTransformation,
-      columns: Immutable.fromJS(props.groups.reduce((total, group) => total.concat(...group), [])),
+      columns: Immutable.fromJS(props.groups.reduce((total, group) => total.concat(...group.get(1)), [])),
     });
   };
 
