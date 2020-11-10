@@ -179,9 +179,9 @@
                                          {:id (util/squuid)
                                           :dataset-version-id new-dataset-version-id
                                           :columns columns}))
-          (db.data-group/update-reference-on-non-modified-groups {:old-dataset-version-id (:id dataset-version)
-                                                                  :new-dataset-version-id new-dataset-version-id
-                                                                  :modified-data-group-id (:group-id data-group)})
+          (db.data-group/update-reference-on-non-modified-groups tenant-conn {:old-dataset-version-id (:id dataset-version)
+                                                                              :new-dataset-version-id new-dataset-version-id
+                                                                              :modified-data-group-id (:group-id data-group)})
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
 
 (defn execute-transformation-1
