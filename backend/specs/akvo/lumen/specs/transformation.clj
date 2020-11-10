@@ -12,8 +12,6 @@
             [clojure.tools.logging :as log])
   (:import [java.time Instant]))
 
-(def columnName? string?)
-
 (s/def ::type #{:transformation :undo})
 
 (defmulti command-spec :type)
@@ -174,8 +172,8 @@
 (create-ns  'akvo.lumen.specs.transformation.generate-geopoints)
 (alias 'transformation.generate-geopoints 'akvo.lumen.specs.transformation.generate-geopoints)
 
-(s/def ::transformation.generate-geopoints/columnNameLat columnName?)
-(s/def ::transformation.generate-geopoints/columnNameLong columnName?)
+(s/def ::transformation.generate-geopoints/columnNameLat ::db.dsv.column.s/columnName)
+(s/def ::transformation.generate-geopoints/columnNameLong ::db.dsv.column.s/columnName)
 (s/def ::transformation.generate-geopoints/columnTitleGeo string?)
 
 
@@ -216,7 +214,7 @@
                                                         ::transformation.merge-datasets.source/mergeColumn
                                                         ::transformation.merge-datasets.source/mergeColumns]))
 
-(s/def ::transformation.merge-datasets.target/mergeColumn columnName?)
+(s/def ::transformation.merge-datasets.target/mergeColumn ::db.dsv.column.s/columnName)
 
 
 (s/def ::transformation.merge-datasets/target (s/keys :req-un [::transformation.merge-datasets.target/mergeColumn]))
@@ -406,7 +404,7 @@
 (alias 'transformation.sort-column 'akvo.lumen.specs.transformation.sort-column)
 
 (s/def ::transformation.sort-column/sortDirection lumen.s/sort?)
-(s/def ::transformation.sort-column/columnName columnName?)
+(s/def ::transformation.sort-column/columnName ::db.dsv.column.s/columnName)
 
 (s/def ::transformation.sort-column/args
   (s/keys :req-un [::transformation.sort-column/sortDirection
@@ -423,7 +421,7 @@
 (create-ns  'akvo.lumen.specs.transformation.remove-sort)
 (alias 'transformation.remove-sort 'akvo.lumen.specs.transformation.remove-sort)
 
-(s/def ::transformation.remove-sort/columnName columnName?)
+(s/def ::transformation.remove-sort/columnName ::db.dsv.column.s/columnName)
 
 (s/def ::transformation.remove-sort/args
   (s/keys :req-un [::transformation.remove-sort/columnName]))
