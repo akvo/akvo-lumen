@@ -160,7 +160,6 @@
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
         (throw (ex-info (or message "") {})))
       (let [new-dataset-version-id (str (util/squuid))]
-        #_(db.transformation/clear-dataset-version-data-table tenant-conn {:id (:id dataset-version)})
         (let [next-dataset-version {:id new-dataset-version-id
                                     :dataset-id dataset-id
                                     :job-execution-id job-execution-id
@@ -180,9 +179,9 @@
                                          {:id (util/squuid)
                                           :dataset-version-id new-dataset-version-id
                                           :columns columns}))
-          (db.data-group/update-reference-non-modified-groups tenant-conn {:old-dataset-version-id (:id dataset-version)
-                                                                           :new-dataset-version-id new-dataset-version-id
-                                                                           :modified-data-group-id (:group-id data-group)})
+          (db.data-group/update-reference-on-non-modified-groups {:old-dataset-version-id (:id dataset-version)
+                                                                  :new-dataset-version-id new-dataset-version-id
+                                                                  :modified-data-group-id (:group-id data-group)})
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
 
 (defn execute-transformation-1
