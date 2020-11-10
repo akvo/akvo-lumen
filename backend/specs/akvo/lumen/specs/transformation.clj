@@ -349,7 +349,7 @@
 (alias 'transformation.rename-column 'akvo.lumen.specs.transformation.rename-column)
 
 (s/def ::transformation.rename-column/newColumnTitle string?) ;; reuse s/def also used in combine
-(s/def ::transformation.rename-column/columnName columnName?)
+(s/def ::transformation.rename-column/columnName ::db.dsv.column.s/columnName)
 
 (s/def ::transformation.rename-column/args
   (s/keys :req-un [::transformation.derive/newColumnTitle
