@@ -79,7 +79,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
-  (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
+  (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply (assoc deps :claims tu/test-claims) dataset-id command)
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
     (conj res (:status job) job)))
 
