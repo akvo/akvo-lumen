@@ -179,9 +179,12 @@
                                          {:id (util/squuid)
                                           :dataset-version-id new-dataset-version-id
                                           :columns columns}))
-          (db.data-group/update-reference-on-non-modified-groups tenant-conn {:old-dataset-version-id (:id dataset-version)
-                                                                              :new-dataset-version-id new-dataset-version-id
-                                                                              :modified-data-group-id (:group-id data-group)})
+          (doseq [dg (db.data-group/list-data-groups-by-dataset-version-id tenant-conn
+                                                                                   {:dataset-version-id (:id dataset-version)})
+                  :when (not= (:id dg) (:id data-group))]
+            (db.data-group/new-data-group tenant-conn (-> dg
+                                                          (assoc :dataset-version-id new-dataset-version-id :id (util/squuid))
+                                                          (update :columns vec))))
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
 
 (defn execute-transformation-1
