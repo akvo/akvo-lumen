@@ -10,7 +10,10 @@
                                          *caddisfly*
                                          caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.env :as db.env]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
@@ -90,6 +93,8 @@
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
 
+(def data-groups-ops (vec (json/parse-string (slurp (io/resource "data-groups-ops.json")))))
+
 (def invalid-op (-> (take 3 ops)
                     vec
                     (update-in [1 "args"] dissoc "parseFormat")))
@@ -146,6 +151,29 @@
                           (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
                                                                              :transformation transformation})))]
       (is (= ::lib/ok tag)))))
+
+
+(deftest ^:functional test-data-groups-transformations
+  (db.env/activate-flag *tenant-conn* "data-groups")
+  (testing "Valid log"
+    (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
+                                                                 :has-column-headers? true
+                                                                 :file "transformation_test.csv"})
+          [tag _] (last (for [transformation data-groups-ops]
+                          (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
+                                                                                   :transformation transformation})))]
+      (is (= ::lib/ok tag))
+
+      (let [dsv (db.dataset-version/latest-dataset-version-2-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+            data-group (first (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn*
+                                                                                     {:dataset-version-id (:id dsv)}))]
+        (is (= '({:rnum 1, :c1 "A   ", :c2 "b   ", :c3 "c"})
+               (get-data *tenant-conn* {:table-name (:table-name data-group)})))
+
+        )
+      ))
+  (db.env/deactivate-flag *tenant-conn* "data-groups"))
+
 
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
