@@ -44,8 +44,8 @@
           expected-stored-data '((:rnum :c1 :c2) (:rnum :c1 :c2))]
       (is (= 1 (count data-groups)))
       (let [data-group (first data-groups)]
-        (is (= (:group_id data-group) "main"))
-        (is (= (:group_name data-group) "main"))
+        (is (= (:group-id data-group) "main"))
+        (is (= (:group-name data-group) "main"))
         (is (= (:repeatable data-group) false)))
       (is (= (map keys stored-data) expected-stored-data))
       (is (= (map keys data-groups-stored-data) expected-stored-data))))
@@ -81,8 +81,8 @@
                                  :identifier)]
       (is (= 3 (count data-groups)))
       (let [data-group (first data-groups)]
-        (is (= (:group_id data-group) "metadata"))
-        (is (= (:group_name data-group) "metadata"))
+        (is (= (:group-id data-group) "metadata"))
+        (is (= (:group-name data-group) "metadata"))
         (is (= (:repeatable data-group) false)))
       (is (= (set (keys (first stored-data))) (set (conj expected-stored-data :c1 :c2 :c3 :c4))))
       (is (= (keys (first (->> (first data-groups)
