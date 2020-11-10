@@ -218,11 +218,7 @@
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (if (and (get (env/all tenant-conn) "data-groups")
-           (contains? #{"core/to-lowercase"
-                        "core/to-titlecase"
-                        "core/to-uppercase"
-                        "core/trim"
-                        "core/trim-doublespace"} (get transformation "op")))
+           (contains? s.transformation/single-column-transformations (get transformation "op")))
     (execute-transformation-2 deps dataset-id job-execution-id transformation)
     (execute-transformation-1 deps dataset-id job-execution-id transformation)))
 

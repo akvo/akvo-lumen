@@ -34,25 +34,28 @@
 (s/def ::transformation.engine.s/namespace (s/with-gen string? #(s/gen #{"main"})))
 
 
-(s/def ::transformation.engine.s/op #{"core/change-datatype"
-                                      "core/combine"
-                                      "core/delete-column"
-                                      "core/derive"
-                                      "core/extract-multiple"
-                                      "core/filter-column"
-                                      "core/generate-geopoints"
-                                      "core/merge-datasets"
-                                      "core/derive-category"
-                                      "core/remove-sort"
-                                      "core/rename-column"
-                                      "core/reverse-geocode"
-                                      "core/sort-column"
-                                      "core/split-column"
-                                      "core/to-lowercase"
-                                      "core/to-titlecase"
-                                      "core/to-uppercase"
-                                      "core/trim"
-                                      "core/trim-doublespace"})
+(def single-column-transformations #{"core/change-datatype"
+                                     "core/delete-column"
+                                     "core/filter-column" ;; TODO:
+                                     "core/to-lowercase"
+                                     "core/to-titlecase"
+                                     "core/to-uppercase"
+                                     "core/trim"
+                                     "core/trim-doublespace"
+                                     "core/rename-column"
+                                     "core/sort-column"
+                                     "core/remove-sort"})
+
+(def multiple-column-transformations #{"core/generate-geopoints"
+                                       "core/extract-multiple"
+                                       "core/combine"
+                                       "core/derive"
+                                       "core/merge-datasets"
+                                       "core/derive-category"
+                                       "core/reverse-geocode"
+                                       "core/split-column"})
+
+(s/def ::transformation.engine.s/op (into multiple-column-transformations single-column-transformations))
 
 (defmulti op-spec :op)
 
@@ -109,7 +112,7 @@
 
 (s/def ::transformation.combine/separator #{" " "," "" "-"})
 
-(s/def ::transformation.combine/columnNames (s/coll-of ::db.dsv.column.s/columnName :kind vector? :distinct true)) 
+(s/def ::transformation.combine/columnNames (s/coll-of ::db.dsv.column.s/columnName :kind vector? :distinct true))
 (s/def ::transformation.combine/args
   (s/keys :req-un [::transformation.combine/columnNames
                    ::transformation.combine/newColumnTitle
