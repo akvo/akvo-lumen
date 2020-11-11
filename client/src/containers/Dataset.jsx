@@ -297,6 +297,7 @@ function Dataset(props) {
     return <LoadingSpinner />;
   }
 
+
   return (
     <NavigationPrompt
       shouldPrompt={pendingSaving.savingFailed}
@@ -308,7 +309,7 @@ function Dataset(props) {
             history={history}
             datasetId={datasetId}
             group={currentGroup}
-            columns={currentGroup ? currentGroup.get('columns') : null}
+            columns={currentGroup ? currentGroup.get('columns').filter(c => !c.get('hidden')) : null}
             rows={currentGroup ? currentGroup.get('rows') : null}
             rowsCount={rowsCount}
             groups={dataset.get('groups') ? dataset.get('groups').filter(group => group.get(1).size) : null}
