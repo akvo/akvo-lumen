@@ -22,7 +22,7 @@ export const getDatasetGroups = (groupsList) => {
   const groupNames = groups.reduce((acc, curr) => acc.concat({
     id: curr.get(1).get(0).get('groupId'),
     name: curr.get(1).get(0).get('groupName'),
-    isRqg: curr.get(1).get(0).get('repeatable'),
+    isRqg: (curr.get(2) || false),
   }), []).sort((x, y) => {
     if (x.id === 'metadata') {
       return -1;
