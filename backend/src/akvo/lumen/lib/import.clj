@@ -22,8 +22,7 @@
 (def ^:dynamic *data-groups-future* true)
 
 (defn- successful-execution [conn job-execution-id data-source-id dataset-id table-name columns {:keys [spec-name spec-description]} claims]
-  (let [imported-table-name (util/gen-table-name "imported")
-        {:strs [rqg]} (env/all conn)]
+  (let [imported-table-name (util/gen-table-name "imported")]
     (db.dataset/insert-dataset conn {:id dataset-id
                           :title spec-name ;; TODO Consistent naming. Change on client side?
                           :description spec-description
@@ -40,20 +39,17 @@
                                :imported-table-name imported-table-name
                                :version 1
                                :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId ns]}]
-                                                (let [column-def {:columnName id
-                                                                  :direction nil
-                                                                  :hidden false
-                                                                  :key (boolean key)
-                                                                  :multipleId multipleId
-                                                                  :multipleType multipleType
-                                                                  :groupName groupName
-                                                                  :groupId groupId
-                                                                  :sort nil
-                                                                  :title (string/trim title)
-                                                                  :type type}]
-                                                  (if rqg
-                                                    (assoc column-def :ns ns :repeatable (= groupId ns))
-                                                    column-def)))
+                                                {:columnName id
+                                                 :direction nil
+                                                 :hidden false
+                                                 :key (boolean key)
+                                                 :multipleId multipleId
+                                                 :multipleType multipleType
+                                                 :groupName groupName
+                                                 :groupId groupId
+                                                 :sort nil
+                                                 :title (string/trim title)
+                                                 :type type})
                                               columns)
                                :transformations []})))
 
