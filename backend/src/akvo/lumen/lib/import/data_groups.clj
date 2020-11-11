@@ -21,7 +21,6 @@
 
 (defn- successful-execution [conn job-execution-id data-source-id dataset-id group-table-names columns {:keys [spec-name spec-description]} claims]
   (let [dataset-version-id (util/squuid)
-        {:strs [rqg]} (env/all conn)
         grouped-columns (group-by :groupId columns)
         ordered-groups-ids (distinct (map :groupId columns))
         ordered-grouped-columns-list (->> ordered-groups-ids
