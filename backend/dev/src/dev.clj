@@ -95,7 +95,7 @@
                                    {:groupId "group2"
                                     :groupName "not repeatable group"
                                     :repeatable false
-                                    :column-types ["number" "date"]}] 2))
+                                    :column-types ["number" "date" "geopoint"]}] 2))
   ([dataset-name groups submissions]
    (when-not system (go))
    (tu/import-file (db-conn)
