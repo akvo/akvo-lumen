@@ -36,7 +36,7 @@
 
 (def single-column-transformations #{"core/change-datatype"
                                      "core/delete-column"
-                                     "core/filter-column" ;; TODO:
+                                     "core/filter-column" ;; TODO: define what will happen in case of filtering by form-submission-id
                                      "core/to-lowercase"
                                      "core/to-titlecase"
                                      "core/to-uppercase"

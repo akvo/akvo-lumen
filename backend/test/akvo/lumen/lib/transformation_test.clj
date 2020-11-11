@@ -370,8 +370,8 @@
                  {:type :transformation
                   :transformation (gen-transformation "core/rename-column"
                                                       {::transformation.derive.s/newColumnTitle    "New Title"
-                                                       ::transformation.rename-column.s/columnName "c5"
-                                                       ::transformation.engine.s/onError           "fail"})})
+                                                       ::transformation.engine.s/onError           "fail"}
+                                                      :columnName "c5")})
               updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
@@ -878,8 +878,7 @@
                                                     :transformation
                                                     (gen-transformation "core/rename-column"
                                                                         {::transformation.derive.s/newColumnTitle    "New Title"
-                                                                         ::transformation.rename-column.s/columnName "c2"
-                                                                         ::transformation.engine.s/onError           "fail"})})]
+                                                                         ::transformation.engine.s/onError           "fail"} :columnName "c2")})]
     (is (= ::lib/ok tag))
     (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                   {:dataset-id dataset-id})]
