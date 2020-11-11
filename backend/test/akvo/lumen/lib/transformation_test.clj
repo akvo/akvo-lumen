@@ -819,11 +819,10 @@
                                            :data         target-data})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} origin-dataset-id)
         tx                   (gen-transformation "core/merge-datasets"
-                                                 {::transformation.merge-datasets.source.s/mergeColumn          "c1"
-                                                  ::transformation.merge-datasets.source.s/aggregationDirection "DESC"
-                                                  ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]
-                                                  ::transformation.merge-datasets.target.s/mergeColumn          "c1"}
+                                                 {::transformation.merge-datasets.source.s/aggregationDirection "DESC"
+                                                  ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]}
                                                  [:source :aggregationColumn] nil
+                                                 [:target :mergeColumn] "c1"
                                                  [:source :mergeColumn] "c1"
                                                  [:source :datasetId] target-dataset-id)
         [tag _ :as res] (apply-transformation {:type           :transformation
@@ -914,9 +913,9 @@
                                                     :transformation
                                                     (gen-transformation "core/generate-geopoints"
                                                                         {::transformation.generate-geopoints.s/columnTitleGeo "Geopoints"
-                                                                         ::transformation.generate-geopoints.s/columnNameLong "c3"
-                                                                         ::transformation.generate-geopoints.s/columnNameLat  "c2"
-                                                                         ::transformation.engine.s/onError                    "fail"})})]
+                                                                         ::transformation.engine.s/onError                    "fail"}
+                                                                        :columnNameLong "c3"
+                                                                        :columnNameLat  "c2")})]
     (is (= ::lib/ok tag))
     (let [dataset             (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           {:keys [columns _]} dataset]
