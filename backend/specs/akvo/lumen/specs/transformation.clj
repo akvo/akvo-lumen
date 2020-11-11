@@ -1,7 +1,5 @@
 (ns akvo.lumen.specs.transformation
-  (:require [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.lib.transformation.engine :as lib.transformation.engine]
-            [akvo.lumen.specs :as lumen.s]
+  (:require [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.db :as db.s]
             [akvo.lumen.specs.db.dataset-version :as db.dsv.s]
             [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
@@ -13,8 +11,6 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log])
   (:import [java.time Instant]))
-
-(def columnName? string?)
 
 (s/def ::type #{:transformation :undo})
 
@@ -38,25 +34,28 @@
 (s/def ::transformation.engine.s/namespace (s/with-gen string? #(s/gen #{"main"})))
 
 
-(s/def ::transformation.engine.s/op #{"core/change-datatype"
-                                      "core/combine"
-                                      "core/delete-column"
-                                      "core/derive"
-                                      "core/extract-multiple"
-                                      "core/filter-column"
-                                      "core/generate-geopoints"
-                                      "core/merge-datasets"
-                                      "core/derive-category"
-                                      "core/remove-sort"
-                                      "core/rename-column"
-                                      "core/reverse-geocode"
-                                      "core/sort-column"
-                                      "core/split-column"
-                                      "core/to-lowercase"
-                                      "core/to-titlecase"
-                                      "core/to-uppercase"
-                                      "core/trim"
-                                      "core/trim-doublespace"})
+(def single-column-transformations #{"core/change-datatype"
+                                     "core/delete-column"
+                                     "core/filter-column" ;; TODO: define what will happen in case of filtering by form-submission-id
+                                     "core/to-lowercase"
+                                     "core/to-titlecase"
+                                     "core/to-uppercase"
+                                     "core/trim"
+                                     "core/trim-doublespace"
+                                     "core/rename-column"
+                                     "core/sort-column"
+                                     "core/remove-sort"})
+
+(def multiple-column-transformations #{"core/generate-geopoints"
+                                       "core/extract-multiple"
+                                       "core/combine"
+                                       "core/derive"
+                                       "core/merge-datasets"
+                                       "core/derive-category"
+                                       "core/reverse-geocode"
+                                       "core/split-column"})
+
+(s/def ::transformation.engine.s/op (into multiple-column-transformations single-column-transformations))
 
 (defmulti op-spec :op)
 
@@ -113,7 +112,7 @@
 
 (s/def ::transformation.combine/separator #{" " "," "" "-"})
 
-(s/def ::transformation.combine/columnNames (s/coll-of ::db.dsv.column.s/columnName :kind vector? :distinct true)) 
+(s/def ::transformation.combine/columnNames (s/coll-of ::db.dsv.column.s/columnName :kind vector? :distinct true))
 (s/def ::transformation.combine/args
   (s/keys :req-un [::transformation.combine/columnNames
                    ::transformation.combine/newColumnTitle
@@ -176,8 +175,8 @@
 (create-ns  'akvo.lumen.specs.transformation.generate-geopoints)
 (alias 'transformation.generate-geopoints 'akvo.lumen.specs.transformation.generate-geopoints)
 
-(s/def ::transformation.generate-geopoints/columnNameLat columnName?)
-(s/def ::transformation.generate-geopoints/columnNameLong columnName?)
+(s/def ::transformation.generate-geopoints/columnNameLat ::db.dsv.column.s/columnName)
+(s/def ::transformation.generate-geopoints/columnNameLong ::db.dsv.column.s/columnName)
 (s/def ::transformation.generate-geopoints/columnTitleGeo string?)
 
 
@@ -218,7 +217,7 @@
                                                         ::transformation.merge-datasets.source/mergeColumn
                                                         ::transformation.merge-datasets.source/mergeColumns]))
 
-(s/def ::transformation.merge-datasets.target/mergeColumn columnName?)
+(s/def ::transformation.merge-datasets.target/mergeColumn ::db.dsv.column.s/columnName)
 
 
 (s/def ::transformation.merge-datasets/target (s/keys :req-un [::transformation.merge-datasets.target/mergeColumn]))
@@ -351,7 +350,7 @@
 (alias 'transformation.rename-column 'akvo.lumen.specs.transformation.rename-column)
 
 (s/def ::transformation.rename-column/newColumnTitle string?) ;; reuse s/def also used in combine
-(s/def ::transformation.rename-column/columnName columnName?)
+(s/def ::transformation.rename-column/columnName ::db.dsv.column.s/columnName)
 
 (s/def ::transformation.rename-column/args
   (s/keys :req-un [::transformation.derive/newColumnTitle
@@ -408,7 +407,7 @@
 (alias 'transformation.sort-column 'akvo.lumen.specs.transformation.sort-column)
 
 (s/def ::transformation.sort-column/sortDirection lumen.s/sort?)
-(s/def ::transformation.sort-column/columnName columnName?)
+(s/def ::transformation.sort-column/columnName ::db.dsv.column.s/columnName)
 
 (s/def ::transformation.sort-column/args
   (s/keys :req-un [::transformation.sort-column/sortDirection
@@ -425,7 +424,7 @@
 (create-ns  'akvo.lumen.specs.transformation.remove-sort)
 (alias 'transformation.remove-sort 'akvo.lumen.specs.transformation.remove-sort)
 
-(s/def ::transformation.remove-sort/columnName columnName?)
+(s/def ::transformation.remove-sort/columnName ::db.dsv.column.s/columnName)
 
 (s/def ::transformation.remove-sort/args
   (s/keys :req-un [::transformation.remove-sort/columnName]))
@@ -559,7 +558,3 @@
                                                ::db.dsv.s/job-execution-id ::db.dsv.s/table-name
                                                ::db.dsv.s/imported-table-name ::db.dsv.s/version
                                                ::db.dsv.s/transformations ::db.dsv.s/columns]))
-
-(s/fdef lib.transformation.engine/new-dataset-version
-  :args (s/cat :conn ::db.s/tenant-connection
-               :dsv ::next-dataset-version))

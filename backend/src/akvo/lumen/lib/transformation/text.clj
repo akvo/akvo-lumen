@@ -9,8 +9,8 @@
   [tenant-conn table-name columns op-spec fn]
   (let [{column-name "columnName"} (engine/args op-spec)]
     (db.tx.text/text-transform tenant-conn {:table-name table-name
-                                 :column-name column-name
-                                 :fn fn})
+                                            :column-name column-name
+                                            :fn fn})
     {:success? true
      :execution-log [(format "Text transform %s on %s" fn column-name)]
      :columns columns}))

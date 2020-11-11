@@ -10,7 +10,10 @@
                                          *caddisfly*
                                          caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
+            [akvo.lumen.db.env :as db.env]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
@@ -79,7 +82,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
-  (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply deps dataset-id command)
+  (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply (assoc deps :claims tu/test-claims) dataset-id command)
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
     (conj res (:status job) job)))
 
@@ -89,6 +92,8 @@
     (get-data *tenant-conn* {:table-name table-name})))
 
 (def ops (vec (json/parse-string (slurp (io/resource "ops.json")))))
+
+(def data-groups-ops (vec (json/parse-string (slurp (io/resource "data-groups-ops.json")))))
 
 (def invalid-op (-> (take 3 ops)
                     vec
@@ -146,6 +151,29 @@
                           (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
                                                                              :transformation transformation})))]
       (is (= ::lib/ok tag)))))
+
+
+(deftest ^:functional test-data-groups-transformations
+  (db.env/activate-flag *tenant-conn* "data-groups")
+  (testing "Valid log"
+    (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
+                                                                 :has-column-headers? true
+                                                                 :file "transformation_test.csv"})
+          [tag _] (last (for [transformation data-groups-ops]
+                          (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
+                                                                                   :transformation transformation})))]
+      (is (= ::lib/ok tag))
+
+      (let [dsv (db.dataset-version/latest-dataset-version-2-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
+            data-group (first (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn*
+                                                                                     {:dataset-version-id (:id dsv)}))]
+        (is (= '({:rnum 1, :c1 "A   ", :c2 "b   ", :c3 "c"})
+               (get-data *tenant-conn* {:table-name (:table-name data-group)})))
+
+        )
+      ))
+  (db.env/deactivate-flag *tenant-conn* "data-groups"))
+
 
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
@@ -342,8 +370,8 @@
                  {:type :transformation
                   :transformation (gen-transformation "core/rename-column"
                                                       {::transformation.derive.s/newColumnTitle    "New Title"
-                                                       ::transformation.rename-column.s/columnName "c5"
-                                                       ::transformation.engine.s/onError           "fail"})})
+                                                       ::transformation.engine.s/onError           "fail"}
+                                                      :columnName "c5")})
               updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
@@ -791,11 +819,10 @@
                                            :data         target-data})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} origin-dataset-id)
         tx                   (gen-transformation "core/merge-datasets"
-                                                 {::transformation.merge-datasets.source.s/mergeColumn          "c1"
-                                                  ::transformation.merge-datasets.source.s/aggregationDirection "DESC"
-                                                  ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]
-                                                  ::transformation.merge-datasets.target.s/mergeColumn          "c1"}
+                                                 {::transformation.merge-datasets.source.s/aggregationDirection "DESC"
+                                                  ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]}
                                                  [:source :aggregationColumn] nil
+                                                 [:target :mergeColumn] "c1"
                                                  [:source :mergeColumn] "c1"
                                                  [:source :datasetId] target-dataset-id)
         [tag _ :as res] (apply-transformation {:type           :transformation
@@ -850,8 +877,7 @@
                                                     :transformation
                                                     (gen-transformation "core/rename-column"
                                                                         {::transformation.derive.s/newColumnTitle    "New Title"
-                                                                         ::transformation.rename-column.s/columnName "c2"
-                                                                         ::transformation.engine.s/onError           "fail"})})]
+                                                                         ::transformation.engine.s/onError           "fail"} :columnName "c2")})]
     (is (= ::lib/ok tag))
     (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
                                                                                   {:dataset-id dataset-id})]
@@ -887,9 +913,9 @@
                                                     :transformation
                                                     (gen-transformation "core/generate-geopoints"
                                                                         {::transformation.generate-geopoints.s/columnTitleGeo "Geopoints"
-                                                                         ::transformation.generate-geopoints.s/columnNameLong "c3"
-                                                                         ::transformation.generate-geopoints.s/columnNameLat  "c2"
-                                                                         ::transformation.engine.s/onError                    "fail"})})]
+                                                                         ::transformation.engine.s/onError                    "fail"}
+                                                                        :columnNameLong "c3"
+                                                                        :columnNameLat  "c2")})]
     (is (= ::lib/ok tag))
     (let [dataset             (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
           {:keys [columns _]} dataset]

@@ -59,6 +59,11 @@
     (stest/unstrument)
     r))
 
+(def test-claims {"email" "author@akvo.org"
+                  "name" "Author"
+                  "given_name" "Author"
+                  "family_name" "Family"})
+
 (defn import-file
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
   [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]
@@ -69,10 +74,7 @@
                           "fileName" (or dataset-name file)
                           "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
-        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker {"email" "author@akvo.org"
-                                                                              "name" "Author"
-                                                                              "given_name" "Author"
-                                                                              "family_name" "Family"} spec)]
+        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker test-claims spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
 

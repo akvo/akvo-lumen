@@ -14,8 +14,9 @@
                            :body map?}
               :handler (fn [{tenant :tenant
                              body :body
+                             jwt-claims :jwt-claims
                              {:keys [dataset-id op1 op2]} :path-params}]
-                         (t/apply {:tenant-conn (p/connection tenant-manager tenant) :caddisfly caddisfly}
+                         (t/apply {:tenant-conn (p/connection tenant-manager tenant) :caddisfly caddisfly :claims jwt-claims}
                                   dataset-id
                                   {:type :transformation
                                    :transformation body}))}}]]
@@ -33,4 +34,3 @@
 
 (defmethod ig/init-key :akvo.lumen.endpoint.transformation/transformation  [_ opts]
   (routes opts))
-

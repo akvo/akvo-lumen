@@ -1,0 +1,9 @@
+[
+  {
+    "op": "core/to-uppercase",
+    "args": {
+      "columnName": "c1"
+    },
+    "onError": "default-value"
+  }
+]
