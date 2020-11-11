@@ -57,7 +57,16 @@
             table-name
             order-by-expr)))
 
+(defn adapt-group [c]
+  (let [[groupId groupName] (cond
+                              (some? (get c "groupId")) [(get c "groupId") (get c "groupName")]
+                              (contains? flow-common/metadata-keys (get c "columnName")) ["metadata" "metadata"]
+                              (tx.engine/is-derived? (get c "columnName")) ["transformations" "transformations"]
+                              :else ["main" "main"])]
 
+    (-> c
+        (assoc "groupId" groupId)
+        (assoc "groupName" groupName))))
 
 (defn- groups
   ([dataset]
@@ -65,7 +74,7 @@
   ([dataset ordered?]
    (let [dataset-columns (->> (:columns dataset)
                               (remove #(get % "hidden"))
-                              (map db.dataset/adapt-group))
+                              (map adapt-group))
          grouped (-> (group-by #(get % "groupId") dataset-columns)
                      (update "transformations" vec))]
      (if ordered?

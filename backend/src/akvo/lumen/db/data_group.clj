@@ -8,3 +8,7 @@
 
 (defn list-data-groups-by-dataset-version-id [conn opts]
   (db-list-data-groups-by-dataset-version-id conn opts))
+
+(defn get-data-group-by-column-name [conn opts]
+  (let [column-name-filter [{:columnName (:column-name opts)}]]
+    (db-get-data-group-by-column-name conn (assoc opts :column-name-filter column-name-filter))))

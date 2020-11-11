@@ -3,6 +3,10 @@
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.job-execution :as db.job-execution]
+            [akvo.lumen.db.data-group :as db.data-group]
+            [akvo.lumen.specs.transformation :as s.transformation]
+            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
+            [akvo.lumen.lib.env :as env]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
@@ -142,7 +146,48 @@
             {}
             changed-columns)))
 
-(defn execute-transformation
+(defn execute-transformation-2
+  [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
+  (let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
+        column-name (first (aggregation.commons/spec-columns ::s.transformation/op-spec (w/keywordize-keys transformation)))
+        data-group (db.data-group/get-data-group-by-column-name tenant-conn {:dataset-version-id (:id dataset-version)
+                                                                             :column-name column-name})
+        source-table (:table-name data-group)
+        previous-columns (vec (:columns data-group))]
+    (let [{:keys [success? message columns execution-log error-data]}
+          (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))]
+      (when-not success?
+        (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
+        (throw (ex-info (or message "") {})))
+      (let [new-dataset-version-id (str (util/squuid))]
+        (let [next-dataset-version {:id new-dataset-version-id
+                                    :dataset-id dataset-id
+                                    :job-execution-id job-execution-id
+                                    :version (inc (:version dataset-version))
+                                    :author (:claims deps)
+                                    :transformations (w/keywordize-keys
+                                                      (conj (vec (:transformations dataset-version))
+                                                            (assoc transformation
+                                                                   "created" (Instant/ofEpochMilli (System/currentTimeMillis))
+                                                                   "changedColumns" (diff-columns previous-columns
+                                                                                                  columns))))}]
+          (db.dataset-version/new-dataset-version-2 tenant-conn next-dataset-version)
+          (db.data-group/new-data-group tenant-conn
+                                        (merge
+                                         (select-keys data-group
+                                                      [:imported-table-name :table-name :group-id :group-name :repeatable :group-order])
+                                         {:id (util/squuid)
+                                          :dataset-version-id new-dataset-version-id
+                                          :columns columns}))
+          (doseq [dg (db.data-group/list-data-groups-by-dataset-version-id tenant-conn
+                                                                                   {:dataset-version-id (:id dataset-version)})
+                  :when (not= (:id dg) (:id data-group))]
+            (db.data-group/new-data-group tenant-conn (-> dg
+                                                          (assoc :dataset-version-id new-dataset-version-id :id (util/squuid))
+                                                          (update :columns vec))))
+          (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
+
+(defn execute-transformation-1
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})
         previous-columns (vec (:columns dataset-version))
@@ -169,6 +214,14 @@
                                     :columns (w/keywordize-keys columns)}]
           (db.dataset-version/new-dataset-version tenant-conn next-dataset-version)
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))))))
+
+(defn execute-transformation
+  [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
+  (if (and (get (env/all tenant-conn) "data-groups")
+           (contains? s.transformation/single-column-transformations (get transformation "op")))
+    (execute-transformation-2 deps dataset-id job-execution-id transformation)
+    (execute-transformation-1 deps dataset-id job-execution-id transformation)))
+
 
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
