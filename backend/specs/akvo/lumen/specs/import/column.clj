@@ -113,7 +113,7 @@
 
 (s/def ::c.geopoint/value (s/with-gen
                             #(instance? Geopoint %)
-                            #(s/gen #{(Geopoint. v/point)})))
+                            #(s/gen #{(Geopoint. (v/rand-point))})))
 
 (s/def ::c.option/value (s/with-gen
                             string?
