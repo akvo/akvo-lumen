@@ -98,7 +98,11 @@
       (let [dataset* (-> (select-keys (first data-groups)
                                       [:name :modified :created :updated :source :transformations])
                          (assoc :status "OK"))]
-        (lib/ok (assoc dataset*  :id id :groups (mapv (juxt :id :columns :repeatable) data-groups))))
+        (lib/ok (assoc dataset*  :id id :groups (->> data-groups
+                                                     (mapv (juxt :id :columns :repeatable))
+                                                     (mapv #(update % 1 (fn [cols]
+                                                                          (filter (fn [col]
+                                                                                    (not (get col "hidden"))) cols))))))))
       (lib/not-found {:error "Not found"}))
     (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
       (let [dataset* (-> (select-keys dsv
@@ -145,18 +149,18 @@
   (if (get (env/all tenant-conn) "data-groups")
     (when-let [dg (db.dataset/data-group-by-dataset-id-and-group-id tenant-conn {:dataset-id id
                                                                                  :group-id group-id})]
-      (let [q (select-data-sql (:table-name dg) (:columns dg))
+      (let [columns (filter #(not (get % "hidden")) (:columns dg))
+            q (select-data-sql (:table-name dg) columns)
             data (rest (jdbc/query tenant-conn
                                    [q]
                                    {:as-arrays? true}))]
         (-> (select-keys dg [:updated :created :modified :transformations])
             remove-token
             (assoc :rows data
-                   :columns (:columns dg)
+                   :columns columns
                    :status "OK" :datasetId id :groupId group-id))))
     (when-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
       (let [columns (get (groups dsv) group-id)
-            namespaces (set (map #(get % "namespace" "main") columns))
             q (select-data-sql (:table-name dsv) columns)
             data (rest (jdbc/query tenant-conn
                                    [q]
