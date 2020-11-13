@@ -40,13 +40,14 @@ services:
    volumes:
      - ./client/e2e-test:/app/e2e-test
    environment:
-      - LUMEN_URL=http://t1.lumen.local:3030/
-      - LUMEN_USER=jerome@t1.akvolumen.org
-      - LUMEN_PASSWORD=password
-      - APP_DIR=/app/e2e-test
+     - CYPRESS_LUMEN_AUTH=keycloak
+     - CYPRESS_LUMEN_URL=http://t1.lumen.local:3030/
+     - CYPRESS_LUMEN_USER=jerome@t1.akvolumen.org
+     - CYPRESS_LUMEN_PASSWORD=password
+     - APP_DIR=/app/e2e-test
    links:
-      - keycloak:auth.lumen.local
-      - client:t1.lumen.local
+     - keycloak:auth.lumen.local
+     - client:t1.lumen.local
    command: "true"
  exporter:
    expose:
