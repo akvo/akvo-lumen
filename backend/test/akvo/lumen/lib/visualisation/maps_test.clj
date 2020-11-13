@@ -48,7 +48,7 @@
 
       (is (not (m/valid-location? {:geom "c1"
                                    :latitude "c1"
-                                   :longitude "c2"} p)))
+                                   :longitude "c2"})))
 
       (is (m/valid-location? {:geom "c1"
                               :latitude "c2"
