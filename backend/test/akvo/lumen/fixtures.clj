@@ -6,9 +6,6 @@
             [akvo.lumen.lib.import :as import]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.test-utils :as tu]
-            [akvo.lumen.test-utils
-             :refer
-             [import-file]]
             [clojure.tools.logging :as log]
             [ragtime.jdbc :as jdbc]
             [ragtime.reporter :as reporter]
@@ -44,9 +41,9 @@
        (binding [*system* (tu/start-system c)]
          (try
            (f)
-           (finally (do
-                      (tu/halt-system *system*)
-                      (lumen-migrate/rollback c :tenant-manager)))))))))
+           (finally
+             (tu/halt-system *system*)
+             (lumen-migrate/rollback c :tenant-manager))))))))
 
 (defn data-groups-future-fixture
   [f]
