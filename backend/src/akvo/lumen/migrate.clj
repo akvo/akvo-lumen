@@ -4,13 +4,8 @@
    [akvo.lumen.config :as config]
    [akvo.lumen.lib.aes :as aes]
    [akvo.lumen.db.migrate :as db.migrate]
-   [clojure.java.io :as io]
-   [clojure.tools.logging :as log]
-   [duct.core :as duct]
    [clojure.spec.alpha :as s]
-   [environ.core :refer [env]]
    [integrant.core :as ig]
-   [meta-merge.core :refer [meta-merge]]
    [ragtime.jdbc :as ragtime-jdbc]
    [ragtime.repl :as ragtime-repl]
    [ragtime.reporter :as reporter]
@@ -87,7 +82,6 @@
   (rollback :tenant-manager) ;; will rollback tenant manager migrations"
   [config arg]
   (let [migrations (load-migrations config)
-        tenant-migrations (:tenants migrations)
         tenant-manager-migrations (:tenant-manager migrations)
 
         tenant-manager-db {:connection-uri (hikaricp/ssl-url (get-in config [:akvo.lumen.component.hikaricp/hikaricp :uri]))}
@@ -122,4 +116,3 @@
 
 (defmethod ig/pre-init-spec :akvo.lumen.migrate/migrate [_]
   (s/keys :req-un [::migrations]))
-
