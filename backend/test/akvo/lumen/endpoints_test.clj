@@ -1,13 +1,13 @@
 (ns akvo.lumen.endpoints-test
   {:functional true}
-  (:require [akvo.lumen.endpoints-test.commons :as commons :refer (get* patch* del* post* put* body-kw job-execution-dataset-id post-files api-url)]
-            [akvo.lumen.fixtures :refer [*system* system-fixture *tenant-conn* tenant-conn-fixture *error-tracker* error-tracker-fixture]]
+  (:require [akvo.lumen.endpoints-test.commons :as commons :refer (get* del* post* put* body-kw job-execution-dataset-id post-files api-url)]
+            [akvo.lumen.fixtures :refer [*system* system-fixture tenant-conn-fixture error-tracker-fixture]]
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clojure.string :as str]
-            [clojure.test :refer :all]
-            [clojure.tools.logging :as log]))
+            [clojure.set :as set]
+            [clojure.test :refer [deftest is testing use-fixtures ]]))
 
 (use-fixtures :once (partial system-fixture "endpoints-test.edn")
   tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
@@ -57,12 +57,13 @@
           (is (= {:resources
                   {:numberOfVisualisations 0,
                    :numberOfExternalDatasets 0,
-                   :numberOfDashboards 0}}(body-kw res)))))
+                   :numberOfDashboards 0}}
+                 (body-kw res)))))
 
       (testing "/admin/users"
         (let [users (-> (h (get* (api-url "/admin/users"))) body-kw :users)]
-          (is (clojure.set/subset? #{"jerome@t1.akvolumen.org" "salim@t1.akvolumen.org"}
-                                   (set (map :email users))))))
+          (is (set/subset? #{"jerome@t1.akvolumen.org" "salim@t1.akvolumen.org"}
+                           (set (map :email users))))))
 
       (testing "/library"
         (let [r (h (get* (api-url "/library")))]
@@ -87,8 +88,7 @@
                           body-kw :id))))
 
           (is (= title* (-> (h (get* (api-url "/library")))
-                            body-kw :dashboards first :title)))
-          ))
+                            body-kw :dashboards first :title)))))
 
       (testing "/collections"
         (let [title* "col-title"]
@@ -99,8 +99,7 @@
                           body-kw :id))))
 
           (is (= title* (-> (h (get* (api-url "/library")))
-                            body-kw :collections first :title)))
-          ))
+                            body-kw :collections first :title)))))
 
       (testing "/multiple-column"
         (is (=
@@ -142,8 +141,7 @@
                             body-kw
                             :importId)
               _           (is (some? import-id))
-              dataset-id (job-execution-dataset-id h import-id)
-              ]
+              dataset-id (job-execution-dataset-id h import-id)]
           (let [dataset (-> (h (get* (api-url "/datasets" dataset-id)))
                             body-kw)]
             (is (= {:transformations []
