@@ -1,8 +1,7 @@
 (ns akvo.lumen.db.tardis-test
   {:functional true}
   (:require [akvo.lumen.fixtures :refer [*tenant-conn* tenant-conn-fixture system-fixture]]
-            [clojure.string :as str]
-            [clojure.test :refer :all]
+            [clojure.test :refer [deftest is testing use-fixtures]]
             [hugsql.core :as hugsql])
   (:import [org.postgresql.util PSQLException]))
 

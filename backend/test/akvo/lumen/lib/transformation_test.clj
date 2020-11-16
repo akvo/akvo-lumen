@@ -11,13 +11,11 @@
                                          caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.db.env :as db.env]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
+            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
-
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
             [akvo.lumen.lib.transformation.engine :as engine]
@@ -35,14 +33,12 @@
             [clj-time.core :as tc]
             [clj-time.format :as timef]
             [clojure.java.io :as io]
-            [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.string :as string]
-            [clojure.test :refer :all]
-            [clojure.tools.logging :as log]
+            [clojure.test :refer [are is deftest testing use-fixtures]]
             [clojure.walk :refer (stringify-keys keywordize-keys)]
             [hugsql.core :as hugsql])
-  (:import [akvo.lumen.postgres Geoshape Geopoint]))
+  (:import [akvo.lumen.postgres Geoshape]))
 
 (ches.generate/add-encoder java.time.Instant (fn [obj jsonGenerator] (.writeString jsonGenerator (str obj))))
 
@@ -82,7 +78,7 @@
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
-  (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply (assoc deps :claims tu/test-claims) dataset-id command)
+  (let [[_ {:keys [jobExecutionId]} :as res] (transformation/apply (assoc deps :claims tu/test-claims) dataset-id command)
         [job _] (retry-job-execution tenant-conn jobExecutionId true)]
     (conj res (:status job) job)))
 
@@ -125,19 +121,19 @@
                (reduce #((if (vector? (first %2))  assoc-in assoc) % (first %2) (last %2)) args (partition 2 kvs))
                args)
 
-]
+        ]
     (conform ::transformation.engine.s/op-spec (assoc s :op op-name :args args))
 
     (tu/clj>json>clj (assoc s :op op-name :args args))))
 
 (def change-datatype-tx (fn [column-name & [new-type]]
-   {:type :transformation
-    :transformation
-    (-> (gen-transformation
-         "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
-                                 ::transformation.change-datatype.s/newType (or new-type "number")
-                                 ::transformation.engine.s/onError "default-value"})
-        (assoc-in ["args" "defaultValue"] nil))}))
+                          {:type :transformation
+                           :transformation
+                           (-> (gen-transformation
+                                "core/change-datatype" {::db.dataset-version.column.s/columnName column-name
+                                                        ::transformation.change-datatype.s/newType (or new-type "number")
+                                                        ::transformation.engine.s/onError "default-value"})
+                               (assoc-in ["args" "defaultValue"] nil))}))
 
 (deftest ^:functional test-transformations
   (testing "Transformation application"
@@ -149,7 +145,7 @@
                                                                  :file "transformation_test.csv"})
           [tag _] (last (for [transformation ops]
                           (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
-                                                                             :transformation transformation})))]
+                                                                                   :transformation transformation})))]
       (is (= ::lib/ok tag)))))
 
 
@@ -166,7 +162,7 @@
 
       (let [dsv (db.dataset-version/latest-dataset-version-2-by-dataset-id *tenant-conn* {:dataset-id dataset-id})
             data-group (first (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn*
-                                                                                     {:dataset-version-id (:id dsv)}))]
+                                                                                    {:dataset-version-id (:id dsv)}))]
         (is (= '({:rnum 1, :c1 "A   ", :c2 "b   ", :c3 "c"})
                (get-data *tenant-conn* {:table-name (:table-name data-group)})))
 
@@ -178,22 +174,22 @@
 (deftest ^:functional test-import-and-transform
   (testing "Import CSV and transform"
     (let [t-log      [(gen-transformation "core/trim" {::db.dataset-version.column.s/columnName "c5"
-                                                      ::transformation.engine.s/onError        "fail"})
+                                                       ::transformation.engine.s/onError        "fail"})
                       (gen-transformation "core/change-datatype" {::db.dataset-version.column.s/columnName        "c5"
-                                                                 ::transformation.change-datatype.s/defaultValue 0
-                                                                 ::transformation.change-datatype.s/newType      "number"
-                                                                 ::transformation.engine.s/onError               "default-value"})
+                                                                  ::transformation.change-datatype.s/defaultValue 0
+                                                                  ::transformation.change-datatype.s/newType      "number"
+                                                                  ::transformation.engine.s/onError               "default-value"})
                       (gen-transformation "core/filter-column" {::db.dataset-version.column.s/columnName    "c4"
-                                                               ::transformation.filter-column.s/expression {"contains" "broken"}
-                                                               ::transformation.engine.s/onError           "fail"})]
+                                                                ::transformation.filter-column.s/expression {"contains" "broken"}
+                                                                ::transformation.engine.s/onError           "fail"})]
           dataset-id (import-file *tenant-conn* *error-tracker* {:name                "GDP Test"
                                                                  :has-column-headers? false
                                                                  :file                "GDP.csv"})]
       (let [[tag {:keys [datasetId]}] (last (for [transformation t-log]
                                               (async-tx-apply {:tenant-conn *tenant-conn*}
-                                                                    dataset-id
-                                                                    {:type           :transformation
-                                                                     :transformation transformation})))]
+                                                              dataset-id
+                                                              {:type           :transformation
+                                                               :transformation transformation})))]
 
         (is (= ::lib/ok tag))
 
@@ -274,10 +270,10 @@
     (testing "Combining columns where one of the columns has empty values"
       (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
-                                         (gen-transformation "core/combine"
-                                                             {:akvo.lumen.specs.transformation.combine/columnNames ["c2" "c3"]                                                                          ::transformation.engine.s/onError "fail"
-                                                              :akvo.lumen.specs.transformation.combine/newColumnTitle "issue1517"
-                                                              :akvo.lumen.specs.transformation.combine/separator " "})})]
+                                           (gen-transformation "core/combine"
+                                                               {:akvo.lumen.specs.transformation.combine/columnNames ["c2" "c3"]                                                                          ::transformation.engine.s/onError "fail"
+                                                                :akvo.lumen.specs.transformation.combine/newColumnTitle "issue1517"
+                                                                :akvo.lumen.specs.transformation.combine/separator " "})})]
         (is (= ::lib/ok tag))
         (let [table-name (:table-name
                           (latest-dataset-version-by-dataset-id *tenant-conn*
@@ -294,24 +290,24 @@
                                :transformation
                                (gen-transformation
                                 "core/change-datatype" {:akvo.lumen.specs.db.dataset-version.column/columnName column-name
-                                                       :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
-                                                       :akvo.lumen.specs.transformation.change-datatype/newType "date"
-                                                       ::transformation.engine.s/onError "fail"}
+                                                        :akvo.lumen.specs.transformation.change-datatype/defaultValue 0
+                                                        :akvo.lumen.specs.transformation.change-datatype/newType "date"
+                                                        ::transformation.engine.s/onError "fail"}
                                 :parseFormat format*)})
         data                (import.s/csv-sample-imported-dataset [:text
-                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
-                                                                                         (fn [[y _ _ :as date]]
-                                                                                           (str y))))
-                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
-                                                                                         (fn [[y m d :as date]]
-                                                                                           (str d "/" m "/" y))))
-                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]
-                                                          [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
-                                                                                         (fn [date]
-                                                                                           (string/join "-" date))))
-                                                                  ::import.values.s/key (fn [] lumen.s/false-gen)}]]
-                                                         10)
+                                                                   [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
+                                                                                                                (fn [[y _ _]]
+                                                                                                                  (str y))))
+                                                                           ::import.values.s/key (fn [] lumen.s/false-gen)}]
+                                                                   [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
+                                                                                                                (fn [[y m d]]
+                                                                                                                  (str d "/" m "/" y))))
+                                                                           ::import.values.s/key (fn [] lumen.s/false-gen)}]
+                                                                   [:text {::import.column.text.s/value (fn [] (lumen.s/date-format-gen
+                                                                                                                (fn [date]
+                                                                                                                  (string/join "-" date))))
+                                                                           ::import.values.s/key (fn [] lumen.s/false-gen)}]]
+                                                                  10)
         years               (map (comp :value second) (:rows data))
         years-slash         (map (comp (partial timef/parse (timef/formatter "dd/MM/yyyy")) :value first next next) (:rows data))
         years-hiphen        (map (comp (partial timef/parse (timef/formatter "yyyy-MM-dd")) :value first next next next) (:rows data))
@@ -342,12 +338,7 @@
                                       :data (import.s/csv-sample-imported-dataset [:text :number :text :number :text :number :text :number] 2)
                                       :with-job? true})
           dataset-id (:dataset_id dataset)
-          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)
-          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
-                                                                :version 1})
-          stored-data (->> (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                 {:dataset-id dataset-id})
-                           (get-data *tenant-conn*))]
+          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
       (testing "Testing columns are removed without tx"
         (let [updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
@@ -367,11 +358,11 @@
 
       (testing "Removing column with rename-name tx, should fails"
         (let [jow (apply-transformation
-                 {:type :transformation
-                  :transformation (gen-transformation "core/rename-column"
-                                                      {::transformation.derive.s/newColumnTitle    "New Title"
-                                                       ::transformation.engine.s/onError           "fail"}
-                                                      :columnName "c5")})
+                   {:type :transformation
+                    :transformation (gen-transformation "core/rename-column"
+                                                        {::transformation.derive.s/newColumnTitle    "New Title"
+                                                         ::transformation.engine.s/onError           "fail"}
+                                                        :columnName "c5")})
               updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
@@ -384,7 +375,7 @@
                                        :transformation
                                        (gen-transformation "core/delete-column"
                                                            {::db.dataset-version.column.s/columnName "c5"
-})})
+                                                            })})
               updated-res (update-file *tenant-conn* (:akvo.lumen.component.caddisfly/caddisfly *system*)
                                        *error-tracker* (:dataset-id job) (:data-source-id job)
                                        {:kind "clj"
@@ -396,8 +387,8 @@
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
                                                                :file "derived-column.csv"})
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
-    (do (apply-transformation (change-datatype-tx "c2"))
-        (apply-transformation (change-datatype-tx "c3")))
+    (apply-transformation (change-datatype-tx "c2"))
+    (apply-transformation (change-datatype-tx "c3"))
 
     (testing "Import and initial transforms"
       (is (= (latest-data dataset-id)
@@ -407,12 +398,12 @@
 
     (testing "js references a non existent row"
       (let [[_ _ status job] (apply-transformation {:type :transformation
-                                       :transformation
-                                       (gen-transformation "core/derive"
-                                                           {::transformation.derive.s/newColumnTitle "Derived 1"
-                                                            ::transformation.derive.s/code "row['oops'].toUpperCase()"
-                                                            ::transformation.derive.s/newColumnType "text"
-                                                            ::transformation.engine.s/onError "leave-empty"})})]
+                                                    :transformation
+                                                    (gen-transformation "core/derive"
+                                                                        {::transformation.derive.s/newColumnTitle "Derived 1"
+                                                                         ::transformation.derive.s/code "row['oops'].toUpperCase()"
+                                                                         ::transformation.derive.s/newColumnType "text"
+                                                                         ::transformation.engine.s/onError "leave-empty"})})]
         (is (= status "FAILED"))
         (is (= (:error-message job) "Failed to transform: Column 'oops' doesn't exist."))))
 
@@ -474,7 +465,7 @@
         (is (= ["a" "b" nil] (map :d3 (latest-data dataset-id))))))
 
     (testing "Date transform"
-      (let [[tag res] (apply-transformation {:type :transformation
+      (let [[tag _] (apply-transformation {:type :transformation
                                            :transformation
                                            (gen-transformation "core/derive"
                                                                {::transformation.derive.s/newColumnTitle "Derived 6"
@@ -485,44 +476,44 @@
         (is (every? number? (map :d4 (latest-data dataset-id))))))
 
     (testing "derive to number column"
-      (let [[tag res] (apply-transformation {:type :transformation
-                                             :transformation
-                                             (gen-transformation "core/derive"
-                                                                 {::transformation.derive.s/newColumnTitle "Derived 7"
-                                                                  ::transformation.derive.s/code "row.bar"
-                                                                  ::transformation.derive.s/newColumnType "number"
-                                                                  ::transformation.engine.s/onError "fail"})})]
+      (let [[tag _] (apply-transformation {:type :transformation
+                                           :transformation
+                                           (gen-transformation "core/derive"
+                                                               {::transformation.derive.s/newColumnTitle "Derived 7"
+                                                                ::transformation.derive.s/code "row.bar"
+                                                                ::transformation.derive.s/newColumnType "number"
+                                                                ::transformation.engine.s/onError "fail"})})]
         (is (= tag ::lib/ok))
         (is (every? number? (map :d5 (latest-data dataset-id))))))
 
     (testing "Valid type check"
-      (let [[tag _ status] (apply-transformation {:type :transformation
-                                                  :transformation
-                                                  (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                       ::transformation.derive.s/code "new Date()"
-                                                                       ::transformation.derive.s/newColumnType "number"
-                                                                       ::transformation.engine.s/onError "fail"})})]
+      (let [[_ _ status] (apply-transformation {:type :transformation
+                                                :transformation
+                                                (gen-transformation "core/derive"
+                                                                    {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                     ::transformation.derive.s/code "new Date()"
+                                                                     ::transformation.derive.s/newColumnType "number"
+                                                                     ::transformation.engine.s/onError "fail"})})]
         (is (= status "FAILED"))))
 
     (testing "Sandboxing java interop"
-      (let [[tag _ status] (apply-transformation {:type :transformation
-                                                  :transformation
-                                                  (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                       ::transformation.derive.s/code "new java.util.Date()"
-                                                                       ::transformation.derive.s/newColumnType "number"
-                                                                       ::transformation.engine.s/onError "fail"})})]
+      (let [[_ _ status] (apply-transformation {:type :transformation
+                                                :transformation
+                                                (gen-transformation "core/derive"
+                                                                    {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                     ::transformation.derive.s/code "new java.util.Date()"
+                                                                     ::transformation.derive.s/newColumnType "number"
+                                                                     ::transformation.engine.s/onError "fail"})})]
         (is (= status "FAILED"))))
 
     (testing "Sandboxing dangerous js functions"
-      (let [[tag _ status] (apply-transformation {:type :transformation
-                                                  :transformation
-                                                  (gen-transformation "core/derive"
-                                                                      {::transformation.derive.s/newColumnTitle "Derived 8"
-                                                                       ::transformation.derive.s/code "quit()"
-                                                                       ::transformation.derive.s/newColumnType "number"
-                                                                       ::transformation.engine.s/onError "fail"})})]
+      (let [[_ _ status] (apply-transformation {:type :transformation
+                                                :transformation
+                                                (gen-transformation "core/derive"
+                                                                    {::transformation.derive.s/newColumnTitle "Derived 8"
+                                                                     ::transformation.derive.s/code "quit()"
+                                                                     ::transformation.derive.s/newColumnType "number"
+                                                                     ::transformation.engine.s/onError "fail"})})]
         (is (= status "FAILED"))))
 
     (testing "Fail early on syntax error"
@@ -557,11 +548,11 @@
                                                   ::transformation.split-column.s/pattern  "%"
                                                   ::transformation.engine.s/onError        "fail"}
                                                  :selectedColumn selectedColumn)
-        [tag _ :as all]      (apply-transformation {:type           :transformation
-                                                    :transformation transformation})]
+        [tag _ ]      (apply-transformation {:type           :transformation
+                                             :transformation transformation})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                                  {:dataset-id dataset-id})]
+    (let [{:keys [columns]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                  {:dataset-id dataset-id})]
       (is (= ["c1" "c2" "d1" "d2" "d3"] (map #(get % "columnName") columns)))
       (let [data (latest-data dataset-id)]
         (is (= ["" "exam" "se"] (map :d1 data)))
@@ -587,8 +578,8 @@
         [tag _]              (apply-transformation {:type           :transformation
                                                     :transformation transformation})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                                  {:dataset-id dataset-id})]
+    (let [{:keys [columns]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                  {:dataset-id dataset-id})]
       (is (= ["c1" "c2" "d1" "d2"] (map #(get % "columnName") columns)))
       (let [data (latest-data dataset-id)]
         (is (= ["v1" "v2$"] (map :d1 data)))
@@ -596,14 +587,14 @@
     (apply-transformation {:type :undo})
     (with-redefs [postgres/adapt-string-value (fn [v] (str "'" v "'::TEXT"))]
 
-      (let [[tag _ status] (apply-transformation {:type           :transformation
-                                                  :transformation c2-tx})]
+      (let [[_ _ status] (apply-transformation {:type           :transformation
+                                                :transformation c2-tx})]
         (is (= status "FAILED"))))
     (let [[tag _] (apply-transformation {:type           :transformation
                                          :transformation c2-tx})]
       (is (= ::lib/ok tag))
-      (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
-                                                                                    {:dataset-id dataset-id})]
+      (let [{:keys [columns]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                    {:dataset-id dataset-id})]
         (is (= ["c1" "c2" "d1" "d2"] (map #(get % "columnName") columns)))
         (let [data (latest-data dataset-id)]
           (is (= ["v1" "v2'"] (map :d1 data)))
@@ -644,7 +635,7 @@
 
 (deftest ^:functional multiple-column-test
   (let [multiple-column-type       "caddisfly"
-        {:keys [hasImage columns]} (:body (multiple-column/details {:caddisfly *caddisfly*} multiple-column-type import.values.s/cad1-id))
+        {:keys [columns]} (:body (multiple-column/details {:caddisfly *caddisfly*} multiple-column-type import.values.s/cad1-id))
         bols                       (at-least-one-true (count columns))
         columns-payload            (mapv #(-> %
                                               (update :name (partial str "new-name-" %2 "-"))
@@ -669,16 +660,16 @@
                            (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
                                                      {::import.values.s/multipleId import.values.s/cad1-id
                                                       ::import.values.s/id         "c1"}))
-          [tag _ :as res] (apply-transformation
-                           {:type :transformation
-                            :transformation
-                            (-> (gen-transformation :core/extract-multiple
-                                                    {::db.dataset-version.column.s/columnName "c1"
-                                                     ::transformation.split-column.s/pattern  "-"
-                                                     ::transformation.engine.s/onError        "fail"}
-                                                    :selectedColumn selected-column)
-                                (update-in ["args" "extractImage"] (constantly true))
-                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+          [tag _] (apply-transformation
+                   {:type :transformation
+                    :transformation
+                    (-> (gen-transformation :core/extract-multiple
+                                            {::db.dataset-version.column.s/columnName "c1"
+                                             ::transformation.split-column.s/pattern  "-"
+                                             ::transformation.engine.s/onError        "fail"}
+                                            :selectedColumn selected-column)
+                        (update-in ["args" "extractImage"] (constantly true))
+                        (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
 
@@ -699,18 +690,18 @@
            (lumen.s/sample-with-gen* ::import.column.multiple.caddisfly.s/header*
                                      {::import.values.s/multipleId import.values.s/cad2-id
                                       ::import.values.s/id         "c2"}))
-          [tag _ :as res] (apply-transformation
-                           {:type :transformation
-                            :transformation
-                            (-> (gen-transformation :core/extract-multiple
-                                                    {::db.dataset-version.column.s/columnName "c2"
-                                                     ::transformation.split-column.s/pattern  "-"
-                                                     ::transformation.engine.s/onError        "fail"}
-                                                    :selectedColumn selected-column)
-                                (update-in ["args" "extractImage"] (constantly true))
-                                (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
+          [tag _] (apply-transformation
+                   {:type :transformation
+                    :transformation
+                    (-> (gen-transformation :core/extract-multiple
+                                            {::db.dataset-version.column.s/columnName "c2"
+                                             ::transformation.split-column.s/pattern  "-"
+                                             ::transformation.engine.s/onError        "fail"}
+                                            :selectedColumn selected-column)
+                        (update-in ["args" "extractImage"] (constantly true))
+                        (assoc-in ["args" "columns"] (stringify-keys columns-payload)))})]
       (is (= ::lib/ok tag))
-      (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
+      (let [{:keys [table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
         (is (= [nil nil] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
 
 (defn- replace-column
@@ -746,8 +737,8 @@
                                                  [:derivation :type] "number"
                                                  [:derivation :uncategorizedValue] uncategorized-value)
 
-        [tag _ :as res] (apply-transformation {:type           :transformation
-                                               :transformation tx})]
+        [tag _] (apply-transformation {:type           :transformation
+                                       :transformation tx})]
     (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
 
     (is (= ::lib/ok tag))
@@ -789,8 +780,8 @@
                                                  [:derivation :type] "text"
                                                  [:derivation :uncategorizedValue] uncategorized-value)
 
-        [tag _ :as res] (apply-transformation {:type           :transformation
-                                               :transformation tx})]
+        [tag _] (apply-transformation {:type           :transformation
+                                       :transformation tx})]
     (is (= (set column-vals)  (->> origin-data :rows (map (comp :value first)) distinct set)))
 
     (is (= ::lib/ok tag))
@@ -828,7 +819,7 @@
         [tag _ :as res] (apply-transformation {:type           :transformation
                                                :transformation tx})]
     (is (= ::lib/ok tag))
-    (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
+    (let [{:keys [columns table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id origin-dataset-id})
           data-db                                      (get-data *tenant-conn* {:table-name table-name})]
       (is (=  (map (comp name :type) (apply conj
                                             (:columns origin-data)
@@ -841,9 +832,9 @@
 
 (deftest ^:functional reverse-geocode-test
   (let [geoshape-data (import.s/csv-sample-imported-dataset
-              [:text
-               [:geoshape {:import.column.geoshape.s/value #(s/gen #{(Geoshape. import.values.s/polygon)})}]]
-              2)
+                       [:text
+                        [:geoshape {:import.column.geoshape.s/value #(s/gen #{(Geoshape. import.values.s/polygon)})}]]
+                       2)
         geopoint-data (import.s/csv-sample-imported-dataset
                        [:text
                         :geopoint]
