@@ -90,7 +90,7 @@ export default function DatasetHeader(props) {
       },
     };
 
-    const result = [dataGroupViewToggle, settings, transform, transformationLog, visualise];
+    const result = [settings, transform, transformationLog, visualise];
 
     return result;
   };
