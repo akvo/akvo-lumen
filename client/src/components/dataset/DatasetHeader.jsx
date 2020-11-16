@@ -5,11 +5,11 @@ import EntityTypeHeader from '../entity-editor/EntityTypeHeader';
 
 export default function DatasetHeader(props) {
   const getActionButtions = () => {
-    const dataGroupViewToggle = {
+    /* const dataGroupViewToggle = {
       buttonText: <FormattedMessage id="switch_view" />,
       customClass: 'dataGroupViewToggle',
       onClick: props.onUseDataGroupsToggle,
-    };
+    }; */
 
     const settings = {
       buttonText: <FormattedMessage id="settings" />,
