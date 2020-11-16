@@ -34,8 +34,10 @@ import usePendingSaving from '../components/common/PendingSaving';
 require('../components/dataset/Dataset.scss');
 
 function Dataset(props) {
-  const maybeUseDataGroups = window.localStorage.getItem('useDataGroups');
-  const useDataGroups = maybeUseDataGroups !== null ? JSON.parse(maybeUseDataGroups) : true;
+  // const maybeUseDataGroups = window.localStorage.getItem('useDataGroups');
+  // const useDataGroups = maybeUseDataGroups !== null ? JSON.parse(maybeUseDataGroups) : true;
+  window.localStorage.removeItem('useDataGroups');
+  const useDataGroups = true;
 
   const dataset = useSelector(
     state => state.library.datasets[props.params.datasetId]
