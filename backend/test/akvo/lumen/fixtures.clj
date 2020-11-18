@@ -44,22 +44,29 @@
 
 (def ^:dynamic *tenant-conn*)
 (def ^:dynamic *system*)
+(def ^:dynamic *system-config*)
+
+(defn system-config-fixture
+  "Returns a fixture that binds a config to `*system-config*`"
+  ([f]
+   (system-config-fixture nil nil f))
+  ([config-edn f]
+   (system-config-fixture config-edn nil f))
+  ([config-edn more-ks f]
+   (binding [*system-config* (tu/start-config config-edn more-ks)]
+     (f))))
 
 (defn system-fixture
-  "Returns a fixture that binds a connection pool to *tenant-conn*"
+  "Returns a fixture that binds a system to `*system*`
+  Expects a current `*system-config*`"
   ([f]
-   (system-fixture nil nil f))
-  ([config-edn f]
-   (system-fixture config-edn nil f))
-  ([config-edn more-ks f]
-   (let [c (tu/start-config config-edn more-ks)]
-     (binding [lumen-migrate/*reporter* reporter/silent]
-       (lumen-migrate/migrate c)
-       (binding [*system* (tu/start-system c)]
-         (try
-           (f)
-           (finally
-             (tu/halt-system *system*))))))))
+   (binding [lumen-migrate/*reporter* reporter/silent]
+     (lumen-migrate/migrate *system-config*)
+     (binding [*system* (tu/start-system *system-config*)]
+       (try
+         (f)
+         (finally
+           (tu/halt-system *system*)))))))
 
 (defn data-groups-future-fixture
   [f]
@@ -67,13 +74,13 @@
     (f)))
 
 (defn tenant-conn-fixture
-  "Returns a fixture that binds a connection pool to *tenant-conn*"
+  "Returns a fixture that binds a connection pool to `*tenant-conn*`
+  Expects a current `*system-config*`"
   [f]
-  (let [c (tu/start-config nil nil)
-        source-tenant (-> c :akvo.lumen.migrate/migrate :seed :tenants first)
+  (let [source-tenant (-> *system-config* :akvo.lumen.migrate/migrate :seed :tenants first)
         new-db-name (format "test_%s" (System/currentTimeMillis))
         new-db-uri (str/replace (:db_uri source-tenant) "test_lumen_tenant_1" new-db-name)]
-    (tu/seed c)
+    (tu/seed *system-config*)
     (ensure-source-db-migration source-tenant)
     (copy-test-db {:connection-uri (:db_uri source-tenant)} new-db-name)
     (binding [*tenant-conn* (pool {:db_uri new-db-uri :label new-db-name})]

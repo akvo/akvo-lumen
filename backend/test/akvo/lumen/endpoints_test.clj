@@ -1,7 +1,7 @@
 (ns akvo.lumen.endpoints-test
   {:functional true}
   (:require [akvo.lumen.endpoints-test.commons :as commons :refer (get* del* post* put* body-kw job-execution-dataset-id post-files api-url)]
-            [akvo.lumen.fixtures :refer [*system* system-fixture tenant-conn-fixture error-tracker-fixture]]
+            [akvo.lumen.fixtures :refer [*system* system-config-fixture system-fixture tenant-conn-fixture error-tracker-fixture]]
             [akvo.lumen.test-utils :as tu]
             [akvo.lumen.util :as util]
             [cheshire.core :as json]
@@ -9,7 +9,8 @@
             [clojure.set :as set]
             [clojure.test :refer [deftest is testing use-fixtures ]]))
 
-(use-fixtures :once (partial system-fixture "endpoints-test.edn")
+(use-fixtures :once (partial system-config-fixture "endpoints-test.edn")
+  system-fixture
   tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (deftest ^:functional handler-test

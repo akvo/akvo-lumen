@@ -4,6 +4,7 @@
                                          tenant-conn-fixture
                                          data-groups-future-fixture
                                          system-fixture
+                                         system-config-fixture
                                          *system*
                                          *error-tracker*
                                          error-tracker-fixture]]
@@ -23,8 +24,7 @@
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 
-(use-fixtures :once system-fixture data-groups-future-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
-
+(use-fixtures :once system-config-fixture system-fixture data-groups-future-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 (deftest ^:functional test-import
   (testing "Testing import csv"
     (let [dataset-id (import-file *tenant-conn* *error-tracker*

@@ -3,6 +3,7 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          system-fixture
+                                         system-config-fixture
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.db.env :as db.env]
@@ -15,7 +16,7 @@
             [clojure.walk :refer (keywordize-keys stringify-keys)]
             [clojure.test :refer :all]))
 
-(use-fixtures :once tu/spec-instrument system-fixture tenant-conn-fixture error-tracker-fixture)
+(use-fixtures :once tu/spec-instrument system-config-fixture system-fixture tenant-conn-fixture error-tracker-fixture)
 
 
 (deftest ^:functional test-aggregation-with-env-flag-without-datagroups

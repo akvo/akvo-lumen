@@ -3,6 +3,7 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          system-fixture
+                                         system-config-fixture
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.test-utils :refer [import-file]]
@@ -19,7 +20,7 @@
 
 
 
-(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once system-config-fixture system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 
 (deftest ^:functional test-dos-file
