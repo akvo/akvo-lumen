@@ -68,7 +68,7 @@
 
 (defn load-tenant [db encryption-key dropwizard-registry tenants label]
   (if-let [{:keys [db_uri label]} (db.tenant-manager/tenant-by-id (:spec db)
-                                                {:label label})]
+                                                                  {:label label})]
     (let [decrypted-db-uri (hikaricp/ssl-url (aes/decrypt encryption-key db_uri))]
       (swap! tenants
              assoc-if-key-does-not-exist

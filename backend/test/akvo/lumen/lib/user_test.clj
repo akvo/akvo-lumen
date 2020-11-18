@@ -2,7 +2,7 @@
   {:functional true}
   (:require [akvo.lumen.component.emailer :as emailer]
             [akvo.lumen.component.keycloak :as keycloak]
-            [akvo.lumen.fixtures :refer [tenant-conn-fixture *tenant-conn* system-fixture]]
+            [akvo.lumen.fixtures :refer [tenant-conn-fixture *tenant-conn* system-fixture system-config-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.user :as user]
             [akvo.lumen.test-utils :as tu]
@@ -35,7 +35,7 @@
               *keycloak* (ig/init-key :akvo.lumen.component.keycloak/authorization-service keycloak-config )]
       (f))))
 
-(use-fixtures :once system-fixture tenant-conn-fixture fixture tu/spec-instrument)
+(use-fixtures :once system-config-fixture system-fixture tenant-conn-fixture fixture tu/spec-instrument)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

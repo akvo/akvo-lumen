@@ -60,6 +60,6 @@
                                :sentry-client-dsn "dev-sentry-client-dsn"}
 
  :akvo.lumen.migrate/migrate {:seed
-                              ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?ssl=true&user=lumen&password=password"
+                              ^:replace {:tenants [{:db_uri "jdbc:postgresql://postgres/test_lumen_tenant_1?user=lumen&password=password"
                                                     :label "t1"
                                                     :title "Tenant 1"}]}}}

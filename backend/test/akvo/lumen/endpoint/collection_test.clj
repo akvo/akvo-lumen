@@ -3,6 +3,7 @@
   (:require [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
                                          system-fixture
+                                         system-config-fixture
                                          *error-tracker*
                                          error-tracker-fixture]]
             [akvo.lumen.lib :as lib]
@@ -17,7 +18,7 @@
             [clojure.test :refer :all]))
 
 
-(use-fixtures :once system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
+(use-fixtures :once system-config-fixture system-fixture tenant-conn-fixture error-tracker-fixture tu/spec-instrument)
 
 (defn entities-set [collection]
   (-> #{}

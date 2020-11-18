@@ -4,6 +4,7 @@
             [akvo.lumen.endpoint.share-test :as share-test]
             [akvo.lumen.fixtures :refer [*tenant-conn*
                                          tenant-conn-fixture
+                                         system-config-fixture
                                          system-fixture]]
             [akvo.lumen.lib.public :as public]
             [akvo.lumen.lib.share :as share]
@@ -16,7 +17,7 @@
 ;;;
 
 
-(use-fixtures :once system-fixture tenant-conn-fixture tu/spec-instrument)
+(use-fixtures :once system-config-fixture system-fixture tenant-conn-fixture tu/spec-instrument)
 
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 
