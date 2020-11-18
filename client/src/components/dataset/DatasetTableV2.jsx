@@ -51,7 +51,7 @@ function useIntroJs(props, isMounted, sidebarProps) {
         exitOnOverlayClick: true,
         steps: [
           {
-            intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/><p>${props.intl.formatMessage({ id: 'data_group_intro_0_footer' })}<p/>`,
+            intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/>`,
             dynamic: true,
             position: 'center',
           },
@@ -66,11 +66,6 @@ function useIntroJs(props, isMounted, sidebarProps) {
             intro: props.intl.formatMessage({ id: 'data_group_intro_2' }),
             dynamic: true,
             position: 'right',
-          },
-          {
-            element: '.dataGroupViewToggle',
-            intro: props.intl.formatMessage({ id: 'data_group_intro_3' }),
-            dynamic: true,
           },
         ],
       });
