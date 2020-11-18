@@ -68,18 +68,16 @@
 
 (defn tenant-conn-fixture
   "Returns a fixture that binds a connection pool to *tenant-conn*"
-  ([f]
-   (tenant-conn-fixture nil nil f))
-  ([config-edn more-ks f]
-   (let [c (tu/start-config config-edn more-ks)
-         source-tenant (-> c :akvo.lumen.migrate/migrate :seed :tenants first)
-         new-db-name (format "test_%s" (System/currentTimeMillis))
-         new-db-uri (str/replace (:db_uri source-tenant) "test_lumen_tenant_1" new-db-name)]
-     (tu/seed c)
-     (ensure-source-db-migration source-tenant)
-     (copy-test-db {:connection-uri (:db_uri source-tenant)} new-db-name)
-     (binding [*tenant-conn* (pool {:db_uri new-db-uri :label new-db-name})]
-       (f)))))
+  [f]
+  (let [c (tu/start-config nil nil)
+        source-tenant (-> c :akvo.lumen.migrate/migrate :seed :tenants first)
+        new-db-name (format "test_%s" (System/currentTimeMillis))
+        new-db-uri (str/replace (:db_uri source-tenant) "test_lumen_tenant_1" new-db-name)]
+    (tu/seed c)
+    (ensure-source-db-migration source-tenant)
+    (copy-test-db {:connection-uri (:db_uri source-tenant)} new-db-name)
+    (binding [*tenant-conn* (pool {:db_uri new-db-uri :label new-db-name})]
+      (f))))
 
 (def ^:dynamic *error-tracker*)
 
