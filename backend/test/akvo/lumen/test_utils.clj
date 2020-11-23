@@ -66,7 +66,7 @@
 
 (defn import-file
   "Import a file and return the dataset-id, or the job-execution-id in case of FAIL status"
-  [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job?]}]
+  [tenant-conn error-tracker {:keys [file dataset-name has-column-headers? kind data with-job? config]}]
   (let [spec {"name" (or dataset-name file)
               "source" (with-meta
                          {"path" (when file (.getAbsolutePath (io/file (io/resource file))))
@@ -74,17 +74,17 @@
                           "fileName" (or dataset-name file)
                           "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
-        [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker test-claims spec)]
+        [tag {:strs [importId]}] (import/handle tenant-conn (or config {}) error-tracker test-claims spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
-  [tenant-conn caddisfly error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind with-job?]}]
+  [tenant-conn caddisfly error-tracker dataset-id data-source-id {:keys [data has-column-headers? kind with-job? config]}]
   (let [spec {"source" (with-meta {"kind" kind
                                    "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
-        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn caddisfly {} error-tracker dataset-id data-source-id spec)]
+        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn caddisfly (or config {}) error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn updateId with-job?)))
 

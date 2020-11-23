@@ -8,20 +8,24 @@
                                          error-tracker-fixture
                                          summarise-transformation-logs-fixture
                                          *caddisfly*
-                                         caddisfly-fixture]]
+                                         caddisfly-fixture
+                                         data-groups-future-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.db.env :as db.env]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
             [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
-
+            [akvo.lumen.lib.dataset :as dataset]
+            [akvo.lumen.lib.import.common :refer [dataset-importer datagroups-importer]]
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.protocols :as p]
             [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.specs.import :as import.s]
             [akvo.lumen.specs.import.column :as import.column.s]
@@ -35,6 +39,7 @@
             [clj-time.core :as tc]
             [clj-time.format :as timef]
             [clojure.java.io :as io]
+            [clojure.java.jdbc :as jdbc]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.string :as string]
@@ -75,7 +80,7 @@
 (alias 'db.dataset-version.s                    'akvo.lumen.specs.db.dataset-version)
 (alias 'db.dataset-version.column.s             'akvo.lumen.specs.db.dataset-version.column)
 
-(use-fixtures :once tu/spec-instrument caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture)
+(use-fixtures :once tu/spec-instrument caddisfly-fixture system-fixture tenant-conn-fixture error-tracker-fixture summarise-transformation-logs-fixture data-groups-future-fixture)
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
@@ -922,3 +927,62 @@
       (is (= 4 (count columns)))
       (is (= "geopoint" (get (last columns) "type")))
       (is (= "d1" (get (last columns) "columnName"))))))
+
+(defn issue-3055-importer
+  [{:keys [update? data-groups?]}]
+  (reify
+    p/DatasetImporter
+    (columns [this]
+      (let [columns [{:id :c1 :type "text" :title "c1" :groupId "main" :groupName "main"}
+                     {:id :c2 :type "number" :title "c2" :groupId "main" :groupName "main"}]]
+        (if update?
+          (butlast columns)
+          columns)))
+    (records [this]
+      (if update?
+        (if data-groups?
+          [{"main" [{:c1 "One"}
+                    {:c1 "Two"}]}]
+          [[{:c1 "One"}]
+           [{:c1 "Two"}]])
+        (if data-groups?
+          [{"main" [{:c1 "One" :c2 0}
+                    {:c1 "Two" :c2 0}]}]
+          [[{:c1 "One" :c2 0}]
+           [{:c1 "Two" :c2 0}]])))
+    java.io.Closeable
+    (close [this])))
+
+(defmethod dataset-importer "issue-3055"
+  [_ config]
+  (issue-3055-importer config))
+
+(defmethod datagroups-importer "issue-3055"
+  [_ config]
+  (issue-3055-importer (assoc config :data-groups? true)))
+
+
+(deftest ^:functional test-update-issue-3055
+  (testing "Testing https://github.com/akvo/akvo-lumen/issues/3055"
+    (let [[job dataset] (import-file *tenant-conn* *error-tracker*
+                                     {:dataset-name (format "Issue 3055 - %s" (System/currentTimeMillis))
+                                      :kind "issue-3055"
+                                      :with-job? true
+                                      :config {:update? false}})
+          dataset-id (:dataset_id dataset)
+          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
+      (apply-transformation {:type :transformation
+                             :transformation (gen-transformation "core/to-uppercase"
+                                                                 {::db.dataset-version.column.s/columnName "c1"
+                                                                  ::transformation.engine.s/onError "fail"})})
+      (apply-transformation {:type :transformation
+                             :transformation (gen-transformation "core/to-lowercase"
+                                                                 {::db.dataset-version.column.s/columnName "c1"
+                                                                  ::transformation.engine.s/onError "fail"})})
+      (update-file *tenant-conn* {} *error-tracker* dataset-id (:data-source-id job) {:dataset-name "Issue 3055"
+                                                                                      :kind "issue-3055"
+                                                                                      :with-job? true
+                                                                                      :config {:update? true}})
+      (apply-transformation {:type :undo})
+      (let [group (akvo.lumen.lib.dataset/fetch-group *tenant-conn* dataset-id "main")]
+        (prn group)))))
