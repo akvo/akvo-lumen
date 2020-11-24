@@ -12,10 +12,12 @@
    [akvo.lumen.lib.visualisation.maps :as v.maps]
    [akvo.lumen.specs.import :as i-c]
    [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
-   [clj-time.core :as t]
+   [clj-time.format :as f]
    [clojure.java.jdbc :as jdbc]
    [clojure.walk :as walk]
-   [clojure.test :refer [deftest testing is use-fixtures]]))
+   [clojure.test :refer [deftest testing is use-fixtures]])
+  (:import [java.sql Date]
+           [java.time Instant]))
 
 ;; clean up dataset once we are done, fixture?
 
@@ -105,18 +107,28 @@
                       :else :default)))
 
 (defmethod verify-val :inst [v f]
-  (clojure.pprint/pprint {:v v
-                          :f f})
-  (is (= v (.toString f))))
+  ;; Since we convert datetime with timezone to text in the mapconfig sql
+  (let [custom-formatter (f/formatter "yyyy-MM-dd HH:mm:ssZ")]
+    (is (= (inst-ms (.toInstant (f/parse custom-formatter v)))
+           (inst-ms f)))))
+
+(comment
+
+  (.format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ssZ")
+           (Date/from (Instant/now)))
+
+  (let [text-date "1997-07-22 00:00:00+00"
+        custom-formatter (f/formatter "yyyy-MM-dd HH:mm:ssZ")
+        d (f/parse custom-formatter text-date)]
+    (.toInstant d)
+    )
+  )
 
 ;; For some reason some times one has more resolution - why???
 (defmethod verify-val :geopoint [v {:strs [wkt-string]}]
   (is (= v (format "SRID=4326;%s" wkt-string))))
 
 (defmethod verify-val :default [v f]
-  (prn "@default")
-  (clojure.pprint/pprint {:v v
-                          :f f})
   (is (= v f)))
 
 (defn verify-cell
@@ -131,7 +143,11 @@
 (defn check-data
   [{:keys [records-v4] :as generated-data} queried-data]
   (let [facts (mapcat #(-> % vals flatten walk/stringify-keys) records-v4)]
+    (println "------------------------------------------------------------")
     (clojure.pprint/pprint facts)
+    (println "------------------------------------------------------------")
+    (clojure.pprint/pprint queried-data)
+    (println "------------------------------------------------------------")
     (doall (map (fn [{:keys [instance_id] :as record}]
                   (doall (map (fn [cell]
                                 (verify-cell (cons instance_id cell) facts))
