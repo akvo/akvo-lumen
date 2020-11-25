@@ -118,9 +118,23 @@
     (is (= (inst-ms (.toInstant (f/parse custom-formatter v)))
            (inst-ms f)))))
 
-;; For some reason some times we get higher resolution - why???
+
 (defmethod verify-val :geopoint [v {:strs [wkt-string]}]
-  (is (= v (format "SRID=4326;%s" wkt-string))))
+  (let [gs (format "SRID=4326;%s" wkt-string)]
+    (when-not (= v gs)
+      (clojure.pprint/pprint gs))
+    (is (= v gs))))
+
+(comment
+  ;; For some reason sometimes the points coordinate have higher resolution than
+  ;; the generated data we put in. So far only seen a padded zero added.
+
+  ;; SELECT ST_Distance(
+  ;;   ST_AsText(GeomFromEWKT('SRID=4326;POINT(111.1111111 1.1111111)'), 2),
+  ;;   ST_AsText(GeomFromEWKT('SRID=4326;POINT(111.1111111 1.111)'), 2)
+  ;; )
+
+)
 
 (defmethod verify-val :default [v f]
   (is (= v f)))
