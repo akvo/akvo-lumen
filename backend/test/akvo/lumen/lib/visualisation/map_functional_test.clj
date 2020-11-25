@@ -1,8 +1,8 @@
 (ns akvo.lumen.lib.visualisation.map-functional-test
   (:require
    [akvo.lumen.db.transformation :refer [dataset-version-by-dataset-id]]
+   [akvo.lumen.lib.dataset :as dataset]
    [akvo.lumen.fixtures :refer [*error-tracker*
-                                *system*
                                 *tenant-conn*
                                 data-groups-future-fixture
                                 error-tracker-fixture
@@ -11,7 +11,7 @@
    [akvo.lumen.lib.visualisation.map-config :as v.map-config]
    [akvo.lumen.lib.visualisation.maps :as v.maps]
    [akvo.lumen.specs.import :as i-c]
-   [akvo.lumen.test-utils :refer [import-file update-file] :as tu]
+   [akvo.lumen.test-utils :as tu]
    [clj-time.format :as f]
    [clojure.java.jdbc :as jdbc]
    [clojure.walk :as walk]
@@ -19,7 +19,10 @@
   (:import [java.sql Date]
            [java.time Instant]))
 
-;; clean up dataset once we are done, fixture?
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Fixtures
+;;;
 
 (def groups-spec [{:groupId "group1"
                    :groupName "repeatable group"
@@ -31,12 +34,30 @@
                    :repeatable false
                    :column-types ["number" "date"]}])
 
-(comment
+(def ^:dynamic *dataset-data*)
+(defn dataset-data-fixture [f]
+  (binding [*dataset-data* (i-c/flow-sample-imported-dataset groups-spec 2)]
+    (f)))
 
-  (def tmp-dataset-data (i-c/flow-sample-imported-dataset groups-spec 2))
-  (clojure.pprint/pprint (:records-v4 tmp-dataset-data))
+(def ^:dynamic *dataset-id*)
+(defn dataset-id-fixture [f]
+  (binding [*dataset-id* (tu/import-file *tenant-conn* *error-tracker*
+                                         {:dataset-name "Generated map"
+                                          :kind "clj-flow"
+                                          :data *dataset-data*})]
+    (f)
+    (dataset/delete *tenant-conn* *dataset-id*)))
 
-  )
+
+(use-fixtures :once
+  system-fixture data-groups-future-fixture tenant-conn-fixture
+  error-tracker-fixture tu/spec-instrument dataset-data-fixture
+  dataset-id-fixture)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Utility fns, random data but we're using same form on the data and are
+;;; utilizing the form to get things like pointColourColumn and popupColumn
+;;;
 
 (defn popup
   "Get one col from each group"
@@ -54,31 +75,21 @@
                            (and (= groupId "group2") (= type "date"))))
                  first :id)}])
 
-(comment
-  (popup (:columns-v4 tmp-dataset-data))
-  )
-
 (defn geom
   "Get the geopoint col"
   [columns-v4]
   (->> columns-v4 (filter #(= (:type %) "geopoint")) first :id))
 
-(comment
-  (geom (:columns-v4 tmp-dataset-data))
-  )
 
-(defn pointColorColumn [columns-v4]
+(defn pointColorColumn
+  "Get the column used as point colour column"
+  [columns-v4]
   (->> columns-v4 (filter #(and (= (:groupId %) "group2")
                                 (= (:type %) "number")))
        first :id))
 
-(comment
-  (pointColorColumn (:columns-v4 tmp-dataset-data))
-  )
-
-
 (defn layers
-  [dataset-id {:keys [columns-v4 records-v4]}]
+  [dataset-id {:keys [columns-v4]}]
   [{:aggregationMethod "avg"
     :popup (popup columns-v4)
     :filters []
@@ -95,12 +106,7 @@
     :latitude nil
     :visible true}])
 
-
-(comment
-  (layers "abc-123" tmp-dataset-data)
-  )
-
-(defmulti verify-val (fn [v f]
+(defmulti verify-val (fn [_ f]
                     (cond
                       (inst? f) :inst
                       (map? f) :geopoint ;; a bit simplistic :-)
@@ -112,19 +118,7 @@
     (is (= (inst-ms (.toInstant (f/parse custom-formatter v)))
            (inst-ms f)))))
 
-(comment
-
-  (.format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ssZ")
-           (Date/from (Instant/now)))
-
-  (let [text-date "1997-07-22 00:00:00+00"
-        custom-formatter (f/formatter "yyyy-MM-dd HH:mm:ssZ")
-        d (f/parse custom-formatter text-date)]
-    (.toInstant d)
-    )
-  )
-
-;; For some reason some times one has more resolution - why???
+;; For some reason some times we get higher resolution - why???
 (defmethod verify-val :geopoint [v {:strs [wkt-string]}]
   (is (= v (format "SRID=4326;%s" wkt-string))))
 
@@ -132,7 +126,7 @@
   (is (= v f)))
 
 (defn verify-cell
-  [[instance_id coll v :as cell] facts]
+  [[instance_id coll v] facts]
   (let [coll (name coll)
         r (first (filter (fn [fact-record]
                            (and (= (get fact-record "instance_id") instance_id)
@@ -141,40 +135,26 @@
     (verify-val v (get r coll))))
 
 (defn check-data
-  [{:keys [records-v4] :as generated-data} queried-data]
+  [{:keys [records-v4]} queried-data]
   (let [facts (mapcat #(-> % vals flatten walk/stringify-keys) records-v4)]
-    (println "------------------------------------------------------------")
-    (clojure.pprint/pprint facts)
-    (println "------------------------------------------------------------")
-    (clojure.pprint/pprint queried-data)
-    (println "------------------------------------------------------------")
     (doall (map (fn [{:keys [instance_id] :as record}]
                   (doall (map (fn [cell]
                                 (verify-cell (cons instance_id cell) facts))
                               record)))
                 queried-data))))
 
-(use-fixtures :once
-  system-fixture data-groups-future-fixture tenant-conn-fixture
-  error-tracker-fixture tu/spec-instrument)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tests
+;;;
 
 (deftest ^:functional basic-map
-  (let [dataset-import-data (i-c/flow-sample-imported-dataset groups-spec 2)
-        imported-dataset-id (tu/import-file *tenant-conn* *error-tracker*
-                                            {:dataset-name "Generated map"
-                                             :kind "clj-flow"
-                                             :data dataset-import-data})]
 
-
-    (testing "Map from Flow dataset using dataset_version"
-      (let [dataset (dataset-version-by-dataset-id *tenant-conn*
-                                                   {:dataset-id imported-dataset-id
-                                                    :version 1})
-            layers (layers imported-dataset-id dataset-import-data)
-            opts {:centre-of-the-world "greenwich"}
-            metadata-array (v.maps/metadata-layers *tenant-conn* layers opts)
-            map-config (v.map-config/build *tenant-conn* layers metadata-array)
-            {:keys [geom_column interactivity sql]} (-> map-config
-                                                        :layers first :options)
-            sql-result (jdbc/query *tenant-conn* sql)]
-        (check-data dataset-import-data sql-result)))))
+  (testing "Map from Flow dataset using dataset_version"
+    (let [layers (layers *dataset-id* *dataset-data*)
+          opts {:centre-of-the-world "greenwich"}
+          metadata-array (v.maps/metadata-layers *tenant-conn* layers opts)
+          map-config (v.map-config/build *tenant-conn* layers metadata-array)
+          {:keys [sql]} (-> map-config :layers first :options)
+          sql-result (jdbc/query *tenant-conn* sql)]
+      (check-data *dataset-data* sql-result))))
