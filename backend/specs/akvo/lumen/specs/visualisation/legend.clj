@@ -21,4 +21,5 @@
 
 (s/def ::order (s/keys :opt-un [::order.s/mode ::order.s/list]))
 
+
 (s/def ::legend (s/keys :req-un [::order]))
