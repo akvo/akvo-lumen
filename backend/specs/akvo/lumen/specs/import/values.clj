@@ -1,9 +1,18 @@
 (ns akvo.lumen.specs.import.values
   (:require [clojure.spec.alpha :as s]
             [akvo.lumen.util :refer (squuid)]
-            [akvo.lumen.specs :as lumen.s :refer (sample)]
+            [akvo.lumen.specs :as lumen.s]
             [akvo.lumen.lib.import.csv :as csv]))
 
+
+(defn round-coordinate
+  "Round coordinate to 6 digits but go by bigdec rounding to remove trailing
+  zeros. This to be able to compare facts to values from Postgis"
+  [coordinate]
+  (-> coordinate
+      bigdec
+      (.setScale 6 java.math.RoundingMode/HALF_EVEN)
+      double))
 
 (defn rand-lng
   []
@@ -19,7 +28,8 @@
 (defn rand-point
   "Random geopoint with 6 decimals resolution"
   []
-  (format "POINT(%.6f %.6f)" (rand-lng) (rand-lat)))
+  (format "POINT(%s %s)"
+          (round-coordinate (rand-lng)) (round-coordinate (rand-lat))))
 
 (def point "POINT(10 10)")
 
