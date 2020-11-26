@@ -1,6 +1,5 @@
 (ns akvo.lumen.lib.visualisation.map-functional-test
   (:require
-   [akvo.lumen.db.transformation :refer [dataset-version-by-dataset-id]]
    [akvo.lumen.lib.dataset :as dataset]
    [akvo.lumen.fixtures :refer [*error-tracker*
                                 *tenant-conn*
@@ -10,14 +9,13 @@
                                 tenant-conn-fixture]]
    [akvo.lumen.lib.visualisation.map-config :as v.map-config]
    [akvo.lumen.lib.visualisation.maps :as v.maps]
+   [akvo.lumen.db.transformation :as db.transformation]
    [akvo.lumen.specs.import :as i-c]
    [akvo.lumen.test-utils :as tu]
    [clj-time.format :as f]
    [clojure.java.jdbc :as jdbc]
    [clojure.walk :as walk]
-   [clojure.test :refer [deftest testing is use-fixtures]])
-  (:import [java.sql Date]
-           [java.time Instant]))
+   [clojure.test :refer [deftest testing is use-fixtures]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -46,7 +44,17 @@
                                           :kind "clj-flow"
                                           :data *dataset-data*})]
     (f)
-    (dataset/delete *tenant-conn* *dataset-id*)))
+    (let [{:keys [imported-table-name table-name]}
+          (db.transformation/latest-dataset-version-by-dataset-id
+           *tenant-conn* {:dataset-id *dataset-id*})
+          drop-imported-table-name (jdbc/drop-table-ddl imported-table-name)
+          drop-table-name (jdbc/drop-table-ddl table-name)]
+      (jdbc/db-do-commands *tenant-conn*
+                           [(format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" table-name)
+                            drop-table-name
+                            (format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" imported-table-name)
+                            drop-imported-table-name])
+      (dataset/delete *tenant-conn* *dataset-id*))))
 
 
 (use-fixtures :once
@@ -118,23 +126,8 @@
     (is (= (inst-ms (.toInstant (f/parse custom-formatter v)))
            (inst-ms f)))))
 
-
 (defmethod verify-val :geopoint [v {:strs [wkt-string]}]
-  (let [gs (format "SRID=4326;%s" wkt-string)]
-    (when-not (= v gs)
-      (clojure.pprint/pprint gs))
-    (is (= v gs))))
-
-(comment
-  ;; For some reason sometimes the points coordinate have higher resolution than
-  ;; the generated data we put in. So far only seen a padded zero added.
-
-  ;; SELECT ST_Distance(
-  ;;   ST_AsText(GeomFromEWKT('SRID=4326;POINT(111.1111111 1.1111111)'), 2),
-  ;;   ST_AsText(GeomFromEWKT('SRID=4326;POINT(111.1111111 1.111)'), 2)
-  ;; )
-
-)
+  (is (= v (format "SRID=4326;%s" wkt-string))))
 
 (defmethod verify-val :default [v f]
   (is (= v f)))
