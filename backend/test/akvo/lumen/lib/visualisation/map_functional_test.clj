@@ -19,22 +19,28 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Fixtures
-;;;
+;;; Groups definition, the form of generated data is later used in utility fns
+;;; where columns that for example makes sense as pointColorcolumn is picked
+;;; based on the form of groups-definition
 
-(def groups-spec [{:groupId "group1"
-                   :groupName "repeatable group"
-                   :repeatable true
-                   :column-types ["text" "number" "geopoint"]
-                   :max-responses 10}
-                  {:groupId "group2"
-                   :groupName "not repeatable group"
-                   :repeatable false
-                   :column-types ["number" "date"]}])
+(def groups-def [{:groupId "group1"
+                  :groupName "repeatable group"
+                  :repeatable true
+                  :column-types ["text" "number" "geopoint"]
+                  :max-responses 10}
+                 {:groupId "group2"
+                  :groupName "not repeatable group"
+                  :repeatable false
+                  :column-types ["number" "date"]}])
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Fixture
+;;;
 
 (def ^:dynamic *dataset-data*)
 (defn dataset-data-fixture [f]
-  (binding [*dataset-data* (i-c/flow-sample-imported-dataset groups-spec 2)]
+  (binding [*dataset-data* (i-c/flow-sample-imported-dataset groups-def 2)]
     (f)))
 
 (def ^:dynamic *dataset-id*)
@@ -47,13 +53,16 @@
     (let [{:keys [imported-table-name table-name]}
           (db.transformation/latest-dataset-version-by-dataset-id
            *tenant-conn* {:dataset-id *dataset-id*})
-          drop-imported-table-name (jdbc/drop-table-ddl imported-table-name)
-          drop-table-name (jdbc/drop-table-ddl table-name)]
-      (jdbc/db-do-commands *tenant-conn*
-                           [(format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" table-name)
-                            drop-table-name
-                            (format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" imported-table-name)
-                            drop-imported-table-name])
+          drop-table-seq
+          (format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" table-name)
+          drop-table (jdbc/drop-table-ddl table-name)
+          drop-imported-table-seq
+          (format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" imported-table-name)
+          drop-imported-table (jdbc/drop-table-ddl imported-table-name)]
+      (jdbc/db-do-commands *tenant-conn* [drop-table-seq
+                                          drop-table
+                                          drop-imported-table-seq
+                                          drop-imported-table])
       (dataset/delete *tenant-conn* *dataset-id*))))
 
 
