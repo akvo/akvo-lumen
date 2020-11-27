@@ -220,9 +220,7 @@
 
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
-  (if (and (get (env/all tenant-conn) "data-groups")
-           (or (contains? s.transformation/single-column-transformations (get transformation "op"))
-               (= "core/combine" (get transformation "op"))))
+  (if (get (env/all tenant-conn) "data-groups")
     (execute-transformation-2 deps dataset-id job-execution-id transformation)
     (execute-transformation-1 deps dataset-id job-execution-id transformation)))
 
