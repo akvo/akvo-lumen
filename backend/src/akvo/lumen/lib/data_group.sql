@@ -18,3 +18,9 @@ SELECT id, group_id AS "group-id", group_name AS "group-name", group_order AS "g
 FROM data_group
 WHERE columns @> :column-name-filter::jsonb
  AND dataset_version_id=:dataset-version-id
+
+-- :name db-get-all-columns-except-group-id :? :1
+-- :doc Gets all columns of all data-groups except group-id for one dataset-version
+select json_agg(columns) AS columns from data_group
+WHERE dataset_version_id=:dataset-version-id
+ AND group_id!=:group-id
