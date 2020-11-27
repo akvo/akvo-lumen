@@ -12,3 +12,6 @@
 (defn get-data-group-by-column-name [conn opts]
   (let [column-name-filter [{:columnName (:column-name opts)}]]
     (db-get-data-group-by-column-name conn (assoc opts :column-name-filter column-name-filter))))
+
+(defn get-all-columns-except-group-id [conn opts]
+  (vec (flatten (:columns (db-get-all-columns-except-group-id conn opts)))))
