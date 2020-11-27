@@ -153,9 +153,12 @@
         data-group (db.data-group/get-data-group-by-column-name tenant-conn {:dataset-version-id (:id dataset-version)
                                                                              :column-name column-name})
         source-table (:table-name data-group)
-        previous-columns (vec (:columns data-group))]
+        other-dgs-columns (db.data-group/get-all-columns-except-group-id tenant-conn {:dataset-version-id (:id dataset-version)
+                                                                                      :group-id (:group-id data-group)})
+        previous-columns (into (vec (:columns data-group)) other-dgs-columns)]
     (let [{:keys [success? message columns execution-log error-data]}
-          (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))]
+          (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))
+          columns (vec (set/difference (set columns) (set other-dgs-columns)))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
         (throw (ex-info (or message "") {})))
@@ -218,10 +221,10 @@
 (defn execute-transformation
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (if (and (get (env/all tenant-conn) "data-groups")
-           (contains? s.transformation/single-column-transformations (get transformation "op")))
+           (or (contains? s.transformation/single-column-transformations (get transformation "op"))
+               (= "core/combine" (get transformation "op"))))
     (execute-transformation-2 deps dataset-id job-execution-id transformation)
     (execute-transformation-1 deps dataset-id job-execution-id transformation)))
-
 
 (defn- apply-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id current-dataset-version]
   (let [imported-table-name (:imported-table-name current-dataset-version)
