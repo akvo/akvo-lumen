@@ -46,7 +46,7 @@ class ReverseGeocodeTransformation extends Component {
 
     const source = spec.get('source') == null ? null : {
       datasetId: spec.getIn(['source', 'datasetId']),
-      geoshapeColumn: spec.getIn(['source', 'geoshapeColumn', 'columnName']),
+      geoshapeColumn: spec.getIn(['source', 'geoshapeColumn']),
       mergeColumn: spec.getIn(['source', 'mergeColumn', 'columnName']),
     };
 
@@ -54,7 +54,7 @@ class ReverseGeocodeTransformation extends Component {
       op: 'core/reverse-geocode',
       args: {
         target: {
-          geopointColumn: spec.getIn(['target', 'geopointColumn', 'columnName']),
+          geopointColumn: spec.getIn(['target', 'geopointColumn']),
           title: spec.getIn(['target', 'title']),
         },
         source,

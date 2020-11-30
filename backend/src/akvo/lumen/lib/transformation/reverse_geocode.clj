@@ -27,7 +27,7 @@
 
 (defn source-table-name-2 [conn {:strs [datasetId]} geoshapeColumn]
   (let [dataset-version-id (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id datasetId}))
-        data-group (db.data-group/db-get-data-group-by-column-name conn {:dataset-version-id dataset-version-id
+        data-group (db.data-group/get-data-group-by-column-name conn {:dataset-version-id dataset-version-id
                                                                          :column-name geoshapeColumn})]
     (:table-name data-group)))
 
