@@ -149,9 +149,11 @@
 (defn execute-transformation-2
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
-        column-name (first (aggregation.commons/spec-columns ::s.transformation/op-spec (w/keywordize-keys transformation)))
-        data-group (db.data-group/get-data-group-by-column-name tenant-conn {:dataset-version-id (:id dataset-version)
-                                                                             :column-name column-name})
+        data-groups (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id dataset-version)})
+        column-name (first (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups))))
+        data-group (->> data-groups
+                        (filter (fn [dg] (seq (filter #(= column-name (get % "columnName")) (:columns dg)))))
+                        first)
         source-table (:table-name data-group)
         other-dgs-columns (db.data-group/get-all-columns-except-group-id tenant-conn {:dataset-version-id (:id dataset-version)
                                                                                       :group-id (:group-id data-group)})
