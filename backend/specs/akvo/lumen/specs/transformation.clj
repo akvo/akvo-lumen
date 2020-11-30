@@ -69,10 +69,6 @@
   (s/keys :req-un [::db.dsv.column.s/columnName]))
 
 
-(s/def ::transformation.delete-column/args
-  (s/keys :req-un [::db.dsv.column.s/columnName]))
-
-
 (defmethod op-spec "core/delete-column"  [_]
   (s/keys
    :req-un [::transformation.delete-column/args
@@ -80,8 +76,6 @@
             ::transformation.engine.s/op]
    :opt-un [::transformation.engine.s/created
             ::transformation.engine.s/namespace]))
-
-
 
 (create-ns  'akvo.lumen.specs.transformation.change-datatype)
 (alias 'transformation.change-datatype 'akvo.lumen.specs.transformation.change-datatype)
@@ -527,8 +521,7 @@
    :req-un [::transformation.trim-doublespace/args
             ::transformation.engine.s/onError
             ::transformation.engine.s/op]
-   :opt-un [::transformation.engine.s/namespace
-            ::transformation.engine.s/namespace]))
+   :opt-un [::transformation.engine.s/namespace]))
 
 (create-ns  'akvo.lumen.specs.dataset-version.transformation)
 (alias 'db.dsv.transformation 'akvo.lumen.specs.dataset-version.transformation)
