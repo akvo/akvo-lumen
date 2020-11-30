@@ -1,6 +1,9 @@
 (ns akvo.lumen.lib.transformation.reverse-geocode
   (:require [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.env :as env]
             [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
             [akvo.lumen.db.transformation.reverse-geocode :as db.tx.reverse-geocode]
             [akvo.lumen.util :as util]
@@ -22,13 +25,23 @@
   (-> (db.transformation/latest-dataset-version-by-dataset-id conn {:dataset-id datasetId})
       :table-name))
 
+(defn source-table-name-2 [conn {:strs [datasetId]} geoshapeColumn]
+  (let [dataset-version-id (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id datasetId}))
+        data-group (db.data-group/db-get-data-group-by-column-name conn {:dataset-version-id dataset-version-id
+                                                                         :column-name geoshapeColumn})]
+    (:table-name data-group)))
+
 (defmethod engine/apply-operation "core/reverse-geocode"
   [{:keys [tenant-conn]} table-name columns {:strs [args] :as op-spec}]
   (let [column-name (engine/next-column-name columns)
         {:strs [target source]} args
         geopointColumn (get target "geopointColumn")
         {:strs [mergeColumn geoshapeColumn]} source
-        source-table-name (source-table-name tenant-conn source)]
+        source-table-name (if (get (env/all tenant-conn) "data-groups")
+                            (or
+                             (source-table-name-2 tenant-conn source geoshapeColumn)
+                             (source-table-name tenant-conn source))
+                            (source-table-name tenant-conn source))]
     (if-let [response-error (engine/column-title-error? (get target "title") columns)]
       response-error
       (do
