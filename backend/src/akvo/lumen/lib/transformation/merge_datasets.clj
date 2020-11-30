@@ -121,12 +121,12 @@
       (throw (ex-info (format "Dataset %s does not exist" source-dataset-id)
                       {:source source})))))
 
-(defn get-source-merge-columns [source source-dataset]
+(defn- get-source-merge-columns [source source-dataset-columns]
   (let [column-names (set (get source "mergeColumns"))]
     (filterv (fn [column]
                (contains? column-names
                           (get column "columnName")))
-             (:columns source-dataset))))
+             source-dataset-columns)))
 
 (defn get-target-merge-columns [source-merge-columns column-names-translation]
   (mapv #(-> %
@@ -142,15 +142,12 @@
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         source-dataset (get-source-dataset conn source)
-        source-table-name (:table-name source-dataset)
-        source-merge-columns (get-source-merge-columns source
-                                                       source-dataset)
+        source-merge-columns (get-source-merge-columns source (:columns source-dataset))
         column-names-translation (merge-column-names-map columns
                                                          source-merge-columns)
         target-merge-columns (get-target-merge-columns source-merge-columns
                                                        column-names-translation)
-        data (fetch-data conn
-                         source-table-name
+        data (fetch-data conn (:table-name source-dataset)
                          target-merge-columns
                          column-names-translation
                          source)]
@@ -158,7 +155,7 @@
     (insert-merged-data conn table-name target data)
     {:success? true
      :execution-log [(format "Merged columns from %s into %s"
-                             source-table-name
+                             (:table-name source-dataset)
                              table-name)]
      :columns (into columns target-merge-columns)}))
 
