@@ -149,16 +149,22 @@
 (defn execute-transformation-2
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
-        column-name (first (aggregation.commons/spec-columns ::s.transformation/op-spec (w/keywordize-keys transformation)))
-        data-group (db.data-group/get-data-group-by-column-name tenant-conn {:dataset-version-id (:id dataset-version)
-                                                                             :column-name column-name})
+        data-groups (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id dataset-version)})
+        column-name (first (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups))))
+        data-group (->> data-groups
+                        (filter (fn [dg] (seq (filter #(= column-name (get % "columnName")) (:columns dg)))))
+                        first)
         source-table (:table-name data-group)
         other-dgs-columns (db.data-group/get-all-columns-except-group-id tenant-conn {:dataset-version-id (:id dataset-version)
                                                                                       :group-id (:group-id data-group)})
         previous-columns (into (vec (:columns data-group)) other-dgs-columns)]
     (let [{:keys [success? message columns execution-log error-data]}
           (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))
-          columns (vec (set/difference (set columns) (set other-dgs-columns)))]
+          columns (let [other-dgs-columns-set (set other-dgs-columns)]
+                    (reduce (fn [container column]
+                              (if (contains? other-dgs-columns-set column)
+                                container
+                                (conj container column))) [] columns))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
         (throw (ex-info (or message "") {})))
@@ -224,7 +230,7 @@
            (or (contains? s.transformation/single-column-transformations (get transformation "op"))
                (contains? (set/difference
                            s.transformation/multiple-column-transformations
-                           #{"core/derive" "core/merge-datasets" "core/reverse-geocode"})
+                           #{"core/merge-datasets" "core/reverse-geocode"})
                           (get transformation "op"))))
     (execute-transformation-2 deps dataset-id job-execution-id transformation)
     (execute-transformation-1 deps dataset-id job-execution-id transformation)))
