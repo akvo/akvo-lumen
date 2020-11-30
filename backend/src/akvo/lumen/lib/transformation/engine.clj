@@ -158,7 +158,11 @@
         previous-columns (into (vec (:columns data-group)) other-dgs-columns)]
     (let [{:keys [success? message columns execution-log error-data]}
           (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))
-          columns (vec (set/difference (set columns) (set other-dgs-columns)))]
+          columns (let [other-dgs-columns-set (set other-dgs-columns)]
+                    (reduce (fn [container column]
+                              (if (contains? other-dgs-columns-set column)
+                                container
+                                (conj container column))) [] columns))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
         (throw (ex-info (or message "") {})))
