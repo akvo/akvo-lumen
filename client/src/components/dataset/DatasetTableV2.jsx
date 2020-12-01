@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Column, Cell, Table } from 'fixed-data-table-2';
 import moment from 'moment';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { injectIntl, intlShape } from 'react-intl';
 import Immutable from 'immutable';
@@ -452,6 +453,7 @@ function DatasetTable(props) {
   };
 
   return (
+
     <React.Fragment>
       {renderHeader()}
 
@@ -484,6 +486,8 @@ function DatasetTable(props) {
                   isLockedFromTransformations={
                     props.isLockedFromTransformations
                   }
+                  env={props.env}
+                  group={props.group}
                   datasetId={props.datasetId}
                   pendingTransformations={props.pendingTransformations}
                 />
@@ -575,6 +579,7 @@ DatasetTable.propTypes = {
   rowsCount: PropTypes.number,
   transformations: PropTypes.object,
   dataSourceKind: PropTypes.string,
+  env: PropTypes.object,
 };
 
-export default withRouter(injectIntl(DatasetTable));
+export default withRouter(injectIntl(connect(state => ({ env: state.env }))(DatasetTable)));

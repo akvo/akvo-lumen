@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Immutable from 'immutable';
+import { get } from 'lodash';
 import { FormattedMessage, intlShape } from 'react-intl';
 import SelectMenu from '../../common/SelectMenu';
 import SidebarHeader from './SidebarHeader';
@@ -63,8 +64,11 @@ export default class CombineColumns extends Component {
     const oppositeColumnId = selectId === 1 ? 0 : 1; // setting the id to check the opposite column
     const args = this.state.transformation.get('args');
     const oppositeColumnName = args.getIn(['columnNames', oppositeColumnId]);
-
-    return filterColumnsByDataGroupDimension(this.props.columns, oppositeColumnName);
+    let columns = this.props.columns;
+    if (get(this.props.env, 'environment.data-groups') && this.props.group) {
+      columns = columns.filter(x => x.get('groupId') === this.props.group.get('groupId'));
+    }
+    return filterColumnsByDataGroupDimension(columns, oppositeColumnName);
   }
 
   isValidTransformation() {
@@ -177,5 +181,7 @@ CombineColumns.propTypes = {
   onClose: PropTypes.func.isRequired,
   onApply: PropTypes.func.isRequired,
   columns: PropTypes.object.isRequired,
+  env: PropTypes.object,
+  group: PropTypes.object,
   intl: intlShape,
 };
