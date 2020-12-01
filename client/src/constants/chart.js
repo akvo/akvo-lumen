@@ -1,6 +1,6 @@
 export const labelFont = {
   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-  fontSize: 11,
+  fontSize: 13,
   fill: '#404040',
   fontWeight: 600,
   dy: 3,
@@ -11,8 +11,8 @@ export const connectionStyle = {
   strokeWidth: 1,
 };
 
-export const MAX_FONT_SIZE = 12;
-export const MIN_FONT_SIZE = 9;
+export const MAX_FONT_SIZE = 14;
+export const MIN_FONT_SIZE = 12;
 
 export const LABEL_CHAR_WIDTH = 10;
 export const LABEL_CHAR_HEIGHT = 12;
