@@ -151,11 +151,22 @@
        (filter (fn [dg] (seq (filter #(= column-name (get % "columnName")) (:columns dg)))))
        first))
 
+(defn ensure-one-data-group-related [transformation column-names data-groups]
+  (when (> (->> column-names
+                (map (partial datagroup-by-column data-groups))
+                set
+                count)
+           1)
+    (throw (ex-info "Failed to transform. Transformation can't have columns from more than one data-group specified"
+                    {:transformation transformation}))))
+
 (defn execute-transformation-2
   [{:keys [tenant-conn] :as deps} dataset-id job-execution-id transformation]
   (let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
         data-groups (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id dataset-version)})
-        column-name (first (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups))))
+        columns-in-transformation (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups)))
+        _  (ensure-one-data-group-related transformation columns-in-transformation data-groups)
+        column-name (first columns-in-transformation)
         data-group (datagroup-by-column data-groups column-name)
         source-table (:table-name data-group)
         other-dgs-columns (db.data-group/get-all-columns-except-group-id tenant-conn {:dataset-version-id (:id dataset-version)
