@@ -121,7 +121,7 @@
 (defn get-source-dataset-2 [conn source]
   (let [dataset-id (get source "datasetId")]
     (if-let [data (aggregation.commons/table-name-and-columns-from-data-grops conn dataset-id)]
-      data
+      (update data :columns walk/stringify-keys)
       nil
       ;; TODO: implemenmt exception when migrated fully to data-groups
       #_(throw (ex-info (format "Dataset %s does not exist" dataset-id)
