@@ -2,6 +2,7 @@
   (:require [akvo.lumen.util :as util]
             [akvo.lumen.lib.env :as env]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
             [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
@@ -118,13 +119,12 @@
                     [(str target-merge-column "= ?") merge-value]))))
 
 (defn get-source-dataset-2 [conn source]
-  (let [mergeColumn (get source "mergeColumn")
-        dataset-id (get source "datasetId")
-        dataset-version-id (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id dataset-id}))]
-    (if-let [data-group (db.data-group/get-data-group-by-column-name conn {:dataset-version-id dataset-version-id
-                                                                           :column-name mergeColumn})]
-      data-group
-      (throw (ex-info (format "Dataset %s does not exist" dataset-id)
+  (let [dataset-id (get source "datasetId")]
+    (if-let [data (aggregation.commons/table-name-and-columns-from-data-grops conn dataset-id)]
+      data
+      nil
+      ;; TODO: implemenmt exception when migrated fully to data-groups
+      #_(throw (ex-info (format "Dataset %s does not exist" dataset-id)
                       {:source source})))))
 
 (defn get-source-dataset [conn source]
