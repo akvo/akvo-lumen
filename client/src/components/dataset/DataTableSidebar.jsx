@@ -57,5 +57,7 @@ DataTableSidebar.propTypes = {
     ]
   ).isRequired,
   onClose: PropTypes.func.isRequired,
+  env: PropTypes.object,
+  group: PropTypes.object,
   intl: intlShape,
 };
