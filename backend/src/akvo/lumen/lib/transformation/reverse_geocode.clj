@@ -2,6 +2,7 @@
   (:require [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.env :as env]
             [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
@@ -26,10 +27,8 @@
       :table-name))
 
 (defn source-table-name-2 [conn {:strs [datasetId]} geoshapeColumn]
-  (let [dataset-version-id (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id datasetId}))
-        data-group (db.data-group/get-data-group-by-column-name conn {:dataset-version-id dataset-version-id
-                                                                         :column-name geoshapeColumn})]
-    (:table-name data-group)))
+  (let [data (aggregation.commons/table-name-and-columns-from-data-grops conn datasetId)]
+    (:table-name data)))
 
 (defmethod engine/apply-operation "core/reverse-geocode"
   [{:keys [tenant-conn]} table-name columns {:strs [args] :as op-spec}]
