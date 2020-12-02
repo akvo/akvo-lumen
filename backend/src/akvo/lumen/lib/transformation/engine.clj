@@ -172,7 +172,7 @@
         other-dgs-columns (db.data-group/get-all-columns-except-group-id tenant-conn {:dataset-version-id (:id dataset-version)
                                                                                       :group-id (:group-id data-group)})
         previous-columns (into (vec (:columns data-group)) other-dgs-columns)]
-    (let [{:keys [success? message columns execution-log error-data]}
+    (let [{:keys [success? message columns execution-log error-data data-groups-to-be-created]}
           (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))
           columns (let [other-dgs-columns-set (set other-dgs-columns)]
                     (reduce (fn [container column]
@@ -195,6 +195,14 @@
                                                                    "changedColumns" (diff-columns previous-columns
                                                                                                   columns))))}]
           (db.dataset-version/new-dataset-version-2 tenant-conn next-dataset-version)
+          (when data-groups-to-be-created
+            (doseq [dg data-groups-to-be-created]
+              (db.data-group/new-data-group tenant-conn
+                                            (merge
+                                             dg
+                                             {:id (util/squuid)
+                                              :dataset-version-id new-dataset-version-id})))
+            )
           (db.data-group/new-data-group tenant-conn
                                         (merge
                                          (select-keys data-group
