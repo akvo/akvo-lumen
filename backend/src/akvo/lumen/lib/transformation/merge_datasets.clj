@@ -134,7 +134,7 @@
         column-names (->> (set (get source "mergeColumns"))
                           (map (fn [i column-name]
                                  {:column-name column-name
-                                  :derivation-column-name (engine/next-column-name
+                                  :derivation-column-name (engine/derivation-column-name
                                                            (+ (engine/next-column-index target-dataset-columns) i))})
                                (range)))]
     (->> column-names
@@ -149,7 +149,8 @@
                                                       (let [column (first (filter (fn [c]
                                                                                     (= (get c "columnName") column-name))
                                                                                   (:columns data-group)))]
-                                                        (-> (assoc :columnName derivation-column-name)
+                                                        (-> column
+                                                            (assoc "columnName" derivation-column-name)
                                                             reset-column-values)))))]
                   (assoc data-group :columns dg-columns-selected)))))))
 
@@ -184,7 +185,7 @@
   [conn table-name columns op-spec]
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
-        data-groups-to-be-created (get-data-groups-to-be-created conn source)
+        data-groups-to-be-created (get-data-groups-to-be-created conn source columns)
 
         ;; column-names-translation (merge-column-names-map columns
         ;;                                                  source-merge-columns)
