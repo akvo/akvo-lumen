@@ -1,6 +1,6 @@
 export const labelFont = {
   fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-  fontSize: 13,
+  fontSize: 14,
   fill: '#404040',
   fontWeight: 600,
   dy: 3,

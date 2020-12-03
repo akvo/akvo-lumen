@@ -30,6 +30,8 @@ import { labelFont, MAX_FONT_SIZE, MIN_FONT_SIZE, LABEL_CHAR_WIDTH } from '../..
 import RenderComplete from '../RenderComplete';
 import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from '../LegendsSortable';
 
+import '../Axis.scss';
+
 const getDatum = (data, datum) => data.filter(({ key }) => key === datum)[0];
 
 const getLabelText = (label, type) => (type === 'date' ?
@@ -442,6 +444,7 @@ export default class SimpleBarChart extends Component {
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    tickClassName={'axisTick'}
                     numTicks={yAxisTicks}
                     labelProps={{
                       fontSize: axisLabelFontSize,
