@@ -32,6 +32,8 @@ import RenderComplete from '../RenderComplete';
 import { isLight } from '../../../utilities/color';
 import { sortLegendListFunc, ensureSpecLegend, noSortFunc } from '../LegendsSortable';
 
+import '../Axis.scss';
+
 const getPaddingBottom = (data) => {
   const labelCutoffLength = 16;
   const longestLabelLength =
@@ -570,6 +572,7 @@ export default class StackedBarChart extends Component {
                     label={yAxisLabel || ''}
                     stroke={'#1b1a1e'}
                     tickTextFill={'#1b1a1e'}
+                    tickClassName={'axisTick'}
                     numTicks={yAxisTicks}
                     labelProps={{
                       fontSize: axisLabelFontSize,

@@ -12,11 +12,16 @@
 
         span {
             text-align: center;
+            font-weight: bold;
         }
     }
 
     .chartMeta {
         text-align: center;
         color: #aaa;
+        span {
+          font-size: 12px;
+          line-height: 16.8px;
+        }
     }
 }
