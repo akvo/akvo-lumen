@@ -96,6 +96,13 @@
             {}
             rows)))
 
+(defn fetch-data-2
+  [conn {:keys [source-data-group source target]}]
+  (let [simple-query? (= (:source-table-name source-data-group)
+                         (:table-name source))]
+    )
+)
+
 (defn add-columns
   "Add the new columns to the target dataset"
   [conn table-name columns]
@@ -135,19 +142,31 @@
         columns-by-group (->> (set (get source "mergeColumns"))
                               (map-indexed (fn [i column-name]
                                              (let [dg (engine/datagroup-by-column data-groups column-name)
-                                                   column (first (filter (fn [c]
-                                                                           (= (get c "columnName") column-name))
-                                                                         (:columns dg)))]
+                                                   column (first (filter #(= (get % "columnName") column-name) (:columns dg)))]
                                                (-> column
-                                                (assoc "columnName" (engine/derivation-column-name
+                                                   (assoc "sourceColumnName" (get column "columnName")
+                                                          "columnName" (engine/derivation-column-name
                                                                      (+ (engine/next-column-index target-dataset-columns) i)))
                                                 reset-column-values))))
-                              (group-by #(get % "groupId")))]
+                              (group-by #(get % "groupId")))
+        instance-id-column (->> (db.data-group/get-data-group-by-column-name ;; TODO: define column as a var? (def instance-id-col {})
+                                 conn
+                                 {:column-name "instance_id"})
+                                :columns
+                                (first (filter #(= "instance_id" (get % "columnName")))))]
     (map (fn [[group-id columns]]
-           (let [dg (first (filter #(= (:group-id %) group-id) data-groups))]
+           (let [dg (first (filter #(= (:group-id %) group-id) data-groups))
+                 instance-id (merge instance-id-column {:groupId group-id
+                                                        :groupName (:groupName dg)
+                                                        :key false
+                                                        :hidden true})
+                 instance-id-exists? (boolean (first (filter #(= "instance_id" (get % "columnName")) columns)))]
              (assoc dg
-                    :columns columns
+                    :columns (if instance-id-exists?
+                               columns
+                               (conj columns instance-id))
                     :table-name (util/gen-table-name "ds")
+                    :source-table-name (:table-name dg)
                     :imported-table-name nil))) columns-by-group)))
 
 (defn get-source-dataset [conn source]
@@ -182,20 +201,22 @@
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         data-groups-to-be-created (get-data-groups-to-be-created conn source columns)
-        dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (get target "datasetId")})
-        instance-id-column     (->> (db.data-group/get-data-group-by-column-name
-                                     conn
-                                     {:column-name "instance_id"})
-                                    :columns
-                                    (first (filter #(= "instance_id" (get % "columnName")))))]
-    (doseq [[{:keys [group-id group-name columns table-name]}] data-groups-to-be-created]
-      (let [adapted-instance-id-column (merge instance-id-column {:groupId group-id
-                                                                  :groupName group-name
-                                                                  :key false
-                                                                  :hidden true})]
-        (postgres/create-dataset-table conn table-name (conj columns adapted-instance-id-column))))
+        target-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (get target "datasetId")})
+        target-merge-data-group (db.data-group/get-data-group-by-column-name conn {:column-name (get target "mergeColumn")
+                                                                                   :dataset-version-id (:id target-dataset-version)})
+        source-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (get source "datasetId")})
+        source-merge-column-data-group (db.data-group/get-data-group-by-column-name {:column-name (get source "mergeColumn")
+                                                                                     :dataset-version-id (:id source-dataset-version)})]
+    (doseq [[{:keys [columns table-name] :as source-data-group} ] data-groups-to-be-created]
+      (let [data (fetch-data-2 conn {:source-data-group source-data-group
+                                     :source {:merge-column (get source "mergeColumn")
+                                              :table-name (:table-name source-merge-column-data-group)}
+                                     :target {:merge-column (get target "mergeColumn")
+                                              :table-name (:table-name target-merge-data-group)}})] ;; [{:instance_id 123 :c1234 0} {:instance_id 566 :c1234 10}]
+        (postgres/create-dataset-table conn table-name columns)
+        (jdbc/insert-multi! conn table-name data)))
 
-    (prn data-groups-to-be-created)
+    (map #(dissoc % :original-table-name) data-groups-to-be-created)
     {:success? true
      :execution-log [(format "Merged columns from %s into %s"
                              "(:table-name source-dataset)"
