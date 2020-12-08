@@ -151,9 +151,11 @@
                               (group-by #(get % "groupId")))
         instance-id-column (->> (db.data-group/get-data-group-by-column-name ;; TODO: define column as a var? (def instance-id-col {})
                                  conn
-                                 {:column-name "instance_id"})
+                                 {:column-name "instance_id"
+                                  :dataset-version-id (:id dataset-version) })
                                 :columns
-                                (first (filter #(= "instance_id" (get % "columnName")))))]
+                                (filter #(= "instance_id" (get % "columnName")))
+                                first)]
     (map (fn [[group-id columns]]
            (let [dg (first (filter #(= (:group-id %) group-id) data-groups))
                  instance-id (merge instance-id-column {:groupId group-id
@@ -201,13 +203,13 @@
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         data-groups-to-be-created (get-data-groups-to-be-created conn source columns)
-        target-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (get target "datasetId")})
+        target-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (:dataset-id op-spec) })
         target-merge-data-group (db.data-group/get-data-group-by-column-name conn {:column-name (get target "mergeColumn")
                                                                                    :dataset-version-id (:id target-dataset-version)})
         source-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (get source "datasetId")})
-        source-merge-column-data-group (db.data-group/get-data-group-by-column-name {:column-name (get source "mergeColumn")
-                                                                                     :dataset-version-id (:id source-dataset-version)})]
-    (doseq [[{:keys [columns table-name] :as source-data-group} ] data-groups-to-be-created]
+        source-merge-column-data-group (db.data-group/get-data-group-by-column-name conn {:column-name (get source "mergeColumn")
+                                                                                          :dataset-version-id (:id source-dataset-version)})]
+    (doseq [{:keys [columns table-name] :as source-data-group}  data-groups-to-be-created]
       (let [data (fetch-data-2 conn {:source-data-group source-data-group
                                      :source {:merge-column (get source "mergeColumn")
                                               :table-name (:table-name source-merge-column-data-group)}
