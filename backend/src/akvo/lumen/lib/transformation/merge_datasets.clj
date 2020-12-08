@@ -1,18 +1,19 @@
 (ns akvo.lumen.lib.transformation.merge-datasets
-  (:require [akvo.lumen.util :as util]
-            [akvo.lumen.lib.env :as env]
-            [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
+  (:require [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
-            [akvo.lumen.db.dataset-version :as db.dataset-version]
-            [akvo.lumen.db.data-group :as db.data-group]
+            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
+            [akvo.lumen.lib.env :as env]
+            [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
             [clojure.set :as set]
             [clojure.set :refer (rename-keys) :as set]
             [clojure.string :as s]
+            [clojure.tools.logging :as log]
             [clojure.walk :as walk])
   (:import [java.sql Timestamp]
            [org.postgis PGgeometry]))
@@ -144,7 +145,10 @@
                               (group-by #(get % "groupId")))]
     (map (fn [[group-id columns]]
            (let [dg (first (filter #(= (:group-id %) group-id) data-groups))]
-             (assoc dg :columns columns))) columns-by-group)))
+             (assoc dg
+                    :columns columns
+                    :table-name (util/gen-table-name "ds")
+                    :imported-table-name nil))) columns-by-group)))
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
@@ -178,25 +182,19 @@
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         data-groups-to-be-created (get-data-groups-to-be-created conn source columns)
+        dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (get target "datasetId")})
+        instance-id-column     (->> (db.data-group/get-data-group-by-column-name
+                                     conn
+                                     {:column-name "instance_id"})
+                                    :columns
+                                    (first (filter #(= "instance_id" (get % "columnName")))))]
+    (doseq [[{:keys [group-id group-name columns table-name]}] data-groups-to-be-created]
+      (let [adapted-instance-id-column (merge instance-id-column {:groupId group-id
+                                                                  :groupName group-name
+                                                                  :key false
+                                                                  :hidden true})]
+        (postgres/create-dataset-table conn table-name (conj columns adapted-instance-id-column))))
 
-        ;; column-names-translation (merge-column-names-map columns
-        ;;                                                  source-merge-columns)
-        ;; target-merge-columns (get-target-merge-columns source-merge-columns
-        ;;                                                column-names-translation)
-        ;; data (fetch-data conn (:table-name source-dataset)
-        ;;                  target-merge-columns
-        ;;                  column-names-translation
-        ;;                  source)
-        ]
-    ;; if data-groups=true we should avoid following logic
-    ;; (add-columns conn table-name target-merge-columns)
-    ;; (insert-merged-data conn table-name target data)
-    ;; {:success? true
-    ;;  :execution-log [(format "Merged columns from %s into %s"
-    ;;                          (:table-name source-dataset)
-    ;;                          table-name)]
-    ;;  :data-groups-to-be-created data-groups-to-be-created
-    ;;  :columns (into columns target-merge-columns)}
     (prn data-groups-to-be-created)
     {:success? true
      :execution-log [(format "Merged columns from %s into %s"
