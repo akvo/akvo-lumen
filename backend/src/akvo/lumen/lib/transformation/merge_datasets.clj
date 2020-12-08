@@ -98,10 +98,29 @@
 
 (defn fetch-data-2
   [conn {:keys [source-data-group source target]}]
-  (let [simple-query? (= (:source-table-name source-data-group)
-                         (:table-name source))]
-    )
-)
+  (let [simple-query?           (= (:source-table-name source-data-group)
+                                   (:table-name source))
+        source-selected-columns (s/join ", "
+                                        (map (partial str "s.")
+                                             (map #(get % "sourceColumnName" "instance_id")
+                                                  (:columns source-data-group))))
+        subquery                (if simple-query?
+                                  (format "select %1$s from %2$s s"
+                                          source-selected-columns
+                                          (-> source :table-name))
+                                  (format "select %1$s, %2$s from %3$s s, %4$s b where s.instance_id = b.instance_id"
+                                          (str  "b." (-> source :merge-column)) ;; merge column
+                                          source-selected-columns
+                                          (-> source-data-group :source-table-name) ;; table of selected columns
+                                          (-> source :table-name) ;; merge-column table
+                                          ))
+        sql                     (format "select t.instance_id, %1$s from (%2$s) s, %3$s t where t.%4$s = s.%5$s"
+                                        source-selected-columns
+                                        subquery
+                                        (-> target :table-name)
+                                        (-> target :merge-column)
+                                        (-> source :merge-column))]
+    (rest (jdbc/query conn [sql]))))
 
 (defn add-columns
   "Add the new columns to the target dataset"
@@ -215,7 +234,10 @@
                                               :table-name (:table-name source-merge-column-data-group)}
                                      :target {:merge-column (get target "mergeColumn")
                                               :table-name (:table-name target-merge-data-group)}})] ;; [{:instance_id 123 :c1234 0} {:instance_id 566 :c1234 10}]
-        (postgres/create-dataset-table conn table-name columns)
+        (postgres/create-dataset-table conn table-name (map #(update % :id (fn [_]
+                                                                             (:columnName %)))
+                                                            (walk/keywordize-keys columns)))
+        (log/error :data data) ;; todo we need to adapt columnnames, eg: change c1234 to d1 c345 to d2
         (jdbc/insert-multi! conn table-name data)))
 
     (map #(dissoc % :original-table-name) data-groups-to-be-created)
