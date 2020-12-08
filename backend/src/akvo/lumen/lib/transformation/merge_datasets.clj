@@ -131,28 +131,20 @@
         data-groups     (db.data-group/list-data-groups-by-dataset-version-id
                          conn
                          {:dataset-version-id (:id dataset-version)})
-        column-names (->> (set (get source "mergeColumns"))
-                          (map (fn [i column-name]
-                                 {:column-name column-name
-                                  :derivation-column-name (engine/derivation-column-name
-                                                           (+ (engine/next-column-index target-dataset-columns) i))})
-                               (range)))]
-    (->> column-names
-         (map (fn [{:keys [derivation-column-name column-name]}]
-                {:data-group (engine/datagroup-by-column data-groups column-name)
-                 :column-name column-name
-                 :derivation-column-name derivation-column-name}))
-         (group-by :data-group)
-         (map (fn [[data-group data-col]]
-                (let [dg-columns-selected (->> (reduce #(conj % (select-keys %2 [:derivation-column-name :column-name])) [] data-col)
-                                               (map (fn [{:keys [column-name derivation-column-name]}]
-                                                      (let [column (first (filter (fn [c]
-                                                                                    (= (get c "columnName") column-name))
-                                                                                  (:columns data-group)))]
-                                                        (-> column
-                                                            (assoc "columnName" derivation-column-name)
-                                                            reset-column-values)))))]
-                  (assoc data-group :columns dg-columns-selected)))))))
+        columns-by-group (->> (set (get source "mergeColumns"))
+                              (map-indexed (fn [i column-name]
+                                             (let [dg (engine/datagroup-by-column data-groups column-name)
+                                                   column (first (filter (fn [c]
+                                                                           (= (get c "columnName") column-name))
+                                                                         (:columns dg)))]
+                                               (-> column
+                                                (assoc "columnName" (engine/derivation-column-name
+                                                                     (+ (engine/next-column-index target-dataset-columns) i)))
+                                                reset-column-values))))
+                              (group-by #(get % "groupId")))]
+    (map (fn [[group-id columns]]
+           (let [dg (first (filter #(= (:group-id %) group-id) data-groups))]
+             (assoc dg :columns columns))) columns-by-group)))
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
@@ -205,7 +197,12 @@
     ;;                          table-name)]
     ;;  :data-groups-to-be-created data-groups-to-be-created
     ;;  :columns (into columns target-merge-columns)}
-
+    (prn data-groups-to-be-created)
+    {:success? true
+     :execution-log [(format "Merged columns from %s into %s"
+                             "(:table-name source-dataset)"
+                             table-name)]
+     :columns (vec columns)}
     ))
 
 (defn apply-merge-operation
