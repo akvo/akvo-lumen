@@ -193,7 +193,7 @@
                                (conj columns instance-id))
                     :table-name (util/gen-table-name "ds")
                     :source-table-name (:table-name dg)
-                    :imported-table-name nil))) columns-by-group)))
+                    :imported-table-name "MERGE_DATASET"))) columns-by-group)))
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
@@ -247,6 +247,7 @@
 
     (map #(dissoc % :original-table-name) data-groups-to-be-created)
     {:success? true
+     :data-groups-to-be-created data-groups-to-be-created
      :execution-log [(format "Merged columns from %s into %s"
                              "(:table-name source-dataset)"
                              table-name)]
