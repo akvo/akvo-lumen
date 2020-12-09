@@ -112,9 +112,12 @@
                                                         (map #(get % "sourceColumnName")
                                                              source-selected-columns)))))
         subquery                (if simple-query?
-                                  (format "select %1$s from %2$s s"
+                                  (format "select distinct on (s.%1$s), %2$s from %3$s s order by s.%1$s, s.%4$s %5$s nulls last"
+                                          (:merge-column source)
                                           (source-selected-columns-select false)
-                                          (-> source :table-name))
+                                          (-> source :table-name)
+                                          (or (:aggregation-column source) (:merge-column source))
+                                          (:aggregation-direction source))
                                   (format "select %1$s, %2$s from %3$s s, %4$s b where s.instance_id = b.instance_id"
                                           (str  "b." (-> source :merge-column)) ;; merge column
                                           (source-selected-columns-select false)
@@ -238,7 +241,9 @@
     (doseq [{:keys [columns table-name] :as source-data-group}  data-groups-to-be-created]
       (let [data (fetch-data-2 conn {:source-data-group source-data-group
                                      :source {:merge-column (get source "mergeColumn")
-                                              :table-name (:table-name source-merge-column-data-group)}
+                                              :table-name (:table-name source-merge-column-data-group)
+                                              :aggregation-column (get source "aggregationColumn")
+                                              :aggregation-direction (get source "aggregationDirection")}
                                      :target {:merge-column (get target "mergeColumn")
                                               :table-name (:table-name target-merge-data-group)}})] ;; [{:instance_id 123 :c1234 0} {:instance_id 566 :c1234 10}]
         (postgres/create-dataset-table conn table-name (map #(update % :id (fn [_]
