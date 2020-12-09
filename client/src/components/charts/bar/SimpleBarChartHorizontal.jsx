@@ -10,6 +10,7 @@ import { Portal } from 'react-portal';
 import merge from 'lodash/merge';
 import { GridColumns } from '@vx/grid';
 import itsSet from 'its-set';
+// import { TextBox } from 'd3plus-text';
 import { barPropTypes, barDefaultProps } from './CommonBarChart';
 
 import { isLight } from '../../../utilities/color';
@@ -157,15 +158,93 @@ export default class SimpleBarChart extends Component {
     });
   }
 
+  getTextWidth(text, font = '100 14px sans-serif') {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = font;
+    return context.measureText(text).width;
+  }
+
+  breakString(word, maxWidth, hyphenCharacter = '-') {
+    const characters = word.split(' ');
+    // const characters = [word];
+    const lines = [];
+    let currentLine = '';
+    characters.forEach((character, index) => {
+      const nextLine = `${currentLine}${character}`;
+      const lineWidth = this.getTextWidth(nextLine);
+      if (lineWidth >= maxWidth) {
+        const currentCharacter = index + 1;
+        const isLastLine = characters.length === currentCharacter;
+        const hyphenatedNextLine = `${nextLine}${hyphenCharacter}`;
+        lines.push(isLastLine ? nextLine : hyphenatedNextLine);
+        currentLine = '';
+      } else {
+        currentLine = nextLine;
+      }
+    });
+    return { hyphenatedStrings: lines, remainingWord: currentLine };
+  }
+
+  wrapLabel(label, maxWidth) {
+    // const words = label.split(' ');
+    const words = [label];
+    const completedLines = [];
+    let nextLine = '';
+    words.forEach((word, index) => {
+      const wordLength = this.getTextWidth(`${word} `);
+      const nextLineLength = this.getTextWidth(nextLine);
+      if (wordLength > maxWidth) {
+        const { hyphenatedStrings, remainingWord } = this.breakString(word, maxWidth);
+        completedLines.push(nextLine, ...hyphenatedStrings);
+        nextLine = remainingWord;
+      } else if (nextLineLength + wordLength >= maxWidth) {
+        completedLines.push(nextLine);
+        nextLine = word;
+      } else {
+        nextLine = [nextLine, word].filter(Boolean).join(' ');
+      }
+      const currentWord = index + 1;
+      const isLastWord = currentWord === words.length;
+      if (isLastWord) {
+        completedLines.push(nextLine);
+      }
+    });
+    return completedLines.filter(line => line !== '');
+  }
+
   renderLabel({ key, nodeHeight, x, y, value, type, index, nodeCount, maxChars }) {
     if (
       (nodeCount >= 200 && index % 10 !== 0) ||
       (nodeCount < 200 && nodeCount > 40 && index % 5 !== 0)
     ) return null;
-    const labelText = abbr(String(getLabelText(key, type)), maxChars);
-
+    // const labelText = abbr(String(getLabelText(key, type)), maxChars);
+    const labelText = String(getLabelText(key, type));
+  
     const labelY = y + (nodeHeight / 2);
     const labelX = x + (value >= 0 ? -10 : 10);
+    
+    // Experiment A, d3plus-text
+    // const data = [
+    //   {text: 'This is a super duper looooong label'}
+    // ];
+    // const l = new TextBox()
+    //   .data(data)
+    //   .fontSize(14)
+    //   .width(100)
+    //   .x((d, i) => i * 250)
+    //   .render();
+
+    // Experiment B, 
+    // https://medium.com/@CarysMills/wrapping-svg-text-without-svg-2-ecbfb58f7ba4
+    //
+    // Outcome: Not great since it wrap text after each
+    const labelTextArray = this.wrapLabel(labelText, 15);
+    const wrappedText = labelTextArray.map((word, i) => (
+      <tspan x={0} dy={i === 0 ? 0 : 14}>
+        {word}
+      </tspan>
+    ));
     return (
       <Text
         textAnchor={value >= 0 ? 'end' : 'start'}
@@ -184,7 +263,7 @@ export default class SimpleBarChart extends Component {
           this.handleMouseLeaveNode({ key });
         }}
       >
-        {labelText}
+        {wrappedText}
       </Text>
     );
   }
