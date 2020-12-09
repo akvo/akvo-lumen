@@ -100,27 +100,32 @@
   [conn {:keys [source-data-group source target]}]
   (let [simple-query?           (= (:source-table-name source-data-group)
                                    (:table-name source))
-        source-selected-columns (s/join ", "
+        source-selected-columns (filter #(not= "instance_id" (get % "columnName")) (:columns source-data-group))
+        source-selected-columns-select  (s/join ", "
                                         (map (partial str "s.")
-                                             (map #(get % "sourceColumnName" "instance_id")
-                                                  (:columns source-data-group))))
+                                             (map #(get % "sourceColumnName")
+                                                  source-selected-columns)))
         subquery                (if simple-query?
                                   (format "select %1$s from %2$s s"
-                                          source-selected-columns
+                                          source-selected-columns-select
                                           (-> source :table-name))
                                   (format "select %1$s, %2$s from %3$s s, %4$s b where s.instance_id = b.instance_id"
                                           (str  "b." (-> source :merge-column)) ;; merge column
-                                          source-selected-columns
+                                          source-selected-columns-select
                                           (-> source-data-group :source-table-name) ;; table of selected columns
                                           (-> source :table-name) ;; merge-column table
                                           ))
         sql                     (format "select t.instance_id, %1$s from (%2$s) s, %3$s t where t.%4$s = s.%5$s"
-                                        source-selected-columns
+                                        source-selected-columns-select
                                         subquery
                                         (-> target :table-name)
                                         (-> target :merge-column)
-                                        (-> source :merge-column))]
-    (rest (jdbc/query conn [sql]))))
+                                        (-> source :merge-column))
+        result (rest (jdbc/query conn [sql]))
+        rename-keys-map (reduce (fn [c co]
+                                  (assoc c (keyword (get co "sourceColumnName")) (keyword (get co "columnName")))
+                                  ) {} source-selected-columns)]
+    (map #(set/rename-keys % rename-keys-map) result)))
 
 (defn add-columns
   "Add the new columns to the target dataset"
