@@ -193,16 +193,28 @@
                                                             (assoc transformation
                                                                    "created" (Instant/ofEpochMilli (System/currentTimeMillis))
                                                                    "changedColumns" (diff-columns previous-columns
-                                                                                                  columns))))}]
+                                                                                                  columns))))}
+
+              ]
           (db.dataset-version/new-dataset-version-2 tenant-conn next-dataset-version)
           (when data-groups-to-be-created
-            (doseq [dg data-groups-to-be-created]
-              (db.data-group/new-data-group tenant-conn
-                                            (merge
-                                             dg
-                                             {:id (util/squuid)
-                                              :dataset-version-id new-dataset-version-id})))
-            )
+            (let [max-group-order (count data-groups)
+                  adapted-data-groups (map-indexed (fn [i item]
+                                                     (let [idx (inc (+ 1000 i max-group-order))
+                                                           group-name (str (:group-name item) " [merge]")]
+                                                       (-> item
+                                                           (assoc :group-order idx)
+                                                           (assoc :group-id idx)
+                                                           (assoc :group-name group-name)
+                                                           (update :columns (fn [cols]
+                                                                              (mapv #(assoc % "groupId" idx "groupName" group-name) cols))))))
+                                                   data-groups-to-be-created)]
+              (doseq [dg adapted-data-groups]
+                     (db.data-group/new-data-group tenant-conn
+                                                   (merge
+                                                    dg
+                                                    {:id (util/squuid)
+                                                     :dataset-version-id new-dataset-version-id})))))
           (db.data-group/new-data-group tenant-conn
                                         (merge
                                          (select-keys data-group
