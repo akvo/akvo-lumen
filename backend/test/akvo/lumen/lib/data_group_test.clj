@@ -1,19 +1,19 @@
-(ns akvo.lumen.lib.aggregation.commons-test
+(ns akvo.lumen.lib.data-group-test
   (:require [akvo.lumen.lib.data-group :as data-group]
-            [clojure.test :refer :all]))
+            [clojure.test :refer [deftest is]]))
 
 (def test-data-groups [{:columns [{:columnName "instance_id"}
                                   {:columnName "rnum"}
                                   {:columnName "identifier"}
                                   {:columnName "A"}]
-                        :groupId "metadata"
+                        :group-id "metadata"
                         :table-name "ds_meta"}
                        {:columns [{:columnName "instance_id"}
                                   {:columnName "rnum"}
                                   {:columnName "B"}]
-                        :groupId "repeated"
+                        :group-id "repeated"
                         :table-name "ds_repeated"}
-                       {:groupId "not-repeated"
+                       {:group-id "not-repeated"
                         :columns [{:columnName "instance_id"}
                                   {:columnName "rnum"}
                                   {:columnName "C"}]
