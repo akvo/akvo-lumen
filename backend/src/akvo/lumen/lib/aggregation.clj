@@ -13,6 +13,7 @@
             [akvo.lumen.lib.aggregation.pivot :as pivot]
             [akvo.lumen.lib.aggregation.scatter :as scatter]
             [akvo.lumen.lib.aggregation.bubble :as bubble]
+            [akvo.lumen.lib.data-group :as data-group]
             [akvo.lumen.lib.env :as env]
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
@@ -31,7 +32,7 @@
 
 (defn data-groups-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
-    (if-let [data (commons/table-name-and-columns-from-data-grops tenant-tx-conn dataset-id) ]
+    (if-let [data (data-group/table-name-and-columns-from-data-grops tenant-tx-conn dataset-id) ]
       (query* tenant-tx-conn (select-keys data [:table-name :columns]) visualisation-type query)
       (lib/not-found {"datasetId" dataset-id}))))
 

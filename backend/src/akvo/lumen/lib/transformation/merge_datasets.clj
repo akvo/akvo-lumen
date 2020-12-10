@@ -238,7 +238,7 @@
         #_(log/error :data data) ;; todo we need to adapt columnnames, eg: change c1234 to d1 c345 to d2
         (jdbc/insert-multi! conn table-name data)))
 
-    (map #(dissoc % :original-table-name) data-groups-to-be-created)
+    #_(map #(dissoc % :original-table-name) data-groups-to-be-created)
     {:success? true
      :data-groups-to-be-created data-groups-to-be-created
      :execution-log [(format "Merged columns from %s into %s"
