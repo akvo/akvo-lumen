@@ -29,13 +29,17 @@
 
 (defn data-groups-sql
   [{:keys [select from]}]
-  (str/join " "
-            [(str "SELECT " (str/join ", "
-                                      (map #(if (= "instance_id" %) "m.instance_id" %) select)))
-             (format "FROM %s m" (:metadata from))
-             (str/join " "
-                       (map #(format "LEFT JOIN %1$s ON m.instance_id = %1$s.instance_id" %)
-                            (:others from)))]))
+  (str/trim
+   (str/join " "
+             [(str "SELECT " (str/join ", "
+                                       (map #(if (= "instance_id" %) "m.instance_id" %) select)))
+              (if (:metadata from)
+                (format "FROM %s m" (:metadata from))
+                (format "FROM %s" (first (:others from))))
+              (when (:metadata from)
+                (str/join " "
+                          (map #(format "LEFT JOIN %1$s ON m.instance_id = %1$s.instance_id" %)
+                               (:others from))))])))
 
 (defn data-groups-temp-view
   [view-name sql]
