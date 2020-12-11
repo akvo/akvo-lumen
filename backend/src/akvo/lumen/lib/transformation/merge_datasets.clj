@@ -103,20 +103,25 @@
                                             (s/join ", "
                                                     (map (fn [{:strs [sourceColumnName columnName]}]
                                                            (format "s.%s as %s" sourceColumnName columnName))
-                                                        source-selected-columns))
+                                                         source-selected-columns))
                                             (s/join ", "
-                                                   (map (partial str "s.")
-                                                        (map #(get % "sourceColumnName")
-                                                             source-selected-columns)))))
-        subquery                (fetch-sql (-> source :table-name) (-> source :spec))
+                                                    (map (partial str "s.")
+                                                         (map #(get % "sourceColumnName")
+                                                              source-selected-columns)))))
+        subquery                (format "SELECT s.%1$s, %2$s FROM (%3$s) a, %4$s s WHERE a.instance_id = s.instance_id"
+                                        (-> source :merge-column)
+                                        (source-selected-columns-select false)
+                                        (fetch-sql (-> source :table-name) (-> source
+                                                                               :spec
+                                                                               (assoc "mergeColumns" ["instance_id"])))
+                                        (-> source :table-name))
         sql                     (format "SELECT t.instance_id, %1$s FROM (%2$s) s, %3$s t WHERE t.%4$s = s.%5$s"
                                         (source-selected-columns-select true)
                                         subquery
                                         (-> target :table-name)
                                         (-> target :merge-column)
                                         (-> source :merge-column))]
-    (prn sql)
-    (rest (jdbc/query conn [sql]))))
+    (jdbc/query conn [sql] {:keywordize? false})))
 
 (defn add-columns
   "Add the new columns to the target dataset"
@@ -223,20 +228,20 @@
                                                                                    :dataset-version-id (:id target-dataset-version)})
         source-dataset (data-group/table-name-and-columns-from-data-grops conn (get source "datasetId"))]
     (doseq [{:keys [columns table-name] :as source-data-group}  data-groups-to-be-created]
-      (let [data (fetch-data-2 conn {:source-data-group source-data-group
-                                     :source {:merge-column (get source "mergeColumn")
-                                              :table-name (:table-name source-dataset)
-                                              :aggregation-column (get source "aggregationColumn")
-                                              :aggregation-direction (get source "aggregationDirection")
-                                              :spec source}
-                                     :target {:merge-column (get target "mergeColumn")
-                                              :table-name (:table-name target-merge-data-group)}})] ;; [{:instance_id 123 :c1234 0} {:instance_id 566 :c1234 10}]
+      (let [data (->>
+                  (fetch-data-2 conn {:source-data-group source-data-group
+                                         :source {:merge-column (get source "mergeColumn")
+                                                  :table-name (:table-name source-dataset)
+                                                  :aggregation-column (get source "aggregationColumn")
+                                                  :aggregation-direction (get source "aggregationDirection")
+                                                  :spec source}
+                                         :target {:merge-column (get target "mergeColumn")
+                                                  :table-name (:table-name target-merge-data-group)}})
+                  (map #(to-sql-types % (walk/stringify-keys columns))))]
         (postgres/create-dataset-table conn table-name (map #(update % :id (fn [_]
                                                                              (:columnName %)))
                                                             (walk/keywordize-keys columns)))
-        (prn table-name)
         (jdbc/insert-multi! conn table-name data)))
-
     #_(map #(dissoc % :original-table-name) data-groups-to-be-created)
     {:success? true
      :data-groups-to-be-created data-groups-to-be-created
