@@ -15,8 +15,12 @@
       padding-left: 0.5em;
       padding-right: 0.5em;
     }
+    div.groupName {
+      padding-top: 1em;
+      padding-left: 0.3em;
+      font-size: 1.1em;
+    }
   }
-
   .SelectAggregation {
     .aggregationContainer {
       display: flex;

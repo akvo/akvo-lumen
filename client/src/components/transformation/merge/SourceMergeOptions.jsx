@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Immutable from 'immutable';
 import { connect } from 'react-redux';
 import { intlShape } from 'react-intl';
+import _ from 'lodash';
 import { ensureDatasetFullyLoaded } from '../../../actions/dataset';
 import SelectDataset from './SelectDataset';
 import SelectMenu from '../../common/SelectMenu';
@@ -10,8 +11,11 @@ import { guessMergeColumn, getColumnName, directionLabels } from './utils';
 import './SourceMergeOptions.scss';
 import { columnName, findColumnI, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 function SelectMergeColumn({ onChange, columns, mergeColumn, intl }) {
-//  console.log('columns', columns, columnSelectOptions(intl, columns));
   return (
     <div>
       <h1>Merge column</h1>
@@ -85,6 +89,8 @@ SelectAggregation.propTypes = {
 function SelectMergeColumns({ onChange, onChangeAll, columns, selected }) {
   const selectedNames = selected.map(o => o.get('columnName'));
   const allSelected = selected.size === columns.size;
+  const orderedGroups = _.sortedUniq(columns.map(c => c.get('groupName')).toJS());
+
   return (
     <fieldset>
       <legend><h1>Choose which columns to merge ({selected.size} / {columns.size})</h1>
@@ -99,24 +105,26 @@ function SelectMergeColumns({ onChange, onChangeAll, columns, selected }) {
           {selected.size === columns.size ? 'All columns selected' : 'Select all Columns'}
         </fieldset>
       </legend>
-      {columns.map((column) => {
-        const cName = columnName(column);
-
-        const id = `merge_column_${cName}`;
-        return (
-          <div key={cName}>
-            <input
-              type="checkbox"
-              id={id}
-              name="merge_column"
-              value={cName}
-              selected={selectedNames.includes(cName)}
-              checked={selectedNames.includes(cName)}
-              onChange={() => onChange(column)}
-            />
-            <label htmlFor={id}>{column.get('title')}</label>
-          </div>
-        );
+      {orderedGroups.map((groupName) => {
+        const colsData = columns.filter(column => column.get('groupName') === groupName).map((column) => {
+          const cName = columnName(column);
+          const id = `merge_column_${cName}`;
+          return (
+            <div key={cName}>
+              <input
+                type="checkbox"
+                id={id}
+                name="merge_column"
+                value={cName}
+                selected={selectedNames.includes(cName)}
+                checked={selectedNames.includes(cName)}
+                onChange={() => onChange(column)}
+              />
+              <label htmlFor={id}>{column.get('title')}</label>
+            </div>
+          );
+        });
+        return <div key={groupName}><div className="groupName">{capitalizeFirstLetter(groupName)}</div>{colsData}</div>;
       })}
     </fieldset>
   );
