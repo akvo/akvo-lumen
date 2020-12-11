@@ -198,9 +198,9 @@
               ]
           (db.dataset-version/new-dataset-version-2 tenant-conn next-dataset-version)
           (when data-groups-to-be-created
-            (let [max-group-order (count data-groups)
+            (let [max-group-order (apply max (conj (map :group-order data-groups) 1000))
                   adapted-data-groups (map-indexed (fn [i item]
-                                                     (let [idx (inc (+ 1000 i max-group-order))
+                                                     (let [idx (inc (+ i max-group-order))
                                                            group-name (str (:group-name item) " [merge]")]
                                                        (-> item
                                                            (assoc :group-order idx)
