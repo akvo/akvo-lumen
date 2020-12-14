@@ -57,7 +57,7 @@
 
 (defn ->pggeometry [value]
   (doto
-    (PGgeometry/geomFromString value)
+      (PGgeometry/geomFromString value)
     (.setSrid 4326)))
 
 (defn ->timestamp [value]
@@ -128,15 +128,15 @@
   [conn table-name columns]
   (doseq [column columns]
     (db.tx.engine/add-column conn {:table-name table-name
-                      :new-column-name (get column "columnName")
-                      :column-type (condp = (get column "type")
-                                     "date" "timestamptz"
-                                     "geopoint" "geometry(POINT, 4326)"
-                                     "geoshape" "geometry(GEOMETRY, 4326)"
-                                     "number" "double precision"
-                                     "multiple" "text"
-                                     "text" "text"
-                                     "option" "text")})))
+                                   :new-column-name (get column "columnName")
+                                   :column-type (condp = (get column "type")
+                                                  "date" "timestamptz"
+                                                  "geopoint" "geometry(POINT, 4326)"
+                                                  "geoshape" "geometry(GEOMETRY, 4326)"
+                                                  "number" "double precision"
+                                                  "multiple" "text"
+                                                  "text" "text"
+                                                  "option" "text")})))
 
 (defn insert-merged-data
   "Insert the merged values into the target dataset"
@@ -166,8 +166,8 @@
                                                (-> column
                                                    (assoc "sourceColumnName" (get column "columnName")
                                                           "columnName" (engine/derivation-column-name
-                                                                     (+ (engine/next-column-index target-dataset-columns) i)))
-                                                reset-column-values))))
+                                                                        (+ (engine/next-column-index target-dataset-columns) i)))
+                                                   reset-column-values))))
                               (group-by #(get % "groupId")))
         instance-id-column (->> (db.data-group/get-data-group-by-column-name ;; TODO: define column as a var? (def instance-id-col {})
                                  conn
@@ -230,13 +230,13 @@
     (doseq [{:keys [columns table-name] :as source-data-group}  data-groups-to-be-created]
       (let [data (->>
                   (fetch-data-2 conn {:source-data-group source-data-group
-                                         :source {:merge-column (get source "mergeColumn")
-                                                  :table-name (:table-name source-dataset)
-                                                  :aggregation-column (get source "aggregationColumn")
-                                                  :aggregation-direction (get source "aggregationDirection")
-                                                  :spec source}
-                                         :target {:merge-column (get target "mergeColumn")
-                                                  :table-name (:table-name target-merge-data-group)}})
+                                      :source {:merge-column (get source "mergeColumn")
+                                               :table-name (:table-name source-dataset)
+                                               :aggregation-column (get source "aggregationColumn")
+                                               :aggregation-direction (get source "aggregationDirection")
+                                               :spec source}
+                                      :target {:merge-column (get target "mergeColumn")
+                                               :table-name (:table-name target-merge-data-group)}})
                   (map #(to-sql-types % (walk/stringify-keys columns))))]
         (postgres/create-dataset-table conn table-name (map #(update % :id (fn [_]
                                                                              (:columnName %)))
