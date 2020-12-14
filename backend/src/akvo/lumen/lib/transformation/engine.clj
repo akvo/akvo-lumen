@@ -172,7 +172,7 @@
         other-dgs-columns (db.data-group/get-all-columns-except-group-id tenant-conn {:dataset-version-id (:id dataset-version)
                                                                                       :group-id (:group-id data-group)})
         previous-columns (into (vec (:columns data-group)) other-dgs-columns)]
-    (let [{:keys [success? message columns execution-log error-data]}
+    (let [{:keys [success? message columns execution-log error-data data-groups-to-be-created]}
           (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))
           columns (let [other-dgs-columns-set (set other-dgs-columns)]
                     (reduce (fn [container column]
@@ -193,8 +193,28 @@
                                                             (assoc transformation
                                                                    "created" (Instant/ofEpochMilli (System/currentTimeMillis))
                                                                    "changedColumns" (diff-columns previous-columns
-                                                                                                  columns))))}]
+                                                                                                  columns))))}
+
+              ]
           (db.dataset-version/new-dataset-version-2 tenant-conn next-dataset-version)
+          (when data-groups-to-be-created
+            (let [max-group-order (apply max (conj (map :group-order data-groups) 1000))
+                  adapted-data-groups (map-indexed (fn [i item]
+                                                     (let [idx (inc (+ i max-group-order))
+                                                           group-name (str (:group-name item) " [merge]")]
+                                                       (-> item
+                                                           (assoc :group-order idx)
+                                                           (assoc :group-id idx)
+                                                           (assoc :group-name group-name)
+                                                           (update :columns (fn [cols]
+                                                                              (mapv #(assoc % "groupId" idx "groupName" group-name) cols))))))
+                                                   data-groups-to-be-created)]
+              (doseq [dg adapted-data-groups]
+                     (db.data-group/new-data-group tenant-conn
+                                                   (merge
+                                                    dg
+                                                    {:id (util/squuid)
+                                                     :dataset-version-id new-dataset-version-id})))))
           (db.data-group/new-data-group tenant-conn
                                         (merge
                                          (select-keys data-group

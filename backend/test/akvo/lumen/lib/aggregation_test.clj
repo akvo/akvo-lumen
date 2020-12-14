@@ -7,13 +7,9 @@
                                          error-tracker-fixture]]
             [akvo.lumen.db.env :as db.env]
             [akvo.lumen.lib :as lib]
-            [akvo.lumen.lib.transformation :as tf]
             [akvo.lumen.lib.aggregation :as aggregation]
-            [akvo.lumen.db.transformation :refer [dataset-version-by-dataset-id]]
             [akvo.lumen.test-utils :refer [import-file] :as tu]
-            [clojure.tools.logging :as log]
-            [clojure.walk :refer (keywordize-keys stringify-keys)]
-            [clojure.test :refer :all]))
+            [clojure.test :refer [deftest is testing use-fixtures]]))
 
 (use-fixtures :once tu/spec-instrument system-fixture tenant-conn-fixture error-tracker-fixture)
 
@@ -21,8 +17,6 @@
 (deftest ^:functional test-aggregation-with-env-flag-without-datagroups
   (testing "Importing csv file"
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:file "geopoints.csv" :dataset-name "example csv"})
-          dataset (dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id
-                                                                :version 1})
           _ (db.env/activate-flag *tenant-conn* "data-groups")
           query {:metricColumnX nil,
                  :horizontal false,
