@@ -11,7 +11,7 @@
   [coordinate]
   (-> coordinate
       bigdec
-      (.setScale 6 java.math.RoundingMode/HALF_EVEN)
+      (.setScale 6 RoundingMode/HALF_EVEN)
       double))
 
 (defn rand-lng
