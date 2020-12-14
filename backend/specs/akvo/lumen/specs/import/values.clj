@@ -2,7 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [akvo.lumen.util :refer (squuid)]
             [akvo.lumen.specs :as lumen.s]
-            [akvo.lumen.lib.import.csv :as csv]))
+            [akvo.lumen.lib.import.csv :as csv])
+  (:import java.math.RoundingMode))
 
 (defn round-coordinate
   "Round coordinate to 6 digits but go by bigdec rounding to remove trailing
