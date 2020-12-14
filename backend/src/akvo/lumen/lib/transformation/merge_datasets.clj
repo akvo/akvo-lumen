@@ -1,21 +1,23 @@
 (ns akvo.lumen.lib.transformation.merge-datasets
-  (:require [akvo.lumen.util :as util]
-            [akvo.lumen.lib.env :as env]
-            [akvo.lumen.lib.transformation.engine :as engine]
-            [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
+  (:require [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.transformation.engine :as db.tx.engine]
-            [akvo.lumen.db.dataset-version :as db.dataset-version]
-            [akvo.lumen.db.data-group :as db.data-group]
+            [akvo.lumen.lib.env :as env]
+            [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.lib.data-group :as data-group]
+            [akvo.lumen.postgres :as postgres]
+            [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
-            [clojure.tools.logging :as log]
-            [clojure.set :as set]
-            [clojure.set :refer (rename-keys) :as set]
+            [clojure.set :as set :refer [rename-keys]]
             [clojure.string :as s]
+            [clojure.tools.logging :as log]
             [clojure.walk :as walk])
   (:import [java.sql Timestamp]
            [org.postgis PGgeometry]))
+
+(declare reset-column-values)
 
 (defmethod engine/valid? "core/merge-datasets"
   [op-spec]
@@ -55,7 +57,7 @@
 
 (defn ->pggeometry [value]
   (doto
-    (PGgeometry/geomFromString value)
+      (PGgeometry/geomFromString value)
     (.setSrid 4326)))
 
 (defn ->timestamp [value]
@@ -93,20 +95,48 @@
             {}
             rows)))
 
+(defn fetch-data-2
+  [conn {:keys [source-data-group source target]}]
+  (let [source-selected-columns (filter #(not= "instance_id" (get % "columnName")) (:columns source-data-group))
+        source-selected-columns-select  (fn [aliased?]
+                                          (if aliased?
+                                            (s/join ", "
+                                                    (map (fn [{:strs [sourceColumnName columnName]}]
+                                                           (format "s.%s as %s" sourceColumnName columnName))
+                                                         source-selected-columns))
+                                            (s/join ", "
+                                                    (map (partial str "s.")
+                                                         (map #(get % "sourceColumnName")
+                                                              source-selected-columns)))))
+        subquery                (format "SELECT s.%1$s, %2$s FROM (%3$s) a, %4$s s WHERE a.instance_id = s.instance_id"
+                                        (-> source :merge-column)
+                                        (source-selected-columns-select false)
+                                        (fetch-sql (-> source :table-name) (-> source
+                                                                               :spec
+                                                                               (assoc "mergeColumns" ["instance_id"])))
+                                        (-> source :table-name))
+        sql                     (format "SELECT t.instance_id, %1$s FROM (%2$s) s, %3$s t WHERE t.%4$s = s.%5$s"
+                                        (source-selected-columns-select true)
+                                        subquery
+                                        (-> target :table-name)
+                                        (-> target :merge-column)
+                                        (-> source :merge-column))]
+    (jdbc/query conn [sql] {:keywordize? false})))
+
 (defn add-columns
   "Add the new columns to the target dataset"
   [conn table-name columns]
   (doseq [column columns]
     (db.tx.engine/add-column conn {:table-name table-name
-                      :new-column-name (get column "columnName")
-                      :column-type (condp = (get column "type")
-                                     "date" "timestamptz"
-                                     "geopoint" "geometry(POINT, 4326)"
-                                     "geoshape" "geometry(GEOMETRY, 4326)"
-                                     "number" "double precision"
-                                     "multiple" "text"
-                                     "text" "text"
-                                     "option" "text")})))
+                                   :new-column-name (get column "columnName")
+                                   :column-type (condp = (get column "type")
+                                                  "date" "timestamptz"
+                                                  "geopoint" "geometry(POINT, 4326)"
+                                                  "geoshape" "geometry(GEOMETRY, 4326)"
+                                                  "number" "double precision"
+                                                  "multiple" "text"
+                                                  "text" "text"
+                                                  "option" "text")})))
 
 (defn insert-merged-data
   "Insert the merged values into the target dataset"
@@ -118,14 +148,43 @@
                     data-map
                     [(str target-merge-column "= ?") merge-value]))))
 
-(defn get-source-dataset-2 [conn source]
-  (let [dataset-id (get source "datasetId")]
-    (if-let [data (aggregation.commons/table-name-and-columns-from-data-grops conn dataset-id)]
-      (update data :columns walk/stringify-keys)
-      nil
-      ;; TODO: implemenmt exception when migrated fully to data-groups
-      #_(throw (ex-info (format "Dataset %s does not exist" dataset-id)
-                      {:source source})))))
+(defn get-data-groups-to-be-created [conn source target-dataset-columns]
+  (let [dataset-id (get source "datasetId")
+        dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id dataset-id})
+        data-groups     (db.data-group/list-data-groups-by-dataset-version-id
+                         conn
+                         {:dataset-version-id (:id dataset-version)})
+        columns-by-group (->> (set (get source "mergeColumns"))
+                              (map-indexed (fn [i column-name]
+                                             (let [dg (engine/datagroup-by-column data-groups column-name)
+                                                   column (first (filter #(= (get % "columnName") column-name) (:columns dg)))]
+                                               (-> column
+                                                   (assoc "sourceColumnName" (get column "columnName")
+                                                          "columnName" (engine/derivation-column-name
+                                                                        (+ (engine/next-column-index target-dataset-columns) i)))
+                                                   reset-column-values))))
+                              (group-by #(get % "groupId")))
+        instance-id-column (->> (db.data-group/get-data-group-by-column-name
+                                 conn
+                                 {:column-name "instance_id"
+                                  :dataset-version-id (:id dataset-version) })
+                                :columns
+                                (filter #(= "instance_id" (get % "columnName")))
+                                first)]
+    (map (fn [[group-id columns]]
+           (let [dg (first (filter #(= (:group-id %) group-id) data-groups))
+                 instance-id (merge instance-id-column {:groupId group-id
+                                                        :groupName (:groupName dg)
+                                                        :key false
+                                                        :hidden true})
+                 instance-id-exists? (boolean (first (filter #(= "instance_id" (get % "columnName")) columns)))]
+             (assoc dg
+                    :columns (if instance-id-exists?
+                               columns
+                               (conj columns instance-id))
+                    :table-name (util/gen-table-name "ds")
+                    :source-table-name (:table-name dg)
+                    :imported-table-name "MERGE_DATASET"))) columns-by-group)))
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
@@ -141,24 +200,55 @@
                           (get column "columnName")))
              source-dataset-columns)))
 
+(defn reset-column-values [c]
+  (assoc c
+         "sort" nil
+         "direction" nil
+         "key" false
+         "hidden" false))
+
 (defn get-target-merge-columns [source-merge-columns column-names-translation]
   (mapv #(-> %
              (update "columnName" column-names-translation)
-             (assoc "sort" nil
-                    "direction" nil
-                    "key" false
-                    "hidden" false))
+             reset-column-values)
         source-merge-columns))
+
+(defn apply-merge-operation-2
+  [conn table-name columns op-spec]
+  (let [source (get-in op-spec ["args" "source"])
+        target (get-in op-spec ["args" "target"])
+        data-groups-to-be-created (get-data-groups-to-be-created conn source columns)
+        target-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (:dataset-id op-spec) })
+        target-merge-data-group (db.data-group/get-data-group-by-column-name conn {:column-name (get target "mergeColumn")
+                                                                                   :dataset-version-id (:id target-dataset-version)})
+        source-dataset (data-group/table-name-and-columns-from-data-grops conn (get source "datasetId"))]
+    (doseq [{:keys [columns table-name] :as source-data-group}  data-groups-to-be-created]
+      (let [data (->>
+                  (fetch-data-2 conn {:source-data-group source-data-group
+                                      :source {:merge-column (get source "mergeColumn")
+                                               :table-name (:table-name source-dataset)
+                                               :aggregation-column (get source "aggregationColumn")
+                                               :aggregation-direction (get source "aggregationDirection")
+                                               :spec source}
+                                      :target {:merge-column (get target "mergeColumn")
+                                               :table-name (:table-name target-merge-data-group)}})
+                  (map #(to-sql-types % (walk/stringify-keys columns))))]
+        (postgres/create-dataset-table conn table-name (map #(update % :id (fn [_]
+                                                                             (:columnName %)))
+                                                            (walk/keywordize-keys columns)))
+        (jdbc/insert-multi! conn table-name data)))
+    {:success? true
+     :data-groups-to-be-created data-groups-to-be-created
+     :execution-log [(format "Merged columns from %s into %s"
+                             "(:table-name source-dataset)"
+                             table-name)]
+     :columns (vec columns)}))
 
 (defn apply-merge-operation
   [conn table-name columns op-spec]
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
-        source-dataset (if (get (env/all conn) "data-groups")
-                         (or
-                          (get-source-dataset-2 conn source)
-                          (get-source-dataset conn source))
-                         (get-source-dataset conn source))
+        source-dataset (get-source-dataset conn source)
         source-merge-columns (get-source-merge-columns source (:columns source-dataset))
         column-names-translation (merge-column-names-map columns
                                                          source-merge-columns)
@@ -178,7 +268,9 @@
 
 (defmethod engine/apply-operation "core/merge-datasets"
   [{:keys [tenant-conn]} table-name columns op-spec]
-  (apply-merge-operation tenant-conn table-name columns op-spec))
+  (if (get (env/all tenant-conn) "data-groups")
+    (apply-merge-operation-2 tenant-conn table-name columns op-spec)
+    (apply-merge-operation tenant-conn table-name columns op-spec)))
 
 (defn- merged-datasets-diff [tenant-conn merged-dataset-sources]
   (let [dataset-ids (mapv :datasetId merged-dataset-sources)
