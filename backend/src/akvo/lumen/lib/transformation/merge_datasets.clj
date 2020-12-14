@@ -150,11 +150,6 @@
 
 (defn get-data-groups-to-be-created [conn source target-dataset-columns]
   (let [dataset-id (get source "datasetId")
-        ;; TODO what would happen if dataset source doesn't have data-groups (old dataset => dataset-version-1)
-        ;; expected shape to return [{:columns :table-name :group-id :group-name :repeatable :group-order }]
-        ;; take care of group-order
-        ;; perhaps group-id and group-name should be unique
-        ;; form-instance-id as internal joined column, what do do now???
         dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id dataset-id})
         data-groups     (db.data-group/list-data-groups-by-dataset-version-id
                          conn
@@ -169,7 +164,7 @@
                                                                         (+ (engine/next-column-index target-dataset-columns) i)))
                                                    reset-column-values))))
                               (group-by #(get % "groupId")))
-        instance-id-column (->> (db.data-group/get-data-group-by-column-name ;; TODO: define column as a var? (def instance-id-col {})
+        instance-id-column (->> (db.data-group/get-data-group-by-column-name
                                  conn
                                  {:column-name "instance_id"
                                   :dataset-version-id (:id dataset-version) })
@@ -242,14 +237,12 @@
                                                                              (:columnName %)))
                                                             (walk/keywordize-keys columns)))
         (jdbc/insert-multi! conn table-name data)))
-    #_(map #(dissoc % :original-table-name) data-groups-to-be-created)
     {:success? true
      :data-groups-to-be-created data-groups-to-be-created
      :execution-log [(format "Merged columns from %s into %s"
                              "(:table-name source-dataset)"
                              table-name)]
-     :columns (vec columns)}
-    ))
+     :columns (vec columns)}))
 
 (defn apply-merge-operation
   [conn table-name columns op-spec]
