@@ -11,10 +11,6 @@ import { guessMergeColumn, getColumnName, directionLabels } from './utils';
 import './SourceMergeOptions.scss';
 import { columnName, findColumnI, columnSelectOptions, columnSelectSelectedOption } from '../../../utilities/column';
 
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 function SelectMergeColumn({ onChange, columns, mergeColumn, intl }) {
   return (
     <div>
@@ -124,7 +120,7 @@ function SelectMergeColumns({ onChange, onChangeAll, columns, selected }) {
             </div>
           );
         });
-        return <div key={groupName}><div className="groupName">{capitalizeFirstLetter(groupName)}</div>{colsData}</div>;
+        return <div key={groupName}><div className="groupName">{_.capitalize(groupName)}</div>{colsData}</div>;
       })}
     </fieldset>
   );
