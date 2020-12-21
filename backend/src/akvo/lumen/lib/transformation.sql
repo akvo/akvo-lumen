@@ -81,7 +81,7 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
    AND namespace = :namespace
    AND version = :version;
 
--- :name clear-dataset-version-data-table :! :n
+-- :name db-clear-dataset-version-data-table :! :n
 -- :doc Clear the table_name for a given dataset_version id
 UPDATE dataset_version
    SET table_name=NULL

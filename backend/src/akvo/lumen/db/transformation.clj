@@ -22,3 +22,5 @@
 (defn dataset-version-by-dataset-id [conn opts]
   (db-dataset-version-by-dataset-id conn (merge dv/defaults opts)))
 
+(defn clear-dataset-version-data-table [conn opts]
+  (db-clear-dataset-version-data-table conn opts))
