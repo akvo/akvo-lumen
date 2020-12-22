@@ -166,18 +166,18 @@
   2. grab all data-group columns
   3. apply-operation
   4. separate transformation data-group columns from the others"
-  [{:keys [tenant-conn dataset-id claims] :as deps}
-   {:keys [dataset-version transformation data-groups]}]
+  [{:keys [tenant-conn claims] :as deps}
+   {:keys [transformation data-groups]}]
   (let [columns-in-transformation (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups)))
         _  (ensure-one-data-group-related transformation columns-in-transformation data-groups)
         column-name (first columns-in-transformation)
         data-group (datagroup-by-column data-groups column-name)
         source-table (:table-name data-group)
-        other-dgs-columns (db.data-group/get-all-columns-except-group-id tenant-conn {:dataset-version-id (:id dataset-version)
-                                                                                       :group-id (:group-id data-group)})
+        other-dgs-columns (reduce (fn [c dg] (if (= (:id dg) (:id data-group))
+                                               c (into c (:columns dg)))) [] data-groups)
         previous-columns (into (vec (:columns data-group)) other-dgs-columns)
         {:keys [success? message execution-log error-data data-groups-to-be-created] :as res}
-        (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))
+        (try-apply-operation deps source-table previous-columns transformation)
         columns (let [other-dgs-columns-set (set other-dgs-columns)]
                   (reduce (fn [container column]
                             (if (contains? other-dgs-columns-set column)
@@ -185,8 +185,8 @@
                               (conj container column))) [] (:columns res)))]
     (when-not success?
       (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
-      (throw (ex-info (or message "") {})))
-    {:data-groups-to-be-created data-groups-to-be-created
+      (throw (ex-info (or message "") {:transformation-result (select-keys res [:success? :message :columns :execution-log])})))
+    {:data-groups-to-be-created (or data-groups-to-be-created [])
      :columns columns
      :previous-columns previous-columns
      :data-group data-group}))
@@ -199,12 +199,12 @@
   4. create all other data-groups to point new dataset-version-id
   5. touch dataset
   "
-  [{:keys [tenant-conn claims dataset-id] :as deps}
-   {:keys [job-execution-id transformation dataset-version data-groups]}
-   {:keys [previous-columns columns data-groups-to-be-created data-group]}]
+  [{:keys [tenant-conn claims] :as deps}
+   {:keys [job-execution-id transformation data-groups]}
+   {:keys [previous-columns columns data-groups-to-be-created data-group dataset-version]}]
   (let [new-dataset-version-id (str (util/squuid))]
     (db.dataset-version/new-dataset-version-2 tenant-conn {:id               new-dataset-version-id
-                                                           :dataset-id       dataset-id
+                                                           :dataset-id       (:dataset-id transformation)
                                                            :job-execution-id job-execution-id
                                                            :version          (inc (:version dataset-version))
                                                            :author           claims
@@ -214,7 +214,7 @@
                                                                                            "created" (Instant/ofEpochMilli (System/currentTimeMillis))
                                                                                            "changedColumns" (diff-columns previous-columns
                                                                                                                           columns))))})
-    (when data-groups-to-be-created
+    (when (seq data-groups-to-be-created)
       (let [max-group-order     (apply max (conj (map :group-order data-groups) 1000))
             adapted-data-groups (map-indexed (fn [i item]
                                                (let [idx        (inc (+ i max-group-order))
@@ -245,21 +245,21 @@
       (db.data-group/new-data-group tenant-conn (-> dg
                                                     (assoc :dataset-version-id new-dataset-version-id :id (util/squuid))
                                                     (update :columns vec))))
-    (db.transformation/touch-dataset tenant-conn {:id dataset-id})))
+    (db.transformation/touch-dataset tenant-conn {:id (:dataset-id transformation)})))
 
 (defn execute-transformation-2
   [{:keys [tenant-conn claims] :as deps} dataset-id job-execution-id transformation]
-  (let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
+  (let [transformation (assoc transformation :dataset-id dataset-id)
+        dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
         data-groups (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id dataset-version)})
-        deps (assoc deps :dataset-id dataset-id)
         tx-data {:data-groups data-groups
-                 :dataset-version dataset-version
                  :job-execution-id job-execution-id
                  :transformation transformation}
         {:keys [columns previous-columns data-groups-to-be-created data-group]}
         (try-apply-operation-2 deps tx-data)]
     (post-try-apply-operation-2 deps tx-data
                                 {:columns columns
+                                 :dataset-version dataset-version
                                  :previous-columns previous-columns
                                  :data-group data-group
                                  :data-groups-to-be-created data-groups-to-be-created})))
@@ -314,7 +314,7 @@
                 {:transaction? false})
     (loop [transformations (butlast (:transformations current-dataset-version))
            columns initial-columns
-           full-execution-log []
+           full-execution-log [] ;; TODO: remove not in use!
            tx-index 0]
       (if (empty? transformations)
         (let [new-dataset-version-id (str (util/squuid))]
