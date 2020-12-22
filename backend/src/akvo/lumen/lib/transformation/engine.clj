@@ -11,7 +11,8 @@
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [clojure.walk :as w])
-  (:import [java.time Instant]))
+  (:import [java.time Instant]
+           [clojure.lang ExceptionInfo]))
 
 (defmulti columns-used
   (fn [applied-transformation columns]
@@ -346,14 +347,86 @@
               (throw (ex-info (str "Failed to undo transformation index:" tx-index ". Tx message:" message) {:transformation-result transformation-result
                                                                                      :transformation transformation})))))))))
 
+;; TODO: merge-datasets tables should be cloned and setted to :imported-table-name
+(defn copy-tables-2 [tenant-conn data-groups]
+  (doall (map (fn [data-group]
+          (let [imported-table-name (:imported-table-name data-group)
+                table-name (util/gen-table-name "ds")]
+            (db.transformation/copy-table tenant-conn
+                                          {:source-table imported-table-name
+                                           :dest-table   table-name}
+                                          {}
+                                          {:transaction? false})
+
+            (assoc data-group :table-name table-name :previous-table-name (:table-name data-group)))
+          ) data-groups)))
+
+(defn- apply-undo-2 [{:keys [tenant-conn claims] :as deps} dataset-id job-execution-id current-dataset-version]
+  (let [initial-dataset-version (db.transformation/initial-dataset-version-2-to-update-by-dataset-id
+                                 tenant-conn
+                                 {:dataset-id dataset-id})
+        initial-data-groups     (->> (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id initial-dataset-version)})
+                                     (copy-tables-2 tenant-conn ))] ;; TODO: initial-data-groups or current-data-groups???
+
+    (loop [data-groups     initial-data-groups
+           transformations (butlast (:transformations current-dataset-version))
+           tx-index        0]
+      (if (empty? transformations)
+        (let [new-dataset-version-id (str (util/squuid))]
+          (db.dataset-version/new-dataset-version-2 tenant-conn {:id               new-dataset-version-id
+                                                                 :dataset-id       dataset-id
+                                                                 :job-execution-id job-execution-id
+                                                                 :version          (inc (:version current-dataset-version))
+                                                                 :author           claims
+                                                                 :transformations  (w/keywordize-keys (vec (butlast (:transformations current-dataset-version))))})
+          (doseq [data-group data-groups]
+            (let [new-data-group-id (str (util/squuid))]
+              ;;  TODO: now we have a database constriction  NOT NULL           (db.transformation/clear-data-group-data-table tenant-conn {:id (:id data-group)})
+              (db.data-group/new-data-group tenant-conn (assoc data-group
+                                                               :id                  new-data-group-id
+                                                               :dataset-version-id  new-dataset-version-id
+                                                               :version             (inc (:version current-dataset-version))
+                                                               :columns             (vec (w/keywordize-keys (:columns data-group)))))
+              (db.transformation/drop-table tenant-conn {:table-name (:previous-table-name data-group)})))
+          (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
+        (let [transformation (assoc (first transformations) :dataset-id dataset-id)
+              {:keys [data-groups-to-be-created data-group columns]}
+              (try
+                (try-apply-operation-2 deps {:transformation transformation
+                                             :data-groups data-groups})
+                (catch ExceptionInfo e
+                  (do
+                    (log/info (str "Unsuccessful undo of dataset: " dataset-id))
+                    (log/debug (->  (ex-data e) :transformation-result :message))
+                    (log/debug "Job executionid: " job-execution-id)
+                    (throw (ex-info (str "Failed to undo transformation index:" tx-index ". Tx message:" (.getMessage e))
+                                    {:transformation-result (:transformation-result (ex-data e))
+                                     :transformation        transformation})))))]
+          (log/error :data-group data-group)
+          (log/error :data-groups data-groups)
+          (log/error :data-groups-to-be-created data-groups-to-be-created)
+          (recur (reduce (fn [c dg]
+                           (if (= (:id dg) (:id data-group ))
+                             (conj c (assoc dg :columns columns))
+                             (conj c dg)
+                             )) data-groups-to-be-created data-groups) (rest transformations) (inc tx-index)))))))
+
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
-  (let [current-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
-                                                                      {:dataset-id dataset-id})]
-    (when (not= (:version current-dataset-version) 1)
-      (apply-undo deps
-                  dataset-id
-                  job-execution-id
-                  current-dataset-version))))
+  (if (get (env/all tenant-conn) "data-groups")
+    (let [current-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn
+                                                                                          {:dataset-id dataset-id})]
+      (when (not= (:version current-dataset-version) 1)
+        (apply-undo-2 deps
+                      dataset-id
+                      job-execution-id
+                      current-dataset-version)))
+   (let [current-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
+                                                                                         {:dataset-id dataset-id})]
+     (when (not= (:version current-dataset-version) 1)
+       (apply-undo deps
+                   dataset-id
+                   job-execution-id
+                   current-dataset-version)))))
 
 (defmulti adapt-transformation
   (fn [op-spec older-columns new-columns]
