@@ -389,7 +389,8 @@
                                                                :dataset-version-id  new-dataset-version-id
                                                                :version             (inc (:version current-dataset-version))
                                                                :columns             (vec (w/keywordize-keys (:columns data-group)))))
-              (db.transformation/drop-table tenant-conn {:table-name (:previous-table-name data-group)})))
+              (when-not (:merged? data-group)
+                (db.transformation/drop-table tenant-conn {:table-name (:previous-table-name data-group)}))))
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [data-groups-to-be-created data-group columns]}
