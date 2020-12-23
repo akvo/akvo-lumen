@@ -15,3 +15,6 @@
 
 (defn get-all-columns-except-group-id [conn opts]
   (vec (flatten (:columns (db-get-all-columns-except-group-id conn opts)))))
+
+(defn get-all-columns [conn opts]
+  (vec (flatten (:columns (db-get-all-columns conn opts)))))
