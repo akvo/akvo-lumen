@@ -406,9 +406,6 @@
                                     {:transformation-result (:transformation-result (ex-data e))
                                      :transformation        transformation})))))
               data-groups-to-be-created (adapt data-groups-to-be-created data-groups)]
-          (log/error :data-group data-group)
-          (log/error :data-groups data-groups)
-          (log/error :data-groups-to-be-created data-groups-to-be-created)
           (recur (reduce (fn [c dg]
                            (if (= (:id dg) (:id data-group ))
                              (conj c (assoc dg :columns columns))
