@@ -349,7 +349,6 @@
               (throw (ex-info (str "Failed to undo transformation index:" tx-index ". Tx message:" message) {:transformation-result transformation-result
                                                                                      :transformation transformation})))))))))
 
-;; TODO: merge-datasets tables should be cloned and setted to :imported-table-name
 (defn copy-tables-2 [tenant-conn data-groups]
   (doall (map (fn [data-group]
           (let [imported-table-name (:imported-table-name data-group)
@@ -368,8 +367,7 @@
                                  tenant-conn
                                  {:dataset-id dataset-id})
         initial-data-groups     (->> (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id initial-dataset-version)})
-                                     (copy-tables-2 tenant-conn ))] ;; TODO: initial-data-groups or current-data-groups???
-
+                                     (copy-tables-2 tenant-conn ))]
     (loop [data-groups     initial-data-groups
            transformations (butlast (:transformations current-dataset-version))
            tx-index        0]
