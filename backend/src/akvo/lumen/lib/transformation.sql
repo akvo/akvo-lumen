@@ -73,6 +73,13 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
   AND namespace = :namespace
   ORDER BY version DESC LIMIT 1;
 
+-- :name db-initial-dataset-version-2-to-update-by-dataset-id :? :1
+SELECT id, version, transformations
+  FROM  dataset_version_2
+  WHERE dataset_id= :dataset-id AND transformations='[]'
+  ORDER BY version DESC LIMIT 1;
+
+
 -- :name db-dataset-version-by-dataset-id :? :1
 -- :doc Returns the most recent dataset version for a given dataset id
 SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-name", columns, version, transformations
@@ -81,11 +88,26 @@ SELECT id, table_name AS "table-name", imported_table_name AS "imported-table-na
    AND namespace = :namespace
    AND version = :version;
 
--- :name clear-dataset-version-data-table :! :n
+-- :name db-dataset-version-2-by-dataset-id-and-version :? :1
+-- :doc Returns the most recent dataset version for a given dataset id
+SELECT id, version, transformations
+  FROM dataset_version_2
+ WHERE dataset_id = :dataset-id
+   AND version = :version;
+
+
+-- :name db-clear-dataset-version-data-table :! :n
 -- :doc Clear the table_name for a given dataset_version id
 UPDATE dataset_version
    SET table_name=NULL
  WHERE id = :id
+
+-- :name db-clear-data-group-data-table :! :n
+-- :doc Clear the table_name for a given data-group
+UPDATE data_group
+   SET table_name=NULL
+ WHERE id = :id
+
 
 -- :name copy-table :!
 -- :doc Copy a table defition (including data)
