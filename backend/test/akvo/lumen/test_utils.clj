@@ -11,6 +11,7 @@
             [akvo.lumen.postgres]
             [akvo.lumen.protocols :as p]
             [akvo.lumen.specs.transformation]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
             [cheshire.core :as json]
             [clj-time.coerce :as tcc]
             [clj-time.core :as tc]
@@ -77,6 +78,13 @@
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker test-claims spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
+
+(defn try-latest-dataset-version-2 [conn dataset-id]
+  (dh/with-retry {:retry-if (fn [v e] (not v))
+                  :max-retries 20
+                  :delay-ms 100}
+    (db.dataset-version/latest-dataset-version-2-by-dataset-id conn
+                                                              {:dataset-id dataset-id})))
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
