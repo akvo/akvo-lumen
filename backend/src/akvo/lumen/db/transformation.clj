@@ -7,6 +7,9 @@
 (defn latest-dataset-version-by-dataset-id [conn opts]
   (db-latest-dataset-version-by-dataset-id conn (merge dv/defaults opts)))
 
+(defn latest-dataset-version-2-by-dataset-id [conn opts]
+  (db-latest-dataset-version-2-by-dataset-id conn (merge dv/defaults opts)))
+
 (defn latest-dataset-versions [conn]
   (db-latest-dataset-versions conn dv/defaults))
 
@@ -19,6 +22,18 @@
 (defn initial-dataset-version-to-update-by-dataset-id [conn opts]
   (db-initial-dataset-version-to-update-by-dataset-id conn (merge dv/defaults opts)))
 
+(defn initial-dataset-version-2-to-update-by-dataset-id [conn opts]
+  (db-initial-dataset-version-2-to-update-by-dataset-id conn (merge dv/defaults opts)))
+
+
 (defn dataset-version-by-dataset-id [conn opts]
   (db-dataset-version-by-dataset-id conn (merge dv/defaults opts)))
 
+(defn dataset-version-2-by-dataset-id-and-version [conn opts]
+  (db-dataset-version-2-by-dataset-id-and-version conn (merge dv/defaults opts)))
+
+(defn clear-dataset-version-data-table [conn opts]
+  (db-clear-dataset-version-data-table conn opts))
+
+(defn clear-data-group-data-table [conn opts]
+  (db-clear-data-group-data-table conn opts))

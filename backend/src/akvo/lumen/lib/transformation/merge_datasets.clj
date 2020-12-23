@@ -184,7 +184,7 @@
                                (conj columns instance-id))
                     :table-name (util/gen-table-name "ds")
                     :source-table-name (:table-name dg)
-                    :imported-table-name "MERGE_DATASET"))) columns-by-group)))
+                    :imported-table-name engine/MERGE-DATASET))) columns-by-group)))
 
 (defn get-source-dataset [conn source]
   (let [source-dataset-id (get source "datasetId")]
