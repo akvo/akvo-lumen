@@ -192,6 +192,19 @@
      :previous-columns previous-columns
      :data-group data-group}))
 
+(defn adapt [data-groups-to-be-created data-groups]
+  (let [max-group-order (apply max (conj (map :group-order data-groups) 1000))]
+    (map-indexed (fn [i item]
+                   (let [idx        (inc (+ i max-group-order))
+                         group-name (str (:group-name item) " [merge]")]
+                                                 (-> item
+                                                     (assoc :group-order idx)
+                                                     (assoc :group-id idx)
+                                                     (assoc :group-name group-name)
+                                                     (update :columns (fn [cols]
+                                                                        (mapv #(assoc % "groupId" idx "groupName" group-name) cols))))))
+                                             data-groups-to-be-created)))
+
 (defn post-try-apply-operation-2
   "
   1. create dataset-version(-2) with new transformation in transformations
@@ -216,23 +229,12 @@
                                                                                            "changedColumns" (diff-columns previous-columns
                                                                                                                           columns))))})
     (when (seq data-groups-to-be-created)
-      (let [max-group-order     (apply max (conj (map :group-order data-groups) 1000))
-            adapted-data-groups (map-indexed (fn [i item]
-                                               (let [idx        (inc (+ i max-group-order))
-                                                     group-name (str (:group-name item) " [merge]")]
-                                                 (-> item
-                                                     (assoc :group-order idx)
-                                                     (assoc :group-id idx)
-                                                     (assoc :group-name group-name)
-                                                     (update :columns (fn [cols]
-                                                                        (mapv #(assoc % "groupId" idx "groupName" group-name) cols))))))
-                                             data-groups-to-be-created)]
-        (doseq [dg adapted-data-groups]
-          (db.data-group/new-data-group tenant-conn
-                                        (merge
-                                         dg
-                                         {:id                 (util/squuid)
-                                          :dataset-version-id new-dataset-version-id})))))
+      (doseq [dg (adapt data-groups-to-be-created data-groups)]
+        (db.data-group/new-data-group tenant-conn
+                                      (merge
+                                       dg
+                                       {:id                 (util/squuid)
+                                        :dataset-version-id new-dataset-version-id}))))
     (db.data-group/new-data-group tenant-conn
                                   (merge
                                    (select-keys data-group
@@ -401,15 +403,18 @@
                     (log/debug "Job executionid: " job-execution-id)
                     (throw (ex-info (str "Failed to undo transformation index:" tx-index ". Tx message:" (.getMessage e))
                                     {:transformation-result (:transformation-result (ex-data e))
-                                     :transformation        transformation})))))]
+                                     :transformation        transformation})))))
+              data-groups-to-be-created (adapt data-groups-to-be-created data-groups)]
           (log/error :data-group data-group)
           (log/error :data-groups data-groups)
           (log/error :data-groups-to-be-created data-groups-to-be-created)
           (recur (reduce (fn [c dg]
                            (if (= (:id dg) (:id data-group ))
                              (conj c (assoc dg :columns columns))
-                             (conj c dg)
-                             )) data-groups-to-be-created data-groups) (rest transformations) (inc tx-index)))))))
+                             (conj c dg)))
+                         data-groups-to-be-created data-groups)
+                 (rest transformations)
+                 (inc tx-index)))))))
 
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
   (if (get (env/all tenant-conn) "data-groups")
