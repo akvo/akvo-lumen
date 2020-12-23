@@ -183,6 +183,7 @@
                                columns
                                (conj columns instance-id))
                     :table-name (util/gen-table-name "ds")
+                    :merged? true
                     :source-table-name (:table-name dg)
                     :imported-table-name "MERGE_DATASET"))) columns-by-group)))
 
