@@ -11,12 +11,11 @@
                                          caddisfly-fixture]]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.db.env :as db.env]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id]]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
-            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id]]
+            [akvo.lumen.db.transformation :refer [latest-dataset-version-by-dataset-id dataset-version-by-dataset-id] :as db.transformation]
 
             [akvo.lumen.lib.transformation :as transformation]
             [akvo.lumen.lib.transformation.derive-category :as derive-category]
@@ -249,6 +248,64 @@
                                         {:rnum 1
                                          :column-name "c1"
                                          :table-name table-name}))))))))
+
+(deftest ^:functional test-undo-data-groups
+  (db.env/activate-flag *tenant-conn* "data-groups")
+  (let [dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "GDP Undo Test"
+                                                               :file "GDP.csv"})
+        dsv (tu/try-latest-dataset-version-2 *tenant-conn* dataset-id)
+        data-group (first (db.data-group/list-data-groups-by-dataset-version-id
+                           *tenant-conn*
+                           {:dataset-version-id (:id dsv)}))
+        {previous-table-name :table-name} data-group
+        apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
+    (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
+    (let [[tag _] (do (apply-transformation {:type :transformation
+                                             :transformation (gen-transformation "core/to-lowercase"
+                                                                                 {::db.dataset-version.column.s/columnName "c1"
+                                                                                  ::transformation.engine.s/onError "fail"})})
+                      (apply-transformation {:type :transformation
+                                             :transformation (gen-transformation "core/change-datatype"
+                                                                                 {::db.dataset-version.column.s/columnName "c5"
+                                                                                  ::transformation.engine.s/onError "default-value"
+                                                                                  ::transformation.change-datatype.s/newType "number"
+                                                                                  ::transformation.change-datatype.s/defaultValue 0})})
+                      (apply-transformation {:type :undo}))
+          dsv (db.transformation/dataset-version-2-by-dataset-id-and-version
+               *tenant-conn*
+               {:dataset-id dataset-id :version 2})
+          dg (first (db.data-group/list-data-groups-by-dataset-version-id
+                             *tenant-conn*
+                             {:dataset-version-id (:id dsv)}))
+          latest-dsv (db.transformation/latest-dataset-version-2-by-dataset-id *tenant-conn*
+                                                                               {:dataset-id dataset-id})
+          latest-dg (first (db.data-group/list-data-groups-by-dataset-version-id
+                             *tenant-conn*
+                             {:dataset-version-id (:id latest-dsv)}))]
+      (is (= ::lib/ok tag))
+      (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
+      (is (= (:columns dg)
+             (:columns latest-dg)))
+      (let [table-name (:table-name latest-dg)]
+        (is (= "usa"
+               (:c1 (get-val-from-table *tenant-conn*
+                                        {:rnum 1
+                                         :column-name "c1"
+                                         :table-name table-name})))))
+      (apply-transformation {:type :undo})
+      (let [latest-dsv (db.transformation/latest-dataset-version-2-by-dataset-id *tenant-conn*
+                                                                                 {:dataset-id dataset-id})
+            latest-dg (first (db.data-group/list-data-groups-by-dataset-version-id
+                              *tenant-conn*
+                              {:dataset-version-id (:id latest-dsv)}))
+
+            table-name (:table-name latest-dg)]
+        (is (= "USA"
+               (:c1 (get-val-from-table *tenant-conn*
+                                        {:rnum 1
+                                         :column-name "c1"
+                                         :table-name table-name})))))))
+  (db.env/deactivate-flag *tenant-conn* "data-groups"))
 
 (deftest ^:functional combine-transformation-test
   (let [dataset-id (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
