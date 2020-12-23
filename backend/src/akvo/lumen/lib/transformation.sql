@@ -105,7 +105,7 @@ UPDATE dataset_version
 -- :name db-clear-data-group-data-table :! :n
 -- :doc Clear the table_name for a given data-group
 UPDATE data_group
-   SET table_name=NULL
+   SET table_name='DELETED'
  WHERE id = :id
 
 

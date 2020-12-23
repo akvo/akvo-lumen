@@ -381,7 +381,7 @@
                                                                  :transformations  (w/keywordize-keys (vec (butlast (:transformations current-dataset-version))))})
           (doseq [data-group data-groups]
             (let [new-data-group-id (str (util/squuid))]
-              ;;  TODO: now we have a database constriction  NOT NULL           (db.transformation/clear-data-group-data-table tenant-conn {:id (:id data-group)})
+              (db.transformation/clear-data-group-data-table tenant-conn {:id (:id data-group)})
               (db.data-group/new-data-group tenant-conn (assoc data-group
                                                                :id                  new-data-group-id
                                                                :dataset-version-id  new-dataset-version-id
