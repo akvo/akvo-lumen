@@ -470,6 +470,59 @@
       {:columns             (w/keywordize-keys columns)
        :transformations     (w/keywordize-keys (vec applied-txs))})))
 
+(defn apply-dataset-transformations-on-table-2
+  "no transactional thus we can discard the temporary table we are working with"
+  [conn caddisfly dataset-id transformations group-table-names new-columns old-columns]
+  (loop [transformations transformations
+         data-groups    (->> new-columns
+                             (reduce (fn [c co]
+                                       (update c {:groupId (get co "groupId")
+                                                  :groupName (get co "groupName")}  conj co)) {})
+                             (map-indexed (fn [idx [group columns]]
+                                            (assoc group
+                                                   :group-order (inc idx)
+                                                   :columns (vec (reverse columns))
+                                                   :table-name (get group-table-names (:groupId group))))))
+         applied-txs     []]
+    (if-let [transformation (first transformations)]
+      (let [columns (reduce into [] (map :columns data-groups))
+            transformation       (adapt-transformation transformation old-columns columns)
+            data-group (data-group-by-tx transformation data-groups)
+            avoid-tranformation? (let [t (w/keywordize-keys transformation)]
+                                   (and
+                                    (avoidable-if-missing? t)
+                                    ((complement set/subset?)
+                                     (set (columns-used t columns))
+                                     (set (map #(get % "columnName") columns)))))]
+        (if avoid-tranformation?
+          (recur (rest transformations) columns  applied-txs)
+          (let [{:keys [data-groups-to-be-created columns previous-columns data-group] :as op}
+                (try
+                  (try-apply-operation-2 {:tenant-conn conn :caddisfly caddisfly}
+                                         {:data-group data-group
+                                          :data-groups data-groups
+                                          :transformation (assoc transformation :dataset-id dataset-id)})
+                  (catch ExceptionInfo e
+                    (do
+                      (log/error e)
+                      (throw
+                       (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s"
+                                        (-> e ex-data :transformation-result :message) transformation) {})))))
+                data-groups-to-be-created (adapt data-groups-to-be-created data-groups)]
+            (let [applied-txs (conj applied-txs
+                                    (assoc transformation "changedColumns"
+                                           (diff-columns columns (:columns op))))]
+              (db.job-execution/vacuum-table conn {:table-name (:table-name data-group)})
+              (recur (rest transformations)
+                     (reduce (fn [c dg]
+                           (if (= (:id dg) (:id data-group ))
+                             (conj c (assoc dg :columns columns))
+                             (conj c dg)))
+                         data-groups-to-be-created data-groups)
+                     applied-txs)))))
+      {:data-groups data-groups
+       :transformations  (w/keywordize-keys (vec applied-txs))})))
+
 (defn column-title-error? [column-title columns]
   (when (not-empty (filter #(= column-title (get % "title")) columns))
     {:success? false

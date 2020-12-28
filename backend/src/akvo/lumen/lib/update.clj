@@ -254,22 +254,20 @@
          (if (get (env/all tenant-conn) "data-groups")
            (let [{:keys [group-table-names
                          importer-columns imported-dataset-columns
-                         latest-dataset-version success?] :as foo} (import-data-to-table-2 tenant-conn
+                         latest-dataset-version success?]} (import-data-to-table-2 tenant-conn
                                                                                    import-config
                                                                                    dataset-id
                                                                                    job-execution-id
                                                                                    data-source-spec)]
-             (throw  (ex-info "foo" foo))
-             #_(when success?
-               (let [{:keys [columns transformations]}
-                     (engine/apply-dataset-transformations-on-table-2 tenant-conn
-                                                                      caddisfly
-                                                                      dataset-id
-                                                                      (:transformations latest-dataset-version)
-                                                                      table-name
-                                                                      importer-columns
-                                                                      imported-dataset-columns)]
-                 (successful-update-2 tenant-conn job-execution-id dataset-id table-name imported-table-name latest-dataset-version columns transformations))))
+             (let [{:keys [data-groups transformations] :as foo}
+                   (engine/apply-dataset-transformations-on-table-2 tenant-conn
+                                                                    caddisfly
+                                                                    dataset-id
+                                                                    (:transformations latest-dataset-version)
+                                                                    group-table-names
+                                                                    importer-columns
+                                                                    imported-dataset-columns)]
+               #_(successful-update-2 tenant-conn claims job-execution-id dataset-id data-groups latest-dataset-version transformations)))
            (let [{:keys [table-name imported-table-name
                          importer-columns imported-dataset-columns
                          latest-dataset-version success?]}  (import-data-to-table tenant-conn
