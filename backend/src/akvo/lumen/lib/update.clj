@@ -242,7 +242,7 @@
                  :imported-dataset-columns imported-dataset-columns
                  :latest-dataset-version latest-dataset-version}))))))))
 
-(defn update-dataset [tenant-conn caddisfly import-config error-tracker dataset-id data-source-id data-source-spec]
+(defn update-dataset [tenant-conn caddisfly claims import-config error-tracker dataset-id data-source-id data-source-spec]
   (if-let [current-tx-job (db.transformation/pending-transformation-job-execution tenant-conn {:dataset-id dataset-id})]
     (lib/bad-request {:message "A running transformation still exists, please wait to update this dataset ..."})
     (let [job-execution-id (str (util/squuid))]
