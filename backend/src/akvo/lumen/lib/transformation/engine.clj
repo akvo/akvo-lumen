@@ -476,13 +476,13 @@
   (loop [transformations transformations
          data-groups    (->> new-columns
                              (reduce (fn [c co]
-                                       (update c {:groupId (get co "groupId")
-                                                  :groupName (get co "groupName")}  conj co)) {})
+                                       (update c {:group-id (get co "groupId")
+                                                  :group-name (get co "groupName")}  conj co)) {})
                              (map-indexed (fn [idx [group columns]]
                                             (assoc group
-                                                   :group-order (inc idx)
-                                                   :columns (vec (reverse columns))
-                                                   :table-name (get group-table-names (:groupId group))))))
+                                                   :group-order idx
+                                                   :columns (reverse columns)
+                                                   :table-name (get group-table-names (:group-id group))))))
          applied-txs     []]
     (if-let [transformation (first transformations)]
       (let [columns (reduce into [] (map :columns data-groups))
