@@ -495,7 +495,7 @@
                                      (set (columns-used t columns))
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
-          (recur (rest transformations) columns  applied-txs)
+          (recur (rest transformations) data-groups applied-txs)
           (let [{:keys [data-groups-to-be-created columns previous-columns data-group] :as op}
                 (try
                   (try-apply-operation-2 {:tenant-conn conn :caddisfly caddisfly}
@@ -515,7 +515,7 @@
               (db.job-execution/vacuum-table conn {:table-name (:table-name data-group)})
               (recur (rest transformations)
                      (reduce (fn [c dg]
-                           (if (= (:id dg) (:id data-group ))
+                           (if (= (:group-id dg) (:group-id data-group))
                              (conj c (assoc dg :columns columns))
                              (conj c dg)))
                          data-groups-to-be-created data-groups)
