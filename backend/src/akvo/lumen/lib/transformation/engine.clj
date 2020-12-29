@@ -194,7 +194,6 @@
       (throw (ex-info (or message "") {:transformation-result (select-keys res [:success? :message :columns :execution-log])})))
     {:data-groups-to-be-created (or data-groups-to-be-created [])
      :columns columns
-     :previous-columns previous-columns
      :data-group data-group}))
 
 (defn adapt [data-groups-to-be-created data-groups]
@@ -220,7 +219,7 @@
   "
   [{:keys [tenant-conn claims] :as deps}
    {:keys [job-execution-id transformation data-groups]}
-   {:keys [previous-columns columns data-groups-to-be-created data-group dataset-version]}]
+   {:keys [columns data-groups-to-be-created data-group dataset-version]}]
   (let [new-dataset-version-id (str (util/squuid))]
     (db.dataset-version/new-dataset-version-2 tenant-conn {:id               new-dataset-version-id
                                                            :dataset-id       (:dataset-id transformation)
@@ -231,7 +230,7 @@
                                                                               (conj (vec (:transformations dataset-version))
                                                                                     (assoc transformation
                                                                                            "created" (Instant/ofEpochMilli (System/currentTimeMillis))
-                                                                                           "changedColumns" (diff-columns previous-columns
+                                                                                           "changedColumns" (diff-columns (:columns data-group)
                                                                                                                           columns))))})
     (when (seq data-groups-to-be-created)
       (doseq [dg (adapt data-groups-to-be-created data-groups)]
@@ -263,12 +262,11 @@
         tx-data {:data-groups data-groups
                  :job-execution-id job-execution-id
                  :transformation transformation}
-        {:keys [columns previous-columns data-groups-to-be-created data-group]}
+        {:keys [columns data-groups-to-be-created data-group]}
         (try-apply-operation-2 deps tx-data)]
     (post-try-apply-operation-2 deps tx-data
                                 {:columns columns
                                  :dataset-version dataset-version
-                                 :previous-columns previous-columns
                                  :data-group data-group
                                  :data-groups-to-be-created data-groups-to-be-created})))
 
@@ -496,7 +494,7 @@
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
           (recur (rest transformations) data-groups applied-txs)
-          (let [{:keys [data-groups-to-be-created columns previous-columns data-group] :as op}
+          (let [{:keys [data-groups-to-be-created columns data-group] :as op}
                 (try
                   (try-apply-operation-2 {:tenant-conn conn :caddisfly caddisfly}
                                          {:data-group data-group
@@ -511,7 +509,7 @@
                 data-groups-to-be-created (adapt data-groups-to-be-created data-groups)]
             (let [applied-txs (conj applied-txs
                                     (assoc transformation "changedColumns"
-                                           (diff-columns previous-columns columns)))]
+                                           (diff-columns (:columns data-group)  columns)))]
               (db.job-execution/vacuum-table conn {:table-name (:table-name data-group)})
               (recur (rest transformations)
                      (reduce (fn [c dg]
