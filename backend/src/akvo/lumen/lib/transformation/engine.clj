@@ -511,7 +511,7 @@
                 data-groups-to-be-created (adapt data-groups-to-be-created data-groups)]
             (let [applied-txs (conj applied-txs
                                     (assoc transformation "changedColumns"
-                                           (diff-columns columns (:columns op))))]
+                                           (diff-columns previous-columns columns)))]
               (db.job-execution/vacuum-table conn {:table-name (:table-name data-group)})
               (recur (rest transformations)
                      (reduce (fn [c dg]
