@@ -319,6 +319,30 @@
         {:error(format "Update failed. This dataset has merged columns that no longer exist in their dataset, %s" (mapv :title (db.dataset/select-datasets-by-id tenant-conn {:ids (mapv :dataset-id column-diff)})))
          :column-diff column-diff}))))
 
+(defn consistency-error-2? [tenant-conn dataset-id]
+  (let [merged-sources (->> (db.transformation/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                            :transformations
+                            walk/keywordize-keys
+                            (filter #(= "core/merge-datasets" (:op %)))
+                            (map #(-> % :args :source)))]
+    (if-let [ds-diff (and (not-empty merged-sources)
+                          (merged-datasets-diff tenant-conn merged-sources))]
+      {:error "Update failed. This dataset has merged columns from a dataset that no longer exists."
+       :dataset-diff ds-diff}
+      (when-let [column-diff (when (not-empty merged-sources)
+                               (let [dss              (->> {:dataset-ids (mapv :datasetId merged-sources)}
+                                                           (db.transformation/latest-dataset-versions-2-by-dataset-ids tenant-conn)
+                                                           (map #(rename-keys % {:dataset_id :dataset-id}))
+                                                           (map (fn [dsv]
+                                                                  (assoc dsv :columns (db.data-group/get-all-columns tenant-conn {:dataset-version-id (:id dsv)})))))
+                                     column-diff-coll (->> merged-sources
+                                                           (map (partial merged-columns-diff dss))
+                                                           (filter some?))]
+                                 (when (not-empty column-diff-coll)
+                                   column-diff-coll)))]
+        {:error(format "Update failed. This dataset has merged columns that no longer exist in their dataset, %s" (mapv :title (db.dataset/select-datasets-by-id tenant-conn {:ids (mapv :dataset-id column-diff)})))
+         :column-diff column-diff}))))
+
 (defn sources-related
   "return the list of transformations sources that use target-dataset-id,
   add `:origin` to each item in collection to keep a reference to the dataset-version

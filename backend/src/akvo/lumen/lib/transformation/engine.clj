@@ -163,18 +163,21 @@
     (throw (ex-info "Failed to transform. Transformation can't have columns from more than one data-group specified"
                     {:transformation transformation}))))
 
+(defn data-group-by-tx [transformation data-groups]
+  (let [columns-in-transformation (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups)))
+        _  (ensure-one-data-group-related transformation columns-in-transformation data-groups)
+        column-name (first columns-in-transformation)]
+    (datagroup-by-column data-groups column-name)))
+
 (defn try-apply-operation-2
   "adapt try-apply-operation to work with data-groups:
   1. find data-group related to transformation
   2. grab all data-group columns
   3. apply-operation
   4. separate transformation data-group columns from the others"
-  [{:keys [tenant-conn claims] :as deps}
-   {:keys [transformation data-groups]}]
-  (let [columns-in-transformation (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups)))
-        _  (ensure-one-data-group-related transformation columns-in-transformation data-groups)
-        column-name (first columns-in-transformation)
-        data-group (datagroup-by-column data-groups column-name)
+  [{:keys [tenant-conn] :as deps}
+   {:keys [transformation data-groups data-group]}]
+  (let [data-group (or data-group (data-group-by-tx transformation data-groups))
         source-table (:table-name data-group)
         other-dgs-columns (reduce (fn [c dg] (if (= (:id dg) (:id data-group))
                                                c (into c (:columns dg)))) [] data-groups)
@@ -466,6 +469,59 @@
               (recur (rest transformations) (:columns op)  applied-txs)))))
       {:columns             (w/keywordize-keys columns)
        :transformations     (w/keywordize-keys (vec applied-txs))})))
+
+(defn apply-dataset-transformations-on-table-2
+  "no transactional thus we can discard the temporary table we are working with"
+  [conn caddisfly dataset-id transformations group-table-names new-columns old-columns]
+  (loop [transformations transformations
+         data-groups    (->> new-columns
+                             (reduce (fn [c co]
+                                       (update c {:group-id (get co "groupId")
+                                                  :group-name (get co "groupName")}  conj co)) {})
+                             (map-indexed (fn [idx [group columns]]
+                                            (assoc group
+                                                   :group-order idx
+                                                   :columns (reverse columns)
+                                                   :table-name (get group-table-names (:group-id group))))))
+         applied-txs     []]
+    (if-let [transformation (first transformations)]
+      (let [columns (reduce into [] (map :columns data-groups))
+            transformation       (adapt-transformation transformation old-columns columns)
+            data-group (data-group-by-tx transformation data-groups)
+            avoid-tranformation? (let [t (w/keywordize-keys transformation)]
+                                   (and
+                                    (avoidable-if-missing? t)
+                                    ((complement set/subset?)
+                                     (set (columns-used t columns))
+                                     (set (map #(get % "columnName") columns)))))]
+        (if avoid-tranformation?
+          (recur (rest transformations) data-groups applied-txs)
+          (let [{:keys [data-groups-to-be-created columns previous-columns data-group] :as op}
+                (try
+                  (try-apply-operation-2 {:tenant-conn conn :caddisfly caddisfly}
+                                         {:data-group data-group
+                                          :data-groups data-groups
+                                          :transformation (assoc transformation :dataset-id dataset-id)})
+                  (catch ExceptionInfo e
+                    (do
+                      (log/error e)
+                      (throw
+                       (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s"
+                                        (-> e ex-data :transformation-result :message) transformation) {})))))
+                data-groups-to-be-created (adapt data-groups-to-be-created data-groups)]
+            (let [applied-txs (conj applied-txs
+                                    (assoc transformation "changedColumns"
+                                           (diff-columns previous-columns columns)))]
+              (db.job-execution/vacuum-table conn {:table-name (:table-name data-group)})
+              (recur (rest transformations)
+                     (reduce (fn [c dg]
+                           (if (= (:group-id dg) (:group-id data-group))
+                             (conj c (assoc dg :columns columns))
+                             (conj c dg)))
+                         data-groups-to-be-created data-groups)
+                     applied-txs)))))
+      {:data-groups data-groups
+       :transformations  (w/keywordize-keys (vec applied-txs))})))
 
 (defn column-title-error? [column-title columns]
   (when (not-empty (filter #(= column-title (get % "title")) columns))

@@ -51,6 +51,14 @@ WHERE dataset_id IN (:v*:dataset-ids)
 AND dataset_version.namespace = :namespace
 order by dataset_id, version desc;
 
+-- :name db-latest-dataset-versions-2-by-dataset-ids :? :*
+-- :doc Returns the most recent dataset version for a given dataset ids
+select DISTINCT ON (dataset_id) dataset_id, id, version, transformations
+FROM dataset_version_2
+WHERE dataset_id IN (:v*:dataset-ids)
+order by dataset_id, version desc;
+
+
 -- :name db-latest-dataset-versions :? :*
 -- :doc Returns the most recent dataset version for a given dataset id
 select DISTINCT ON (dataset_id) dataset_id, dataset_version.id as id, version, title, transformations
