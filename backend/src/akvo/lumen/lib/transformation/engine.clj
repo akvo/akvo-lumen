@@ -353,24 +353,27 @@
                                                                                      :transformation transformation})))))))))
 
 (defn copy-tables-2 [tenant-conn data-groups]
-  (doall (map (fn [data-group]
-          (let [imported-table-name (:imported-table-name data-group)
-                table-name (util/gen-table-name "ds")]
-            (db.transformation/copy-table tenant-conn
-                                          {:source-table imported-table-name
-                                           :dest-table   table-name}
-                                          {}
-                                          {:transaction? false})
+  (reduce (fn [c data-group]
+         (let [imported-table-name (:imported-table-name data-group)
+               table-name (util/gen-table-name "ds")]
+           (db.transformation/copy-table tenant-conn
+                                         {:source-table imported-table-name
+                                          :dest-table   table-name}
+                                         {}
+                                         {:transaction? false})
 
-            (assoc data-group :table-name table-name :previous-table-name (:table-name data-group)))
-          ) data-groups)))
+           (assoc c (:group-id data-group) {:table-name table-name :previous-table-name (:table-name data-group)
+                                            :imported-table-name (:imported-table-name data-group)}))
+         ) {} data-groups))
 
 (defn- apply-undo-2 [{:keys [tenant-conn claims] :as deps} dataset-id job-execution-id current-dataset-version]
-  (let [initial-dataset-version (db.transformation/initial-dataset-version-2-to-update-by-dataset-id
+  (let [tables-dict     (->> (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id current-dataset-version)})
+                             (copy-tables-2 tenant-conn))
+        initial-dataset-version (db.transformation/initial-dataset-version-2-to-update-by-dataset-id
                                  tenant-conn
                                  {:dataset-id dataset-id})
         initial-data-groups     (->> (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id initial-dataset-version)})
-                                     (copy-tables-2 tenant-conn ))]
+                                     (map (fn [dg] (merge dg (get tables-dict (:group-id dg))))))]
     (loop [data-groups     initial-data-groups
            transformations (butlast (:transformations current-dataset-version))
            tx-index        0]
