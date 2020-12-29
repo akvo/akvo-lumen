@@ -99,7 +99,7 @@
                                        jwt-token :jwt-token
                                        body :body
                                        {:keys [id]} :path-params}]
-                                   (dataset/update* (p/connection tenant-manager tenant) caddisfly (merge import-config upload-config)
+                                   (dataset/update* (p/connection tenant-manager tenant) caddisfly jwt-claims (merge import-config upload-config)
                                                    error-tracker id (assoc (w/stringify-keys body)
                                                                            "token" jwt-token
                                                                            "email" (get jwt-claims "email"))))}}]]]])
