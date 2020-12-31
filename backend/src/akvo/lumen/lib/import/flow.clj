@@ -13,6 +13,9 @@
   {:internal (:internal-url flow-api)
    :url (:url flow-api)})
 
+(defn adapter [file version rows-cols col*]
+  col*)
+
 (defmethod import/dataset-importer "AKVO_FLOW"
   [{:strs [instance surveyId formId token email version] :as spec}
    {:keys [flow-api environment] :as config}]
@@ -28,9 +31,10 @@
       p/DatasetImporter
       (columns [this]
         (try
-          (cond
-            (<= version 2) (v2/dataset-columns (flow-common/form @survey formId) environment)
-            (<= version 3) (v3/dataset-columns (flow-common/form @survey formId) environment))
+          (let [res (cond
+                  (<= version 2) (v2/dataset-columns (flow-common/form @survey formId) environment)
+                  (<= version 3) (v3/dataset-columns (flow-common/form @survey formId) environment))]
+            (adapter (format "%s-%s-%s" instance surveyId formId) 3 :cols res))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (do
@@ -45,9 +49,10 @@
               (throw e)))))
       (records [this]
         (try
-          (cond
-            (<= version 2) (v2/form-data headers-fn @survey formId)
-            (<= version 3) (v3/form-data headers-fn instance @survey formId))
+          (let [res (cond
+                      (<= version 2) (v2/form-data headers-fn @survey formId)
+                      (<= version 3) (v3/form-data headers-fn instance @survey formId))]
+            (adapter (format "%s-%s-%s" instance surveyId formId) 3 :rows res))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
@@ -78,8 +83,10 @@
                               (merge instance-id-column {:groupId groupId
                                                          :groupName groupName
                                                          :key false
-                                                         :hidden true}))]
-            (apply conj columns new-columns))
+                                                         :hidden true}))
+                res (apply conj columns new-columns)]
+            (adapter (format "%s-%s-%s" instance surveyId formId) 4 :cols res)
+            )
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (do
@@ -94,7 +101,8 @@
               (throw e)))))
       (records [this]
         (try
-          (v4/form-data headers-fn instance @survey formId)
+          (let [res (v4/form-data headers-fn instance @survey formId)]
+            (adapter (format "%s-%s-%s" instance surveyId formId) 4 :rows res))
           (catch Throwable e
             (if-let [ex-d (ex-data e)]
               (throw (ex-info (or (:cause e) (str "Null cause from instance: " instance))
