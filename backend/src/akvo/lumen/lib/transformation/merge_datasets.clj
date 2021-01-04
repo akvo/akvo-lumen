@@ -249,7 +249,8 @@
   (let [source (get-in op-spec ["args" "source"])
         target (get-in op-spec ["args" "target"])
         source-dataset (get-source-dataset conn source)
-        source-merge-columns (get-source-merge-columns source (:columns source-dataset))
+        source-merge-columns (->> (get-source-merge-columns source (:columns source-dataset))
+                                  (map #(dissoc % "groupId" "groupName")))
         column-names-translation (merge-column-names-map columns
                                                          source-merge-columns)
         target-merge-columns (get-target-merge-columns source-merge-columns
