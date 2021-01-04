@@ -389,7 +389,46 @@
         (is (= years-slash (map (comp tcc/from-long :c3) table-data)))
         (is (= years-hiphen (map (comp tcc/from-long :c4) table-data)))))))
 
-
+(deftest ^:functional merge-datasets-test-3086
+  "https://github.com/akvo/akvo-lumen/issues/3086"
+  (let [registration-dataset-id (tu/import-file *tenant-conn* *error-tracker*
+                                                {:dataset-name "registration"
+                                                 :kind         "clj-flow"
+                                                 :data         (tu/read-edn-flow-dataset "uat1" "697789115" "694759115")})
+        monitoring-dataset-id   (tu/import-file *tenant-conn* *error-tracker*
+                                                {:dataset-name "monitoring"
+                                                 :kind         "clj-flow"
+                                                 :data         (tu/read-edn-flow-dataset "uat1" "697789115" "684819115")})
+        apply-transformation    (partial async-tx-apply {:tenant-conn *tenant-conn*} monitoring-dataset-id)
+        transformation          {"op" "core/merge-datasets",
+                                 "args"
+                                 {"source"
+                                  {"datasetId"            registration-dataset-id,
+                                   "mergeColumn"          "identifier",
+                                   "aggregationColumn"    nil,
+                                   "aggregationDirection" "DESC",
+                                   "mergeColumns"         ["device_id" "c707599115"]},
+                                  "target" {"mergeColumn" "identifier"}}}
+        [tag _ :as all]         (apply-transformation {:type           :transformation
+                                                       :transformation transformation})]
+    (let [{:keys [columns transformations]} (latest-dataset-version-by-dataset-id *tenant-conn*
+                                                                                  {:dataset-id monitoring-dataset-id})]
+      (is (= ["identifier"
+             "instance_id"
+             "display_name"
+             "submitter"
+             "submitted_at"
+             "surveyal_time"
+             "device_id"
+             "c699849115"
+             "c688379115"
+             "c697789120"
+             "c678589115"
+              "d1"
+              "d2"] (mapv #(get % "columnName") columns)))
+      (is (= #{"metadata" "697789118" nil} (into #{} (map #(get % "groupId") columns))))
+  )
+    ))
 
 (deftest ^:functional test-update-issue-2254
   (testing "Testing https://github.com/akvo/akvo-lumen/issues/2254 "
