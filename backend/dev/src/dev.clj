@@ -45,13 +45,6 @@
   (check-specs!))
 
 (defn go []
-  (alter-var-root #'flow/adapter (fn [f]
-                                   (fn [{:keys [version rows-cols instance survey-id form-id]} data]
-                                     (let [file-name (->> (format "%s-%s-%s-%s-%s" instance survey-id form-id (name rows-cols) version)
-                                                          (format "./dev/resources/%s/%s.edn" dev-flow-datasets-dir))]
-                                       (doseq [d data]
-                                         (spit file-name d :append true)))
-                                     (f nil data))))
   (commons/config)
   (ir/go))
 
@@ -143,6 +136,24 @@
     :columns-v4 (read-edn-filename (format "%s-%s-%s.edn" base-name "cols" 4))
     :records-v3 (read-edn-filename (format "%s-%s-%s.edn" base-name "rows" 3))
     :records-v4 (read-edn-filename (format "%s-%s-%s.edn" base-name "rows" 4))}))
+
+(defn activate-write-locally-flow-data []
+  (alter-var-root #'flow/adapter
+                  (fn [f]
+                    (fn [{:keys [version rows-cols instance survey-id form-id] :as m} data]
+                      (let [file-name (->> (format "%s-%s-%s-%s-%s" instance survey-id form-id (name rows-cols) version)
+                                           (format "./dev/resources/%s/%s.edn" dev-flow-datasets-dir))]
+                        (doseq [d data]
+                          (spit file-name d :append true)))
+                      (f m data))))
+  :activated-write-locally-flow-data)
+
+(defn deactivate-write-locally-flow-data []
+  (alter-var-root #'flow/adapter
+                  (fn [f]
+                    (fn [{:keys [version rows-cols instance survey-id form-id] :as m} data]
+                      (f m data))))
+  :deativated-write-locally-flow-data)
 
 (comment
   (read-edn-filename "uat1-638889127-638879132-cols-3.edn")
