@@ -47,10 +47,10 @@
 (defn go []
   (alter-var-root #'flow/adapter (fn [f]
                                    (fn [{:keys [version rows-cols instance survey-id form-id]} data]
-                                     (doall (map (fn [d]
-                                                   (let [file-name (format "./dev/resources/%s/%s-%s-%s.edn" dev-flow-datasets-dir (format "%s-%s-%s" instance survey-id form-id) (name rows-cols) version)]
-                                                     (spit file-name data :append true)
-                                                     d)) data))
+                                     (let [file-name (->> (format "%s-%s-%s-%s-%s" instance survey-id form-id (name rows-cols) version)
+                                                          (format "./dev/resources/%s/%s.edn" dev-flow-datasets-dir))]
+                                       (doseq [d data]
+                                         (spit file-name data :append true)))
                                      (f nil data))))
   (commons/config)
   (ir/go))
