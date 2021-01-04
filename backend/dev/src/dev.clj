@@ -29,6 +29,8 @@
   (:import [org.postgresql.util PSQLException PGobject]
            [java.time Instant]))
 
+(def dev-flow-datasets-dir "flow-datasets")
+
 (defn check-specs! []
   (log/warn "instrumenting specs!")
   (stest/instrument))
@@ -43,6 +45,13 @@
   (check-specs!))
 
 (defn go []
+  (alter-var-root #'flow/adapter (fn [f]
+                                   (fn [{:keys [version rows-cols instance survey-id form-id]} data]
+                                     (doall (map (fn [d]
+                                                   (let [file-name (format "./dev/resources/%s/%s-%s-%s.edn" dev-flow-datasets-dir (format "%s-%s-%s" instance survey-id form-id) (name rows-cols) version)]
+                                                     (spit file-name data :append true)
+                                                     d)) data))
+                                     (f nil data))))
   (commons/config)
   (ir/go))
 
@@ -118,7 +127,7 @@
 (defn read-edn-filename
   "file should live in resources"
   [filename]
-  (let [x (->> filename
+  (let [x (->> (format "%s/%s" dev-flow-datasets-dir filename)
                (clojure.java.io/resource)
                (clojure.java.io/file)
                (slurp))]
@@ -137,15 +146,11 @@
 
 (comment
   (read-edn-filename "uat1-638889127-638879132-cols-3.edn")
-  (with-redefs [flow/adapter (fn [file version rows-cols col*]
-                               (map (fn [data](let [file-name (format "./dev/resources/%s-%s-%s.edn" file (name rows-cols) version)]
-                                                (spit file-name data :append true)
-                                                data)) col*))]
-    (def dataset-id (tu/import-file (db-conn)
-                                    (:akvo.lumen.utils.local-error-tracker/local system)
-                                    {:dataset-name "dataset-name"
-                                     :kind "clj-flow"
-                                     :data (read-edn-flow-dataset "uat1" "638889127" "638879132")})))
+  (def dataset-id (tu/import-file (db-conn)
+                                  (:akvo.lumen.utils.local-error-tracker/local system)
+                                  {:dataset-name "dataset-name"
+                                   :kind "clj-flow"
+                                   :data (read-edn-flow-dataset "uat1" "638889127" "638879132")}))
 
   (def dataset-id-updated (tu/update-file (db-conn)
                                           (:akvo.lumen.component.caddisfly/local system)
