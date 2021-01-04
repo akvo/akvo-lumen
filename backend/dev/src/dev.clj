@@ -50,7 +50,7 @@
                                      (let [file-name (->> (format "%s-%s-%s-%s-%s" instance survey-id form-id (name rows-cols) version)
                                                           (format "./dev/resources/%s/%s.edn" dev-flow-datasets-dir))]
                                        (doseq [d data]
-                                         (spit file-name data :append true)))
+                                         (spit file-name d :append true)))
                                      (f nil data))))
   (commons/config)
   (ir/go))
