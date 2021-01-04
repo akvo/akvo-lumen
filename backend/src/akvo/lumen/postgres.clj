@@ -107,22 +107,6 @@
 
 (defrecord Multipoint [wkt-string])
 
-(defmethod clojure.core/print-method Geopoint
-     [system ^java.io.Writer writer]
-  (.write writer "#<Geopoint>"))
-
-(defmethod clojure.core/print-method Geoshape
-     [system ^java.io.Writer writer]
-     (.write writer "#<Geoshape>"))
-
-(defmethod clojure.core/print-method Geoline
-     [system ^java.io.Writer writer]
-     (.write writer "#<Geoline>"))
-
-(defmethod clojure.core/print-method Multipoint
-     [system ^java.io.Writer writer]
-  (.write writer "#<Multipoint>"))
-
 (extend-protocol p/CoerceToSql
   java.lang.String
   (coerce [value] value)
