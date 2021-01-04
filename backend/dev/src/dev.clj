@@ -151,11 +151,14 @@
   (alter-var-root #'flow/adapter
                   (fn [f]
                     (fn [{:keys [version rows-cols instance survey-id form-id] :as m} data]
-                      (let [file-name (->> (format "%s-%s-%s-%s-%s" instance survey-id form-id (name rows-cols) version)
-                                           (format "./dev/resources/%s/%s.edn" dev-flow-datasets-dir))]
-                        (io/delete-file file-name true)
-                        (doseq [d data]
-                          (spit file-name d :append true)))
+                      (try
+                        (let [file-name (->> (format "%s-%s-%s-%s-%s" instance survey-id form-id (name rows-cols) version)
+                                            (format "./dev/resources/%s/%s.edn" dev-flow-datasets-dir))]
+                         (io/delete-file file-name true)
+                         (doseq [d data]
+                           (spit file-name d :append true)))
+                        (catch Exception ex
+                          (log/error ex "Problems writing locally flow data to edn" m data)))
                       (f m data))))
   :activated-write-locally-flow-data)
 
