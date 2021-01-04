@@ -27,7 +27,8 @@
             [integrant.repl :as ir]
             [integrant.repl.state :as state :refer (system)])
   (:import [org.postgresql.util PSQLException PGobject]
-           [java.time Instant]))
+           [java.time Instant]
+           [akvo.lumen.postgres Geopoint Geoshape Geoline Multipoint]))
 
 (def dev-flow-datasets-dir "flow-datasets")
 
@@ -127,7 +128,16 @@
    ;;binding  [*default-data-reader-fn* tagged-literal]
    (edn/read-string {:readers {'object (fn [o]
                                          (condp = (first o)
-                                           'java.time.Instant (Instant/parse (last o))))}}
+                                           'java.time.Instant (Instant/parse (last o))))
+                               'akvo.lumen.postgres.Multipoint (fn [o]
+                                                                 (Multipoint. (:wkt-string o)))
+                               'akvo.lumen.postgres.Geoshape (fn [o]
+                                                                 (Geoshape. (:wkt-string o)))
+
+                               'akvo.lumen.postgres.Geoline (fn [o]
+                                                               (Geoline. (:wkt-string o)))
+                               'akvo.lumen.postgres.Geopoint (fn [o]
+                                                               (Geopoint. (:wkt-string o)))}}
                     (format "[%s]" x))))
 
 (defn read-edn-flow-dataset [instance survey-id form-id]
