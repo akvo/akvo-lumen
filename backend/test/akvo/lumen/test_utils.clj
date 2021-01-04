@@ -17,6 +17,7 @@
             [clj-time.core :as tc]
             [clj-time.format :as timef]
             [clojure.java.io :as io]
+            [clojure.edn :as edn]
             [clojure.java.jdbc :as jdbc]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
@@ -28,7 +29,8 @@
             [hugsql.core :as hugsql]
             [integrant.core :as ig])
   (:import [java.time Instant]
-           [org.postgresql.util PSQLException]))
+           [org.postgresql.util PSQLException]
+           [akvo.lumen.postgres Geopoint Geoshape Geoline Multipoint]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/job-execution.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/raster.sql")
@@ -192,3 +194,34 @@
                                                   :auth-dashboards     (mapv :id (all-dashboards tenant-conn))
                                                   :auth-collections    (mapv :id (all-collections tenant-conn))
                                                   :rasters             (mapv :id (all-rasters tenant-conn))})))))))
+
+(def ^:dynamic dev-flow-datasets-dir "flow-datasets")
+
+(defn read-edn-filename
+  "file should live in resources"
+  [filename]
+  (let [x (->> (format "%s/%s" dev-flow-datasets-dir filename)
+               (clojure.java.io/resource)
+               (clojure.java.io/file)
+               (slurp))]
+   ;;binding  [*default-data-reader-fn* tagged-literal]
+   (edn/read-string {:readers {'object (fn [o]
+                                         (condp = (first o)
+                                           'java.time.Instant (Instant/parse (last o))))
+                               'akvo.lumen.postgres.Multipoint (fn [o]
+                                                                 (Multipoint. (:wkt-string o)))
+                               'akvo.lumen.postgres.Geoshape (fn [o]
+                                                                 (Geoshape. (:wkt-string o)))
+
+                               'akvo.lumen.postgres.Geoline (fn [o]
+                                                               (Geoline. (:wkt-string o)))
+                               'akvo.lumen.postgres.Geopoint (fn [o]
+                                                               (Geopoint. (:wkt-string o)))}}
+                    (format "[%s]" x))))
+
+(defn read-edn-flow-dataset [instance survey-id form-id]
+  (let [base-name (format "%s-%s-%s" instance survey-id form-id)]
+   {:columns-v3 (read-edn-filename (format "%s-%s-%s.edn" base-name "cols" 3))
+    :columns-v4 (read-edn-filename (format "%s-%s-%s.edn" base-name "cols" 4))
+    :records-v3 (read-edn-filename (format "%s-%s-%s.edn" base-name "rows" 3))
+    :records-v4 (read-edn-filename (format "%s-%s-%s.edn" base-name "rows" 4))}))
