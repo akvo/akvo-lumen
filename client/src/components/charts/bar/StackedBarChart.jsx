@@ -68,7 +68,7 @@ const getData = (props) => { // eslint-disable-line
 
   const series = merge({}, data.common, { data: values });
   const combinedData = series.data.sort((a, b) => a.key - b.key);
-
+  if (!combinedData.length) return false;
   return {
     ...series,
     data: combinedData,
