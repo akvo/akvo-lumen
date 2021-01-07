@@ -78,15 +78,19 @@
                                                                :type type})
                                                             columns)})))))
 
+(defn adapt-columns [importer-columns]
+  (let [columns (map (fn [c] (-> c
+                                 (update :groupName (fn [groupName] (or groupName "main")))
+                                 (update :groupId (fn [groupId] (or groupId "main")))))
+                     importer-columns)]
+    (let [group-ids (distinct (map :groupId columns))]
+      {:group-table-names (reduce #(assoc % %2 (util/gen-table-name "ds")) {} group-ids)
+       :columns columns})))
+
 (defn execute [conn job-execution-id data-source-id dataset-id claims spec import-config]
   (with-open [importer (common/datagroups-importer (get spec "source") (assoc import-config :environment (env/all conn)))]
-    (let [rows               (p/records importer)
-          columns            (map (fn [c] (-> c
-                                              (update :groupName (fn [groupName] (or groupName "main")))
-                                              (update :groupId (fn [groupId] (or groupId "main")))))
-                                  (p/columns importer))
-          group-table-names  (let [group-ids (distinct (map :groupId columns))]
-                               (reduce #(assoc % %2 (util/gen-table-name "ds")) {} group-ids))]
+    (let [rows                                (p/records importer)
+          {:keys [columns group-table-names]} (adapt-columns (p/columns importer))]
       (doseq [[groupId cols] (group-by :groupId columns)]
         (postgres/create-dataset-table conn (get group-table-names groupId) cols))
       (doseq [response (take common/rows-limit rows)]
