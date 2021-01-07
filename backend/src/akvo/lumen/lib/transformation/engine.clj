@@ -163,7 +163,7 @@
     (throw (ex-info "Failed to transform. Transformation can't have columns from more than one data-group specified"
                     {:transformation transformation}))))
 
-(defn data-group-by-tx [transformation data-groups]
+(defn data-group-by-op [transformation data-groups]
   (let [columns-in-transformation (columns-used (w/keywordize-keys transformation) (reduce into [] (map :columns data-groups)))
         _  (ensure-one-data-group-related transformation columns-in-transformation data-groups)
         column-name (first columns-in-transformation)]
@@ -177,7 +177,7 @@
   4. separate transformation data-group columns from the others"
   [{:keys [tenant-conn] :as deps}
    {:keys [transformation data-groups data-group]}]
-  (let [data-group (or data-group (data-group-by-tx transformation data-groups))
+  (let [data-group (or data-group (data-group-by-op transformation data-groups))
         source-table (:table-name data-group)
         other-dgs-columns (reduce (fn [c dg] (if (= (:id dg) (:id data-group))
                                                c (into c (:columns dg)))) [] data-groups)
@@ -488,7 +488,7 @@
     (if-let [transformation (first transformations)]
       (let [columns (reduce into [] (map :columns data-groups))
             transformation       (adapt-transformation transformation old-columns columns)
-            data-group (data-group-by-tx transformation data-groups)
+            data-group (data-group-by-op transformation data-groups)
             avoid-tranformation? (let [t (w/keywordize-keys transformation)]
                                    (and
                                     (avoidable-if-missing? t)
