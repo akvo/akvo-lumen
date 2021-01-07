@@ -12,6 +12,7 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.db.env :as db.env]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.lib.multiple-column :as multiple-column]
             [akvo.lumen.db.transformation-test :refer [get-data get-val-from-table get-row-count table-exists]]
@@ -429,6 +430,45 @@
         (is (= #{nil "692519115" "metadata" "697789118"} (into #{} (map #(get % "groupId") columns))))
         )
       )))
+
+(deftest ^:functional test-update-flow-data-groups
+  (db.env/activate-flag *tenant-conn* "data-groups")
+  (let [original-data (tu/read-edn-flow-dataset "uat1" "638889127" "638879132")
+        dataset-id (tu/import-file *tenant-conn* *error-tracker*
+                                   {:dataset-name "example"
+                                    :kind         "clj-flow"
+                                    :data         original-data})
+        initial-dsv (tu/try-latest-dataset-version-2 *tenant-conn* dataset-id)
+        initial-data-group (first (filter #(= "653389137" (:group-id %)) (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn* {:dataset-version-id (:id initial-dsv)})))
+        initial-data-group-data (get-data *tenant-conn* {:table-name (:table-name initial-data-group)})
+
+        updated-data (update-in original-data [:records-v4]
+                                (fn [records]
+                                  (let [instance-id "631139135"]
+                                    (conj records (-> (last records)
+                                                      (dissoc "655359129")
+                                                      (assoc-in ["metadata" 0 :submitter ] "test" )
+                                                      (assoc-in ["metadata" 0 :instance_id] instance-id )
+                                                      (assoc-in ["653389137"] [{:instance_id instance-id
+                                                                                "c655369136" "Test"
+                                                                                "c635099115" 85.0}]))))))
+        _ (tu/update-file *tenant-conn* *caddisfly* *error-tracker*
+                          dataset-id
+                          (:id (db.dataset/data-source-by-dataset-id *tenant-conn* {:dataset-id dataset-id}))
+                          {:dataset-name "example"
+                           :kind "clj-flow"
+                           :data updated-data})
+        updated-dsv (tu/try-latest-dataset-version-2 *tenant-conn* dataset-id 2)
+        updated-data-group (first (filter #(= "653389137" (:group-id %)) (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn* {:dataset-version-id (:id updated-dsv)})))
+        updated-data-group-data (get-data *tenant-conn* {:table-name (:table-name updated-data-group)})]
+    (is (= 8 (count initial-data-group-data)))
+    (is (= 9 (count updated-data-group-data)))
+    (is (=  {:rnum 9,
+             :c655369136 "Test",
+             :c635099115 85.0,
+             :instance_id "631139135"}
+            (last updated-data-group-data))))
+  (db.env/deactivate-flag *tenant-conn* "data-groups"))
 
 (deftest ^:functional test-update-issue-2254
   (testing "Testing https://github.com/akvo/akvo-lumen/issues/2254 "

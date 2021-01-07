@@ -81,12 +81,18 @@
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn importId with-job?)))
 
-(defn try-latest-dataset-version-2 [conn dataset-id]
+(defn try-latest-dataset-version-2 [conn dataset-id & [version]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
                   :max-retries 20
                   :delay-ms 100}
-    (db.dataset-version/latest-dataset-version-2-by-dataset-id conn
-                                                              {:dataset-id dataset-id})))
+    (if version
+      (db.dataset-version/dataset-version-2-by-dataset-id-and-version
+       conn
+       {:dataset-id dataset-id :version version})
+      (db.dataset-version/latest-dataset-version-2-by-dataset-id
+       conn
+       {:dataset-id dataset-id}))))
+
 
 (defn update-file
   "Update a file and return the dataset-id, or the job-execution-id in case of FAIL status"
@@ -94,7 +100,10 @@
   (let [spec {"source" (with-meta {"kind" kind
                                    "hasColumnHeaders" (boolean has-column-headers?)}
                          {:data data})}
-        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn caddisfly {} {} error-tracker dataset-id data-source-id spec)]
+        [tag {:strs [updateId] :as res}] (update/update-dataset tenant-conn caddisfly {:name "test_name"
+                                                                                       :given_name "test_given_name"
+                                                                                       :family_name "test_family_name"
+                                                                                       :email "test_email"} {} error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
     (retry-job-execution tenant-conn updateId with-job?)))
 
