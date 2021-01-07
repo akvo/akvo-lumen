@@ -271,7 +271,7 @@
                                                                                   ::transformation.change-datatype.s/newType "number"
                                                                                   ::transformation.change-datatype.s/defaultValue 0})})
                       (apply-transformation {:type :undo}))
-          dsv (db.transformation/dataset-version-2-by-dataset-id-and-version
+          dsv (db.dataset-version/dataset-version-2-by-dataset-id-and-version
                *tenant-conn*
                {:dataset-id dataset-id :version 2})
           dg (first (db.data-group/list-data-groups-by-dataset-version-id
