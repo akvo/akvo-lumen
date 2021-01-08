@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
+            [clojure.string :as str]
             [org.akvo.resumed :as resumed]))
 
 (defn squuid
@@ -25,6 +26,11 @@
    (gen-table-name nil))
   ([prefix]
    (str (when prefix (str prefix "_")) (str/replace (java.util.UUID/randomUUID) "-" "_"))))
+
+(defn table-name-to-imported
+  "reuse same table-name uuid but changing prefix"
+  [table-name]
+  (str/replace table-name "ds_" "imported_"))
 
 (defn conform-email
   "Returns valid email or throws."
