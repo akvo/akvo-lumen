@@ -159,6 +159,7 @@
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
                                                                  :has-column-headers? true
                                                                  :file "transformation_test.csv"})
+          _ (tu/try-latest-dataset-version-2 *tenant-conn* dataset-id)
           [tag _] (last (for [transformation data-groups-ops]
                           (async-tx-apply {:tenant-conn *tenant-conn*} dataset-id {:type :transformation
                                                                                    :transformation transformation})))]
@@ -168,10 +169,7 @@
             data-group (first (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn*
                                                                                      {:dataset-version-id (:id dsv)}))]
         (is (= '({:rnum 1, :c1 "A   ", :c2 "b   ", :c3 "c"})
-               (get-data *tenant-conn* {:table-name (:table-name data-group)})))
-
-        )
-      ))
+               (get-data *tenant-conn* {:table-name (:table-name data-group)}))))))
   (db.env/deactivate-flag *tenant-conn* "data-groups"))
 
 
