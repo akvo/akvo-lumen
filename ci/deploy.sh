@@ -69,10 +69,10 @@ else
     GW_POD_MEM_REQUESTS="32Mi"
 
     log Pushing images
-    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-backend
-    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-client
-    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-maps
-    gcloud docker -- push eu.gcr.io/${PROJECT_NAME}/lumen-exporter
+    gcloud docker -- push "eu.gcr.io/${PROJECT_NAME}/lumen-backend:${CI_COMMIT}"
+    gcloud docker -- push "eu.gcr.io/${PROJECT_NAME}/lumen-client:${CI_COMMIT}"
+    gcloud docker -- push "eu.gcr.io/${PROJECT_NAME}/lumen-maps:${CI_COMMIT}"
+    gcloud docker -- push "eu.gcr.io/${PROJECT_NAME}/lumen-exporter:${CI_COMMIT}"
 fi
 
 log Finding blue/green state
