@@ -1,18 +1,19 @@
 (ns akvo.lumen.lib.transformation.engine
-  (:require [akvo.lumen.util :as util]
-            [akvo.lumen.db.transformation :as db.transformation]
+  (:require [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.db.job-execution :as db.job-execution]
-            [akvo.lumen.db.data-group :as db.data-group]
-            [akvo.lumen.specs.transformation :as s.transformation]
+            [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
+            [akvo.lumen.lib.data-group :as lib.data-group]
             [akvo.lumen.lib.env :as env]
+            [akvo.lumen.specs.transformation :as s.transformation]
+            [akvo.lumen.util :as util]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [clojure.walk :as w])
-  (:import [java.time Instant]
-           [clojure.lang ExceptionInfo]))
+  (:import [clojure.lang ExceptionInfo]
+           [java.time Instant]))
 
 (def MERGE-DATASET "MERGE_DATASET")
 
@@ -395,6 +396,7 @@
                                                                :columns             (vec (w/keywordize-keys (:columns data-group)))))
               (when-not (= MERGE-DATASET (:imported-table-name data-group))
                 (db.transformation/drop-table tenant-conn {:table-name (:previous-table-name data-group)}))))
+          (lib.data-group/table-name-and-columns-from-data-grops tenant-conn (str dataset-id) false (lib.data-group/view-table-name new-dataset-version-id))
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [data-groups-to-be-created data-group columns]}
