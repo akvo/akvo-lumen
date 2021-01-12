@@ -59,7 +59,7 @@
             (data-groups-view t-name temporary?)
             vector
             (jdbc/execute! tenant-conn))
-       {:table-name table-name :columns columns}))))
+       {:table-name t-name :columns columns}))))
 
 (defn view-table-name [uuid]
   (str "dsv_view_" (str/replace uuid "-" "_")))
