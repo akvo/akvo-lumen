@@ -183,6 +183,14 @@
                    "direction" nil
                    "columnName" "c2"}])]
     (is (= nil (derive/columns-groups columns)))
-    (is (= {"Transformations" [:d1]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :columnName "d1"))))))
-    (is (= {"Metadata" [:identifier]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :columnName "identifier"))))))
-    (is (= {"My Group" [:c1]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :groupName "My Group"))))))))
+    (is (= {"transformations" [:d1]
+            "Transformations" [:d1]
+            "Main" [:c2]
+            "main" [:c2]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :columnName "d1"))))))
+    (is (= {"metadata" [:identifier]
+            "Metadata" [:identifier]
+            "Main" [:identifier :c2]
+            "main" [:identifier :c2]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :columnName "identifier"))))))
+    (is (= {"My Group" [:c1]
+            "Main" [:c2]
+            "main" [:c2]} (derive/columns-groups (update-in columns [0] (fn [c] (assoc c :groupName "My Group"))))))))
