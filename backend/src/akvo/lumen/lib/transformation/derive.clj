@@ -67,12 +67,17 @@
                                                           (first
                                                            (filter
                                                             (fn [c]
-                                                              (and (or (= column-ref1 (:groupName c))
-                                                                       (and (engine/is-derived? (:columnName c))
-                                                                            (= column-ref1 "Transformations"))
-                                                                       (and (contains? flow-metadata-questions (:columnName c))
-                                                                            (= column-ref1 "Metadata")))
-                                                                   (= column-ref2 (:title c)))) columns)))
+                                                              (let [column-ref1 (if (= column-ref1 "Main")
+                                                                                  nil
+                                                                                  (if (contains? #{"Metadata" "Main" "Transformations"} column-ref1)
+                                                                                    (str/lower-case column-ref1)
+                                                                                    column-ref1))]
+                                                                (and (or (= column-ref1 (:groupName c))
+                                                                         (and (engine/is-derived? (:columnName c))
+                                                                              (= column-ref1 "transformations"))
+                                                                         (and (contains? flow-metadata-questions (:columnName c))
+                                                                              (= column-ref1 "metadata")))
+                                                                     (= column-ref2 (:title c))))) columns)))
                                                          (let [results (filter (fn [c] (= column-ref1 (:title c))) columns)]
                                                            (if (> (count results) 1)
                                                              (throw (ex-info (format "There is more than one column with this name: '%s', Js code needs to reference the column with the group. Eg: row['Transformations']['%s']" column-ref1 column-ref1)
@@ -132,18 +137,26 @@
        (map (fn [[i]] (db.tx.derive/delete-row conn (merge {:rnum i} opts))))
        doall))
 
+(defn adapt-groups-letter-case [main groups]
+  (cond-> groups
+    (get groups "transformations") (assoc "Transformations" (get groups "transformations"))
+    (get groups "metadata") (assoc "Metadata" (get groups "metadata"))
+    true (assoc "Main" main "main" main)))
+
 (defn columns-groups [columns]
   (let [groups (group-by :groupName columns)
         flow-groups (not-empty (dissoc groups nil))
         no-flow-qg (get groups  nil)
+        main-group (filter #((complement engine/is-derived?) (:columnName %)) (get groups nil))
         tx-group (when-let [txs (not-empty (filter #(engine/is-derived? (:columnName %)) no-flow-qg))]
-                   {"Transformations" txs })
+                   {"transformations" txs })
         mt-group (when-let [mts (not-empty (filter #(contains? flow-metadata-questions (:columnName %)) no-flow-qg))]
-                   {"Metadata" mts})]
+                   {"metadata" mts})]
     (when (or flow-groups tx-group mt-group)
       (->> (merge flow-groups
                   tx-group
                   mt-group)
+           (adapt-groups-letter-case main-group)
            (reduce (fn [c [k v]]
                      (assoc c k (map (comp keyword :columnName) v))) {})))))
 
