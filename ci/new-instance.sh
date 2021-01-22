@@ -15,7 +15,7 @@ fi
 
 log "CLUSTER: $CLUSTER"
 
-read -r -p "lumen url:" URL
+read -r -p "lumen url (should include https://):" URL
 
 if [ -z "${URL}" ]; then
     log "Nothing typed"
@@ -43,8 +43,12 @@ log "EMAIL $EMAIL"
 
 gcloud container clusters get-credentials "$CLUSTER" --zone europe-west1-d --project akvo-lumen
 
-export POD_NAME=$(kubectl get pods -l "run=lumen-blue-green,color=$(./live-color.sh)" -o jsonpath="{.items[0].metadata.name}")
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+CURRENT_LIVE_COLOR=$("${DIR}"/live-color.sh)
+
+POD_NAME=$(kubectl get pods -l "run=lumen-blue-green,color=$CURRENT_LIVE_COLOR" -o jsonpath="{.items[0].metadata.name}")
 
 log "POD $POD_NAME"
 
-kubectl exec "$POD_NAME" -c lumen-backend -- java -cp akvo-lumen.jar clojure.main -m akvo.lumen.admin.add-tenant "$URL" "$$ORGANISATION" "$EMAIL"
+kubectl exec "$POD_NAME" -c lumen-backend -- java -cp akvo-lumen.jar clojure.main -m akvo.lumen.admin.add-tenant "$URL" "$ORGANISATION" "$EMAIL"
