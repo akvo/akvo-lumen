@@ -110,6 +110,8 @@ SELECT data_group.table_name AS "table-name",
        source_data.source,
        dataset_version_2.created AS "updated",
        data_group.columns,
+       data_group.group_id AS "group-id",
+       data_group.group_name AS "group-name",
        dataset_version_2.transformations
   FROM dataset_version_2, dataset, source_data, data_group
  WHERE dataset_version_2.dataset_id = :dataset-id
@@ -137,6 +139,7 @@ SELECT data_group.table_name AS "table-name",
        dataset.modified,
        data_group.group_id AS "id",
        data_group.group_id AS "group-id",
+       data_group.group_name AS "group-name",
        dataset.author,
        source_data.source,
        dataset_version_2.created AS "updated",
