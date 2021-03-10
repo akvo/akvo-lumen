@@ -99,10 +99,16 @@
                                       [:name :modified :created :updated :source :transformations])
                          (assoc :status "OK"))]
         (lib/ok (assoc dataset*  :id id :groups (->> data-groups
-                                                     (mapv (juxt :id :columns :repeatable))
-                                                     (mapv #(update % 1 (fn [cols]
-                                                                          (filter (fn [col]
-                                                                                    (not (get col "hidden"))) cols))))))))
+                                                     (mapv (juxt :id :columns :repeatable :group-name))
+                                                     (mapv #(let [[group-id _ _ group-name :as data] %]
+                                                              (update data 1 (fn [cols]
+                                                                               (->> cols
+                                                                                    (filter (fn [col]
+                                                                                              (not (get col "hidden"))))
+                                                                                    (map (fn [col]
+                                                                                           (assoc col
+                                                                                                  "groupName" group-name
+                                                                                                  "groupId" group-id))))))))))))
       (lib/not-found {:error "Not found"}))
     (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
       (let [dataset* (-> (select-keys dsv
@@ -115,15 +121,32 @@
 (defn fetch-metadata
   "Fetch dataset metadata (everything apart from rows)"
   [tenant-conn id]
-  (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
-    (let [groups   (groups dsv)
-          dataset* (-> (select-keys dsv
-                                    [:created :id :modified :status :title :transformations :updated :author :source :columns])
-                       (assoc :status "OK")
-                       (assoc :columns (reduce into [] (vals groups)))
-                       (rename-keys {:title :name}))]
-      (lib/ok dataset*))
-    (lib/not-found {:error "Not found"})))
+  (if (get (env/all tenant-conn) "data-groups")
+    (if-let [data-groups (seq (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id id}))]
+      (let [dataset* (-> (select-keys (first data-groups)
+                                      [:name :modified :created :updated :source :transformations])
+                         (rename-keys {:title :name})
+                         (assoc :status "OK"))]
+        (lib/ok (assoc dataset*  :id id :columns (->> data-groups
+                                                      (mapv #(let [{:keys [columns group-id group-name]} %]
+                                                               (->> columns
+                                                                    (filter (fn [col]
+                                                                              (not (get col "hidden"))))
+                                                                    (map (fn [col]
+                                                                           (assoc col
+                                                                                  "groupName" group-name
+                                                                                  "groupId" group-id))))))
+                                                      (flatten)))))
+      (lib/not-found {:error "Not found"}))
+   (if-let [dsv (db.dataset/dataset-by-id tenant-conn {:id id})]
+     (let [groups   (groups dsv)
+           dataset* (-> (select-keys dsv
+                                     [:created :id :modified :status :title :transformations :updated :author :source :columns])
+                        (assoc :status "OK")
+                        (assoc :columns (reduce into [] (vals groups)))
+                        (rename-keys {:title :name}))]
+       (lib/ok dataset*))
+     (lib/not-found {:error "Not found"}))))
 
 (defn fetch
   [tenant-conn id]
@@ -149,7 +172,11 @@
   (if (get (env/all tenant-conn) "data-groups")
     (when-let [dg (db.dataset/data-group-by-dataset-id-and-group-id tenant-conn {:dataset-id id
                                                                                  :group-id group-id})]
-      (let [columns (filter #(not (get % "hidden")) (:columns dg))
+      (let [columns (->> (:columns dg)
+                         (filter #(not (get % "hidden")))
+                         (map #(assoc %
+                                      "groupName" (:group-name dg)
+                                      "groupId" (:group-id dg))))
             q (select-data-sql (:table-name dg) columns)
             data (rest (jdbc/query tenant-conn
                                    [q]
