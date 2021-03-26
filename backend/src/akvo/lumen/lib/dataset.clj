@@ -3,7 +3,9 @@
             [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.job-execution :as db.job-execution]
             [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.db.visualisation :as db.visualisation]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.endpoint.job-execution :as job-execution]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.env :as env]
@@ -199,23 +201,43 @@
                    :status "OK" :datasetId (:id dsv) :groupId group-id))))))
 
 (defn sort-text
-  [tenant-conn id column-name limit order]
-  (when-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-conn {:id id})]
-    (let [column (dutils/find-column (w/keywordize-keys (:columns dataset)) column-name)]
-      (let [result (->> (merge {:column-name (acommons/sql-option-bucket-column column) :table-name (:table-name dataset)}
-                               (when limit {:limit limit}))
-                        (db.dataset/count-vals-by-column-name tenant-conn)
-                        (map (juxt :counter :coincidence)))]
-        (cond->> result
-          (= "value" order) (sort-by second))))))
+  [tenant-conn dataset-id column-name limit order]
+  (if (get (env/all tenant-conn) "data-groups")
+    (when-let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+      (let [data-group (db.data-group/get-data-group-by-column-name tenant-conn {:dataset-version-id (:id dataset-version)
+                                                                             :column-name column-name})
+            column (dutils/find-column (w/keywordize-keys (:columns data-group)) column-name)]
+        (let [result (->> (merge {:column-name (acommons/sql-option-bucket-column column) :table-name (:table-name data-group)}
+                                 (when limit {:limit limit}))
+                          (db.dataset/count-vals-by-column-name tenant-conn)
+                          (map (juxt :counter :coincidence)))]
+          (cond->> result
+            (= "value" order) (sort-by second)))))
+    (when-let [dataset (db.dataset/table-name-and-columns-by-dataset-id tenant-conn {:id dataset-id})]
+      (let [column (dutils/find-column (w/keywordize-keys (:columns dataset)) column-name)]
+        (let [result (->> (merge {:column-name (acommons/sql-option-bucket-column column) :table-name (:table-name dataset)}
+                                 (when limit {:limit limit}))
+                          (db.dataset/count-vals-by-column-name tenant-conn)
+                          (map (juxt :counter :coincidence)))]
+          (cond->> result
+            (= "value" order) (sort-by second)))))))
 
 (defn sort-number
   [tenant-conn id column-name]
-  (when-let [dataset (db.dataset/table-name-by-dataset-id tenant-conn {:id id})]
-    (merge (->> {:column-name column-name :table-name (:table-name dataset)}
-                (db.dataset/count-num-vals-by-column-name tenant-conn))
-           (->> {:column-name column-name :table-name (:table-name dataset)}
-                (db.dataset/count-unique-vals-by-colum-name tenant-conn)))))
+  (if (get (env/all tenant-conn) "data-groups")
+    (when-let [dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id id})]
+      (let [data-group (db.data-group/get-data-group-by-column-name tenant-conn {:dataset-version-id (:id dataset-version)
+                                                                                 :column-name column-name})]
+        (merge (->> {:column-name column-name :table-name (:table-name data-group)}
+                    (db.dataset/count-num-vals-by-column-name tenant-conn))
+               (->> {:column-name column-name :table-name (:table-name data-group)}
+                    (db.dataset/count-unique-vals-by-colum-name tenant-conn)))
+        ))
+    (when-let [dataset (db.dataset/table-name-by-dataset-id tenant-conn {:id id})]
+      (merge (->> {:column-name column-name :table-name (:table-name dataset)}
+                  (db.dataset/count-num-vals-by-column-name tenant-conn))
+             (->> {:column-name column-name :table-name (:table-name dataset)}
+                  (db.dataset/count-unique-vals-by-colum-name tenant-conn))))))
 
 (defn delete
   [tenant-conn id]
