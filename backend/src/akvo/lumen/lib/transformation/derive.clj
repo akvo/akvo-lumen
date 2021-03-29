@@ -96,8 +96,13 @@
 
 (defmethod engine/adapt-transformation "core/derive"
   [op-spec older-columns new-columns]
-  (update-in op-spec ["args" "code"]
-             #(columnName>columnTitle (compute-transformation-code % older-columns) new-columns)))
+  (let [code  (get-in op-spec ["args" "code"])
+        new-code (-> code
+                     (compute-transformation-code older-columns)
+                     (columnName>columnTitle new-columns))]
+    (-> op-spec
+     (assoc-in ["args" "original-code"] code)
+     (assoc-in ["args" "code"] new-code))))
 
 (defn lumen->pg-type [type]
   (condp = type
@@ -211,7 +216,7 @@
 
 (defmethod engine/columns-used "core/derive"
   [applied-transformation columns]
-  (let [code (-> applied-transformation :args :code)
+  (let [code (or (-> applied-transformation :args :original-code) (-> applied-transformation :args :code))
         computed (compute-transformation-code code columns)]
     (reduce (fn [c r]
               (conj c (if-let [column-name (:column-name r)]
