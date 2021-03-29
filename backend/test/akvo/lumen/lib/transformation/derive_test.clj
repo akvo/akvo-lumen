@@ -157,7 +157,8 @@
                       "columnName" "c2"}]
         computed (derive/compute-transformation-code (get-in t1 ["args" "code"]) older-columns)]
     (is (= code_v2 (derive/columnName>columnTitle computed new-columns)))
-    (is (= (update-in t1 ["args" "code"] (constantly code_v2))
+    (is (= (-> (update-in t1 ["args" "code"] (constantly code_v2))
+               (assoc-in ["args" "original-code"] code_v1))
            (engine/adapt-transformation t1 older-columns new-columns)))))
 
 (deftest ^:unit row-template-format-test
