@@ -450,7 +450,9 @@
          columns         new-columns
          applied-txs     []]
     (if-let [transformation (first transformations)]
-      (let [transformation       (adapt-transformation transformation old-columns columns)
+      (let [_ (log/error :before-adapt-transformation :apply-dataset-transformations-on-table transformation)
+            transformation       (adapt-transformation transformation old-columns columns)
+            _ (log/error :after-adapt-transformation :apply-dataset-transformations-on-table transformation)
             avoid-tranformation? (let [t (w/keywordize-keys transformation)]
                                    (and
                                     (avoidable-if-missing? t)
