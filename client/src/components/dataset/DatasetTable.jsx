@@ -424,6 +424,7 @@ class DatasetTable extends Component {
       const columnHeader = (
         <ColumnHeader
           key={index}
+          env={this.props.env}
           column={column}
           onToggleDataTypeContextMenu={this.handleToggleDataTypeContextMenu}
           onToggleColumnContextMenu={this.handleToggleColumnContextMenu}
@@ -594,6 +595,7 @@ DatasetTable.propTypes = {
   Header: PropTypes.any,
   headerProps: PropTypes.object,
   datasetRowAvailable: PropTypes.bool,
+  env: PropTypes.object.isRequired,
 };
 
 export default withRouter(injectIntl(DatasetTable));

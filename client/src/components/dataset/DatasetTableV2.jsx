@@ -369,6 +369,7 @@ function DatasetTable(props) {
     const columnHeader = (
       <ColumnHeader
         key={index}
+        env={props.env}
         column={column}
         onToggleDataTypeContextMenu={handleToggleDataTypeContextMenu}
         onToggleColumnContextMenu={handleToggleColumnContextMenu}
@@ -575,6 +576,7 @@ DatasetTable.propTypes = {
   rowsCount: PropTypes.number,
   transformations: PropTypes.object,
   dataSourceKind: PropTypes.string,
+  env: PropTypes.object.isRequired,
 };
 
 export default withRouter(injectIntl(DatasetTable));

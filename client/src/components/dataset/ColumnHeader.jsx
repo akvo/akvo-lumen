@@ -65,8 +65,7 @@ class ColumnHeader extends Component {
   }
 
   render() {
-    const { column, disabled } = this.props;
-
+    const { column, disabled, env } = this.props;
     return (
       <div
         className={`ColumnHeader ${disabled ? '' : 'clickable'}
@@ -117,7 +116,7 @@ class ColumnHeader extends Component {
             </span>
           }
           <ConditionalTooltip>
-            {isTransformationColumn(column.get('columnName')) && <span className="fxColumn">fx</span>}
+            {env.environment['data-groups'] && isTransformationColumn(column.get('columnName')) && <span className="fxColumn">fx</span>}
             {column.get('title')}
           </ConditionalTooltip>
         </span>
@@ -171,4 +170,5 @@ ColumnHeader.propTypes = {
   columnMenuActive: PropTypes.bool.isRequired,
   disabled: PropTypes.bool,
   intl: intlShape.isRequired,
+  env: PropTypes.object.isRequired,
 };

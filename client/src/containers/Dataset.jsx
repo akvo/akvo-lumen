@@ -309,6 +309,7 @@ function Dataset(props) {
           <DatasetTableV2
             history={history}
             datasetId={datasetId}
+            env={props.env}
             group={currentGroup}
             columns={currentGroup ? currentGroup.get('columns') : null}
             rows={currentGroup ? currentGroup.get('rows') : null}
@@ -343,6 +344,7 @@ function Dataset(props) {
         ) : (
           <DatasetTableV1
             history={history}
+            env={props.env}
             datasetId={datasetId}
             columns={getColumns(dataset)}
             rows={getRows(dataset)}
@@ -381,7 +383,8 @@ Dataset.propTypes = {
   params: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  env: PropTypes.object.isRequired,
 };
 
 // // Just inject `dispatch`
-export default withRouter(connect()(Dataset));
+export default withRouter(connect(state => state)(Dataset));
