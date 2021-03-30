@@ -449,11 +449,9 @@
   (loop [transformations transformations
          columns         new-columns
          applied-txs     []]
-    (if-let [transformation (first transformations)]
-      (let [_ (log/error :before-adapt-transformation :apply-dataset-transformations-on-table transformation)
-            transformation       (adapt-transformation transformation old-columns columns)
-            _ (log/error :after-adapt-transformation :apply-dataset-transformations-on-table transformation)
-            avoid-tranformation? (let [t (w/keywordize-keys transformation)]
+    (if-let [transformation-original (first transformations)]
+      (let [transformation-adapted       (adapt-transformation transformation-original old-columns columns)
+            avoid-tranformation? (let [t (w/keywordize-keys transformation-adapted)]
                                    (and
                                     (avoidable-if-missing? t)
                                     ((complement set/subset?)
@@ -461,12 +459,12 @@
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
           (recur (rest transformations) columns  applied-txs)
-          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns (assoc transformation :dataset-id dataset-id))]
+          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns (assoc transformation-adapted :dataset-id dataset-id))]
             (when-not (:success? op)
               (throw
-               (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation) {})))
+               (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation-original) {})))
             (let [applied-txs (conj applied-txs
-                                    (assoc transformation "changedColumns"
+                                    (assoc transformation-original "changedColumns"
                                            (diff-columns columns (:columns op))))]
               (db.job-execution/vacuum-table conn {:table-name table-name})
               (recur (rest transformations) (:columns op)  applied-txs)))))
@@ -487,11 +485,11 @@
                                                    :columns (reverse columns)
                                                    :table-name (get group-table-names (:group-id group))))))
          applied-txs     []]
-    (if-let [transformation (first transformations)]
+    (if-let [transformation-original (first transformations)]
       (let [columns (reduce into [] (map :columns data-groups))
-            transformation       (adapt-transformation transformation old-columns columns)
-            data-group (data-group-by-op transformation data-groups)
-            avoid-tranformation? (let [t (w/keywordize-keys transformation)]
+            transformation-adapted       (adapt-transformation transformation-original old-columns columns)
+            data-group (data-group-by-op transformation-adapted data-groups)
+            avoid-tranformation? (let [t (w/keywordize-keys transformation-adapted)]
                                    (and
                                     (avoidable-if-missing? t)
                                     ((complement set/subset?)
@@ -504,16 +502,16 @@
                   (try-apply-operation-2 {:tenant-conn conn :caddisfly caddisfly}
                                          {:data-group data-group
                                           :data-groups data-groups
-                                          :transformation (assoc transformation :dataset-id dataset-id)})
+                                          :transformation (assoc transformation-adapted :dataset-id dataset-id)})
                   (catch ExceptionInfo e
                     (do
                       (log/error e)
                       (throw
                        (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s"
-                                        (-> e ex-data :transformation-result :message) transformation) {})))))
+                                        (-> e ex-data :transformation-result :message) transformation-original) {})))))
                 data-groups-to-be-created (adapt data-groups-to-be-created data-groups)]
             (let [applied-txs (conj applied-txs
-                                    (assoc transformation "changedColumns"
+                                    (assoc transformation-original "changedColumns"
                                            (diff-columns (:columns data-group)  columns)))]
               (db.job-execution/vacuum-table conn {:table-name (:table-name data-group)})
               (recur (rest transformations)
