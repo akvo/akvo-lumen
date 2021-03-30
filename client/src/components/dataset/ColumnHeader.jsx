@@ -5,6 +5,7 @@ import { intlShape, injectIntl } from 'react-intl';
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import IMAGES from '../../constants/images';
+import { isTransformationColumn } from '../../utilities/column';
 
 require('./ColumnHeader.scss');
 
@@ -116,6 +117,7 @@ class ColumnHeader extends Component {
             </span>
           }
           <ConditionalTooltip>
+            {isTransformationColumn(column.get('columnName')) && <span className="fxColumn">fx</span>}
             {column.get('title')}
           </ConditionalTooltip>
         </span>
