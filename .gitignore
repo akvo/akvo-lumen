@@ -189,3 +189,6 @@ Session.vim
 
 # ORG-ROAM
 backend/roam
+
+# ZULIP
+notify.team.sh
