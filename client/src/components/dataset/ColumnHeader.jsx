@@ -115,8 +115,7 @@ class ColumnHeader extends Component {
               </span>
             </span>
           }
-          <ConditionalTooltip>
-            {env.environment['data-groups'] && isTransformationColumn(column.get('columnName')) && <span className="fxColumn">fx</span>}
+          <ConditionalTooltip fx={env.environment['data-groups'] && isTransformationColumn(column.get('columnName'))}>
             {column.get('title')}
           </ConditionalTooltip>
         </span>
@@ -131,7 +130,7 @@ class ColumnHeader extends Component {
   }
 }
 
-const ConditionalTooltip = ({ children }) => {
+const ConditionalTooltip = ({ children, fx }) => {
   const [useTooltip, setUseTooltip] = useState(false); // eslint-disable-line
   const handleRef = (ref) => {
     if (!ref) return;
@@ -151,7 +150,10 @@ const ConditionalTooltip = ({ children }) => {
           </Tooltip>
         }
       >
-        <span className="holder"><span>{children}</span></span>
+        <span className="holder">
+          {fx && <span className="fxColumn">fx</span>}
+          <span>{children}</span>
+        </span>
       </OverlayTrigger>,
     ];
   }
