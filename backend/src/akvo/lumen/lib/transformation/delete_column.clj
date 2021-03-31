@@ -33,26 +33,31 @@
       (filter (fn [[id name columns]]
                 (some #(= % column-name) columns)))))
 
+(defn- delete-column [tenant-conn table-name columns column-name]
+  (let [column-idx  (engine/column-index columns column-name)]
+    (db.tx.engine/delete-column tenant-conn {:table-name table-name :column-name column-name})
+    {:success?      true
+     :execution-log [(format "Deleted column %s" column-name)]
+     :columns       (into (vec (take column-idx columns))
+                          (drop (inc column-idx) columns))}))
+
 (defmethod engine/apply-operation "core/delete-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
-  (let [column-name (col-name op-spec)
-        merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]
-    (if (empty? merged-sources)
-      (if-let [existent-viss (seq (visualisations-with-dataset-column tenant-conn (:dataset-id op-spec) column-name))]        
-        {:success? false
-         :message  (format "Cannot delete column. It is used in the following visalisations: %s"
-                           (str/join ", " (map #(format "'%s'" (second %))  existent-viss)))
-         :error-data existent-viss}
-        (let [column-idx  (engine/column-index columns column-name)]
-          (db.tx.engine/delete-column tenant-conn {:table-name table-name :column-name column-name})
-          {:success?      true
-           :execution-log [(format "Deleted column %s" column-name)]
-           :columns       (into (vec (take column-idx columns))
-                                (drop (inc column-idx) columns))})
-        )
-      {:success? false
-       :message  (format "Cannot delete column. It is used in merge transformations of dataset: %s"
-                         (str/join "," (map (comp :title second) merged-sources)))})))
+  (let [column-name (col-name op-spec)]
+    (log/info "core/delete-column" (:main-op op-spec) op-spec)
+    (if (not (contains? #{:undo :update} (:main-op op-spec)))
+      (let [merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]
+        (if (empty? merged-sources)
+          (if-let [existent-viss (seq (visualisations-with-dataset-column tenant-conn (:dataset-id op-spec) column-name))]
+            {:success? false
+             :message  (format "Cannot delete column. It is used in the following visalisations: %s"
+                               (str/join ", " (map #(format "'%s'" (second %))  existent-viss)))
+             :error-data existent-viss}
+            (delete-column tenant-conn table-name columns column-name))
+          {:success? false
+           :message  (format "Cannot delete column. It is used in merge transformations of dataset: %s"
+                             (str/join "," (map (comp :title second) merged-sources)))}))
+      (delete-column tenant-conn table-name columns column-name))))
 
 (defmethod engine/columns-used "core/delete-column"
   [applied-transformation columns]
