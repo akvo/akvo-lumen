@@ -176,14 +176,16 @@
   3. apply-operation
   4. separate transformation data-group columns from the others"
   [{:keys [tenant-conn] :as deps}
-   {:keys [transformation data-groups data-group]}]
+   {:keys [transformation data-groups data-group dataset-id main-op]}]
   (let [data-group (or data-group (data-group-by-op transformation data-groups))
         source-table (:table-name data-group)
         other-dgs-columns (reduce (fn [c dg] (if (= (:id dg) (:id data-group))
                                                c (into c (:columns dg)))) [] data-groups)
         previous-columns (into (vec (:columns data-group)) other-dgs-columns)
         {:keys [success? message execution-log error-data data-groups-to-be-created] :as res}
-        (try-apply-operation deps source-table previous-columns transformation)
+        (try-apply-operation deps source-table previous-columns (assoc transformation
+                                                                       :main-op main-op
+                                                                       :dataset-id dataset-id))
         columns (let [other-dgs-columns-set (set other-dgs-columns)]
                   (reduce (fn [container column]
                             (if (contains? other-dgs-columns-set column)
@@ -261,7 +263,9 @@
         data-groups (db.data-group/list-data-groups-by-dataset-version-id tenant-conn {:dataset-version-id (:id dataset-version)})
         tx-data {:data-groups data-groups
                  :job-execution-id job-execution-id
-                 :transformation transformation}
+                 :transformation transformation
+                 :dataset-id dataset-id
+                 :main-op :transformation}
         {:keys [columns data-groups-to-be-created data-group]}
         (try-apply-operation-2 deps tx-data)]
     (post-try-apply-operation-2 deps tx-data
@@ -276,7 +280,9 @@
         previous-columns (vec (:columns dataset-version))
         source-table (:table-name dataset-version)]
     (let [{:keys [success? message columns execution-log error-data]}
-          (try-apply-operation deps source-table previous-columns (assoc transformation :dataset-id dataset-id))]
+          (try-apply-operation deps source-table previous-columns (assoc transformation
+                                                                         :dataset-id dataset-id
+                                                                         :main-op :transformation))]
       (when-not success?
         (log/errorf "Failed to transform: %s, columns: %s, execution-log: %s, data: %s" message columns execution-log error-data)
         (throw (ex-info (or message "") {})))
@@ -342,7 +348,9 @@
             (db.transformation/drop-table tenant-conn {:table-name previous-table-name})))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [success? message columns execution-log] :as transformation-result}
-              (try-apply-operation deps table-name columns (assoc transformation :dataset-id dataset-id))]
+              (try-apply-operation deps table-name columns (assoc transformation
+                                                                  :dataset-id dataset-id
+                                                                  :main-op :undo))]
           (if success?
             (recur (rest transformations) columns (into full-execution-log execution-log) (inc tx-index))
             (do
@@ -400,7 +408,9 @@
               {:keys [data-groups-to-be-created data-group columns]}
               (try
                 (try-apply-operation-2 deps {:transformation transformation
-                                             :data-groups data-groups})
+                                             :data-groups data-groups
+                                             :dataset-id dataset-id
+                                             :main-op :undo})
                 (catch ExceptionInfo e
                   (do
                     (log/info (str "Unsuccessful undo of dataset: " dataset-id))
@@ -459,7 +469,7 @@
                                      (set (map #(get % "columnName") columns)))))]
         (if avoid-tranformation?
           (recur (rest transformations) columns  applied-txs)
-          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns (assoc transformation-adapted :dataset-id dataset-id))]
+          (let [op (try-apply-operation {:tenant-conn conn :caddisfly caddisfly} table-name columns (assoc transformation-adapted :dataset-id dataset-id :main-op :update))]
             (when-not (:success? op)
               (throw
                (ex-info (format "Failed to update due to transformation mismatch: %s . TX: %s" (:message op) transformation-original) {})))
@@ -502,6 +512,8 @@
                   (try-apply-operation-2 {:tenant-conn conn :caddisfly caddisfly}
                                          {:data-group data-group
                                           :data-groups data-groups
+                                          :dataset-id dataset-id
+                                          :main-op :update
                                           :transformation (assoc transformation-adapted :dataset-id dataset-id)})
                   (catch ExceptionInfo e
                     (do
