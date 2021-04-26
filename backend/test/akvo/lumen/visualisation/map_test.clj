@@ -1,4 +1,4 @@
-(ns akvo.lumen.visualisation.map_test
+(ns akvo.lumen.visualisation.map-test
   {:functional true}
   (:require
    [akvo.lumen.lib.dataset :as dataset]
@@ -39,38 +39,9 @@
 ;;; Fixture
 ;;;
 
-(def ^:dynamic *dataset-data*)
-(defn dataset-data-fixture [f]
-  (binding [*dataset-data* (i-c/flow-sample-imported-dataset groups-def 2)]
-    (f)))
-
-(def ^:dynamic *dataset-id*)
-(defn dataset-id-fixture [f]
-  (binding [*dataset-id* (tu/import-file *tenant-conn* *error-tracker*
-                                         {:dataset-name "Generated map"
-                                          :kind "clj-flow"
-                                          :data *dataset-data*})]
-    (f)
-    (let [{:keys [imported-table-name table-name]}
-          (db.transformation/latest-dataset-version-by-dataset-id
-           *tenant-conn* {:dataset-id *dataset-id*})
-          drop-table-seq
-          (format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" table-name)
-          drop-table (jdbc/drop-table-ddl table-name)
-          drop-imported-table-seq
-          (format "DROP SEQUENCE IF EXISTS %s_rnum_seq CASCADE" imported-table-name)
-          drop-imported-table (jdbc/drop-table-ddl imported-table-name)]
-      (jdbc/db-do-commands *tenant-conn* [drop-table-seq
-                                          drop-table
-                                          drop-imported-table-seq
-                                          drop-imported-table])
-      (dataset/delete *tenant-conn* *dataset-id*))))
-
-
 (use-fixtures :once
   system-fixture data-groups-future-fixture tenant-conn-fixture
-  error-tracker-fixture tu/spec-instrument dataset-data-fixture
-  dataset-id-fixture)
+  error-tracker-fixture tu/spec-instrument)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Utility fns, random data but we're using same form on the data and are
@@ -166,12 +137,16 @@
 ;;;
 
 (deftest ^:functional basic-map
-
   (testing "Map from Flow dataset using dataset_version"
-    (let [layers (layers *dataset-id* *dataset-data*)
+    (let [dataset-data (i-c/flow-sample-imported-dataset groups-def 2)
+          dataset-id (tu/import-file *tenant-conn* *error-tracker*
+                                         {:dataset-name "Generated map"
+                                          :kind "clj-flow"
+                                          :data dataset-data})
+          layers (layers dataset-id dataset-data)
           opts {:centre-of-the-world "greenwich"}
           metadata-array (v.maps/metadata-layers *tenant-conn* layers opts)
           map-config (v.map-config/build *tenant-conn* layers metadata-array)
           {:keys [sql]} (-> map-config :layers first :options)
           sql-result (jdbc/query *tenant-conn* sql)]
-      (check-data *dataset-data* sql-result))))
+      (check-data dataset-data sql-result))))
