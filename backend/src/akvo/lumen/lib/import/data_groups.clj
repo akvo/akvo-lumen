@@ -9,6 +9,7 @@
             [akvo.lumen.protocols :as p]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.env :as env]
+            [akvo.lumen.lib.data-group :as lib.data-group]
             [akvo.lumen.lib.import.flow :as i.flow]
             [akvo.lumen.lib.import.csv]
             [akvo.lumen.lib.raster]
@@ -76,7 +77,8 @@
                                                                :sort nil
                                                                :title (string/trim title)
                                                                :type type})
-                                                            columns)})))))
+                                                            columns)})))
+    (lib.data-group/table-name-and-columns-from-data-grops conn (str dataset-id) false (lib.data-group/view-table-name dataset-version-id))))
 
 (defn adapt-columns [importer-columns]
   (let [columns (map (fn [c] (-> c
