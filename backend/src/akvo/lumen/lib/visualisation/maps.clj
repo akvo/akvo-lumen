@@ -109,7 +109,7 @@
                {:keys [table-name columns raster_table]} (if (= current-layer-type "raster")
                                                            (db.raster/raster-by-id tenant-conn {:id current-dataset-id})
                                                            (if (-> (env/all tenant-conn) (get "data-groups"))
-                                                             (or (data-group/table-name-and-columns-from-data-grops tenant-conn current-dataset-id)
+                                                             (or (data-group/create-view-from-data-groups tenant-conn current-dataset-id)
                                                                  (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id}))
                                                              (db.dataset/dataset-by-id tenant-conn {:id current-dataset-id})))
                current-where-clause (filter/sql-str (walk/keywordize-keys columns) (:filters current-layer))]

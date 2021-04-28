@@ -4,6 +4,7 @@
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.env :as env]
+            [akvo.lumen.lib.data-group :as lib.data-group]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.import.data-groups :as import.data-groups]
             [akvo.lumen.util :as util]
@@ -80,7 +81,8 @@
       (db.transformation/drop-table conn {:table-name (:imported-table-name old-dg)})
       (db.transformation/drop-table conn {:table-name (:table-name old-dg)}))
     (db.transformation/touch-dataset conn {:id dataset-id})
-    (db.job-execution/update-successful-job-execution conn {:id job-execution-id})))
+    (db.job-execution/update-successful-job-execution conn {:id job-execution-id})
+    (lib.data-group/create-view-from-data-groups conn dataset-id)))
 
 (defn- successful-update
   "On a successful update we need to create a new dataset-version that
