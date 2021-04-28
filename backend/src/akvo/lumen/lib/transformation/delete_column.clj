@@ -1,9 +1,11 @@
 (ns akvo.lumen.lib.transformation.delete-column
   (:require [akvo.lumen.db.transformation.engine :as db.tx.engine]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
             [akvo.lumen.lib.aggregation.commons :as aggregation.commons]
             [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.transformation.merge-datasets :as merge-datasets]
             [akvo.lumen.lib.visualisation :as visualisation]
+            [akvo.lumen.lib.data-group :as lib.data-group]
             [akvo.lumen.specs.visualisation :as s.visualisation]
             [akvo.lumen.util :as util]
             [clojure.string :as str]
@@ -33,8 +35,10 @@
       (filter (fn [[id name columns]]
                 (some #(= % column-name) columns)))))
 
-(defn- delete-column [tenant-conn table-name columns column-name]
+(defn- delete-column [tenant-conn table-name columns column-name dataset-id]
   (let [column-idx  (engine/column-index columns column-name)]
+    (when-let [dv2 (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+      (lib.data-group/drop-view! tenant-conn (:id dv2)))
     (db.tx.engine/delete-column tenant-conn {:table-name table-name :column-name column-name})
     {:success?      true
      :execution-log [(format "Deleted column %s" column-name)]
@@ -53,11 +57,11 @@
              :message  (format "Cannot delete column. It is used in the following visalisations: %s"
                                (str/join ", " (map #(format "'%s'" (second %))  existent-viss)))
              :error-data existent-viss}
-            (delete-column tenant-conn table-name columns column-name))
+            (delete-column tenant-conn table-name columns column-name (:dataset-id op-spec)))
           {:success? false
            :message  (format "Cannot delete column. It is used in merge transformations of dataset: %s"
                              (str/join "," (map (comp :title second) merged-sources)))}))
-      (delete-column tenant-conn table-name columns column-name))))
+      (delete-column tenant-conn table-name columns column-name (:dataset-id op-spec)))))
 
 (defmethod engine/columns-used "core/delete-column"
   [applied-transformation columns]

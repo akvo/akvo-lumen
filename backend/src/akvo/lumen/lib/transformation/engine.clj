@@ -344,9 +344,9 @@
                                                          (butlast
                                                           (:transformations current-dataset-version))))
                                       :columns (w/keywordize-keys columns)}]
-            (db.dataset-version/new-dataset-version tenant-conn
-                                 next-dataset-version)
+            (db.dataset-version/new-dataset-version tenant-conn next-dataset-version)
             (db.transformation/touch-dataset tenant-conn {:id dataset-id})
+            (lib.data-group/drop-view! tenant-conn (:id current-dataset-version))
             (db.transformation/drop-table tenant-conn {:table-name previous-table-name})))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [success? message columns execution-log] :as transformation-result}
@@ -404,6 +404,7 @@
                                                                :version             (inc (:version current-dataset-version))
                                                                :columns             (vec (w/keywordize-keys (:columns data-group)))))
               (when-not (= MERGE-DATASET (:imported-table-name data-group))
+                (lib.data-group/drop-view! tenant-conn (:id current-dataset-version))
                 (db.transformation/drop-table tenant-conn {:table-name (:previous-table-name data-group)}))))
           (lib.data-group/create-view-from-data-groups  tenant-conn dataset-id)
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
