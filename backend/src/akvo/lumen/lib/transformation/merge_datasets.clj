@@ -221,7 +221,7 @@
         target-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id conn {:dataset-id (:dataset-id op-spec) })
         target-merge-data-group (db.data-group/get-data-group-by-column-name conn {:column-name (get target "mergeColumn")
                                                                                    :dataset-version-id (:id target-dataset-version)})
-        source-dataset (data-group/table-name-and-columns-from-data-groups conn (get source "datasetId"))]
+        source-dataset (data-group/create-view-from-data-groups conn (get source "datasetId"))]
     (doseq [{:keys [columns table-name] :as source-data-group}  data-groups-to-be-created]
       (let [data (->>
                   (fetch-data-2 conn {:source-data-group source-data-group

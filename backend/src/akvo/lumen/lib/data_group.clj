@@ -5,7 +5,8 @@
             [clojure.tools.logging :as log]
             [clojure.string :as str]
             [clojure.walk :as walk])
-  (:import [org.postgresql.util PSQLException]))
+  (:import [org.postgresql.util PSQLException]
+           [java.time Instant]))
 
 (defn data-groups-sql-template
   "Returns a data structure useful to generate a SELECT statement with the data groups passed as
@@ -50,20 +51,18 @@
 (defn view-table-name [uuid]
   (str "dsv_view_" (str/replace uuid "-" "_")))
 
-(defn table-name-and-columns-from-data-groups
-  [tenant-conn dataset-id]
-  (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                                   (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-    (let [columns (reduce #(into % (:columns %2)) [] data-groups)
-          t-name (view-table-name (:dataset-version-id (first data-groups)))]
-      {:table-name t-name :columns columns})))
+(defn drop-view! [conn dataset-version-2-id]
+  (log/warn :drop-view! (view-table-name dataset-version-2-id) dataset-version-2-id)
+  (jdbc/execute! conn [(format "DROP VIEW %s" (view-table-name dataset-version-2-id))]))
 
 (defn create-view-from-data-groups
   [tenant-conn dataset-id]
   (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
                                    (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-    (let [columns (reduce #(into % (:columns %2)) [] data-groups)
-          t-name (view-table-name (:dataset-version-id (first data-groups)))]
+    (let [fdg (first data-groups)
+          created (Instant/ofEpochMilli (:updated fdg)) ;; TODO: only call if date is previous to the release of data-groups [backward compatibility]
+          columns (reduce #(into % (:columns %2)) [] data-groups)
+          t-name (view-table-name (:dataset-version-id fdg))]
       (try
         (->> data-groups
              data-groups-sql-template
