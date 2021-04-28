@@ -255,7 +255,8 @@
       (db.data-group/new-data-group tenant-conn (-> dg
                                                     (assoc :dataset-version-id new-dataset-version-id :id (util/squuid))
                                                     (update :columns vec))))
-    (db.transformation/touch-dataset tenant-conn {:id (:dataset-id transformation)})))
+    (db.transformation/touch-dataset tenant-conn {:id (:dataset-id transformation)})
+    (lib.data-group/create-view-from-data-groups  tenant-conn (:dataset-id transformation))))
 
 (defn execute-transformation-2
   [{:keys [tenant-conn claims] :as deps} dataset-id job-execution-id transformation]
@@ -404,7 +405,7 @@
                                                                :columns             (vec (w/keywordize-keys (:columns data-group)))))
               (when-not (= MERGE-DATASET (:imported-table-name data-group))
                 (db.transformation/drop-table tenant-conn {:table-name (:previous-table-name data-group)}))))
-          (lib.data-group/table-name-and-columns-from-data-grops tenant-conn (str dataset-id) false (lib.data-group/view-table-name new-dataset-version-id))
+          (lib.data-group/create-view-from-data-groups  tenant-conn dataset-id)
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [data-groups-to-be-created data-group columns]}

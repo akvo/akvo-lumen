@@ -78,7 +78,7 @@
                                                                :title (string/trim title)
                                                                :type type})
                                                             columns)})))
-    (lib.data-group/table-name-and-columns-from-data-grops conn (str dataset-id) false (lib.data-group/view-table-name dataset-version-id))))
+    (lib.data-group/create-view-from-data-groups conn dataset-id)))
 
 (defn adapt-columns [importer-columns]
   (let [columns (map (fn [c] (-> c
