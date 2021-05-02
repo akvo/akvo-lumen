@@ -253,7 +253,8 @@
                                                                         {:dataset-version-id (:id dataset-version)})
             :when (not= (:id dg) (:id data-group))]
       (db.data-group/new-data-group tenant-conn (-> dg
-                                                    (assoc :dataset-version-id new-dataset-version-id :id (util/squuid))
+                                                    (assoc :dataset-version-id new-dataset-version-id :id
+                                                           (str (util/squuid)))
                                                     (update :columns vec))))
     (db.transformation/touch-dataset tenant-conn {:id (:dataset-id transformation)})
     (lib.data-group/create-view-from-data-groups  tenant-conn (:dataset-id transformation))))
