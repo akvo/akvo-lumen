@@ -52,8 +52,8 @@
   (str "dsv_view_" (str/replace uuid "-" "_")))
 
 (defn drop-view! [conn dataset-version-2-id]
-  (log/warn :drop-view! (view-table-name dataset-version-2-id) dataset-version-2-id)
-  (jdbc/execute! conn [(format "DROP VIEW %s" (view-table-name dataset-version-2-id))]))
+  (let [view-name (view-table-name dataset-version-2-id)]
+   (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
 
 (defn create-view-from-data-groups
   [tenant-conn dataset-id]
