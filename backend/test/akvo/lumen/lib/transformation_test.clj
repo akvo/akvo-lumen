@@ -256,6 +256,7 @@
         data-group (first (db.data-group/list-data-groups-by-dataset-version-id
                            *tenant-conn*
                            {:dataset-version-id (:id dsv)}))
+        _ (log/error dataset-id dsv data-group)
         {previous-table-name :table-name} data-group
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
     (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
