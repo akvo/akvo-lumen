@@ -1,6 +1,8 @@
 (ns akvo.lumen.lib.transformation.change-datatype
   (:require [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.db.transformation.change-datatype :as db.tx.change-datatype]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.lib.data-group :as lib.data-group]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
@@ -46,6 +48,12 @@
         to-type (lumen-type->pg-type (get-in op-spec ["args" "newType"]))]
     (format "%s_to_%s" from-type to-type)))
 
+(defn drop-view [tenant-conn op-spec table-name]
+  (log/error :droping-dataset-id (:dataset-id op-spec) table-name)
+  (when-let [dv2 (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id (:dataset-id op-spec)})]
+    (log/error :droping-dv2 (:id dv2) table-name)
+    (lib.data-group/drop-view! tenant-conn (:id dv2))))
+
 (defn change-datatype-to-number
   [tenant-conn table-name columns op-spec]
   (let [type-conversion (type-conversion-sql-function columns op-spec)
@@ -58,6 +66,7 @@
                           "default-value" (alter-table "%s(%s, %s)" type-conversion column-name default-value)
                           "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
     (engine/ensure-number default-value)
+    (drop-view tenant-conn op-spec table-name)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defn change-datatype-to-text
@@ -72,6 +81,7 @@
                           "fail" (alter-table "%s(%s)" type-conversion column-name)
                           "default-value" (alter-table "%s(%s, '%s')" type-conversion column-name default-value)
                           "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))]
+    (drop-view tenant-conn op-spec table-name)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defn change-datatype-to-date
@@ -95,6 +105,7 @@
                                                                   type-conversion column-name default-value)
                                      "delete-row" (alter-table "%s(%s, NULL)" type-conversion column-name))) ]
     (engine/ensure-number default-value)
+    (drop-view tenant-conn op-spec table-name)
     (change-datatype tenant-conn table-name column-name on-error alter-table-sql)))
 
 (defmethod engine/apply-operation "core/change-datatype"
