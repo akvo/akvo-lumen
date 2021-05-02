@@ -264,13 +264,13 @@
                                              :transformation (gen-transformation "core/to-lowercase"
                                                                                  {::db.dataset-version.column.s/columnName "c1"
                                                                                   ::transformation.engine.s/onError "fail"})})
-                      (apply-transformation {:type :transformation
+                      #_(apply-transformation {:type :transformation
                                              :transformation (gen-transformation "core/change-datatype"
                                                                                  {::db.dataset-version.column.s/columnName "c5"
                                                                                   ::transformation.engine.s/onError "default-value"
                                                                                   ::transformation.change-datatype.s/newType "number"
                                                                                   ::transformation.change-datatype.s/defaultValue 0})})
-                      (apply-transformation {:type :undo}))
+                      #_(apply-transformation {:type :undo}))
           dsv (db.dataset-version/dataset-version-2-by-dataset-id-and-version
                *tenant-conn*
                {:dataset-id dataset-id :version 2})
@@ -283,7 +283,7 @@
                              *tenant-conn*
                              {:dataset-version-id (:id latest-dsv)}))]
       (is (= ::lib/ok tag))
-      (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
+;;      (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
       (is (= (:columns dg)
              (:columns latest-dg)))
       (let [table-name (:table-name latest-dg)]
