@@ -18,3 +18,6 @@
 
 (defn get-all-columns [conn opts]
   (vec (flatten (:columns (db-get-all-columns conn opts)))))
+
+(defn exists-view? [conn table-name]
+  (:exists (db-exists-view conn {:table-name table-name})))

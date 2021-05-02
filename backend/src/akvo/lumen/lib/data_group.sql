@@ -29,3 +29,13 @@ WHERE dataset_version_id=:dataset-version-id
 -- :doc Gets all columns of all data-groups except group-id for one dataset-version
 select json_agg(columns) AS columns from data_group
 WHERE dataset_version_id=:dataset-version-id
+
+-- :name db-exists-view :? :1
+-- :doc delete dataset
+SELECT EXISTS(
+    SELECT *
+    FROM information_schema.tables
+    WHERE
+      table_schema = 'public' AND
+      table_name = :table-name
+);
