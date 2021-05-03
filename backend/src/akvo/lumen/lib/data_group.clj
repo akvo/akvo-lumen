@@ -41,11 +41,11 @@
                           (map #(format "LEFT JOIN %1$s ON m.instance_id = %1$s.instance_id" %)
                                (:others from))))])))
 
-(defn data-groups-temp-view
-  [view-name sql]
-  (format "CREATE TEMP VIEW %s AS %s" view-name sql))
+(defn data-groups-view
+  [view-name temporary? sql]
+  (format "CREATE %s VIEW %s AS %s" (if temporary? "TEMP" "") view-name sql))
 
-(defn table-name-and-columns-from-data-grops [tenant-conn dataset-id]
+(defn create-view-from-data-groups [tenant-conn dataset-id]
   (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
                                    (map #(update % :columns (comp walk/keywordize-keys vec)))))]
     (let [columns (reduce #(into % (:columns %2)) [] data-groups)
@@ -53,7 +53,7 @@
       (->> data-groups
            data-groups-sql-template
            data-groups-sql
-           (data-groups-temp-view table-name)
+           (data-groups-view table-name true)
            vector
            (jdbc/execute! tenant-conn))
       {:table-name table-name :columns columns})))
