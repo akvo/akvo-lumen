@@ -83,7 +83,7 @@
 
 (defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply (assoc deps :claims tu/test-claims) dataset-id command)
-        [job _] (retry-job-execution tenant-conn jobExecutionId true)]
+        [job _] (retry-job-execution tenant-conn jobExecutionId true :transformation)]
     (conj res (:status job) job)))
 
 (defn latest-data [dataset-id]

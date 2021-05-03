@@ -38,16 +38,18 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
-(defn retry-job-execution [tenant-conn job-execution-id with-job?]
+(defn retry-job-execution [tenant-conn job-execution-id with-job? & [job-type]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
                   :max-retries 20
                   :delay-ms 100}
     (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
-          ds-job (datasource-job-execution-by-id tenant-conn {:id job-execution-id})
+          ds-job (when (= :import job-type) (datasource-job-execution-by-id tenant-conn {:id job-execution-id}))
           status (:status job)
           res (when (and status (not= "PENDING" status))
                 (if (= "OK" status)
-                  (:dataset_id ds-job)
+                  (if (= :import job-type)
+                    (:dataset_id ds-job)
+                    (:dataset-id job))
                   job-execution-id))]
       (when res
         (if with-job?
@@ -79,7 +81,7 @@
                          {:data data})}
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker test-claims spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (retry-job-execution tenant-conn importId with-job?)))
+    (retry-job-execution tenant-conn importId with-job? :import)))
 
 (defn try-latest-dataset-version-2 [conn dataset-id & [version]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
@@ -105,7 +107,7 @@
                                                                                        :family_name "test_family_name"
                                                                                        :email "test_email"} {} error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (retry-job-execution tenant-conn updateId with-job?)))
+    (retry-job-execution tenant-conn updateId with-job? :import)))
 
 (defn rand-bol []
   (if (= 0 (rand-int 2)) false true))
