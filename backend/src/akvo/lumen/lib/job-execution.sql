@@ -27,6 +27,15 @@ SELECT spec
  WHERE data_source.id = job_execution.data_source_id
    AND job_execution.id = :job-execution-id;
 
+-- :name db-data-source-id-by-dataset-id :? :1
+-- :doc Get the data source spec by job execution id
+SELECT data_source.id
+  FROM data_source, job_execution
+ WHERE data_source.id = job_execution.data_source_id
+   AND job_execution.dataset_id = :dataset-id
+   AND job_execution.type = 'IMPORT' and job_execution.status = 'OK'
+
+
 -- :name update-failed-job-execution :! :n
 -- :doc Update failed job execution
 UPDATE job_execution

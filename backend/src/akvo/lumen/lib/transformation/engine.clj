@@ -271,6 +271,7 @@
                  :main-op :transformation}
         {:keys [columns data-groups-to-be-created data-group]}
         (try-apply-operation-2 deps tx-data)]
+    (lib.data-group/drop-view! tenant-conn (:id dataset-version))
     (post-try-apply-operation-2 deps tx-data
                                 {:columns columns
                                  :dataset-version dataset-version
@@ -407,7 +408,6 @@
               (when-not (= MERGE-DATASET (:imported-table-name data-group))
                 (lib.data-group/drop-view! tenant-conn (:id current-dataset-version))
                 (db.transformation/drop-table tenant-conn {:table-name (:previous-table-name data-group)}))))
-          (lib.data-group/create-view-from-data-groups  tenant-conn dataset-id)
           (db.transformation/touch-dataset tenant-conn {:id dataset-id}))
         (let [transformation (assoc (first transformations) :dataset-id dataset-id)
               {:keys [data-groups-to-be-created data-group columns]}
@@ -436,12 +436,16 @@
 (defn execute-undo [{:keys [tenant-conn] :as deps} dataset-id job-execution-id]
   (if (get (env/all tenant-conn) "data-groups")
     (let [current-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn
-                                                                                          {:dataset-id dataset-id})]
+                                                                                             {:dataset-id dataset-id})]
+      (log/error :execute-undo (:version current-dataset-version))
       (when (not= (:version current-dataset-version) 1)
+        (lib.data-group/drop-view! tenant-conn (:id current-dataset-version))
         (apply-undo-2 deps
                       dataset-id
                       job-execution-id
-                      current-dataset-version)))
+                      current-dataset-version)
+        (lib.data-group/create-view-from-data-groups tenant-conn dataset-id))
+      )
    (let [current-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn
                                                                                          {:dataset-id dataset-id})]
      (when (not= (:version current-dataset-version) 1)

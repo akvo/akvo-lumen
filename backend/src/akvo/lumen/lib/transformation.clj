@@ -67,8 +67,9 @@
       (let [v (validate command)]
         (if-not (:valid? v)
           (lib/bad-request {:message (:message v)})
-          (let [job-execution-id (str (squuid))]
-            (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
+          (let [job-execution-id (str (squuid))
+                data-source-id (db.job-execution/data-source-id-by-dataset-id tenant-conn dataset-id)]
+            (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id :data-source-id data-source-id})
             (execute-tx deps job-execution-id dataset-id command)
             (lib/ok {:jobExecutionId job-execution-id
                      :datasetId dataset-id}))))

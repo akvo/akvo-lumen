@@ -1,7 +1,8 @@
 -- :name new-transformation-job-execution :! :n
 -- :doc Inserts a new transformation job execution
-INSERT INTO job_execution (id, dataset_id, type)
-VALUES (:id, :dataset-id, 'TRANSFORMATION')
+INSERT INTO job_execution (id, dataset_id, data_source_id, type)
+VALUES (:id, :dataset-id, :data-source-id, 'TRANSFORMATION')
+
 
 -- :name pending-transformation-job-execution :? :1
 SELECT * from job_execution

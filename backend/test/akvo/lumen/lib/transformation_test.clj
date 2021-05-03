@@ -256,21 +256,26 @@
         data-group (first (db.data-group/list-data-groups-by-dataset-version-id
                            *tenant-conn*
                            {:dataset-version-id (:id dsv)}))
-        _ (log/error dataset-id dsv data-group)
         {previous-table-name :table-name} data-group
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} dataset-id)]
+    (log/error :before-undo)
     (is (= ::lib/ok (first (apply-transformation {:type :undo}))))
+    (log/error :after-undo)
     (let [[tag _] (do (apply-transformation {:type :transformation
                                              :transformation (gen-transformation "core/to-lowercase"
                                                                                  {::db.dataset-version.column.s/columnName "c1"
                                                                                   ::transformation.engine.s/onError "fail"})})
-                      #_(apply-transformation {:type :transformation
+                      (log/error :after-first-tx)
+                      (apply-transformation {:type :transformation
                                              :transformation (gen-transformation "core/change-datatype"
                                                                                  {::db.dataset-version.column.s/columnName "c5"
                                                                                   ::transformation.engine.s/onError "default-value"
                                                                                   ::transformation.change-datatype.s/newType "number"
                                                                                   ::transformation.change-datatype.s/defaultValue 0})})
-                      #_(apply-transformation {:type :undo}))
+                      (log/error :after-second-tx)
+
+                      (apply-transformation {:type :undo}))
+          _ (log/error :after-second-undo)
           dsv (db.dataset-version/dataset-version-2-by-dataset-id-and-version
                *tenant-conn*
                {:dataset-id dataset-id :version 2})
@@ -283,7 +288,7 @@
                              *tenant-conn*
                              {:dataset-version-id (:id latest-dsv)}))]
       (is (= ::lib/ok tag))
-;;      (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
+      (is (not (:exists (table-exists *tenant-conn* {:table-name previous-table-name}))))
       (is (= (:columns dg)
              (:columns latest-dg)))
       (let [table-name (:table-name latest-dg)]

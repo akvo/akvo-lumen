@@ -9,3 +9,7 @@
    (str "vacuum-table " (:table-name opts))
    (do
      (vacuum-table* conn opts {} {:transaction? false}))))
+
+
+(defn data-source-id-by-dataset-id [conn id]
+  (:id (db-data-source-id-by-dataset-id conn {:dataset-id id})))
