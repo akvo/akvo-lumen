@@ -54,8 +54,7 @@
 (defn drop-view! [conn dataset-version-2-id]
   (let [view-name (view-table-name dataset-version-2-id)]
     (db.data-group/exists-view? conn view-name)
-    (log/error :drop-view view-name)
-   (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
+    (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
 
 (defn create-view-from-data-groups
   [tenant-conn dataset-id]
@@ -63,7 +62,6 @@
                                    (map #(update % :columns (comp walk/keywordize-keys vec)))))]
     (let [columns (reduce #(into % (:columns %2)) [] data-groups)
           t-name (view-table-name (:dataset-version-id (first data-groups)))]
-      (log/error :create-view-from-data-groups t-name :dataset-id dataset-id :dsv-id (:dataset-version-id (first data-groups)))
       (if-not (db.data-group/exists-view? tenant-conn t-name)
         (->> data-groups
              data-groups-sql-template
