@@ -67,7 +67,7 @@
       (try
         (with-open [importer (common/dataset-importer (get spec "source")
                                                       (assoc import-config :environment (env/all conn)))]
-          (let [dataset-id (util/squuid)
+          (let [dataset-id (str (util/squuid))
                 columns (p/columns importer)]
             (postgres/create-dataset-table conn table-name columns)
             (doseq [record (map (comp postgres/coerce-to-sql common/extract-first-and-merge)

@@ -14,8 +14,10 @@
 (s/def ::job-execution-id (s/nilable ::lumen.s/str-uuid))
 
 (defn- ds-table-name? [s]
-  (let [[_ uuid] (string/split  s #"ds_")]
-       (lumen.s/str-uuid? (string/replace uuid "_" "-"))))
+  (let [[_ uuid] (if (string/includes? s "dsv_view_")
+                   (string/split  s #"dsv_view_")
+                   (string/split  s #"ds_"))]
+    (lumen.s/str-uuid? (string/replace uuid "_" "-"))))
 
 (s/def ::table-name (s/with-gen
                              (s/and string? ds-table-name?)

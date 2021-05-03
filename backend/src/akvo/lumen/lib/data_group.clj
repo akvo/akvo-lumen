@@ -1,9 +1,12 @@
 (ns akvo.lumen.lib.data-group
   (:require [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.data-group :as db.data-group]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
             [clojure.string :as str]
-            [clojure.walk :as walk]))
+            [clojure.walk :as walk])
+  (:import [org.postgresql.util PSQLException]))
 
 (defn data-groups-sql-template
   "Returns a data structure useful to generate a SELECT statement with the data groups passed as
@@ -45,15 +48,27 @@
   [view-name temporary? sql]
   (format "CREATE %s VIEW %s AS %s" (if temporary? "TEMP" "") view-name sql))
 
-(defn create-view-from-data-groups [tenant-conn dataset-id]
+(defn view-table-name [uuid]
+  (str "dsv_view_" (str/replace uuid "-" "_")))
+
+(defn drop-view! [conn dataset-version-2-id]
+  (let [view-name (view-table-name dataset-version-2-id)]
+    (db.data-group/exists-view? conn view-name)
+    (log/error :drop-view view-name)
+   (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
+
+(defn create-view-from-data-groups
+  [tenant-conn dataset-id]
   (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
                                    (map #(update % :columns (comp walk/keywordize-keys vec)))))]
     (let [columns (reduce #(into % (:columns %2)) [] data-groups)
-          table-name (util/gen-table-name "ds")]
-      (->> data-groups
-           data-groups-sql-template
-           data-groups-sql
-           (data-groups-view table-name true)
-           vector
-           (jdbc/execute! tenant-conn))
-      {:table-name table-name :columns columns})))
+          t-name (view-table-name (:dataset-version-id (first data-groups)))]
+      (log/error :create-view-from-data-groups t-name :dataset-id dataset-id :dsv-id (:dataset-version-id (first data-groups)))
+      (if-not (db.data-group/exists-view? tenant-conn t-name)
+        (->> data-groups
+             data-groups-sql-template
+             data-groups-sql
+             (data-groups-view t-name false)
+             vector
+             (jdbc/execute! tenant-conn)))
+      {:table-name t-name :columns columns})))

@@ -5,6 +5,8 @@
             [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.env :as env]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.lib.data-group :as lib.data-group]
             [akvo.lumen.lib.import.data-groups :as import.data-groups]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
@@ -287,7 +289,9 @@
      (future
        (try
          (if (get (env/all tenant-conn) "data-groups")
-           (let [{:keys [group-table-names
+           (let [
+                 _ (lib.data-group/drop-view! tenant-conn (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})))
+                 {:keys [group-table-names
                          importer-columns imported-dataset-columns
                          latest-dataset-version success?]} (import-data-to-table-2 tenant-conn
                                                                                    import-config
@@ -318,7 +322,8 @@
                                                                                                       table-name
                                                                                                       importer-columns
                                                                                                       imported-dataset-columns)]
-                 (successful-update tenant-conn job-execution-id dataset-id table-name imported-table-name latest-dataset-version columns transformations)))))
+                 (successful-update tenant-conn job-execution-id dataset-id table-name imported-table-name latest-dataset-version columns transformations)
+                 (lib.data-group/create-view-from-data-groups tenant-conn dataset-id)))))
          (catch Exception e
            (failed-update tenant-conn job-execution-id (.getMessage e))
            (p/track error-tracker e)
