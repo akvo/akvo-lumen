@@ -38,7 +38,9 @@
                  :showValueLabels false,
                  :metricColumnsY []}]
       (is (= :akvo.lumen.lib/ok
-             (first (aggregation/query *tenant-conn* dataset-id "bar" query)))))))
+             (first (aggregation/query *tenant-conn* dataset-id "bar" query))))
+        (db.env/deactivate-flag *tenant-conn* "data-groups")
+      )))
 
 (defn query* [t dataset-id & [expected-tag]]
   (fn [q]
