@@ -16,8 +16,9 @@
 
 (deftest ^:functional test-aggregation-with-env-flag-without-datagroups
   (testing "Importing csv file"
-    (let [dataset-id (import-file *tenant-conn* *error-tracker* {:file "geopoints.csv" :dataset-name "example csv"})
-          _ (db.env/activate-flag *tenant-conn* "data-groups")
+    (let [_ (db.env/activate-flag *tenant-conn* "data-groups")
+          dataset-id (import-file *tenant-conn* *error-tracker* {:file "geopoints.csv" :dataset-name "example csv"})
+
           query {:metricColumnX nil,
                  :horizontal false,
                  :metricAggregation "count",
