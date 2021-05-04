@@ -40,7 +40,7 @@
 
 (defn retry-job-execution [tenant-conn job-execution-id with-job? & [job-type]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
-                  :max-retries 20
+                  :max-retries 500
                   :delay-ms 100}
     (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
           ds-job (when (= :import job-type) (datasource-job-execution-by-id tenant-conn {:id job-execution-id}))
@@ -85,7 +85,7 @@
 
 (defn try-latest-dataset-version-2 [conn dataset-id & [version]]
   (dh/with-retry {:retry-if (fn [v e] (not v))
-                  :max-retries 20
+                  :max-retries 500
                   :delay-ms 100}
     (if version
       (db.dataset-version/dataset-version-2-by-dataset-id-and-version

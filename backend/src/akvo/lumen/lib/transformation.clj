@@ -53,12 +53,11 @@
           (condp = (:type command)
             :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
-        (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
+        (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id})
+        (when (get (env/all tx-conn) "data-groups")
+          (lib.data-group/create-view-from-data-groups tx-conn dataset-id)))
       (let [dsv (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
         (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
-      (when (get (env/all tenant-conn) "data-groups")
-        (lib.data-group/create-view-from-data-groups tenant-conn dataset-id))
-
       (catch Exception e
         (let [msg (.getMessage e)]
           (engine/log-ex e)
