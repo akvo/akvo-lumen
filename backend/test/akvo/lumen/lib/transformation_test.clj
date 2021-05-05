@@ -82,9 +82,9 @@
 (hugsql/def-db-fns "akvo/lumen/lib/transformation.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/visualisation.sql")
 
-(defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command]
+(defn async-tx-apply [{:keys [tenant-conn] :as deps} dataset-id command & [silent-exception?]]
   (let [[tag {:keys [jobExecutionId datasetId]} :as res] (transformation/apply (assoc deps :claims tu/test-claims) dataset-id command)
-        [job _] (retry-job-execution tenant-conn jobExecutionId true :transformation)]
+        [job _] (retry-job-execution tenant-conn jobExecutionId true :transformation silent-exception?)]
     (conj res (:status job) job)))
 
 (defn latest-data [dataset-id]
@@ -143,7 +143,7 @@
 (deftest ^:functional test-transformations
   (testing "Transformation application"
     (is (= [::lib/bad-request {:message "Dataset not found"} nil nil]
-           (async-tx-apply {:tenant-conn *tenant-conn*} "Not-valid-id" []))))
+           (async-tx-apply {:tenant-conn *tenant-conn*} "Not-valid-id" [] true))))
   (testing "Valid log"
     (let [dataset-id (import-file *tenant-conn* *error-tracker* {:name "Transformation Test"
                                                                  :has-column-headers? true
@@ -667,7 +667,7 @@
                                                                {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code ")"
                                                                 ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
+                                                                ::transformation.engine.s/onError "fail"})} true)]
         (is (= tag ::lib/bad-request))))
 
     (testing "Fail infinite loop"
@@ -677,7 +677,7 @@
                                                                {::transformation.derive.s/newColumnTitle "Derived 8"
                                                                 ::transformation.derive.s/code "for(;;);"
                                                                 ::transformation.derive.s/newColumnType "text"
-                                                                ::transformation.engine.s/onError "fail"})})]
+                                                                ::transformation.engine.s/onError "fail"})} true)]
         (is (= tag ::lib/bad-request))))))
 
 (deftest ^:functional split-column-test
