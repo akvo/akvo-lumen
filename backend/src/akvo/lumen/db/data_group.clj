@@ -21,5 +21,4 @@
   (vec (flatten (:columns (db-get-all-columns conn opts)))))
 
 (defn exists-view? [conn table-name]
-  (log/error (db-exists-view conn {:table-name table-name}))
   (:exists (db-exists-view conn {:table-name table-name})))
