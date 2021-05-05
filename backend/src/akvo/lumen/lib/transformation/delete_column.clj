@@ -44,7 +44,6 @@
 (defmethod engine/apply-operation "core/delete-column"
   [{:keys [tenant-conn]} table-name columns op-spec]
   (let [column-name (col-name op-spec)]
-    (log/info "core/delete-column" (:main-op op-spec) op-spec)
     (if (not (contains? #{:undo :update} (:main-op op-spec)))
       (let [merged-sources (merged-sources-with-column tenant-conn column-name (:dataset-id op-spec))]
         (if (empty? merged-sources)

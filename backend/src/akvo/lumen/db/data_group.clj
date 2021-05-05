@@ -1,5 +1,6 @@
 (ns akvo.lumen.db.data-group
-  (:require [hugsql.core :as hugsql]))
+  (:require [hugsql.core :as hugsql]
+            [clojure.tools.logging :as log]))
 
 (hugsql/def-db-fns "akvo/lumen/lib/data_group.sql")
 
@@ -18,3 +19,6 @@
 
 (defn get-all-columns [conn opts]
   (vec (flatten (:columns (db-get-all-columns conn opts)))))
+
+(defn exists-view? [conn table-name]
+  (:exists (db-exists-view conn {:table-name table-name})))

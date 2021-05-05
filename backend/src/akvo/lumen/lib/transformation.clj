@@ -2,6 +2,9 @@
   (:refer-clojure :exclude [apply])
   (:require [akvo.lumen.lib :as lib]
             [akvo.lumen.lib.transformation.engine :as engine]
+            [akvo.lumen.db.dataset-version :as db.dataset-version]
+            [akvo.lumen.lib.data-group :as lib.data-group]
+            [akvo.lumen.lib.env :as env]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.db.job-execution :as db.job-execution]
             [clojure.tools.logging :as log]
@@ -50,7 +53,9 @@
           (condp = (:type command)
             :transformation (engine/execute-transformation tx-deps dataset-id job-execution-id (:transformation command))
             :undo (engine/execute-undo tx-deps dataset-id job-execution-id)))
-        (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id}))
+        (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id})
+        (when (get (env/all tx-conn) "data-groups")
+          (lib.data-group/create-view-from-data-groups tx-conn dataset-id)))
       (let [dsv (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
         (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
       (catch Exception e
@@ -68,6 +73,8 @@
         (if-not (:valid? v)
           (lib/bad-request {:message (:message v)})
           (let [job-execution-id (str (squuid))]
+            (when (get (env/all tenant-conn) "data-groups")
+              (lib.data-group/drop-view! tenant-conn (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id}))))
             (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
             (execute-tx deps job-execution-id dataset-id command)
             (lib/ok {:jobExecutionId job-execution-id

@@ -38,21 +38,30 @@
 (hugsql/def-db-fns "akvo/lumen/lib/dashboard.sql")
 (hugsql/def-db-fns "akvo/lumen/lib/collection.sql")
 
-(defn retry-job-execution [tenant-conn job-execution-id with-job?]
-  (dh/with-retry {:retry-if (fn [v e] (not v))
-                  :max-retries 20
-                  :delay-ms 100}
-    (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
-          ds-job (datasource-job-execution-by-id tenant-conn {:id job-execution-id})
-          status (:status job)
-          res (when (and status (not= "PENDING" status))
-                (if (= "OK" status)
-                  (:dataset_id ds-job)
-                  job-execution-id))]
-      (when res
-        (if with-job?
-          [job ds-job]
-          res)))))
+(defn retry-job-execution [tenant-conn job-execution-id with-job? & [job-type silent-exception?]]
+  (let [res (dh/with-retry {:retry-if (fn [v e] (not v))
+                            :max-retries 20
+                            :delay-ms 300}
+              (let [job (job-execution-by-id tenant-conn {:id job-execution-id})
+                    ds-job (when (= :import job-type) (datasource-job-execution-by-id tenant-conn {:id job-execution-id}))
+                    status (:status job)
+                    res (when (and status (not= "PENDING" status))
+                          (if (= "OK" status)
+                            (if (= :import job-type)
+                              (:dataset_id ds-job)
+                              (:dataset-id job))
+                            job-execution-id))]
+                (when res
+                  (if with-job?
+                    [job ds-job]
+                    res))))]
+    (if res
+      res
+      (when-not silent-exception?
+        (throw (ex-info "no job execution expectations" {:data [job-execution-id with-job? [job-type]]
+                                                         :job (job-execution-by-id tenant-conn {:id job-execution-id})
+                                                         :ds-job (when (= :import job-type) (datasource-job-execution-by-id tenant-conn {:id job-execution-id}))
+                                                         }))))))
 
 (defn spec-instrument
   "Fixture to instrument all functions"
@@ -79,19 +88,22 @@
                          {:data data})}
         [tag {:strs [importId]}] (import/handle tenant-conn {} error-tracker test-claims spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (retry-job-execution tenant-conn importId with-job?)))
+    (retry-job-execution tenant-conn importId with-job? :import)))
 
 (defn try-latest-dataset-version-2 [conn dataset-id & [version]]
-  (dh/with-retry {:retry-if (fn [v e] (not v))
-                  :max-retries 20
-                  :delay-ms 100}
-    (if version
-      (db.dataset-version/dataset-version-2-by-dataset-id-and-version
-       conn
-       {:dataset-id dataset-id :version version})
-      (db.dataset-version/latest-dataset-version-2-by-dataset-id
-       conn
-       {:dataset-id dataset-id}))))
+  (let [res (dh/with-retry {:retry-if (fn [v e] (not v))
+                        :max-retries 20
+                        :delay-ms 300}
+          (if version
+            (db.dataset-version/dataset-version-2-by-dataset-id-and-version
+             conn
+             {:dataset-id dataset-id :version version})
+            (db.dataset-version/latest-dataset-version-2-by-dataset-id
+             conn
+             {:dataset-id dataset-id})))]
+    (if res
+      res
+      (throw (ex-info "no dsv2 result" {:data [dataset-id version]})))))
 
 
 (defn update-file
@@ -105,7 +117,7 @@
                                                                                        :family_name "test_family_name"
                                                                                        :email "test_email"} {} error-tracker dataset-id data-source-id spec)]
     (t/is (= tag :akvo.lumen.lib/ok))
-    (retry-job-execution tenant-conn updateId with-job?)))
+    (retry-job-execution tenant-conn updateId with-job? :import)))
 
 (defn rand-bol []
   (if (= 0 (rand-int 2)) false true))
