@@ -23,6 +23,9 @@ const typeOptions = [
   }, {
     label: <FormattedMessage id="date" />,
     value: 'date',
+  }, {
+    label: <FormattedMessage id="option" />,
+    value: 'option',
   },
 ];
 

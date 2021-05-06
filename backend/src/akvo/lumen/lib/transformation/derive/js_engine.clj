@@ -18,6 +18,27 @@
                   {:value value
                    :type (type value)})))
 
+(def akvo-utilities "
+function akvoMultipleToMultiple(valuesToKeep, uncategorizedValue, v){
+     var dict = new Set(valuesToKeep);
+     var others = uncategorizedValue;
+     var x = v.split('|');
+     var needOthers = false;
+     var final = [];
+     x.forEach((e) => {
+         if(!dict.has(e)){
+             needOthers = true;
+         } else {
+          final.push(e);
+         }
+     });
+     if(needOthers){
+       final.push(uncategorizedValue);
+     }
+     return final.join('|');
+ }
+")
+
 (defn- column-function [fun code]
   (format "var %s = function(row) {if (row.__rqg__) { row.__rqg__.forEach((e) => { row[e] = JSON.parse(row[e]); })}; return %s; }" fun code))
 
@@ -33,6 +54,9 @@
       "text" (if (string? value)
                value
                (throw-invalid-return-type value))
+      "option" (if (string? value)
+                 value
+                 (throw-invalid-return-type value))
       "date" (cond
                (number? value)
                (java.sql.Timestamp. (long value))
@@ -109,7 +133,7 @@
   [{:keys [adapter code column-type]}]
   (let [engine (js-engine)
         fun-name "deriveColumn"]
-    (eval* engine (column-function fun-name code))
+    (eval* engine (format "%s %s" akvo-utilities (column-function fun-name code)))
     (fn [row]
       (let [res (->> row
                      (adapter)

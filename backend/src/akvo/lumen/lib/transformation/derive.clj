@@ -108,7 +108,8 @@
   (condp = type
     "text"   "text"
     "number" "double precision"
-    "date"   "timestamptz"))
+    "date"   "timestamptz"
+    "option" "text"))
 
 (defn args [op-spec]
   (let [{code         "code"
