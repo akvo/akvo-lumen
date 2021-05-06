@@ -128,7 +128,7 @@
 
 (s/def ::transformation.derive/code string?) ;; improve js validation
 
-(s/def ::transformation.derive/newColumnType #{"number" "text" "date"})
+(s/def ::transformation.derive/newColumnType #{"number" "text" "date" "option"})
 
 (s/def ::transformation.derive/args
   (s/keys :req-un [::transformation.derive/newColumnTitle
