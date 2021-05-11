@@ -8,3 +8,9 @@ Example way to use it
  cd akvo-lumen
  docker-compose exec postgres bash
  #+END_SRC
+
+ Once inside the postgres service you can
+
+  #+BEGIN_SRC shell
+cd /data
+  #+END_SRC
