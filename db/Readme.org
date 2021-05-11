@@ -1,0 +1,10 @@
+* Readme
+
+This folder, in local-development, acts as a internal volume for postgres service
+
+Example way to use it
+
+#+BEGIN_SRC shell
+ cd akvo-lumen
+ docker-compose exec postgres bash
+ #+END_SRC

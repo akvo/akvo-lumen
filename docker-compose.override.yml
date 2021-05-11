@@ -3,6 +3,8 @@ services:
  postgres:
    ports:
     - "5432:5432"
+   volumes:
+    - ./db:/data
  keycloak:
    ports:
     - "8080:8080"
