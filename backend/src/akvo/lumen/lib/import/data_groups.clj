@@ -20,7 +20,7 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
-(defn- successful-execution [conn job-execution-id dataset-id group-table-names columns claims]
+(defn successful-execution [conn job-execution-id dataset-id group-table-names columns claims]
   (let [dataset-version-id (util/squuid)
         grouped-columns (group-by :groupId columns)
         ordered-groups-ids (distinct (map :groupId columns))
@@ -65,8 +65,8 @@
                                              :group-name (:groupName (first columns) group-id)
                                              :repeatable (:repeatable (first columns) false)
                                              :group-order group-order
-                                             :columns (mapv (fn [{:keys [title id type key multipleType multipleId groupName groupId hidden]}]
-                                                              {:columnName id
+                                             :columns (mapv (fn [{:keys [title id columnName type key multipleType multipleId groupName groupId hidden]}]
+                                                              {:columnName (or id columnName)
                                                                :direction nil
                                                                :groupId groupId
                                                                :groupName groupName

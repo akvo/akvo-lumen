@@ -19,7 +19,7 @@
 (defn adapt-string-value [v]
   (str "$anylumenthing$" v "$anylumenthing$::TEXT"))
 
-(defn- val->geometry-pgobj
+(defn val->geometry-pgobj
   [v]
   (doto (PGobject.)
     (.setType "geometry")
@@ -137,7 +137,10 @@
   (coerce [value]
     (let [geom (PGgeometry/geomFromString (:wkt-string value))]
       (.setSrid geom 4326)
-      geom)))
+      geom))
+  PGobject
+  (coerce [value] value)
+  )
 
 (defn coerce-to-sql [record]
   (reduce-kv
