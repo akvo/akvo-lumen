@@ -117,6 +117,12 @@
                     :kind "clj"
                     :data (i-c/csv-sample-imported-dataset column-types submissions)})))
 
+(defn isystem []
+  system)
+
+(defn jwt-token []
+  "xxx")
+
 (defn flags []
   (env/all-values (db-conn)))
 

@@ -1,30 +1,19 @@
 (ns akvo.lumen.lib.data-groups-adapter
-  (:require [akvo.lumen.lib.import.common :as common]
+  (:require [akvo.lumen.db.data-source :as db.data-source]
+            [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.db.transformation :as db.transformation]
+            [akvo.lumen.lib.import.common :as common]
             [akvo.lumen.lib.import.data-groups :as i.data-groups]
             [akvo.lumen.postgres :as postgres]
-            [akvo.lumen.db.job-execution :as db.job-execution]
-            [akvo.lumen.db.dataset :as db.dataset]
-            [akvo.lumen.db.dataset-version :as db.dataset-version]
-            [akvo.lumen.db.data-source :as db.data-source]
-            [akvo.lumen.db.data-group :as db.data-group]
-            [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.protocols :as p]
-            [akvo.lumen.lib.import.csv]
-            [akvo.lumen.lib.env :as env]
-            [akvo.lumen.lib.data-group :as lib.data-group]
-            [akvo.lumen.lib.import.flow :as i.flow]
-            [akvo.lumen.lib.import.csv]
-            [akvo.lumen.lib.raster]
-            [akvo.lumen.lib :as lib]
-            [akvo.lumen.util :as util]
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
-            [clojure.walk :as w]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [clojure.walk :as w]))
 
 (defn adapter [conn rows columns job-execution-id dataset-id claims]
-  (let [_ (log/info :columns-dsv2 columns)
+  (let [_ (log/debug :columns-dsv2 columns)
         {:keys [columns group-table-names]} (i.data-groups/adapt-columns columns)
         columns (if-let [instance_id (first (filter #(= "instance_id" (get % :columnName))columns))]
                   (reduce (fn [c groupId]
@@ -33,19 +22,16 @@
                                            :groupName groupId))
                             ) columns (disj (set (keys (group-by :groupId columns))) "metadata"))
                   columns)
-
-
-        group-cols (group-by :groupId columns)
-        ]
-    (log/error :group-cols group-cols)
+        group-cols (group-by :groupId columns)]
+    (log/debug :group-cols group-cols)
     (doseq [[groupId cols] group-cols]
       (postgres/create-dataset-table conn (get group-table-names groupId) cols))
     (doseq [response (take common/rows-limit rows)]
       (log/debug :response-dsv2 response )
       (doseq [[groupId iterations] response]
         (let [table-name (get group-table-names groupId)]
-          (log/error :its iterations)
-          (jdbc/insert-multi! conn table-name (mapv postgres/coerce-to-sql iterations))))) ;; perhaps don't need coercion (mapv postgres/coerce-to-sql iterations)
+          (log/debug :its iterations)
+          (jdbc/insert-multi! conn table-name (mapv postgres/coerce-to-sql iterations)))))
     (postgres/create-data-group-foreign-keys conn group-table-names)
     (i.data-groups/successful-execution conn job-execution-id dataset-id group-table-names columns claims)))
 
@@ -79,10 +65,8 @@
 
         column-group-dict (reduce (fn [c co]
                                     (assoc c  (get co "columnName") (get co "groupId") )
-                                    ){} columns)
-        ]
-           (log/error column-group-dict)
-
+                                    ){} columns)]
+    (log/debug column-group-dict)
     (->> (jdbc/query tenant-conn [(format "SELECT * FROM %s ORDER BY rnum" imported-table-name)])
          (map (fn [x]
                 (if (csv? import-type)
@@ -103,25 +87,7 @@
                                      c)
                                    ){} it)
                          (reduce (fn [c [k v]]
-                                   (assoc c k [(merge {"instance_id" (get it "instance_id")} v)])) {})))))))
-))
-
-(comment
-  (let [dataset-id "609bcbef-fe39-41a6-ba26-a47b4b945c15"
-       tenant-conn (dev/db-conn "t1")]
-   (let [initial-dataset-version (db.transformation/initial-dataset-version-to-update-by-dataset-id tenant-conn {:dataset-id dataset-id})
-         latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-     (let [data-source (adapter-data-source tenant-conn dataset-id)
-           job-execution-id (:job_execution_id data-source)
-           claims (adapter-claims data-source)
-           rows (adapter-rows tenant-conn data-source dataset-id)
-           columns (w/keywordize-keys (:columns initial-dataset-version))]
-       (first rows)
-
-       )
-     ))
-
-  )
+                                   (assoc c k [(merge {"instance_id" (get it "instance_id")} v)])) {})))))))))
 
 (defn adapter-claims [data-source]
     (let [email (get-in data-source [:spec "source" "email"])]
@@ -129,6 +95,26 @@
 
 (defn adapter-data-source [tenant-conn dataset-id]
   (db.data-source/db-data-source-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+
+(defn adapt-columns-group [tenant-conn dataset-id columns]
+  (let [flow-api (:akvo.lumen.component.flow/api (dev/isystem))
+        spec (merge
+              (:source (akvo.lumen.db.dataset/dataset-by-id tenant-conn {:id dataset-id}))
+              {"token" (dev/jwt-token)})]
+    (if (= "AKVO_FLOW" (get spec "kind"))
+      (let [importer ((get-method common/datagroups-importer "AKVO_FLOW")
+                      spec {:flow-api flow-api})
+            flow-columns(p/columns importer)]
+        (mapv (fn [c]
+                (if-let [flow-col (first (filter (fn [fc]
+                                                   (= (:columnName c) (:id fc))) flow-columns ))]
+                  (merge c (select-keys flow-col [:groupName :groupId]))
+                  (throw (ex-info "no flow-col" {:flow-columns flow-columns
+                                                 :c c} ))
+                  )
+                ) columns)
+        )
+      columns)))
 
 (comment
   (let [tenant-conn (dev/db-conn "t1")
@@ -146,27 +132,24 @@
     )
 
 
+(:source (akvo.lumen.db.dataset/dataset-by-id (dev/db-conn "t1") {:id "609bb44d-8595-4eb5-8ca0-3423bbf91740"}))
 
-  (let [dataset-id "609c0344-1fc3-4665-8cb5-b47434919e04"
-        tenant-conn (dev/db-conn "t1")]
-    (let [initial-dataset-version (db.transformation/initial-dataset-version-to-update-by-dataset-id tenant-conn {:dataset-id dataset-id})
-          latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
-      (let [data-source (adapter-data-source tenant-conn dataset-id)
-              job-execution-id (:job_execution_id data-source)
-              claims (adapter-claims data-source)
-              rows (adapter-rows tenant-conn data-source dataset-id)
-              columns (w/keywordize-keys (:columns initial-dataset-version))]
-          (adapter tenant-conn rows columns job-execution-id dataset-id claims)
-          )
-      #_(if (= (:version initial-dataset-version) (:version latest-dataset-version))
+
+(let [dataset-id "609c05bc-a6d8-4a4c-8abd-e9b3221b6b54"
+      tenant-conn (dev/db-conn "t1")]
+  (let [initial-dataset-version (db.transformation/initial-dataset-version-to-update-by-dataset-id tenant-conn {:dataset-id dataset-id})
+        latest-dataset-version (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+    (let [data-source (adapter-data-source tenant-conn dataset-id)
+          job-execution-id (:job_execution_id data-source)
+          claims (adapter-claims data-source)
+          rows (adapter-rows tenant-conn data-source dataset-id)
+          columns (->> (:columns initial-dataset-version)
+                       (w/keywordize-keys)
+                       (adapt-columns-group tenant-conn dataset-id))]
+      (adapter tenant-conn rows columns job-execution-id dataset-id claims)
+      )
+    #_(if (= (:version initial-dataset-version) (:version latest-dataset-version))
         :no-tx
         [:txs (:transformations latest-dataset-version)])))
 
-
-
-
-  (akvo.lumen.db.dataset/dataset-by-id (dev/db-conn) {:id "609a8c81-02da-4e94-9bde-4881cc8e05be"})
-
-
-
-  )
+)
