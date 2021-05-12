@@ -7,6 +7,9 @@
            [org.postgresql.util PGobject]
            [clojure.lang PersistentVector]))
 
+(defn column-id [column]
+  (or (:id column) (:columnName column)))
+
 (defn escape-string [s]
   (when-not (nil? s)
     (when-not (string? s)
@@ -47,9 +50,9 @@
   (doseq [column columns]
     (condp = (:type column)
       "geoshape"
-      (jdbc/execute! conn (geo-index table-name (name (:id column))))
+      (jdbc/execute! conn (geo-index table-name (name (column-id column))))
       "geopoint"
-      (jdbc/execute! conn (geo-index table-name (name (:id column))))
+      (jdbc/execute! conn (geo-index table-name (name (column-id column))))
 
       ;; else
       nil)))
@@ -60,11 +63,11 @@
     (jdbc/execute! conn
                    (format "ALTER TABLE \"%s\" ADD UNIQUE (%s)"
                            table-name
-                           (name (:id column))))
+                           (name (column-id column))))
     (jdbc/execute! conn
                    (format "ALTER TABLE \"%s\" ALTER COLUMN %s SET NOT NULL"
                            table-name
-                           (name (:id column))))))
+                           (name (column-id column))))))
 (defn colum-type-fn* [type]
   (condp = type
     "date" "timestamptz"
@@ -78,10 +81,10 @@
     "option" "text"
     "text" "text"))
 
-(defn- column-type-fn [{:keys [id type]}]
+(defn- column-type-fn [column]
   (format "%s %s"
-          (name id)
-          (colum-type-fn* type)))
+          (name (column-id column))
+          (colum-type-fn* (:type column))))
 
 (defn create-dataset-table [conn table-name columns]
   (jdbc/execute! conn [(format "create table %s (rnum serial primary key, %s);"
