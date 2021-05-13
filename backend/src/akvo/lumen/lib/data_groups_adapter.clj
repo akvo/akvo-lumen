@@ -3,6 +3,7 @@
             [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.transformation :as db.transformation]
             [akvo.lumen.lib.import.common :as common]
+            [akvo.lumen.lib.transformation.engine :as engine]
             [akvo.lumen.lib.import.data-groups :as i.data-groups]
             [akvo.lumen.postgres :as postgres]
             [akvo.lumen.protocols :as p]
@@ -96,11 +97,10 @@
 (defn adapter-data-source [tenant-conn dataset-id]
   (db.data-source/db-data-source-by-dataset-id tenant-conn {:dataset-id dataset-id}))
 
-(defn adapt-columns-group [tenant-conn dataset-id columns]
-  (let [flow-api (:akvo.lumen.component.flow/api (dev/isystem))
-        spec (merge
+(defn adapt-columns-group [jwt-token flow-api tenant-conn dataset-id columns]
+  (let [spec (merge
               (:source (akvo.lumen.db.dataset/dataset-by-id tenant-conn {:id dataset-id}))
-              {"token" (dev/jwt-token)})]
+              {"token" jwt-token})]
     (if (= "AKVO_FLOW" (get spec "kind"))
       (let [importer ((get-method common/datagroups-importer "AKVO_FLOW")
                       spec {:flow-api flow-api})
@@ -145,11 +145,21 @@
           rows (adapter-rows tenant-conn data-source dataset-id)
           columns (->> (:columns initial-dataset-version)
                        (w/keywordize-keys)
-                       (adapt-columns-group tenant-conn dataset-id))]
+                       (adapt-columns-group (dev/jwt-token) (:akvo.lumen.component.flow/api (dev/isystem)) tenant-conn dataset-id))]
       (adapter tenant-conn rows columns job-execution-id dataset-id claims)
-      )
-    #_(if (= (:version initial-dataset-version) (:version latest-dataset-version))
+      (if (= (:version initial-dataset-version) (:version latest-dataset-version))
         :no-tx
-        [:txs (:transformations latest-dataset-version)])))
+        (let [current-dataset-version (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})]
+          (engine/apply-undo-2 {:tenant-conn tenant-conn
+                                :claims claims
+                                :txs (:transformations latest-dataset-version)
+
+                                }
+                               dataset-id
+                               job-execution-id
+                               current-dataset-version))))))
+
+
+
 
 )
