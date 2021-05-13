@@ -11,7 +11,12 @@
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as string]
             [clojure.tools.logging :as log]
-            [clojure.walk :as w]))
+            [clojure.walk :as w]
+            [hugsql.core :as hugsql]))
+
+
+
+(hugsql/def-db-fns "akvo/lumen/lib/adapter.sql")
 
 (defn adapter [conn rows columns job-execution-id dataset-id claims]
   (let [_ (log/debug :columns-dsv2 columns)
@@ -116,6 +121,30 @@
         )
       columns)))
 
+(defn merge-tx-dsv-ordered-by-date [conn]
+  (->> (all-merge-dsv-bis conn)
+       (mapv (fn [dsv]
+               (-> (select-keys dsv [:id :created :dataset_id :version])
+                   (assoc  :transformations (seq (filter (fn [t]
+                                                           (= "core/merge-datasets" (get t "op"))
+                                                           )(:transformations dsv)))))))
+       (group-by :dataset_id)
+       (reduce (fn [xx [dataset_id dsvs]]
+                 (into xx (let [txs (vec (reduce
+                                          (fn [c dsv]
+                                            (reduce  (fn [cc tx]
+                                                       (if-not (contains? cc tx)
+                                                         (conj cc (with-meta tx dsv))
+                                                         cc))  c (:transformations dsv)))
+                                          #{} (sort-by :version dsvs)))]
+                            (mapv (fn [tx]
+                                    (merge (select-keys (meta tx) [:created :dataset_id :version :id])
+                                           {:args-source (get-in tx ["args" "source"])})
+                                    ) txs)))) [])
+       (sort-by :created)
+       (mapv (fn [x]
+               (assoc x :created (java.time.Instant/ofEpochMilli (:created x)))))))
+
 (comment
   (let [tenant-conn (dev/db-conn "t1")
         dataset-id "609badab-0ba8-40df-ba16-03898b773da9"
@@ -158,6 +187,18 @@
                                dataset-id
                                job-execution-id
                                current-dataset-version))))))
+
+
+
+
+
+
+
+(merge-tx-dsv-ordered-by-date (dev/db-conn "t1"))
+
+
+
+(all-merge-dsv-bis (dev/db-conn "t1"))
 
 
 
