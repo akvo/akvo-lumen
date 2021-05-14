@@ -12,6 +12,10 @@
             [clojure.string :as string]
             [clojure.tools.logging :as log]
             [clojure.walk :as w]
+            [amazonica.aws.s3 :as s3]
+            [amazonica.aws.s3transfer :as s3t]
+            [clojure.data.xml :as xml]
+            [clojure.set :as set]
             [hugsql.core :as hugsql]))
 
 
@@ -201,6 +205,53 @@
 (all-merge-dsv-bis (dev/db-conn "t1"))
 
 
+(def aws-creds1 {:access-key ""
+                 :secret-key ""
+                 :endpoint   "us-west-1"})
+(def aws-creds2 {:access-key ""
+                 :secret-key ""
+                 :endpoint   "us-west-1"})
 
 
-)
+#_(s3/list-buckets aws-creds1
+                   {:client-config {
+                                    :path-style-access-enabled false
+                                    :chunked-encoding-disabled false
+                                    :accelerate-mode-enabled false
+                                    :payload-signing-enabled true
+                                    :dualstack-enabled true
+                                    :force-global-bucket-access-enabled true}})
+
+(def key-pair
+  (let [kg (java.security.KeyPairGenerator/getInstance "RSA")]
+    (.initialize kg 1024 (java.security.SecureRandom.))
+    (.generateKeyPair kg)))
+
+(defn form
+  ([flow-instance-id survey-id]
+   (try (form aws-creds1 flow-instance-id survey-id)
+        (catch Exception e (form aws-creds2 flow-instance-id survey-id)))
+   )
+  ([creds flow-instance-id survey-id]
+   (let [stream (-> (s3/get-object creds :bucket-name (str "akvoflow-" flow-instance-id)
+                                   :encryption {:key-pair key-pair}
+                                   :key (format "surveys/%s.zip" survey-id))
+                    :input-stream
+
+                    (java.util.zip.ZipInputStream.)
+
+                    )]
+     (.getNextEntry stream)
+     (xml/parse-str (slurp stream)))))
+
+(defn questions [xml-questions]
+  (mapv (fn [e]  (-> (select-keys (:attrs e) [:id :order :type])
+                     (assoc :name (->  e :content last :content first)))) xml-questions))
+(defn groups [xml-form]
+  (mapv (fn [e]
+          {(-> e :content first :content first)
+           (questions (-> e :content next))}) (:content xml-form)))
+(comment
+  (groups (form "161" "26200002"))
+;;=>   [{"SCHOOL BASELINE " [{:id "25160084", :order "1", :type "cascade", :name "Location Details"} {:id "20230028", :order "2", :type "free", :name "Name of The School "} {:id "25250003", :order "3", :type "option", :name "What is the type of school?"} {:id "22200002", :order "4", :type "photo", :name " Take a photo of the school and school sign"} {:id "28080020", :order "5", :type "geo", :name "Take the GPS location at the school"}]}]
+  (groups (form "7" "979504001")))
