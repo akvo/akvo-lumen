@@ -1,6 +1,13 @@
 # Setup new tenant
 
-Run the ci/new-instance.sh
+Run `ci/new-instance.sh`
+
+If you get this error:
+
+`ERROR: (gcloud.container.clusters.get-credentials) ResponseError: code=403, message=Required "container.clusters.get" permission(s) for `
+
+run:
+`gcloud auth login` and login in the browser.
 
 # Remove existent tenant
 
