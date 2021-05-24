@@ -109,8 +109,9 @@
 (defn flags []
   (env/all-values (db-conn)))
 
-(defn activate-flag [flag]
-  (env/activate-flag (db-conn) flag))
+(defn activate-flag
+  ([tenant-label flag]
+   (env/activate-flag (db-conn tenant-label) flag)))
 
 (defn deactivate-flag [flag]
   (env/deactivate-flag (db-conn) flag))

@@ -103,7 +103,9 @@
                                             (println "Starting BackEnd ...")
                                             (check-specs!)
                                             (go)
-                                            (migrate-and-seed))
+                                            (migrate-and-seed)
+                                            (activate-flag "t1" "data-groups")
+                                            (activate-flag "t2" "data-groups"))
                                     :host "0.0.0.0"
                                     :port 47480}
                    :env            {:port "3000"}}
