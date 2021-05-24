@@ -1,7 +1,7 @@
 version: "3"
 services:
  postgres:
-   image: akvo/akvo-lumen-db:20210511.084608.3343320
+   image: akvo/akvo-lumen-db:20200831.110958.672242e
    environment:
      - POSTGRES_PASSWORD=akvo
    volumes:

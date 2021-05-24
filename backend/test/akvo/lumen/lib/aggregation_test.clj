@@ -189,9 +189,9 @@
 
       (let [[tag query-result] (query {:bucketColumn "c2"})]
         (is (= query-result
-               {:series [{:key "B", :label "B", :data (vec (reverse [{:value 5} {:value 3}]))}],
+               {:series [{:key "B", :label "B", :data  [{:value 5} {:value 3}]}],
                 :common
-                {:data (vec (reverse [{:key "b1", :label "b1"} {:key "b2", :label "b2"}])),
+                {:data [{:key "b1", :label "b1"} {:key "b2", :label "b2"}],
                  :metadata {:type "text"}}}))))))
 
 (deftest ^:functional bar-tests
@@ -399,11 +399,11 @@
                {:series
                 [{:key nil,
                   :label nil,
-                  :data (vec (reverse [{:value 2} {:value 1} {:value 1}])),
+                  :data [{:value 2} {:value 1} {:value 1}],
                   :metadata {:type nil}}],
                 :common
                 {:metadata {:sampled false},
-                 :data (vec (reverse [{:label "c" :key "c"} {:label "b" :key "b"} {:label "a" :key "a"}]))}}))))
+                 :data [{:label "c" :key "c"} {:label "b" :key "b"} {:label "a" :key "a"}]}}))))
     (testing "Metric queries"
       (let [[tag query-result] (query {:bucketColumn "c1"
                                        :metricColumn "c2"
@@ -412,8 +412,8 @@
                {:series
                 [{:key "B",
                   :label "B",
-                  :data (vec (reverse [{:value 4M} {:value 2M} {:value 1M}])),
+                  :data [{:value 4M} {:value 2M} {:value 1M}],
                   :metadata {:type "number"}}],
                 :common
                 {:metadata {:sampled false},
-                 :data (vec (reverse [{:label "c" :key "c"} {:label "b" :key "b"} {:label "a" :key "a"}]))}}))))))
+                 :data [{:label "c" :key "c"} {:label "b" :key "b"} {:label "a" :key "a"}]}}))))))
