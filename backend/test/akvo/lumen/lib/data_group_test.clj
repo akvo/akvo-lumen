@@ -28,7 +28,7 @@
                        :group-id "main"
                        :table-name "ds_main"}])
 
-(def csv-data-groups-template {:select ["c1"]
+(def csv-data-groups-template {:select ["c1" "rnum"]
                                :from {:metadata nil
                                       :others ["ds_main"]}})
 
@@ -38,7 +38,7 @@
 
 (deftest ^:unit generate-data-groups-sql
   (let [flow-sql "SELECT m.instance_id, rnum, identifier, A, B, C FROM ds_meta m LEFT JOIN ds_repeated ON m.instance_id = ds_repeated.instance_id LEFT JOIN ds_not_repeated ON m.instance_id = ds_not_repeated.instance_id"
-        csv-sql "SELECT c1 FROM ds_main"]
+        csv-sql "SELECT c1, rnum FROM ds_main"]
     (is (= flow-sql (data-group/data-groups-sql test-data-groups-template)))
     (is (= csv-sql (data-group/data-groups-sql csv-data-groups-template)))))
 

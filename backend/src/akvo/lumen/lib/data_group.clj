@@ -26,7 +26,8 @@
                                                  columns))}))
                      []
                      data-groups)]
-    {:select (mapv :columnName (flatten (map :columns adapted-dgs)))
+    {:select (cond-> (mapv :columnName (flatten (map :columns adapted-dgs)))
+               (= 1 (count data-groups)) (conj "rnum"))
      :from {:metadata (->> adapted-dgs (filter :metadata?) first :table-name)
             :others (->> adapted-dgs (filter #(not (:metadata? %))) (mapv :table-name))}}))
 
