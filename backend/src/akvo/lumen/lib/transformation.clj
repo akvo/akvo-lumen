@@ -62,6 +62,7 @@
         (let [msg (.getMessage e)]
           (engine/log-ex e)
           (db.job-execution/update-failed-job-execution tenant-conn {:id job-execution-id :reason [msg]})
+          (lib.data-group/create-view-from-data-groups tenant-conn dataset-id)
           (lib/conflict {:jobExecutionId job-execution-id :datasetId dataset-id :message msg}))))))
 
 (defn apply
