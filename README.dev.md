@@ -43,6 +43,18 @@ To stop:
 docker-compose down -v
 ```
 
+## User
+To add your email and use Google as authenticator run the local-admin script.
+```
+./backend/dev_helpers/local-admin.sh <email>
+akvo
+└── lumen
+    ├── t1
+    │   └── admin
+    └── t2
+        └── admin
+```
+
 ## Keycloak
 
 Keycloack is available at http://auth.lumen.local:8080/
