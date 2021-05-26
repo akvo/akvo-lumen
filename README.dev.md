@@ -47,12 +47,6 @@ docker-compose down -v
 To add your email and use Google as authenticator run the local-admin script.
 ```
 ./backend/dev_helpers/local-admin.sh <email>
-akvo
-└── lumen
-    ├── t1
-    │   └── admin
-    └── t2
-        └── admin
 ```
 
 ## Keycloak
