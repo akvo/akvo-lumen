@@ -210,6 +210,20 @@ spec:
             cpu: "10m"
           limits:
             cpu: "1000m"
+      - name: backend-monitor
+        image: google/cloud-sdk:206.0.0-alpine
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          apk add --no-cache inotify-tools &&
+          gcloud auth activate-service-account --key-file=/secrets/jvm-debug.json &&
+          inotifywait -m /dumps -e close_write | while read path action file; do gsutil cp "$path$file" "gs://heap-dump/$file"; rm -f "$path$file"; done;
+        volumeMounts:
+        - name: heap-dumps
+          mountPath: /dumps
+        - name: "secret-config"
+          mountPath: /secrets
+          readOnly: true
       - name: cloudsql-proxy
         image: eu.gcr.io/cloudsql-docker/gce-proxy:1.16
         command: ["/cloud_sql_proxy",
