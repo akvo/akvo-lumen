@@ -194,16 +194,11 @@
         (let [tenant-conn    (p/connection tenant-manager tenant)
               dss            (db.dataset/all-datasets tenant-conn)
               rasters        (mapv :id (db.raster/all-rasters tenant-conn))
-              auth-uuid-tree (if (match-by-jwt-family-name? request)
-                               (load-auth-data dss rasters tenant-conn authz-service-client request collector tenant)
-                               (do
-                                 (future
-                                   (load-auth-data dss rasters tenant-conn authz-service-client request collector tenant))
-                                 {:rasters             rasters
-                                  :auth-datasets       (mapv :id dss)
-                                  :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
-                                  :auth-dashboards     (mapv :id (db.dashboard/all-dashboards-ids tenant-conn))
-                                  :auth-collections    (mapv :id (db.collection/all-collections-ids tenant-conn))}))]
+              auth-uuid-tree {:rasters             rasters
+                              :auth-datasets       (mapv :id dss)
+                              :auth-visualisations (mapv :id (db.visualisation/all-visualisations-ids tenant-conn))
+                              :auth-dashboards     (mapv :id (db.dashboard/all-dashboards-ids tenant-conn))
+                              :auth-collections    (mapv :id (db.collection/all-collections-ids tenant-conn))}]
           (handler (assoc request
                           :auth-service (new-auth-service auth-uuid-tree))))))))
 
