@@ -179,7 +179,7 @@
    {:keys [transformation data-groups data-group dataset-id main-op]}]
   (let [data-group (or data-group (data-group-by-op transformation data-groups))
         source-table (:table-name data-group)
-        other-dgs-columns (reduce (fn [c dg] (if (= (:id dg) (:id data-group))
+        other-dgs-columns (reduce (fn [c dg] (if (= (:group-id dg) (:group-id data-group))
                                                c (into c (:columns dg)))) [] data-groups)
         previous-columns (into (vec (:columns data-group)) other-dgs-columns)
         {:keys [success? message execution-log error-data data-groups-to-be-created] :as res}
