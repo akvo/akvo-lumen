@@ -247,3 +247,5 @@ spec:
          - name: "secret-config"
            secret:
              secretName: "lumen"
+         - name: heap-dumps
+           emptyDir: {}
