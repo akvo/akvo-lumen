@@ -191,6 +191,9 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.labels['lumen-version']
+        volumeMounts:
+        - name: heap-dumps
+          mountPath: /dumps
       - name: flow-maps-statsd-to-prometheus
       # If you change this version, probably you want to change the /windsahft/Dockerfile version
         image: akvo/akvo-maps-statsd-to-prometheus:f156d42c
