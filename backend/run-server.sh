@@ -13,6 +13,7 @@ dump_filename="${hostname}-${ts}.hprof"
 
 java -XshowSettings:vm \
      -Xlog:gc=info \
+     -XX:+UseG1GC \
      -XX:+HeapDumpOnOutOfMemoryError \
      -XX:HeapDumpPath="/dumps/${dump_filename}" \
      -jar /app/akvo-lumen.jar
