@@ -16,4 +16,6 @@ java -XshowSettings:vm \
      -XX:+UseG1GC \
      -XX:+HeapDumpOnOutOfMemoryError \
      -XX:HeapDumpPath="/dumps/${dump_filename}" \
+     -XX:+UseContainerSupport \
+     -XX:MaxRAMPercentage=75.0 \
      -jar /app/akvo-lumen.jar
