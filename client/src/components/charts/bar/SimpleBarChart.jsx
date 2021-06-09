@@ -397,7 +397,7 @@ export default class SimpleBarChart extends Component {
                                       margins.left + x + nodeWidth :
                                       margins.left + x
                                   }
-                                  top={y + (normalizedHeight / 2) + margins.top}
+                                  top={15}
                                   placement={colorpickerPlacement}
                                   onChange={({ hex }) => {
                                     onChangeVisualisationSpec({

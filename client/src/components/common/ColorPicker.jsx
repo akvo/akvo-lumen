@@ -9,7 +9,7 @@ import LegendShape from '../charts/LegendShape';
 const ColorPicker = ({ title, left = 0, top = 0, placement, style, hideArrow, ...rest }) => (
   <Popover
     left={left}
-    top={0}
+    top={top}
     placement={placement}
     hideArrow={hideArrow}
     className="color-picker-popover"
