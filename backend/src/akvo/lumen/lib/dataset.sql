@@ -211,3 +211,9 @@ SELECT COUNT(*) as "all", max(:i:column-name) as "max", min(:i:column-name) as "
 
 -- :name count-unique-vals-by-colum-name :? :1
 select COUNT(DISTINCT :i:column-name) as "uniques" from :i:table-name
+
+
+-- :name db-dataset-type :? :1
+ select spec#>>'{"source", "kind"}' as "type" from job_execution
+ left join data_source on data_source.id=job_execution.data_source_id
+ where type='IMPORT' and dataset_id= :dataset-id

@@ -8,9 +8,11 @@
 (defn importer-type [spec]
   (get spec "kind"))
 
+(def csv-types #{"LINK" "DATA_FILE"})
+
 (defn- dispatch-on-kind [spec]
   (let [kind (importer-type spec)]
-    (if (#{"LINK" "DATA_FILE"} kind)
+    (if (csv-types kind)
       "CSV" ;; TODO: Unify elsewhere
       kind)))
 
@@ -64,3 +66,16 @@
        vals
        (map first)
        (reduce merge {})))
+
+(defn new-instance-id-column [group-id group-name]
+  (merge {:type "text"
+          :title "Instance id"
+          :multipleId nil
+          :multipleType nil
+          :columnName "instance_id"
+          :direction nil
+          :sort nil}
+         {:groupId group-id
+          :groupName group-name
+          :key false
+          :hidden true}))
