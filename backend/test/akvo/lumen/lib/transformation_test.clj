@@ -1050,6 +1050,40 @@
                (mapv (juxt :d1 :instance_id) data-db))))))
   (db.env/deactivate-flag *tenant-conn* "data-groups"))
 
+(deftest ^:functional merge-datasets-flow-source-csv-target-data-groups-test
+  (db.env/activate-flag *tenant-conn* "data-groups")
+  (with-redefs [t.merge-datasets/csv-dataset? (fn [x] (contains? #{"DATA_FILE" "LINK" "clj"} x))]
+    (let [target-dataset-id (import-file *tenant-conn* *error-tracker* {:dataset-name "Names"
+                                                                        :has-column-headers? true
+                                                                        :file "names.csv"})
+
+          source-dataset-id    (tu/import-file *tenant-conn* *error-tracker*
+                                                  {:dataset-name "monitoring"
+                                                   :kind         "clj-flow"
+                                                   :data         (tu/read-edn-flow-dataset "uat1" "638889127" "638879132")})
+          apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} target-dataset-id)
+
+          tx                   {"args"
+                                {"source"
+                                 {"datasetId" source-dataset-id
+                                  "mergeColumn" "c655369136"
+                                  "aggregationColumn"    nil
+                                  "aggregationDirection" "DESC"
+                                  "mergeColumns" ["c635099115"]}
+                                 "target" {"mergeColumn" "c1"}}
+                                "op" "core/merge-datasets"}
+          [tag _ :as res] (apply-transformation {:type           :transformation
+                                                 :transformation tx})]
+      (is (= ::lib/ok tag))
+      (let [{:keys [transformations] :as dsv} (db.dataset-version/latest-dataset-version-2-by-dataset-id *tenant-conn* {:dataset-id target-dataset-id})
+            dgs (db.data-group/list-data-groups-by-dataset-version-id *tenant-conn* {:dataset-version-id (:id dsv)})
+            _ (is (= 1 (count dgs)))
+            {:keys [columns table-name]} (first dgs)
+            data-db (get-data *tenant-conn* {:table-name table-name})]
+        (is (= '(:c1 :c2 :d1) (map #(keyword (get % "columnName")) columns)))
+        (is (= [2.0 3.0 5.0 55.0 56.0 57.0 1.0 2.0] (mapv :d1 data-db))))))
+  (db.env/deactivate-flag *tenant-conn* "data-groups"))
+
 (deftest ^:functional reverse-geocode-test
   (let [geoshape-data (import.s/csv-sample-imported-dataset
               [:text

@@ -251,24 +251,29 @@
               (map #(to-sql-types % (walk/stringify-keys (:columns source-data-group)))))]
     (if target-csv-type?
       (do
-        (add-columns conn (:table-name target-merge-data-group) (:columns source-data-group))
+        (add-columns conn (:table-name target-merge-data-group)
+                     (if source-csv-type?
+                       (:columns source-data-group)
+                       (let [predicate (if (contains? (set (get source "mergeColumns")) "instance_id")
+                                         #(and (not= true (get % "key"))
+                                               (not= "instance_id" (get % "columnName")))
+                                         #(not= "instance_id" (get % "columnName")))]
+                         (filter predicate (:columns source-data-group)))))
         (doseq [record data]
           (jdbc/update! conn
                         (:table-name target-merge-data-group)
                         (dissoc record "rnum")
                         [(str "rnum" "= ?") (get record "rnum")])))
-      (do
-        (let [columns (if source-csv-type?
-                        (conj (:columns source-data-group)
-                              (icommon/new-instance-id-column (:group-id source-data-group)
-                                                              (:group-name source-data-group)))
-                        (:columns source-data-group)
-                        )]
-          (postgres/create-dataset-table conn (:table-name source-data-group)
-                                         (map #(update % :id (fn [_]
-                                                               (:columnName %)))
-                                              (walk/keywordize-keys columns)))
-          (jdbc/insert-multi! conn (:table-name source-data-group) data))))))
+      (let [columns (if source-csv-type?
+                      (conj (:columns source-data-group)
+                            (icommon/new-instance-id-column (:group-id source-data-group)
+                                                            (:group-name source-data-group)))
+                      (:columns source-data-group))]
+        (postgres/create-dataset-table conn (:table-name source-data-group)
+                                       (map #(update % :id (fn [_]
+                                                             (:columnName %)))
+                                            (walk/keywordize-keys columns)))
+        (jdbc/insert-multi! conn (:table-name source-data-group) data)))))
 
 (defn apply-merge-operation-2
   [conn table-name columns op-spec]
@@ -283,11 +288,11 @@
         target-csv-type? (csv-dataset? (db.dataset/dataset-import-type conn (:dataset-id op-spec)))
         ]
     (if source-csv-type?
-      (let [{:keys [columns] :as source-data-group}  (first data-groups-to-be-created)
-            source-dataset {:table-name (:source-table-name source-data-group)}]
-        (new-merged-data-group conn source target target-merge-data-group target-csv-type? source-csv-type? source-data-group source-dataset))
+      (let [source-dataset {:table-name (:source-table-name (first data-groups-to-be-created))}]
+        (doseq [source-data-group  data-groups-to-be-created]
+          (new-merged-data-group conn source target target-merge-data-group target-csv-type? source-csv-type? source-data-group source-dataset)))
       (let [source-dataset (data-group/create-view-from-data-groups conn (get source "datasetId"))]
-        (doseq [{:keys [columns] :as source-data-group}  data-groups-to-be-created]
+        (doseq [source-data-group  data-groups-to-be-created]
           (new-merged-data-group conn source target target-merge-data-group target-csv-type? source-csv-type? source-data-group source-dataset))))
     {:success? true
      :data-groups-to-be-created (if target-csv-type?
@@ -298,7 +303,14 @@
                              table-name)]
      :columns (if-not target-csv-type?
                 (vec columns)
-                (into (vec columns) (:columns (first data-groups-to-be-created))))}))
+                (into (vec columns)
+                      (if source-csv-type?
+                        (vec (:columns (first data-groups-to-be-created)))
+                        (let [predicate (if (contains? (set (get source "mergeColumns")) "instance_id")
+                                          #(and (not= true (get % "key"))
+                                                (not= "instance_id" (get % "columnName")))
+                                          #(not= "instance_id" (get % "columnName")))]
+                          (filter predicate  (reduce #(into % (:columns %2)) [] data-groups-to-be-created))))))}))
 
 (defn apply-merge-operation
   [conn table-name columns op-spec]
