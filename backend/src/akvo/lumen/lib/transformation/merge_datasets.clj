@@ -261,8 +261,9 @@
         (let [columns (if source-csv-type?
                         (conj (:columns source-data-group)
                               (icommon/new-instance-id-column (:group-id source-data-group)
-                                                      (:group-name source-data-group)))
-                        (:columns source-data-group))]
+                                                              (:group-name source-data-group)))
+                        (:columns source-data-group)
+                        )]
           (postgres/create-dataset-table conn (:table-name source-data-group)
                                          (map #(update % :id (fn [_]
                                                                (:columnName %)))

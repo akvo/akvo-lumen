@@ -975,7 +975,7 @@
       (is (= (map (comp :value first) (:rows origin-data)) (map :c1 data-db)))
       (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db))))))
 
-(deftest ^:functional merge-datasets-csv-data-groups-test
+(deftest ^:functional merge-datasets-csv-source-csv-target-data-groups-test
   (db.env/activate-flag *tenant-conn* "data-groups")
   (with-redefs [t.merge-datasets/csv-dataset? (fn [x] (contains? #{"DATA_FILE" "LINK" "clj"} x))]
     (let [origin-data          (import.s/csv-sample-imported-dataset [:text :date] 2)
@@ -1013,7 +1013,6 @@
         (is (= (map (comp :value first) (:rows origin-data)) (map :c1 data-db)))
         (is (= (map (comp :value last) (:rows target-data)) (map :d3 data-db))))))
   (db.env/deactivate-flag *tenant-conn* "data-groups"))
-
 
 (deftest ^:functional merge-datasets-csv-source-flow-target-data-groups-test
   (db.env/activate-flag *tenant-conn* "data-groups")
@@ -1079,7 +1078,6 @@
                                                            [:target :title] "reverse-geocode-new-column"
                                                            )})]
     (is (= ::lib/ok tag))))
-
 
 (deftest ^:functional rename-column-test
   (let [dataset-id           (import-file *tenant-conn* *error-tracker* {:has-column-headers? true
