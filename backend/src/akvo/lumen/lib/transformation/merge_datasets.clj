@@ -20,6 +20,9 @@
 
 (declare reset-column-values)
 
+(defn csv-dataset? [ds-type]
+  (contains? icommon/csv-types ds-type))
+
 (defmethod engine/valid? "core/merge-datasets"
   [op-spec]
   (let [source (get-in op-spec ["args" "source"])
@@ -164,7 +167,7 @@
         data-groups     (db.data-group/list-data-groups-by-dataset-version-id
                          conn
                          {:dataset-version-id (:id dataset-version)})
-        dataset-csv-type? (contains? icommon/csv-types (db.dataset/dataset-import-type conn dataset-id))
+        dataset-csv-type? (csv-dataset? (db.dataset/dataset-import-type conn dataset-id))
         columns-by-group (->> (set (get source "mergeColumns"))
                               (map-indexed (fn [i column-name]
                                              (let [dg (engine/datagroup-by-column data-groups column-name)
@@ -276,7 +279,7 @@
         target-merge-data-group (db.data-group/get-data-group-by-column-name conn {:column-name (get target "mergeColumn")
                                                                                    :dataset-version-id (:id target-dataset-version)})
         source-csv-type? (:source-csv-type? (first data-groups-to-be-created))
-        target-csv-type? (contains? icommon/csv-types (db.dataset/dataset-import-type conn (:dataset-id op-spec)))
+        target-csv-type? (csv-dataset? (db.dataset/dataset-import-type conn (:dataset-id op-spec)))
         ]
     (if source-csv-type?
       (let [{:keys [columns] :as source-data-group}  (first data-groups-to-be-created)
@@ -294,8 +297,7 @@
                              table-name)]
      :columns (if-not target-csv-type?
                 (vec columns)
-                (into (vec columns) (:columns (first data-groups-to-be-created)))
-                )}))
+                (into (vec columns) (:columns (first data-groups-to-be-created))))}))
 
 (defn apply-merge-operation
   [conn table-name columns op-spec]
