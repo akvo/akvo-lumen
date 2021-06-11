@@ -30,3 +30,7 @@
 
 (defn data-source-by-dataset-id [conn opts]
   (db-data-source-by-dataset-id conn (merge dv/defaults opts)))
+
+
+(defn dataset-import-type [conn dataset-id]
+  (:type (db-dataset-type conn {:dataset-id dataset-id})))

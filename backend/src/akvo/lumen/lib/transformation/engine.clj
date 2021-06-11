@@ -364,11 +364,12 @@
   (reduce (fn [c data-group]
          (let [imported-table-name (:imported-table-name data-group)
                table-name (util/gen-table-name "ds")]
-           (db.transformation/copy-table tenant-conn
-                                         {:source-table imported-table-name
-                                          :dest-table   table-name}
-                                         {}
-                                         {:transaction? false})
+           (when-not (= "MERGE_DATASET" imported-table-name)
+             (db.transformation/copy-table tenant-conn
+                                           {:source-table imported-table-name
+                                            :dest-table   table-name}
+                                           {}
+                                           {:transaction? false}))
 
            (assoc c (:group-id data-group) {:table-name table-name :previous-table-name (:table-name data-group)
                                             :imported-table-name (:imported-table-name data-group)}))
