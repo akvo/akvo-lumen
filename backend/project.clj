@@ -55,7 +55,6 @@
   :source-paths   ["src" "specs"]
   :uberjar-name "akvo-lumen.jar"
   :repl-options {:timeout 120000}
-  :pedantic? :abort
   :plugins [[lein-ancient "0.6.15"]
             [lein-codox "0.9.6"]
             [lein-environ "1.0.3"]
@@ -84,7 +83,8 @@
                                                 org.clojure/java.classpath
                                                 org.clojure/spec.alpha
                                                 org.clojure/tools.reader]]]}
-   :uberjar       {:aot :all}
+   :uberjar       {:aot :all
+                   :pedantic? :abort}
    :profiles/dev  {}
    :profiles/test  {}
    :project/dev   {:dependencies   [[duct/generate "0.8.2"]
