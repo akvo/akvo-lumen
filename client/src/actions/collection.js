@@ -73,14 +73,27 @@ export function deleteCollection(id) {
 export function addEntitiesToCollection(entityIds, collectionId) {
   return (dispatch, getState) => {
     const collection = getState().library.collections[collectionId];
+   
+    console.log(entityIds, collection, "for need purpose")
     const visualisations = uniq([...entityIds.visualisations, ...collection.visualisations]);
+    console.log( "i got here finally, where the bug is")
     const dashboards = uniq([...entityIds.dashboards, ...collection.dashboards]);
     const rasters = uniq([...entityIds.rasters, ...collection.rasters]);
     const datasets = uniq([...entityIds.datasets, ...collection.datasets]);
     const entities = { visualisations, dashboards, rasters, datasets };
     const newCollection = { ...collection, ...entities };
+   
     dispatch(editCollection(newCollection));
+    
     dispatch(showNotification('info', `Added to ${collection.title}`, true));
+  };
+}
+export function addEntityToCollection(entityId, collectionId) {
+  return (dispatch, getState) => {
+      const collection = getState().library.collections[collectionId];
+      collection.datasets.push(entityId)
+      dispatch(editCollection(collection));
+      dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
 }
 
