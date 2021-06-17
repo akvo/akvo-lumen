@@ -5,7 +5,6 @@ import { hideModal } from './activeModal';
 import applyTransformation from '../reducers/transform';
 import { showNotification } from './notification';
 import {
-  addEntitiesToCollection,
   addDatasetToCollection,
   addTemporaryEntitiesToCollection,
   removeTemporaryEntitiesFromCollection,
