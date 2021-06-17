@@ -6,7 +6,7 @@ import applyTransformation from '../reducers/transform';
 import { showNotification } from './notification';
 import {
   addEntitiesToCollection,
-  addEntityToCollection,
+  addDatasetToCollection,
   addTemporaryEntitiesToCollection,
   removeTemporaryEntitiesFromCollection,
 } from './collection';
@@ -245,7 +245,7 @@ function importDatasetSuccess(datasetId, importId, collectionId) {
     });
     if (collectionId) {
       dispatch(removeTemporaryEntitiesFromCollection(importId, collectionId));
-      dispatch(addEntityToCollection(datasetId, collectionId));
+      dispatch(addDatasetToCollection(datasetId, collectionId));
     }
   };
 }
