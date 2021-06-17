@@ -85,10 +85,10 @@ export function addEntitiesToCollection(entityIds, collectionId) {
     dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
 }
-export function addEntityToCollection(entityId, collectionId) {
+export function addDatasetToCollection(datasetId, collectionId) {
   return (dispatch, getState) => {
       const collection = getState().library.collections[collectionId];
-      collection.datasets.push(entityId)
+      collection.datasets.push(datasetId)
       dispatch(editCollection(collection));
       dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
