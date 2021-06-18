@@ -79,18 +79,18 @@ export function addEntitiesToCollection(entityIds, collectionId) {
     const datasets = uniq([...entityIds.datasets, ...collection.datasets]);
     const entities = { visualisations, dashboards, rasters, datasets };
     const newCollection = { ...collection, ...entities };
-   
+
     dispatch(editCollection(newCollection));
-    
+
     dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
 }
 export function addDatasetToCollection(datasetId, collectionId) {
   return (dispatch, getState) => {
-      const collection = getState().library.collections[collectionId];
-      collection.datasets.push(datasetId)
-      dispatch(editCollection(collection));
-      dispatch(showNotification('info', `Added to ${collection.title}`, true));
+    const collection = getState().library.collections[collectionId];
+    collection.datasets.push(datasetId);
+    dispatch(editCollection(collection));
+    dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
 }
 
