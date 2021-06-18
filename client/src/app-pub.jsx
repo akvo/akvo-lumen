@@ -6,6 +6,7 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import PrivacyGate from './components/PrivacyGate';
 import PublicDashboard from './containers/PublicDashboard';
 import * as auth from './utilities/auth';
+import ErrorScreenCustom from './components/common/ErrorScreenCustom';
 
 require('./styles/reset.global.scss');
 require('./styles/style.global.scss');
@@ -30,6 +31,16 @@ function PublicApp() {
 
   function renderErrorView() {
     setView('AUTH_ERROR');
+
+    // if already in error screen, then show password incorrect
+    if (view === 'AUTH_ERROR') {
+      setHasSubmittedPassword(true);
+    }
+
+    return null;
+  }
+  function renderNoDashboard() {
+    setView('NO_DASHBOARD');
 
     // if already in error screen, then show password incorrect
     if (view === 'AUTH_ERROR') {
@@ -64,6 +75,9 @@ function PublicApp() {
         .then((response) => {
           if (response.status === 403) {
             return renderErrorView();
+          }
+          if (response.status === 404) {
+            return renderNoDashboard();
           }
 
           if (view === 'AUTH_ERROR') {
@@ -144,7 +158,14 @@ function PublicApp() {
   }
 
   if (view === 'NO_DATA') {
-    return <p>No such public dashboard or visualisation</p>;
+    return (<ErrorScreenCustom code="Oops!" title="dashboard failed to load">
+      <div>Please contact support@akvo.org for help</div>
+    </ErrorScreenCustom>);
+  }
+  if (view === 'NO_DASHBOARD') {
+    return (<ErrorScreenCustom code="Oops!" title="dashboard does not exist">
+      <div>Please contact support@akvo.org for help</div>
+    </ErrorScreenCustom>);
   }
 
   if (view === 'APP') {
