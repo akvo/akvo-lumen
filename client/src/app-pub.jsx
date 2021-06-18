@@ -158,20 +158,14 @@ function PublicApp() {
   }
 
   if (view === 'NO_DATA') {
-    return  <ErrorScreenCustom
-    code="Oops!"
-    title="dashboard failed to load"
-  >
-    <div>Please contact support@akvo.org for help</div>
-  </ErrorScreenCustom>;
+    return (<ErrorScreenCustom code="Oops!" title="dashboard failed to load">
+      <div>Please contact support@akvo.org for help</div>
+    </ErrorScreenCustom>);
   }
   if (view === 'NO_DASHBOARD') {
-    return  <ErrorScreenCustom
-    code="Oops!"
-    title="dashboard does not exist"
-  >
-    <div>Please contact support@akvo.org for help</div>
-  </ErrorScreenCustom>;
+    return (<ErrorScreenCustom code="Oops!" title="dashboard does not exist">
+      <div>Please contact support@akvo.org for help</div>
+    </ErrorScreenCustom>);
   }
 
   if (view === 'APP') {
