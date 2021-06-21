@@ -85,27 +85,11 @@ export function addEntitiesToCollection(entityIds, collectionId) {
     dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
 }
-export function addDatasetToCollection(datasetId, collectionId) {
-  return (dispatch, getState) => {
-    const collection = getState().library.collections[collectionId];
-    collection.datasets.push(datasetId);
-    dispatch(editCollection(collection));
-    dispatch(showNotification('info', `Added to ${collection.title}`, true));
-  };
-}
 
-export function addVisualisationToCollection(visualisationId, collectionId) {
+export function addEntityToCollection(entityType, entityId, collectionId) {
   return (dispatch, getState) => {
     const collection = getState().library.collections[collectionId];
-    collection.visualisations.push(visualisationId);
-    dispatch(editCollection(collection));
-    dispatch(showNotification('info', `Added to ${collection.title}`, true));
-  };
-}
-export function addDashboardToCollection(dashboardId, collectionId) {
-  return (dispatch, getState) => {
-    const collection = getState().library.collections[collectionId];
-    collection.dashboards.push(dashboardId);
+    collection[`${entityType}s`].push(entityId);
     dispatch(editCollection(collection));
     dispatch(showNotification('info', `Added to ${collection.title}`, true));
   };
