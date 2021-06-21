@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
 import { saveAs } from 'file-saver/FileSaver';
 
-import { addEntitiesToCollection } from './collection';
+import { addDashboardToCollection } from './collection';
 import { showNotification } from './notification';
 import * as api from '../utilities/api';
 import { base64ToBlob, extToContentType } from '../utilities/export';
@@ -22,7 +22,7 @@ export function createDashboard(history, dashboard, collectionId, callback = () 
         const dash = body;
         dispatch(createDashboardSuccess(dash));
         if (collectionId) {
-          dispatch(addEntitiesToCollection(dash.id, collectionId));
+          dispatch(addDashboardToCollection(dash.id, collectionId));
         }
         history.push(`/dashboard/${dash.id}`);
         callback();

@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver/FileSaver';
 import { fetchDataset } from './dataset';
 import { showNotification } from './notification';
 import * as dashboardActions from './dashboard';
-import { addEntitiesToCollection } from './collection';
+import { addVisualisationToCollection } from './collection';
 import * as api from '../utilities/api';
 import { base64ToBlob, extToContentType } from '../utilities/export';
 
@@ -25,7 +25,7 @@ export function createVisualisation(history, visualisation, collectionId, callba
         const vis = body;
         dispatch(createVisualisationSuccess(vis));
         if (collectionId) {
-          dispatch(addEntitiesToCollection(vis.id, collectionId));
+          dispatch(addVisualisationToCollection(vis.id, collectionId));
         }
         history.push(`/visualisation/${vis.id}`);
         callback();

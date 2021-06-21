@@ -94,6 +94,23 @@ export function addDatasetToCollection(datasetId, collectionId) {
   };
 }
 
+export function addVisualisationToCollection(datasetId, collectionId) {
+  return (dispatch, getState) => {
+    const collection = getState().library.collections[collectionId];
+    collection.visualisations.push(datasetId);
+    dispatch(editCollection(collection));
+    dispatch(showNotification('info', `Added to ${collection.title}`, true));
+  };
+}
+export function addDashboardToCollection(datasetId, collectionId) {
+  return (dispatch, getState) => {
+    const collection = getState().library.collections[collectionId];
+    collection.dashboards.push(datasetId);
+    dispatch(editCollection(collection));
+    dispatch(showNotification('info', `Added to ${collection.title}`, true));
+  };
+}
+
 export function removeEntitiesFromCollection(entityIds, collectionId) {
   return (dispatch, getState) => {
     const c = getState().library.collections[collectionId];
