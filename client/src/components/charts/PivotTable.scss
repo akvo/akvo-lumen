@@ -28,7 +28,7 @@
     }
 
     td, th {
-        border: 0.1rem solid $midGrey;
+        border: 1px solid $lightGrey;
         padding: 0.25rem;
     }
 
@@ -38,7 +38,7 @@
     }
 
     .categoryColumnTitle, .rowColumnTitle {
-        background-color: $lightBlueGrey;
+        background-color: $white;
     }
 
     .uniqueColumnValue {
