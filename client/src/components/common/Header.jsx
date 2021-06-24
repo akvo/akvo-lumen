@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
 import './Header.scss';
 
@@ -11,6 +12,7 @@ function Header({
   className = '',
   backButtonTarget,
   location,
+  collectionHistory,
 }) {
   const haveHistory = location.state && location.state.from;
   let target;
@@ -22,7 +24,11 @@ function Header({
     target = { onClick: () => history.goBack() };
   } else {
     isLink = true;
-    target = { to: '/library' };
+    if (collectionHistory.location.length > 0) {
+      target = { to: collectionHistory.location };
+    } else {
+      target = { to: '/library' };
+    }
   }
   const Arrow = () => (
     <i
@@ -60,9 +66,15 @@ function Header({
   );
 }
 
+const mapStateToProps = (state) => {
+  const { collectionHistory } = state;
+  return { collectionHistory };
+};
+
 Header.propTypes = {
   history: PropTypes.object.isRequired,
   location: PropTypes.object,
+  collectionHistory: PropTypes.object,
   backButtonTarget: PropTypes.string,
   children: PropTypes.node,
   actions: PropTypes.node,
@@ -70,4 +82,4 @@ Header.propTypes = {
   className: PropTypes.string,
 };
 
-export default withRouter(Header);
+export default connect(mapStateToProps, null)(withRouter(Header));

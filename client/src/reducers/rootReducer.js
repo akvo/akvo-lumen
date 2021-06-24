@@ -8,6 +8,7 @@ import notification from './notification';
 import print from './print';
 import locale from './locale';
 import profile from './profile';
+import collectionHistory from './collectionHistory';
 
 function env(state = {}) {
   return state;
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
   print,
   locale,
   profile,
+  collectionHistory,
 });
 
 export default rootReducer;
