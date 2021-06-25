@@ -168,7 +168,7 @@
                          conn
                          {:dataset-version-id (:id dataset-version)})
         dataset-csv-type? (csv-dataset? (db.dataset/dataset-import-type conn dataset-id))
-        columns-by-group (->> (set (get source "mergeColumns"))
+        columns-by-group (->> (get source "mergeColumns")
                               (map-indexed (fn [i column-name]
                                              (let [dg (engine/datagroup-by-column data-groups column-name)
                                                    column (first (filter #(= (get % "columnName") column-name) (:columns dg)))]
