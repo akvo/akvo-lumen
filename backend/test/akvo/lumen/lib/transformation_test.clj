@@ -956,7 +956,7 @@
         apply-transformation (partial async-tx-apply {:tenant-conn *tenant-conn*} origin-dataset-id)
         tx                   (gen-transformation "core/merge-datasets"
                                                  {::transformation.merge-datasets.source.s/aggregationDirection "DESC"
-                                                  ::transformation.merge-datasets.source.s/mergeColumns         ["c2" "c3" "c4"]}
+                                                  ::transformation.merge-datasets.source.s/mergeColumns         ["c4" "c3" "c2"]}
                                                  [:source :aggregationColumn] nil
                                                  [:target :mergeColumn] "c1"
                                                  [:source :mergeColumn] "c1"
