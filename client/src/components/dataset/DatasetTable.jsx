@@ -486,6 +486,8 @@ class DatasetTable extends Component {
       }
     }
 
+    console.log(datasetRowAvailable, "final bustop")
+
     return (
       <React.Fragment>
         <DatasetHeader
@@ -571,7 +573,7 @@ class DatasetTable extends Component {
             </div>
           </div>
         ) : (
-          <LoadingSpinner />
+          <h1>error screen</h1>
         )}
       </React.Fragment>
     );
