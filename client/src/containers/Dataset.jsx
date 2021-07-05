@@ -300,7 +300,6 @@ function Dataset(props) {
   }
 
   const dataGroups = dataset.get('groups');
-  console.log(dataGroups, 'maybe the end')
 
   return (
     <NavigationPrompt
