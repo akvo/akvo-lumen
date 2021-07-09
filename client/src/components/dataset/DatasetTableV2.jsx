@@ -6,7 +6,6 @@ import moment from 'moment';
 import { withRouter } from 'react-router';
 import { injectIntl, intlShape } from 'react-intl';
 import Immutable from 'immutable';
-import introJs from '../../vendor/intro';
 import ColumnHeader from './ColumnHeader';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { getDatasetGroups } from '../../utilities/dataset';
@@ -28,69 +27,6 @@ function formatCellValue(type, value) {
   }
 }
 
-function useIntroJs(props, isMounted, sidebarProps) {
-  const introStarted = useRef(false);
-
-  useEffect(() => {
-    if (window.localStorage.getItem('useDataGroupsIntroDone')) {
-      return undefined;
-    }
-
-    const intro = introJs(
-      () => window.localStorage.setItem('useDataGroupsIntroDone', true),
-      () => window.localStorage.setItem('useDataGroupsIntroDone', true),
-      {
-        nextLabel: props.intl.formatMessage({ id: 'next' }),
-        prevLabel: props.intl.formatMessage({ id: 'back' }),
-        hidePrev: true,
-        skipLabel: props.intl.formatMessage({ id: 'skip' }),
-        doneLabel: props.intl.formatMessage({ id: 'got_it' }),
-        showStepNumbers: false,
-        showBullets: false,
-        exitOnEsc: true,
-        exitOnOverlayClick: true,
-        steps: [
-          {
-            intro: `<h2>${props.intl.formatMessage({ id: 'data_group_intro_0_header' })}</h2><p>${props.intl.formatMessage({ id: 'data_group_intro_0_body' })}<p/>`,
-            dynamic: true,
-            position: 'center',
-          },
-          {
-            element: '#GroupsList',
-            intro: props.intl.formatMessage({ id: 'data_group_intro_1' }),
-            dynamic: true,
-            position: 'right',
-          },
-          {
-            element: '#GroupsList .groupItem:first-child',
-            intro: props.intl.formatMessage({ id: 'data_group_intro_2' }),
-            dynamic: true,
-            position: 'right',
-          },
-        ],
-      });
-
-    const datasetHasGroups = props.groups && props.groups.size > 1;
-    const startIntro = isMounted.current &&
-      !introStarted.current &&
-      (props.datasetGroupsAvailable && datasetHasGroups) &&
-      (sidebarProps || {}).type === 'groupsList';
-
-
-    if (startIntro) {
-      intro.start();
-      introStarted.current = true;
-    }
-
-    return undefined;
-  }, [
-    props.datasetGroupsAvailable,
-    props.groups,
-    isMounted.current,
-    sidebarProps,
-    introStarted.current,
-  ]);
-}
 
 function DatasetTable(props) {
   const wrappingDiv = useRef(null);
@@ -143,8 +79,6 @@ function DatasetTable(props) {
     });
   };
 
-  // handle intro
-  useIntroJs(props, isMounted, sidebarProps);
 
   // handle resize
   useEffect(() => {
