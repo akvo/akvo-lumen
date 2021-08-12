@@ -319,7 +319,7 @@ export default class MapVisualisation extends Component {
     const windshaftAvailable = Boolean(layerGroupId);
     const canUpdate = windshaftAvailable || needToRemovePopup;
 
-    if ((needToAddOrUpdate || needToRemovePopup) && canUpdate) {
+    if ((newSpec.filters.length === 0 || needToAddOrUpdate || needToRemovePopup) && canUpdate) {
       if (haveUtfGrid) {
         // Remove the existing grid
         this.map.closePopup();
