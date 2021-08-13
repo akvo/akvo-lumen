@@ -694,10 +694,16 @@ class LayerConfigMenu extends Component {
           >
             <ToggleInput
               className="inputGroup"
-              disabled
-              checked
+              disabled={disabled || false}
+              checked={(layer.popup && layer.popup.length > 0) || false}
               label={intl.formatMessage({ id: 'popup' })}
-              onChange={() => null}
+              onChange={(x) => {
+                if (x) {
+                  this.handlePopupChange(filterColumns(columnOptions, ['text', 'number', 'date'])[0].value);
+                } else {
+                  this.props.onChangeMapLayer(this.props.layerIndex, { popup: [] });
+                }
+              }}
             />
             <div
               className="inputGroup"
