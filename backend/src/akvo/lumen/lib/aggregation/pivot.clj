@@ -67,12 +67,13 @@
     {:columns []
      :rows [[]]}))
 
-(defn apply-query [conn table-name {:keys [row-column category-column value-column] :as query} filter-str]
+(defn apply-query [conn table-name {:keys [row-column category-column value-column flow?] :as query} filter-str]
   (cond
 
     (and (nil? row-column) (nil? category-column))
     {:columns [{:type "number" :title "Total"}]
-     :rows    (run-query conn (format "SELECT count(*) FROM %s WHERE %s"
+     :rows    (run-query conn (format "SELECT count(%s) FROM %s WHERE %s"
+                                      (if flow? "distinct instance_id" "*")
                                       table-name
                                       filter-str))}
 
@@ -124,6 +125,7 @@
                       "count" "count"
                       (throw (ex-info "Unsupported aggregation function"
                                       {:aggregation (:aggregation query )})))
+   :flow? (some #(= "instance_id" (:columnName %)) columns)
    :filters         (:filters query)})
 
 (defn query [tenant-conn {:keys [columns table-name]} query]
