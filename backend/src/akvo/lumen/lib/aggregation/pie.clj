@@ -9,8 +9,11 @@
   [tenant-conn {:keys [columns table-name]} query]
   (let [filter-sql    (sql-str columns (:filters query))
         bucket-column (find-column columns (:bucketColumn query))
-        query         (format "SELECT %1$s as x, count(*) FROM %2$s WHERE %3$s GROUP BY x"
-                              (sql-option-bucket-column bucket-column) table-name filter-sql)
+        flow? (some #(= "instance_id" (:columnName %)) columns)
+        query         (format "SELECT %1$s as x, count(%2$s) FROM %3$s WHERE %4$s GROUP BY x"
+                              (sql-option-bucket-column bucket-column)
+                              (if flow? "distinct instance_id" "*")
+                              table-name filter-sql)
         counts        (run-query tenant-conn query)
         max-segments  50]
     (if (> (count counts) max-segments)
