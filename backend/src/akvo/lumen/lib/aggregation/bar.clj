@@ -61,13 +61,13 @@
           sort-sql
           truncate-size))
 
-(defn- aggregation* [aggregation-method metric-column bucket-column]
+(defn- aggregation* [aggregation-method metric-column bucket-column flow?]
   (let [aggregation-method (if-not metric-column "count" (or aggregation-method "count"))]
     (format
      (case aggregation-method
        nil                         "NULL"
        ("min" "max" "sum")         (str aggregation-method  "(%s)")
-       "count"                     (str aggregation-method  "(*)")
+       "count"                     (format "count(%s)" (if flow? "distinct instance_id" "*"))
        "mean"                      "avg(%s)"
        "median"                    "percentile_cont(0.5) WITHIN GROUP (ORDER BY %s)"
        "distinct"                  "COUNT(DISTINCT %s)"
@@ -144,7 +144,8 @@
     (let [subbucket-column (find-column columns (:subBucketColumn query))
           metric-y-column  (or (find-column columns (:metricColumnY query)) subbucket-column)
           metric-aggregation (:metricAggregation query)
-          aggregation      (aggregation* metric-aggregation metric-y-column bucket-column)
+          flow? (some #(= "instance_id" (:columnName %)) columns)
+          aggregation      (aggregation* metric-aggregation metric-y-column bucket-column flow?)
           metric-columns-y (when (not (empty? (:metricColumnsY query)))
                              (let [metric-columns-y (map #(find-column columns %) (:metricColumnsY query) )]
                                (conj metric-columns-y metric-y-column)))
@@ -156,7 +157,7 @@
                               bucket-column
                               (if metric-columns-y
                                 (->> metric-columns-y
-                                     (map #(aggregation* metric-aggregation %  bucket-column))
+                                     (map #(aggregation* metric-aggregation %  bucket-column flow?))
                                      (map-indexed
                                       (fn [index x]
                                         (if (= index 0) (str x " as y") x)) )
