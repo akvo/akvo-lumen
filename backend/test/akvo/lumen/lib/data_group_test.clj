@@ -1,5 +1,6 @@
 (ns akvo.lumen.lib.data-group-test
   (:require [akvo.lumen.lib.data-group :as data-group]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is]]))
 
 (def test-data-groups [{:columns [{:columnName "instance_id"}
@@ -44,4 +45,4 @@
 
 (deftest ^:unit data-groups-view
   (let [expected "CREATE TEMP VIEW foo AS SELECT * FROM bar"]
-    (is (= expected (data-group/data-groups-view "foo" true false "SELECT * FROM bar ")))))
+    (is (= expected (str/trim (data-group/data-groups-view "foo" true false "SELECT * FROM bar"))))))
