@@ -44,9 +44,13 @@
                           (map #(format "LEFT JOIN %1$s ON m.instance_id = %1$s.instance_id" %)
                                (:others from))))])))
 
+(def data-groups-limit 25)
+
+(def data-groups-rows-limit "LIMIT 50000")
+
 (defn data-groups-view
-  [view-name temporary? sql]
-  (format "CREATE %s VIEW %s AS %s" (if temporary? "TEMP" "") view-name sql))
+  [view-name temporary? limit? sql]
+  (format "CREATE %s VIEW %s AS %s %s" (if temporary? "TEMP" "") view-name sql (if limit? data-groups-rows-limit "")))
 
 (defn view-table-name [uuid]
   (str "dsv_view_" (str/replace uuid "-" "_")))
@@ -63,10 +67,11 @@
     (let [columns (reduce #(into % (:columns %2)) [] data-groups)
           t-name (view-table-name (:dataset-version-id (first data-groups)))]
       (if-not (db.data-group/exists-view? tenant-conn t-name)
-        (->> data-groups
-             data-groups-sql-template
-             data-groups-sql
-             (data-groups-view t-name false)
-             vector
-             (jdbc/execute! tenant-conn)))
+        (let [limit? (> (count data-groups) data-groups-limit)]
+         (->> data-groups
+              data-groups-sql-template
+              data-groups-sql
+              (data-groups-view t-name false limit?)
+              vector
+              (jdbc/execute! tenant-conn))))
       {:table-name t-name :columns columns})))
