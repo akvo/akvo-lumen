@@ -44,4 +44,4 @@
 
 (deftest ^:unit data-groups-view
   (let [expected "CREATE TEMP VIEW foo AS SELECT * FROM bar"]
-    (is (= expected (data-group/data-groups-view "foo" true "SELECT * FROM bar")))))
+    (is (= expected (data-group/data-groups-view "foo" true false "SELECT * FROM bar")))))
