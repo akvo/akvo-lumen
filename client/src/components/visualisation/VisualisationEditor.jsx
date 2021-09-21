@@ -181,7 +181,7 @@ class VisualisationEditor extends Component {
       };
       api
         .get(`/api/aggregation/${datasetId}/${VIS_TYPE_TO_AGGR_ENDPOINT_NAME[vType]}`, {
-          query: JSON.stringify({...spec, id}),
+          query: JSON.stringify({ ...spec, id }),
         })
         .then(({ body }) => {
           if (requestId === this.latestRequestId) {
