@@ -6,7 +6,7 @@
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
-            [akvo.lumen.lib.aggregation.commons :as commons]
+            [akvo.lumen.lib.aggregation.commons :as commons :refer (cols*)]
             [akvo.lumen.lib.aggregation.pie :as pie]
             [akvo.lumen.lib.aggregation.maps :as a.maps]
             [akvo.lumen.lib.aggregation.line :as line]
@@ -20,10 +20,6 @@
             [clojure.spec.alpha :as s]
             [clojure.java.jdbc :as jdbc]
             [clojure.walk :as walk]))
-
-(defmulti cols*
-  (fn [visualisation-type query]
-    visualisation-type))
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]

@@ -8,6 +8,10 @@
             [clojure.string :as str]
             [clojure.walk :as walk]))
 
+(defmulti cols*
+  (fn [visualisation-type query]
+    visualisation-type))
+
 (defn run-query [tenant-conn sql]
   (log/debug :run-query sql)
   (rest (jdbc/query tenant-conn [sql] {:as-arrays? true})))
