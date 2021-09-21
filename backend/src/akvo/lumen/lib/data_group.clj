@@ -44,34 +44,32 @@
                           (map #(format "LEFT JOIN %1$s ON m.instance_id = %1$s.instance_id" %)
                                (:others from))))])))
 
-(def data-groups-limit 25)
-
-(def data-groups-rows-limit "LIMIT 50000")
-
 (defn data-groups-view
-  [view-name temporary? limit? sql]
-  (format "CREATE %s VIEW %s AS %s %s" (if temporary? "TEMP" "") view-name sql (if limit? data-groups-rows-limit "")))
+  [view-name temporary? sql]
+  (format "CREATE %s VIEW %s AS %s" (if temporary? "TEMP" "") view-name sql))
 
 (defn view-table-name [uuid]
   (str "dsv_view_" (str/replace uuid "-" "_")))
 
-(defn drop-view! [conn dataset-version-2-id]
-  (let [view-name (view-table-name dataset-version-2-id)]
-    (db.data-group/exists-view? conn view-name)
+(defn drop-view! [conn uuid]
+  (let [view-name (view-table-name uuid)]
+    ;;(db.data-group/exists-view? conn view-name)
     (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
 
 (defn create-view-from-data-groups
-  [tenant-conn dataset-id]
+  [tenant-conn dataset-id & [viz-id]]
   (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
                                    (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+    (when viz-id
+      (log/error :ids (mapv :group-id data-groups))
+      )
     (let [columns (reduce #(into % (:columns %2)) [] data-groups)
           t-name (view-table-name (:dataset-version-id (first data-groups)))]
       (if-not (db.data-group/exists-view? tenant-conn t-name)
-        (let [limit? (> (count data-groups) data-groups-limit)]
-         (->> data-groups
-              data-groups-sql-template
-              data-groups-sql
-              (data-groups-view t-name false limit?)
-              vector
-              (jdbc/execute! tenant-conn))))
+        (->> data-groups
+             data-groups-sql-template
+             data-groups-sql
+             (data-groups-view t-name false)
+             vector
+             (jdbc/execute! tenant-conn)))
       {:table-name t-name :columns columns})))
