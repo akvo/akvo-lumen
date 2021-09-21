@@ -140,14 +140,13 @@
 
 (defn move-persisted-view
   "update persisted views with visualisation specs, from dsv1 to dsv2, (eg: after transformations) to ensure view is consistent "
-  [tenant-conn dsv1 dsv2]
+  [tenant-conn dataset-id dsv1 dsv2]
   (log/error ::move-persisted-view dsv1 dsv2)
   (when (and dsv1 dsv2 (not= dsv1 dsv2))
     (jdbc/with-db-transaction [tx-conn tenant-conn]
       (doseq [pvs (db.persisted-view/get-persisted-views-by-dsv tx-conn {:dataset-version-id dsv1})]
         (db.persisted-view/db-delete-persistent-view tx-conn {:id (:id pvs)})
         (let [{:keys [id spec visualisationtype]} (akvo.lumen.db.visualisation/visualisation-by-id tx-conn {:id (:visualisation-id pvs)})]
-          (create-view-from-data-groups tx-conn "61498f6b-192c-4257-827d-97ef7b2c26bf"
+          (create-view-from-data-groups tx-conn dataset-id
                                         id
-                                        (akvo.lumen.lib.aggregation.commons/cols* visualisationtype (walk/keywordize-keys spec))))
-        ))))
+                                        (akvo.lumen.lib.aggregation.commons/cols* visualisationtype (walk/keywordize-keys spec))))))))

@@ -58,7 +58,7 @@
          (db.job-execution/update-successful-job-execution tx-conn {:id job-execution-id})
          (when (get (env/all tx-conn) "data-groups")
            (let [dsv2 (db.transformation/latest-dataset-version-by-dataset-id tx-conn {:dataset-id dataset-id})]
-             (lib.data-group/create-view-from-data-groups tx-conn dataset-id)
+             (lib.data-group/create-view-from-data-groups dataset-id tx-conn dataset-id)
              (lib.data-group/move-persisted-view tx-conn (:id dsv1) (:id dsv2))))))
       (let [dsv (db.transformation/latest-dataset-version-by-dataset-id tenant-conn {:dataset-id dataset-id})]
         (db.job-execution/vacuum-table tenant-conn (select-keys dsv [:table-name])))
