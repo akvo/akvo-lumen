@@ -196,3 +196,14 @@
 (defmethod query* "bubble"
     [tenant-conn dataset _ query]
     (bubble/query tenant-conn dataset query))
+
+(defn cols-ids
+  "extract columns ids from data using specs"
+  [spec data]
+  (let [ids    (atom #{})
+        add-id (fn [id]
+                 (when id
+                   (swap! ids conj id)))]
+    (binding [db.dsv.column.s/*columnName?* add-id]
+      (s/explain-str spec data)
+      (deref ids))))
