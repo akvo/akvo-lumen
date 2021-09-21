@@ -2,6 +2,7 @@
   (:require [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.util :as util]
+            [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
@@ -16,9 +17,13 @@
             [akvo.lumen.lib.data-group :as data-group]
             [akvo.lumen.lib.env :as env]
             [clojure.tools.logging :as log]
+            [clojure.spec.alpha :as s]
             [clojure.java.jdbc :as jdbc]
             [clojure.walk :as walk]))
 
+(defmulti cols*
+  (fn [visualisation-type query]
+    visualisation-type))
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]
@@ -207,3 +212,31 @@
     (binding [db.dsv.column.s/*columnName?* add-id]
       (s/explain-str spec data)
       (deref ids))))
+
+(defmethod cols* "pivot"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.pivot/query query))
+
+(defmethod cols* "pie"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.pie/query query))
+
+(defmethod cols* "donut"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.donut/query query))
+
+(defmethod cols* "line"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.line/query query))
+
+(defmethod cols* "bar"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.bar/query query))
+
+(defmethod cols* "scatter"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.scatter/query query))
+
+(defmethod cols* "bubble"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.bubble/query query))
