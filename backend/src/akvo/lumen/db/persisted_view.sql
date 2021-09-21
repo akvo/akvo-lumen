@@ -10,6 +10,9 @@
 -- :doc insert persisted view
 insert into persisted_view(id, visualisation_id, dataset_version_id) VALUES(:id, :visualisation-id, :dataset-version-id)
 
+-- :name db-get-persisted-view-by-dsv :? :*
+-- :doc persisted views by dsv-id
+select id, visualisation_id as "visualisation-id", dataset_version_id as "dataset-version-id" from  persisted_view where dataset_version_id=:dataset-version-id
 
 -- :name db-insert-persisted-view-data-group :! :n
 -- :doc insert persisted view data-group

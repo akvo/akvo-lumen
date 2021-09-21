@@ -38,3 +38,7 @@
        (map #(update % :columns (comp walk/keywordize-keys vec)))
        seq))
 
+(defn get-persisted-views-by-dsv [db-conn {:keys [dataset-version-id] :as opts}]
+  (log/error opts)
+  (db-get-persisted-view-by-dsv db-conn opts))
+
