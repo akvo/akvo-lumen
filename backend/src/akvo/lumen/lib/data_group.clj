@@ -116,7 +116,7 @@
                       (db.persisted-view/insert-persisted-view tenant-conn opts))]
     (response tenant-conn data-groups-selected* (view-table-name viz-id) (all-dg-columns all-data-groups) (boolean persistent-view-id))))
 
-(defn- persisted-view-updated?
+(defn- persisted-view-not-updated?
   "is there more columns from different data-groups related in the new expected persisted-view?"
   [persisted-view-data-groups all-data-groups cols]
   (= (set (map :data-group-id persisted-view-data-groups))
@@ -132,7 +132,7 @@
           _ (log/error :dataset-version-id dataset-version-id :viz-id viz-id)]
       (if viz-id
         (if-let [persisted-view-data-groups (db.persisted-view/get-persisted-view tenant-conn {:visualisation-id viz-id :dataset-version-id dataset-version-id})]
-          (if (persisted-view-updated? persisted-view-data-groups all-data-groups cols)
+          (if (persisted-view-not-updated? persisted-view-data-groups all-data-groups cols)
             (response tenant-conn persisted-view-data-groups (view-table-name viz-id) (all-dg-columns all-data-groups))
             (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols (-> persisted-view-data-groups first :id)))
           (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols))
