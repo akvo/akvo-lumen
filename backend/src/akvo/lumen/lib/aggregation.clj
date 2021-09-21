@@ -37,7 +37,7 @@
 
 (defn data-groups-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
-    (if-let [data (data-group/create-view-from-data-groups tenant-tx-conn dataset-id) ]
+    (if-let [{:keys [table-name columns] :as data} (data-group/create-view-from-data-groups tenant-tx-conn dataset-id (:id query) (cols* visualisation-type query))]
       (query* tenant-tx-conn (select-keys data [:table-name :columns]) visualisation-type query)
       (lib/not-found {"datasetId" dataset-id}))))
 
