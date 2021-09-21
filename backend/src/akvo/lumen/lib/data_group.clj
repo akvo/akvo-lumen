@@ -1,6 +1,7 @@
 (ns akvo.lumen.lib.data-group
   (:require [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.db.data-group :as db.data-group]
+            [akvo.lumen.db.persisted-view :as db.persisted-view]
             [akvo.lumen.util :as util]
             [clojure.java.jdbc :as jdbc]
             [clojure.tools.logging :as log]
@@ -49,27 +50,90 @@
   (format "CREATE %s VIEW %s AS %s" (if temporary? "TEMP" "") view-name sql))
 
 (defn view-table-name [uuid]
-  (str "dsv_view_" (str/replace uuid "-" "_")))
+  (let [pattern "dsv_view_"
+        uuid (str/replace uuid "-" "_")]
+    (if (str/includes? uuid pattern)
+      uuid
+      (str pattern uuid))))
 
 (defn drop-view! [conn uuid]
   (let [view-name (view-table-name uuid)]
     ;;(db.data-group/exists-view? conn view-name)
     (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
 
-(defn create-view-from-data-groups
-  [tenant-conn dataset-id & [viz-id]]
-  (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                                   (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-    (when viz-id
-      (log/error :ids (mapv :group-id data-groups))
-      )
-    (let [columns (reduce #(into % (:columns %2)) [] data-groups)
-          t-name (view-table-name (:dataset-version-id (first data-groups)))]
+(defn log** [x]
+  (log/error x)
+  x)
+
+(defn- all-dg-columns [data-groups]
+  (reduce #(into % (:columns %2)) [] data-groups))
+
+(defn- datagroup-by-column [data-groups column-name]
+  (->> data-groups
+       (filter (fn [dg] (seq (filter #(= column-name (get % :columnName)) (:columns dg)))))
+       first))
+
+(defn- response [tenant-conn data-groups t-name & [all-columns update?]]
+  (when update?
+    (drop-view! tenant-conn t-name))
+  (let [columns (all-dg-columns data-groups)]
       (if-not (db.data-group/exists-view? tenant-conn t-name)
         (->> data-groups
+             log**
              data-groups-sql-template
+             log**
              data-groups-sql
+             log**
              (data-groups-view t-name false)
              vector
+             log**
              (jdbc/execute! tenant-conn)))
-      {:table-name t-name :columns columns})))
+      {:table-name t-name :columns (or all-columns columns)}))
+
+(defn- main-metadata
+  "data-groups persistent view needs at least metadata or main for the following joins"
+  [all-data-groups]
+  (first (or (seq (filter #(= "metadata" (:group-id %)) all-data-groups))
+             (seq (filter #(= "main" (:group-id %)) all-data-groups)))))
+
+(defn- data-groups-selected
+  "returns only data-groups referenced by cols plus metadata/main data-group"
+  [all-data-groups cols]
+  (into #{(main-metadata all-data-groups)}
+        (mapv (partial datagroup-by-column all-data-groups) cols)))
+
+(defn- response-with-updated-persisted-view
+  "create or update a persisted view"
+  [tenant-conn viz-id dataset-version-id all-data-groups cols & [persistent-view-id]]
+  (let [data-groups-selected* (data-groups-selected all-data-groups cols)
+        opts                  {:visualisation-id   viz-id
+                               :dataset-version-id dataset-version-id
+                               :data-groups        (map (fn [x]
+                                                          {:id (:data-group-id x)}
+                                                          ) data-groups-selected*)}
+        view-id               (if persistent-view-id
+                      (db.persisted-view/update-persisted-view tenant-conn (assoc opts :id persistent-view-id) )
+                      (db.persisted-view/insert-persisted-view tenant-conn opts))]
+    (response tenant-conn data-groups-selected* (view-table-name viz-id) (all-dg-columns all-data-groups) (boolean persistent-view-id))))
+
+(defn- persisted-view-updated?
+  "is there more columns from different data-groups related in the new expected persisted-view?"
+  [persisted-view-data-groups all-data-groups cols]
+  (= (set (map :data-group-id persisted-view-data-groups))
+     (set (map :data-group-id (data-groups-selected all-data-groups cols)))))
+
+(defn create-view-from-data-groups
+  "if visualisation-id the persisted view based on viz-id and dsv-id
+  else the persisted view is only based on dsv-id"
+  [tenant-conn dataset-id & [viz-id cols]]
+  (when-let [all-data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                       (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+    (let [dataset-version-id (:dataset-version-id (first all-data-groups))
+          _ (log/error :dataset-version-id dataset-version-id :viz-id viz-id)]
+      (if viz-id
+        (if-let [persisted-view-data-groups (db.persisted-view/get-persisted-view tenant-conn {:visualisation-id viz-id :dataset-version-id dataset-version-id})]
+          (if (persisted-view-updated? persisted-view-data-groups all-data-groups cols)
+            (response tenant-conn persisted-view-data-groups (view-table-name viz-id) (all-dg-columns all-data-groups))
+            (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols (-> persisted-view-data-groups first :id)))
+          (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols))
+        (response tenant-conn all-data-groups (view-table-name (:dataset-version-id (first all-data-groups))))))))
