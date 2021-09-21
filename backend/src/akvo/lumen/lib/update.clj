@@ -289,8 +289,9 @@
      (future
        (try
          (if (get (env/all tenant-conn) "data-groups")
-           (let [
-                 _ (lib.data-group/drop-view! tenant-conn (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id})))
+           (let [dsv1 (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id}))
+                 _ (lib.data-group/drop-view! tenant-conn dsv1)
+                 _ (lib.data-group/drop-persisted-views! tenant-conn dsv1)
                  {:keys [group-table-names
                          importer-columns imported-dataset-columns
                          latest-dataset-version success?]} (import-data-to-table-2 tenant-conn

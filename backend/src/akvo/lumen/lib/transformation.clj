@@ -80,9 +80,7 @@
             (when (get (env/all tenant-conn) "data-groups")
               (let [dsv-id (:id (db.dataset-version/latest-dataset-version-2-by-dataset-id tenant-conn {:dataset-id dataset-id}))]
                 (lib.data-group/drop-view! tenant-conn dsv-id)
-                (mapv (fn [v]
-                        (lib.data-group/drop-view! tenant-conn (:visualisation-id v)))
-                      (db.persisted-view/get-persisted-views-by-dsv tenant-conn {:dataset-version-id dsv-id}))))
+                (lib.data-group/drop-persisted-views! tenant-conn dsv-id)))
             (db.transformation/new-transformation-job-execution tenant-conn {:id job-execution-id :dataset-id dataset-id})
             (execute-tx deps job-execution-id dataset-id command)
             (lib/ok {:jobExecutionId job-execution-id

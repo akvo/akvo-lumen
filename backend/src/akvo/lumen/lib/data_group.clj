@@ -157,3 +157,9 @@
           (create-view-from-data-groups tx-conn dataset-id
                                         id
                                         (akvo.lumen.lib.aggregation.commons/cols* visualisationtype (walk/keywordize-keys spec))))))))
+
+
+(defn drop-persisted-views! [conn dsv-id]
+  (doseq [pvs (db.persisted-view/get-persisted-views-by-dsv conn {:dataset-version-id dsv-id})]
+    (drop-view! conn (:visualisation-id pvs))
+    (db.persisted-view/db-delete-persistent-view conn {:id (:id pvs)})))
