@@ -21,3 +21,8 @@ insert into persisted_view_data_group(id, data_group_id, persisted_view_id) VALU
 -- :name db-delete-all-persistent-view-data-groups :! :n
 -- :doc delete all persistent view data-groups
 delete from persisted_view_data_group where persisted_view_id=:id;
+
+
+-- :name db-delete-persistent-view :! :1
+-- :doc delete persistent view by id
+delete from persisted_view where id=:id;
