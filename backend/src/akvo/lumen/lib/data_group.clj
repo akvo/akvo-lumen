@@ -136,7 +136,14 @@
             (response tenant-conn persisted-view-data-groups (view-table-name viz-id) (all-dg-columns all-data-groups))
             (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols (-> persisted-view-data-groups first :id)))
           (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols))
-        (response tenant-conn all-data-groups (view-table-name (:dataset-version-id (first all-data-groups))))))))
+        (jdbc/with-db-transaction [tx-conn tenant-conn]
+          (when-let [persisted-views (db.persisted-view/get-persisted-views-by-dsv tx-conn {:dataset-version-id dataset-version-id})]
+            (doseq [pvs persisted-views]
+              (let [{:keys [id spec visualisationtype]} (akvo.lumen.db.visualisation/visualisation-by-id tx-conn {:id (:visualisation-id pvs)})]
+                (create-view-from-data-groups tx-conn dataset-id
+                                              id
+                                              (akvo.lumen.lib.aggregation.commons/cols* visualisationtype (walk/keywordize-keys spec))))))
+          (response tx-conn all-data-groups (view-table-name (:dataset-version-id (first all-data-groups)))))))))
 
 (defn move-persisted-view
   "update persisted views with visualisation specs, from dsv1 to dsv2, (eg: after transformations) to ensure view is consistent "
