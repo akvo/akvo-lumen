@@ -123,7 +123,7 @@ class VisualisationEditor extends Component {
   }
 
   fetchAggregatedData(visualisation) {
-    const { spec, datasetId } = visualisation;
+    const { spec, datasetId, id } = visualisation;
     const vType = visualisation.visualisationType;
     const requestId = Math.random();
     this.latestRequestId = requestId;
@@ -181,7 +181,7 @@ class VisualisationEditor extends Component {
       };
       api
         .get(`/api/aggregation/${datasetId}/${VIS_TYPE_TO_AGGR_ENDPOINT_NAME[vType]}`, {
-          query: JSON.stringify(spec),
+          query: JSON.stringify({...spec, id}),
         })
         .then(({ body }) => {
           if (requestId === this.latestRequestId) {
