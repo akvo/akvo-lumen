@@ -4,7 +4,7 @@ CREATE TABLE persisted_view (
     dataset_version_id text REFERENCES dataset_version_2 (id) ON UPDATE CASCADE ON DELETE CASCADE,
     created timestamptz DEFAULT now(),
     modified timestamptz DEFAULT now(),
-    UNIQUE (visualisation_id, dataset_version_id)
+    UNIQUE (visualisation_id)
 );
 
 CREATE TABLE persisted_view_data_group (
