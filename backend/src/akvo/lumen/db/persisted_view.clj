@@ -1,6 +1,7 @@
 (ns akvo.lumen.db.persisted-view
   (:require [hugsql.core :as hugsql]
             [clojure.java.jdbc :as jdbc]
+            [clojure.walk :as walk]
             [akvo.lumen.util :as util]
             [clojure.tools.logging :as log]))
 
@@ -33,4 +34,7 @@
   (str id))
 
 (defn get-persisted-view [db-conn {:keys [visualisation-id dataset-version-id] :as opts}]
-  (db-get-persisted-view db-conn opts))
+  (->> (db-get-persisted-view db-conn opts)
+       (map #(update % :columns (comp walk/keywordize-keys vec)))
+       seq))
+
