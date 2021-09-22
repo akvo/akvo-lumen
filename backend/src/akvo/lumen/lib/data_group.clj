@@ -61,7 +61,7 @@
     (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
 
 (defn log** [x]
-  (log/error x)
+  (log/debug x)
   x)
 
 (defn- all-dg-columns [data-groups]
