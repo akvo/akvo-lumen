@@ -88,7 +88,6 @@
     {:table-name t-name :columns (or all-columns columns)}))
 
 (defn- main-metadata
-  "data-groups persistent view needs at least metadata or main for the following joins"
   [all-data-groups]
   (first (or (seq (filter #(= "metadata" (:group-id %)) all-data-groups))
              (seq (filter #(= "main" (:group-id %)) all-data-groups)))))
@@ -99,7 +98,7 @@
   (into #{(main-metadata all-data-groups)}
         (mapv (partial datagroup-by-column all-data-groups) cols)))
 
-(defn- response-with-updated-persisted-view
+(defn- temp-view-response-with-selected-data-groups
   [tenant-conn viz-id dataset-version-id all-data-groups cols]
   (let [data-groups-selected* (data-groups-selected all-data-groups cols)]
     (response tenant-conn
@@ -114,6 +113,6 @@
                                        (map #(update % :columns (comp walk/keywordize-keys vec)))))]
     (let [dataset-version-id (:dataset-version-id (first all-data-groups))]
       (if viz-id
-        (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols)
+        (temp-view-response-with-selected-data-groups tenant-conn viz-id dataset-version-id all-data-groups cols)
         (response tenant-conn all-data-groups
                   (view-table-name (:dataset-version-id (first all-data-groups))))))))
