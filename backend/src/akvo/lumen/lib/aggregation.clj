@@ -2,10 +2,11 @@
   (:require [akvo.lumen.db.dataset :as db.dataset]
             [akvo.lumen.lib :as lib]
             [akvo.lumen.util :as util]
+            [akvo.lumen.specs.db.dataset-version.column :as db.dsv.column.s]
             [akvo.lumen.lib.dataset :as dataset]
             [akvo.lumen.lib.visualisation :as visualisation]
             [akvo.lumen.lib.visualisation.maps :as maps]
-            [akvo.lumen.lib.aggregation.commons :as commons]
+            [akvo.lumen.lib.aggregation.commons :as commons :refer (cols*)]
             [akvo.lumen.lib.aggregation.pie :as pie]
             [akvo.lumen.lib.aggregation.maps :as a.maps]
             [akvo.lumen.lib.aggregation.line :as line]
@@ -16,9 +17,9 @@
             [akvo.lumen.lib.data-group :as data-group]
             [akvo.lumen.lib.env :as env]
             [clojure.tools.logging :as log]
+            [clojure.spec.alpha :as s]
             [clojure.java.jdbc :as jdbc]
             [clojure.walk :as walk]))
-
 
 (defmulti query*
   (fn [tenant-conn dataset visualisation-type query]
@@ -32,7 +33,7 @@
 
 (defn data-groups-query [tenant-conn dataset-id visualisation-type query]
   (jdbc/with-db-transaction [tenant-tx-conn tenant-conn]
-    (if-let [data (data-group/create-view-from-data-groups tenant-tx-conn dataset-id) ]
+    (if-let [{:keys [table-name columns] :as data} (data-group/create-view-from-data-groups tenant-tx-conn dataset-id (util/squuid) (cols* visualisation-type query))]
       (query* tenant-tx-conn (select-keys data [:table-name :columns]) visualisation-type query)
       (lib/not-found {"datasetId" dataset-id}))))
 
@@ -143,7 +144,7 @@
     (merge-dashboard-filters visualisation filters)))
 
 (defn visualisation-response-data [tenant-conn id windshaft-url filters counter]
-  (log/info (format "Before! Counter %s - Vis id: %s" @counter id ))
+  (log/debug (format "Before! Counter %s - Vis id: %s" @counter id ))
   (swap! counter inc)
   (util/time-with-log
    (format "Vis id: %s" id)
@@ -196,3 +197,42 @@
 (defmethod query* "bubble"
     [tenant-conn dataset _ query]
     (bubble/query tenant-conn dataset query))
+
+(defn cols-ids
+  "extract columns ids from data using specs"
+  [spec data]
+  (let [ids    (atom #{})
+        add-id (fn [id]
+                 (when id
+                   (swap! ids conj id)))]
+    (binding [db.dsv.column.s/*columnName?* add-id]
+      (s/explain-str spec data)
+      (deref ids))))
+
+(defmethod cols* "pivot"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.pivot/query query))
+
+(defmethod cols* "pie"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.pie/query query))
+
+(defmethod cols* "donut"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.donut/query query))
+
+(defmethod cols* "line"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.line/query query))
+
+(defmethod cols* "bar"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.bar/query query))
+
+(defmethod cols* "scatter"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.scatter/query query))
+
+(defmethod cols* "bubble"
+  [_ query]
+  (cols-ids :akvo.lumen.lib.aggregation.bubble/query query))

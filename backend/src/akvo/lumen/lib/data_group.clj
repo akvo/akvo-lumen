@@ -44,34 +44,76 @@
                           (map #(format "LEFT JOIN %1$s ON m.instance_id = %1$s.instance_id" %)
                                (:others from))))])))
 
-(def data-groups-limit 25)
-
-(def data-groups-rows-limit "LIMIT 50000")
-
 (defn data-groups-view
-  [view-name temporary? limit? sql]
-  (format "CREATE %s VIEW %s AS %s %s" (if temporary? "TEMP" "") view-name sql (if limit? data-groups-rows-limit "")))
+  [view-name temporary? sql]
+  (format "CREATE %s VIEW %s AS %s" (if temporary? "TEMP" "") view-name sql))
 
 (defn view-table-name [uuid]
-  (str "dsv_view_" (str/replace uuid "-" "_")))
+  (let [pattern "dsv_view_"
+        uuid (str/replace uuid "-" "_")]
+    (if (str/includes? uuid pattern)
+      uuid
+      (str pattern uuid))))
 
-(defn drop-view! [conn dataset-version-2-id]
-  (let [view-name (view-table-name dataset-version-2-id)]
-    (db.data-group/exists-view? conn view-name)
+(defn drop-view! [conn uuid]
+  (let [view-name (view-table-name uuid)]
+    ;;(db.data-group/exists-view? conn view-name)
     (jdbc/execute! conn [(format "DROP VIEW IF EXISTS %s" view-name)])))
 
+(defn log** [x]
+  (log/error x)
+  x)
+
+(defn- all-dg-columns [data-groups]
+  (reduce #(into % (:columns %2)) [] data-groups))
+
+(defn- datagroup-by-column [data-groups column-name]
+  (->> data-groups
+       (filter (fn [dg] (seq (filter #(= column-name (get % :columnName)) (:columns dg)))))
+       first))
+
+(defn- response [tenant-conn data-groups t-name & [all-columns temp?]]
+  (let [columns (all-dg-columns data-groups)]
+    (when-not (db.data-group/exists-view? tenant-conn t-name)
+      (->> data-groups
+;;           log**
+           data-groups-sql-template
+           log**
+           data-groups-sql
+           log**
+           (data-groups-view t-name (boolean temp?))
+           vector
+           log**
+           (jdbc/execute! tenant-conn)))
+    {:table-name t-name :columns (or all-columns columns)}))
+
+(defn- main-metadata
+  "data-groups persistent view needs at least metadata or main for the following joins"
+  [all-data-groups]
+  (first (or (seq (filter #(= "metadata" (:group-id %)) all-data-groups))
+             (seq (filter #(= "main" (:group-id %)) all-data-groups)))))
+
+(defn- data-groups-selected
+  "returns only data-groups referenced by cols plus metadata/main data-group"
+  [all-data-groups cols]
+  (into #{(main-metadata all-data-groups)}
+        (mapv (partial datagroup-by-column all-data-groups) cols)))
+
+(defn- response-with-updated-persisted-view
+  [tenant-conn viz-id dataset-version-id all-data-groups cols]
+  (let [data-groups-selected* (data-groups-selected all-data-groups cols)]
+    (response tenant-conn
+              data-groups-selected*
+              (view-table-name viz-id)
+              (all-dg-columns all-data-groups)
+              true)))
+
 (defn create-view-from-data-groups
-  [tenant-conn dataset-id]
-  (when-let [data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
-                                   (map #(update % :columns (comp walk/keywordize-keys vec)))))]
-    (let [columns (reduce #(into % (:columns %2)) [] data-groups)
-          t-name (view-table-name (:dataset-version-id (first data-groups)))]
-      (if-not (db.data-group/exists-view? tenant-conn t-name)
-        (let [limit? (> (count data-groups) data-groups-limit)]
-         (->> data-groups
-              data-groups-sql-template
-              data-groups-sql
-              (data-groups-view t-name false limit?)
-              vector
-              (jdbc/execute! tenant-conn))))
-      {:table-name t-name :columns columns})))
+  [tenant-conn dataset-id & [viz-id cols]]
+  (when-let [all-data-groups (seq (->> (db.dataset/data-groups-by-dataset-id tenant-conn {:dataset-id dataset-id})
+                                       (map #(update % :columns (comp walk/keywordize-keys vec)))))]
+    (let [dataset-version-id (:dataset-version-id (first all-data-groups))]
+      (if viz-id
+        (response-with-updated-persisted-view tenant-conn viz-id dataset-version-id all-data-groups cols)
+        (response tenant-conn all-data-groups
+                  (view-table-name (:dataset-version-id (first all-data-groups))))))))
