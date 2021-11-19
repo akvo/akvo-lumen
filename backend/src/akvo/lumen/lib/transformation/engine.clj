@@ -539,5 +539,5 @@
 
 (defn column-title-error? [column-title columns]
   (when (not-empty (filter #(= column-title (get % "title")) columns))
-    {:success? false
+    #_{:success? false
      :message  (format "In this dataset there's already a column with this name: %s. Please choose another non existing name" column-title)}))
