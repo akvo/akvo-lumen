@@ -231,7 +231,7 @@
             shape-table-name)))
 
 (defn point-sql [tenant-conn columns geom-column popup-columns
-                 point-color-column where-clause {:keys [datasetId] :as layer}]
+                 point-color-column where-clause {:keys [datasetId tableName] :as layer}]
   (let [{:keys [table-name columns]} (db.dataset/dataset-by-id tenant-conn {:id datasetId})
         date-column-set (reduce (fn [m {:strs [columnName type]}]
                                   (if (= "date" type) (conj m columnName) m))
@@ -246,7 +246,7 @@
                 point-color-column (conj (str (sql-option-bucket-column point-color-column) " as " (:columnName point-color-column)))))]
     (format "select %s from %s where %s"
                         (str/join ", " cols)
-                        table-name
+                        (or tableName table-name)
                         where-clause)))
 
 (defn shape-sql [tenant-conn columns geom-column popup-columns point-color-column where-clause
@@ -322,8 +322,8 @@
           (or end-color "#000000")))
 
 (defn- get-layers [tenant-conn layers metadata-array]
-  (map-indexed (fn [idx {:keys [datasetId rasterId filters geom popup pointColorColumn]
-                         :as layer}]
+  (map (fn [idx {:keys [datasetId rasterId filters geom popup pointColorColumn]
+                         :as layer} metadata]
                  (if (= (:layerType layer) "raster")
                    (let [{:keys [raster_table metadata]} (db.raster/raster-by-id tenant-conn {:id (:rasterId layer)})]
                      {:type "mapnik"
@@ -342,9 +342,7 @@
                          point-color-column (find-column kw-columns pointColorColumn)
                          sql (get-sql tenant-conn columns geom-column
                                       popup-columns point-color-column
-                                      where-clause layer idx)]
-
-
+                                      where-clause (assoc layer :tableName (:tableName metadata)) idx)]
                      {:type "mapnik"
                       :options {:cartocss (trim-css (cartocss layer idx metadata-array))
                                 :cartocss_version "2.0.0"
@@ -352,7 +350,7 @@
                                 :interactivity (get-interactivity layer popup-columns)
                                 :sql sql
                                 :srid "4326"}})))
-               layers))
+               (range) layers metadata-array))
 
 (defn build [tenant-conn layers metadata-array]
   {:version "1.6.0"

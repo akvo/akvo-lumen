@@ -144,7 +144,8 @@
 
 (defn point-metadata [tenant-conn table-name layer where-clause opts]
   (let [column-titles (get-column-titles tenant-conn "table_name" table-name "main" (:datasetId layer))]
-    {:boundingBox (bounds tenant-conn table-name layer where-clause opts)
+    {:tableName table-name
+     :boundingBox (bounds tenant-conn table-name layer where-clause opts)
      :pointColorMapping (point-color-mapping tenant-conn table-name layer where-clause column-titles)
      :availableColors palette
      :pointColorMappingTitle (get-column-title-for-name column-titles (:pointColorColumn layer))
