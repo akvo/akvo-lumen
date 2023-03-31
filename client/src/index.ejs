@@ -7,10 +7,41 @@
     <link rel="shortcut icon" href="/favicon.ico">
     <link href='https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.9.3/introjs.css' rel='stylesheet' type='text/css'>
     <script src="https://use.fontawesome.com/51ad00bb8c.js"></script>
-    <script async data-cfasync='false' src='https://d29l98y0pmei9d.cloudfront.net/js/widget.min.js?k=Y2xpZW50SWQ9NzQ3Jmhvc3ROYW1lPWFrdm9sdW1lbi5zdXBwb3J0aGVyby5pbw=='></script>
+    <style>
+    #support-button {
+      display: block;
+      position: fixed;
+      background-color: rgb(0, 153, 0);
+      color: rgb(255, 255, 255);
+      border-color: rgb(255, 255, 255);
+      font-family: "proxima-nova", Arial, sans-serif;
+      font-size: 14px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      cursor: pointer;
+      padding: 8px 10px 21px;
+      z-index: 100000;
+      top: 200px;
+      right: -15px;
+      transform: rotate(270deg);
+    }
+    #support-button:hover {
+      right: -9px;
+    }
+    #support-button a {
+      text-decoration: none;
+    }
+    #support-button a,
+    #support-button a:visited,
+    #support-button a:hover,
+    #support-button a:active {
+      color: inherit;
+    }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet' type='text/css'>
+    <div id="support-button" class="support-button" style=""><a href="https://kb.akvo.org/lumen/" target="_blank">HELP</a></div>
   </body>
 </html>
