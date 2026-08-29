@@ -12,6 +12,7 @@
             [clojure.core.match :refer [match]]
             [clojure.walk :as walk]
             [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.db.raster :as db.raster])
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
@@ -40,6 +41,43 @@
   (and (= (count columns)
           (count (into #{} columns)))
        (every? p columns)))
+
+(def ^:private valid-aggregation-methods #{"avg" "count" "sum" "max" "min"})
+
+(defn validate-layer-columns
+  "Ensure every user-supplied column field in a map layer names a real column of
+  the dataset it is read from, before those fields are used to build SQL.
+
+  Two distinct datasets are in play: `popup` columns and `shapeLabelColumn` are
+  selected from the shape dataset (`shape-columns`); `aggregationColumn` and
+  `aggregationGeomColumn` are read from the aggregation dataset (`agg-columns`).
+  Validating the aggregation fields against the shape columns would both reject
+  valid maps and let unchecked names through, so the caller must pass the
+  correct column sets.
+
+  Aggregation fields (and `aggregationMethod`) only reach SQL when the aggregation
+  path is active — all of `aggregationDataset`/`aggregationColumn`/
+  `aggregationGeomColumn` present — so they are validated only in that case.
+  Raster layers reach none of these code paths and are skipped.
+
+  Returns the layer unchanged on success; throws `ex-info` on the first invalid
+  field (via `find-column`, or directly for `aggregationMethod`)."
+  [{:keys [layerType popup shapeLabelColumn aggregationDataset aggregationColumn
+           aggregationGeomColumn aggregationMethod] :as layer}
+   shape-columns agg-columns]
+  (when (not= layerType "raster")
+    (doseq [{:keys [column]} popup]
+      (find-column shape-columns column))
+    (when shapeLabelColumn
+      (find-column shape-columns shapeLabelColumn))
+    (when (and aggregationDataset aggregationColumn aggregationGeomColumn)
+      (find-column agg-columns aggregationColumn)
+      (find-column agg-columns aggregationGeomColumn)
+      (when (and aggregationMethod
+                 (not (contains? valid-aggregation-methods aggregationMethod)))
+        (throw (ex-info (str "Invalid aggregationMethod: " aggregationMethod)
+                        {:aggregationMethod aggregationMethod})))))
+  layer)
 
 (defn valid-location?
   "Validate map spec layer."
