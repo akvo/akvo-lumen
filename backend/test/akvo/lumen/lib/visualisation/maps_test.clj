@@ -154,8 +154,4 @@
       (is (some? (m/validate-layer-columns (assoc base :aggregationMethod "sum")
                                            shape-cols agg-cols)))
       ;; absent aggregationMethod -> defaults to "avg" downstream, must be accepted
-      (is (some? (m/validate-layer-columns base shape-cols agg-cols)))))
-
-  (testing "raster layers are skipped entirely"
-    (let [layer {:layerType "raster" :popup [{:column bogus-column}]}]
-      (is (= layer (m/validate-layer-columns layer nil nil))))))
+      (is (some? (m/validate-layer-columns base shape-cols agg-cols))))))

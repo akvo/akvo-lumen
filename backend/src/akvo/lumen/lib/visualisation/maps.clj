@@ -57,26 +57,20 @@
 
   Aggregation fields (and `aggregationMethod`) only reach SQL when the aggregation
   path is active — all of `aggregationDataset`/`aggregationColumn`/
-  `aggregationGeomColumn` present — so they are validated only in that case.
-  Raster layers reach none of these code paths and are skipped.
-
-  Returns the layer unchanged on success; throws `ex-info` on the first invalid
-  field (via `find-column`, or directly for `aggregationMethod`)."
-  [{:keys [layerType popup shapeLabelColumn aggregationDataset aggregationColumn
+  `aggregationGeomColumn` present — so they are validated only in that case."
+  [{:keys [popup shapeLabelColumn aggregationDataset aggregationColumn
            aggregationGeomColumn aggregationMethod] :as layer}
    shape-columns agg-columns]
-  (when (not= layerType "raster")
-    (doseq [{:keys [column]} popup]
-      (find-column shape-columns column))
-    (when shapeLabelColumn
-      (find-column shape-columns shapeLabelColumn))
-    (when (and aggregationDataset aggregationColumn aggregationGeomColumn)
-      (find-column agg-columns aggregationColumn)
-      (find-column agg-columns aggregationGeomColumn)
-      (when (and aggregationMethod
-                 (not (contains? valid-aggregation-methods aggregationMethod)))
-        (throw (ex-info (str "Invalid aggregationMethod: " aggregationMethod)
-                        {:aggregationMethod aggregationMethod})))))
+  (doseq [{:keys [column]} popup]
+    (find-column shape-columns column))
+  (find-column shape-columns shapeLabelColumn)
+  (when (and aggregationDataset aggregationColumn aggregationGeomColumn)
+    (find-column agg-columns aggregationColumn)
+    (find-column agg-columns aggregationGeomColumn)
+    ;; Mirrors the "avg" default that `map-config` applies when the key is absent.
+    (when-not (valid-aggregation-methods (or aggregationMethod "avg"))
+      (throw (ex-info (str "Invalid aggregationMethod: " aggregationMethod)
+                      {:aggregationMethod aggregationMethod}))))
   layer)
 
 (defn valid-location?
@@ -129,15 +123,12 @@
         ;; dataset (:datasetId); the aggregation fields come from the aggregation
         ;; dataset (:aggregationDataset). Runs on stored specs at render time too,
         ;; so existing specs are checked without needing a migration.
-        (doseq [layer non-raster-layers]
-          (let [shape-columns (walk/keywordize-keys
-                               (:columns (db.dataset/dataset-by-id
-                                          tenant-conn {:id (:datasetId layer)})))
-                agg-columns   (when (:aggregationDataset layer)
-                                (walk/keywordize-keys
-                                 (:columns (db.dataset/dataset-by-id
-                                            tenant-conn {:id (:aggregationDataset layer)}))))]
-            (validate-layer-columns layer shape-columns agg-columns)))
+        (let [cols #(walk/keywordize-keys
+                     (:columns (db.dataset/dataset-by-id tenant-conn {:id %})))]
+          (doseq [layer non-raster-layers]
+            (validate-layer-columns layer
+                                    (cols (:datasetId layer))
+                                    (some-> (:aggregationDataset layer) cols))))
         [(if (not dataset-id) raster-id dataset-id)]))))
 
 (defn create-raster [tenant-conn windshaft-url raster-id]
