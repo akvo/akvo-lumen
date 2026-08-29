@@ -150,3 +150,30 @@
           {:keys [sql]} (-> map-config :layers first :options)
           sql-result (jdbc/query *tenant-conn* sql)]
       (check-data dataset-data sql-result))))
+
+(deftest ^:functional reject-unknown-map-columns
+  (let [dataset-data (i-c/flow-sample-imported-dataset groups-def 2)
+        dataset-id   (tu/import-file *tenant-conn* *error-tracker*
+                                     {:dataset-name "Guard map"
+                                      :kind "clj-flow"
+                                      :data dataset-data})
+        ;; The `layers` helper may carry keyword column ids; coerce the fields
+        ;; that conform-create-args inspects (geom + popup columns) to strings so
+        ;; location validation passes and we exercise the column guard.
+        strify (fn [l]
+                 (-> l
+                     (update-in [0 :geom] #(some-> % name))
+                     (update-in [0 :popup]
+                                (partial mapv (fn [p] (update p :column #(some-> % name)))))))
+        good   (strify (layers dataset-id dataset-data))]
+
+    (testing "valid column names conform to [dataset-id]"
+      (is (= [dataset-id] (v.maps/conform-create-args *tenant-conn* good))))
+
+    (testing "a popup column that is not a real column is rejected before SQL is built"
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo #"No such column"
+           (v.maps/conform-create-args
+            *tenant-conn*
+            (assoc-in good [0 :popup 0 :column]
+                      "name,(select v from other_table) as extra")))))))
