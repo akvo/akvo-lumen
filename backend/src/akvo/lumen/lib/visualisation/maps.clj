@@ -12,6 +12,7 @@
             [clojure.core.match :refer [match]]
             [clojure.walk :as walk]
             [akvo.lumen.db.dataset :as db.dataset]
+            [akvo.lumen.lib.dataset.utils :refer (find-column)]
             [akvo.lumen.db.raster :as db.raster])
   (:import [com.zaxxer.hikari HikariDataSource]
            [java.net URI]))
@@ -41,6 +42,43 @@
           (count (into #{} columns)))
        (every? p columns)))
 
+(def ^:private valid-aggregation-methods #{"avg" "count" "sum" "max" "min"})
+
+(defn validate-layer-columns
+  "Ensure every user-supplied column field in a map layer names a real column of
+  the dataset it is read from, before those fields are used to build SQL.
+
+  Two distinct datasets are in play: `popup` columns and `shapeLabelColumn` are
+  selected from the shape dataset (`shape-columns`); `aggregationColumn` and
+  `aggregationGeomColumn` are read from the aggregation dataset (`agg-columns`).
+  Validating the aggregation fields against the shape columns would both reject
+  valid maps and let unchecked names through, so the caller must pass the
+  correct column sets.
+
+  Aggregation fields (and `aggregationMethod`) only reach SQL when the aggregation
+  path is active — all of `aggregationDataset`/`aggregationColumn`/
+  `aggregationGeomColumn` present — so they are validated only in that case.
+  Raster layers reach none of these code paths and are skipped.
+
+  Returns the layer unchanged on success; throws `ex-info` on the first invalid
+  field (via `find-column`, or directly for `aggregationMethod`)."
+  [{:keys [layerType popup shapeLabelColumn aggregationDataset aggregationColumn
+           aggregationGeomColumn aggregationMethod] :as layer}
+   shape-columns agg-columns]
+  (when (not= layerType "raster")
+    (doseq [{:keys [column]} popup]
+      (find-column shape-columns column))
+    (when shapeLabelColumn
+      (find-column shape-columns shapeLabelColumn))
+    (when (and aggregationDataset aggregationColumn aggregationGeomColumn)
+      (find-column agg-columns aggregationColumn)
+      (find-column agg-columns aggregationGeomColumn)
+      (when (and aggregationMethod
+                 (not (contains? valid-aggregation-methods aggregationMethod)))
+        (throw (ex-info (str "Invalid aggregationMethod: " aggregationMethod)
+                        {:aggregationMethod aggregationMethod})))))
+  layer)
+
 (defn valid-location?
   "Validate map spec layer."
   [layer p]
@@ -64,7 +102,7 @@
 
            :else false)))
 
-(defn conform-create-args [layers]
+(defn conform-create-args [tenant-conn layers]
   (let [dataset-id (->> layers
                         (filter (fn[layer] (util/valid-dataset-id? (:datasetId layer))))
                         first
@@ -72,18 +110,35 @@
         raster-id (->> layers
                        (filter (fn[layer] (util/valid-dataset-id? (:rasterId layer))))
                        first
-                       :rasterId)]
+                       :rasterId)
+        non-raster-layers (remove #(= (:layerType %) "raster") layers)]
     (cond
       (and (not dataset-id) (not raster-id))
       (throw (ex-info "No valid datasetID"
                       {"reason" "No valid datasetID"}))
 
       (some (fn [layer] (not (valid-location? layer util/valid-column-name?)))
-            (filter (fn [layer] (not (= (:layerType layer) "raster"))) layers))
+            non-raster-layers)
       (throw (ex-info "Location spec not valid"
                       {"reason" "Location spec not valid"}))
 
-      :else [(if (not dataset-id) raster-id dataset-id)])))
+      :else
+      (do
+        ;; Check every column field against the columns of the dataset it is
+        ;; actually read from. popup + shapeLabelColumn come from the shape
+        ;; dataset (:datasetId); the aggregation fields come from the aggregation
+        ;; dataset (:aggregationDataset). Runs on stored specs at render time too,
+        ;; so existing specs are checked without needing a migration.
+        (doseq [layer non-raster-layers]
+          (let [shape-columns (walk/keywordize-keys
+                               (:columns (db.dataset/dataset-by-id
+                                          tenant-conn {:id (:datasetId layer)})))
+                agg-columns   (when (:aggregationDataset layer)
+                                (walk/keywordize-keys
+                                 (:columns (db.dataset/dataset-by-id
+                                            tenant-conn {:id (:aggregationDataset layer)}))))]
+            (validate-layer-columns layer shape-columns agg-columns)))
+        [(if (not dataset-id) raster-id dataset-id)]))))
 
 (defn create-raster [tenant-conn windshaft-url raster-id]
   (let [{:keys [raster_table metadata]} (db.raster/raster-by-id tenant-conn {:id raster-id})
@@ -125,7 +180,7 @@
 (defn create
   [tenant-conn windshaft-url layers opts]
   (try
-    (conform-create-args layers)
+    (conform-create-args tenant-conn layers)
     (let [metadata-array (metadata-layers tenant-conn layers opts)
           map-config (map-config/build tenant-conn layers metadata-array)
           headers* (headers tenant-conn)
