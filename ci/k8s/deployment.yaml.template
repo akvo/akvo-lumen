@@ -82,6 +82,18 @@ spec:
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
         - containerPort: 3000
+        # Without this the container counts as ready the instant it starts, so
+        # both the rollout and the deploy script's readiness wait pass while the
+        # JVM is still booting, and nginx answers 502 until it finishes.
+        # Readiness only, deliberately no liveness probe: a slow boot should
+        # keep traffic away, not restart the pod into a crash loop.
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 60
         resources:
           requests:
             cpu: ${BACKEND_POD_CPU_REQUESTS}
