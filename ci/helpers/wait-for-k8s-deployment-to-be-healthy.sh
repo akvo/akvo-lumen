@@ -3,7 +3,7 @@
 starttime=$(date +%s)
 healthz_check_url=$1
 
-while [ $(( $(date +%s) - 60 )) -lt "${starttime}" ]; do
+while [ $(( $(date +%s) - 300 )) -lt "${starttime}" ]; do
 
     if wget "$healthz_check_url" -O - -nv 2>/dev/null; then
         exit 0
