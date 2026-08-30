@@ -82,3 +82,76 @@
         (is (m/valid-location? {"geom" nil
                                 "latitude" "c1"
                                 "longitude" "c2"} p)))))
+
+(def ^:private shape-cols
+  [{:columnName "name"} {:columnName "c1"} {:columnName "geom"}])
+
+(def ^:private agg-cols
+  [{:columnName "population"} {:columnName "boundary"}])
+
+(def ^:private bogus-column
+  "name,(select v from other_table) as extra")
+
+(deftest ^:unit validate-layer-columns
+  (testing "valid popup + label columns return the layer unchanged"
+    (let [layer {:layerType "geo-location"
+                 :popup [{:column "name"} {:column "c1"}]
+                 :shapeLabelColumn "name"}]
+      (is (= layer (m/validate-layer-columns layer shape-cols nil)))))
+
+  (testing "unknown popup column is rejected"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"No such column"
+         (m/validate-layer-columns
+          {:layerType "geo-location" :popup [{:column bogus-column}]}
+          shape-cols nil))))
+
+  (testing "unknown shapeLabelColumn is rejected"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"No such column"
+         (m/validate-layer-columns
+          {:layerType "geo-shape" :popup [] :shapeLabelColumn bogus-column}
+          shape-cols nil))))
+
+  (testing "aggregation columns are validated against the aggregation dataset, not the shape dataset"
+    (let [layer {:layerType "geo-shape" :popup []
+                 :aggregationDataset "agg-id"
+                 :aggregationColumn "population"
+                 :aggregationGeomColumn "boundary"
+                 :aggregationMethod "avg"}]
+      ;; "population" exists in agg-cols -> accepted
+      (is (= layer (m/validate-layer-columns layer shape-cols agg-cols)))
+      ;; a shape-dataset column name is NOT valid for the aggregation field
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo #"No such column"
+           (m/validate-layer-columns
+            (assoc layer :aggregationColumn "name") shape-cols agg-cols)))))
+
+  (testing "unknown aggregationColumn / aggregationGeomColumn are rejected"
+    (let [base {:layerType "geo-shape" :popup []
+                :aggregationDataset "agg-id"
+                :aggregationColumn "population"
+                :aggregationGeomColumn "boundary"
+                :aggregationMethod "avg"}]
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo #"No such column"
+           (m/validate-layer-columns (assoc base :aggregationColumn bogus-column)
+                                     shape-cols agg-cols)))
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo #"No such column"
+           (m/validate-layer-columns (assoc base :aggregationGeomColumn bogus-column)
+                                     shape-cols agg-cols)))))
+
+  (testing "aggregationMethod: present-and-invalid rejected, valid accepted, absent defaults ok"
+    (let [base {:layerType "geo-shape" :popup []
+                :aggregationDataset "agg-id"
+                :aggregationColumn "population"
+                :aggregationGeomColumn "boundary"}]
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo #"aggregationMethod"
+           (m/validate-layer-columns (assoc base :aggregationMethod "sum);drop table t;--")
+                                     shape-cols agg-cols)))
+      (is (some? (m/validate-layer-columns (assoc base :aggregationMethod "sum")
+                                           shape-cols agg-cols)))
+      ;; absent aggregationMethod -> defaults to "avg" downstream, must be accepted
+      (is (some? (m/validate-layer-columns base shape-cols agg-cols))))))
