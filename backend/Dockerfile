@@ -1,8 +1,8 @@
-FROM openjdk:11-jre-stretch
+FROM eclipse-temurin:11-jre-jammy
 
 RUN set -ex; apt-get update && \
     apt-get -qq install -y --no-install-recommends --no-install-suggests \
-    postgis gdal-bin postgresql-client-9.6 && \
+    postgis gdal-bin postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

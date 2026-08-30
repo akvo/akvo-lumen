@@ -106,15 +106,23 @@ describe('Akvo Lumen e2e tests', () => {
         force: true,
       });
 
+      cy.waitForAutoSave();
+
       cy.get('[data-test-id="dataset-menu"] .SelectMenu input')
         .first()
         .click({ force: true })
         .type(`${datasetName}{enter}`, { force: true });
 
-      cy.get('[data-test-id="column-select"] .SelectMenu input')
+      cy.waitForAutoSave();
+
+      cy.get('[data-test-id="column-select"] .SelectMenu input', {
+        timeout: 10000,
+      })
         .first()
         .click({ force: true })
         .type(`${COLUMNS.TEXT_1}{enter}`, { force: true });
+
+      cy.waitForAutoSave();
 
       const title = `Visualisation of ${datasetName} 2`;
       // Selecting column

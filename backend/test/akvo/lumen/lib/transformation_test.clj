@@ -849,6 +849,20 @@
       (let [{:keys [columns transformations table-name]} (latest-dataset-version-by-dataset-id *tenant-conn* {:dataset-id dataset-id})]
         (is (= [nil nil] (mapv :d3 (get-data *tenant-conn* {:table-name table-name}))))))))
 
+(defn- distinct-merge-keys
+  "Force column `column-idx` to distinct values.
+
+  These tests merge two datasets on their first column, which is only a well
+  defined join when that column's values are unique. The sample generator
+  draws very short random strings — measured at a ~1.6% chance of producing a
+  duplicate pair for two rows — and a duplicate makes both origin rows resolve
+  to the same target row, so the assertions fail at random rather than for any
+  reason to do with merging."
+  [data column-idx]
+  (assoc data :rows (map-indexed (fn [i row]
+                                   (assoc-in row [column-idx :value] (str "merge-key-" i)))
+                                 (:rows data))))
+
 (defn- replace-column
   "utility to have same column in other generated dataset"
   [origin-data target-data column-idx]
@@ -943,7 +957,7 @@
 	         :before nil}} (:changedColumns applied-tx)))))))
 
 (deftest ^:functional merge-datasets-test
-  (let [origin-data          (import.s/csv-sample-imported-dataset [:text :date] 2)
+  (let [origin-data          (distinct-merge-keys (import.s/csv-sample-imported-dataset [:text :date] 2) 0)
         target-data          (replace-column origin-data (import.s/csv-sample-imported-dataset [:text :number :number :text] 2) 0)
         origin-dataset-id    (import-file *tenant-conn* *error-tracker*
                                           {:dataset-name "origin-dataset"
@@ -978,7 +992,7 @@
 (deftest ^:functional merge-datasets-csv-source-csv-target-data-groups-test
   (db.env/activate-flag *tenant-conn* "data-groups")
   (with-redefs [t.merge-datasets/csv-dataset? (fn [x] (contains? #{"DATA_FILE" "LINK" "clj"} x))]
-    (let [origin-data          (import.s/csv-sample-imported-dataset [:text :date] 2)
+    (let [origin-data          (distinct-merge-keys (import.s/csv-sample-imported-dataset [:text :date] 2) 0)
           target-data          (replace-column origin-data (import.s/csv-sample-imported-dataset [:text :number :number :text] 2) 0)
           origin-dataset-id    (import-file *tenant-conn* *error-tracker*
                                             {:dataset-name "origin-dataset"
