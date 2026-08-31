@@ -82,6 +82,27 @@ spec:
         image: eu.gcr.io/akvo-lumen/lumen-backend:${BUILD_HASH}
         ports:
         - containerPort: 3000
+        # Without a probe the container counts as ready the instant it starts,
+        # even when Integrant init throws and the process exits straight away.
+        # That is how `wait-for-k8s-deployment-to-be-ready.sh` came to report
+        # `all good!` for a backend that had restarted 260 times, leaving the
+        # deploy to fail later as an unexplained 502 from the ingress, two hops
+        # from the actual fault. With the probe the failure is reported at the
+        # readiness step, naming the container.
+        #
+        # Readiness only, deliberately no liveness probe: a backend that cannot
+        # reach its dependencies should be kept out of the service, not restarted
+        # into a crash loop.
+        #
+        # The 10s delay plus 60 x 5s sits just above the 300s that script allows,
+        # so the script stays the arbiter of when a rollout has failed.
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 60
         resources:
           requests:
             cpu: ${BACKEND_POD_CPU_REQUESTS}
