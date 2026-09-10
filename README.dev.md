@@ -117,14 +117,32 @@ folder and run:
 To run the tests, either do it from the REPL or run:
 
 ```sh
-docker-compose exec backend lein test
+docker-compose exec backend run-as-user.sh lein test :all
 ```
+
+Two details in that command matter.
+
+`run-as-user.sh` is not optional. `docker-compose exec` runs as **root**, while
+the container does its own work as the `akvo` user. Running lein as root writes
+root-owned files into the bind-mounted `~/.m2`, after which the container's own
+user gets `Permission denied` and the backend exits. If that has already
+happened, repair it with:
+
+```sh
+docker-compose run --rm --entrypoint sh backend \
+  -c 'find /home/akvo/.m2 ! -user akvo -print0 | xargs -0 -r chown akvo:akvo'
+```
+
+`:all` runs every test selector. A bare `lein test` runs the default selector,
+which **excludes the `:functional` tests** — so it can pass while functional
+tests are broken. CI has the same split: `lein do test, eastwood, uberjar` runs
+only the default selector, and functional tests run in a separate job.
 
 #### Postgres
 
 To connect to the postgres server connect using something like:
 ```sh
-docker-compose exec backend psql --host=akvo-lumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
+docker-compose exec backend run-as-user.sh psql --host=akvo-lumen_postgres_1 --port=5432 --dbname=lumen_tenant_1 --username=lumen --password
 ```
 
 To enable postgres SQL statement logging execute:
