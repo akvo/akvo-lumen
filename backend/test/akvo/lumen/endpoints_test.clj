@@ -377,8 +377,8 @@
                   invitation (last store)]
               (is (= 1 (count store)))
               (is (= email (-> invitation :recipients first)))
-              (is (= "Akvo Lumen invite" (-> invitation :email (get "Subject"))))
-              (let [url (str/replace (re-find #"https.*+" (-> invitation :email (get "Text-part"))) "https://t1.lumen.local" "")
+              (is (= "Akvo Lumen invite" (-> invitation :email :subject)))
+              (let [url (str/replace (re-find #"https.*+" (-> invitation :email :body)) "https://t1.lumen.local" "")
 
                     res-verify (h (get* url ))]
                 (is (= 302 (:status res-verify))))

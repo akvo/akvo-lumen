@@ -209,10 +209,20 @@
                                                        :credentials {:client_id #duct/env [ "LUMEN_KEYCLOAK_CLIENT_ID" :or "akvo-lumen-confidential" ]
                                                                      :client_secret #duct/env "LUMEN_KEYCLOAK_CLIENT_SECRET"}}
 
- :akvo.lumen.component.emailer/mailjet-v3-emailer {:email-password #duct/env "LUMEN_EMAIL_PASSWORD"
-                                                   :email-user #duct/env "LUMEN_EMAIL_USER"
-                                                   :from-email "noreply@akvo.org"
-                                                   :from-name "Akvo Lumen"}
+ ;; Defaults are the ones a real SMTP relay usually wants: STARTTLS on port
+ ;; 587, implicit SSL off. A relay on port 465 needs LUMEN_EMAIL_USE_SSL=true
+ ;; and LUMEN_EMAIL_USE_TLS=false - neither mode is inferable from the port
+ ;; number, and picking the wrong one opens a plaintext socket against a
+ ;; TLS-only port and blocks until the timeout.
+ :akvo.lumen.component.emailer/smtp-emailer {:host #duct/env "LUMEN_EMAIL_HOST"
+                                             :port #duct/env [ "LUMEN_EMAIL_PORT" Int :or 587]
+                                             :tls? #duct/env [ "LUMEN_EMAIL_USE_TLS" Bool :or true]
+                                             :ssl? #duct/env [ "LUMEN_EMAIL_USE_SSL" Bool :or false]
+                                             :timeout 10000
+                                             :email-password #duct/env "LUMEN_EMAIL_PASSWORD"
+                                             :email-user #duct/env "LUMEN_EMAIL_USER"
+                                             :from-email #duct/env [ "LUMEN_EMAIL_FROM" :or "noreply@akvo.org"]
+                                             :from-name "Akvo Lumen"}
 
 
 

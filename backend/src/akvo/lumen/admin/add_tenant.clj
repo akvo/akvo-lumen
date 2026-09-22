@@ -1,7 +1,7 @@
 (ns akvo.lumen.admin.add-tenant
   "The following env vars are assumed to be present:
   LUMEN_ENCRYPTION_KEY, LUMEN_KEYCLOAK_URL, LUMEN_KEYCLOAK_CLIENT_SECRET, PG_HOST, PG_DATABASE, PG_USER, PG_PASSWORD,
-  LUMEN_EMAIL_PASSWORD, LUMEN_EMAIL_USER
+  LUMEN_EMAIL_HOST, LUMEN_EMAIL_PASSWORD, LUMEN_EMAIL_USER
   LUMEN_ENCRYPTION_KEY is a key specific for the Kubernetes environment used for
   encrypting the db_uri which can be found in the lumen secret in K8s.
 
@@ -19,7 +19,7 @@
   Use this as follow
   $ env LUMEN_ENCRYPTION_KEY=*** \\
         LUMEN_KEYCLOAK_URL=https://*** LUMEN_KEYCLOAK_CLIENT_SECRET=*** \\
-        LUMEN_EMAIL_USER=https://*** LUMEN_EMAIL_PASSWORD=*** \\
+        LUMEN_EMAIL_HOST=smtp.*** LUMEN_EMAIL_USER=*** LUMEN_EMAIL_PASSWORD=*** \\
         PG_HOST=***.db.elephantsql.com PG_DATABASE=*** \\
         PG_USER=*** PG_PASSWORD=*** \\
         lein run -m akvo.lumen.admin.add-tenant <url> <title> <email>
@@ -124,25 +124,25 @@
 
 (defn exec-mail [{:keys [emailer user-creds tenant-db url]}]
   (let [{:keys [user-id email tmp-password]} user-creds
-        text-part (if (some? tmp-password)
-                    (let [invite-id
-                          (:id (util/exec! tenant-db
-                                           {:return-keys true}
-                                           (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
-                                                   email
-                                                   (lib.user/expire-time)
-                                                   (json/encode {:email "admin@akvo.org"}))))]
-                      (selmer/render-file (format "akvo/lumen/email/new_tenant_non_existent_user.txt")
-                                          {:email email
-                                           :invite-id invite-id
-                                           :tmp-password tmp-password
-                                           :location url}))
-                    (selmer/render-file (format "akvo/lumen/email/new_tenant_existent_user.txt")
-                                        {:email email
-                                         :location url}))]
-    (log/info :sending email text-part)
-    (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                   "Text-part" text-part})))
+        body (if (some? tmp-password)
+               (let [invite-id
+                     (:id (util/exec! tenant-db
+                                      {:return-keys true}
+                                      (format "INSERT INTO invite (email, expire, author) VALUES ('%s', '%s', '%s') RETURNING *;"
+                                              email
+                                              (lib.user/expire-time)
+                                              (json/encode {:email "admin@akvo.org"}))))]
+                 (selmer/render-file (format "akvo/lumen/email/new_tenant_non_existent_user.txt")
+                                     {:email email
+                                      :invite-id invite-id
+                                      :tmp-password tmp-password
+                                      :location url}))
+               (selmer/render-file (format "akvo/lumen/email/new_tenant_existent_user.txt")
+                                   {:email email
+                                    :location url}))]
+    (log/info :sending email body)
+    (p/send-email emailer [email] {:subject "Akvo Lumen invite"
+                                   :body body})))
 
 (defn new-tenant-db-pass []
   (str/replace (squuid) "-" ""))

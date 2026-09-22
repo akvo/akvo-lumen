@@ -16,6 +16,7 @@
   (assert (:lumen-keycloak-url env) (error-msg "LUMEN_KEYCLOAK_URL"))
   (assert (:lumen-file-upload-path env) (error-msg "LUMEN_FILE_UPLOAD_PATH"))
   (when-not (= "yes" (:ci-build env))
+    (assert (:lumen-email-host env) (error-msg "LUMEN_EMAIL_HOST"))
     (assert (:lumen-email-password env) (error-msg "LUMEN_EMAIL_PASSWORD"))
     (assert (:lumen-email-user env) (error-msg "LUMEN_EMAIL_USER"))
     (assert (:lumen-sentry-backend-dsn env) (error-msg "LUMEN_SENTRY_BACKEND_DSN"))

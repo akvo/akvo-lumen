@@ -24,26 +24,26 @@
   "Create an invite and use provider emailer to send an invitation email."
   [emailer tenant-conn location email author-claims]
   (let [invite-id (invite-id* tenant-conn author-claims email)
-        text-part (selmer/render-file (format "akvo/lumen/email/invite_to_tenant.txt")
-                    {:author-email (get author-claims "email")
-                     :invite-id invite-id
-                     :location location})]
-    (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                   "Text-part" text-part})))
+        body (selmer/render-file (format "akvo/lumen/email/invite_to_tenant.txt")
+               {:author-email (get author-claims "email")
+                :invite-id invite-id
+                :location location})]
+    (p/send-email emailer [email] {:subject "Akvo Lumen invite"
+                                   :body body})))
 
 (defn new-invitation-id [tenant-conn author-claims email]
   (invite-id* tenant-conn author-claims email))
 
 (defn send-invitation-account-email [emailer sender-email email location invite-id tmp-password]
-  (let [text-part (selmer/render-file
-                   (format "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt")
-                   {:author-email sender-email
-                    :email email
-                    :invite-id invite-id
-                    :location location
-                    :tmp-password tmp-password})]
-    (p/send-email emailer [email] {"Subject" "Akvo Lumen invite"
-                                   "Text-part" text-part})))
+  (let [body (selmer/render-file
+              (format "akvo/lumen/email/create_new_account_and_invite_to_tenant.txt")
+              {:author-email sender-email
+               :email email
+               :invite-id invite-id
+               :location location
+               :tmp-password tmp-password})]
+    (p/send-email emailer [email] {:subject "Akvo Lumen invite"
+                                   :body body})))
 
 (defn create-new-account [keycloak tenant-conn email]
   (let [headers (keycloak/request-headers keycloak)

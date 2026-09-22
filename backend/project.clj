@@ -13,6 +13,10 @@
                  [cheshire "5.9.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [clj-http "3.10.0" :exclusions [org.apache.httpcomponents/httpcore org.apache.httpcomponents/httpclient org.apache.httpcomponents/httpmime commons-io/commons-io]]
                  [clj-time "0.15.1"]
+                 ;; commons-codec comes in via clj-http at 1.12; postal asks for 1.9 and
+                 ;; only uses Base64 from it, so take clj-http's rather than leave the
+                 ;; version to resolution order.
+                 [com.draines/postal "2.0.5" :exclusions [commons-codec]]
                  [com.layerware/hugsql "0.4.9"]
                  [commons-io/commons-io "2.6"]
                  [compojure "1.6.1" :exclusions [medley]]
