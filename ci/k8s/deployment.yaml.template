@@ -126,16 +126,39 @@ spec:
             secretKeyRef:
               name: lumen
               key: postgres-db-url
+        - name: LUMEN_EMAIL_FROM
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: email.from
+              optional: true
+        - name: LUMEN_EMAIL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: email.host
         - name: LUMEN_EMAIL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: lumen
               key: email.password
+        - name: LUMEN_EMAIL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: email.port
+              optional: true
         - name: LUMEN_EMAIL_USER
           valueFrom:
             secretKeyRef:
               name: lumen
               key: email.user
+        - name: LUMEN_EMAIL_USE_SSL
+          valueFrom:
+            secretKeyRef:
+              name: lumen
+              key: email.use_ssl
+              optional: true
         - name: LUMEN_ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
